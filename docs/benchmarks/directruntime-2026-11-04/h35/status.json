@@ -1,0 +1,19 @@
+{
+  "status": "blocked",
+  "checkpointStatus": "partial",
+  "vmValidationHead": "65e23115fe6c3c5c78aa632f319091b63301fb6f",
+  "ownedLeanChanges": 0,
+  "newOrChangedWorkerTheorems": 0,
+  "printAxioms": "N/A: no worker theorem targets; producer proof closure is separate",
+  "targetBuild": "PASS: Solidity.Tools.DirectRuntime, actual target weakLeanArgs -j1",
+  "controls": {
+    "nativeRequests": 249,
+    "nativeControls": 14,
+    "pythonTests": 18,
+    "passed": true
+  },
+  "cacheShipment": "FAIL: missing coordinator routing state; no remote receipt",
+  "localPackVerification": "PASS:1673 artifacts/559 mappings;3 skipped traces retained",
+  "runtimeGatePass": false,
+  "originalAssignment": "Still blocked on producer migration/controls and required browser control; no completion claim."
+}

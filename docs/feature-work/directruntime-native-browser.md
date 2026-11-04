@@ -176,3 +176,39 @@ Still required: the exact positive Identity diamond twin and false/default/alias
 controls on both fresh backends; C controls; producer migration/parity; remaining cold-start/build comparison limits; matched post-integration native LSP/browser performance; successful
 per-file/final policy gates; final independent reviews and owner-integrated merge handoff.
 These blocked gates do not imply all future independent work is exhausted.
+
+## H35 VM validation and cache transport
+
+H35 was applied on this same VM at source head
+`65e23115fe6c3c5c78aa632f319091b63301fb6f`.
+The actual runtime target built successfully with the serial configuration's
+`-j1`; all 249 fresh native requests, 14 controls and 18 tests passed again.
+The worker has no Lean changes relative to the delivered coordinator commit,
+including no uncommitted or untracked Lean files. Therefore there are zero new
+or changed worker theorems and no applicable `#print axioms` targets; this is
+an explicit inventory, not a claim about producer proof closure. The initial
+inventory setup assertion failed before checking any modules and is preserved;
+the corrected full gate and strengthened working-tree inventory passed.
+
+The actual `ship-cache.sh` call used its supported non-master-head override and
+the VM's real Lake cache. It prepared 1,673 artifacts / 559 mappings (three
+uncached traces skipped), then exited 1 because coordinator routing state
+`/home/ubuntu/.local/state/cloudvm-coord/poll-state.json` is absent. No receiver
+was contacted and no successful shipment receipt or shipped marker exists.
+The script is documented as coordinator-to-lanes and its VMEXEC/catalog/state
+configuration is not available here. No empty lane list or invented receiver
+was supplied to obtain a vacuous success.
+
+The 539,036,429-byte pack remains at
+`.lake/native-browser-h35-cache-ship/20261104T222539Z-65e23115/pack-afaaecf77f0a6f11.tar.zst`,
+SHA-256 `3f2fb9f6a585b6a64f386b6e127b972a84fd7149ca914a29a191afac97d95dbb`.
+A separate bounded streaming check verified every archive member against the
+manifest and all mapping references, without loading Lean environments.
+`h35/cache-shipment-receipt.json` records the failed transport and local
+verification separately; it is not a remote cache success receipt.
+
+Under H35, unshipped checkpoints remain **partial**, despite passing VM gates;
+earlier completed implementation/build labels do not establish merge readiness.
+Q-H35-CACHE asks for either worker-accessible routing to rerun the script, or
+coordinator retrieval/verification and a real cache receipt. All previous
+producer, Identity, browser-stack and final-gate obligations remain unchanged.

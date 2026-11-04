@@ -468,6 +468,101 @@
     "kind": "bounded gate"
   },
   {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/cache-ship-gate.json",
+    "command": [
+      "bash",
+      "scripts/coord-tools/ship-cache.sh",
+      "/workspace/solidity-lean"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 15.197332412000833,
+    "sampledContainerProcessRssPeakBytes": 132468736,
+    "minimumOuterHeadroomBytes": 4555546624,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/cache-shipment-receipt.json",
+    "command": [
+      "bash",
+      "scripts/coord-tools/ship-cache.sh",
+      "/workspace/solidity-lean"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": null,
+    "childStarted": null,
+    "wallSeconds": null,
+    "sampledContainerProcessRssPeakBytes": null,
+    "minimumOuterHeadroomBytes": null,
+    "kind": "external command"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/cache-verification-gate.json",
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/h35-verify-cache.py"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 8.973519983999722,
+    "sampledContainerProcessRssPeakBytes": 39497728,
+    "minimumOuterHeadroomBytes": 4637364224,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/gates-retry.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h35-gates.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 9.789088177996746,
+    "sampledContainerProcessRssPeakBytes": 343531520,
+    "minimumOuterHeadroomBytes": 6367817728,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/gates.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h35-gates.sh"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 0.10086629500074196,
+    "sampledContainerProcessRssPeakBytes": 14028800,
+    "minimumOuterHeadroomBytes": 6667128832,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h35/inventory-working-tree-gate.json",
+    "command": [
+      "env",
+      "H35_INVENTORY_ONLY=1",
+      "H35_AXIOM_RECEIPT=docs/benchmarks/directruntime-2026-11-04/h35/axiom-inventory-working-tree.json",
+      "bash",
+      "tests/directruntime-20261104/native-browser/h35-gates.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 0.10072924599808175,
+    "sampledContainerProcessRssPeakBytes": 12390400,
+    "minimumOuterHeadroomBytes": 4662841344,
+    "kind": "bounded gate"
+  },
+  {
     "receipt": "docs/benchmarks/directruntime-2026-11-04/hardening/browser-build-gate.json",
     "command": [
       "bash",

@@ -52,5 +52,10 @@
     "finder": "Reviewed override/config/LLVM tool and child-extraction boundaries. Verified exact WASM/module equality, native/browser metrics and persistent backend failure. Found missing classification linkage checks; fixed and separately rerun.",
     "skeptic": "Independent confirmation of metrics and13/14 failure denominator. Required classification passed/binary/coarse-receipt binding; fixed with native-audit-bound rerun. No runtime/whole-goal acceptance implied.",
     "method": "Independent read-only finder/skeptic, no Lean server; no new final handoff finding. Separately reviewed completed empty-output native build, binary identity,249 requests/14 controls and warm-Lean boundary. Environment selectors saved in cold-native/command-context.json."
+  },
+  "h35": {
+    "finder": "Verified serial target shim/config, empty committed+working/untracked worker Lean inventory, passing controls; found committed-only inventory coverage gap, corrected and supplementary gate passed. No new final finding.",
+    "skeptic": "Verified VM gate scope and failed cache transport; local1673-artifact/559-mapping validation is not remote shipment. Three skipped traces preserved; checkpoints remain partial. No new final finding.",
+    "method": "Independent read-only, no Lean server/build rerun by reviewers; main worker ran all recorded gates and pack verification."
   }
 }

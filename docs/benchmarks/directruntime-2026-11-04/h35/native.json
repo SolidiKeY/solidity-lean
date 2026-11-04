@@ -1,0 +1,4742 @@
+{
+  "backend": "generated-c-native",
+  "executableSha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+  "manifestSha256": "e46debc41fb539b7e2e5cd72a24be07e042a6f038d7f899fe3f8997ddd51168b",
+  "leanCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+  "trials": [
+    {
+      "name": "additionStorageWrite",
+      "round": 0,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "wallMs": 2.4557559999998375,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionSimple",
+      "round": 0,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "wallMs": 0.7758929999999964,
+      "result": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionStorageRead",
+      "round": 0,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "wallMs": 1.0386220000000321,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionSimple",
+      "round": 0,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "wallMs": 0.7640240000000631,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionStorageRead",
+      "round": 0,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "wallMs": 0.8583240000002661,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "multiplicationSimple",
+      "round": 0,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "wallMs": 0.726760000000013,
+      "result": {
+        "results": [
+          {
+            "function": "multiplicationSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "divisionSimple",
+      "round": 0,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "wallMs": 0.6821329999997943,
+      "result": {
+        "results": [
+          {
+            "function": "divisionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moduloSimple",
+      "round": 0,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "wallMs": 0.6951219999996283,
+      "result": {
+        "results": [
+          {
+            "function": "moduloSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "powerSimple",
+      "round": 0,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "wallMs": 0.6887830000000577,
+      "result": {
+        "results": [
+          {
+            "function": "powerSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "localArithmeticInRange",
+      "round": 0,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "wallMs": 1.6514119999997092,
+      "result": {
+        "results": [
+          {
+            "function": "localArithmeticInRange",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterEqualSimple",
+      "round": 0,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "wallMs": 0.6590089999999691,
+      "result": {
+        "results": [
+          {
+            "function": "greaterEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterThanSimple",
+      "round": 0,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "wallMs": 0.654613000000154,
+      "result": {
+        "results": [
+          {
+            "function": "greaterThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessEqualSimple",
+      "round": 0,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "wallMs": 0.5814040000000205,
+      "result": {
+        "results": [
+          {
+            "function": "lessEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessThanSimple",
+      "round": 0,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "wallMs": 0.602954999999838,
+      "result": {
+        "results": [
+          {
+            "function": "lessThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "notEqualSimple",
+      "round": 0,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "wallMs": 0.5458010000002105,
+      "result": {
+        "results": [
+          {
+            "function": "notEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndSimple",
+      "round": 0,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "wallMs": 0.6135810000000674,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "round": 0,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "wallMs": 0.8419499999999971,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalNotSimple",
+      "round": 0,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "wallMs": 0.5391610000001492,
+      "result": {
+        "results": [
+          {
+            "function": "logicalNotSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 52,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrSimple",
+      "round": 0,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "wallMs": 0.6428639999999177,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "round": 0,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "wallMs": 0.819025999999667,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "round": 0,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "wallMs": 0.8329770000000281,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryCaptureCond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryToIf",
+      "round": 0,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "wallMs": 0.7266089999998258,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryToIf",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifUnfold",
+      "round": 0,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "wallMs": 0.8503930000001674,
+      "result": {
+        "results": [
+          {
+            "function": "ifUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseUnfold",
+      "round": 0,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "wallMs": 0.8624709999999141,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifSplit",
+      "round": 0,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "wallMs": 0.771885999999995,
+      "result": {
+        "results": [
+          {
+            "function": "ifSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseSplit",
+      "round": 0,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "wallMs": 0.8047649999998612,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifTrue",
+      "round": 0,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "wallMs": 0.6627840000001015,
+      "result": {
+        "results": [
+          {
+            "function": "ifTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifFalse",
+      "round": 0,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "wallMs": 0.6685529999999744,
+      "result": {
+        "results": [
+          {
+            "function": "ifFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseTrue",
+      "round": 0,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "wallMs": 0.7010809999997036,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseFalse",
+      "round": 0,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "wallMs": 0.6741910000000644,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseNegated",
+      "round": 0,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "wallMs": 0.8249749999999949,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseNegated",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 68,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireTrueLiteral",
+      "round": 0,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "wallMs": 0.6334510000001501,
+      "result": {
+        "results": [
+          {
+            "function": "requireTrueLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireFalseLiteral",
+      "round": 0,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "wallMs": 0.5096660000003794,
+      "result": {
+        "results": [
+          {
+            "function": "requireFalseLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireGuardBox",
+      "round": 0,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "wallMs": 0.9081390000001193,
+      "result": {
+        "results": [
+          {
+            "function": "requireGuardBox",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "round": 0,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "wallMs": 0.9155589999995755,
+      "result": {
+        "results": [
+          {
+            "function": "requireHoldsDiamond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testSimpleAssert",
+      "round": 0,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "wallMs": 0.7146310000002813,
+      "result": {
+        "results": [
+          {
+            "function": "testSimpleAssert",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootReadWrite",
+      "round": 0,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "wallMs": 0.6401710000000094,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootAddAssign",
+      "round": 0,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "wallMs": 0.7331880000001547,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootSubAssign",
+      "round": 0,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "wallMs": 0.743333999999777,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMulAssign",
+      "round": 0,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "wallMs": 0.7520260000001144,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMulAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDivAssign",
+      "round": 0,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "wallMs": 0.6927580000001399,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDivAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootModAssign",
+      "round": 0,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "wallMs": 0.7748110000002271,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootModAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "round": 0,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "wallMs": 0.7211309999997866,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPostincrement",
+      "round": 0,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "wallMs": 0.7805989999997109,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPreincrement",
+      "round": 0,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "wallMs": 0.7284220000001369,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPreincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPredecrement",
+      "round": 0,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "wallMs": 0.7800990000000638,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPredecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDelete",
+      "round": 0,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "wallMs": 0.7669390000000931,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDisjoint",
+      "round": 0,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "wallMs": 0.760689000000184,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDisjoint",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "round": 0,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "wallMs": 2.8141489999998157,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootWriteRhsCapture",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "round": 0,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "wallMs": 0.6959929999998167,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "round": 0,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "wallMs": 0.8860659999995733,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexRootMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "round": 0,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "wallMs": 0.9774820000002364,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMappingAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "round": 0,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "wallMs": 1.3149619999999231,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadMappingStoreRoot",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "round": 0,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "wallMs": 3.2065309999998135,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexWriteNseChain",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "round": 0,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "wallMs": 1.1379299999998693,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteMappingBool",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "round": 0,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "wallMs": 1.9760639999999512,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 76,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "round": 0,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "wallMs": 2.1416300000000774,
+      "result": {
+        "results": [
+          {
+            "function": "testStorageMapReadWriteAndDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 100,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "round": 0,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "wallMs": 4.464901000000282,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexCopyValue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 90,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageGridWriteRead",
+      "round": 0,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "wallMs": 1.2398009999997157,
+      "result": {
+        "results": [
+          {
+            "function": "storageGridWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "round": 0,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "wallMs": 0.7949200000002747,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolKeyedMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "round": 0,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "wallMs": 2.0653769999998985,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "round": 0,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "wallMs": 2.039357999999993,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "round": 0,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "wallMs": 1.5751289999998335,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "round": 0,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "wallMs": 2.089662999999746,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "round": 0,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "wallMs": 2.052118000000064,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostdecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDelete",
+      "round": 0,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "wallMs": 1.5991539999999986,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "round": 0,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "wallMs": 1.976394999999684,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 78,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "round": 0,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "wallMs": 1.0378209999998944,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "round": 0,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "wallMs": 1.061236000000008,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayReadOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "round": 0,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "wallMs": 2.7366139999999177,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "round": 0,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "wallMs": 15.478695000000243,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 109,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushEmpty",
+      "round": 0,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "wallMs": 1.3172359999998662,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushEmpty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "round": 0,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "wallMs": 0.8614389999997911,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushLengthPositive",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "round": 0,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "wallMs": 3.887883000000329,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushNonsimpleArg",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushReadBack",
+      "round": 0,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "wallMs": 1.6714529999999286,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushReadBack",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopAfterPush",
+      "round": 0,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "wallMs": 1.2018440000001647,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopAfterPush",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopNonempty",
+      "round": 0,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "wallMs": 1.6653529999998682,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopNonempty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 75,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "round": 0,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "wallMs": 0.5731319999999869,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopUnknownLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileCountsUp",
+      "round": 0,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "wallMs": 1.1554959999998573,
+      "result": {
+        "results": [
+          {
+            "function": "whileCountsUp",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "round": 0,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "wallMs": 85.16380500000014,
+      "result": {
+        "results": [
+          {
+            "function": "whileBodyDeclaresLocal",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 80,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "forWritesStorageArray",
+      "round": 0,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "wallMs": 18.078775999999834,
+      "result": {
+        "results": [
+          {
+            "function": "forWritesStorageArray",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantCountsToBound",
+      "round": 0,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "wallMs": 1.4441440000000512,
+      "result": {
+        "results": [
+          {
+            "function": "invariantCountsToBound",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 72,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "round": 0,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "wallMs": 2.1034840000002077,
+      "result": {
+        "results": [
+          {
+            "function": "invariantForCountsArrayLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionStorageWrite",
+      "round": 1,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "wallMs": 2.0969539999996414,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionSimple",
+      "round": 1,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "wallMs": 0.7358330000001843,
+      "result": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionStorageRead",
+      "round": 1,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "wallMs": 0.8425210000000334,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionSimple",
+      "round": 1,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "wallMs": 0.7458069999997861,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionStorageRead",
+      "round": 1,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "wallMs": 0.7541500000002088,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "multiplicationSimple",
+      "round": 1,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "wallMs": 0.6689530000003288,
+      "result": {
+        "results": [
+          {
+            "function": "multiplicationSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "divisionSimple",
+      "round": 1,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "wallMs": 0.6979370000003655,
+      "result": {
+        "results": [
+          {
+            "function": "divisionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moduloSimple",
+      "round": 1,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "wallMs": 0.6880420000002232,
+      "result": {
+        "results": [
+          {
+            "function": "moduloSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "powerSimple",
+      "round": 1,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "wallMs": 0.7608099999997648,
+      "result": {
+        "results": [
+          {
+            "function": "powerSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "localArithmeticInRange",
+      "round": 1,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "wallMs": 1.7050020000001496,
+      "result": {
+        "results": [
+          {
+            "function": "localArithmeticInRange",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterEqualSimple",
+      "round": 1,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "wallMs": 0.7437740000000304,
+      "result": {
+        "results": [
+          {
+            "function": "greaterEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterThanSimple",
+      "round": 1,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "wallMs": 0.6493339999997261,
+      "result": {
+        "results": [
+          {
+            "function": "greaterThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessEqualSimple",
+      "round": 1,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "wallMs": 0.6277720000002773,
+      "result": {
+        "results": [
+          {
+            "function": "lessEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessThanSimple",
+      "round": 1,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "wallMs": 0.6453480000000127,
+      "result": {
+        "results": [
+          {
+            "function": "lessThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "notEqualSimple",
+      "round": 1,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "wallMs": 0.5516389999997955,
+      "result": {
+        "results": [
+          {
+            "function": "notEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndSimple",
+      "round": 1,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "wallMs": 0.6608209999999417,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "round": 1,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "wallMs": 0.8865059999998266,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalNotSimple",
+      "round": 1,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "wallMs": 0.6022440000001552,
+      "result": {
+        "results": [
+          {
+            "function": "logicalNotSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 52,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrSimple",
+      "round": 1,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "wallMs": 0.6304660000000695,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "round": 1,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "wallMs": 0.9342069999997875,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "round": 1,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "wallMs": 0.8939270000000761,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryCaptureCond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryToIf",
+      "round": 1,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "wallMs": 0.8713539999998829,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryToIf",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifUnfold",
+      "round": 1,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "wallMs": 0.8438729999998031,
+      "result": {
+        "results": [
+          {
+            "function": "ifUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseUnfold",
+      "round": 1,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "wallMs": 0.9210680000001048,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifSplit",
+      "round": 1,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "wallMs": 0.8715040000001864,
+      "result": {
+        "results": [
+          {
+            "function": "ifSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseSplit",
+      "round": 1,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "wallMs": 0.8199369999997543,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifTrue",
+      "round": 1,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "wallMs": 0.7081020000000535,
+      "result": {
+        "results": [
+          {
+            "function": "ifTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifFalse",
+      "round": 1,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "wallMs": 0.6678319999996347,
+      "result": {
+        "results": [
+          {
+            "function": "ifFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseTrue",
+      "round": 1,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "wallMs": 0.7491329999998015,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseFalse",
+      "round": 1,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "wallMs": 0.7975040000001172,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseNegated",
+      "round": 1,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "wallMs": 0.8766619999996692,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseNegated",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 68,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireTrueLiteral",
+      "round": 1,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "wallMs": 0.5468220000002475,
+      "result": {
+        "results": [
+          {
+            "function": "requireTrueLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireFalseLiteral",
+      "round": 1,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "wallMs": 0.5545539999998255,
+      "result": {
+        "results": [
+          {
+            "function": "requireFalseLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireGuardBox",
+      "round": 1,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "wallMs": 0.9674359999999069,
+      "result": {
+        "results": [
+          {
+            "function": "requireGuardBox",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "round": 1,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "wallMs": 0.9533959999998842,
+      "result": {
+        "results": [
+          {
+            "function": "requireHoldsDiamond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testSimpleAssert",
+      "round": 1,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "wallMs": 0.71478100000013,
+      "result": {
+        "results": [
+          {
+            "function": "testSimpleAssert",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootReadWrite",
+      "round": 1,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "wallMs": 0.6767150000000584,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootAddAssign",
+      "round": 1,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "wallMs": 0.7696430000000873,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootSubAssign",
+      "round": 1,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "wallMs": 0.972863999999845,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMulAssign",
+      "round": 1,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "wallMs": 0.7846650000001318,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMulAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDivAssign",
+      "round": 1,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "wallMs": 0.7726779999998143,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDivAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootModAssign",
+      "round": 1,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "wallMs": 0.777353999999832,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootModAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "round": 1,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "wallMs": 0.8702319999997599,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPostincrement",
+      "round": 1,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "wallMs": 0.7575849999998354,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPreincrement",
+      "round": 1,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "wallMs": 0.7514759999999114,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPreincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPredecrement",
+      "round": 1,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "wallMs": 0.8015199999999822,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPredecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDelete",
+      "round": 1,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "wallMs": 0.7046860000000379,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDisjoint",
+      "round": 1,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "wallMs": 0.7315760000001319,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDisjoint",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "round": 1,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "wallMs": 2.8635330000001886,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootWriteRhsCapture",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "round": 1,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "wallMs": 0.6791279999997641,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "round": 1,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "wallMs": 0.7268489999996746,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexRootMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "round": 1,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "wallMs": 0.8197570000002088,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMappingAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "round": 1,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "wallMs": 1.228153999999904,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadMappingStoreRoot",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "round": 1,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "wallMs": 3.6510309999998753,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexWriteNseChain",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "round": 1,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "wallMs": 0.9109730000000127,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteMappingBool",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "round": 1,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "wallMs": 1.5674770000000535,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 76,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "round": 1,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "wallMs": 2.034229999999752,
+      "result": {
+        "results": [
+          {
+            "function": "testStorageMapReadWriteAndDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 100,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "round": 1,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "wallMs": 5.071882000000187,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexCopyValue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 90,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageGridWriteRead",
+      "round": 1,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "wallMs": 1.396042999999736,
+      "result": {
+        "results": [
+          {
+            "function": "storageGridWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "round": 1,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "wallMs": 0.9533459999997831,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolKeyedMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "round": 1,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "wallMs": 2.3992929999999433,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "round": 1,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "wallMs": 2.347486000000117,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "round": 1,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "wallMs": 1.7052120000003015,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "round": 1,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "wallMs": 2.265553999999611,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "round": 1,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "wallMs": 2.309600000000046,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostdecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDelete",
+      "round": 1,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "wallMs": 1.8139240000000427,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "round": 1,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "wallMs": 4.1356620000001385,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 78,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "round": 1,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "wallMs": 1.1448500000001332,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "round": 1,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "wallMs": 3.1362269999999626,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayReadOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "round": 1,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "wallMs": 2.9846919999999955,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "round": 1,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "wallMs": 12.343420000000151,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 109,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushEmpty",
+      "round": 1,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "wallMs": 1.1880049999999756,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushEmpty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "round": 1,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "wallMs": 0.8585950000001503,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushLengthPositive",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "round": 1,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "wallMs": 3.8233470000000125,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushNonsimpleArg",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushReadBack",
+      "round": 1,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "wallMs": 1.589100000000144,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushReadBack",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopAfterPush",
+      "round": 1,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "wallMs": 1.1470930000000408,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopAfterPush",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopNonempty",
+      "round": 1,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "wallMs": 1.7410449999997581,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopNonempty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 75,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "round": 1,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "wallMs": 0.5023759999999129,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopUnknownLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileCountsUp",
+      "round": 1,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "wallMs": 1.1220760000001064,
+      "result": {
+        "results": [
+          {
+            "function": "whileCountsUp",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "round": 1,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "wallMs": 93.43115200000011,
+      "result": {
+        "results": [
+          {
+            "function": "whileBodyDeclaresLocal",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 80,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "forWritesStorageArray",
+      "round": 1,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "wallMs": 17.885179000000335,
+      "result": {
+        "results": [
+          {
+            "function": "forWritesStorageArray",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantCountsToBound",
+      "round": 1,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "wallMs": 1.3211019999998825,
+      "result": {
+        "results": [
+          {
+            "function": "invariantCountsToBound",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 72,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "round": 1,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "wallMs": 1.6367409999998017,
+      "result": {
+        "results": [
+          {
+            "function": "invariantForCountsArrayLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionStorageWrite",
+      "round": 2,
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "wallMs": 1.751600999999937,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionSimple",
+      "round": 2,
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "wallMs": 0.6688429999999244,
+      "result": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "additionStorageRead",
+      "round": 2,
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "wallMs": 0.7747309999999743,
+      "result": {
+        "results": [
+          {
+            "function": "additionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionSimple",
+      "round": 2,
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "wallMs": 0.6720279999999548,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "subtractionStorageRead",
+      "round": 2,
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "wallMs": 0.7323879999999008,
+      "result": {
+        "results": [
+          {
+            "function": "subtractionStorageRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "multiplicationSimple",
+      "round": 2,
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "wallMs": 0.6796099999996841,
+      "result": {
+        "results": [
+          {
+            "function": "multiplicationSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "divisionSimple",
+      "round": 2,
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "wallMs": 0.6472309999999197,
+      "result": {
+        "results": [
+          {
+            "function": "divisionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "moduloSimple",
+      "round": 2,
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "wallMs": 0.625238999999965,
+      "result": {
+        "results": [
+          {
+            "function": "moduloSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "powerSimple",
+      "round": 2,
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "wallMs": 0.6535300000000461,
+      "result": {
+        "results": [
+          {
+            "function": "powerSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "localArithmeticInRange",
+      "round": 2,
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "wallMs": 1.610290999999961,
+      "result": {
+        "results": [
+          {
+            "function": "localArithmeticInRange",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterEqualSimple",
+      "round": 2,
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "wallMs": 0.63460299999997,
+      "result": {
+        "results": [
+          {
+            "function": "greaterEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "greaterThanSimple",
+      "round": 2,
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "wallMs": 0.6165959999998449,
+      "result": {
+        "results": [
+          {
+            "function": "greaterThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessEqualSimple",
+      "round": 2,
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "wallMs": 0.5666310000001431,
+      "result": {
+        "results": [
+          {
+            "function": "lessEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "lessThanSimple",
+      "round": 2,
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "wallMs": 0.5762049999998453,
+      "result": {
+        "results": [
+          {
+            "function": "lessThanSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "notEqualSimple",
+      "round": 2,
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "wallMs": 0.5798409999997602,
+      "result": {
+        "results": [
+          {
+            "function": "notEqualSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndSimple",
+      "round": 2,
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "wallMs": 0.6032759999998234,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "round": 2,
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "wallMs": 0.8526470000001609,
+      "result": {
+        "results": [
+          {
+            "function": "logicalAndShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalNotSimple",
+      "round": 2,
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "wallMs": 0.591928999999709,
+      "result": {
+        "results": [
+          {
+            "function": "logicalNotSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 52,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrSimple",
+      "round": 2,
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "wallMs": 0.5486349999996492,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "round": 2,
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "wallMs": 0.8104339999999866,
+      "result": {
+        "results": [
+          {
+            "function": "logicalOrShortCircuitRhs",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "round": 2,
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "wallMs": 0.8452250000000276,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryCaptureCond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ternaryToIf",
+      "round": 2,
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "wallMs": 0.7647659999997813,
+      "result": {
+        "results": [
+          {
+            "function": "ternaryToIf",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifUnfold",
+      "round": 2,
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "wallMs": 0.8108340000003409,
+      "result": {
+        "results": [
+          {
+            "function": "ifUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseUnfold",
+      "round": 2,
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "wallMs": 0.8448849999999766,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseUnfold",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifSplit",
+      "round": 2,
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "wallMs": 0.7473089999998592,
+      "result": {
+        "results": [
+          {
+            "function": "ifSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseSplit",
+      "round": 2,
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "wallMs": 0.7992770000000746,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseSplit",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 69,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifTrue",
+      "round": 2,
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "wallMs": 0.7038649999999507,
+      "result": {
+        "results": [
+          {
+            "function": "ifTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifFalse",
+      "round": 2,
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "wallMs": 0.673870000000079,
+      "result": {
+        "results": [
+          {
+            "function": "ifFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 59,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseTrue",
+      "round": 2,
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "wallMs": 0.7327880000002551,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseTrue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseFalse",
+      "round": 2,
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "wallMs": 0.7374450000002071,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseFalse",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ifElseNegated",
+      "round": 2,
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "wallMs": 0.8548189999996794,
+      "result": {
+        "results": [
+          {
+            "function": "ifElseNegated",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 68,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireTrueLiteral",
+      "round": 2,
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "wallMs": 0.5198019999997996,
+      "result": {
+        "results": [
+          {
+            "function": "requireTrueLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireFalseLiteral",
+      "round": 2,
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "wallMs": 0.5127010000001064,
+      "result": {
+        "results": [
+          {
+            "function": "requireFalseLiteral",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 51,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireGuardBox",
+      "round": 2,
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "wallMs": 0.9155399999999645,
+      "result": {
+        "results": [
+          {
+            "function": "requireGuardBox",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "round": 2,
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "wallMs": 0.839125999999851,
+      "result": {
+        "results": [
+          {
+            "function": "requireHoldsDiamond",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testSimpleAssert",
+      "round": 2,
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "wallMs": 0.6847270000002936,
+      "result": {
+        "results": [
+          {
+            "function": "testSimpleAssert",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootReadWrite",
+      "round": 2,
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "wallMs": 0.6969749999998385,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 57,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootAddAssign",
+      "round": 2,
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "wallMs": 0.723924999999781,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootSubAssign",
+      "round": 2,
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "wallMs": 0.766208000000006,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMulAssign",
+      "round": 2,
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "wallMs": 0.7417319999999563,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMulAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDivAssign",
+      "round": 2,
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "wallMs": 0.7547709999998915,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDivAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootModAssign",
+      "round": 2,
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "wallMs": 0.7166440000000875,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootModAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "round": 2,
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "wallMs": 0.7344899999998233,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPostincrement",
+      "round": 2,
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "wallMs": 0.7661180000000058,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPreincrement",
+      "round": 2,
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "wallMs": 0.7371350000003076,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPreincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootPredecrement",
+      "round": 2,
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "wallMs": 0.7148720000000139,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootPredecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDelete",
+      "round": 2,
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "wallMs": 0.723453999999947,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootDisjoint",
+      "round": 2,
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "wallMs": 0.7315759999996772,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootDisjoint",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "round": 2,
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "wallMs": 2.8923150000000533,
+      "result": {
+        "results": [
+          {
+            "function": "storageRootWriteRhsCapture",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "round": 2,
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "wallMs": 0.6406210000000101,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolRootReadWrite",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "round": 2,
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "wallMs": 0.7535189999998693,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexRootMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 61,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "round": 2,
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "wallMs": 0.8413199999999961,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMappingAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "round": 2,
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "wallMs": 1.21253999999999,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadMappingStoreRoot",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "round": 2,
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "wallMs": 3.151429999999891,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexWriteNseChain",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "round": 2,
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "wallMs": 0.8118650000001253,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteMappingBool",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 65,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "round": 2,
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "wallMs": 1.2792999999996937,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDeleteNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 76,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "round": 2,
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "wallMs": 1.7684760000001916,
+      "result": {
+        "results": [
+          {
+            "function": "testStorageMapReadWriteAndDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 100,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "round": 2,
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "wallMs": 4.296169000000191,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexCopyValue",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 90,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageGridWriteRead",
+      "round": 2,
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "wallMs": 1.1384899999998197,
+      "result": {
+        "results": [
+          {
+            "function": "storageGridWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "round": 2,
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "wallMs": 0.7536890000001222,
+      "result": {
+        "results": [
+          {
+            "function": "storageBoolKeyedMapping",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 63,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "round": 2,
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "wallMs": 2.0740599999999176,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexAddAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "round": 2,
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "wallMs": 2.103002999999717,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexSubAssign",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "round": 2,
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "wallMs": 1.6409770000000208,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexMultipleWrites",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 74,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "round": 2,
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "wallMs": 2.0823519999999007,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostincrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "round": 2,
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "wallMs": 2.1598770000000513,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexPostdecrement",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexDelete",
+      "round": 2,
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "wallMs": 1.5961709999996856,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexDelete",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "round": 2,
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "wallMs": 1.9353940000000875,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexReadNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 78,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "round": 2,
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "wallMs": 0.9470670000000609,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayAddAssignOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 60,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "round": 2,
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "wallMs": 1.0221879999999146,
+      "result": {
+        "results": [
+          {
+            "function": "storageIndexArrayReadOutOfBoundsReverts",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "round": 2,
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "wallMs": 2.7078010000000177,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixWriteRead",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 81,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "round": 2,
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "wallMs": 11.537432999999965,
+      "result": {
+        "results": [
+          {
+            "function": "storageMatrixNseIndex",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 109,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushEmpty",
+      "round": 2,
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "wallMs": 1.102657000000363,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushEmpty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 62,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "round": 2,
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "wallMs": 0.8117050000000745,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushLengthPositive",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "round": 2,
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "wallMs": 3.7264229999996132,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushNonsimpleArg",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 87,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePushReadBack",
+      "round": 2,
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "wallMs": 1.5347899999997026,
+      "result": {
+        "results": [
+          {
+            "function": "storagePushReadBack",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopAfterPush",
+      "round": 2,
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "wallMs": 1.1871130000004086,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopAfterPush",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 67,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopNonempty",
+      "round": 2,
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "wallMs": 1.5953890000000683,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopNonempty",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 75,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "round": 2,
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "wallMs": 0.5245390000000043,
+      "result": {
+        "results": [
+          {
+            "function": "storagePopUnknownLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileCountsUp",
+      "round": 2,
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "wallMs": 1.0838690000000497,
+      "result": {
+        "results": [
+          {
+            "function": "whileCountsUp",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 64,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "round": 2,
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "wallMs": 85.81908800000019,
+      "result": {
+        "results": [
+          {
+            "function": "whileBodyDeclaresLocal",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 80,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "forWritesStorageArray",
+      "round": 2,
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "wallMs": 18.071756000000278,
+      "result": {
+        "results": [
+          {
+            "function": "forWritesStorageArray",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 79,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantCountsToBound",
+      "round": 2,
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "wallMs": 1.3575660000001335,
+      "result": {
+        "results": [
+          {
+            "function": "invariantCountsToBound",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 72,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "round": 2,
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "wallMs": 1.641037000000324,
+      "result": {
+        "results": [
+          {
+            "function": "invariantForCountsArrayLength",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 73,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    }
+  ],
+  "startupMs": 8.50649199999998,
+  "failures": [],
+  "passed": true
+}

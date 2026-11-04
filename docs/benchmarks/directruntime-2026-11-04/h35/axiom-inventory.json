@@ -1,0 +1,9 @@
+{
+  "head": "65e23115fe6c3c5c78aa632f319091b63301fb6f",
+  "publishedDelivery": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "ownedLeanChanges": [],
+  "newOrChangedWorkerTheorems": [],
+  "printAxiomsCommands": [],
+  "status": "not applicable: no new or changed worker Lean declarations",
+  "boundary": "Published producer changes are separate from worker ownership. This does not establish their proof closure or the missing Identity acceptance."
+}
