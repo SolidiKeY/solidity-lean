@@ -31,10 +31,10 @@ theorem suffix_run (left right : List Evm.Instr) (word : Scalar.Word) (tail : Sc
   rw [Evm.run_append_skip (test_run (left.length + 1) word tail initial)]
   cases flag : word == 0 with
   | false =>
-    simp only [flag, Bool.false_eq_true, if_false]
+    simp only [Bool.false_eq_true, if_false]
     exact Evm.exec_append left ([.jump right.length] ++ right) 0 _
   | true =>
-    simp only [flag, if_true]
+    simp only [if_true]
     rw [Evm.exec_skip_append]
     rfl
 
