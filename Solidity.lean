@@ -1583,6 +1583,8 @@ import Solidity.Frontend.QualifiedUnits.CheckedControls
 import Solidity.Frontend.QualifiedUnits.Controls
 import Solidity.Frontend.QualifiedUnits.Inheritance
 import Solidity.Frontend.QualifiedUnits.Lookup
+import Solidity.Frontend.QualifiedUnits.ReferenceControls
+import Solidity.Frontend.QualifiedUnits.References
 import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.QualifiedUnits.Specification
 import Solidity.Frontend.QualifiedUnits.UnitPaths
