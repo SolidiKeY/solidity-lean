@@ -706,3 +706,7 @@ or Lean server. They confirmed Source-selected rows still use machine call
 value in the IR outcome and do not certify successful Source body execution.
 Unused simp arguments were removed after focused compilation and the importing
 consumer was rechecked.
+
+`EntryRoutesInterface.lean` specifies one compiled continuation path: short
+inputs use special selection, full inputs prefer the first ordinary match,
+and ordinary misses use special selection. Getter/body integration is open.
