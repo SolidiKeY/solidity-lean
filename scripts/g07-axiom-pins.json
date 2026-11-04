@@ -2156,6 +2156,36 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_compiles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_packet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_parsed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.raw_nested_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean:SolidityBridge.Yul.StructuredSwitchJson.KernelControls.checkedFromParse": [
   "Classical.choice",
   "Quot.sound",

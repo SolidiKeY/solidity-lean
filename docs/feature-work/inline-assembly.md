@@ -378,3 +378,11 @@ lowering are inhabited. Exact checked-packet reconstruction is proved only
 under the visible premise `blockAux 20 ast = .ok tree`; that raw decoder
 equality remains the H14 routine task, so NJ1 is still partial. See
 [the lane record](inline-assembly-vy3.md).
+
+
+VY3 NJ1 closed for the fixed fixture: `StructuredSwitchJsonKernelAttachment`
+proves the exact original decoder equality and unconditional packet,
+compilation and source endpoints. Its model theorem retains the actual
+represented-stack premise; a fixed low-fuel refusal is also proved. Bounds and
+observations are unchanged. Full lane/source/native obligations remain open;
+see [the lane record](inline-assembly-vy3.md).

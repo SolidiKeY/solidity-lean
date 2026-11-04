@@ -1176,3 +1176,35 @@ not an assumed decoder proof; they remain finite model observations. New raw
 JSON guards from the previous milestone remain evaluations. Body admission,
 Source/G24/views/readback, native/resource/world/trace adequacy, final joint
 gates and the original unfinished queue remain open along with the NJ1 equality.
+
+
+### NJ1 exact fixture attachment closed
+
+`StructuredSwitchJsonKernelAttachment` proves `raw_nested_parsed`, the original
+`blockAux 20 ast = .ok tree` obligation, without a parser premise. The original
+`raw_nested_packet` and exact `raw_nested_compiles` equality are instantiated
+from that proof. `raw_nested_source` proves actual checked-word execution at
+horizon16, and `raw_nested_model` quantifies arbitrary mathematical machines
+and caller tails with the existing represented-stack premise. NJ1 is closed
+for this one unchanged synthetic fixture; it is not generic JSON correctness.
+
+The proof reuses the existing decoder, literal-range and child equations.
+Case producers retain decoded-word freshness, singleton final default and
+nonempty-switch checks. Three existing path equations are exposed unchanged;
+only y/eq require new finite identifier proofs. Small constructor equations
+avoid failed large definitional reductions, with no recursion-budget increase.
+Bounds20/16, dirty literal and expected21/999/42/17 observations are unchanged.
+`raw_nested_low_fuel` additionally proves exact compiler refusal at horizon2;
+this is not general source revert/divergence transport.
+
+Independent read-only finder and skeptic reviews found no confirmed findings.
+Six actual endpoint axiom reports are enforced with standard axioms only.
+Focused/per-file kernel checks, MCP diagnostics, signatures, trust/layers/
+roots/docs/module-map and axiom inventory pass. Raw failed automation,
+elaboration and recursion-limit exits are retained. The prefix observations
+remain finite target analysis controls; the raw packet/parser equality is now
+a named kernel witness. No new external solc/EVM evidence is claimed.
+
+Body admission, independent JSON specification/completeness, source attachment/
+MemOK, Source/G24/views/readback, native/resource/world/trace correspondence
+and final joint gates remain unfinished. Closing NJ1 does not complete VY3.

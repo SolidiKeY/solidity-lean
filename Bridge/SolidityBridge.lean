@@ -380,6 +380,7 @@ import SolidityBridge.Yul.StructuredJsonControls
 import SolidityBridge.Yul.StructuredSource
 import SolidityBridge.Yul.StructuredSourceControls
 import SolidityBridge.Yul.StructuredSwitchJsonControls
+import SolidityBridge.Yul.StructuredSwitchJsonKernelAttachment
 import SolidityBridge.Yul.StructuredSwitchJsonKernelControls
 import SolidityBridge.Yul.SwitchCompilation
 import SolidityBridge.Yul.SwitchCompilationControls

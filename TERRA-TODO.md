@@ -1,45 +1,22 @@
-# New routine handoff
+# Routine handoff status
 
-Only NJ1 is recorded here; no earlier excluded Terra file is restored.
-No placeholder, axiom, budget increase or changed fixture is authorized.
+## NJ1 — completed for the fixed fixture
 
-## NJ1 — remaining exact raw decoder equality
+The exact original decoder equality, packet and compilation/source/model
+endpoints are now kernel-proved in the actual module
+`SolidityBridge.Yul.StructuredSwitchJsonKernelAttachment`, namespace
+`SolidityBridge.Yul.StructuredSwitchJson.KernelControls`:
 
-Actual module: `SolidityBridge.Yul.StructuredSwitchJsonKernelControls`.
-Namespace: `SolidityBridge.Yul.StructuredSwitchJson.KernelControls`.
-`tree`, `prepared`, `lowered`, `checkedFromParse`, `compiledFromParse`,
-`packetFromParse` and `compilesFromParse` are implemented and kernel-checked.
-Preparation/lowering is inhabited independently; raw JSON attachment is NOT.
+- `raw_nested_parsed`: `blockAux 20 ast = .ok tree`, with no parser premise.
+- `raw_nested_packet`: the original `Packet [] 20 16 (Controls.fixture "1")`.
+- `raw_nested_compiles`: exact `checkCompile` equality returning that packet.
+- `raw_nested_source`: actual closed-word execution at horizon16.
+- `raw_nested_low_fuel`: exact compiler horizon2 refusal for the same fixture.
+- `raw_nested_model`: arbitrary mathematical machine/caller, with the real
+  represented-stack premise retained.
 
-The remaining declaration must prove this exact statement:
-
-```lean
-theorem raw_nested_parsed :
-    Solidity.Frontend.YulJson.blockAux 20 ast = .ok tree
-```
-
-Then construct the original requested declarations using the existing builders:
-
-```lean
-def raw_nested_packet : SolidityBridge.Yul.StructuredJson.Packet [] 20 16
-    (SolidityBridge.Yul.StructuredSwitchJson.Controls.fixture "1") :=
-  packetFromParse raw_nested_parsed
-
-theorem raw_nested_compiles :
-    SolidityBridge.Yul.StructuredJson.checkCompile [] 20 16
-      (SolidityBridge.Yul.StructuredSwitchJson.Controls.fixture "1") =
-    .ok raw_nested_packet := compilesFromParse raw_nested_parsed
-```
-
-These are pending statements, not declarations in a Lean module. Do not infer
-that the explicit parser premise has been inhabited. The builders already
-construct metadata, flags, span (using the real earlier span equation), syntax
-precision, typed preparation and concrete target fields without other premises.
-
-Why routine: prove actual span/name/literal/child decoder equations with the
-published parser definitions and compose them. The old `StructuredJsonControls`
-certificate illustrates the explicit route. Direct reduction and recursive
-simplification attempts remain failed evidence; keep all proof/fuel/recursion
-budgets unchanged. Source/target soundness remains with VY3. Preserve bounds20/16
-and prefix outcomes21/999/42/17. Until this is proved, raw JSON success guards
-remain evaluations, not a named unconditional kernel packet certificate.
+Bounds20/16, dirty literal, fixture and expected prefix21/999/42/17 are unchanged.
+Earlier failed attempts are preserved as evidence. No NJ1 proof remains pending;
+this closes only the fixed-fixture obligation, not generic JSON correctness,
+Solidity admission, Source/G24/native adequacy or the full original lane.
+No earlier excluded Terra tasks or completed work are restored here.

@@ -200,7 +200,7 @@ private theorem decimalOne : decimal "1" = some 1 := by
     show (!"1".isEmpty && "1".toUTF8.data.all (fun b => 48 ≤ b && b ≤ 57)) = true by decide,
     if_true,parseOne]
 
-private theorem pathX : identifierPath (ident "x") = .ok ("x",[]) := by
+theorem pathX : identifierPath (ident "x") = .ok ("x",[]) := by
   change (do
     let parts := "x".splitOn "."
     if !(parts.all fun part => match Solidity.Frontend.Checked.yulTok (bytes part) with
@@ -208,7 +208,7 @@ private theorem pathX : identifierPath (ident "x") = .ok ("x",[]) := by
     match parts with | head :: tail => pure (head,tail) | [] => throw (Solidity.Frontend.YulJson.Error.identifier "x")) = _
   rw [splitX]
   rfl
-private theorem pathAdd : identifierPath (ident "add") = .ok ("add",[]) := by
+theorem pathAdd : identifierPath (ident "add") = .ok ("add",[]) := by
   change (do
     let parts := "add".splitOn "."
     if !(parts.all fun part => match Solidity.Frontend.Checked.yulTok (bytes part) with
@@ -216,7 +216,7 @@ private theorem pathAdd : identifierPath (ident "add") = .ok ("add",[]) := by
     match parts with | head :: tail => pure (head,tail) | [] => throw (Solidity.Frontend.YulJson.Error.identifier "add")) = _
   rw [splitAdd]
   rfl
-private theorem pathMul : identifierPath (ident "mul") = .ok ("mul",[]) := by
+theorem pathMul : identifierPath (ident "mul") = .ok ("mul",[]) := by
   change (do
     let parts := "mul".splitOn "."
     if !(parts.all fun part => match Solidity.Frontend.Checked.yulTok (bytes part) with
