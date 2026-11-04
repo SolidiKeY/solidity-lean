@@ -1267,3 +1267,26 @@ Independent read-only finder and skeptic reviews report no findings.
 Both modules have zero diagnostic errors; fifteen scoped axiom reports use
 only Lean standard axioms. Failed reduction attempts are retained in checkpoint
 evidence; explicit step/residue proofs keep the original statements and budgets.
+
+### Checked uint8 terminal horizons
+
+`LocalU8Horizon.successor` proves exact result/state equality after one extra
+fuel level when the existing run does not return timeout; `extension` proves
+the same for arbitrary added fuel. Both quantify over the existing read,
+assignment and checked-add certificates, every raw local frame and each
+pipeline separately. The proofs use the existing pair cost and right-first
+legacy versus left-first via-IR execution, including child halts and writes.
+Eight controls reuse inhabited side-effecting certificates: both pipeline
+results remain stable, checked panic remains stable, assignments and raw flags
+are retained, multiplication remains unsupported, and zero/assignment-timeout
+runs concretely change at higher fuel. The non-timeout premise is essential.
+This is a local horizon law, not a general divergence, unchecked arithmetic,
+Source readback, assembly-admission or compiler-adequacy result. Existing Source
+checked-frame premises and observations are unchanged. General P16 and the
+full Y01/Y02/Y03/Y09.01 queue and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Per-file MCP diagnostics report zero errors for both modules; scoped Lean,
+generated-root and layer checks pass. Ten scoped axiom reports use only
+Lean standard axioms. Raw failed automation/reduction attempts are retained
+separately from passing checks; no proof budgets were raised.

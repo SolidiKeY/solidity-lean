@@ -107,3 +107,5 @@
 | `Yul/LocalDefaultPostRepresentation.lean`, `Yul/Checks/LocalDefaultPostRepresentation.lean` | All-fuel default-scope post and omitted-guard congruence with post-effect/continuation controls. |
 
 | `Yul/LocalU8Representation.lean`, `Yul/Checks/LocalU8Representation.lean` | Exact checked-u8 result/error congruence and comparison/Boolean composition, retaining per-pipeline operand order. |
+
+| `Yul/LocalU8Horizon.lean`, `Yul/Checks/LocalU8Horizon.lean` | Exact full-run stability after non-timeout checked-u8 results, arbitrary added fuel and timeout counterexamples. |
