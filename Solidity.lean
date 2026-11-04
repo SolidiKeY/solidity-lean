@@ -878,6 +878,8 @@ import Solidity.Backend.StructuredFlow.CoreSequence
 import Solidity.Backend.StructuredFlow.CoreSequenceControls
 import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
+import Solidity.Backend.StructuredFlow.ForBreakCompiler
+import Solidity.Backend.StructuredFlow.ForBreakCompilerControls
 import Solidity.Backend.StructuredFlow.ForContinueCompiler
 import Solidity.Backend.StructuredFlow.ForContinueCompilerControls
 import Solidity.Backend.StructuredFlow.ForReturnCompiler
