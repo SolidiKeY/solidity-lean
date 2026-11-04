@@ -672,3 +672,7 @@ Source short exclusion and both-branch linkage, padded collision controls,
 protected state and the explicit native/special/body boundaries. Neither used
 a build or Lean server. Unused simp arguments found by the focused build were
 removed and the importing consumer rechecked without own warnings.
+
+`SpecialRoutesInterface.lean` specifies empty-input receive preference, fallback
+choice, absence rejection and selected special payability. It certifies
+continuation routing, not special-body execution or fallback parameter binding.
