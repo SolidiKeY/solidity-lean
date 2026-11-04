@@ -251,3 +251,16 @@ passes all eight checkpoint gates (library3441 jobs) and its per-file check.
 MCP errors/warnings are zero; independent finder/skeptic reviews pass. The
 signature is now available for a separate implementation checkpoint. No
 PendingG24 inhabitant or completed Source/representation endpoint is inferred.
+
+P20Consumer implements that consumer by passing only the published
+PendingG24.lowering field to existing compose. Its finite-byte theorem retains
+the original successful full-frame IR equation; it does not derive that
+equation from Source, Input or Rep. The original success witness also proves
+the supplied domain nonempty and rules out a false-domain pending link.
+
+P20ConsumerControls reuses the published nonidentity closed Yul assignment
+producer rather than copying one. Its exact selected three-instruction code
+executes to35 bytes, retains the protected suffix and dirty high bits, and
+distinguishes wrong-slot and corrupted-tail results by independent byte
+evaluation. This inhabits the closed numeric fragment, not PendingG24 or
+PendingRepresentedSuccess. The latter producer obligations remain open.

@@ -714,6 +714,8 @@ import Solidity.Backend.Selection.LoopLayout
 import Solidity.Backend.Selection.LoopPackets
 import Solidity.Backend.Selection.MixedSelection
 import Solidity.Backend.Selection.NumericSequence
+import Solidity.Backend.Selection.P20Consumer
+import Solidity.Backend.Selection.P20ConsumerControls
 import Solidity.Backend.Selection.P20ConsumerInterface
 import Solidity.Backend.Selection.Premises
 import Solidity.Backend.Selection.PremisesV2
