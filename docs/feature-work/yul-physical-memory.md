@@ -452,6 +452,17 @@ no-access and preserve whole Source state. This is same-length payload support,
 not growth, arbitrary owned writes, static-call or assembly admission, resource
 feasibility or allocator/compiler adequacy.
 
+`P6ByteFamilyCopy` factors that proof over the existing indexed
+`heapByteType`/`heapByteData` APIs. Bytes and strings share a physical shape but
+retain their actual Source constructors. The old `P6ByteObjectCopy` signatures
+are unchanged byte specializations; there is one payload-copy realization proof.
+The string witness uses the existing three-root Source heap and copies across a
+word boundary from its last string byte and nonzero padding. Its resulting33byte
+payload is `0x61` followed by32bytes of `0xa5`, retained as Source string data
+without UTF-8 validation. Actual owner observation and heap-type distinction are
+proved; both surrounding byte objects and the whole view survive. This extends
+same-length payload support, not string indexing, growth or allocator adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

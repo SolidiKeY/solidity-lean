@@ -87,3 +87,4 @@
 | `Yul/Adapters/P6ByteCopyPreparation` | Actual overlapping copy-byte readback and canonical byte-object update existence from header/payload and retained-capacity facts. |
 | `Yul/Adapters/P6ChangedPayloadHashControls` | Kernel exact changed-byte Source state, nonempty history and changed-payload Source/KECCAK witness with sibling/alias preservation. |
 | `Yul/Adapters/P6ByteObjectCopy{,Controls}` | General payload-only byte copying with derived retained capacity, actual Source action, complete refreshed view and unrelated-cell/layout preservation. |
+| `Yul/Adapters/P6ByteFamilyCopy{,Controls}` | Shared bytes/string payload-copy realization preserving intrinsic data types, with exact byte-API specialization and cross-word string controls. |

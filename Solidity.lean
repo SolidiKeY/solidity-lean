@@ -2412,6 +2412,8 @@ import Solidity.Yul.Adapters.MemoryBytesControls
 import Solidity.Yul.Adapters.ObjectWriteback
 import Solidity.Yul.Adapters.ObjectWritebackControls
 import Solidity.Yul.Adapters.P6ByteCopyPreparation
+import Solidity.Yul.Adapters.P6ByteFamilyCopy
+import Solidity.Yul.Adapters.P6ByteFamilyCopyControls
 import Solidity.Yul.Adapters.P6ByteMemory
 import Solidity.Yul.Adapters.P6ByteMemoryControls
 import Solidity.Yul.Adapters.P6ByteObjectCopy
