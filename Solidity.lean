@@ -386,6 +386,7 @@ import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedSelect
 import Solidity.Backend.MemoryOps.SourceRawBoolCopy
 import Solidity.Backend.MemoryOps.SourceRawBoolCopyControls
+import Solidity.Backend.MemoryOps.SourceRawBoolEntry
 import Solidity.Backend.MemoryOps.SourceRawUintDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasReject

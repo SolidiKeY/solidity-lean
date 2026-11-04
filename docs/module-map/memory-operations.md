@@ -255,3 +255,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean` | Raw-byte-derived Boolean decode/copy success, ordered first-invalid failure and Source frames. |
 | `Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean` | Populated objects/aliases, nonzero raw offset, late invalid Boolean and actual padding/empty controls. |
+
+| `Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean` | Actual dynamic entry guard composed with raw Boolean copy under selector/frame binding; ordered refusal and success laws. |
