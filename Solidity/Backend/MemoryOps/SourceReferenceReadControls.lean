@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder
 import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
 import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
 import Solidity.Backend.MemoryOps.SourceConditional
@@ -2444,5 +2445,167 @@ theorem local_reference_reject_late_timeout (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms local_reference_late_reject_vectors
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms local_reference_reject_late_timeout
+
+
+private theorem order_left_elems : MObj.elems .dyn (rhsHeap.get left)=[true,true,false] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | change MObj.elems .dyn ((hp.set left (MObj.setElem .dyn (hp.get left) 1 true)).get left)=_
+    rw [Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn]
+    rfl
+
+private def orderLocalState := (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).1.setLocal
+  (.there .here : Idx RhsΓ (.mem B)) (some (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2)
+private def orderLocalWord := writeMachine (allocateMachine (rhsMidWord false) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def orderLocalItems : Source.RItems E0 [] false .body RhsSΓ RhsSΓ :=
+  .stmt rejectLocalAssign (.stmt rejectLocalDelete .nil)
+
+/-- Both pipelines: write-then-delete succeeds while delete-then-write rejects.
+The old parent-held alias keeps the materially changed LEFT[1]=true. -/
+theorem local_reference_order_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+    let z : Source.EMState E0 RhsSΓ := (ym.1.set (.there .here) (.memRef rfl ym.2.heap.next),
+      {ym.2 with heap := (ym.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+    (Source.execS (G0 p) F0 (horizon+5) RhsSΓ.length none rejectLocalAssign (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal ym.1),(.nil,ym.2)) ∧
+    [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2,ym.2.heap.get 3,ym.2.heap.get 4,ym.2.heap.get 5]=
+      [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,none] ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none orderLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal z.1),(.nil,z.2)) ∧
+    Prog.run (rhsState false) (.cons (rhsNative (.there (.there tj)))
+      (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl)) .nil))=
+      .ok ⟨orderLocalState,List.prefix_append H [B]⟩ ∧
+    run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 ∧
+    run (rhsCode (.there (.there tj)) ++ rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B))
+      (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord false)=.ok orderLocalWord 0 ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,rejectLocalSource.2)) ∧
+    [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+      [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    z.1=(rhsSource false).1.set (.there .here) (.memRef rfl 5) ∧ z.2.heap.next=6 ∧
+    SourceBoolMemoryAt z 0 orderLocalState.heap (left.wk (List.prefix_append H [B])) .dyn ∧
+    Source.MemOK E0 SH z ∧ StateRepr 1 1 8 rhsFrag orderLocalState (upd base 5 ⟨48,by decide⟩) orderLocalWord ∧
+    StructAllocatorRepr orderLocalState.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ orderLocalWord ∧
+    Heap.Keeps (List.prefix_append H [B]) rhsHeap orderLocalState.heap ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 0 1 .bool).run z=(.ok (.bool true),z) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 5 1 .bool).run z=(.error (.revert (Source.panicData .index)),z) ∧
+    (z.2.ex=(rhsSource false).2.ex ∧ z.2.events=(rhsSource false).2.events ∧
+      z.2.logs=(rhsSource false).2.logs ∧ z.2.fnLocals=(rhsSource false).2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,write,oldMid,midOthers,firstStmt,_,items,_,_,native,word₁,_,word,oldAt,fresh,mok,repr,alloc,keep,elems,_,others,locals,next₁,next₂,ex,events,logs,fnLocals,_,_,_⟩ :=
+      source_bool_write_local_delete_program (G0 p) F0 horizon (rhsSource false) (.there .here) (.there (.there si)) .here
+        (rhsState false) (.there .here) (.there (.there tj)) .here left 0 (uintOfNat 1) true (rhsAt false)
+        rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) SH (rhsOK false)
+        (rhsRepr false) (rhsAllocator false) (by decide) (by decide)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have equalHeap : mid=rhsHeap := Option.some.inj (write.symm.trans known)
+    subst mid
+    have equalWord : mm=rhsMidWord false := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word false))).1
+    subst mm
+    let z : Source.EMState E0 RhsSΓ := (ym.1.set (.there .here) (.memRef rfl ym.2.heap.next),
+      {ym.2 with heap := (ym.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+    have midLeaf : ym.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ := by
+      change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (rhsHeap.get left))⟩ at oldMid
+      rw [order_left_elems] at oldMid
+      exact oldMid
+    have midEmpty : ym.2.heap.get 5=none := by
+      have noEntry := ym.2.heap.alloc_fresh ⟨SB,sourceBoolMemory []⟩
+      change ym.2.heap.get ym.2.heap.next=none at noEntry
+      rw [next₁] at noEntry;exact noEntry
+    have midTables : [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2,ym.2.heap.get 3,ym.2.heap.get 4,ym.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,none] := by
+      rw [midLeaf,midOthers 1 _ (by decide) (by rfl),midOthers 2 _ (by decide) (by rfl),
+        midOthers 3 _ (by decide) (by rfl),midOthers 4 _ (by decide) (by rfl),midEmpty]
+    have selected : MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B])))=[true,true,false] := by
+      change MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B])))=
+        (MObj.elems .dyn (hp.get left)).set (uintOfNat 1).1.toNat true at elems
+      rw [elems]
+      simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast]
+      rfl
+    have leaf : z.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ := by
+      change z.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B]))))⟩ at oldAt
+      rw [selected] at oldAt;exact oldAt
+    have emptyElems : MObj.elems .dyn (orderLocalState.heap.get
+        (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[] := by
+      change MObj.elems .dyn ((rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.get (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[]
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    have newObject : z.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ := by
+      change z.2.heap.get ym.2.heap.next=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (orderLocalState.heap.get
+        (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2))⟩ at fresh
+      rw [emptyElems,next₁] at fresh;exact fresh
+    have tables : [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory []⟩] := by
+      rw [leaf,others 1 _ (by decide) (by rfl),others 2 _ (by decide) (by rfl),
+        others 3 _ (by decide) (by rfl),others 4 _ (by decide) (by rfl),newObject]
+    refine ⟨ym,firstStmt,midTables,items,native,word₁,word,(local_reference_late_reject_client p horizon).2.2.2.2.1,tables,?_,next₂,oldAt,mok,repr,alloc,keep,?_,?_,ex,events,logs,fnLocals⟩
+    · change ym.1.set (.there .here) (.memRef rfl ym.2.heap.next)=_
+      rw [locals,next₁]
+      rfl
+    · exact source_bool_read z 0 [true,true,false] leaf 1 (by decide)
+    · exact source_bool_bounds z 5 [] newObject 1 (by decide)
+
+/-- Complete word prefix/final observations discriminate the orders even though
+both prefix allocators rebind to the same new empty object. -/
+theorem local_reference_order_vectors :
+    words (rhsMidWord false)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words orderLocalWord ++ [orderLocalWord.mem 48,orderLocalWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[1],w[3],w[1],w[1],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    words orderLocalWord≠words rejectLocalWord ∧ orderLocalWord.stack=[w[42]] ∧
+    (orderLocalWord.mem 0,orderLocalWord.mem 6,orderLocalWord.mem 18)=(w[49],w[48],w[1]) ∧
+    (rejectLocalWord.mem 0,rejectLocalWord.mem 6,rejectLocalWord.mem 18)=(w[49],w[48],w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,by decide,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_vectors' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_vectors
+
+
+/-- Direct native tables of the reached final heap, including all shared
+reference parents and both the old empty object and fresh empty object. -/
+theorem local_reference_order_native_vectors :
+    let e := List.prefix_append H [B]
+    let q := (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2
+    q.id=5 ∧ MObj.elems .dyn (orderLocalState.heap.get q)=[] ∧
+    MObj.elems .dyn (orderLocalState.heap.get (left.wk e))=[true,true,false] ∧
+    MObj.elems .dyn (orderLocalState.heap.get (right.wk e))=[false,true,false] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (old.wk e))).map HRef.id=[0] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (fresh.wk e))).map HRef.id=[0,1,0] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (empty.wk e))).map HRef.id=[] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | dsimp only
+    have keep : Heap.Keeps (List.prefix_append H [B]) rhsHeap orderLocalState.heap :=
+      Heap.keeps_alloc rhsHeap (defaultArray .bool ⟨0,W_pos⟩)
+    have other {Q : RefTy} (r : HRef H Q) (ne : left.id≠r.id) : rhsHeap.get r=hp.get r :=
+      Heap.get_set_ne hp left r ne _
+    refine ⟨rfl,?_,?_,?_,?_,?_,?_⟩
+    · change MObj.elems .dyn ((rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.get (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[]
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    · rw [keep left,MObj.elems_wk]
+      rw [order_left_elems]
+      simp only [List.map_cons,List.map_nil] <;> rfl
+    · rw [keep right,MObj.elems_wk,other right (by decide)]
+      simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep old,MObj.elems_wk,other old (by decide)]
+      simp only [Heap.get,Objs.get,hp,old,left,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep fresh,MObj.elems_wk,other fresh (by decide)]
+      simp only [Heap.get,Objs.get,hp,fresh,left,right,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep empty,MObj.elems_wk,other empty (by decide)]
+      simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn,List.map_nil] <;> rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_native_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

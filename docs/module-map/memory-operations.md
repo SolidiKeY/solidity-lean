@@ -208,3 +208,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceLocalReferenceDelete.lean` | Actual Source local Bool-array reference deletion paired with native allocating rebind and complete published word code; fresh observer and retained old aliases. |
 
 | `Backend/MemoryOps/SourceLocalReferenceReject.lean` | Actual local-reference allocation/rebinding prefix followed by reached empty-root bounds rejection in Source Items, native Prog and full word append; retained-prefix frames. |
+
+| `Backend/MemoryOps/SourceLocalReferenceOrder.lean` | Actual indexed write then allocating local-reference deletion in Source Items/native Prog/full word append; changed retained aliases and world/allocator frames. |
