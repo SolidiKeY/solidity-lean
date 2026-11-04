@@ -119,3 +119,6 @@
 
 | `Source/MonetaryRollback.lean` | Actual mark/captured-credit/rollback full-state execution and explicit saved-account range transport; no generic heap rollback or transaction-finalization claim. |
 | `Source/MonetaryRollbackControls.lean` | Inhabited heap/log/journal prefix, wrong-mark, capture-only and zero-credit controls with actual full-byte continuation readback. |
+
+| `Source/MonetaryStorage.lean` | Actual persistent/transient mutable storage and typed-write preservation of explicit current-and-saved balance bounds, with static refusal unchanged. |
+| `Source/MonetaryStorageControls.lean` | Inhabited typed direct-storage controls: full caller state/prefixes, balance17, changed cells, static/type refusals and actual journal undo; not dispatched execution. |

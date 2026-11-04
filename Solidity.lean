@@ -2194,6 +2194,8 @@ import Solidity.Source.MonetaryExecution
 import Solidity.Source.MonetaryLaws
 import Solidity.Source.MonetaryRollback
 import Solidity.Source.MonetaryRollbackControls
+import Solidity.Source.MonetaryStorage
+import Solidity.Source.MonetaryStorageControls
 import Solidity.Source.MonetaryWorld
 import Solidity.Source.Observe
 import Solidity.Source.Overloads

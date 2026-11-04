@@ -257,3 +257,23 @@ full Source/EVM/reachability/session/transaction-finalization claim. H25 G01
 review and authority wiring, H16/P8a realization, immutable/funds release and
 original24 full obligations/six combinations remain open. Helper-reserved
 pure monetary arithmetic is unchanged.
+
+
+Mutable storage range increment (2026-11-04): five laws connect real
+Source.applyOp/setCell/writeAt to the current-and-saved-account balance
+invariant. Persistent writes retain account money and save its old bounded
+account; transient writes add only a nonmonetary journal entry. Static refusal
+and invalid type/stuck paths preserve the entire state. Eleven inhabited
+controls use actual registered EB persistent/transient paths with balance17,
+nonempty journal, heap alias and event/log/function-local prefixes. They
+verify changed cells9/7, full result/state, range, static/type refusal and
+exact undo. These are direct storage-operation controls, not registered
+contract dispatch or a full evaluator induction. No Source write semantics,
+helper-reserved arithmetic, journal contract, observations or budget changed.
+Finder and skeptic reviewed independently read-only without Lean/build/tests;
+no findings. Original dependent-elaboration and syntax failures remain in
+/workspace/vy5-composition/monetary-storage-20261104. Standard axioms only,
+with exact pins. No fresh native observations. H19 full reachability/consumer
+closure, H25 G01 review and settlement/session wiring, H16/P8a execution and
+realization, immutable/funds release and original24 obligations/six general
+combinations remain open; Work2 and BackfillA/B remain partial.
