@@ -376,3 +376,11 @@ placement controls without semantic findings. The shortage control supplies a
 one-word state directly at ADD; it is not a fault reached from the sample's
 normal entry. Both reviews explicitly retain the open branch/loop and full
 composition obligations and used neither builds nor the Lean server.
+
+
+The code/sequence implementation checkpoint7583709c passes all eight
+checkpoint gates and both scoped per-file checks. KeySort passes under
+Lean4.24.0/Lake5.0.0-src+797c613. The scoped reports contain only standard
+axioms. These are checkpoint checks, not the unfinished assignment's full
+runtime gate. The following documentation-only handoff records this result;
+its Lean sources are identical to the gated implementation commit.
