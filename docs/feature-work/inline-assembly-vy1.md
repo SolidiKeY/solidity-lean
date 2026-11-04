@@ -1730,3 +1730,37 @@ and layer checks pass. Fifteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation, initial fixture-parenthesis correction
 and scratch constructor-tactic correction remain separate from passing checks;
 no control statement, expected outcome or proof/checking limit changed.
+
+### Completed raw sequence and block horizons
+
+`RawSequenceHorizon.successor` and `blockSuccessor` preserve the entire
+actual sequence/block result and raw frame after non-timeout execution.
+`extension` and `blockExtension` extend that equality to every larger
+horizon. Certificate induction derives the head's non-timeout premise from
+actual sequence propagation, fixes its captured frame using the concrete
+statement producer, and applies the tail induction at that same next frame.
+No coherent-input, clean projection, supplied child simulation or abstract
+adapter-stability law is assumed.
+Ten controls use two distinct conditional-write statements over the existing
+mixed raw frame. Fuel 5 retains the first statement's partial true write; fuel 8
+retains the second statement's partial false write. The sequence completes at
+9 with true, and its block at 10 returns the same full frame; both remain exactly
+equal at every larger horizon. The narrow sibling stays 257, whereas its clean
+backup is 1, giving an explicit cell witness against coherence. This witness
+also proves dirty projection refusal without whole-frame brute-force checking.
+Separate clean-start observation and all-fuel concrete Source block agreement
+controls retain the existing coherence boundary.
+The original brute-force control proof reached the existing heartbeat limit.
+The cell-witness proof, beta reduction and corrected scratch indentation pass
+without changing any control statement, outcome or checking/proof limit.
+These same-context Boolean expression sequences add no declarations, arbitrary
+control, Source dirty readback, general admission or compiler adequacy.
+Source/ExtCall/evaluators/layouts and observations remain unchanged.
+Full VY1/general P16 and final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Fourteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation, the brute-force heartbeat failure and
+intermediate witness rewrite/indentation failures remain separate from passing
+checks. No control statement, expected outcome or proof/checking limit changed.

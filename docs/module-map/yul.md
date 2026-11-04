@@ -150,3 +150,5 @@
 | `Yul/LocalForFirstDone.lean`, `Yul/Checks/LocalForFirstDone.lean` | Actual Source firstDone outcomes for initialized omitted guards; least-horizon, break, continue and completed-failure controls. |
 
 | `Yul/RawStatementHorizon.lean`, `Yul/Checks/RawStatementHorizon.lean` | Concrete raw/coherence-aware statement horizon stability with exact dirty-frame retention and projection/timeout controls. |
+
+| `Yul/RawSequenceHorizon.lean`, `Yul/Checks/RawSequenceHorizon.lean` | Concrete same-context raw sequence/block stability; partial-stage, dirty-cell witness and clean Source controls. |

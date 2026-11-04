@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(RawSequenceHorizon|Checks\.RawSequenceHorizon)$/, // Concrete whole raw-frame sequence/block horizons.
   /^Solidity\.Yul\.(RawStatementHorizon|Checks\.RawStatementHorizon)$/, // Concrete whole raw-frame expression-statement horizons.
   /^Solidity\.Yul\.(LocalForFirstDone|Checks\.LocalForFirstDone)$/, // Concrete actual Source horizon-selector consequences.
   /^Solidity\.Yul\.(LocalForTimeout|Checks\.LocalForTimeout)$/, // Concrete full-for timeout classification and Source consequences.

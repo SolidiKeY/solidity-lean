@@ -331,3 +331,5 @@ VY1: concrete full Boolean for timeout classification and clean Source outcomes;
 VY1: concrete Source firstDone horizon selection; [scope and controls](inline-assembly-vy1.md#concrete-source-horizon-selection). Full lane remains open.
 
 VY1: concrete completed raw-frame statement horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-frame-statement-horizons). Full lane remains open.
+
+VY1: completed raw sequence/block horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-sequence-and-block-horizons). Full lane remains open.
