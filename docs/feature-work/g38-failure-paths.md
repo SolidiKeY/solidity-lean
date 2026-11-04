@@ -108,9 +108,11 @@ It is not a universal source/world representation.
 
 The remaining exact producer boundaries are:
 
-- G41, v13-abi-world: general upstream ABI/error encoding via
-  `Backend/AbiWorld/ErrorLayout` and `ErrorRoundtrip` is absent from this base.
-  `Premises.EncodingAt` specifies the actual upstream execution needed.
+- G41, v13-abi-world: the published `Backend/AbiWorld/ErrorLayout` and
+  `ErrorRoundtrip` packet laws are consumed by `ReasonCodec` below. Their
+  presence does not discharge general runtime value encoding:
+  `Premises.EncodingAt` still specifies the actual upstream execution needed
+  for those values. The packet modules themselves are not a missing dependency.
 - v12-flow-calls: `InternalFlow/RuntimeFrameInterfaceV1.BareRevertClaim` explicitly
   excludes payload, panic and exhaustion. General internal-frame failure
   transport must come from that owner; G38 does not edit those modules.
