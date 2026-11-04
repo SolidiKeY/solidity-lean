@@ -1469,3 +1469,16 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Twelve scoped axiom reports use only Lean standard
 axioms. Failed standard automation attempts remain raw evidence, distinct from
 passing gates; no checking/proof limits were increased.
+
+### Published P16 dependency adoption
+
+Adopted the published scheduled dependency checkpoint while preserving later
+local proofs. The P16 import boundary is byte-identical to the published and
+previous local versions. The sole module-map conflict retained both row sets
+and deduplicated the generic P16 row; generated roots retain both parents'
+imports. Source, Core call syntax and local runtime definitions are unchanged.
+Focused P16, local-horizon and published P20 interface checks pass, with no layer
+violations. Independent read-only finder/skeptic merge reviews report no findings.
+P20 pending producer fields remain explicit obligations; importing them proves
+no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
+remain open.

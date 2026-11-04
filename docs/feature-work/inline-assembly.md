@@ -311,3 +311,5 @@ VY1: heterogeneous default-item and restored-block completed horizon stability; 
 VY1: completed unchecked-scope/ordinary-continuation horizon stability; see [lane handoff](inline-assembly-vy1.md#unchecked-scope-and-ordinary-continuation-horizons). Full lane remains open.
 
 VY1: independently typed conditional-scope completed horizon stability; see [lane handoff](inline-assembly-vy1.md#independently-typed-conditional-scope-horizons). Full lane remains open.
+
+VY1: adopted the published P16 dependency without changing its interface; retained local checkpoints and explicit P20 producer obligations. See [lane handoff](inline-assembly-vy1.md#published-p16-dependency-adoption).
