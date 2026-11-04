@@ -483,3 +483,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/G19/ConditionalReturn.lean` | V07-related conditional assignments then unconditional bare return, scoped branch temps and independent true return flag. |
 | `Lowering/G19/ConditionalReturnControls.lean` | Both-pipeline/checked-mode branch writes, reached-state donor, wrong donor/flag and Source return classification controls. |
+
+| `Backend/StructuredFlow/ConditionalReturnCompiler.lean` | Actual compiler composition for V07-related conditional assignments followed by captured bare return. |
+| `Backend/StructuredFlow/ConditionalReturnCompilerControls.lean` | Both-pipeline native full-cell/stack observations and compiled donor/flag mutation refusals. |
