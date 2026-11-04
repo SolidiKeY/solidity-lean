@@ -3371,6 +3371,8 @@ import Solidity.Yul.World.CreationAddressing
 import Solidity.Yul.World.CreationAddressingChecks
 import Solidity.Yul.World.CreationFrames
 import Solidity.Yul.World.CreationFramesChecks
+import Solidity.Yul.World.CreationReturnWindow
+import Solidity.Yul.World.CreationReturnWindowControls
 import Solidity.Yul.World.CreationRules
 import Solidity.Yul.World.Frames
 import Solidity.Yul.World.Lifecycle
@@ -3385,11 +3387,14 @@ import Solidity.Yul.World.LogPortRules
 import Solidity.Yul.World.LogSuccess
 import Solidity.Yul.World.LogSuccessControls
 import Solidity.Yul.World.Observations
+import Solidity.Yul.World.PendingCoupling
 import Solidity.Yul.World.Raw
 import Solidity.Yul.World.ReturnSize
 import Solidity.Yul.World.ReturnSizeChecks
 import Solidity.Yul.World.ReturndataBuiltin
 import Solidity.Yul.World.ReturndataBuiltinControls
+import Solidity.Yul.World.ReturndataByteLoad
+import Solidity.Yul.World.ReturndataByteLoadControls
 import Solidity.Yul.World.SelfDestruct
 import Solidity.Yul.World.SelfDestructBuiltin
 import Solidity.Yul.World.SelfDestructBuiltinControls

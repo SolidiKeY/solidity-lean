@@ -539,3 +539,29 @@ The Source observation boundary is relational, so it does not reconstruct log
 interleaving from separate legacy lists. Fault endpoints and concrete producers
 remain open. Independent read-only finder/skeptic follow-ups report no remaining
 confirmed interface findings; scoped module/signature checks pass.
+
+## Published P6/P14 conditional consumers
+
+`ReturndataByteLoad.copy_load` consumes the exact published P6
+`Physical.ByteWorld.Producer` field. The existing function-level copy derives
+its actual 32-byte image and outside-byte frame; the pending byte-load law
+then preserves memory and the saved stack. Source-window bounds, alignment,
+capacity and stack room remain explicit. Controls cover distinct bytes,
+wrong/truncated words, exact-end zero and out-of-source zero refusal. No
+concrete MLOAD producer or emitted RETURNDATACOPY implementation is claimed.
+
+`CreationReturnWindow.returned_window` consumes P14's exact return-address
+field and actual constructor Exec, deriving strict 20-byte bounds rather than
+assuming them. Its conditional witness retains nonempty runtime/arguments and
+immutable patches. Concrete controls reuse the published executed constructor
+and inspect both linked-address windows, wrong offsets, argument separation
+and zero-length boundaries. These bytes are returned runtime, not the deployed
+contract address or caller returndata after successful CREATE. Source creation,
+physical ownership/MemOK, world/compiler/resource and G51 closure remain open.
+
+Validation: four modules, importing controls and exact signatures pass scoped
+serial checks; all 25 consumer/control declarations are standard-axiom-only.
+Independent read-only finder and skeptic report no findings. Generated roots,
+area coverage, layers, trust and documentation paths pass. Initial automation
+and namespace diagnostics are retained. No concrete P6/P14 Producer instance,
+new opcode admission or final full-lane gate passage is inferred.

@@ -64,3 +64,5 @@
 | `Yul/Interfaces/P16.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/ReturndataByteLoad.lean`, `Yul/World/ReturndataByteLoadControls.lean` | Conditional published P6 load after actual function-level copy; exact byte framing and strict-bound controls, no concrete load producer. |
+| `Yul/World/CreationReturnWindow.lean`, `Yul/World/CreationReturnWindowControls.lean` | Conditional P14 returned-runtime linked-address windows with derived bounds and concrete constructor controls; not CREATE caller returndata. |
