@@ -1,7 +1,12 @@
 import Solidity.Frontend.ExpressionUniqueness.AttributeBalance
+import Solidity.Frontend.ExpressionUniqueness.BinaryControls
+import Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra
+import Solidity.Frontend.ExpressionUniqueness.BinaryRank
+import Solidity.Frontend.ExpressionUniqueness.BinaryRoot
 import Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction
 import Solidity.Frontend.ExpressionUniqueness.ExpressionBalance
+import Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree
 import Solidity.Frontend.ExpressionUniqueness.Families
@@ -39,6 +44,252 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.attrsP_balanced' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_balanced
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryMarker' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryMarker
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.BinaryFree' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_nil' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_nil
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_append' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_append
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_atom' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_atom
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_parens' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_parens
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_braces' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_braces
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_square' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_square
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_tk' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_tk
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_idt' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_idt
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_path' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_path
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_elem' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_elem
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_mul' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_mul
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_add' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_add
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_shift' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_shift
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_order' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_order
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_equality' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_equality
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.litP_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.litP_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.binaryFree_single' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_single
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.certified_exp_marker' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.certified_exp_marker
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_punct_injective' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_punct_injective
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_punct_injective' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_punct_injective
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_punct_injective' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_punct_injective
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_punct_injective' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_punct_injective
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.LastBinaryIs' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.LastBinaryIs
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.derives_firstBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.derives_firstBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.run_of_skip' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.run_of_skip
@@ -189,6 +440,21 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.expression_binary_property' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.expression_binary_property
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree
+
+/-- info: 'Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree
 
 /-- info: 'Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_commaFree' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_commaFree

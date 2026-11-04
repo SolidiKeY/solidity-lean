@@ -21,13 +21,13 @@
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Joint marker freedom is derived from existing recursive precedence. Certified roots classify as assignment/conditional/higher, and assignment operator reconstructs. Full operand/colon spans and remaining operator roots remain open."
+    "evidence": "Joint loose markers and non-minus binary rank markers are derived from original certificates. Nine left families select last markers, power selects first; lower/higher root disjointness and enum operators reconstruct. Rank10 operand state and complete operand/colon/high-root spans remain open."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
     "status": "partial",
-    "evidence": "All associativity refusal families proved; loose root/operator class reconstructs. Full arithmetic/bitwise/logical/relational/exponent precedence unambiguity and remaining boundaries stay open."
+    "evidence": "All refusal/association boundary families remain proved. Arbitrary non-minus binary marker orientation and lower/higher precedence-root disjointness added; full same-yield tree associativity/precedence, rank10 and remaining boundaries stay open."
   },
   {
     "id": "EU-06",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Every assignment operator and arbitrary prefix depth has an inhabited middle-assignment conditional with exact yield/prec and first-question/not-assignment controls. Other arbitrary families remain. Full boundary acceptance stays open."
+    "evidence": "Inhabited arbitrary-depth prefix family refutes only raw rank10 freedom, with grouping shielding control. All root-marker theorems quantify arbitrary subtrees/operators. Earlier holes/nesting/middle-assignment controls retained. Full boundary acceptance remains open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "22 modules and 374 source declarations inventoried with exact kernel standard-only pins, including Classical.choice where reported. Raw wrapped messages preserved."
+    "evidence": "27 modules and461 source declarations have exact kernel standard-only axiom pins and source signatures; raw wrapped messages preserved."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at22 frozen registrations; source trust3694/layers pass; central axiom inventory zero errors but374 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at27 frozen registrations; trust3699zero/layers559zero pass; central axiom inventory zero errors but461 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted loose-root proofs, arbitrary middle-assignment controls and exact multiline axiom auditing with no remaining findings; no Lean server/edits. See evidence/reviews-lowroots.json."
+    "evidence": "Separate finder/skeptic accepted binary selector, root/rank/operator and prefix countercontrol proofs with no defects; no Lean server/edits. See evidence/reviews-binary.json."
   },
   {
     "id": "EU-14",

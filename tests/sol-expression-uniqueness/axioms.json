@@ -17,6 +17,264 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free": [],
+  "Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryMarker": [],
+  "Solidity.Frontend.ExpressionUniqueness.BinaryFree": [],
+  "Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_append": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_atom": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_parens": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_braces": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_square": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_tk": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_idt": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_path": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_elem": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_mul": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_add": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_shift": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_order": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_equality": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.litP_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs": [],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.binaryFree_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases": [],
+  "Solidity.Frontend.ExpressionUniqueness.certified_exp_marker": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.mul_punct_injective": [],
+  "Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.shift_punct_injective": [],
+  "Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.order_punct_injective": [],
+  "Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.equality_punct_injective": [],
+  "Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.LastBinaryIs": [],
+  "Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs": [],
+  "Solidity.Frontend.ExpressionUniqueness.derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.derives_firstBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.run_of_skip": [
     "propext"
   ],
@@ -175,6 +433,23 @@
     "Quot.sound"
   ],
   "Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty": [],
+  "Solidity.Frontend.ExpressionUniqueness.expression_binary_property": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree": [
     "propext",
     "Quot.sound"
   ],

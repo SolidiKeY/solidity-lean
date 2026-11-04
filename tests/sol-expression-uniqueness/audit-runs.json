@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-lowroots-final",
-  "proof_gate_dir": "checkpoint-gates-lowroots-final",
-  "signature_stem": "signature-audit-lowroots",
-  "signature_gate_dir": "signature-gates-lowroots"
+  "proof_stem": "checkpoint-proof-binary",
+  "proof_gate_dir": "checkpoint-gates-binary",
+  "signature_stem": "signature-audit-binary",
+  "signature_gate_dir": "signature-gates-binary"
 }

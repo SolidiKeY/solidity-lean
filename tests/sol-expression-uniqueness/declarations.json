@@ -36,6 +36,498 @@
     "source_signature": "theorem attrsP_balanced (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : BalancedAttrs singles) (hm : BalancedItems mods) :\n    Produces (attrsP singles mods order) Balanced"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free",
+    "source_signature": "theorem successor_prefix_not_binary_ten_free (n : Nat) (name : String) :\n    \u00ac BinaryFree 10 (negTokens (n + 1) name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol",
+    "source_signature": "theorem rank_ten_prefix_countercontrol (n : Nat) (name : String) :\n    (negFamily (n + 1) name).Derives (negTokens (n + 1) name) \u2227\n    (negFamily (n + 1) name).prec = true \u2227 \u00ac BinaryFree 10 (negTokens (n + 1) name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free",
+    "source_signature": "theorem grouped_prefix_binary_ten_free (n : Nat) (name : String) :\n    BinaryFree 10 (parens (negTokens n name))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryMarker",
+    "source_signature": "def binaryMarker (rank : Nat) : Tok \u2192 Bool\n  | .punct .or => decide (rank = 2)\n  | .punct .and => decide (rank = 3)\n  | .punct .equal | .punct .notEqual => decide (rank = 4)\n  | .punct .lt | .punct .gt | .punct .le | .punct .ge => decide (rank = 5)\n  | .punct .bitOr => decide (rank = 6)\n  | .punct .bitXor => decide (rank = 7)\n  | .punct .bitAnd => decide (rank = 8)\n  | .punct .shl | .punct .sar | .punct .shr => decide (rank = 9)\n  | .punct .add | .punct .sub => decide (rank = 10)\n  | .punct .mul | .punct .div | .punct .mod => decide (rank = 11)\n  | .punct .exp => decide (rank = 12)\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BinaryFree",
+    "source_signature": "def BinaryFree (rank : Nat) (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems",
+    "source_signature": "def BinaryFreeItems (rank : Nat) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic",
+    "source_signature": "theorem binaryMarker_atomic (rank : Nat) : AtomicSelector (binaryMarker rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_nil",
+    "source_signature": "theorem binaryFree_nil {rank : Nat} : BinaryFree rank []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced",
+    "source_signature": "theorem binaryFree_balanced {rank : Nat} {ts : List Tok} (h : (BinaryFree rank) ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced",
+    "source_signature": "theorem binaryFreeItems_balanced {rank : Nat} {items : List (List Tok)} (h : (BinaryFreeItems rank) items) :\n    BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_append",
+    "source_signature": "theorem binaryFree_append {rank : Nat} {xs ys : List Tok} (hx : (BinaryFree rank) xs) (hy : (BinaryFree rank) ys) :\n    (BinaryFree rank) (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_atom",
+    "source_signature": "theorem binaryFree_atom {rank : Nat} {t : Tok} (hb : bracket t = none) (hc : (binaryMarker rank) t = false) :\n    (BinaryFree rank) [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil",
+    "source_signature": "theorem binaryFreeItems_nil {rank : Nat} : (BinaryFreeItems rank) []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons",
+    "source_signature": "theorem binaryFreeItems_cons {rank : Nat} {ts : List Tok} {items : List (List Tok)}\n    (h : (BinaryFree rank) ts) (hs : (BinaryFreeItems rank) items) : (BinaryFreeItems rank) (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single",
+    "source_signature": "theorem binaryFreeItems_single {rank : Nat} {ts : List Tok} (h : (BinaryFree rank) ts) : (BinaryFreeItems rank) [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead",
+    "source_signature": "theorem binaryFreeItems_dropHead {rank : Nat} {ts : List Tok} {items : List (List Tok)}\n    (h : (BinaryFreeItems rank) (ts :: items)) : (BinaryFreeItems rank) items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten",
+    "source_signature": "theorem binaryFreeItems_flatten {rank : Nat} {items : List (List Tok)} (h : (BinaryFreeItems rank) items) :\n    (BinaryFree rank) items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap",
+    "source_signature": "theorem binaryFree_flatMap {rank : Nat} {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 (BinaryFree rank) (f x)) : (BinaryFree rank) (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms",
+    "source_signature": "theorem binaryFree_of_atoms {rank : Nat} (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 (binaryMarker rank) t = false) :\n    (BinaryFree rank) ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_parens",
+    "source_signature": "theorem binaryFree_parens {rank : Nat} {ts : List Tok} (h : Balanced ts) : (BinaryFree rank) (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_braces",
+    "source_signature": "theorem binaryFree_braces {rank : Nat} {ts : List Tok} (h : Balanced ts) : (BinaryFree rank) (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_square",
+    "source_signature": "theorem binaryFree_square {rank : Nat} {ts : List Tok} (h : Balanced ts) :\n    (BinaryFree rank) (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_tk",
+    "source_signature": "theorem binaryFree_tk {rank : Nat} (k : Kw) : (BinaryFree rank) (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_idt",
+    "source_signature": "theorem binaryFree_idt {rank : Nat} (name : String) : (BinaryFree rank) (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_path",
+    "source_signature": "theorem binaryFree_path {rank : Nat} (p : IdPath) : (BinaryFree rank) p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_elem",
+    "source_signature": "theorem binaryFree_elem {rank : Nat} (e : Elem) : (BinaryFree rank) e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility",
+    "source_signature": "theorem binaryFree_visibility {rank : Nat} (v : Visibility) : (BinaryFree rank) v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability",
+    "source_signature": "theorem binaryFree_mutability {rank : Nat} (m : Mutability) : (BinaryFree rank) m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc",
+    "source_signature": "theorem binaryFree_dataLoc {rank : Nat} (l : DataLoc) : (BinaryFree rank) l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks",
+    "source_signature": "theorem binaryFree_optToks {rank : Nat} {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, (BinaryFree rank) (f a))\n    (value : Option \u03b1) : (BinaryFree rank) (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix",
+    "source_signature": "theorem binaryFree_prefix {rank : Nat} (op : PrefixOp) (hskip : rank \u2260 10) :\n    (BinaryFree rank) op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix",
+    "source_signature": "theorem binaryFree_suffix {rank : Nat} (op : SuffixOp) : (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_mul",
+    "source_signature": "theorem binaryFree_mul {rank : Nat} (op : MulOp) (hne : rank \u2260 11) :\n    (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_add",
+    "source_signature": "theorem binaryFree_add {rank : Nat} (op : AddOp) (hne : rank \u2260 10) :\n    (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_shift",
+    "source_signature": "theorem binaryFree_shift {rank : Nat} (op : ShiftOp) (hne : rank \u2260 9) :\n    (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_order",
+    "source_signature": "theorem binaryFree_order {rank : Nat} (op : OrderOp) (hne : rank \u2260 5) :\n    (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_equality",
+    "source_signature": "theorem binaryFree_equality {rank : Nat} (op : EqOp) (hne : rank \u2260 4) :\n    (BinaryFree rank) (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree",
+    "source_signature": "theorem fragsP_binaryFree {rank : Nat} (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none \u2227 (binaryMarker rank) (mk bs) = false)\n    (bs : Bytes) : Produces (fragsP mk bs) (BinaryFree rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_binaryFree",
+    "source_signature": "theorem litP_binaryFree {rank : Nat} (l : Lit) : Produces (litP l) (BinaryFree rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs",
+    "source_signature": "def BinaryFreeAttrs (rank : Nat) (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append",
+    "source_signature": "theorem binaryFreeAttrs_append {rank : Nat} {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : (BinaryFreeAttrs rank) xs) (hy : (BinaryFreeAttrs rank) ys) : (BinaryFreeAttrs rank) (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binaryFree_single",
+    "source_signature": "theorem binaryFree_single {rank : Nat} (slot : Slot) (ts : List Tok) (h : (BinaryFree rank) ts) :\n    (BinaryFreeAttrs rank) (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree",
+    "source_signature": "theorem arrange_binaryFree {rank : Nat} (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : (BinaryFreeAttrs rank) singles)\n    (hm : (BinaryFreeItems rank) mods) (h : arrange order singles mods = some ts) : (BinaryFree rank) ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree",
+    "source_signature": "theorem attrsP_binaryFree {rank : Nat} (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : (BinaryFreeAttrs rank) singles) (hm : (BinaryFreeItems rank) mods) :\n    Produces (attrsP singles mods order) (BinaryFree rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker",
+    "source_signature": "theorem certified_left_binary_marker (e : Syn .expr) (ts : List Tok)\n    (hmin : 2 \u2264 e.level) (hmax : e.level \u2264 11) (hskip : e.level \u2260 10)\n    (hp : e.prec = true) (hd : e.Derives ts) :\n    \u2203 position marker, lastTop (binaryMarker e.level) ts = some (position, marker) \u2227\n      binaryMarker e.level marker = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases",
+    "source_signature": "theorem expr_level_twelve_cases (e : Syn .expr) (hl : e.level = 12) :\n    \u2203 a b, e = Syn.exp a b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_exp_marker",
+    "source_signature": "theorem certified_exp_marker (e : Syn .expr) (ts : List Tok) (hl : e.level = 12)\n    (hp : e.prec = true) (hd : e.Derives ts) :\n    \u2203 position, firstTop (binaryMarker 12) [] ts = some (position, .punct .exp)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint",
+    "source_signature": "theorem left_binary_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (hmin : 2 \u2264 a.level) (hmax : a.level \u2264 11) (hskip : a.level \u2260 10)\n    (higher : a.level < b.level) (ha : a.prec = true) (hb : b.prec = true)\n    (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint",
+    "source_signature": "theorem exp_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (hal : a.level = 12) (higher : 12 < b.level)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_punct_injective",
+    "source_signature": "theorem mul_punct_injective (op op' : MulOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed",
+    "source_signature": "theorem mul_operator_reconstructed (op op' : MulOp) (a b c d : Syn .expr) (ts : List Tok)\n    (ha : (Syn.mulDivMod op a b).prec = true) (hb : (Syn.mulDivMod op' c d).prec = true)\n    (da : (Syn.mulDivMod op a b).Derives ts) (db : (Syn.mulDivMod op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_punct_injective",
+    "source_signature": "theorem shift_punct_injective (op op' : ShiftOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed",
+    "source_signature": "theorem shift_operator_reconstructed (op op' : ShiftOp) (a b c d : Syn .expr) (ts : List Tok)\n    (ha : (Syn.shift op a b).prec = true) (hb : (Syn.shift op' c d).prec = true)\n    (da : (Syn.shift op a b).Derives ts) (db : (Syn.shift op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_punct_injective",
+    "source_signature": "theorem order_punct_injective (op op' : OrderOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed",
+    "source_signature": "theorem order_operator_reconstructed (op op' : OrderOp) (a b c d : Syn .expr) (ts : List Tok)\n    (ha : (Syn.order op a b).prec = true) (hb : (Syn.order op' c d).prec = true)\n    (da : (Syn.order op a b).Derives ts) (db : (Syn.order op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_punct_injective",
+    "source_signature": "theorem equality_punct_injective (op op' : EqOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRank",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed",
+    "source_signature": "theorem equality_operator_reconstructed (op op' : EqOp) (a b c d : Syn .expr) (ts : List Tok)\n    (ha : (Syn.equality op a b).prec = true) (hb : (Syn.equality op' c d).prec = true)\n    (da : (Syn.equality op a b).Derives ts) (db : (Syn.equality op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LastBinaryIs",
+    "source_signature": "def LastBinaryIs (rank : Nat) (marker : Tok) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs",
+    "source_signature": "def FirstBinaryIs (rank : Nat) (marker : Tok) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_lastBinary",
+    "source_signature": "theorem derives_lastBinary (e : Syn .expr) (ts : List Tok) (rank : Nat) (marker : Tok)\n    (hy : Produces e.yield (LastBinaryIs rank marker)) (hd : e.Derives ts) :\n    \u2203 n, lastTop (binaryMarker rank) ts = some (n, marker)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_firstBinary",
+    "source_signature": "theorem derives_firstBinary (e : Syn .expr) (ts : List Tok) (rank : Nat) (marker : Tok)\n    (hy : Produces e.yield (FirstBinaryIs rank marker)) (hd : e.Derives ts) :\n    \u2203 n, firstTop (binaryMarker rank) [] ts = some (n, marker)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary",
+    "source_signature": "theorem mul_yield_lastBinary (op : MulOp) (a b : Syn .expr)\n    (hp : (Syn.mulDivMod op a b).prec = true) : Produces (Syn.mulDivMod op a b).yield (LastBinaryIs 11 (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary",
+    "source_signature": "theorem mul_derives_lastBinary (op : MulOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.mulDivMod op a b).prec = true) (hd : (Syn.mulDivMod op a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 11) ts = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary",
+    "source_signature": "theorem shift_yield_lastBinary (op : ShiftOp) (a b : Syn .expr)\n    (hp : (Syn.shift op a b).prec = true) : Produces (Syn.shift op a b).yield (LastBinaryIs 9 (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary",
+    "source_signature": "theorem shift_derives_lastBinary (op : ShiftOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.shift op a b).prec = true) (hd : (Syn.shift op a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 9) ts = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary",
+    "source_signature": "theorem order_yield_lastBinary (op : OrderOp) (a b : Syn .expr)\n    (hp : (Syn.order op a b).prec = true) : Produces (Syn.order op a b).yield (LastBinaryIs 5 (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary",
+    "source_signature": "theorem order_derives_lastBinary (op : OrderOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.order op a b).prec = true) (hd : (Syn.order op a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 5) ts = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary",
+    "source_signature": "theorem equality_yield_lastBinary (op : EqOp) (a b : Syn .expr)\n    (hp : (Syn.equality op a b).prec = true) : Produces (Syn.equality op a b).yield (LastBinaryIs 4 (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary",
+    "source_signature": "theorem equality_derives_lastBinary (op : EqOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.equality op a b).prec = true) (hd : (Syn.equality op a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 4) ts = some (n, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary",
+    "source_signature": "theorem bitAnd_yield_lastBinary (a b : Syn .expr)\n    (hp : (Syn.bitAnd a b).prec = true) : Produces (Syn.bitAnd a b).yield (LastBinaryIs 8 (.punct .bitAnd))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary",
+    "source_signature": "theorem bitAnd_derives_lastBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.bitAnd a b).prec = true) (hd : (Syn.bitAnd a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 8) ts = some (n, .punct .bitAnd)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary",
+    "source_signature": "theorem bitXor_yield_lastBinary (a b : Syn .expr)\n    (hp : (Syn.bitXor a b).prec = true) : Produces (Syn.bitXor a b).yield (LastBinaryIs 7 (.punct .bitXor))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary",
+    "source_signature": "theorem bitXor_derives_lastBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.bitXor a b).prec = true) (hd : (Syn.bitXor a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 7) ts = some (n, .punct .bitXor)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary",
+    "source_signature": "theorem bitOr_yield_lastBinary (a b : Syn .expr)\n    (hp : (Syn.bitOr a b).prec = true) : Produces (Syn.bitOr a b).yield (LastBinaryIs 6 (.punct .bitOr))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary",
+    "source_signature": "theorem bitOr_derives_lastBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.bitOr a b).prec = true) (hd : (Syn.bitOr a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 6) ts = some (n, .punct .bitOr)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary",
+    "source_signature": "theorem and_yield_lastBinary (a b : Syn .expr)\n    (hp : (Syn.and a b).prec = true) : Produces (Syn.and a b).yield (LastBinaryIs 3 (.punct .and))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary",
+    "source_signature": "theorem and_derives_lastBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.and a b).prec = true) (hd : (Syn.and a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 3) ts = some (n, .punct .and)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary",
+    "source_signature": "theorem or_yield_lastBinary (a b : Syn .expr)\n    (hp : (Syn.or a b).prec = true) : Produces (Syn.or a b).yield (LastBinaryIs 2 (.punct .or))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary",
+    "source_signature": "theorem or_derives_lastBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.or a b).prec = true) (hd : (Syn.or a b).Derives ts) :\n    \u2203 n, lastTop (binaryMarker 2) ts = some (n, .punct .or)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary",
+    "source_signature": "theorem exp_yield_firstBinary (a b : Syn .expr) (hp : (Syn.exp a b).prec = true) :\n    Produces (Syn.exp a b).yield (FirstBinaryIs 12 (.punct .exp))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary",
+    "source_signature": "theorem exp_derives_firstBinary (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.exp a b).prec = true) (hd : (Syn.exp a b).Derives ts) :\n    \u2203 n, firstTop (binaryMarker 12) [] ts = some (n, .punct .exp)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.BinaryRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree",
+    "source_signature": "theorem lastTop_none_of_binaryFree (rank : Nat) (ts : List Tok) (hf : BinaryFree rank ts) :\n    lastTop (binaryMarker rank) ts = none"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.run_of_skip",
@@ -334,6 +826,36 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close",
     "source_signature": "theorem expr_cannot_start_close (k : Bracket) (rest : List Tok) (e : Syn .expr) :\n    \u00ac e.Derives (closeTok k :: rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty",
+    "source_signature": "def BinaryYieldProperty (rank : Nat) {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_binary_property",
+    "source_signature": "theorem expression_binary_property (rank : Nat) (hmin : 2 \u2264 rank) (hskip : rank \u2260 10)\n    {c : Cat} (e : Syn c) : BinaryYieldProperty rank e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree",
+    "source_signature": "theorem high_expr_yield_binaryFree (rank : Nat) (hmin : 2 \u2264 rank) (hskip : rank \u2260 10)\n    (e : Syn .expr) (hp : e.prec = true) (hl : rank < e.level) :\n    Produces e.yield (BinaryFreeItems rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree",
+    "source_signature": "theorem type_yield_binaryFree (rank : Nat) (hmin : 2 \u2264 rank) (hskip : rank \u2260 10)\n    (ty : Syn .typeName) : Produces ty.yield (BinaryFreeItems rank)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree",
+    "source_signature": "theorem high_expr_derives_binaryFree (rank : Nat) (hmin : 2 \u2264 rank) (hskip : rank \u2260 10)\n    (e : Syn .expr) (ts : List Tok) (hp : e.prec = true) (hl : rank < e.level)\n    (hd : e.Derives ts) : BinaryFree rank ts"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree",

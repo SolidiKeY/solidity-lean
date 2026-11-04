@@ -1,7 +1,12 @@
 import Solidity.Frontend.ExpressionUniqueness.AttributeBalance
+import Solidity.Frontend.ExpressionUniqueness.BinaryControls
+import Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra
+import Solidity.Frontend.ExpressionUniqueness.BinaryRank
+import Solidity.Frontend.ExpressionUniqueness.BinaryRoot
 import Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction
 import Solidity.Frontend.ExpressionUniqueness.ExpressionBalance
+import Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree
 import Solidity.Frontend.ExpressionUniqueness.Families
@@ -32,6 +37,170 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 #print axioms Solidity.Frontend.ExpressionUniqueness.arrange_balanced
 #check Solidity.Frontend.ExpressionUniqueness.attrsP_balanced
 #print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_balanced
+#check Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free
+#print axioms Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free
+#check Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol
+#print axioms Solidity.Frontend.ExpressionUniqueness.rank_ten_prefix_countercontrol
+#check Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free
+#print axioms Solidity.Frontend.ExpressionUniqueness.grouped_prefix_binary_ten_free
+#check Solidity.Frontend.ExpressionUniqueness.binaryMarker
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryMarker
+#check Solidity.Frontend.ExpressionUniqueness.BinaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFree
+#check Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFreeItems
+#check Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryMarker_atomic
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_nil
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_balanced
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_balanced
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_append
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_atom
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_nil
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_cons
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_single
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_dropHead
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeItems_flatten
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_flatMap
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_of_atoms
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_parens
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_parens
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_braces
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_braces
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_square
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_square
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_tk
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_tk
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_idt
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_idt
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_path
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_path
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_elem
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_elem
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_visibility
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_mutability
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_dataLoc
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_optToks
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_prefix
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_suffix
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_mul
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_mul
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_add
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_add
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_shift
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_shift
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_order
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_order
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_equality
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_equality
+#check Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.litP_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.litP_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs
+#print axioms Solidity.Frontend.ExpressionUniqueness.BinaryFreeAttrs
+#check Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFreeAttrs_append
+#check Solidity.Frontend.ExpressionUniqueness.binaryFree_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.binaryFree_single
+#check Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.arrange_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker
+#print axioms Solidity.Frontend.ExpressionUniqueness.certified_left_binary_marker
+#check Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_level_twelve_cases
+#check Solidity.Frontend.ExpressionUniqueness.certified_exp_marker
+#print axioms Solidity.Frontend.ExpressionUniqueness.certified_exp_marker
+#check Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint
+#print axioms Solidity.Frontend.ExpressionUniqueness.left_binary_higher_root_disjoint
+#check Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint
+#print axioms Solidity.Frontend.ExpressionUniqueness.exp_higher_root_disjoint
+#check Solidity.Frontend.ExpressionUniqueness.mul_punct_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.mul_punct_injective
+#check Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.mul_operator_reconstructed
+#check Solidity.Frontend.ExpressionUniqueness.shift_punct_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.shift_punct_injective
+#check Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.shift_operator_reconstructed
+#check Solidity.Frontend.ExpressionUniqueness.order_punct_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.order_punct_injective
+#check Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.order_operator_reconstructed
+#check Solidity.Frontend.ExpressionUniqueness.equality_punct_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.equality_punct_injective
+#check Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.equality_operator_reconstructed
+#check Solidity.Frontend.ExpressionUniqueness.LastBinaryIs
+#print axioms Solidity.Frontend.ExpressionUniqueness.LastBinaryIs
+#check Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs
+#print axioms Solidity.Frontend.ExpressionUniqueness.FirstBinaryIs
+#check Solidity.Frontend.ExpressionUniqueness.derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.derives_firstBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.derives_firstBinary
+#check Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.mul_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.mul_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.shift_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.shift_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.order_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.order_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.equality_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.equality_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitAnd_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitXor_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.bitOr_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.and_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.and_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.or_yield_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.or_derives_lastBinary
+#check Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.exp_yield_firstBinary
+#check Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary
+#print axioms Solidity.Frontend.ExpressionUniqueness.exp_derives_firstBinary
+#check Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.lastTop_none_of_binaryFree
 #check Solidity.Frontend.ExpressionUniqueness.run_of_skip
 #print axioms Solidity.Frontend.ExpressionUniqueness.run_of_skip
 #check Solidity.Frontend.ExpressionUniqueness.commaFree_balanced
@@ -132,6 +301,16 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 #print axioms Solidity.Frontend.ExpressionUniqueness.expr_derives_balanced
 #check Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close
 #print axioms Solidity.Frontend.ExpressionUniqueness.expr_cannot_start_close
+#check Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty
+#print axioms Solidity.Frontend.ExpressionUniqueness.BinaryYieldProperty
+#check Solidity.Frontend.ExpressionUniqueness.expression_binary_property
+#print axioms Solidity.Frontend.ExpressionUniqueness.expression_binary_property
+#check Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_yield_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_binaryFree
+#check Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_derives_binaryFree
 #check Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_commaFree
 #print axioms Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_commaFree
 #check Solidity.Frontend.ExpressionUniqueness.expr_yield_commaFree

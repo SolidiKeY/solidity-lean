@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 374 source declarations with source signatures;
+`declarations.json` enumerates all 461 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The twenty-two modules are proposed for coordinator registration, with module-map rows,
+The twenty-seven modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -100,7 +100,12 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionLowFree` | Existing recursive precedence plus level ≥ 2 derives loose-marker freedom for all expression roots; type and call-argument outer words are unconditionally free, including arbitrary enclosed descendants. |
 | `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Full operand spans and the conditional colon cut are still open. |
 | `LowControls` | Every assignment operator and arbitrary prefix depth inhabit a conditional middle branch with exact yield and whole precedence; the first marker is the outer question, never that middle assignment. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 374 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `BinaryFreeAlgebra` | Parameterized exact binary-rank markers and token/attribute algebra; prefix helper records its necessary rank-10 limitation. |
+| `ExpressionBinaryFree` | Original certificates imply marker freedom above each rank 2–9, 11 and 12, across all constructors and reachable type/call syntax. Rank 10 remains an operand-state obligation. |
+| `BinaryRoot` | Nine left-associative root families derive their last same-rank marker; exponentiation derives its first marker. All scanner conditions follow from original child certificates and bounds. |
+| `BinaryRank` | Exhaustive intrinsic root-rank cases distinguish those lower roots from any higher certified root; multiplicative/shift/order/equality operator values reconstruct from equal yields. |
+| `BinaryControls` | Every nonzero negative-prefix depth inhabits a certificate that refutes only raw rank-10 marker freedom; grouping shields all those markers. This is not a certified-tree ambiguity. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 461 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -141,13 +146,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-lowroots-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-binary.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-lowroots-final.inside.json`. It took 18.247962 seconds, child peak RSS
-243668 KiB, exact container peak 782254080 bytes, minimum parent headroom
-15693119488 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-binary.inside.json`. It took 22.693124 seconds, child peak RSS
+247824 KiB, exact container peak 816787456 bytes, minimum parent headroom
+15651323904 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -159,10 +164,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these twenty-two modules lack central root imports. The orphan gate
-reported the same twenty-two. Source trust passed (3694 sources, zero findings), and
+check: exactly these twenty-seven modules lack central root imports. The orphan gate
+reported the same twenty-seven. Source trust passed (3699 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 374 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 461 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -184,9 +189,9 @@ results are saved under the evidence directory; future proof checkpoints still
 require their own reviews.
 
 The expression-closure delimiter invariant and grouped/enclosed span reconstruction
-are now proved. The comma separator invariant is now derived from
-certificates. Next derive precedence-selector invariants and reconstruct
-arbitrary precedence roots. A raw
+are now proved. The comma separator and joint loose/non-minus binary marker invariants are now
+derived from certificates. Next prove the rank-ten operand-state invariant and
+complete child-span decomposition for arbitrary precedence roots. A raw
 punctuation split is insufficient: `-` is both a prefix and binary token, and
 conditional middle expressions mask nested assignments/colons. Prove those facts;
 do not add a desired split, parse completeness or uniqueness as a premise.
@@ -253,7 +258,7 @@ public theorem, accepted-tree corollary and full final acceptance remain open.
 
 ## Loose-root checkpoint
 
-Four modules add 71 declarations, bringing the current total to 22 modules and
+Four modules add 71 declarations, bringing that checkpoint total to 22 modules and
 374 declarations. The original `Syn.prec` certificate and root level, rather than
 new producer conditions, yield the loose-marker invariant. Taking the first
 joint question/assignment marker handles arbitrary assignments in conditional
@@ -285,3 +290,32 @@ binds every current proof source hash and successful kernel guard run. Wrapped
 positive reports and duplicate/forbidden/unterminated negative controls pass.
 Separate finder/skeptic reviews accepted the source and audit changes without
 Lean-server use. Verdicts are in `evidence/reviews-lowroots.json`.
+
+## Binary marker and root-rank checkpoint
+
+Five modules add 87 declarations, bringing the current total to 27 modules and
+461 declarations. The parameterized helper covers exact binary ranks 2–9, 11
+and 12. Every child certificate and bound comes from original `Syn.prec`; no
+scanner cut is assumed by the public certified-root results. Nine left-associative
+families derive the last same-rank marker, while exponentiation derives the first.
+Lower/higher root disjointness holds for arbitrary intrinsic subtrees, and every
+multiplicative, shift, relational and equality operator value reconstructs from
+shared yields. These are marker/rank/operator results, not complete child-tree
+or operand-span equality.
+
+Rank ten remains open in the original theorem. The arbitrary `negFamily (n+1)`
+control is inhabited and certified, but begins with the same raw subtraction token
+as a binary subtraction. Thus the intermediate raw-selector freedom lemma cannot
+cover rank ten. Grouping shields all such prefix tokens. No original premise,
+refusal or target was narrowed; there is no certified-tree ambiguity here. A
+separate operand-state scanner must distinguish prefix and binary subtraction.
+
+Direct natural-number bound composition keeps the new expression invariant check
+to about 11.5 seconds including serial setup; no heartbeat or timeout changed.
+All five new modules pass diagnostics and the actual kernel signature/pin gates.
+Their exact axiom sets are recorded; the overall lane standard union remains
+`propext`, `Classical.choice`, `Quot.sound`. Independent finder and skeptic
+accepted the source without Lean-server use. Verdicts are recorded in
+`evidence/reviews-binary.json`. Full operand/conditional-colon spans, high-root
+reconstruction, recursive type/argument/tree uniqueness and the parseCat corollary
+remain open, as do full registration-dependent global gates.

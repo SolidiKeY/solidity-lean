@@ -1,0 +1,20 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial binary-marker checkpoint; no confirmed defects.",
+    "method": "Independent read-only review; no Lean server or edits.",
+    "results": "Exact rank table and all29 constructor cases preserve original recursive precedence. Last markers for nine left families and first power marker derive scanner conditions internally. Lower/higher roots and Mul/Shift/Order/Eq operators reconstruct for arbitrary certified subtrees.",
+    "precision": "Raw-rank10 freedom fails on inhabited arbitrary negative-prefix family; grouping shields it. This is an intermediate-helper countercontrol, not a target ambiguity or new exclusion.",
+    "open": "Rank10 operand state, complete operand/colon spans, high-root/recursive type/list/argument/tree uniqueness, accepted-tree corollary and full acceptance remain open.",
+    "final_metadata": "Independent current checkpoint and corruption controls pass at27 modules/461 declarations; metadata accepted with no remaining findings."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial binary-marker checkpoint; no confirmed defects.",
+    "method": "Independent read-only review; no Lean server or edits.",
+    "results": "Exact rank table and all29 constructor cases preserve original recursive precedence. Last markers for nine left families and first power marker derive scanner conditions internally. Lower/higher roots and Mul/Shift/Order/Eq operators reconstruct for arbitrary certified subtrees.",
+    "precision": "Raw-rank10 freedom fails on inhabited arbitrary negative-prefix family; grouping shields it. This is an intermediate-helper countercontrol, not a target ambiguity or new exclusion.",
+    "open": "Rank10 operand state, complete operand/colon spans, high-root/recursive type/list/argument/tree uniqueness, accepted-tree corollary and full acceptance remain open.",
+    "final_metadata": "Independent current checkpoint and corruption controls pass at27 modules/461 declarations; metadata accepted with no remaining findings."
+  }
+]
