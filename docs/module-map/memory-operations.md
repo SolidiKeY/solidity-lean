@@ -198,3 +198,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceLeafArrays.lean` | Proved bytes/string/empty-dynamic Source leaf defaults, arbitrary-length child traversal with exact addresses and fresh fixed-parent certificate. |
 | `Backend/MemoryCopies/SourceLeafControls.lean` | Populated empty/64 bytes arrays, string and nested dynamic children, partial timeout and wrong-parent controls. |
 | `Backend/MemoryCopies/SourceConstructionInterface.lean` | Existing Source default success certificates with exact object counts, sufficient horizons and composable child traversal obligations. |
+| `Backend/MemoryCopies/SourceConstruction.lean` | Proved Source leaf lift and fixed-array closure with recursive exact object counts, sufficient horizons, parent-last identity and full state framing. |
+| `Backend/MemoryCopies/SourceConstructionControls.lean` | Actual nested bytes/string/dynamic defaults, unused large child under empty parent, populated-state frame and wrong-count control. |
