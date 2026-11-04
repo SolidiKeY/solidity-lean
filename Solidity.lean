@@ -17,6 +17,9 @@ import Solidity.Backend.AbiEntry.EntryRoutesControls
 import Solidity.Backend.AbiEntry.EntryRoutesInterface
 import Solidity.Backend.AbiEntry.EntryTransport
 import Solidity.Backend.AbiEntry.EnumEntry
+import Solidity.Backend.AbiEntry.GetterRoutes
+import Solidity.Backend.AbiEntry.GetterRoutesControls
+import Solidity.Backend.AbiEntry.GetterRoutesInterface
 import Solidity.Backend.AbiEntry.HeadCheck
 import Solidity.Backend.AbiEntry.HeadCheckControls
 import Solidity.Backend.AbiEntry.HeadCheckInterface

@@ -164,3 +164,6 @@
 | `Backend/AbiEntry/EntryRoutesInterface.lean` | Combined ordinary/special continuation execution certificate. |
 | `Backend/AbiEntry/EntryRoutes.lean` | One typed length/ordinary/special tree with exact public compiler execution. |
 | `Backend/AbiEntry/EntryRoutesControls.lean` | Precedence, terminal rejection, equal-label and saved-state controls. |
+| `Backend/AbiEntry/GetterRoutesInterface.lean` | Source ordinary/getter/special precedence execution certificate. |
+| `Backend/AbiEntry/GetterRoutes.lean` | Actual getter tables and full-length/short Source-linked continuation execution. |
+| `Backend/AbiEntry/GetterRoutesControls.lean` | Public-variable collision, getter value refusal and Source-byte controls. |

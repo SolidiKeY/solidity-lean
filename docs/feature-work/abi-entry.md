@@ -743,3 +743,31 @@ without warnings in the changed modules.
 `GetterRoutesInterface.lean` specifies actual Source ordinary/getter/special
 continuation precedence through the existing EntryRoutes compiler. Getter
 argument decoding, storage reads and output/body execution remain separate.
+
+`GetterRoutes.lean` appends actual `Env.getters` rows to actual ordinary rows,
+then uses the existing EntryRoutes tree for special selection on a miss. Getter
+rows use the existing fixed-hash selector and are nonpayable. General lookup
+proves ordinary-before-getter precedence against actual `pickFn`/`pickGetter`;
+short-input getter absence reuses the four-byte selector theorem. The exported
+actual public-compiler execution theorem covers every represented input length
+and produces exactly the Source ordinary/getter/special row outcome, preserving
+all machine state except the result cell and zero pending skip. Selector/length
+representation is explicit; the outcome uses machine call value and makes no
+silent claim equating it with a Source frame. Actual Source getter value refusal
+is separately proved to return empty revert bytes before argument/storage work.
+Controls use typed Source public uint variables, a payable ordinary function
+and fallback, and a synthetic colliding hash on both pipelines. They cover
+ordinary priority despite getter collision, first-getter order/zero acceptance,
+nonzero rejection without fallback retry, short padded inputs/full misses to
+fallback, exact Source getter refusal bytes and protected saved state. The hash
+is not Keccak/solc evidence. Getter argument/head/type checks, storage reads and
+return encoding, general ABI decoding/argument binding and successful body
+execution remain open; labels remain observations, not compiled ABI bodies.
+Native loading/fetched execution and failure-byte correspondence remain open.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked actual getter eligibility/order, ordinary/getter/special
+precedence for short/full inputs, public compiler execution, Source rejection
+bytes, synthetic controls and machine-versus-frame value/body boundaries.
+Neither used a build or Lean server. The focused consumer was rechecked after
+removing its single unused simp argument and has no changed-module warnings.
