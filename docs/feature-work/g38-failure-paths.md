@@ -383,3 +383,42 @@ aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
 `Quot.sound`. Independent read-only reviews checked the source and the corrected
 fault-versus-revert control. Failed initial proof attempts are retained. The
 previous full checkpoint timeout remains failed and was not retried unchanged.
+
+
+## Executable selection of Boolean-local guards
+
+`FailurePaths.LocalGuardSelection.compile` inspects an actual indexed Source
+statement and accepts bare `require(local)` for a Boolean local. Its dependent
+view retains the source type, local index and statement equality. The caller
+supplies an explicit Boolean-local context map; the selector constructs the
+intrinsic guard and invokes public `Evm.Memory.compileStmt`. It does not accept
+a supplied target node, compiled certificate or desired execution.
+
+`selected_correct` proves both actual runs for every successful decision, from
+initial local correspondence and full initial `Memory.StateRepr`. The Boolean
+value is obtained from the recognized source local. At horizon `n+7`, Source
+returns normally or reverts with empty bytes, preserving its state and caller
+locals; selected target code preserves the whole machine on true or produces
+bare revert on false. The public compiler selection is also part of the result.
+
+`LocalGuardSelectionControls` consumes that success theorem with inhabited
+memory, saved stack word 77, both Boolean values and both Source pipelines.
+Literals, assert and message-bearing require are refused by this selector;
+these are fragment refusals, not Source-language rejection. A separate negative
+control refutes an incorrect initial local correspondence; the selector does
+not check runtime values. Zero source horizon still times out. Existing literal
+and other guard compilers and their refusal boundaries are unchanged.
+
+This closes executable Source selection for this narrow indexed-statement leaf.
+Constructing the context map, frontend/unit lowering, general conditions,
+message/assert payload compilation, target failure poststate and bytecode/EVM
+adequacy remain outside it. The target machine exposes no revert bytes or
+post-machine; no internal-frame failure transport follows.
+
+Validation target is `Solidity.Backend.FailurePaths.LocalGuardSelectionControls`.
+The serial guarded check passed in 8.208 seconds with 1,053,290,496 bytes peak
+aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
+`Quot.sound`. Independent read-only finder and skeptic reviews found no
+confirmed defect. Failed initial dependent-pattern/type-check attempts remain
+in the handoff. The earlier full-checkpoint timeout remains failed and was not
+retried unchanged.

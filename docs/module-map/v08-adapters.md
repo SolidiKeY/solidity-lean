@@ -521,3 +521,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Source/Progress/ReadyRebinding.lean` | Finite ready local-rebinding prefixes and actual Source body/call progress paired with reference preservation. |
 | `Source/Progress/ReadyRebindingControls.lean` | Inhabited parameter rebinding, distinct old/fresh aliases, caller restoration, heap persistence and panic/refusal controls. |
+
+| `Backend/FailurePaths/LocalGuardSelection.lean` | Executable indexed Source Boolean-local require selection through the public memory compiler, with every-success correctness. |
+| `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Inhabited actual selector consumers in both pipelines and selector/refuted-relation/horizon controls. |
