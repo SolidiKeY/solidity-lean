@@ -251,3 +251,12 @@ needs only one proof-side legacy None disambiguation. Evidence/interface:
 `/workspace/vy5-composition/request-admission-20261104/final`. The held
 factored-core timing candidate is not landed. H16 session/P8, H19 and all24/six
 remain open; no new native evidence or full-lane/runtime-gate pass.
+
+VY5 H16 no-cut primitive child: eight cursor/check laws, one actual emitter
+execution law and eleven complete-state/negative controls;21 exact axiom
+guards. Checkpoint at6889b6dc686f15492df703e5b550614505bc3898 passes
+library3362, strict classification and all checkpoint static gates. Structural
+CutFree is an explicit real premise; NoFail plan alone is insufficient on
+arbitrary cursors. Existing evaluator/cursor bodies unchanged. Interface and
+receipts: `/workspace/vy5-composition/no-cuts-20261104/final`. Full Source
+coherence/NoFail/session/P8, H19 and all24/six remain open. No native pass.
