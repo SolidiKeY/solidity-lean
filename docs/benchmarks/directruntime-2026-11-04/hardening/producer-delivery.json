@@ -1,0 +1,10 @@
+{
+  "published": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "verifiedRemote": "origin/master",
+  "pinnedBaseAncestor": true,
+  "integrationHead": "15356663e55a0a03c847657b01164de993c771f4",
+  "sharedProducer": "fcdddfcc446b5004860875f772ff6033e60c745f",
+  "runtimeMigrated": false,
+  "directRuntimeUnchanged": true,
+  "scope": "Coordinator-published source delivery only. B/C controls and A runtime migration remain unavailable. No producer duplicate or unowned local source edit."
+}

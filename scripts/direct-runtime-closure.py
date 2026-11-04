@@ -8,6 +8,25 @@ import re
 import hashlib
 from bisect import bisect_right
 from pathlib import Path
+def file_sha256(path):
+    """Hash incrementally so runtime archives do not become resident copies."""
+    digest=hashlib.sha256()
+    with Path(path).open('rb') as stream:
+        for block in iter(lambda:stream.read(1024*1024), b''):
+            digest.update(block)
+    return digest.hexdigest()
+
+def snapshot_files(paths):
+    """Pin the exact selected file set as well as its contents."""
+    return {str(path):file_sha256(path) for path in sorted(set(map(Path,paths)))}
+
+def verify_snapshot(expected, paths):
+    actual=snapshot_files(paths)
+    if actual!=expected:
+        changed=sorted(key for key in expected.keys()|actual.keys()
+                       if expected.get(key)!=actual.get(key))
+        raise ValueError('Build inputs changed: '+', '.join(changed))
+
 IDENT=re.compile(r'\b[A-Za-z_]\w*\b')
 FUNC=re.compile(r'^(?:(?:LEAN_EXPORT|static)\s+)?[A-Za-z_][\w *]*?\s+(\w+)\([^;\n]*\) \{',re.M)
 GLOBAL=re.compile(r'^(?:(?:LEAN_EXPORT|static)\s+)?(?:lean_object\s*\*|uint\d+_t|int\d+_t|size_t|double|float)\s*(\w+)\s*;',re.M)

@@ -3,11 +3,25 @@
 Usage: build-direct-runtime.py NATIVE_LEAN_PREFIX WASM_STAGE OUTPUT
 Set EMCC when emcc is not on PATH. Run under the repository memory guard.
 """
-import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys
+import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
+for override in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH']:
+    if os.environ.get(override):
+        raise ValueError('Unpinned compiler override: '+override)
+if os.environ.get('DIRECT_RUNTIME_FULL')=='1':
+    raise ValueError('Full Lean runtime is not an ordinary verifier; use a separate optional certification pipeline')
+for override in ['EMCC_CFLAGS','EM_COMPILER_WRAPPER','EM_LLVM_ROOT','EM_BINARYEN_ROOT']:
+    if os.environ.get(override):raise ValueError('Unpinned compiler override: '+override)
 prefix, stage, output = map(lambda x:pathlib.Path(x).resolve(),sys.argv[1:])
 output.mkdir(parents=True,exist_ok=True)
 emcc=os.environ.get('EMCC','emcc')
 root=pathlib.Path(__file__).resolve().parent.parent
+closure_path=root/'scripts/direct-runtime-closure.py'
+closure_bytes=closure_path.read_bytes()
+spec=importlib.util.spec_from_file_location('direct_closure',closure_path)
+helper=importlib.util.module_from_spec(spec)
+exec(compile(closure_bytes,str(closure_path),'exec'),helper.__dict__)
+bridge_path=root/'web/browser/direct-bridge.c'
+bridge_bytes=bridge_path.read_bytes()
 commit=subprocess.check_output([str(prefix/'bin/lean'),'--githash'],text=True).strip()
 if commit!='797c613eb9b6d4ec95db23e3e00af9ac6657f24b':raise ValueError('The direct verifier requires the pinned Lean runtime')
 wasm_source=pathlib.Path(os.environ.get('LEAN_WASM_SOURCE',str(stage.parent.parent/'lean4')))
@@ -19,11 +33,30 @@ if not compiler.is_file():
     compiler=pathlib.Path(shutil.which(emcc) or emcc).resolve()
 clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/clang')))
 compiler_identity={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [compiler,compiler.with_suffix('.py'),clang]}
+emcc=str(compiler)
 compiler_version=subprocess.check_output([emcc,'--version'],text=True).strip()
 headers=hashlib.sha256()
 for header in sorted((prefix/'include/lean').rglob('*.h')):
     headers.update(str(header.relative_to(prefix/'include')).encode());headers.update(header.read_bytes())
 build_identity=hashlib.sha256(json.dumps({'compiler':compiler_identity,'version':compiler_version,'headers':headers.hexdigest(),'lean':commit},sort_keys=True).encode()).digest()
+
+def provenance_paths():
+    return [pathlib.Path(__file__).resolve(),closure_path,bridge_path,root/'lean-toolchain',root/'lakefile.toml',
+            *map(pathlib.Path,compiler_identity),prefix/'bin/lean',prefix/'bin/lake',
+            *sorted(compiler.parent.rglob('*.py')),
+            *([pathlib.Path(os.environ['EM_CONFIG'])] if os.environ.get('EM_CONFIG') else []),
+            *sorted((prefix/'include').rglob('*.h')),
+            *sorted((stage/'lib/lean').glob('*.a')),
+            stage/'libuv/src/libuv/libuv.a',stage.parent.parent/'gmp-wasm64/lib/libgmp.a']
+provenance=helper.snapshot_files(provenance_paths())
+if any(provenance[p]!=digest for p,digest in compiler_identity.items()):raise ValueError('Compiler changed before snapshot')
+headers_check=hashlib.sha256()
+for header in sorted((prefix/'include/lean').rglob('*.h')):
+    headers_check.update(str(header.relative_to(prefix/'include')).encode());headers_check.update(header.read_bytes())
+if headers_check.digest()!=headers.digest():raise ValueError('Headers changed before snapshot')
+if provenance[str(closure_path)]!=hashlib.sha256(closure_bytes).hexdigest():raise ValueError('Closure changed before snapshot')
+if provenance[str(bridge_path)]!=hashlib.sha256(bridge_bytes).hexdigest():raise ValueError('Bridge changed before snapshot')
+build_identity+=hashlib.sha256(json.dumps(provenance,sort_keys=True).encode()).digest()
 
 subprocess.run([str(prefix/'bin/lake'),'build','Solidity.Tools.DirectRuntime'],cwd=root,env=dict(os.environ,LEAN_NUM_THREADS='1'),check=True)
 setup=json.loads((root/'.lake/build/ir/Solidity/Tools/DirectRuntime.setup.json').read_text())
@@ -32,7 +65,7 @@ for name in sorted({n for n in setup['importArts'] if n.startswith('Solidity.')}
     source_files.append({'module':name,'sourceSha256':hashlib.sha256((root/pathlib.Path(name.replace('.','/')+'.lean')).read_bytes()).hexdigest(),
       'cSha256':hashlib.sha256((root/'.lake/build/ir'/pathlib.Path(name.replace('.','/')+'.c')).read_bytes()).hexdigest()})
 toolchain=(root/'lean-toolchain').read_text().strip()
-full=os.environ.get('DIRECT_RUNTIME_FULL')=='1'
+full=False
 include=output/'include/lean'
 include.mkdir(parents=True,exist_ok=True)
 config=(prefix/'include/lean/config.h').read_text().replace('#define LEAN_MIMALLOC','/* wasm runtime uses the Lean allocator */')
@@ -47,8 +80,6 @@ if full:
     closure={'full':True}
     flags.append('-DSOLIDITY_DIRECT_FULL')
 else:
-    spec=importlib.util.spec_from_file_location('direct_closure',root/'scripts/direct-runtime-closure.py')
-    helper=importlib.util.module_from_spec(spec);spec.loader.exec_module(helper)
     undefined=subprocess.check_output([str(clang.parent/'llvm-nm'),'--undefined-only','--format=posix',str(stage/'lib/lean/libleanrt.a')],text=True)
     native_roots=set(re.findall(r'^(\w+) U ',undefined,re.M))
     inputs,closure=helper.extract(root,stage,native_roots=native_roots)
@@ -85,24 +116,35 @@ lib=stage/'lib/lean'
 libraries=[lib/n for n in (['libInit.a','libStd.a','libLean.a','libleancpp.a','libleanrt.a','libleanmanifest.a'] if full else ['libleanrt.a'])]
 gmp=stage.parent.parent/'gmp-wasm64/lib/libgmp.a'
 libraries.append(stage/'libuv/src/libuv/libuv.a')
-subprocess.run([emcc,*flags,str(root/'web/browser/direct-bridge.c'),*objects,
+link_output=pathlib.Path(tempfile.mkdtemp(prefix='link-',dir=output))
+bridge_source=output/('bridge-'+hashlib.sha256(bridge_bytes).hexdigest()+'.c')
+bridge_source.write_bytes(bridge_bytes)
+subprocess.run([emcc,*flags,str(bridge_source),*objects,
     '-Wl,--start-group',*map(str,libraries),str(gmp),'-Wl,--end-group',
     '--no-entry','-fwasm-exceptions','-sMODULARIZE=1','-sEXPORT_NAME=createDirectVerifier','-sENVIRONMENT=worker,node',
     '-sALLOW_MEMORY_GROWTH=1','-sINITIAL_MEMORY=67108864','-sMAXIMUM_MEMORY=4294967296',
     '-sSTACK_SIZE=16777216','-sASSERTIONS=0',
     '-sEXPORTED_FUNCTIONS=_direct_init,_direct_check,_malloc,_free',
     '-sEXPORTED_RUNTIME_METHODS=ccall,UTF8ToString',
-    '-Wl,--lto-O0,--threads=1','-o',str(output/'direct.js')],check=True)
+    '-Wl,--lto-O0,--threads=1','-o',str(link_output/'direct.js')],check=True)
 for entry in source_files:
     for suffix,key in [('.lean','sourceSha256'),('.c','cSha256')]:
         file=(root if suffix=='.lean' else root/'.lake/build/ir')/pathlib.Path(entry['module'].replace('.','/')+suffix)
         if hashlib.sha256(file.read_bytes()).hexdigest()!=entry[key]:raise ValueError('Backend changed during build: '+entry['module'])
-runtime_libraries={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [*libraries,gmp]}
-manifest={'toolchain':toolchain,'sourceFiles':source_files,'bridgeSha256':hashlib.sha256((root/'web/browser/direct-bridge.c').read_bytes()).hexdigest(),'closureScriptSha256':hashlib.sha256((root/'scripts/direct-runtime-closure.py').read_bytes()).hexdigest(),'runtimeLibraries':runtime_libraries,'optimization':'-O2','version':1,'leanCommit':commit,'stageSourceCommit':stage_commit,'compiler':compiler_identity,'compilerVersion':compiler_version,'leanHeadersSha256':headers.hexdigest(),'modules':sources,'closure':closure,
- 'javascript':hashlib.sha256((output/'direct.js').read_bytes()).hexdigest(),
- 'wasm':hashlib.sha256((output/'direct.wasm').read_bytes()).hexdigest(),
- 'wasmBytes':(output/'direct.wasm').stat().st_size}
-(output/'build.json').write_text(json.dumps(manifest,indent=2)+'\n')
+for name,_,source,expected in inputs:
+    if helper.file_sha256(source)!=expected:raise ValueError('Generated source changed during link: '+name)
+helper.verify_snapshot(provenance,provenance_paths())
+runtime_libraries={str(p):provenance[str(p)] for p in [*libraries,gmp]}
+manifest={'toolchain':toolchain,'sourceFiles':source_files,'bridgeSha256':hashlib.sha256(bridge_bytes).hexdigest(),'closureScriptSha256':hashlib.sha256(closure_bytes).hexdigest(),'buildInputs':provenance,'runtimeLibraries':runtime_libraries,'optimization':'-O2','version':1,'leanCommit':commit,'stageSourceCommit':stage_commit,'compiler':compiler_identity,'compilerVersion':compiler_version,'leanHeadersSha256':headers.hexdigest(),'modules':sources,'closure':closure,
+ 'javascript':hashlib.sha256((link_output/'direct.js').read_bytes()).hexdigest(),
+ 'wasm':hashlib.sha256((link_output/'direct.wasm').read_bytes()).hexdigest(),
+ 'wasmBytes':(link_output/'direct.wasm').stat().st_size}
+for name in ['direct.wasm','direct.js']:
+    (link_output/name).replace(output/name)
+link_output.rmdir()
+manifest_tmp=output/'build.json.tmp'
+manifest_tmp.write_text(json.dumps(manifest,indent=2)+'\n')
+manifest_tmp.replace(output/'build.json')
 licenses=output/'licenses';licenses.mkdir(exist_ok=True)
 for name in ['LICENSE','LICENSES']:shutil.copyfile(prefix/name,licenses/('Lean-'+name+'.txt'))
 for name in ['COPYING','COPYING.LESSERv3','COPYINGv2','COPYINGv3']:
