@@ -489,3 +489,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/G19/ConditionalReturnContinuation.lean` | V07-related conditional return suppresses arbitrary unreachable Source and intrinsic target continuations. |
 | `Lowering/G19/ConditionalReturnContinuationControls.lean` | Both-pipeline/checked-mode return continuation controls and eager caller-write rejection for both guards. |
+
+| `Backend/StructuredFlow/ConditionalContinuationCompiler.lean` | Actual compiler of V07-related captured-return continuation guard with whole-tail fragment check. |
+| `Backend/StructuredFlow/ConditionalContinuationCompilerControls.lean` | Full native cell/stack guard observations and separately compiled eager caller-write rejection. |
