@@ -226,3 +226,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceGuardedUintDelete.lean` | Actual cdTail guard then Source Items uint copy/delete; byte-derived success, early refusal and late bounds failure with explicit initial view alignment. |
 
 | `Solidity/Backend/MemoryOps/SourceUintSliceNative.lean` | Actual byte-derived uint slice expression and guarded paired Source/native allocation with old-object/map frames. |
+
+| `Solidity/Backend/MemoryOps/SourceUintSliceBinding.lean` | Actual uint slice-result local binding and reached successful/rejecting Items deletion with native allocation/write and old-object frames. |

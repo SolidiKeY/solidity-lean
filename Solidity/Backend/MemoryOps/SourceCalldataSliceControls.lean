@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintSliceBinding
 import Solidity.Backend.MemoryOps.SourceUintSliceNative
 import Solidity.Backend.MemoryOps.SourceCalldataSlice
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
@@ -374,5 +375,140 @@ theorem guarded_uint_slice_timeout (p : Roadmap.Pipeline) :
 #guard_msgs (whitespace := lax) in #print axioms guarded_uint_slice_truncation
 /-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.guarded_uint_slice_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms guarded_uint_slice_timeout
+
+private abbrev bindDst : Source.Idx Γ SU := .there (.there (.there .here))
+private def sliceBound : Source.EMState E0 Γ :=
+  ((sliceInput 1 3).1.set bindDst (.memRef rfl 2),(sliceResult 1 3).2)
+private theorem sliceRawPayload : CalldataPackets.RawUint.payload (sliceFrame sliceData)
+    (68+32*(u 1).1.toNat) ((u 3).1.toNat-(u 1).1.toNat)=payload := by
+  have bytes := CalldataPackets.RawUint.payload_frame (sliceFrame sliceData) sliceSelector sliceData rfl rfl 96 2
+  exact bytes.trans slicePayload
+
+/-- Both pipelines execute one actual binding/delete program. The initial
+old alias remains at object0; only the newly bound object2 loses max. -/
+theorem slice_bind_delete_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ (finalHeap : Heap (H++[A])) (finalSource : Source.EMState E0 Γ),
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+4)
+        (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false)).run (sliceInput 1 3)=
+        (.ok (.val (.memRef rfl 2)),sliceBound) ∧
+      (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+        (sourceUintIndexedDelete bindDst (.there .here))).run sliceBound=(.ok Source.RVal.unit,finalSource) ∧
+      (Source.execItems (G0 p) (sliceFrame sliceData) (fuel+6) Γ.length none
+        (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false))
+          (.stmt (.expr (sourceUintIndexedDelete bindDst (.there .here))) .nil) :
+          Source.RItems E0 [] false .body Γ Γ) (sliceInput 1 3).1).run (.nil,(sliceInput 1 3).2)=
+        (.ok (.normal finalSource.1),(.nil,finalSource.2)) ∧
+      out.writeAddr (.index fresh .dyn (u 1)) (PrimTy.dflt .uint)=some finalHeap ∧
+      SourceUintMemoryAt finalSource 2 finalHeap fresh .dyn ∧ Source.MemOK E0 SH finalSource ∧
+      Heap.Keeps (List.prefix_append H [A]) hp finalHeap ∧
+      [MObj.elems .dyn (finalHeap.get (left.wk (List.prefix_append H [A]))),
+        MObj.elems .dyn (finalHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (finalHeap.get fresh)]=
+        [old,neighbor,[u 0,u 0]] ∧
+      [finalSource.2.heap.get 0,finalSource.2.heap.get 1,finalSource.2.heap.get 2,finalSource.2.heap.get 3]=
+        [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,
+          some ⟨SU,sourceUintMemory [u 0,u 0]⟩,none] ∧
+      finalSource.1=sliceBound.1 ∧
+      finalSource.2.ex=(sliceInput 1 3).2.ex ∧ finalSource.2.events=(sliceInput 1 3).2.events ∧
+      finalSource.2.logs=(sliceInput 1 3).2.logs ∧ finalSource.2.fnLocals=(sliceInput 1 3).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | have result := source_uint_slice_bind_delete (sliceInput 1 3) hp (G0 p) (sliceFrame sliceData) fuel Γ.length
+      bindDst .here (.there .here) (.there (.there .here)) (.there .here) 68 3
+      (u 1) (u 3) (u 1) false rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide) SH (sliceMemOK 1 3)
+    simp only [Bool.false_eq_true,if_false,sliceRawPayload] at result
+    obtain ⟨valid,finalHeap,finalSource,first,second,items,write,new,mok,keeps,values,occupied,locals,ex,events,logs,fn⟩ := result
+    have newValues : MObj.elems .dyn (finalHeap.get fresh)=[u 0,u 0] := values
+    have oldValues : MObj.elems .dyn (finalHeap.get (left.wk (List.prefix_append H [A])))=old := by
+      rw [keeps left,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have neighborValues : MObj.elems .dyn (finalHeap.get (right.wk (List.prefix_append H [A])))=neighbor := by
+      rw [keeps right,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have objectNew : finalSource.2.heap.get 2=some ⟨SU,sourceUintMemory [u 0,u 0]⟩ := by
+      change finalSource.2.heap.get 2=some ⟨SU,sourceUintMemory (MObj.elems .dyn (finalHeap.get fresh))⟩ at new
+      rw [newValues] at new
+      exact new
+    have absent : finalSource.2.heap.get 3=none := by
+      obtain ⟨typed,run⟩ := source_uint_write sliceBound 2 payload rfl (u 1).1.toNat (by decide) (PrimTy.dflt .uint)
+      have selected : SourceUintMemoryAt sliceBound 2 out fresh .dyn :=
+        (guarded_uint_slice_client p 0).2.2.2.2.1
+      have inBounds : (u 1).1.toNat<out.len fresh .dyn := by
+        change (u 1).1.toNat<(MObj.elems .dyn (out.get fresh)).length
+        rw [nativePayload]
+        decide
+      have actualDelete := selected.eval_delete_of_run (G0 p) (sliceFrame sliceData) fuel
+        bindDst (.there .here) (u 1) rfl rfl inBounds run
+      have state := congrArg Prod.snd (second.symm.trans actualDelete)
+      change finalSource=_ at state
+      rw [state]
+      exact (Source.Heap.write_other _ (by decide : 3≠2) _ typed).trans rfl
+    refine ⟨finalHeap,finalSource,first,second,items,write,new,mok,keeps,?_,?_,locals,ex,events,logs,fn⟩
+    · rw [oldValues,neighborValues,newValues]
+    · rw [occupied 0 _ rfl,occupied 1 _ rfl,objectNew,absent]
+
+/-- Complete caller locals before/after rebinding, and discriminating actual
+prefix reads: retained alias reads7 while the rebound root's last cell is max. -/
+theorem slice_bind_locals_reads (p : Roadmap.Pipeline) :
+    sliceBound.1=.cons (.cdRef rfl 68 3) (.cons (sourceUint (u 1)) (.cons (sourceUint (u 3))
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+    (Source.memElem (E := E0) (Γ := Γ) 2 1 (.int .u256)).run sliceBound=(.ok (sourceUint maximum),sliceBound) ∧
+    (Source.memElem (E := E0) (Γ := Γ) 0 0 (.int .u256)).run sliceBound=(.ok (sourceUint (u 7)),sliceBound) ∧
+    (Source.execItems (G0 p) (sliceFrame sliceData) 1 Γ.length none
+      (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) false))
+        (.stmt (.expr (sourceUintIndexedDelete bindDst (.there .here))) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sliceInput 1 3).1).run (.nil,(sliceInput 1 3).2)=
+      (.error .timeout,(.nil,(sliceInput 1 3).2)) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,source_uint_read sliceBound 2 payload rfl 1 (by decide),
+      source_uint_read sliceBound 0 old rfl 0 (by decide),rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_bind_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_locals_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_bind_locals_reads
+
+private def sliceEndBound : Source.EMState E0 Γ :=
+  ((sliceInput 1 2).1.set bindDst (.memRef rfl 2),(sliceResult 1 2).2)
+
+/-- Omitted end gives length2 even though the finish/index operand is2.
+Binding really allocates object2; exact-end deletion panics and Items retains
+that allocation in globals, without returning locals or a suffix machine. -/
+theorem slice_bind_endpoint (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+4)
+      (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true)).run (sliceInput 1 2)=
+      (.ok (.val (.memRef rfl 2)),sliceEndBound) ∧
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+      (sourceUintIndexedDelete bindDst (.there (.there .here)))).run sliceEndBound=
+      (.error (.revert (Source.panicData .index)),sliceEndBound) ∧
+    (Source.execItems (G0 p) (sliceFrame sliceData) (fuel+6) Γ.length none
+      (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true))
+        (.stmt (.expr (sourceUintIndexedDelete bindDst (.there (.there .here)))) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sliceInput 1 2).1).run (.nil,(sliceInput 1 2).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,sliceEndBound.2)) ∧
+    out.writeAddr (.index fresh .dyn (u 2)) (PrimTy.dflt .uint)=none ∧
+    SourceUintMemoryAt sliceEndBound 2 out fresh .dyn ∧ Source.MemOK E0 SH sliceEndBound ∧
+    Heap.Keeps (List.prefix_append H [A]) hp out ∧
+    [sliceEndBound.2.heap.get 0,sliceEndBound.2.heap.get 1,sliceEndBound.2.heap.get 2,sliceEndBound.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    (Source.memElem (E := E0) (Γ := Γ) 2 1 (.int .u256)).run sliceEndBound=(.ok (sourceUint maximum),sliceEndBound) ∧
+    sliceEndBound.1=.cons (.cdRef rfl 68 3) (.cons (sourceUint (u 1)) (.cons (sourceUint (u 2))
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+    sliceEndBound.2.ex=(sliceInput 1 2).2.ex ∧ sliceEndBound.2.events=(sliceInput 1 2).2.events ∧
+    sliceEndBound.2.logs=(sliceInput 1 2).2.logs ∧ sliceEndBound.2.fnLocals=(sliceInput 1 2).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | have result := source_uint_slice_bind_delete_bounds (sliceInput 1 2) hp (G0 p) (sliceFrame sliceData) fuel Γ.length
+      bindDst .here (.there .here) (.there (.there .here)) (.there (.there .here)) 68 3
+      (u 1) (u 2) (u 2) true rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide) SH (sliceMemOK 1 2)
+    have values : CalldataPackets.RawUint.payload (sliceFrame sliceData)
+        (68+32*(u 1).1.toNat) (3-(u 1).1.toNat)=payload := sliceRawPayload
+    simp only [if_true,values] at result
+    obtain ⟨valid,first,second,items,failed,new,mok,keep,occupied⟩ := result
+    exact ⟨first,second,items,failed,new,mok,keep,rfl,
+      source_uint_read sliceEndBound 2 payload rfl 1 (by decide),rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_bind_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_bind_endpoint
 
 end Solidity.Backend.MemoryOps.UintSliceControls
