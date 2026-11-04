@@ -268,3 +268,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Exact published StorageOps.ReachedEndpoint consumed at the unchanged local execution/composition boundary. |
 | `Backend/MemoryCopies/PublishedStorage.lean` | Published reached-storage execution converted to existing local composition certificates; same-store endpoint transport preserves every producer field. |
 | `Backend/MemoryCopies/PublishedStorageControls.lean` | Actual represented memory-array copy followed by published scalar SSTORE, reached allocator preservation and skipped-store rejection. |
+| `Backend/MemoryCopies/RuntimeStorageArrayInterface.lean` | Runtime storage-header/word loop using existing controller and allocator, with actual typed source representation and full reached allocator contract. |
