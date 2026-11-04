@@ -397,6 +397,20 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbort.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Roadmap/V16/H24Input.lean` | Explicit V16 input boundary for the published H24 companion; no admission inhabitant. |
+| `Backend/Executable/CreationPatchOrder.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationPatchOrderControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturn.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturnControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/ConditionalCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodec.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/ReasonCodecControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeUnwind.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
@@ -408,8 +422,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
 | `Backend/StructuredFlow/MappedBranch.lean` | Branch code over the actual V07-mapped effectful condition. |
 | `Backend/StructuredFlow/MappedBranchControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
-| `Backend/StructuredFlow/MappedCondition.lean` | Actual published compiler code and reached machine for the V07 mapped assignment condition. |
-| `Backend/StructuredFlow/MappedConditionControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
 | `Backend/StructuredFlow/ScopedMappedSequence.lean` | Drop the mapped branch's private capture in the existing intrinsic block, then compile a continuation in the reached caller context. |
 | `Backend/StructuredFlow/ScopedMappedSequenceControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
 | `Lowering/G19/AssignmentDoWhileBreak.lean` | A mapped assignment in a do-while body followed by unconditional break. |
@@ -418,7 +430,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/AssignmentDoWhileContinueControls.lean` | Actual mixed mapped clients and effectful/declaration suffix rejection. |
 | `Lowering/G19/AssignmentForBreak.lean` | One mapped for-loop initializer followed by an immediate break. |
 | `Lowering/G19/AssignmentForBreakControls.lean` | Real mapped initializer writes and skipped optional for-loop post expressions. |
-| `Lowering/G19/AssignmentReturnFlag.lean` | G19 client of the existing V07 ContextMap and assignment operand. |
 | `Lowering/G19/AssignmentReturnFlagControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
 | `Lowering/G19/AssignmentWhileBreak.lean` | One mapped effectful while shape: a Boolean local-assignment condition and an immediate break body. |
 | `Lowering/G19/AssignmentWhileBreakControls.lean` | Actual mixed V07/P12 inputs. |
@@ -428,8 +439,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/ConditionalStatementControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
 | `Lowering/G19/ReturnTail.lean` | Consume the existing mapped return selector to suppress a real caller assignment. |
 | `Lowering/G19/ReturnTailControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
-| `Lowering/G19/WhileReturn.lean` | The mapped assignment selector lowers a while whose body immediately bare-returns. |
-| `Lowering/G19/WhileReturnControls.lean` | Inhabited map-guided G19 clients over V07's actual mixed Bool/integer/ memory/storage fixture. |
 | `Backend/StructuredFlow/ConditionalSequenceCompiler.lean` | Compiler connection for the existing V07-related conditional followed by an assignment in its reached caller context. |
 | `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Inhabited Source/compiler continuation witnesses, frame observations and wrong-slot controls. |
 | `Lowering/G19/AssignmentWhileReset.lean` | Mapped Boolean assignment while with an actual resetting body and intrinsic loop. |

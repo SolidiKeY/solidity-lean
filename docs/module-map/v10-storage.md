@@ -71,3 +71,5 @@
 | `Lowering/StorageOps/SourceWordCommutationControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/StorageOps/SourceWriteRollback.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/StorageOps/SourceWriteRollbackControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/StorageOps/SourceStorageCopyPrefix.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/StorageOps/SourceStorageCopyPrefixControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
