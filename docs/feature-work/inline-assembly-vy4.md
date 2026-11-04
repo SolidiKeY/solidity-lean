@@ -520,3 +520,22 @@ review. Its public signature, existing laws and complete control module are
 unchanged. RETURN/REVERT retain full loaded bytes, STOP ignores memory, and
 missing memory or unhandled builtins still return `none`. This mechanical
 repair adds no interpreter, Source/G01/G51 or compiler adequacy claim.
+
+## H26 pending producer interfaces
+
+P7's nonempty payload obligation already exists as
+`Backend.FailurePaths.Premises.TransientPayloadAt`; its published controls refute
+the current nonempty adapter, so no instance is claimed.
+`World/PendingCoupling.WorldLogAt` adds a per-reached-invocation P19 contract
+using the existing G42 Step, actual full Source state, physical/transient
+carriers, complete observations and exact return buffers. Representation and
+Source observation relation still require their layout/H25/G01 owners' review;
+arbitrary parameter choices are not adequacy. No producer instance, Source
+change, target execution implementation or whole-lane closure is supplied.
+Review fixes before freezing: captured-entry carriers and successful target/P7
+endpoint machine equality are explicit. Raw Source halt bytes are not equated
+with caller-local returndata; only completed outcomes constrain that buffer.
+The Source observation boundary is relational, so it does not reconstruct log
+interleaving from separate legacy lists. Fault endpoints and concrete producers
+remain open. Independent read-only finder/skeptic follow-ups report no remaining
+confirmed interface findings; scoped module/signature checks pass.
