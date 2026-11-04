@@ -200,3 +200,11 @@ roots are regenerated and the area map retains each module exactly once.
 The imported nonvacuity audit is historical at its frozen input, not an audit
 of these later producers. The source/Bridge premises and full lane validation
 obligations above remain open; announced cache delivery is still pending.
+
+Fresh validation on adoption commit63deee119a84320f18a99c4d9917c130116019da
+passes all eight checkpoint gates and nine per-file checks, including the two
+newly published literal modules. The nine files have no warnings and61 scoped
+standard-only reports; the library replays all465 exact Selection reports.
+Independent finder/skeptic adoption reviews pass. This is fresh dependency
+validation, not reuse of old-head gates. The full gate is still outstanding,
+and shared-cache reclamation remains unauthorized.
