@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintSliceCompoundBounds
 import Solidity.Backend.MemoryOps.SourceUintSliceCompound
 import Solidity.Backend.MemoryOps.SourceUintSliceBinding
 import Solidity.Backend.MemoryOps.SourceUintSliceNative
@@ -694,5 +695,170 @@ theorem slice_stale_alias_add (p : Roadmap.Pipeline) (fuel : Nat) :
 
 /-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_stale_alias_add' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms slice_stale_alias_add
+
+/-- Actual omitted-end slicing binds length2, then endpoint2 compound
+rejects before arithmetic. Native read and every possible write reject too. -/
+theorem slice_add_endpoint (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+4)
+      (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true)).run (sliceInput 1 2)=
+      (.ok (.val (.memRef rfl 2)),sliceEndBound) ∧
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+      (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))).run sliceEndBound=
+      (.error (.revert (Source.panicData .index)),sliceEndBound) ∧
+    (Source.execItems (G0 p) (sliceFrame sliceData) (fuel+6) Γ.length none
+      (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true))
+        (.stmt (.expr (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sliceInput 1 2).1).run (.nil,(sliceInput 1 2).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,sliceEndBound.2)) ∧
+    out.readAddr (.index fresh .dyn (u 2))=none ∧
+    (∀ v : PrimTy.uint.Denote,out.writeAddr (.index fresh .dyn (u 2)) v=none) ∧
+    SourceUintMemoryAt sliceEndBound 2 out fresh .dyn ∧ Source.MemOK E0 SH sliceEndBound ∧
+    Heap.Keeps (List.prefix_append H [A]) hp out ∧
+    [MObj.elems .dyn (out.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (out.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (out.get fresh)]=
+      [old,neighbor,payload] := by
+  first
+  | solve | simp only [] | omega
+  | have result := source_uint_slice_bind_add_bounds (sliceInput 1 2) hp (G0 p) (sliceFrame sliceData) fuel Γ.length
+      bindDst .here (.there .here) (.there (.there .here)) (.there (.there .here)) (.there .here) 68 3
+      (u 1) (u 2) (u 2) (u 1) true rfl rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide) SH (sliceMemOK 1 2)
+    have values : CalldataPackets.RawUint.payload (sliceFrame sliceData)
+        (68+32*(u 1).1.toNat) (3-(u 1).1.toNat)=payload := sliceRawPayload
+    simp only [if_true,values] at result
+    obtain ⟨valid,first,second,items,read,write,new,mok,keep,occupied⟩ := result
+    have kept : Heap.Keeps (List.prefix_append H [A]) hp out := keep
+    refine ⟨first,second,items,read,write,new,mok,keep,?_⟩
+    have oldValues : MObj.elems .dyn (out.get (left.wk (List.prefix_append H [A])))=old := by
+      rw [kept left,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have neighborValues : MObj.elems .dyn (out.get (right.wk (List.prefix_append H [A])))=neighbor := by
+      rw [kept right,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    rw [oldValues,neighborValues,nativePayload]
+
+/-- With binding skipped, index2 is valid on the old length3 array and
+max+1 actually panics arithmetically. Both local roots and error bytes differ
+from the genuine reached endpoint program; no error rollback is inferred. -/
+theorem slice_add_failure_order (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+      (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))).run (sliceInput 1 2)=
+      (.error (.revert (Source.panicData .arithmetic)),sliceInput 1 2) ∧
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+2)
+      (.indexArray (.local (.there (.there (.there (.there .here)))) : Source.RExpr E0 Γ SU)
+        (.local (.there (.there .here))) rfl)).run sliceEndBound=
+      (.ok (.val (sourceUint maximum)),sliceEndBound) ∧
+    Source.panicData .index≠Source.panicData .arithmetic ∧
+    [((sliceInput 1 2).1.get bindDst),(sliceEndBound.1.get bindDst),
+      sliceEndBound.1.get (.there (.there (.there (.there .here))))]=
+      [.memRef rfl 0,.memRef rfl 2,.memRef rfl 0] ∧
+    sliceEndBound.1=.cons (.cdRef rfl 68 3) (.cons (sourceUint (u 1)) (.cons (sourceUint (u 2))
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+    [(sliceInput 1 2).2.heap.get 0,(sliceInput 1 2).2.heap.get 1,(sliceInput 1 2).2.heap.get 2,(sliceInput 1 2).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [sliceEndBound.2.heap.get 0,sliceEndBound.2.heap.get 1,sliceEndBound.2.heap.get 2,sliceEndBound.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory payload⟩,none] ∧
+    [(sliceInput 1 2).2.heap.next,sliceEndBound.2.heap.next,fresh.id]=[2,3,2] ∧
+    sliceEndBound.2.ex=(sliceInput 1 2).2.ex ∧ sliceEndBound.2.events=(sliceInput 1 2).2.events ∧
+    sliceEndBound.2.logs=(sliceInput 1 2).2.logs ∧ sliceEndBound.2.fnLocals=(sliceInput 1 2).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | have values : MObj.elems .dyn (hp.get left)=old := by rw [MObj.elems_dyn];rfl
+    have bound : (u 2).1.toNat<hp.len left .dyn := by
+      change (u 2).1.toNat<(MObj.elems .dyn (hp.get left)).length
+      rw [values]
+      decide
+    have bad : PrimTy.uint.inRange ((MObj.elems .dyn (hp.get left))[(u 2).1.toNat].1+(u 1).1)≠true := by
+      simp only [values]
+      change PrimTy.uint.inRange (maximum.1+(u 1).1)≠true
+      decide
+    have oldInitial : SourceUintMemoryAt (sliceInput 1 2) 0 hp left .dyn := old_at 1 2
+    have oldReached : SourceUintMemoryAt sliceEndBound 0 hp left .dyn := old_at 1 2
+    have wrong := oldInitial.compound_add_overflow (G0 p) (sliceFrame sliceData) fuel rfl bindDst
+      (.there (.there .here)) (.there .here) (u 2) (u 1) rfl rfl rfl bound bad
+    have read := oldReached.eval_index (G0 p) (sliceFrame sliceData) fuel
+      (.there (.there (.there (.there .here)))) (.there (.there .here)) (u 2) rfl rfl bound
+    simp only [values] at read
+    exact ⟨wrong,read,by decide,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+private def emptySliceHeap : Heap (H++[A]) := (hp.alloc (R := A) (⟨[],by decide⟩ : MObj H A)).1
+private def emptySliceFresh : HRef (H++[A]) A := (hp.alloc (R := A) (⟨[],by decide⟩ : MObj H A)).2
+private def emptySliceBound : Source.EMState E0 Γ :=
+  ((sliceInput 3 0).1.set bindDst (.memRef rfl 2),{(sliceInput 3 0).2 with heap :=
+    ((sliceInput 3 0).2.heap.alloc ⟨SU,sourceUintMemory []⟩).1})
+
+/-- A literal empty dynamic slice is really allocated and bound. Index0
+rejects; no zero-length fixed-array Source admission or padded object is used. -/
+theorem slice_add_empty (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+4)
+      (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true)).run (sliceInput 3 0)=
+      (.ok (.val (.memRef rfl 2)),emptySliceBound) ∧
+    (Source.evalE (G0 p) (sliceFrame sliceData) (fuel+3)
+      (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))).run emptySliceBound=
+      (.error (.revert (Source.panicData .index)),emptySliceBound) ∧
+    (Source.execItems (G0 p) (sliceFrame sliceData) (fuel+6) Γ.length none
+      (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true))
+        (.stmt (.expr (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sliceInput 3 0).1).run (.nil,(sliceInput 3 0).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,emptySliceBound.2)) ∧
+    emptySliceHeap.readAddr (.index emptySliceFresh .dyn (u 0))=none ∧
+    (∀ v : PrimTy.uint.Denote,emptySliceHeap.writeAddr (.index emptySliceFresh .dyn (u 0)) v=none) ∧
+    SourceUintMemoryAt emptySliceBound 2 emptySliceHeap emptySliceFresh .dyn ∧ Source.MemOK E0 SH emptySliceBound ∧
+    Heap.Keeps (List.prefix_append H [A]) hp emptySliceHeap ∧
+    [MObj.elems .dyn (emptySliceHeap.get (left.wk (List.prefix_append H [A]))),
+      MObj.elems .dyn (emptySliceHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (emptySliceHeap.get emptySliceFresh)]=
+      [old,neighbor,[]] ∧
+    [emptySliceBound.2.heap.get 0,emptySliceBound.2.heap.get 1,emptySliceBound.2.heap.get 2,emptySliceBound.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory []⟩,none] ∧
+    emptySliceBound.1=.cons (.cdRef rfl 68 3) (.cons (sourceUint (u 3)) (.cons (sourceUint (u 0))
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil))))) ∧
+    [emptySliceBound.2.heap.next,emptySliceFresh.id]=[3,2] ∧
+    emptySliceBound.2.ex=(sliceInput 3 0).2.ex ∧ emptySliceBound.2.events=(sliceInput 3 0).2.events ∧
+    emptySliceBound.2.logs=(sliceInput 3 0).2.logs ∧ emptySliceBound.2.fnLocals=(sliceInput 3 0).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | have result := source_uint_slice_bind_add_bounds (sliceInput 3 0) hp (G0 p) (sliceFrame sliceData) fuel Γ.length
+      bindDst .here (.there .here) (.there (.there .here)) (.there (.there .here)) (.there .here) 68 3
+      (u 3) (u 0) (u 0) (u 3) true rfl rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide) SH (sliceMemOK 3 0)
+    have values : CalldataPackets.RawUint.payload (sliceFrame sliceData) (68+32*(u 3).1.toNat) (3-(u 3).1.toNat)=[] := rfl
+    simp only [if_true,values] at result
+    obtain ⟨valid,first,second,items,read,write,new,mok,keep,occupied⟩ := result
+    have kept : Heap.Keeps (List.prefix_append H [A]) hp emptySliceHeap := keep
+    have freshValues : MObj.elems .dyn (emptySliceHeap.get emptySliceFresh)=[] := by
+      unfold emptySliceHeap emptySliceFresh
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+      rfl
+    refine ⟨first,second,items,read,write,new,mok,keep,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+    have oldValues : MObj.elems .dyn (emptySliceHeap.get (left.wk (List.prefix_append H [A])))=old := by
+      rw [kept left,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    have neighborValues : MObj.elems .dyn (emptySliceHeap.get (right.wk (List.prefix_append H [A])))=neighbor := by
+      rw [kept right,MObj.elems_wk,MObj.elems_dyn]
+      exact List.map_id'' (fun _ => rfl) _
+    rw [oldValues,neighborValues,freshValues]
+
+/-- Low expression fuel preserves the independently reached binding prefix;
+whole Items horizon5 instead times out before allocating. These differ. -/
+theorem slice_add_bounds_timing (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) (sliceFrame sliceData) 2
+      (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))).run sliceEndBound=
+      (.error .timeout,sliceEndBound) ∧
+    (Source.execItems (G0 p) (sliceFrame sliceData) 5 Γ.length none
+      (.stmt (.expr (sourceUintSliceBind bindDst .here (.there .here) (.there (.there .here)) true))
+        (.stmt (.expr (sourceUintIndexedAdd bindDst (.there (.there .here)) (.there .here))) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sliceInput 1 2).1).run (.nil,(sliceInput 1 2).2)=
+      (.error .timeout,(.nil,(sliceInput 1 2).2)) := by
+  first
+  | solve | simp only [] | omega
+  | exact ⟨source_uint_add_low (G0 p) (sliceFrame sliceData) sliceEndBound bindDst
+      (.there (.there .here)) (.there .here) 2 (by decide),rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_endpoint
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_failure_order' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_failure_order
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_empty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_empty
+/-- info: 'Solidity.Backend.MemoryOps.UintSliceControls.slice_add_bounds_timing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms slice_add_bounds_timing
 
 end Solidity.Backend.MemoryOps.UintSliceControls
