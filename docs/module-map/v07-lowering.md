@@ -96,3 +96,5 @@
 | `Lowering/V07/UnsignedQuotRemEffectsControls.lean` | Inhabited ordered alias, zero-divisor, context and mixed-reference controls. |
 | `Lowering/V07/UnsignedQuotRemPass.lean` | Exact published panic insertion for pure and effectful quotient/remainder clauses, with independent Source transport. |
 | `Lowering/V07/UnsignedQuotRemPassControls.lean` | Inhabited pass clients, alias/context controls and ordered payload negatives. |
+| `Lowering/V07/LessThan.lean` | Signed/unsigned less-than and actual assignment/read Source transport with fresh captures. |
+| `Lowering/V07/LessThanControls.lean` | Inhabited boundaries, alias/context/frame and operand-order controls. |

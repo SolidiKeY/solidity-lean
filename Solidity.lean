@@ -2157,6 +2157,8 @@ import Solidity.Lowering.V07.IntegerConstantControls
 import Solidity.Lowering.V07.IntegerConstants
 import Solidity.Lowering.V07.IntegerLocalFamily
 import Solidity.Lowering.V07.IntegerSubtraction
+import Solidity.Lowering.V07.LessThan
+import Solidity.Lowering.V07.LessThanControls
 import Solidity.Lowering.V07.LocalFamilyControls
 import Solidity.Lowering.V07.LocalFieldSupport
 import Solidity.Lowering.V07.LocationGraphCompleteness
