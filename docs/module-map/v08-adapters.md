@@ -400,6 +400,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Roadmap/V16/H24Input.lean` | Explicit V16 input boundary for the published H24 companion; no admission inhabitant. |
 | `Backend/Executable/CreationPatchOrder.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationPatchOrderControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturn.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/WhileReturnControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

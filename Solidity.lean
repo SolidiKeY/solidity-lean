@@ -1586,6 +1586,8 @@ import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
 import Solidity.Lowering.G19.AssignmentReturnFlag
+import Solidity.Lowering.G19.WhileReturn
+import Solidity.Lowering.G19.WhileReturnControls
 import Solidity.Lowering.P8.CheckedSyntax
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
