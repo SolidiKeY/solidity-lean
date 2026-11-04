@@ -30,3 +30,38 @@ premise, profile, semantics, fixture, budget or persistent-goal status changes.
 Historical Suite124, full1/cold124, bodyexport1, docs1/frozen comparison1 remain
 failures; publication/prior finding equality is separate. Earlier observation
 sources and sealed outputs are unchanged, not claimed as freshly rerun here.
+
+## Conditional consumer of the published byte-load producer
+
+`MutatingByteLoad.write_then_load` imports the exact published
+`MemoryOps.Physical.ByteWorld.Producer loadCode`; it supplies no instance. From
+the actual publicly selected intrinsic write and INITIAL physical frame, the
+consumer derives the reached word/byte image, numeric word load and existing
+`runSlice` store-plus-load composition. Only the byte load uses the explicit
+producer parameter. The old reference, typed reached representation, exact
+zero allocation growth, word footprint and all exterior bytes remain conclusions.
+The code parameter depends only on a word-cell index, never a desired value or
+reached memory. The complete written image needed by the producer is derived.
+
+`MutatingByteLoadControls.actual_prefix` is independently inhabited, without a
+producer parameter: old word9 becomes2 and neighbor4 remains. In contrast,
+`conditional_application` and `conditional_wrong_scale` remain conditional.
+There is NO claimed concrete successful byte-load witness. The scale negative
+passes cell576 (byte18432, zero) rather than cell18 (byte576, value2).
+The actual literal MLOAD refusal is retained, including an inhabited nondefault
+metadata frame. The literal-only producer is refuted, not every possible code.
+
+The imported `tail.length+1≤1024` condition concerns the LOAD output. It does
+not establish the store's `tail.length+2` input fit, intermediate program stack
+bounds, gas or physical hardware adequacy; those remain separate resource
+obligations. Native and byte stack carriers also remain separate. No full
+intrinsic-statement-to-byte-program compiler theorem or Source/world origin
+relation follows from this conditional local composition.
+
+Proposed registrations: `Solidity.Backend.AbiWorld.MutatingByteLoad` and
+`Solidity.Backend.AbiWorld.MutatingByteLoadControls`. Proposed area rows are the
+same two names: conditional published ByteWorld consumer, and actual-prefix /
+conditional-load / literal-refusal controls respectively. The coordinator may
+register these with the exact committed owned prefix import closure; this
+packet does not resubmit or modify a producer. Generated roots and shared maps
+are not manually edited for this packet.
