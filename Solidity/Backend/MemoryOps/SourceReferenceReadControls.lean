@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
 import Solidity.Backend.MemoryOps.SourceConditional
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
@@ -2219,5 +2220,118 @@ theorem conditional_low_horizon (p : Roadmap.Pipeline) (v : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms conditional_false_body_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms conditional_memory_client
+
+
+private def localDeleteSource : Source.EMState E0 AliasSΓ :=
+  (aliasSource.1.set .here (.memRef rfl 5),
+   {aliasSource.2 with heap := (aliasSource.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def localDeleteWord := writeMachine (allocateMachine aliasWord ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+
+/-- Both pipelines execute the actual reference delete and the existing whole
+allocation/rebind program. Parent-held aliases still point to the old object. -/
+theorem local_reference_delete_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+3) (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.ok Source.RVal.unit,localDeleteSource) ∧
+    Evm.run (rebindNewCode 1 (.here : Idx AliasΓ (.mem B)) (.lit 0 rfl : Simple C AliasΓ .uint)) aliasWord=
+      .ok localDeleteWord 0 ∧
+    Source.MemOK E0 SH localDeleteSource ∧
+    SourceBoolMemoryAt localDeleteSource 0
+      (aliasState.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.heap (left.wk (List.prefix_append H [B])) .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_rebind_word (G0 p) F0 fuel aliasSource .here aliasState .here left 0
+      (show SourceBoolMemoryAt aliasSource 0 hp left .dyn from left_at) rfl rfl SH aliasSourceOK
+      aliasRepr.state aliasAllocator (by decide) (by decide)
+    exact ⟨h.1,h.2.2.2.1,h.2.2.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.2.2.1⟩
+
+/-- The inhabited native execution and its reached legacy representation,
+allocator, fresh identity and empty contents are explicit client observations. -/
+theorem local_reference_delete_native_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    let pair := aliasState.alloc (defaultArray .bool ⟨0,W_pos⟩)
+    let state := pair.1.setLocal (.here : Idx AliasΓ (.mem B)) (some pair.2)
+    Stmt.run aliasState (.rebindMem (.here : Idx AliasΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))=
+      .ok ⟨state,List.prefix_append H [B]⟩ ∧
+    StateRepr 1 1 8 aliasFrag state (upd base 5 ⟨48,by decide⟩) localDeleteWord ∧
+    StructAllocatorRepr state.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ localDeleteWord ∧
+    SourceBoolMemoryAt localDeleteSource 5 state.heap pair.2 .dyn ∧
+    pair.2.id=5 ∧ pair.2.id≠(left.wk (List.prefix_append H [B])).id ∧
+    TEnv.get (.here : Idx AliasΓ (.mem B)) state.env=some pair.2 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_rebind_word (G0 p) F0 fuel aliasSource .here aliasState .here left 0
+      (show SourceBoolMemoryAt aliasSource 0 hp left .dyn from left_at) rfl rfl SH aliasSourceOK
+      aliasRepr.state aliasAllocator (by decide) (by decide)
+    exact ⟨h.2.2.1,h.2.2.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.1,
+      h.2.2.2.2.2.2.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.2.2.2.2.1,rfl⟩
+
+theorem local_reference_delete_native_vectors :
+    let pair := hp.alloc (defaultArray .bool ⟨0,W_pos⟩)
+    (left.id,right.id,old.id,fresh.id,empty.id,pair.2.id)=(0,1,2,3,4,5) ∧
+    MObj.elems .dyn (pair.1.get pair.2)=[] ∧
+    MObj.elems .dyn (pair.1.get (left.wk (List.prefix_append H [B])))=[true,false,false] ∧
+    MObj.elems .dyn (pair.1.get (right.wk (List.prefix_append H [B])))=[false,true,false] ∧
+    (MObj.elems .dyn (pair.1.get (old.wk (List.prefix_append H [B])))).map HRef.id=[0] ∧
+    (MObj.elems .dyn (pair.1.get (fresh.wk (List.prefix_append H [B])))).map HRef.id=[0,1,0] ∧
+    (MObj.elems .dyn (pair.1.get (empty.wk (List.prefix_append H [B])))).map HRef.id=[] ∧
+    aliasSource.2.heap.get 5=none ∧ aliasSource.1.get (.here : Source.Idx AliasSΓ SB)=.memRef rfl 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | dsimp only
+    have keep : Heap.Keeps (List.prefix_append H [B]) hp (hp.alloc (defaultArray .bool ⟨0,W_pos⟩)).1 :=
+      Heap.keeps_alloc hp (defaultArray .bool ⟨0,W_pos⟩)
+    refine ⟨rfl,?_,?_,?_,?_,?_,?_,rfl,rfl⟩
+    · rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    · rw [keep left,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep right,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep old,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,old,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep fresh,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,fresh,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep empty,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,empty,MObj.elems_dyn,List.map_nil]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_native_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_native_vectors
+
+/-- Complete old object table plus the allocated object and all existing word
+observations plus its header and next cell. The old parent aliases are retained. -/
+theorem local_reference_delete_vectors :
+    aliasViews localDeleteSource=aliasViews aliasSource ∧
+    localDeleteSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    localDeleteSource.1.get (.here : Source.Idx AliasSΓ SB)=.memRef rfl 5 ∧
+    cells.map localDeleteWord.mem ++ [localDeleteWord.mem 48,localDeleteWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[99],w[3],w[1],w[0],w[0],
+       w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    localDeleteWord.stack=[w[42]] ∧ localDeleteSource.2.heap.next=6 ∧
+    localDeleteSource.2.heap.get 0≠localDeleteSource.2.heap.get 5 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,?_⟩
+    intro h
+    have hlen := congrArg (fun q => q.map (fun v => match v with
+      | ⟨.array _ _ _,.array n _ _⟩ => n
+      | _ => 0)) h
+    contradiction
+
+/-- The reached fresh root rejects index zero while the retained old object
+still returns true. Low horizons return the real unchanged Source state. -/
+theorem local_reference_delete_boundaries (p : Roadmap.Pipeline) :
+    (Source.memElem (E := E0) (Γ := AliasSΓ) 5 0 .bool).run localDeleteSource=
+      (.error (.revert (Source.panicData .index)),localDeleteSource) ∧
+    (Source.memElem (E := E0) (Γ := AliasSΓ) 0 0 .bool).run localDeleteSource=
+      (.ok (.bool true),localDeleteSource) ∧
+    (Source.evalE (G0 p) F0 1 (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.error .timeout,aliasSource) ∧
+    (Source.evalE (G0 p) F0 2 (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.error .timeout,aliasSource) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_boundaries
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls
