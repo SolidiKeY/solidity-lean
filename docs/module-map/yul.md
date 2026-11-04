@@ -162,3 +162,5 @@
 | `Yul/RawSequenceWhileHorizon.lean`, `Yul/Checks/RawSequenceWhileHorizon.lean` | Concrete sequence-bodied while stability; deep-tail break/continue, mutation, timeout and clean Source controls. |
 
 | `Yul/RawAdapterLoopHorizon.lean`, `Yul/Checks/RawAdapterLoopHorizon.lean` | Exact concrete P16 adapter/driver agreement, completed whole-frame stability and inhabited Source/dirty controls. |
+
+| `Yul/RawAdapterSequenceLoopHorizon.lean`, `Yul/Checks/RawAdapterSequenceLoopHorizon.lean` | Concrete P16 sequence/block loop agreement, full-frame stability and inhabited dirty/Source controls. |

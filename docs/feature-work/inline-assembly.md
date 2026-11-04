@@ -343,3 +343,5 @@ VY1: completed raw controlled-while horizons and read views; [scope and controls
 VY1: completed raw sequence-bodied while horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-sequence-bodied-while-horizons). Full lane remains open.
 
 VY1: concrete P16 loop-adapter horizons; [scope and controls](inline-assembly-vy1.md#concrete-p16-loop-adapter-horizons). Full lane remains open.
+
+VY1: concrete P16 sequence-loop adapter horizons; [scope and controls](inline-assembly-vy1.md#concrete-p16-sequence-loop-adapter-horizons). Full lane remains open.

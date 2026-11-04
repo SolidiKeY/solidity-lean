@@ -1910,3 +1910,29 @@ Per-file diagnostics report zero errors; focused Lean, affected core build,
 generated-root and layer checks pass. Twelve scoped axiom reports use only
 Lean standard axioms. Failed standard automation and the corrected concrete
 alias rewrite remain raw evidence; statements, outcomes and limits unchanged.
+
+### Concrete P16 sequence-loop adapter horizons
+
+`RawAdapterSequenceLoopHorizon.block_agrees` proves exact all-fuel execution
+equality for the actual block/sequence factory and control-block runner.
+`body_agrees` composes that fact into exact concrete adapter/sequence-while
+driver equality, including errors and raw frames. `successor` and
+`extension` transport actual completed-frame stability to the genuine typed
+P16 loop(block(sequence)) adapter. The real intrinsic item certificate and
+original non-timeout premise remain explicit; no supplied driver equality,
+coherence or projection law is assumed. No arbitrary-adapter raw stability is
+inferred from the clean Source correctness field.
+Nine controls inhabit actual P16 instances: break5 retains raw2/u8257;
+mutating continue7 and normal12 exit with false and untouched257. Entire
+completed frames stabilize at every larger horizon. Block/driver agreement
+is checked at every fuel/raw state; early timeout6 remains distinct, and
+actual Source correctness remains separately clean-start bounded.
+No Source/ExtCall/evaluator/layout/observation or budget changes, general
+admission, dirty Source readback or compiler adequacy are introduced.
+Full VY1/general P16 and final lane gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Per-file diagnostics report zero errors; focused Lean, affected core build,
+generated-root and layer checks pass. Thirteen scoped axiom reports use only
+Lean standard axioms. Standard automation failures remain raw evidence;
+statements, outcomes and proof limits are unchanged.

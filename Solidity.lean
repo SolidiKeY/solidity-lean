@@ -2545,6 +2545,7 @@ import Solidity.Yul.Checks.Parsing
 import Solidity.Yul.Checks.Placement
 import Solidity.Yul.Checks.Powers
 import Solidity.Yul.Checks.RawAdapterLoopHorizon
+import Solidity.Yul.Checks.RawAdapterSequenceLoopHorizon
 import Solidity.Yul.Checks.RawControlSequenceHorizon
 import Solidity.Yul.Checks.RawControlledWhileHorizon
 import Solidity.Yul.Checks.RawDefaultDeclaration
@@ -2811,6 +2812,7 @@ import Solidity.Yul.OpenScoped
 import Solidity.Yul.OpenStatementAgreement
 import Solidity.Yul.PlacementCheck
 import Solidity.Yul.RawAdapterLoopHorizon
+import Solidity.Yul.RawAdapterSequenceLoopHorizon
 import Solidity.Yul.RawBoundary
 import Solidity.Yul.RawCoherent
 import Solidity.Yul.RawCondition
