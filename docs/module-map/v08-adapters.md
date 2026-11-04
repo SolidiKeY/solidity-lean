@@ -474,3 +474,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/StructuredFlow/ReturnPairCompiler.lean` | Actual compiler composition for mapped captured return and two reached-state suffix assignments; explicit fragment/capacity and entry premises. |
 | `Backend/StructuredFlow/ReturnPairCompilerControls.lean` | Inhabited both-pipeline runs, full native snapshot and typed/native suffix mutation negatives. |
+
+| `Lowering/G19/AssignmentDoWhileReturn.lean` | Mapped do-while body assignment then bare return; arbitrary trailing condition skipped, true fresh flag independent of assigned value. |
+| `Lowering/G19/AssignmentDoWhileReturnControls.lean` | Both-pipeline/checked-mode true and false body runs, same-slot, wrong flag, skipped-effect and return classification controls. |

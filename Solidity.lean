@@ -1640,6 +1640,8 @@ import Solidity.Lowering.G19.AssignmentDoWhileBreak
 import Solidity.Lowering.G19.AssignmentDoWhileBreakControls
 import Solidity.Lowering.G19.AssignmentDoWhileContinue
 import Solidity.Lowering.G19.AssignmentDoWhileContinueControls
+import Solidity.Lowering.G19.AssignmentDoWhileReturn
+import Solidity.Lowering.G19.AssignmentDoWhileReturnControls
 import Solidity.Lowering.G19.AssignmentForBreak
 import Solidity.Lowering.G19.AssignmentForBreakControls
 import Solidity.Lowering.G19.AssignmentForContinue
