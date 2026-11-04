@@ -117,3 +117,5 @@
 | `Lowering/V07/P12NextInterface.lean` | H26 generated request-indexed P12 condition/reference dependency contracts; all producer fields pending, no instances. |
 | `Lowering/V07/EnumUnsignedCasts.lean` | Enum-to-approved-unsigned assignment transport; only the result narrows, with full caller-context alignment. |
 | `Lowering/V07/EnumUnsignedCastControls.lean` | Inhabited mixed-reference, all-width, capture-extension and incorrect caller-narrowing controls with exact axiom guards. |
+| `Lowering/V07/EnumSignedWord.lean` | Actual enum-to-int256 assignment/sign-result transport, deriving full caller-context alignment from initial relations. |
+| `Lowering/V07/EnumSignedWordControls.lean` | Inhabited mixed-reference, sign-boundary, capture-extension and stale/truncation controls with exact axiom guards. |
