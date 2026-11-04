@@ -317,3 +317,5 @@ VY1: adopted the published P16 dependency without changing its interface; retain
 VY1: recursive default-scoped while completed horizon stability and mutating-iteration controls; see [lane handoff](inline-assembly-vy1.md#recursive-while-completed-horizons). Full lane remains open.
 
 VY1: body-first recursive do/while completed horizon stability and two-iteration controls; see [lane handoff](inline-assembly-vy1.md#body-first-dowhile-completed-horizons). Full lane remains open.
+
+VY1: guarded for/post completed horizon stability and retained-post-effect controls; see [lane handoff](inline-assembly-vy1.md#guarded-forpost-completed-horizons). Full lane remains open.

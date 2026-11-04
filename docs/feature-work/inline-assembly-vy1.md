@@ -1534,3 +1534,29 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Thirteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation attempts remain distinct from passing
 gates; no checking/proof limits were increased.
+
+### Guarded for/post completed horizons
+
+`LocalForPostHorizon.successor` and `extension` preserve the identical final
+caller raw frame after actual normal completion of the existing guarded
+default-scoped for/post runner. Fuel induction fixes actual guard and restored
+body results through concrete Boolean/block horizon producers, then fixes the
+post's full state before the actual recursive step. The successful post value
+remains ignored exactly as in the existing runner; its effects are retained.
+Eleven controls add an inhabited post that writes the caller Boolean false
+before a delayed expression times out. They distinguish body failure in its
+extended prefix from post failure in the restored, written caller frame, then
+show later exact completion and arbitrary added-fuel stability. Additional
+controls cover false guards skipping both body/post, false versus true post
+values over a mutating body, dirty projection refusal and zero fuel.
+No simulation or child termination law is supplied. Normal completion remains
+required; timeout stability, arbitrary for control, readback, admission and
+general Source/compiler adequacy remain open. Source/ExtCall/evaluators/layouts,
+observations and proof budgets are unchanged. General P16/full VY1 and final
+gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Thirteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation remains separate from passing gates;
+no checking/proof limits were increased.
