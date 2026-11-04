@@ -114,7 +114,6 @@
 | `Lowering/V07/EnumGuardControls.lean` | Inhabited guarded enum, reached-state order, prefix and zero/full-capacity controls with exact pins. |
 | `Lowering/V07/UnsignedEnumGuard.lean` | Approved unsigned-width Source enum conversions reuse the existing native guard, with initial-derived success/failure transport. |
 | `Lowering/V07/UnsignedEnumGuardControls.lean` | Inhabited narrow-width alias, context and maximum-bound controls across all 32 widths. |
-| `Lowering/V07/P12NextInterface.lean` | H26 generated request-indexed P12 condition/reference dependency contracts; all producer fields pending, no instances. |
 | `Lowering/V07/EnumUnsignedCasts.lean` | Enum-to-approved-unsigned assignment transport; only the result narrows, with full caller-context alignment. |
 | `Lowering/V07/EnumUnsignedCastControls.lean` | Inhabited mixed-reference, all-width, capture-extension and incorrect caller-narrowing controls with exact axiom guards. |
 | `Lowering/V07/EnumSignedWord.lean` | Actual enum-to-int256 assignment/sign-result transport, deriving full caller-context alignment from initial relations. |
@@ -142,3 +141,5 @@
 | `Lowering/V07/IntegerConstantAssignmentControls.lean` | All64 integer types, ordered assignment observations, repeated/equal aliases and executed missing-write/stale/wrong-destination controls. |
 | `Lowering/V07/IntegralRationalConstants.lean` | Arbitrary integral rational meaning, Source conversion/assignment and native capture transport with existing range typing. |
 | `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
+| `Lowering/V07/P12AssignedCondition.lean` | Actual published P12 Condition producer for Boolean local assignment, arbitrary successful horizons and derived caller alignment. |
+| `Lowering/V07/P12AssignedConditionControls.lean` | Inhabited mixed-reference producer, success witnesses, source-timeout boundary and executed missing-write/stale-capture controls. |
