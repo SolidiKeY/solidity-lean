@@ -273,6 +273,7 @@ import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.AllocationPanic
 import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
+import Solidity.Backend.MemoryCopies.CopyPathInterface
 import Solidity.Backend.MemoryCopies.DeepCopyContents
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
