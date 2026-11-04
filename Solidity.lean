@@ -1924,6 +1924,8 @@ import Solidity.Lowering.V08.LiteralFailureConvertedFields
 import Solidity.Lowering.V08.LiteralFailureConvertedFieldsControls
 import Solidity.Lowering.V08.LiteralFailureCopyEncoding
 import Solidity.Lowering.V08.LiteralFailureCopyEncodingControls
+import Solidity.Lowering.V08.LiteralFailureCopyReturn
+import Solidity.Lowering.V08.LiteralFailureCopyReturnControls
 import Solidity.Lowering.V08.LiteralFailureCopySelector
 import Solidity.Lowering.V08.LiteralFailureCopySelectorControls
 import Solidity.Lowering.V08.LiteralFailureCopySequence

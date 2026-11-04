@@ -499,3 +499,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailureCopySignature.lean` | Signature alias transport through actual copies and signature-prefixed encoder execution. |
 | `Lowering/V08/LiteralFailureCopySignatureControls.lean` | Actual aliased signature/read/copy packets, dangling-read and timeout-priority controls. |
+
+| `Lowering/V08/LiteralFailureCopyReturn.lean` | Derived converted tuple-return execution, slot extraction and actual return-data encoding. |
+| `Lowering/V08/LiteralFailureCopyReturnControls.lean` | Populated hidden return slots/caller parameters, exact extracted packets and copy-only allocation controls. |
