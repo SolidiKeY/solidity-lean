@@ -319,6 +319,7 @@ import Solidity.Backend.MemoryCopies.SourceRootCopies
 import Solidity.Backend.MemoryCopies.SourceSize
 import Solidity.Backend.MemoryCopies.SourceSizeInputs
 import Solidity.Backend.MemoryCopies.SourceStorageFrames
+import Solidity.Backend.MemoryCopies.SourceStringsInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
