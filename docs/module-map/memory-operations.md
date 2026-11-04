@@ -226,3 +226,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceCopyHorizonInterface.lean` | Exact non-timeout result/reached-state preservation obligations under additional Source storage-copy traversal fuel. |
 | `Backend/MemoryCopies/SourceCopyHorizon.lean` | Generic exact non-timeout result/state extension for all existing Source copy traversals via bind and mutual fuel descent. |
 | `Backend/MemoryCopies/SourceCopyHorizonControls.lean` | Nested and64-byte stability, mapping refusal retention, partially allocated timeout/recovery and old-state controls. |
+| `Backend/MemoryCopies/SourceDefaultHorizonInterface.lean` | Exact non-timeout default traversal observation/state preservation under additional interpreter fuel. |

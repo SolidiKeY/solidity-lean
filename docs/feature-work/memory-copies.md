@@ -435,3 +435,7 @@ Own declared bytes[][] controls copy nested bytes[17,23] with roots1/2/3 and out
 Independent read-only finder/skeptic passed. Finder identified an untyped intermediate observation equality; its explicit type was added and re-reviewed. Neither reviewer used Lean/server/builds or wrote files. All three files have zero MCP errors/warnings. Direct recursion proofs passed after bind normalization, typed halt equality, namespace and empty-fuel arithmetic repairs; failed alternatives and passing final MCP/standalone probes are retained. No heartbeat increase or proof escape is used. Checkpoint gates and scoped axiom receipts remain required before acceptance.
 
 This is generic preservation for already completed non-timeout copy traversals, not termination/admission for all recursive Source shapes, a physical compiler refinement, allocation-size/gas semantics or full G33/G35 completion. Interpreter timeout is kept distinct from size panic and out-of-gas. Source/H16 files and public interfaces/premises/exclusions/proof budgets are unchanged; VY5 S03-PANIC41, V11 G34/G35.02/.03 and V10 G27.05 boundaries and remaining local implementation/composition work remain open. Final lane-end run-lean is pending.
+
+## Source default horizon extension
+
+`SourceDefaultHorizonInterface.lean` states exact non-timeout result/reached-state preservation for existing zeroData/zeroVal/zeroElems/zeroFields under additional interpreter fuel. It reuses CopyHorizonExtends and adds no evaluator, admission selector or physical allocation premise.

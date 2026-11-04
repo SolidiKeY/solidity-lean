@@ -311,6 +311,7 @@ import Solidity.Backend.MemoryCopies.SourceCopyHorizon
 import Solidity.Backend.MemoryCopies.SourceCopyHorizonControls
 import Solidity.Backend.MemoryCopies.SourceCopyHorizonInterface
 import Solidity.Backend.MemoryCopies.SourceDefaultFrames
+import Solidity.Backend.MemoryCopies.SourceDefaultHorizonInterface
 import Solidity.Backend.MemoryCopies.SourceFields
 import Solidity.Backend.MemoryCopies.SourceFieldsControls
 import Solidity.Backend.MemoryCopies.SourceFieldsInterface
