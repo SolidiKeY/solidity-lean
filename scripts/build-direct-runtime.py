@@ -111,6 +111,13 @@ else:
     # collect()'s recursive visitor can retain its temporary source graph via
     # a Python reference cycle. Only the extracted C buffers are needed below.
     gc.collect()
+    if hasattr(os,'posix_fadvise'):
+        # Extraction has finished reading these immutable originals. Compilers
+        # consume the captured/pruned buffers, not the original source files.
+        for directory in [stage/'lib/temp',root/'.lake/build/ir']:
+            for original in directory.rglob('*.c'):
+                with original.open('rb') as stream:
+                    os.posix_fadvise(stream.fileno(),0,0,os.POSIX_FADV_DONTNEED)
     print('Pure generated-C closure: '+json.dumps(closure),flush=True)
 objects=[];sources=[]
 for i,(name,text,source,expected) in enumerate(inputs):
