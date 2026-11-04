@@ -234,4 +234,27 @@ Checkpoint gates and scoped axiom reports are required separately.
 default, including reference-valued base elements. The selected builder uses
 the existing V2 certificate and an actual fitting allocator input. This is
 intrinsic successful construction, not Source graph admission or total checked
-allocation failure. The signature precedes implementation.
+allocation failure. The signature commit precedes `NestedDefaults.lean`. Selection is total for
+all dimensions at the existing map-free element type, independent of capacity;
+the implementation extracts only `compileDefault.get` with a proved `isSome`.
+There is no second code generator. The exact cell cost is the right fold of
+`max 1 n + n * child`, starting at1. Execution is the actual existing builder
+simulation, retaining source default heap, old-cursor root, exact allocator
+growth, base extension, lower cells and prior gaps. Its success capacity
+condition remains explicit; no runtime failure selector is claimed.
+
+`NestedDefaultControls.lean` supplies an actual populated represented allocator
+at cursor40, with reference-valued dynamic base elements. Actual selected-code
+observations are (root40,next41,old7) for no fixed dimensions, next54 for[2,3]
+and next169 for[1,64]. The old live word at17 is unchanged. The selected V2
+certificate is inhabited; empty code and wrong cursor55 are rejected. Target
+loop results follow from checked execution, not evaluation of the target's
+noncomputable loop implementation or an assumed target run.
+
+Independent read-only finder and skeptic found no concrete semantic/trust
+finding or new selector/filter/hidden capacity claim. They confirmed the
+scope: fixed arrays allocate nested default children, but dynamic base defaults
+are empty; populated dynamic construction, Source graph/layout refinement,
+guarded recursive graphs and runtime checked failures remain separate. Neither
+reviewer used Lean/build/server/edits. All three modules have zero MCP errors
+and warnings; checkpoint gates and scoped axiom reports remain required.

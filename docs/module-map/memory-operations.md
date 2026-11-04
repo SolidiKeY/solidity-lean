@@ -179,3 +179,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/AllocationPanicInterface.lean` | Explicit Source allocation-panic state and byte-exact emitted terminal-slice obligation; no size-selector premise hidden. |
 | `Backend/MemoryCopies/AllocationPanic.lean` | Derived oversized Source failure joined to reused byte-exact Panic(0x41) emission, packet framing and wrong-result/timeout/zero-length controls. |
 | `Backend/MemoryCopies/NestedDefaultInterface.lean` | Production-selected nested-array default builder with a real fitting allocator witness; no new compiler or admission filter. |
+| `Backend/MemoryCopies/NestedDefaults.lean` | Total production selection for fixed dimensions around empty dynamic defaults, exact cost and existing allocator-growth execution. |
+| `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |

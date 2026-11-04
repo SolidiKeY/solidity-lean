@@ -278,7 +278,9 @@ import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.MemoryCopies.InterfaceV2Roots
+import Solidity.Backend.MemoryCopies.NestedDefaultControls
 import Solidity.Backend.MemoryCopies.NestedDefaultInterface
+import Solidity.Backend.MemoryCopies.NestedDefaults
 import Solidity.Backend.MemoryCopies.Premises
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
