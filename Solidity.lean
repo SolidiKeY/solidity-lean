@@ -258,6 +258,7 @@ import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.MemoryCopies.InterfaceV2Roots
 import Solidity.Backend.MemoryCopies.Premises
+import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
