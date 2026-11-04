@@ -1,5 +1,4 @@
 import Solidity.Yul.Adapters.RawPhysicalInventory
-import Solidity.Backend.MemoryOps.PhysicalByteJournal
 
 /-! Whole-map unchanged writeback for complete raw-local snapshots. The
 physical complement is retained exactly, rather than reconstructed from clean
@@ -11,21 +10,8 @@ open RawPhysicalInventory
 variable {ctx : Source.Ctx}
 
 theorem write_read_self (memory : Environment.Memory) (offset length : Nat) :
-    Environment.writeBytes memory offset (Environment.readMemory memory offset length)=memory := by
-  first | (simp only;done) | decide | omega | rfl | skip
-  rw [readMemory_eq_getBytes]
-  induction length generalizing offset with
-  | zero => rfl
-  | succ length ih =>
-    have same : Environment.writeByte memory offset (memory offset)=memory := by
-      funext i
-      by_cases equal : i=offset
-      · subst i;exact if_pos rfl
-      · exact if_neg equal
-    change Environment.writeBytes (Environment.writeByte memory offset (memory offset)) (offset+1)
-      (Failure.Slice.getBytes memory (offset+1) length)=memory
-    rw [same]
-    exact ih (offset+1)
+    Environment.writeBytes memory offset (Environment.readMemory memory offset length)=memory :=
+  MemoryBytes.write_read_identity memory offset length
 
 /-- Actual per-cell reads imply byte-for-byte identity, not merely selected
 projections. This lemma is applied below with reads derived from encoding. -/

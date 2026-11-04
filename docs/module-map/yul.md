@@ -151,3 +151,4 @@
 | `Yul/Adapters/RawPhysicalProducer` | Consumer of the actual bounded P16 Adapter.correct field, transporting its exact reached Source representation through complete raw-local physical capture under the unchanged coherent-input premise. |
 | `Yul/Adapters/RawPhysicalWriteback{,Controls}` | Whole raw-map and complete P6-frame identity after unchanged all-cell decode/reencode, retaining residual bytes and distinguishing view equality from overlay administration. |
 | `Yul/Adapters/RawPhysicalUpdate{,Controls}` | Derives complete raw-local inventory reencoding/readback after actual RawFrame.write and P6/MSTORE word updates, retaining other cells and residual bytes under explicit span/coordinate guards. |
+| `Yul/Adapters/RawPhysicalInterior{,Controls}` | Complete raw-local inventory transport after an interior-byte P6/MSTORE8 update, using exact full-word codecs and retaining other bytes/cells under explicit coordinate/fit guards. |

@@ -1140,3 +1140,14 @@ no inferred compiler layout or general gas/expansion theorem. Controls store a
 full-width word in a uint8 cell, retain the bool and both function fields,
 preserve padding, reject wrong coordinates and retain latest repeated writes.
 Clean Source locals/world and explicit dirty-readback boundaries are unchanged.
+
+
+`RawPhysicalInterior` handles one actual byte inside any represented raw-local
+word. Existing exact big-endian codec inverses reconstruct all 32 bytes, so
+updated inventory reads, complete reencoding and decoded raw-view agreement are
+derived without canonical narrowing. Its P6/MSTORE8 theorem retains the real
+Word offset, finite byte fit and coordinate agreement; only the MSTORE8 input
+is truncated to one byte. Controls distinguish high/low byte order, retain the
+other 31 bytes and sibling cells/padding, and reject byte32. Clean Source fields
+and dirty readback policy remain unchanged. The compatible writeback helper
+now reuses the existing byte-memory write/read identity proof.
