@@ -252,3 +252,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Populated full-byte/word vectors, actual overlapping order, empty and unsupported boundaries. |
 
 | `Solidity/Backend/MemoryOps/PhysicalByteStack.lean` | Existing checked stack guard for arbitrary emitted byte materialization; transient peak and reached live REVERT. |
+
+| `Solidity/Backend/MemoryOps/SourceRawBoolCopy.lean` | Raw-byte-derived Boolean decode/copy success, ordered first-invalid failure and Source frames. |
+| `Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean` | Populated objects/aliases, nonzero raw offset, late invalid Boolean and actual padding/empty controls. |
