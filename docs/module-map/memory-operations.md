@@ -209,3 +209,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStringsInterface.lean` | Complete Source string-copy family over actual persistent typed length and byte cells, reusing the byte-reader boundary. |
 | `Backend/MemoryCopies/SourceStrings.lean` | Actual Source string payload load and complete fresh-root copy family through the proved byte reader and existing allocator. |
 | `Backend/MemoryCopies/SourceStringsControls.lean` | Separately declared populated/empty string copies, distinct byte order, old/nonheap frame, reversal rejection and horizon refusal. |
+| `Backend/MemoryCopies/SourceNestedBytesInterface.lean` | Actual persistent child-cell inputs and nested Source byte traversal with exact fresh identities and retained payloads. |
