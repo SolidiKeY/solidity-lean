@@ -850,3 +850,14 @@ real fourth object (logical ID 3, physical word 288), pointer-array aliases, a
 bounds panic retaining the allocation, and interior/wrong-type preparation None.
 This does not prove a target sink-word store or full changed-memory reconstruction,
 which remain separate physical-writeback obligations.
+
+`ArrayWordStore` relates an actual raw `mstore` to a typed array-member write.
+Existing old/new `MemoryElement` codecs and genuine old reads derive updated
+member decoding; the complete writeback result equals actual `Source.writeLoc`.
+Static and dynamic headers remain correct, and selected-array encoding with the
+same complement reconstructs the complete patched ByteView. Controls connect
+new-reference allocation (ID 3/address 288) to parent-word storage at 256, retain
+new/sibling payloads and unknown bytes, and reject wrong logical-ID/byte-offset
+preparations. This equality concerns the selected array plus complementary bytes;
+refreshed whole-heap changed-image reconstruction and target opcode execution
+remain separate obligations.

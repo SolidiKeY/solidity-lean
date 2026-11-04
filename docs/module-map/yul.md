@@ -124,3 +124,4 @@
 | `Yul/Views/NewMemory{,Controls}` | Actual newArray evaluator with intrinsic uint256-local length, existing size panic/timeout and newData; constructive full physical allocation/writeback with static bytes/bool[] and padding controls. |
 | `Yul/Views/NewMemoryOperand{,Controls}` | Universal actual newArray operand decomposition and reached-prefix success/panic/halt transport; physical realization at the reached state, postincrement and late-timeout controls. |
 | `Yul/Views/AllocationPointer{,Controls}` | Actual allocated-reference decoding and existing pointer writeback agree with newArray/getV/writeLoc execution, including writer halts and owner safety; aliases, bounds and decoder-boundary controls. |
+| `Yul/Views/ArrayWordStore{,Controls}` | Real one-word array patch derives updated codec reads and exact Source member writeback, whole selected-array/complement ByteView reconstruction, new-pointer sink and dynamic-header mutation controls. |
