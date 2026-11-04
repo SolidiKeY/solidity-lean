@@ -413,6 +413,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureMemoryReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationReturnInterfaceV1.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationReturnInterfaceV1Controls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveStep.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveTurn.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

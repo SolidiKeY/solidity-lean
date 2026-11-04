@@ -231,6 +231,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveTurn
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
