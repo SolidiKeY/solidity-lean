@@ -3476,6 +3476,8 @@ import Solidity.Yul.Views.ScalarWritebackControls
 import Solidity.Yul.Views.ScratchHeapControls
 import Solidity.Yul.Views.ScratchHeapTransport
 import Solidity.Yul.Views.ScratchSourceWriteback
+import Solidity.Yul.Views.SharedZeroRead
+import Solidity.Yul.Views.SharedZeroReadControls
 import Solidity.Yul.Views.SignedDynamicBoundaryControls
 import Solidity.Yul.Views.SignedDynamicControls
 import Solidity.Yul.Views.SignedDynamicCrossControls

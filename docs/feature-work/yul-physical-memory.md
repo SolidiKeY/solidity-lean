@@ -1273,3 +1273,14 @@ it without cleaning. A separate output writes byte `96` to `1`: the complete
 six-object Source state still writes back unchanged, but `ReservedOK` fails.
 Thus object-complement separation and Source identity do not imply reserved
 safety, source admission or general shared-zero representation adequacy.
+
+`SharedZeroRead` establishes limited read-side facts for empty dynamic arrays:
+actual Source `lengthOf` returns zero, every actual `indexLoc` produces the exact
+index panic without changing state, and `ReservedOK` supplies a zero header at
+physical pointer `96`. Controls obtain two distinct logical IDs from two actual
+`allocRef` calls. Their read observations agree with that header, but ordinary
+`Placement` forbids either occupied object at `96`, and a raw-pointer-only
+function cannot recover both identities. This does not select a new decoder or
+prove target allocation, write-alias behavior, initialization reachability, or
+whole shared-zero view/writeback adequacy. A corrupt-header control retains the
+boundary between physical bytes and Source observations.
