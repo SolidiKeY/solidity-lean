@@ -147,3 +147,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/CalldataViewPackingControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained premises are in the module. |
 | `Backend/MemoryOps/CalldataViewExtension.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/CalldataViewExtensionControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/TraversalControls.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/TraversalFresh.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/TraversalInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
