@@ -142,3 +142,5 @@
 | `Yul/LocalForInitHorizon.lean`, `Yul/Checks/LocalForInitHorizon.lean` | Exact Boolean/default scope and iteration agreement, concrete initializer stability and full present-guard/post for-statement completed horizons. |
 
 | `Yul/LocalForNoPostHorizon.lean`, `Yul/Checks/LocalForNoPostHorizon.lean` | Exact Boolean/default while agreement and concrete initialized no-post for completed horizons, with nested-scope caller-write controls. |
+
+| `Yul/LocalForNoGuardFailure.lean`, `Yul/Checks/LocalForNoGuardFailure.lean` | Concrete initialized omitted-guard finite noncompletion, clean Source consequences and scoped mutation/refusal controls. |

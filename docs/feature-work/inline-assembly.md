@@ -323,3 +323,5 @@ VY1: guarded for/post completed horizon stability and retained-post-effect contr
 VY1: concrete full initialized-for completed horizon composition and exact scope/iteration agreement; see [lane handoff](inline-assembly-vy1.md#full-for-initializer-completed-horizons). Full lane remains open.
 
 VY1: concrete initialized no-post for completed horizon composition and nested-scope caller-write controls; see [lane handoff](inline-assembly-vy1.md#initialized-no-post-for-completed-horizons). Full lane remains open.
+
+VY1: concrete initialized omitted-guard noncompletion and clean Source consequences; [scope and controls](inline-assembly-vy1.md#initialized-omitted-guard-noncompletion). Full lane remains open.

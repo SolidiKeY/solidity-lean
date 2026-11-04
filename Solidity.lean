@@ -2514,6 +2514,7 @@ import Solidity.Yul.Checks.LocalDefaultWhile
 import Solidity.Yul.Checks.LocalDoWhileHorizon
 import Solidity.Yul.Checks.LocalExprStatement
 import Solidity.Yul.Checks.LocalForInitHorizon
+import Solidity.Yul.Checks.LocalForNoGuardFailure
 import Solidity.Yul.Checks.LocalForNoPostHorizon
 import Solidity.Yul.Checks.LocalForPostHorizon
 import Solidity.Yul.Checks.LocalIfHorizon
@@ -2757,6 +2758,7 @@ import Solidity.Yul.LocalDefaultWhile
 import Solidity.Yul.LocalDoWhileHorizon
 import Solidity.Yul.LocalExprStatement
 import Solidity.Yul.LocalForInitHorizon
+import Solidity.Yul.LocalForNoGuardFailure
 import Solidity.Yul.LocalForNoPostHorizon
 import Solidity.Yul.LocalForPostHorizon
 import Solidity.Yul.LocalIfHorizon

@@ -1612,3 +1612,30 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Sixteen scoped axiom reports use only Lean standard
 axioms. Failed standard automation remains raw evidence separate from passing
 gates; no checking/proof limits were increased.
+
+### Initialized omitted-guard noncompletion
+
+`LocalForNoGuardFailure.no_normal` and `no_post_normal` exclude finite
+normal completion of the existing full Boolean initializer/omitted-guard
+adapters, with or without a post expression. They compose the actual initializer,
+unchanged scope close, existing constant-true noncompletion and concrete
+all-fuel iteration agreement; no bridge or child termination law is assumed.
+`source_no_normal` and `source_no_post_normal` carry this through existing
+clean-input Source agreements, quantifying over both initial and final worlds.
+Nine controls reuse an inhabited context-growing body that writes counter and
+caller separately. They cover arbitrary-fuel raw noncompletion, exact retained
+counter writes, a present guard that completes, a false initializer that still
+enters an omitted-guard loop, dirty projection refusal, a post failure retaining
+effects, and both concrete Source noncompletion cases.
+The certificates contain no break or return. This excludes finite normal
+completion only, without classifying halts, proving general divergence or
+expanding admission. Dirty readback, arbitrary control, general Source/compiler
+adequacy, full P16/VY1 and final lane gates remain open.
+No Source/ExtCall/evaluator/layout, expected outcome or proof-budget changes.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Thirteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation is separate from passing gates.
+A wrapper-only version-query failure is retained; direct toolchain binaries
+report Lean 4.24.0 and Lake 5.0.0-src+797c613. No checking/proof limits changed.
