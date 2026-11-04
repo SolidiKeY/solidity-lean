@@ -272,3 +272,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeStorageArray.lean` | Constant storage-header-driven SLOAD/MSTORE loop, finite termination witness, typed source-word extraction and complete allocator/root-gap simulation. |
 | `Backend/MemoryCopies/RuntimeStorageArrayControls.lean` | Identical runtime code for actual lengths0/2/64 with distinct data on a populated old heap, read-only store/frame, freshness and negative controls. |
 | `Backend/MemoryCopies/RuntimePathArrayInterface.lean` | Existing storage-path compilation feeding runtime array copying, actual declaration/rebinding with full ownership and failed-path certificates. |
+| `Backend/MemoryCopies/RuntimePathArray.lean` | Actual checked path simulation feeding runtime array copying, full declaration/rebinding ownership and source/target failed-path propagation. |
+| `Backend/MemoryCopies/RuntimePathArrayControls.lean` | Runtime nested-path declarations/rebindings with two old aliases, distinct empty/pair/64-element data, source alias preservation and invalid-empty controls. |
