@@ -18,3 +18,7 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check PlainEntryPre
 #check assertionObligation
 #check obligation
+
+#check validateMetadata
+#check checkedExpression
+#check checkedStatements

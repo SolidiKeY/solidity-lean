@@ -295,7 +295,7 @@ in these functions and route recursive children through the one-step APIs.
 An error is final; it is never a signal to retry another translation path. -/
 def reader : Reader := { typeName, expression, statements, params, specification }
 
-def function (read : Reader) (j : Json) (avoid : String) : Except String (String × FunDecl) := do
+private def decodeFunction (read : Reader) (j : Json) (avoid : String) : Except String (String × FunDecl) := do
   unless (← str j "kind") == "function" && (← arrDefault j "modifiers").isEmpty do throw "constructor or modifiers"
   let spec ← read.specification j
   let mut fresh := "__solidity_direct_return_"
@@ -308,7 +308,7 @@ def function (read : Reader) (j : Json) (avoid : String) : Except String (String
   let payable := (← str j "stateMutability") == "payable"
   return (← str j "name", { params := ps, rets := rs, body, spec, payable })
 
-def contract (read : Reader) (j : Json) : Except String Contract := do
+private def decodeContract (read : Reader) (j : Json) : Except String Contract := do
   unless (← str j "contractKind") == "contract" && (← arrDefault j "baseContracts").isEmpty do throw "inheritance or interface"
   unless (← keyClauses (docText j)).isEmpty do throw "contract specification"
   let mut vars := []
@@ -325,5 +325,47 @@ def contract (read : Reader) (j : Json) : Except String Contract := do
       return { vars, vars_ok := h, vars_nodup := hn }
     else throw "duplicate storage root"
   else throw "ill-formed storage type"
+
+/-- Metadata-only validation after a complete legacy root has decoded.
+The existing J.nodes walker also visits constant-folded children. This pass
+constructs no Raw syntax, term, program, formula, or alternate translator. -/
+def validateMetadata (j : Json) : Except String Unit := do
+  for n in J.nodes j do
+    if J.kind n == "Literal" && J.str? n "kind" == some "bool" then
+      let value ← str n "value"
+      unless value == "true" || value == "false" do throw "a malformed boolean literal"
+    if J.hasOperatorFunction n then
+      let some id := J.operatorFunction? n |
+        throw "a malformed resolved operator function annotation"
+      unless id > 0 do throw "an operator alias must name a positive declaration identity"
+      throw "compact verifier: unsupported operator alias"
+
+/-- Standalone expression admission: one legacy decode, then metadata checks.
+A legacy refusal is returned before any new metadata refusal is considered. -/
+def checkedExpression (j : Json) : Except String RawExpr := do
+  let result ← expression j
+  validateMetadata j
+  return result
+
+/-- Standalone statement-root admission with the same two-phase ordering. -/
+def checkedStatements (j : Json) : Except String (List RawStmt) := do
+  let result ← statements j
+  validateMetadata j
+  return result
+
+/-- The public function boundary validates only after the entire legacy decode.
+Raw Reader callbacks remain decoding inputs; they do not certify admission. -/
+def function (read : Reader) (j : Json) (avoid : String) : Except String (String × FunDecl) := do
+  let result ← decodeFunction read j avoid
+  validateMetadata j
+  return result
+
+/-- Validate admitted storage metadata without inspecting sibling function bodies.
+The original whole-contract refusal retains priority over new metadata checks. -/
+def contract (read : Reader) (j : Json) : Except String Contract := do
+  let result ← decodeContract read j
+  for member in ← arr j "nodes" do
+    if (← node member) == "VariableDeclaration" then validateMetadata member
+  return result
 
 end Solidity.Frontend.ExecutableAst.Shared

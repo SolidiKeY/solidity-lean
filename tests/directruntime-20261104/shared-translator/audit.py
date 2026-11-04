@@ -7,7 +7,14 @@ current=(root/'Solidity/Tools/DirectRuntime.lean').read_text()
 shared=(root/'Solidity/Frontend/ExecutableAst/Shared/Translate.lean').read_text()
 removed=original[original.index('private def field'):original.index('/-- Plain assertion obligations')]
 literals=lambda s:re.findall(r'"(?:[^"\\]|\\.)*"',s)
-assert literals(removed)==literals(shared), 'reader strings/order changed'
+published=subprocess.check_output(['git','show','fcdddfcc446b5004860875f772ff6033e60c745f:Solidity/Frontend/ExecutableAst/Shared/Translate.lean'],cwd=root,text=True)
+assert literals(removed)==literals(published), 'published extraction strings/order changed'
+# Remove only the separately reviewed metadata/admission phase. Every existing
+# decoding algorithm (including recursive calls and failure order) is unchanged.
+a=shared.index('/-- Metadata-only validation')
+withoutGuards=(shared[:a]+'end Solidity.Frontend.ExecutableAst.Shared\n')
+withoutGuards=withoutGuards.replace('private def decodeFunction (read : Reader)', 'def function (read : Reader)',1).replace('private def decodeContract (read : Reader)', 'def contract (read : Reader)',1)
+assert withoutGuards==published, 'legacy decoding algorithm changed'
 proofBlock=lambda s:s[s.index('private structure Stronger'):s.index('def check (request')]
 assert proofBlock(original)==proofBlock(current), 'proof-search block changed'
 intrinsic=(root/'Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean').read_text()
@@ -32,4 +39,4 @@ assert all(not re.search(r'\b(?:sorry|axiom|admit)\b', q.read_text())
 files=subprocess.check_output(['git','diff','--name-only',base],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
 allowed=lambda p:p=='Solidity/Tools/DirectRuntime.lean' or p.startswith(('Solidity/Frontend/ExecutableAst/Shared/','tests/directruntime-20261104/shared-translator/')) or p=='docs/feature-work/directruntime-shared-translator.md'
 assert all(allowed(p) for p in files), 'unowned path modified'
-print(json.dumps({'readerStringLiteralCount':len(literals(removed)),'proofSearchBlock':'byte-identical','assertionBuilder':'exact callback extraction plus reference gate','exportedWrapper':'byte-identical','ownedPathsOnly':True,'newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
+print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'exact callback extraction plus reference gate','exportedWrapper':'byte-identical','ownedPathsOnly':True,'newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))

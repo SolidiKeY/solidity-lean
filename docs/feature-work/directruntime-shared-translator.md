@@ -51,8 +51,9 @@ primitive locals, arrays/mappings as storage roots, selected expression forms,
 assignment/assert/require/push/pop, while/for and compact specification parsing.
 References, tuples, richer contracts/calls and do-while remain refused by this
 default. The existing name-only identifier reader and String diagnostics retain
-known parity gaps. Malformed boolean validation and constant-kind dispatch need
-separate regression-backed fixes; this extraction does not declare them solved.
+known parity gaps. The metadata increment below rejects malformed booleans and unhandled operator
+annotations after whole-root decoding. Existing unknown constant-kind failures
+remain unchanged; these controls do not establish complete producer parity.
 
 ## Import closure and CR migration packet
 
@@ -199,3 +200,34 @@ SHA/path receipt is saved in artifacts/API-RECEIPT.json after committing. Reader
 signatures remain unchanged from b2c27cb7. Intrinsic is implemented and checked,
 not a placeholder proof or declaration stub. First-checkpoint completion still
 requires full producer parity/adoption and native/WASM closure evidence.
+
+## Whole-root metadata refusal increment
+
+The original decoder algorithms and recursive callbacks are unchanged. Metadata
+validation runs after successful complete decoding, using existing J.nodes to
+inspect folded descendants. Public function validates one complete function;
+contract validates admitted storage members and skips sibling function bodies.
+Legacy whole-root errors retain priority. Malformed booleans, malformed/nonpositive
+operator identities and unhandled positive aliases cannot become admitted roots.
+
+Raw Reader callbacks are elaboration-input decoders, not admission certificates.
+Use public function/contract for their roots, or checkedExpression/checkedStatements
+for standalone roots. Do not insert checked child wrappers into a root decoder if
+you require its legacy later-sibling error priority. No Reader signature changed.
+The default validator refuses all operator aliases; CR's full migration must wire
+reviewed declaration-aware support before claiming prior producer alias parity.
+
+38 ParityControls guards passed, including folded metadata, later-sibling errors,
+whole-function priority, and malformed-function sibling isolation. Existing reader
+and real-solc fixture controls passed. Per-file MCP diagnostics for Translate and
+ParityControls were zero. The original per-node prototype was rejected in review
+and is not the committed implementation. The audit reconstructs the published
+fcdddfcc decoder prefix exactly and separately identifies added admission checks.
+
+MetadataBench used 73 expression nodes from the source-SHA-pinned ReaderFixtures,
+three serial raw/checked pairs of 20000 calls each, varying input index each call.
+Raw samples:2.418s,2.269s,0.889s. Checked samples:2.695s,2.424s,2.310s.
+Every call succeeded. These are variable Lean development-evaluator measurements,
+not standalone runtime timings, a stable overhead factor or RUNTIME_GATE_PASS.
+The benchmark and source/C/olean hashes are saved in evidence/metadata-* files.
+Full native/WASM closure and before/after verification evidence remain pending.

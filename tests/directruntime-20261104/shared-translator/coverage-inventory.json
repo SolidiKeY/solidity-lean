@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "b2c27cb7be09b246887f403c67b378a8e8becf94",
+  "headAtGeneration": "fcdddfcc446b5004860875f772ff6033e60c745f",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -2668,7 +2668,8 @@
         "admission": "partial/context-dependent",
         "source": [
           "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:60",
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:65"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:65",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:334"
         ]
       },
       "existingSolcJson": {
@@ -4931,7 +4932,8 @@
       "defaultExecutableReader": {
         "admission": "partial/context-dependent",
         "source": [
-          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:317"
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:317",
+          "Solidity/Frontend/ExecutableAst/Shared/Translate.lean:368"
         ]
       },
       "existingSolcJson": {
@@ -5483,7 +5485,7 @@
   "localSharedImportClosure": {
     "Solidity.Frontend.ExecutableAst.Shared.Translate": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
-      "sha256": "c39cb830d5002721ee1705452e260134000dbf7547dee4befcd29f5c3c937a92"
+      "sha256": "490eac4a26e63a3af878aa7052b1a23623756eddbbc988ec16d8eb0fd11035b4"
     },
     "Solidity.Frontend.ExecutableAst.Shared.Boundary": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",

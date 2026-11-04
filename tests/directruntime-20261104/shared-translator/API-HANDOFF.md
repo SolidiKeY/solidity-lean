@@ -49,3 +49,12 @@ H30 owners: DR-D native/browser scripts; CR Admission/P8; V11 MemoryOps;
 V09 Passes; VY5 H16 Source; V08 Lowering/V08; V16 Aggregates/Roadmap.
 Source/ExtCall and shared roots/maps/trust pins stay frozen. A supplies registration
 proposals only. No push, merge, PR or publication.
+
+## Metadata admission increment after the published fcdddfcc API
+
+Reader signatures and step decoders remain unchanged. Public function/contract
+now validate metadata after whole legacy root success; standalone roots can use
+checkedExpression/checkedStatements. Raw Reader callbacks are not admission
+certificates. Constant-folded descendants are inspected; legacy errors retain
+priority; contract checks do not inspect sibling function bodies. Full CR operator
+alias support remains pending because the default metadata policy refuses aliases.
