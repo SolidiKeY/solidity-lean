@@ -324,3 +324,9 @@ Independent read-only finder and skeptic reviews passed with no findings. They
 confirmed saturation rather than immediate truncation, the non-vacuous frame
 bound, preserved fuel ordering and the explicit distinction between head flags,
 initial representation and full entry admission/native execution.
+
+`OffsetChecksInterface.lean` states exact emitted tail/region predicates over
+four runtime words with explicit stack order. Signed comparisons and modular
+arithmetic are retained; neither predicate alone is whole-reference or entry
+admission. Native argument loading, metadata-to-word correspondence and the
+separate length/fuel/entry checks remain open.
