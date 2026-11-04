@@ -127,3 +127,6 @@
 | `Bridge/SolidityBridge/AccessBridge/AbiWordInterface.lean` | Native semantic-word and all-kind numeric validation/rejection contracts, retaining charged-load failures and budgets. |
 | `Bridge/SolidityBridge/AccessBridge/AbiWord.lean` | Actual native load to indexed decoder and existing validator agreement without an assumed decoded word. |
 | `Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean` | Prefixed/unaligned fetched word, validation/refusal, padding/large-offset and distinct zero-fuel controls. |
+| `Backend/AbiEntry/HeadCheckInterface.lean` | Emitted ordinary short-head predicate contracts with explicit initial size-word representation and no success-admission claim. |
+| `Backend/AbiEntry/HeadCheck.lean` | Exact unbounded head-threshold emission, initial semantic rejection and non-vacuous Selection V2 capacity certificate. |
+| `Backend/AbiEntry/HeadCheckControls.lean` | Selector/head boundaries, static/dynamic and huge metadata, semantic fuel ordering, passed-head rejection and stack-height controls. |

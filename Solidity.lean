@@ -15,6 +15,7 @@ import Solidity.Backend.AbiEntry.EntryComposition
 import Solidity.Backend.AbiEntry.EntryTransport
 import Solidity.Backend.AbiEntry.EnumEntry
 import Solidity.Backend.AbiEntry.HeadCheck
+import Solidity.Backend.AbiEntry.HeadCheckControls
 import Solidity.Backend.AbiEntry.HeadCheckInterface
 import Solidity.Backend.AbiEntry.Interface
 import Solidity.Backend.AbiEntry.LengthCheck

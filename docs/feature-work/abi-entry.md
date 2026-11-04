@@ -306,3 +306,21 @@ word-to-byte-length equality is an initial representation fact; native size
 loading and coverage of Source inputs are not supplied. A true flag means this
 initial guard rejects; a false flag does not imply entry success. Receive and
 fallback selection use their separate paths and are not replaced by this check.
+`HeadCheck.lean` emits the actual short-head flag through the existing unsigned
+bound emitter and exports a non-vacuous Selection V2 frame. Arbitrary semantic
+head extents at or above the word range reject every size word rather than
+truncating an immediate. The complete saved numeric suffix is preserved and
+capacity holds under the explicit one-extra-word bound. When the size word
+represents the actual byte length, its flag is exactly the semantic initial
+predicate; short input has the original early `.revert` even at zero fuel.
+Controls cover empty/one-word selector boundaries, mixed static tuple/dynamic
+heads, oversized static metadata, actual height refusal and an inhabited V2
+frame. A passed head followed by a dirty bool still rejects; a complete empty
+head can succeed with no decode fuel. These preserve phase/error distinctions.
+Native size-word correspondence and its Source-input coverage remain open;
+no word-size relation is silently adopted as a global input exclusion. This
+predicate is not fetched native branching or a full decoding/admission result.
+Independent read-only finder and skeptic reviews passed with no findings. They
+confirmed saturation rather than immediate truncation, the non-vacuous frame
+bound, preserved fuel ordering and the explicit distinction between head flags,
+initial representation and full entry admission/native execution.
