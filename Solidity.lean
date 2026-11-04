@@ -2449,6 +2449,7 @@ import Solidity.Yul.Checks.LocalDefaultUnchecked
 import Solidity.Yul.Checks.LocalDefaultWhile
 import Solidity.Yul.Checks.LocalExprStatement
 import Solidity.Yul.Checks.LocalItemFailure
+import Solidity.Yul.Checks.LocalItemHorizon
 import Solidity.Yul.Checks.LocalItemWorld
 import Solidity.Yul.Checks.LocalLoopFailure
 import Solidity.Yul.Checks.LocalLoopReductions
@@ -2681,6 +2682,7 @@ import Solidity.Yul.LocalDefaultUnchecked
 import Solidity.Yul.LocalDefaultWhile
 import Solidity.Yul.LocalExprStatement
 import Solidity.Yul.LocalItemFailure
+import Solidity.Yul.LocalItemHorizon
 import Solidity.Yul.LocalItemWorld
 import Solidity.Yul.LocalLoopFailure
 import Solidity.Yul.LocalLoopReductions

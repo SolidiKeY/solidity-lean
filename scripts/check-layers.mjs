@@ -21,6 +21,7 @@ const CORE = [
   /^Solidity\.Yul\.(LocalU8CompareHorizon|Checks\.LocalU8CompareHorizon)$/, // Checked-u8 comparison terminal fuel stability.
   /^Solidity\.Yul\.(LocalBoolHorizon|Checks\.LocalBoolHorizon)$/, // Boolean full-run terminal fuel stability.
   /^Solidity\.Yul\.(LocalCompareHorizon|Checks\.LocalCompareHorizon)$/, // Concrete comparison/Boolean conditional horizon composition.
+  /^Solidity\.Yul\.(LocalItemHorizon|Checks\.LocalItemHorizon)$/, // Context-growing completed item fuel stability.
   /^Solidity\.Yul\.(LocalDefaultPostRepresentation|Checks\.LocalDefaultPostRepresentation)$/, // Default-scope post and omitted-guard congruence.
   /^Solidity\.Yul\.(LocalDefaultControlRepresentation|Checks\.LocalDefaultControlRepresentation)$/, // Independently indexed default branches and loops.
   /^Solidity\.Yul\.(LocalDefaultRepresentation|Checks\.LocalDefaultRepresentation)$/, // Heterogeneous default and unchecked exact-word congruence.

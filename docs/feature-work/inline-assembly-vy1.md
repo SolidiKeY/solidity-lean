@@ -1364,3 +1364,30 @@ Both modules have zero per-file diagnostic errors; scoped Lean, root and layer
 checks pass. Twelve scoped axiom reports use only Lean standard axioms.
 Raw failed automation and the misspelled panic-reference attempt are preserved;
 the actual PanicCode correction changes no expected behavior or proof budget.
+
+### Context-growing completed item horizons
+
+`LocalItemHorizon.successor` proves that actual normal completion of any
+existing Boolean item certificate yields the identical final indexed raw frame
+at one extra fuel level; `extension` covers arbitrary added fuel. The statements
+quantify over the actual input/output contexts, syntax and certificates.
+Concrete `LocalBoolHorizon.successor` stabilizes each executed initializer or
+expression, then structural tail induction uses its actual next frame (including
+a prepended declaration value). No child simulation law is assumed.
+Nine controls include a new inhabited two-declaration certificate reaching a
+three-local context, its arbitrary-fuel final-state equality, pre/post growth
+timeouts, retained partial frames, timeout-to-completion change, persistent
+failed clean projection and unsupported comparison-statement refusal.
+These are completed-run laws only: timeout-prefix equality, general divergence,
+arbitrary declarations/control, parser admission, dirty readback and full Source
+or compiler adequacy remain separate. Existing runners, Source/ExtCall layers,
+checked-frame premises and observations are unchanged. General P16/full VY1
+and final gates remain open. Recursive simplification initially reached the
+existing recursion limit; one-constructor reductions solved it without raising
+any checking/proof budget.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Eleven scoped axiom reports use only Lean standard
+axioms. Failed automation and recursive-simplification diagnostics are retained
+separately from passing checks; no checking/proof limits were increased.
