@@ -1,0 +1,16 @@
+Producer/coordinator proposals only; shared roots/maps intentionally unchanged.
+Solidity.Backend.PrimitivePackets.UnsignedMul.Selection
+Solidity.Backend.PrimitivePackets.UnsignedMul.Execution
+Solidity.Backend.PrimitivePackets.UnsignedMul.Controls
+Solidity.Backend.PrimitivePackets.UnsignedMul.WideControls
+Solidity.Backend.PrimitivePackets.UnsignedMul.WidthControls
+
+Area rows: use the owning Backend area file under docs/module-map/.
+Selection — Public Memory.compileVal selection for width-cleaned runtime-local multiplication.
+Execution — All legal unsigned widths: actual Source locals to selected emitted execution, full StateRepr and saved tails.
+Controls — Distinct uint8 locals, old allocated array, zero/max/wrap, wrong cleaner, horizon and saved-tail refusals.
+WideControls — Runtime-local uint256 multiplication, including maximum-times-two wraparound.
+WidthControls — Inhabited exact-zero physical execution for every legal unsigned byte width.
+
+Documentation: docs/feature-work/primitive-packets-1104-UnsignedMul.md
+Fixture: tests/primitive-packets-1104/UnsignedMul/Observations.lean
