@@ -441,3 +441,4 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/G19/AssignmentForContinue.lean` | Actual mapped for/continue/post proof with complete scoped structural value extraction and replay. |
 | `Lowering/G19/AssignmentForContinueControls.lean` | Inhabited post-after-continue and fixed-resource omitted-post Source controls. |
 | `Lowering/G19/AssignmentForReturn.lean`, `Lowering/G19/AssignmentForReturnControls.lean` | G19 map-guided for-loop immediate return with arbitrary skipped post, actual Source runs, captured target flag and mixed-state controls ([scope](../feature-work/roadmap-g19-for-return.md)). |
+| `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
