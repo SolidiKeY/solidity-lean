@@ -257,3 +257,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceRawBoolCopyControls.lean` | Populated objects/aliases, nonzero raw offset, late invalid Boolean and actual padding/empty controls. |
 
 | `Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean` | Actual dynamic entry guard composed with raw Boolean copy under selector/frame binding; ordered refusal and success laws. |
+
+| `Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Initial raw-word facts derive both decoder phases of the existing linked Bool slice Items program, retaining its actual first allocation. |

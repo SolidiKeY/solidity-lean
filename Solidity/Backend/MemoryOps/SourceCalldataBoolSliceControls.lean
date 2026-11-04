@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceSequence
+import Solidity.Backend.MemoryOps.SourceRawBoolSliceSequence
 import Solidity.Source.SemanticsExamples
 
 /-! Actual Boolean calldata views select or exclude a malformed word. A real
@@ -202,4 +202,45 @@ theorem empty_and_capacity (p : Roadmap.Pipeline) (fuel : Nat) :
 /-- info: 'Solidity.Backend.MemoryOps.BoolSliceControls.empty_and_capacity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms empty_and_capacity
+/-- The original inhabited program consumes raw-word premises, not the earlier
+fixture decoder-run lemmas. Its complete ordered observations remain unchanged;
+reversed order and low horizon distinguish the real allocated prefix. -/
+theorem raw_word_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) frame (fuel+4) first).run initial=(.ok (.val (.memRef rfl 2)),middle) ∧
+    (Source.evalE (G0 p) frame (fuel+3) second).run middle=(.error (.revert []),middle) ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none program initial.1).run (.nil,initial.2)=
+      (.error (.revert []),(.nil,middle.2)) ∧
+    Source.MemOK E0 SH middle ∧
+    (∀ b obj,initial.2.heap.get b=some obj → middle.2.heap.get b=some obj ∧ b≠initial.2.heap.next) ∧
+    middle.1=initial.1 ∧ middle.2.heap.next=initial.2.heap.next+1 ∧
+    middle.2.ex=initial.2.ex ∧ middle.2.events=initial.2.events ∧
+    middle.2.logs=initial.2.logs ∧ middle.2.fnLocals=initial.2.fnLocals ∧
+    (Source.execItems (G0 p) frame (fuel+6) nps none
+      (.stmt (.expr second) (.stmt (.expr first) .nil) : Source.RItems E0 [] false .body Γ Γ)
+        initial.1).run (.nil,initial.2)=(.error (.revert []),(.nil,initial.2)) ∧
+    (Source.evalE (G0 p) frame 2 first).run initial=(.error .timeout,initial) ∧
+    initial.2.heap.get 2=none ∧ middle.2.heap.get 2=some ⟨SU,sourceBoolMemory payload⟩ := by
+  first
+  | solve | simp only [] | omega
+  | have canonical : ∀ j,j<((if false then 4 else (u 4).1.toNat)-(u 2).1.toNat) →
+        Source.cdWordAt frame (0+32*(u 2).1.toNat+32*j)=0 ∨ Source.cdWordAt frame (0+32*(u 2).1.toNat+32*j)=1 := by
+      change ∀ j,j<2 → Source.cdWordAt frame (64+32*j)=0 ∨ Source.cdWordAt frame (64+32*j)=1
+      intro j hj
+      have casesJ : j=0 ∨ j=1 := by omega
+      rcases casesJ with rfl|rfl <;> decide
+    have raw := source_bool_slice_raw_late_error (G0 p) frame fuel nps initial
+      root start finish badStart badFinish 0 4 (u 2) (u 4) (u 0) (u 3) false false
+      rfl rfl rfl rfl rfl (by decide) (by decide) (by decide) (by decide) canonical [0] [2] 1 rfl
+      (by intro j hj;simp only [List.mem_cons,List.not_mem_nil,or_false] at hj;subst j;decide)
+      (by decide) SH (memOK 2 4 0 3)
+    have values : rawBoolPayload frame (0+32*(u 2).1.toNat)
+        ((if false then 4 else (u 4).1.toNat)-(u 2).1.toNat)=payload := by decide
+    dsimp only at raw
+    rw [values] at raw
+    obtain ⟨run1,run2,items,mok,keeps,locals,next,ex,events,logs,fn⟩ := raw
+    have negative := wrong_order_and_timeout p fuel nps
+    exact ⟨run1,run2,items,mok,keeps,locals,next,ex,events,logs,fn,negative.1,negative.2.2.2.1,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.BoolSliceControls.raw_word_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_word_program
 end Solidity.Backend.MemoryOps.BoolSliceControls
