@@ -191,3 +191,15 @@ is still absent. No original proof obligation is completed by these unrelated
 partial producer/interface deliveries. All original queue/holds remain binding.
 Current adoption handoff: `evidence/dependency-adoption-122441.md`; exact gate
 commands/results: `evidence/dependency-adoption-122441-gates.log`.
+
+## Published dependency adoption, 2026-11-04T182351Z
+
+Adopted exact publication `89373e34cdfd6bb5db7054b1c204d01edffc5fa7` via
+`abd77535e8ec11e45f642ce30a8f44c9603e7ecf`, preserving original work and
+helper snapshot `584d34226053a12ae8e7cf82f58da44c177b54c5`. Relevant precompile
+inputs and SignedMod modules are unchanged. Inventory/12 controls, roots and
+central axiom inventory pass; both independent read-only adoption reviews pass
+without findings or Lean/server use. No new composition or local full-build
+claim. Original Mathlib transport and all unfinished precompile proof/final
+obligations remain pending. Receipt: `evidence/dependency-adoption-182351.md`;
+commands/results: `evidence/dependency-adoption-182351-gates.log`.
