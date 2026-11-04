@@ -911,3 +911,13 @@ an actual child-pointer update and boolean update, preserving the sibling alias,
 other objects, caller locals, padding and the successful prefix on a later
 wrong-type write. This extends allocation provenance for these writes, not
 arbitrary shape-changing histories or general dirty/target execution transport.
+
+`ByteElementStore` connects actual `writeLoc (.memByte …)` to a single existing
+`saveByte` patch. Bytes and string objects retain their type and length. Payload
+replacement and region separation derive every post-write image read, whole map
+reconstruction, original-allocation-history writeback, every-H MemOK and reserved
+preservation. Controls cover bytes/string aliases, invalid UTF-8 bytes without
+cleaning, padding, a source/payload byte-32 crossing, exact Panic0x32 state
+preservation, and static memory-write success. No string surface syntax,
+shape-changing update, target opcode execution or general dirty representation
+adequacy is inferred.

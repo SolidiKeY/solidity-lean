@@ -2852,6 +2852,8 @@ import Solidity.Yul.Views.ArrayWordRetained
 import Solidity.Yul.Views.ArrayWordRetainedControls
 import Solidity.Yul.Views.ArrayWordStore
 import Solidity.Yul.Views.ArrayWordStoreControls
+import Solidity.Yul.Views.ByteElementStore
+import Solidity.Yul.Views.ByteElementStoreControls
 import Solidity.Yul.Views.ByteHeapRealization
 import Solidity.Yul.Views.ByteHeapRealizationControls
 import Solidity.Yul.Views.ByteObjects
