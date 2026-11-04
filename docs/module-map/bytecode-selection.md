@@ -34,3 +34,4 @@
 | `Backend/CalldataPackets/RawUint/Controls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawUint/Execution.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/FramedLoweringInterface.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/CalldataWordInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
