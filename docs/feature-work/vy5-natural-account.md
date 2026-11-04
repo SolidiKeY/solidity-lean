@@ -136,3 +136,44 @@ Source/H19 release, external ledger/range/reachability, H16/P8 realization,
 immutable/funds release and all24 original Y10 obligations/six combinations
 remain open. Full-lane gates are not inferred from this consumer batch.
 No fresh native comparison or original goal status change is claimed.
+
+## H25 exact authority adapter draft (2026-11-04)
+
+Human H25 resolves H19-LEDGER1: exact money has its own authority; the shared
+Word ledger is not made unbounded. `Source.MonetaryAuthority` implements the
+small typed representation/adapter draft for G01 owner review. Exact balances
+include2^256. Actual Source account writes use the existing journal and undo;
+the isolated actual requestScope transfers the entire Nat post-fee amount
+into the returned authority, retaining the other Source state/local fields.
+That scope leaf starts at ordinal0 and is not session/H18 wiring.
+
+The funding adapter saturates to the largest Word only for affordability
+checks. Its theorem proves equivalence for EVERY Word-valued request, with
+no Fits assumption. It must never be used as the observed balance. Optional
+checked balance conversion rejects an unrepresentable Word conversion, not
+the request or failure plan. Wide controls distinguish exact2^256, saturated
+funding and modular Word zero. No Source/Eval/Session/shared-ledger body is
+changed; actual fee settlement, authority synchronization and reachable-EVM
+range remain pending G01 review and implementation. Six axiom guards use
+only standard axioms. Read-only finder/skeptic approved this narrow draft.
+
+G01 review request H25-G01-REVIEW1 asks review of the exact Source and external
+funding/balance signatures before session wiring; coordinator relays it.
+H26 helper scope is disjoint credit/debit and checkedWord arithmetic over
+committed046292ee Source.Monetary/MonetaryLaws, with exclusive new MonetaryBounds
+packet paths and no Source edits.
+
+H26 P8 interfaces are already published: FrozenInterface has OperationalReference,
+SourceOrigins, FailureProjection and SourceRealization; SourceRealization.lean
+anchors the actual current session. Existing CorrectnessInstances.Stages and
+CorrectnessPublic.PublicBoundary are reused, not duplicated and not inhabited
+with a fabricated assembly instance. Concrete P8 realization/full resource
+execution and all24 original obligations/six combinations stay open. HOST1's
+previous typed packet979c7444 remains separately relayed to V17.
+
+The H25 interface is split for early review: `MonetaryAuthority.lean` imports
+only the unchanged pure `Monetary.lean` (Roadmap.Contracts dependency). Both
+can be reviewed without the held Source core migration. Actual journal and
+request-scope adapters are in `MonetaryAuthoritySource.lean`, which explicitly
+requires the owner-held H16 cursor/H19 account changes. No interface is a
+claim that fee settlement or session authority wiring already exists.

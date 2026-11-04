@@ -110,3 +110,7 @@
 | `Source/FailureNoCutsControls.lean` | Constructed nested request/frame no-cut budgets, full-state events/heap bytes and counterexample to NoFail-plan-alone reasoning on arbitrary cursors. |
 
 | `Source/MonetaryWorld.lean` | Explicit current-account and saved-journal monetary range, actual natural/Word transfer preservation and saved-wide rollback counterexample; no full reachability claim. |
+
+| `Source/MonetaryAuthority.lean` | H25 exact-money authority representation, actual journal/request-scope adapters, lossless Word-request funding saturation and checked balance conversion; G01 settlement/session review pending. |
+
+| `Source/MonetaryAuthoritySource.lean` | H25 authority journal write/undo and exact post-fee request-scope adapters; depends on owner-held H16/H19 core changes, not G01 settlement/session wiring. |
