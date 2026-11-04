@@ -35,14 +35,16 @@ base=sys.argv[1]
 def git(*args): return subprocess.check_output(["git",*args],text=True).splitlines()
 merge=git("merge-base",base,"HEAD")[0]
 files=set(git("diff","--name-only","--no-renames",merge,"--")) | set(git("ls-files","--others","--exclude-standard"))
+def eligible(p):
+    return p.startswith("Solidity/") and p.endswith(".lean") and not p.startswith("Solidity/Scratch/")
 mods={}
 for p in pathlib.Path("Solidity").rglob("*.lean"):
-    if str(p).startswith("Solidity/Scratch/"): continue
+    if not eligible(str(p)): continue
     mods[str(p)[:-5].replace("/",".")]=[line.split()[1] for line in p.read_text(errors="replace").splitlines() if line.startswith("import ") and len(line.split())>1]
 rev={}
 for m,imports in mods.items():
     for dep in imports: rev.setdefault(dep,set()).add(m)
-touched={p[:-5].replace("/",".") for p in files if p.endswith(".lean") and p.startswith("Solidity/")}
+touched={p[:-5].replace("/",".") for p in files if eligible(p)}
 out=set(touched); stack=list(out)
 while stack:
     for m in rev.get(stack.pop(),()):
