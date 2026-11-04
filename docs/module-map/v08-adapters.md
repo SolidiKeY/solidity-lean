@@ -260,6 +260,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean` | Complete zero/byte/selector/ABI/full-width States, cost/capacity/resource and endian/length/order controls; no allocator premise. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentSelection.lean` | Canonical five-key G31 view, typed source representation and charged fetched transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentSelectionControls.lean` | Inhabited all-key source/native clients, wrapped timestamp and ordered negative observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuards.lean` | Exact all-key gas/stack checks, counted-prefix result and actual X fuel/refusal order. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuardControls.lean` | Both-permission legal stack boundaries, populated full States and ordered fuel/resource negatives. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 

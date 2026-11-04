@@ -190,6 +190,8 @@ import SolidityBridge.RoadmapV15.P10.Controls
 import SolidityBridge.RoadmapV15.P10.CountedAppend
 import SolidityBridge.RoadmapV15.P10.DecoderAgreement
 import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls
+import SolidityBridge.RoadmapV15.P10.EnvironmentGuardControls
+import SolidityBridge.RoadmapV15.P10.EnvironmentGuards
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness
 import SolidityBridge.RoadmapV15.P10.EnvironmentSelection

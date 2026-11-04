@@ -1605,3 +1605,26 @@ weakening; the explicit representation and source-origin boundary is retained.
 
 Review corrected the two new index rows into the existing P10 table with actual
 module paths; theorem statements and premises were unchanged.
+
+## Environment failure classification
+
+`EnvironmentGuards` classifies the actual charged gate and counted fetched step
+for every admitted `EnvKey`, arbitrary native state and both permissions. The
+memory charge is zero, total instruction cost is 2 or 5, and insufficient gas
+precedes push-capacity refusal. Success consumes the existing fetched producer.
+The actual `X` gas/stack refusals are derived from its original unfolding.
+
+Short fuel has two distinct meanings: the counted prefix rejects fuel 0 or 1
+before gate evaluation, whereas actual `X 1` checks gas and stack before its
+zero-fuel instruction step. The law records this distinction rather than
+asserting equivalence outside the positive-fuel continuation domain.
+
+`EnvironmentGuardControls` instantiates all keys and both permission flags. A
+legal 1024-word input is rejected for overflow at adequate gas, while low gas
+wins when both checks would fail; a 1023-word input successfully pushes to 1024.
+The complete independent expected States retain distinct ordered spill values,
+code, accounts, memory, calldata and return bytes. An identical-length reordered
+tail is rejected. These reference-model errors return no State; no account or
+transaction rollback theorem follows. Source/frame, Osaka approval and all full
+opcode-row obligations remain open. Separate read-only finder and skeptic
+reviews confirmed the fuel distinction and populated boundary coverage.
