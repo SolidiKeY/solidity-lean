@@ -893,3 +893,74 @@ uniqueness/association, remaining universal compound statement fuel coverage,
 full repository gates and whole-scope reviews/acceptance. Recursive block/
 control yield uniqueness is now proved, but it is not whole-language
 uniqueness. The original persistent goal remains active and incomplete.
+
+
+## Checkpoint M: Boolean compound coverage with recursive block bodies
+
+BoolCompound.lean proves actual parser equations for explicit Boolean literal
+atoms followed by rparen or semi at sufficient expression fuel n+5. This is
+a fixed-atom parser observation, not expression uniqueness or general
+expression coverage. It then derives syntax-fuel coverage for while,
+do-while, empty-header for, and both if alternatives, with arbitrary
+NestedItems braced bodies. It preserves loop/unchecked indices, arbitrary
+suffix/layout/EOF and the existing zero internal location convention.
+
+The sufficient fuel for while/do/empty-for/no-else-if is n+d+6. For if with
+else, the two independently derived body budgets give n+d+e+6. Every child
+parser success is discharged by fixed Boolean atom equations or the proved
+recursive block coverage; final statements assume no successful parse.
+The empty for header covers exactly absent init/condition/update. Compound
+bodies are the previously proved recursive block/control fragment, not a
+recursive closure containing arbitrary if/loop nodes.
+
+NoFollowingElse states the exact necessary token observation for preserving
+a no-else prefix: the next located token is not else. eat_else_false derives
+the operational result from that observation. A checked inhabited control
+shows why it cannot be dropped: if(true){} followed by else{} parses to the
+some alternative, and the supposed none result preserving else{} is proved
+false. This records the existing grammar boundary, not an added exclusion
+or a presumed successful parse. Then/else bodies are braced, so no new claim
+about unbraced dangling-else token association is made.
+
+All five covered forms also have exact actual yield equations for arbitrary
+layout. A helper handles the existing some/block statement yield. Thus the
+concrete Boolean/header/body inputs correspond to actual existing printer
+clauses, rather than mocked parser successes or replacement syntax.
+
+Controls quantify over both Boolean values and arbitrary excess fuel/state.
+Their mixed loop body has break, continue and an ordinary nested return
+block. Both unchecked states, nonempty else suffix, fragment layout and
+EOF19 are represented. Empty if bodies exercise both alternatives, a close
+brace supplies a no-else boundary, and explicit capture/inequality controls
+prove the following-else restriction necessary. Actual while and if-some
+yield controls preserve residual layout. All five alternatives are covered;
+general expression atoms and other for headers remain pending.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/BoolCompound.lean | pass, final some/yield additions | /workspace/h28-statement-grammar-evidence/run-1793809310619069974 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.BoolCompound | pass; 5.05s timed wall, RSS 432304 KiB | /workspace/h28-statement-grammar-evidence/run-1793809357265997326 |
+| runtime.py diag tests/h28-sol/statement-grammar/BoolCompoundControls.lean | pass, final necessary-boundary inequality | /workspace/h28-statement-grammar-evidence/run-1793809434739696766 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/BoolCompound.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793809462301044777 |
+| runtime.py gate tests/h28-sol/statement-grammar/BoolCompoundControls.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793809482644479811 |
+
+All 15 public source axiom sets are printed in the source gate. The two
+Boolean atom equations and while_bool_prefix have none; eat_else_false uses
+propext; the remaining 11 use propext and Quot.sound. Exact signatures and
+control axiom sets are saved. No custom axiom, unsafe/native_decide,
+heartbeat raise, expression uniqueness premise or producer change was added.
+The one failed source diagnostic (run-1793809141571783009) needed explicit
+Located/Tok types in the token observation; those were made explicit.
+The failed receipt is retained. Statement equations unfold stmt only once
+instead of recursively simplifying every parser branch. No speedup claim
+or existing implementation refactor is made.
+
+Separate read-only finder and skeptic pass source and all controls, without
+Lean/server/builds. Both verified the exact no-else boundary countercontrol
+and restricted fixed-atom/body scope. Registration remains local only.
+
+Remaining full assignment: all-syntax/atom balance, general mixed statement
+splitting, simple-root discrimination, token-level conditional uniqueness/
+association, general compound expression/header/body fuel coverage, full
+repository gates and whole-scope reviews/acceptance. SG-CEX-01 remains
+OPEN/REFUTED. The original persistent goal remains active and incomplete.
