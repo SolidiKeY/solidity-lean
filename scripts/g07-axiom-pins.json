@@ -27697,6 +27697,71 @@
  "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
   "propext"
  ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.bare_revert_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.exhaustion_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.mutating_element": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.mutating_entry_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.mutating_entry_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.native_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.native_return_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.native_spec_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.parent_specification": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.returned_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.wrong_child_contents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.wrong_child_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/NativeParentConsumer.lean:Solidity.Roadmap.V16.NativeParentConsumer.wrong_returned_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Roadmap/V16/SourceTransactionConsumer.lean:Solidity.Roadmap.V16.SourceTransactionConsumer.after_revert_success": [
   "Classical.choice",
   "Quot.sound",
