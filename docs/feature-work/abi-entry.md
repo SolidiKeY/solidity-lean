@@ -194,3 +194,10 @@ Independent read-only finder and skeptic reviews of this extent checkpoint
 passed with no findings. They confirmed that all-offset word-count accounting
 and the exact post-image iff do not narrow admission, and that the endpoint
 control is raw-model evidence rather than a charged-execution claim.
+
+`MemoryLoadExecutionInterface.lean` extends the existing access, raw-load and
+extent certificates with actual fetched charged MLOAD/P6 linkage. It retains
+all original gate refusals and budgets. The success branch takes the actual
+gate result, initial image, stack and bounded span; it must derive execution,
+loaded bytes, saved tail and the exact existing post-image boundary. It assumes
+no desired value, run or reached state, nor a concrete byte-world producer.
