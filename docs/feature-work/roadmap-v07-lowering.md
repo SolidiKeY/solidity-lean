@@ -617,3 +617,41 @@ V17. G18.06 awaits their ordered admitted-source applications, recursive copy,
 delete/lifetime and representation certificates. The published H24 companion
 is a typed premise without a concrete P8 inhabitant; H16/P8-SPEC remains VY5.
 Constructor coverage is zero. Private rank proposals remain unproved.
+
+## Unsigned local increment/decrement
+
+`UnsignedLocalUpdate` proves unchecked local prefix/postfix `++` and `--` at
+every approved unsigned width. Six kernel laws cover actual Source incDecVal,
+evalLoc/readLoc/writeLoc execution, typed add/sub value programs, old capture,
+caller write, result capture and Operand.run before both fresh binders drop.
+The transport theorem derives target input and every selected postbinding from
+the initial IntegerLocalFamily/read/range. Alias reflection supplies target
+separation for untouched cells; no desired execution or postrelation is assumed.
+Exact resulting states retain each side's heap/world and nonlocal fields.
+
+Twelve closed clients cover every headline, repeated aliases, distinct cells
+with equal contents, binder/Thin extension and a caller with live memory/storage
+references. The controls execute1536 wrapped boundary/sample cases across all32
+unsigned widths, both pipelines and both increment/prefix flags. They observe
+the old capture, caller write, returned result and final caller. Actual Source
+pair evaluation and ordered target operand/read evaluations distinguish postfix
+overflow followed by an alias read: legacy returns pair(255,255), viaIR(255,0),
+both leaving caller0. This is a closed combination control, not a general pair
+compiler proof. Wrong post-code typed reads, skipped writes and decrements
+produce different observations. A checked-overflow negative recognizes the
+actual Source arithmetic-panic payload before any local write; checked lowering
+and rollback/payload transport are not claimed. Eighteen queried exact inline
+guards pin all new headlines/clients to the standard three axioms.
+
+Separate independent read-only finder/skeptic source reviews found no soundness
+issue. The finder requested precise wrong-read wording; the negative now runs
+an actual typed Val read from the post-code state. Initial normalization,
+constructor-inference and control-syntax failures are retained in lane evidence.
+Scratch automation candidates failed; explicit location/composition/alias steps
+were then checked separately;
+no new axiom, representation, budget or source-owner change was introduced.
+G16/G17/P12 and Backfill A/B remain partial, including signed/general-location
+updates, general operand production and tuples/failures. G18.01 and G18.06 retain
+the accepted-source/concrete-P8/ordered-child dependencies stated above; G18
+children and G19 remain delegated. Constructor coverage remains zero. These
+kernel proofs and bounded Lean observations add no external compiler/EVM tests.
