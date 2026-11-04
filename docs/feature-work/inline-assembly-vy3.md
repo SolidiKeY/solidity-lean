@@ -909,3 +909,33 @@ Both new per-file MCP diagnostics report zero errors. Focused/touched kernel,
 scoped trust, layer, generated-root, doc-path and global axiom-pin checks pass.
 The existing library headroom stop and interrupted optional Bridge closure
 remain recorded limitations; they are not reclassified as passes.
+
+### Recursive normal scope/control visitor
+
+`SolidityBridge.Yul.RecursiveScopes.compile` now recursively compiles original
+Yul sequences, conditionals, single-word initialized scopes and arbitrary-arity
+zero scopes, using the existing normal compiler for leaves. Its evidence is
+indexed by the original statement, control, context and source horizon. Two
+general proofs derive actual same-horizon closed-word evaluation and exact
+`StructuredExec` execution for every emitted block and caller suffix. Scope
+entry/retirement is derived, not assumed; temporary depth is zero.
+
+Controls combine nested scopes under a branch with a later scoped multiply,
+producing 20 and 140 while preserving other locals, dirty words and machine
+fields. They cover false/high-word conditions, actual source evaluation,
+insufficient horizons, underflow, live index 15 versus inaccessible 16, separate
+prefix capacity, oversized model success and explicit loop/early-flow refusals.
+This extends the compiler, not Solidity admission or full Source/G24/native
+adequacy; functions, loops, early flow and physical/readback composition remain
+open.
+
+Independent finder review caught a G0 indexed-match violation in three helper
+definitions. It was fixed with generalized explicit recursors and structural
+recursion; the same 111-job proof/control checks pass (observed 7.64 versus
+7.68 seconds). Finder confirmed the fix; skeptic found no mathematical defect.
+Neither reviewer ran Lean or a server. Proof budgets and verdicts are unchanged.
+
+Focused/per-file kernel checks, both per-file MCP diagnostics, touched imports,
+trust/layer/registration/docs and global axiom pins pass. Two guarded axiom
+reports use standard axioms only. Broad library/optional-root/final gates remain
+open; prior resource and runtime-interruption failures are retained.

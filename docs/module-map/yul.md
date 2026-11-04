@@ -62,3 +62,5 @@
 | `Bridge/SolidityBridge/Yul/JsonCompilation.lean`, `Bridge/SolidityBridge/Yul/JsonCompilationControls.lean` | Closed checked JSON word preparation to scoped instruction/model certificates; synthetic decoder, arithmetic and refusal controls. Source attachment, Body admission and full G24/native adequacy remain open. |
 
 | `Bridge/SolidityBridge/Yul/ScopedControl.lean`, `Bridge/SolidityBridge/Yul/ScopedControlControls.lean` | Original Yul let/zero scopes with concrete normal structured bodies; exact source/target prefix entry and retirement, arbitrary caller tail and explicit depth-zero domain. |
+
+| `Bridge/SolidityBridge/Yul/RecursiveScopes.lean`, `Bridge/SolidityBridge/Yul/RecursiveScopesControls.lean` | Original context/horizon-indexed recursive scope/branch/sequence compiler; same-horizon source and structured execution proofs with caller-tail preservation. |

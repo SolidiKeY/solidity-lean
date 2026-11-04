@@ -1955,6 +1955,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/RecursiveScopes.lean:SolidityBridge.Yul.RecursiveScopes.Derivation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/RecursiveScopes.lean:SolidityBridge.Yul.RecursiveScopes.Derivation.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/ScopedControl.lean:SolidityBridge.Yul.ScopedControl.letOne_source": [
   "Classical.choice",
   "Quot.sound",
