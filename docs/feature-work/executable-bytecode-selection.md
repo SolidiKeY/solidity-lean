@@ -523,3 +523,11 @@ modules without findings and used no edits, builds or Lean server. Finite
 StructuredExec is a finite-execution premise, not a termination proof. These
 results cover the frozen structured fragment; source adequacy, gas and Bridge
 agreement remain separate. G45.06 composition remains open.
+
+
+The general-loop/all-shapes implementation1314ed5e passes all eight checkpoint
+gates and five per-file checks, with only standard axioms in the exact scoped
+reports. KeySort passes under Lean4.24.0/Lake5.0.0-src+797c613. This following
+documentation-only handoff preserves the checked Lean sources. Whole control
+realization for the frozen shaped fragment is available; G45.06 IR-to-byte
+composition and the assignment's final full gate remain open.
