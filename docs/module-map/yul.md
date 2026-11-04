@@ -96,3 +96,4 @@
 | `Yul/Adapters/P6ByteAssignment{,Controls}` | Actual resolved Source indexed-byte assignment, exact local-operand horizon/errors and constructive shared Source/physical mixed-inventory result. |
 | `Yul/Adapters/P6ChainedByteAssignment{,Controls}` | Actual effectful byte-assignment RHS with two chronological Source/physical inventories and exact inner/outer failure prefixes. |
 | `Yul/Views/RetainedLocalAlias{,Controls}` | Actual typed local-assignment capture preserves overwritten entry aliases and returned references, with whole-store identity and dormant-path loss controls. |
+| `Yul/Views/RetainedLocalAliasImage{,Controls}` | Actual alias capture drives checked enlarged retained images, source traversal, whole-storage unchanged writeback and exact complementary raw-map reconstruction. |

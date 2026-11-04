@@ -565,3 +565,13 @@ from actual MemOK. Controls overwrite dormant child1 with child0 while outer
 length is zero: final-only collection loses child1, whereas captured duplicate-safe
 visits retain both. This establishes the local-alias producer case, not global
 producer completeness or realization of the newly enlarged captured inventory.
+
+`RetainedLocalAliasImage` connects the actual alias producer's unchanged store
+to the existing captured-image source traversal. Registration coverage is proved
+for expanded snapshots. The two-dormant-child control computes the image from
+captured indices `[1,0]`, checks eight real field coordinates and separation,
+and derives canonical Source views, exact whole-storage unchanged writeback and
+full raw-map reencoding. Newly observed child1 owns its low value99 while high
+padding bits remain residual; the stale-complement and no-cleaning controls
+make that distinction explicit. These are checked snapshot ownership facts,
+not a logical write, journal transition or global retained-reference adequacy.
