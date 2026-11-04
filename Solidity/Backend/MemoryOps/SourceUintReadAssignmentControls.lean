@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceUintAliasWrite
 import Solidity.Backend.MemoryOps.SourceUintAlias
 import Solidity.Backend.MemoryOps.SourceUintReadSequence
 import Solidity.Evm.Correct
@@ -820,5 +821,56 @@ theorem dynamic_uint_alias_stale_word :
 
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_stale_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_stale_word
+
+/-- A populated existing shorter object is selected before the material write.
+Both pipeline parameters and self-alias are actual clients, with the strong
+word representation retained; no post-error target state is claimed. -/
+theorem dynamic_uint_alias_write_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (out : Heap H) (z : Source.EMState E0 Γ) (target : Machine),
+      (Source.execItems (G0 p) F0 (fuel+6) Γ.length none
+        (.stmt (.expr (sourceLocalAlias dr (aliasSource self)))
+          (.stmt (.expr (sourceUintIndexedAssign dr di si)) .nil) : Source.RItems E0 [] false .body Γ Γ)
+          (sy false 1 42).1).run (.nil,(sy false 1 42).2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run (state false 1 42) (.cons (.rebindMem dt (.alias (.var (aliasTarget self) rfl)))
+        (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local it))) (.val (.simple (.local jt)))) .nil))=
+        .ok ⟨((state false 1 42).setLocal dt (some (aliasRef self))).withHeap out,List.prefix_refl _⟩ ∧
+      run (aliasLocalCode 1 dt (aliasTarget self)++uintAliasWriteCode (C := C) 1 dt it jt)
+        (machine false 1 42)=.ok target 0 ∧
+      Objects.StateRepr 1 1 8 (Frag.init Δ)
+        (((state false 1 42).setLocal dt (some (aliasRef self))).withHeap out) base target ∧
+      Objects.AllocatorRepr out base 8 ⟨40,by decide⟩ target ∧
+      SourceUintMemoryAt z (aliasAddress self) out (aliasRef self) .dyn ∧
+      Source.MemOK E0 SH z ∧
+      MObj.elems .dyn (out.get (aliasRef self))=(if self then old else next).set 1 (u 42) ∧
+      out.get right=hp.get right ∧
+      (self=false → out.get left=hp.get left ∧ z.2.heap.get 0=(sy false 1 42).2.heap.get 0) ∧
+      z.1=(sy false 1 42).1.set dr (.memRef rfl (aliasAddress self)) ∧
+      z.2.ex=(sy false 1 42).2.ex ∧ z.2.events=(sy false 1 42).2.events ∧
+      z.2.logs=(sy false 1 42).2.logs ∧ z.2.fnLocals=(sy false 1 42).2.fnLocals ∧
+      target.stack=[w[77],w[88]] ∧ target.mem 0=w[40] := by
+  first
+  | solve | simp only [] | omega
+  | have initial : SourceUintMemoryAt (sy false 1 42) (aliasAddress self) hp (aliasRef self) .dyn := by
+      cases self <;> unfold SourceUintMemoryAt <;> rw [MObj.elems_dyn] <;> rfl
+    have sourceRoot : (sy false 1 42).1.get (aliasSource self)=.memRef rfl (aliasAddress self) := by cases self <;> rfl
+    have targetRoot : TEnv.get (aliasTarget self) (state false 1 42).env=some (aliasRef self) := by cases self <;> rfl
+    have bound : (u 1).1.toNat<hp.len (aliasRef self) .dyn := by
+      cases self <;> simp only [aliasRef,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,left,neighbor,MObj.elems_dyn] <;> decide
+    obtain ⟨out,z,target,first,second,items,aliasNative,native,prog,write,selected,new,mok,aliasCode,code,whole,repr,alloc,keep,stack,free,values,locals,rootS,rootT,sourceOther,frames,sourceFrames,ex,events,logs,fn⟩ :=
+      source_uint_alias_assign_word (G0 p) F0 fuel (sy false 1 42) dr (aliasSource self) di si
+        (aliasAddress self) (u 1) (u 42) sourceRoot rfl rfl SH (memOK false 1 42)
+        (state false 1 42) dt (aliasTarget self) it jt (aliasRef self) targetRoot rfl rfl initial bound
+        (initial_repr false 1 42) (allocator false 1 42) (by decide) rfl rfl
+    have contents : MObj.elems .dyn ((state false 1 42).heap.get (aliasRef self))=(if self then old else next) := by
+      cases self <;> rw [MObj.elems_dyn] <;> rfl
+    refine ⟨out,z,target,items,prog,whole,repr,alloc,new,mok,?_,?_,?_,locals,ex,events,logs,fn,stack,free⟩
+    · simpa only [contents,show (u 1).1.toNat=1 from by decide] using values
+    · exact frames _ right (by cases self <;> decide)
+    · intro eq
+      subst self
+      exact ⟨frames _ left (by decide),sourceFrames 0 (by decide)⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.dynamic_uint_alias_write_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dynamic_uint_alias_write_client
 
 end Solidity.Backend.MemoryOps.UintReadAssignmentControls
