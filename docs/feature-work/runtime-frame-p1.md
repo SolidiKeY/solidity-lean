@@ -1413,3 +1413,34 @@ specialized no-result recursive-image consumer. The old alias is retained by
 native return, not produced by `CallRet.mem`. General recursive compiler
 selection, approved-profile provenance, target caller argument/export transport
 and byte/world correspondence remain open. Earlier observations are unchanged.
+
+
+### Primitive scalar-result recursion
+
+`ScalarRecursiveSource` uses the existing intrinsic `callRec`, a private uint
+result binder and `CallRet.val`. Each true arm calls the next counter value,
+receives the child's actual result, then consumes it in checked addition by
+one. The zero arm writes zero. `all_horizons` proves that every sufficient
+quotation returns the original counter in the result slot, leaving the
+counter, reference and other state fields intact. Insufficient quotations
+remain exhausted. The word-range bound is intrinsic; no new depth admission
+cutoff is introduced.
+
+`call_all_horizons` derives the exact native caller update from actual evaluated
+arguments. `source_coherence` proves the frozen successful-output coherence
+clause for this family and any compatible typed caller/result binder. It does
+not equate errors or assume successful runs. Arithmetic, native return, arm
+execution and induction use small separately checked proof boundaries and the
+published `runR_eq` and sequence equations; execution semantics are unchanged.
+
+`ScalarRecursiveSource.Controls` has two same-typed caller scalars: result
+77 becomes 3 while the protected scalar stays 2. The private result starts at
+zero and actually returns three. Ordered aliases remain 0/0/1 and heap values
+7/9/4 remain intact. Controls reject the alternate destination, default result
+and wrong alias, distinguish shallow exhaustion from revert, and prove actual
+argument failure before callee entry at every index.
+
+These are source/kernel results. No target recursive image, physical stack,
+public compiler selection, approved-profile provenance, world relation or
+`PendingRecursiveReturns` inhabitant is claimed. Existing target observations
+and frozen interfaces remain unchanged.
