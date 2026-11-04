@@ -124,3 +124,5 @@
 | `Lowering/V07/SignedEnumGuard.lean` | Actual signed assignment, nonnegative panic check, UInt capture and existing enum membership guard, including zero/full capacity. |
 | `Lowering/V07/SignedEnumTransport.lean` | Source-to-native signed-input enum conversion success/panic at all approved widths, with initial-derived caller-family transport. |
 | `Lowering/V07/SignedEnumControls.lean` | Inhabited mixed-reference, all-width panic/order/sign/capacity controls and exact axiom guards. |
+| `Lowering/V07/UdvtAssignment.lean` | Integer-underlying UDVT local assignment and same-tag identity conversion, nominal-refusal boundaries and initial-derived context transport. |
+| `Lowering/V07/UdvtAssignmentControls.lean` | Real two-tag UDVT metadata, mixed-reference and all64 integer-type controls with nominal-erasure/stale-read negatives and exact guards. |
