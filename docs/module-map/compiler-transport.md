@@ -82,3 +82,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/AllocatedReferenceRead.lean` | Actual selected-map fresh-reference reader and reached old-alias bounds failure after allocating join. |
 | `Backend/Passes/AllocatedReferenceReadControls.lean` | Complete memory observations, returned-word/saved-tail controls and public receiver selection. |
 | `Backend/Passes/AllocatedReferenceReadPins.lean` | Exact standard-only axioms for post-allocation value sequencing. |
+| `Backend/Passes/MemoryJoinFrame.lean` | Exact legacy-memory joined static frame/Input equivalence and derived reached mapped boundary link. |
+| `Backend/Passes/MemoryJoinFrameControls.lean` | Actual allocating public admission, scoped slot reuse and static-frame refusal after failure. |
+| `Backend/Passes/MemoryJoinFramePins.lean` | Exact standard-only axioms for joined memory admission and controls. |

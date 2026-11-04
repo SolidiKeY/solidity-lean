@@ -652,6 +652,25 @@ keeps the returned zero but deletes caller99, distinguishing full saved-tail
 preservation from top-word-only checking. These remain intrinsic/abstract-Instr
 results, not independent Source lowering, public ABI or gas/session adequacy.
 
+## Exact joined memory admission
+
+`MemoryJoinFrame` proves that the original static `frameNeedProg` of a join
+is the maximum of both stage demands, including nested scopes. Together with
+the reached allocation-cost law it gives an exact legacy-memory Input
+equivalence. The joined Input derives both the prefix Input and the per-run
+mapped boundary link; no link or desired preservation conclusion is assumed.
+`public_admission` retains actual public compiler selections, fragments/code,
+full representation, both frame bounds and original allocation capacity.
+
+Controls inhabit allocating public admission/execution at cursor25, reject a
+prefix-only frame, and demonstrate that sequential scopes reuse max3 private
+slots rather than sum5. An unreachable allocation costs0 but its static frame
+reservation remains required by the original Input. Its representation and
+allocation-budget fields are inhabited and the code actually reverts; the
+small static frame bound is the sole missing Input field. These laws concern the
+legacy memory branch; call/loop certificate-specific need/Room and public
+resource/session adequacy are not normalized or discharged.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
