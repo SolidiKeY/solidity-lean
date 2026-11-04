@@ -6,7 +6,8 @@ and diagnostic differences are pinned explicitly, never treated as success. -/
 open Lean Solidity Solidity.Frontend.ExecutableAst.Shared
 private def obj (xs : List (String × Json)) : Json := Json.mkObj xs
 private def typed (kind ty : String) (fields : List (String × Json) := []) : Json :=
-  obj ([("nodeType", toJson kind), ("typeDescriptions", obj [("typeString", toJson ty)])] ++ fields)
+  obj ([("nodeType", toJson kind), ("typeDescriptions", obj [("typeString", toJson ty)])] ++
+    (if kind == "BinaryOperation" then [("commonType", obj [("typeString", toJson ty)])] else []) ++ fields)
 private def number (value ty : String) : Json := typed "Literal" ty [("kind", "number"), ("value", toJson value)]
 private def boolean (value : String) : Json := typed "Literal" "bool" [("kind", "bool"), ("value", toJson value)]
 private def producerText (j : Json) (expected : String) : Bool :=
@@ -96,3 +97,26 @@ private def siblingContract : Json := obj [("nodeType", "ContractDefinition"),
 #guard match function reader cleanFunction "" with | .ok ("good", _) => true | _ => false
 #guard match function reader malformedFunction "" with
   | .error "a malformed boolean literal" => true | _ => false
+
+-- Root tags are part of admission, even when all legacy payload fields decode.
+#guard match contract reader (siblingContract.setObjVal! "nodeType" "UnknownContract") with
+  | .error "compact verifier: expected contract definition" => true | _ => false
+#guard match contract reader (siblingContract.setObjVal! "nodeType" .null) with
+  | .error "compact verifier: expected contract definition" => true | _ => false
+#guard match function reader (cleanFunction.setObjVal! "nodeType" "UnknownFunction") "" with
+  | .error "compact verifier: expected function definition" => true | _ => false
+#guard match function reader (cleanFunction.setObjVal! "nodeType" .null) "" with
+  | .error "compact verifier: expected function definition" => true | _ => false
+-- Legacy payload refusal still wins over the newly checked root tag.
+#guard match function reader ((functionRoot #[obj [("nodeType", "UnknownStatement")]]).setObjVal! "nodeType" "UnknownFunction") "" with
+  | .error "compact verifier: unsupported statement" => true | _ => false
+#guard match contract reader ((siblingContract.setObjVal! "nodes" (toJson #[obj [("nodeType", "UnknownMember")]])).setObjVal! "nodeType" "UnknownContract") with
+  | .error "contract member" => true | _ => false
+
+-- Folded descendants still require compiler expression headers.
+#guard sharedError (folded.setObjVal! "leftExpression" ((number "2" "int_const 2").setObjVal! "typeDescriptions" .null))
+  "expression lacks its compiler type"
+#guard sharedError (folded.setObjVal! "leftExpression" (negative.setObjVal! "prefix" .null))
+  "unary expression lacks its prefix flag"
+#guard sharedError (folded.setObjVal! "commonType" .null)
+  "binary expression lacks its common type"

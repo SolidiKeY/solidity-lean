@@ -1,3 +1,4 @@
+import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Frontend.Import
 
@@ -52,3 +53,18 @@ private def returnC : Contract := exampleContract
   | .ok _ => true | _ => false
 #guard match obligation failedLowering markerPre emptyC "f" false false with
   | .error "lowering sentinel" => true | _ => false
+
+-- Known producer/shared normalization gap: raw signed complement decodes,
+-- while intrinsic unary complement accepts uint only. This is not support.
+private def signedComplement : Lean.Json := Lean.Json.mkObj [
+  ("nodeType", "UnaryOperation"), ("operator", "~"), ("prefix", .bool true),
+  ("typeDescriptions", Lean.Json.mkObj [("typeString", "int256")]),
+  ("subExpression", Lean.Json.mkObj [("nodeType", "Identifier"), ("name", "x"),
+    ("typeDescriptions", Lean.Json.mkObj [("typeString", "int256")])])]
+#guard match checkedExpression signedComplement with
+  | .ok (.unop .bnot (.name "x")) => true | _ => false
+private def signedComplementC : Contract := exampleContract
+  { emptyDecl with params := [("x", .prim .int)], body :=
+    [.assert (.binop .eqB (.unop .bnot (.name "x")) (.num 0))] }
+#guard match assertionObligation lowerBodyLoops markerPre signedComplementC "f" false with
+  | .error "operator ~ does not take int" => true | _ => false

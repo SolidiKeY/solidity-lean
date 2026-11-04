@@ -70,3 +70,26 @@ with Lean; it was renamed and diagnostics passed. No source proof placeholder or
 #eval! was added. Skeptic reviewed the final benchmark: identical indexed inputs,
 serial alternating samples, all20000 calls checked, substantial timing variability.
 Report ranges/samples, never a stable overhead factor or native/WASM gate result.
+
+Finder backfill correction: conditional features appended in Admission.walk are now included: canonicalRethrow, operatorAliases, fixedPoint/commonType and payment-context emptyDataValueCall. They are conditional alternatives, not support claims. Existing fixture subvariants are indexed separately without execution/proof inference.
+
+## Root, request, header and coverage checkpoint
+
+Separate finder and skeptic reviewed the actual source and fixtures read-only,
+without Lean/server calls. Findings fixed: missing root tags; malformed selectors
+being treated as absent; malformed/nonpositive function IDs escaping duplicate
+checking; missing expression type, unary prefix and binary common-type metadata
+(including folded descendants). Global function-header identity validation is
+separate from skipping unsupported sibling bodies. Legacy decoding/refusal
+priority and Reader signatures remain unchanged. Finder also caught a new test's
+BinOp.eq typo (fixed to eqB) and omitted stepSound_arms inventory reference.
+MCP caught an ambiguous Name annotation (fixed to Lean.Name). No source proof
+admissions were added; generated elaborator-error admissions in the first failed
+MCP run are not passing evidence. All eight corrected per-file MCP checks and
+nine repository per-file gates passed. Both final reviews found no further
+confirmed blocker for this increment.
+
+This is bounded refusal/inventory validation, not full producer admission,
+AST/Raw source preservation, or backend/runtime closure. Signed int complement
+remains a demonstrated raw-success/intrinsic-refusal normalization gap. Complete
+CR/B/C adoption, exact theorem/axiom signatures and final full gates remain open.

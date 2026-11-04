@@ -36,7 +36,13 @@ for kind, start, end in [
     ('MemberAccess', 'private def magicMember', 'private def builtinFeatures')]:
     text=fullAdmission[fullAdmission.index(start):fullAdmission.index(end)]
     nodeFeatures[kind]=sorted(set(nodeFeatures[kind]) | (set(re.findall(r'\.([a-z]\w+)',text)) & features.keys()))
-nodeFeatures['InlineAssembly']=['inlineAssembly'] if 'inlineAssembly' in features else []
+nodeFeatures['InlineAssembly']=[f for f in ['inlineAssembly','canonicalRethrow'] if f in features]
+# Admission.walk appends these conditional alternatives outside nodeFeatures.
+for kind, alternatives in {'UnaryOperation':['operatorAliases'],
+    'BinaryOperation':['operatorAliases','fixedPoint'],
+    'MemberAccess':['emptyDataValueCall']}.items():
+    nodeFeatures[kind]=sorted(set(nodeFeatures[kind]) | (set(alternatives) & features.keys()))
+
 rawMap = {
  'Identifier':['RawExpr.name'], 'MemberAccess':['RawExpr.field','RawExpr.env'],
  'Literal':['RawExpr.num','RawExpr.bool','RawExpr.call (existing bytesLitName byte-literal encoding)'], 'UnaryOperation':['RawExpr.unop','RawExpr.incDec','RawStmt.delete'],
@@ -68,7 +74,7 @@ for kind in sorted(emitted):
     ids=nodeFeatures.get(kind,[])
     evidence=sorted({p for f in ids for p in features[f]['localEvidence'] if (root/p).exists()})
     rows.append({'nodeType':kind,'compilerExporter':refs(exporterPath,kind),
-      'admission':{'recognized':True,'featureIds':ids,'featureMapping':'conservative conditional union, including helper dispatch; actual feature use depends on fields/declaration identity','source':refs(admissionPath,kind)},
+      'admission':{'recognized':True,'featureIds':ids,'featureMapping':'conservative conditional union of nodeFeatures, helpers and Admission.walk; actual feature use depends on fields/declaration identity/payment context','source':refs(admissionPath,kind)},
       'defaultExecutableReader':{'admission':'partial/context-dependent' if kind in partial else 'refused/not a standalone reader input',
         'source':refs('Solidity/Frontend/ExecutableAst/Shared/Translate.lean',kind)},
       'existingSolcJson':{'source':refs('Solidity/Frontend/SolcJson/Body.lean',kind)+refs('Solidity/Frontend/SolcJson/Contract.lean',kind),

@@ -109,6 +109,19 @@ The same intrinsic obligation builder and executable verifier are called. -/
 def check (request : Json) : Except String Json := do
   let source ← field request "contract"
   let base ← contract reader source
+  if (request.getObjVal? "function").isOk && !(request.getObjValAs? String "function").isOk then
+    throw "invalid function selector"
+  if (request.getObjVal? "sourceId").isOk && !(request.getObjValAs? Int "sourceId").isOk then
+    throw "invalid sourceId selector"
+  if (request.getObjVal? "listing").isOk && !(request.getObjValAs? Bool "listing").isOk then
+    throw "invalid listing flag"
+  let mut identities : List Int := []
+  for member in ← arr source "nodes" do
+    if J.kind member == "FunctionDefinition" then
+      let some id := J.id? member | throw "invalid function identity"
+      unless id > 0 do throw "invalid function identity"
+      if identities.contains id then throw "duplicate function identity"
+      identities := id :: identities
   let avoid := source.compress
   let selected := (request.getObjValAs? String "function").toOption
   let selectedId := (request.getObjValAs? Int "sourceId").toOption

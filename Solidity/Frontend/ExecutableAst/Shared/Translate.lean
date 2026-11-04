@@ -331,6 +331,15 @@ The existing J.nodes walker also visits constant-folded children. This pass
 constructs no Raw syntax, term, program, formula, or alternate translator. -/
 def validateMetadata (j : Json) : Except String Unit := do
   for n in J.nodes j do
+    if ["Identifier", "Literal", "UnaryOperation", "BinaryOperation", "Conditional",
+        "Assignment", "IndexAccess", "MemberAccess", "FunctionCall", "NewExpression",
+        "IndexRangeAccess", "TupleExpression"].contains (J.kind n) && (J.tyStr n).isEmpty then
+      throw "expression lacks its compiler type"
+    if J.kind n == "UnaryOperation" && !(n.getObjValAs? Bool "prefix").isOk then
+      throw "unary expression lacks its prefix flag"
+    if J.kind n == "BinaryOperation" &&
+        ((J.opt n "commonType").bind (J.str? · "typeString")).all (·.isEmpty) then
+      throw "binary expression lacks its common type"
     if J.kind n == "Literal" && J.str? n "kind" == some "bool" then
       let value ← str n "value"
       unless value == "true" || value == "false" do throw "a malformed boolean literal"
@@ -357,6 +366,7 @@ def checkedStatements (j : Json) : Except String (List RawStmt) := do
 Raw Reader callbacks remain decoding inputs; they do not certify admission. -/
 def function (read : Reader) (j : Json) (avoid : String) : Except String (String × FunDecl) := do
   let result ← decodeFunction read j avoid
+  unless J.kind j == "FunctionDefinition" do throw "compact verifier: expected function definition"
   validateMetadata j
   return result
 
@@ -364,6 +374,7 @@ def function (read : Reader) (j : Json) (avoid : String) : Except String (String
 The original whole-contract refusal retains priority over new metadata checks. -/
 def contract (read : Reader) (j : Json) : Except String Contract := do
   let result ← decodeContract read j
+  unless J.kind j == "ContractDefinition" do throw "compact verifier: expected contract definition"
   for member in ← arr j "nodes" do
     if (← node member) == "VariableDeclaration" then validateMetadata member
   return result

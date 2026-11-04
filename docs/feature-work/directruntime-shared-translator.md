@@ -231,3 +231,55 @@ Every call succeeded. These are variable Lean development-evaluator measurements
 not standalone runtime timings, a stable overhead factor or RUNTIME_GATE_PASS.
 The benchmark and source/C/olean hashes are saved in evidence/metadata-* files.
 Full native/WASM closure and before/after verification evidence remain pending.
+
+## Coverage and refusal checkpoint handoff
+
+The census now records source-hash anchors, fixture/compiler identities, JSON
+pointers, source ranges/lines and enclosing declarations for all 57 modern
+Solidity kinds. Throw is legacy-only and the pinned 0.8.34 compiler rejects it
+at its original source span. The 77 existing fixtures contain 70 with matching
+source hashes; eight selected fixtures witness the modern kinds. These existing
+AST files may include intentional mutations: matching source/header hashes are
+not authenticated compiler regeneration. 806 observed subtype combinations are
+indexed separately. The owned freshly compiled Yul fixture contains all 16 Yul
+kinds; direct JSON controls check decoding and grammar shape only.
+
+raw-elaboration-ledger.json indexes all 17 RawExpr and 42 RawStmt constructors
+against existing source arms and records exact declaration starts for typed
+calculus/operation theorems. It does not certify Raw lowering preservation,
+source equivalence, or the axioms of those declarations.
+
+Public roots now check their expected nodeType after successful legacy decode.
+Whole-root metadata checks require compiler expression types, Boolean unary
+prefix flags and binary common types, including folded descendants. Existing
+decode errors retain priority. DirectRuntime rejects malformed present selector
+and listing fields; function declarations globally require positive, unique
+integer IDs before selection. This validates headers without reading unselected
+function bodies. Conjunctive name/ID selection remains unchanged. Signed int
+complement remains unsupported at intrinsic elaboration; its raw success is
+explicitly not counted as semantic support. No Reader signature changed.
+
+Validation: the dc271809 touched gate passed 340 jobs in 4289.227s, child maximum
+RSS 3211968 KiB, cgroup peak 4651905024 bytes, minimum outer headroom 7339847680
+bytes. The subsequent changed-source/Yul rebuild passed 357 jobs; after the final
+header/ID corrections, DirectRuntime rebuilt successfully again. All eight
+per-file MCP diagnostics and nine repository per-file regression gates passed.
+The scope remained 12 GiB, swap disabled, one CPU/Lean thread, with monitored
+4 GiB outer headroom. Lean 4.24.0 and Lake 5.0.0-src+797c613 remain the actual
+toolchain. Earlier KeySort passed 377 taclets, 131 read-bearing/table-covered.
+These are touched/per-file gates, not the assignment's final full gate.
+
+Evidence and initial corrected failures are saved under
+tests/directruntime-20261104/shared-translator/evidence/refusal-checkpoint/.
+Independent finder/skeptic findings and fixes are recorded in evidence/reviews.md.
+Published origin/master89373e34 contains only the earlier Shared Boundary and
+Translate snapshot from fcdddfcc, not this lane's Intrinsic/wiring/refusal changes.
+The immutable starter API receipt is retained in artifacts/API-RECEIPT.json.
+
+Queue accounting: complete per-form admission/proof/semantic/backend controls
+remain partial; FIRST adoption/parity remains partial; exact reviewed B/C/CR
+integration remains pending; native C/WASM closure, exact-base/head runtime,
+exact theorem/axiom comparisons and final full gates remain pending. The existing
+general SolcJson translation has not migrated, so no single-boundary completion
+or RUNTIME_GATE_PASS is claimed. Registration remains a central proposal; H30
+excludes generated roots/maps/trust pins from this lane. No push/PR/publication.
