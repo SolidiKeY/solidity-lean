@@ -253,3 +253,32 @@ theorem copy_timeout_prefix :
 ```
 
 One added to prior twenty: twenty-one adapters remain pending.
+
+## C174: successful outer snapshot wrapper
+
+Module: `Solidity.Lowering.StorageOps.SourceByteCaptureSuccess`.
+Lemma: `snapshot_all`.
+Why routine: unfold one actual array loadMem/header bind and apply checked
+`capture_all` at start0, preserving both returned typed references and heap
+payloads. Proposition type only; no theorem, assumption or stub registered.
+
+```lean
+theorem snapshot_all :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (path : Solidity.Source.SPath) (count budget : Nat)
+ (length : Nat → Nat) (payload : Nat → Nat → UInt8)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_enough : ∀ j<count,length j<count+budget-j)
+ (_outerHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame path).run (locals,state)=(.ok count,(locals,state)))
+ (_headers : ∀ j<count,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (path.go (.index j))).run (locals,state)=
+  (.ok (length j),(locals,state)))
+ (_reads : ∀ j<count,∀ k<length j,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame ((path.go (.index j)).go (.index k)) (.fixedBytes 1 (by decide))).run (locals,state)=
+  (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j k] rfl),(locals,state))),
+ (Solidity.Source.loadMem (E:=E) (Γ:=Γ) frame (count+budget+4) (.array .memory (.bytes .memory) none) path).run (locals,state)=
+ (.ok (Solidity.Source.Data.array (l:=.memory) (τ:=.bytes .memory) (n:=none) count (fun _ h=>nomatch h)
+  (fun j : Fin count=>Solidity.Source.Data.val (Solidity.Source.Val.memRef (D:=E.layout) (τ:=.bytes .memory) rfl (state.heap.next+j.val)))),
+  (locals,(List.range' 0 count).foldl
+  (fun state j=>Solidity.Lowering.StorageOps.SourceNestedByteValues.allocateAt (length j) payload state j) state))
+```
+
+One added to prior twenty-one: twenty-two adapters remain pending.

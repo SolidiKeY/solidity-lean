@@ -104,3 +104,6 @@
 
 | `Lowering/StorageOps/SourceVaryingByteCapture.lean` | Actual capture prefixes with independent runtime child lengths, payloads and original per-child fuel conditions |
 | `Lowering/StorageOps/SourceVaryingByteCaptureControls.lean` | Complete variable-length copy outcomes, retained tails, heap/journal observations and necessary-fuel counterexample |
+
+| `Lowering/StorageOps/SourceByteCaptureSuccess.lean` | Successful varying-length Source capture with exact returned fresh references and heap footprint |
+| `Lowering/StorageOps/SourceByteCaptureSuccessControls.lean` | Full/shifted/static/empty capture identities, complete state/journals, actual heap reads and wrong-offset control |

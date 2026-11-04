@@ -225,6 +225,23 @@ type-checked prose only; twenty-one Terra adapters remain unproved. General
 recursive shapes, eager target realization, physical allocation and compiler/
 world composition remain open.
 
+## Successful capture and returned identities
+
+`SourceByteCaptureSuccess.capture_all` proves successful runtime traversal of
+varying-length byte children under the original per-child fuel conditions and
+OLD reads. It returns the exact typed reference function `oldHeap.next+j`,
+independent of the storage start index, together with the ordered allocation
+footprint. The empty case and the `finCons` identity step are included.
+
+Full, shifted, static, empty, one-short and outer snapshot controls pin returned
+identities, complete states/headers/heaps/contexts/journals and actual heap-byte
+readbacks. An unallocated address is refused; an incorrect absolute-source-index
+offset is a negative control. Old objects and retained source tails survive.
+The routine outer snapshot wrapper is a type-checked proposition only in
+TERRA-TODO; twenty-two adapters remain unproved. These are logical Source heap
+identities, not physical pointer compilation, allocation-failure or world/
+compiler closure.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI
