@@ -3105,6 +3105,8 @@ import Solidity.Yul.Views.NestedDeclarationStore
 import Solidity.Yul.Views.NestedMappingControls
 import Solidity.Yul.Views.NestedMappingLayout
 import Solidity.Yul.Views.NestedMappingSlots
+import Solidity.Yul.Views.NewMemory
+import Solidity.Yul.Views.NewMemoryControls
 import Solidity.Yul.Views.NominalInventory
 import Solidity.Yul.Views.NominalInventoryControls
 import Solidity.Yul.Views.NominalInventoryDynamic

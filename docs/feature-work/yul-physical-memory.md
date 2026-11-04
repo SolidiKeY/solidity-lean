@@ -819,3 +819,13 @@ dangling-child allocation that Source executes successfully despite absent owner
 validity. A three-object control contains a pointer to the first allocated object;
 empty input leaves the original state and residual bytes intact. General Source
 producer coverage, allocator selection and retained-history refinement remain open.
+
+`NewMemory` connects actual `Source.evalE` new-memory expressions to the physical
+encoder. It retains the existing local-length evaluation, `2^64` Panic `0x41`,
+`Source.newData` computation, allocation and timeout outcomes. Constructive
+physical realization derives a full map and unchanged Source writeback from
+actual owner validity, canonical support, initial image reads/reserved words and
+exact geometric room. Controls include static-frame `new bytes` and `new bool[]`,
+exact size panic, timeout, padding and unknown bytes. This is the local-length
+producer adapter, not arbitrary operand instrumentation or target allocator
+selection/refinement. No new execution limit or admission exclusion is added.
