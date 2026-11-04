@@ -2551,6 +2551,7 @@ import Solidity.Yul.Checks.RawControlledWhileHorizon
 import Solidity.Yul.Checks.RawDefaultDeclaration
 import Solidity.Yul.Checks.RawDefaultScope
 import Solidity.Yul.Checks.RawDivergence
+import Solidity.Yul.Checks.RawDoWhileHorizon
 import Solidity.Yul.Checks.RawIntegerInitialization
 import Solidity.Yul.Checks.RawIntegerScope
 import Solidity.Yul.Checks.RawLiteralInitialization
@@ -2822,6 +2823,7 @@ import Solidity.Yul.RawControlledWhile
 import Solidity.Yul.RawControlledWhileHorizon
 import Solidity.Yul.RawDefaultDeclaration
 import Solidity.Yul.RawDefaultScope
+import Solidity.Yul.RawDoWhileHorizon
 import Solidity.Yul.RawFrame
 import Solidity.Yul.RawIfElse
 import Solidity.Yul.RawIfThen

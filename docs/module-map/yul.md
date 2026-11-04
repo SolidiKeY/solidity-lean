@@ -164,3 +164,5 @@
 | `Yul/RawAdapterLoopHorizon.lean`, `Yul/Checks/RawAdapterLoopHorizon.lean` | Exact concrete P16 adapter/driver agreement, completed whole-frame stability and inhabited Source/dirty controls. |
 
 | `Yul/RawAdapterSequenceLoopHorizon.lean`, `Yul/Checks/RawAdapterSequenceLoopHorizon.lean` | Concrete P16 sequence/block loop agreement, full-frame stability and inhabited dirty/Source controls. |
+
+| `Yul/RawDoWhileHorizon.lean`, `Yul/Checks/RawDoWhileHorizon.lean` | Concrete body-first driver/adapter completed-frame stability, dirty controls and clean Source boundary. |
