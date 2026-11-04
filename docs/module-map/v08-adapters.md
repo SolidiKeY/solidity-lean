@@ -428,6 +428,10 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/Shifts/Controls.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Shifts/General.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Shifts/Transport.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Comparisons/Agreement.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Comparisons/Controls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Comparisons/LocalReads.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Comparisons/Selected.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

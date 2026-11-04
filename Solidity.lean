@@ -614,6 +614,10 @@ import Solidity.Backend.PrimitivePackets.CheckedAdd.Controls
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Selected
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Source
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Target
+import Solidity.Backend.PrimitivePackets.Comparisons.Agreement
+import Solidity.Backend.PrimitivePackets.Comparisons.Controls
+import Solidity.Backend.PrimitivePackets.Comparisons.LocalReads
+import Solidity.Backend.PrimitivePackets.Comparisons.Selected
 import Solidity.Backend.PrimitivePackets.Shifts.Controls
 import Solidity.Backend.PrimitivePackets.Shifts.General
 import Solidity.Backend.PrimitivePackets.Shifts.Transport
