@@ -613,6 +613,8 @@ import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
+import Solidity.Backend.PrimitivePackets.Bitwise.Selected
+import Solidity.Backend.PrimitivePackets.Bitwise.Source
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Agreement
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Controls
 import Solidity.Backend.PrimitivePackets.CheckedAdd.Selected
