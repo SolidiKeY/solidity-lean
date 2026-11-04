@@ -66,4 +66,25 @@ theorem hm_missing_reference (F : Source.Fr) (n : Nat) :
     (Source.bytesOfRV F n (Source.RVal.val (Source.Val.memRef (τ := .bytes .memory) rfl 999))).run mixedState=
       (.error (.stuck "dangling memory reference"),mixedState) := sourceBytesOfMemory_missing F n mixedState 999 rfl
 
+/-- Invalid UTF-8 is preserved by the owner's memory alias conversion. -/
+theorem hm_string_alias_bytes (n : Nat) :
+    (Source.bytesOfRV mixedReadFrame n
+      (.val (Source.Val.memRef (τ := .bytes .memory) rfl 1))).run mixedState=
+      (.ok [0xff,0x61],mixedState) := by
+  first | (simp only; done) | decide | omega | rfl
+
+/-- The conversion neither copies the object nor erases source administration. -/
+theorem hm_string_alias_conversion (n : Nat) :
+    (Source.convRV mixedReadFrame n (.bytes .memory)
+      (.val (Source.Val.memRef (τ := .string .memory) rfl 1))).run mixedState=
+      (.ok (.val (Source.Val.memRef rfl 1)),mixedState) := by
+  first | (simp only; done) | decide | omega | rfl
+
+/-- Wrong-object aliases preserve the owner's actual error, not preparation None. -/
+theorem hm_string_alias_wrong_object (n : Nat) :
+    (Source.bytesOfRV mixedReadFrame n
+      (.val (Source.Val.memRef (τ := .bytes .memory) rfl 2))).run mixedState=
+      (.error (.stuck "not a bytes object"),mixedState) := by
+  first | (simp only; done) | decide | omega | rfl
+
 end Solidity.Yul.Views.Controls

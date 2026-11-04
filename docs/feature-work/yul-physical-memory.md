@@ -1027,3 +1027,11 @@ cover repeated writes, caller-local restoration and stale/header/padded input
 differences without hash injectivity. The initial typed bytes local/object
 premises remain explicit; other hash producers and target opcode/resource
 correspondence remain open.
+
+The additive `sourceBytesOfMemory_alias_run` and
+`sourceKeccakMemory_alias_run` laws also cover a bytes-typed local pointing to
+an actual memory string object. `sourceStringBytes_pointer` proves the owner's
+pointer-preserving conversion with the complete source state unchanged. These
+laws retain invalid UTF-8 bytes and the actual lookup error; they do not prove
+historical reference formation, surface admission, or general string-backed
+whole-map transport after a write plan. Existing bytes-only APIs are unchanged.
