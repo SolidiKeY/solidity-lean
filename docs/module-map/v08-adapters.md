@@ -441,6 +441,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/NumericLiteralProofs/WordTable/Part00.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/Fragments.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ConstantDepth/Rank.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Trace.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

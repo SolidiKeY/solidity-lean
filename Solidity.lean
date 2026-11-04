@@ -1502,6 +1502,8 @@ import Solidity.Frontend.Admission.SyntaxOccurrences
 import Solidity.Frontend.Admission.TypedExpressionPolicy
 import Solidity.Frontend.Admission.TypedObservationPolicy
 import Solidity.Frontend.Admission.TypedStatementPolicy
+import Solidity.Frontend.C3Exactness.Controls
+import Solidity.Frontend.C3Exactness.Trace
 import Solidity.Frontend.Checked.Certificate
 import Solidity.Frontend.Checked.Check
 import Solidity.Frontend.Checked.ExprExamples
