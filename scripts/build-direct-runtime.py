@@ -4,7 +4,7 @@ Usage: build-direct-runtime.py NATIVE_LEAN_PREFIX WASM_STAGE OUTPUT
 Set EMCC when emcc is not on PATH and EM_CONFIG to its explicit SDK config.
 Run under the repository memory guard.
 """
-import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
+import gc, hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 for override in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH']:
     if os.environ.get(override):
         raise ValueError('Unpinned compiler override: '+override)
@@ -101,6 +101,9 @@ else:
     undefined=subprocess.check_output([configured['nm'],'--undefined-only','--format=posix',str(stage/'lib/lean/libleanrt.a')],text=True)
     native_roots=set(re.findall(r'^(\w+) U ',undefined,re.M))
     inputs,closure=helper.extract(root,stage,native_roots=native_roots)
+    # collect()'s recursive visitor can retain its temporary source graph via
+    # a Python reference cycle. Only the extracted C buffers are needed below.
+    gc.collect()
     print('Pure generated-C closure: '+json.dumps(closure),flush=True)
 objects=[];sources=[]
 for i,(name,text,source,expected) in enumerate(inputs):
