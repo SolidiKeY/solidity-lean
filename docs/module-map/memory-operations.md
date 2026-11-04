@@ -260,3 +260,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PrimitiveArray.lean` | Arbitrary finite primitive payload initialization through existing stores/reservation/adoption, exact source allocation, full allocator and V2/root-gap certificates. |
 | `Backend/MemoryCopies/PrimitiveArrayControls.lean` | Inhabited fitting uint-list copies, empty/pair/64-element observations, exact lengths/live contents, old payload preservation and negative controls. |
 | `Backend/MemoryCopies/LoadedArrayInterface.lean` | Existing expression loads followed by finite populated array initialization, with explicit source evaluation inputs and full reached allocator contract. |
+| `Backend/MemoryCopies/LoadedArray.lean` | Existing expression load simulation, stack-fed finite array stores, complete allocator transport, actual storage-copy declaration and failed-load companion. |
+| `Backend/MemoryCopies/LoadedArrayControls.lean` | Represented storage pair reads for arbitrary distinct payloads, empty and64 replicated-read copies, source linkage and failed-load/negative controls. |
