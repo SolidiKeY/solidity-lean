@@ -3143,6 +3143,8 @@ import Solidity.Yul.Views.RetainedEntryRun
 import Solidity.Yul.Views.RetainedExpressionCapture
 import Solidity.Yul.Views.RetainedHeapAllocation
 import Solidity.Yul.Views.RetainedIndices
+import Solidity.Yul.Views.RetainedLocalAlias
+import Solidity.Yul.Views.RetainedLocalAliasControls
 import Solidity.Yul.Views.RetainedLocationControls
 import Solidity.Yul.Views.RetainedLocationProducers
 import Solidity.Yul.Views.RetainedLocationRun
