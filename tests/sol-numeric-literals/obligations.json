@@ -41,11 +41,13 @@
   },
   {
     "id": "target-import-closure",
-    "status": "pending"
+    "status": "done",
+    "evidence": "evidence/recovered-full-gates/1.log: 49 jobs completed; source hashes match audit-validation.json"
   },
   {
     "id": "static-gates",
-    "status": "pending"
+    "status": "blocked",
+    "evidence": "Trust, layers, docs, axiom pins, TestSuite, corpus and automation pass; root/orphan/module-map checks await coordinator registration."
   },
   {
     "id": "coordinator-registration",
@@ -57,6 +59,7 @@
   },
   {
     "id": "immutable-handoff",
-    "status": "pending"
+    "status": "pending",
+    "evidence": "This blocked checkpoint is sealed separately; final assignment seal must follow passing integration/runtime gates."
   }
 ]

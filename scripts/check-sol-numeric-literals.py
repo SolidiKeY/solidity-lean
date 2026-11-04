@@ -3,7 +3,7 @@
 --implementation validates all scoped code/proofs/fixtures and reports remaining
 integration gates without claiming assignment completion. Never updates a pin.
 """
-import argparse,copy,importlib.util,json,os,pathlib,re,subprocess,sys
+import argparse,copy,importlib.util,json,os,pathlib,re,subprocess,sys,tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests/sol-numeric-literals'))
 from packetlib import BASE,FOLDER,PREFIX,CONSTRUCTOR_CONTROLS,REQUIRED_THEOREMS,blank_lean,case_families,controls,git,normalized_inventory,permitted,sha,source_snapshot
@@ -131,6 +131,7 @@ def check(implementation=False,self_test=False):
  require(registration['base']==BASE and registration['modules']==[m['name'] for m in modules],'coordinator registration manifest incomplete')
  require(len(registration['module_map_rows'])==len(modules),'module-map row inventory incomplete')
  require(sha(FOLDER/'registration.patch')==registration['root_patch_sha256'],'registration patch drift')
+ require(sha(FOLDER/'registration.module-map.patch')==registration['module_map_patch_sha256'],'module-map patch drift')
  run([sys.executable,'tests/sol-numeric-literals/generate-wordtable.py','--check'])
  run([sys.executable,'tests/sol-numeric-literals/generate-fixtures.py','--check'])
  run(['node','tests/sol-numeric-literals/run-fixtures.mjs'])
@@ -151,7 +152,15 @@ def check(implementation=False,self_test=False):
   try:validate_registration(forged)
   except ValueError:pass
   else:raise ValueError('forged completion ledger bypassed actual registration')
-  print('acceptance negative controls: 5 inventory mutations and forged completion state rejected')
+  fd,temporary=tempfile.mkstemp(prefix='uncommitted-input-',suffix='.json',dir=FOLDER)
+  os.close(fd);relative=pathlib.Path(temporary).relative_to(ROOT).as_posix()
+  try:
+   try:validate_committed_inputs()
+   except ValueError as e:require(relative in str(e),'uncommitted input was not detected')
+   else:raise ValueError('uncommitted checked input bypassed the seal binding')
+  finally:pathlib.Path(temporary).unlink()
+  run([sys.executable,'tests/sol-numeric-literals/runtime/test-check.py'])
+  print('acceptance negative controls: 5 inventory mutations, forged completion, uncommitted input and MOCK resource-stop reporting passed')
  authored=sum(len(m['authored']) for m in modules)
  print(f'implementation acceptance: {len(modules)} modules, {authored} authored declarations, {len(actual)} kernel declarations, {len(CONSTRUCTOR_CONTROLS)} inhabited constructors, {len(controls())} scanner controls, 42 paired fixtures')
  obligations=json.loads((FOLDER/'obligations.json').read_text())

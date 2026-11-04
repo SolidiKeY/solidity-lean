@@ -67,7 +67,9 @@ and kernel checksum controls at lengths 39/40/41 and with mixed-case success and
 failure. `fixture_observations_pass` kernel-checks the complete typed Lean result
 for every one of the 42 fixed compiler spellings. The acceptance gate also
 rejects five concrete inventory mutations: deletion, axiom growth, unsafe flag,
-changed signature and duplicate declaration.
+changed signature and duplicate declaration. Additional controls reject forged
+completion state and a real uncommitted input. A separate MOCK-only regression
+checks auto-removal/resource-stop reporting; it never stops a real container.
 
 The exact solc is `0.8.38+commit.1835d247.Emscripten.clang`, SHA256
 `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
@@ -125,6 +127,14 @@ observations transcribe the read-only scanner; they are not proven lemmas.
 | `hexNumber` | Exact lowercase `0x` prefix only, then hexDigits. Result keeps `ds.map toFin16` and `eip55 ds`. All other prefixes refuse. |
 | `toFin16` | `hexVal b % 16`, not an unchecked cast. HexVal subtracts 48, 55 or 87 in the three ASCII ranges. |
 | `eip55` | False outside decoded length 40; at length 40 hash lowercase ASCII with existing Keccak and compare letter case against corresponding hash nibbles. Numeric characters impose no case condition. Uses underscore-erased, case-preserved digits. No cryptographic equality assertion. |
+
+The pinned ANTLR `DecimalNumber` production uses `DecimalDigits`, while
+`OctalNumber` is a separate, disallowed token family. The scanner's leading-zero
+refusal applies after underscore erasure, including `0_1`; the `Decimal` relation
+retains that existing guard rather than claiming to model the isolated
+`DecimalNumber` production. `digitsTail` alone also admits an initial underscore
+followed by a digit; `Digits` requires its initial digit. These helper and token
+boundaries are explicit, with no converse restriction added to hide them.
 
 `NumLit.value` in read-only Source/Const interprets a decimal with e ≥ 0 as
 numerator m*10^e.toNat and denominator 10^f, and e < 0 as numerator m and
@@ -241,3 +251,58 @@ untouched. The registration proposal is concrete and reviewable; after the
 coordinator applies it, the unchanged full gate and remaining integration checks
 must pass before the persistent goal can be complete. A partial checkpoint,
 implementation-only acceptance or failed full gate is not completion.
+
+
+## Committed checkpoint handoff
+
+The validated implementation head is
+`ebb4d3257694880f45b3591435cb270200d5ed2c`. Subsequent scoped changes add only
+reporting regression controls, refreshed evidence and this handoff; all 42 Lean
+source hashes are unchanged. The containing final commit and original base are
+recorded in the sealed packet's manifest. The committed handoff is
+[HANDOFF.md](../../tests/sol-numeric-literals/HANDOFF.md).
+
+The complete unchanged `gate.sh full` run took 2949.590 seconds, exit 1.
+Linux maximum child RSS was 5656896 KiB; cumulative container memory peak was
+8661929984 bytes. Minimum parent/VM headroom was 7935414272 bytes, above the
+unchanged 4 GiB reserve, and no resource stop occurred. The full-suite result is:
+
+| Gate | Result |
+| --- | --- |
+| touched import closure | pass: all 42 owned modules, 49 jobs |
+| source trust | pass: 3714 sources, 285 inventoried sites, zero findings |
+| layers | pass: 559 core modules; no elaborator or checked-parser reach |
+| documentation paths | pass; existing ambiguous references remain warnings |
+| shared axiom pins | pass: 6343 pinned theorems, zero errors or changes |
+| TestSuite | pass: 552 derived, 11 refuted, zero pending; existing one exclusion and two skips unchanged |
+| corpus | pass: exact pinned probe results and full corpus build |
+| automatic strict | pass: classification only; cumulative timing is not checked |
+| roots / orphans | fail: 42 imports await coordinator registration |
+| run-lean | fail at registration, before default targets or executable checks |
+| module map | fail: 42 coordinator-owned rows remain unapplied |
+
+The source trust lint initially flagged the audit metadata string; its documented
+raw-string convention fixed that without changing emitted metadata. A missing
+adjacent SolKey setup pin was recovered byte-for-byte from the published-base
+pin after all 274 snapshot files were verified. Earlier failed runs and the
+first failed MOCK harness setup are preserved, not counted as passing gates.
+`runtime-versions-actual.log` is the strict successful version probe; the earlier
+wrapper version probe printed an error and is not a passing version check.
+
+The owned runtime now captures the container ID before launch and retains a
+failure report even if auto-removal makes final peak memory unavailable. The
+MOCK control tests that branch; it is external Python testing, not a Lean proof
+or evidence of an actual resource stop. The real source-binding control creates
+and removes a unique untracked input, and requires its exact path in the refusal.
+
+Coordinator integration must register the concrete root/module-map proposals,
+then rerun the unchanged final gates in the approved envelope. The full default
+build, examples, CLI and SolKey executable remain unvalidated because run-lean
+stopped before those stages. No RUNTIME_GATE_PASS or completed persistent goal
+is claimed. The goal state was left unchanged as instructed.
+
+Final runtime review also found F-RUNTIME-01: an exit-0 race after a reserve
+breach. The wrapper now preserves the observed process exit separately and
+forces effective exit 125 when a resource stop coincides with process exit 0.
+The isolated MOCK tests cover both observed exits 137 and 0, with auto-removal;
+no real pressure or stop is induced. This does not change any Lean source.
