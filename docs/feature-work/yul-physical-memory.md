@@ -762,3 +762,14 @@ survive while transient residuals reset. Preparation is an explicit constructed
 initialization boundary: retaining an existing undo list does not prove its
 historical compatibility, automatic initialization, or rollback transport.
 Original canonical views, separation and request-registration premises remain.
+
+`CellHashFrames` derives external execution of a combined typed-write/hash run
+from its actual chronological source operations. A child consumes the reached
+caller state and retained calldata local. Frame rollback restores the full
+external/residual carrier; committing that child then reverting its enclosing
+frame restores the initial carrier. A genuine initial finite view and computed
+complement give whole-map reconstruction from restored journal cells. Preparation
+precedes frame entry; no rollback across initialization is asserted. Controls
+reverse child writes (leaving 2 instead of caller 3) and perform two real heap
+allocations. These laws do not restore the allocated heap, establish call
+admission, or claim complete Source-state rollback.

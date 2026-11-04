@@ -116,3 +116,4 @@
 | `Yul/Views/CellWritesCalldataHash{,Controls}` | One actual typed storage-write/calldata-hash computation with same-state raw banks, clipped same-Fixed payload binding, allocation safety and exact timeout/static prefixes. |
 | `Yul/Views/CellHashFinalization{,Controls}` | Transaction finalization of one actual mixed typed-write/calldata-hash run: persistent reconstruction with original complement, transient/default and journal reset, late-timeout prefix controls. |
 | `Yul/Views/LinkedCellHash{,Controls}` | Computed account-tagged initial journal complements and whole persistent reencoding from the actual finalized journal, with nonzero unknown-slot and account/bank controls. |
+| `Yul/Views/CellHashFrames{,Controls}` | Actual mixed-write/hash external projection, child-prefix rollback, committed-child/enclosing rollback and restored journal-driven full-map reconstruction; retained calldata aliases and real child mutation controls. |
