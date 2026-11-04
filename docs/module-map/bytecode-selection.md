@@ -20,6 +20,7 @@
 | `Backend/Selection/UnsignedSelection.lean` | Actual numeric IR DIV/MOD/SHL/SHR certificates, zero-divisor and full-count semantics, complete-frame/underflow and boundary/order/tail/opcode controls; capacity remains V2. |
 | `Backend/Selection/SignedSelection.lean` | Actual numeric IR SLT/SGT/SDIV/SMOD certificates reusing signed bridges; sign/truncation/minimum-overflow/zero/frame/underflow and opcode controls, without caller exclusions. |
 | `Backend/Selection/NumericSequence.lean` | Unified numeric selection and actual whole-IR/Scalar execution with early/late faults; existing lowering-certificate inhabitant and nonempty frame/order/refusal controls, without capacity or byte-runtime claims. |
+| `Backend/Selection/StackSelection.lean` | Native POP/DUP/SWAP IR selection, tight V2 frames and actual-prefix1024 capacity composition; conservative successful-program consumer and depth/overflow/frame/opcode controls. |
 | `Backend/FailurePaths/Interface.lean`, `Backend/FailurePaths/Premises.lean` | G38 failure-path predicates over the indexed source statement and its execution, and explicit producer boundaries (see [G38 failure paths](../feature-work/g38-failure-paths.md)). |
 | `Backend/FailurePaths/Statements.lean` | Completed failure statements compiled with G21's literal recognizer and Boolean custom-error encoder. |
 | `Backend/FailurePaths/Parametric.lean`, `Backend/FailurePaths/ParametricControls.lean` | Failure statements independent of the function return signature, with reference-returning controls. |

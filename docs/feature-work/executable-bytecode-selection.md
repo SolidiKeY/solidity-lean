@@ -260,3 +260,41 @@ Independent read-only finder and skeptic reviews passed the selector, total
 sequence equation, existing-contract inhabitant and controls without findings.
 They checked actual intermediate stacks, zero skips, frame threading, early
 and late faults, and separation from capacity and fetched-byte execution.
+
+## Native stack selection and physical frames
+
+StackSelection.lean relates numeric-stack IR POP, DUP1--DUP16 and SWAP1--SWAP16
+steps to their existing physical operations, including operand refusal and
+complete nonstack IR-frame preservation. The one-based IR indices are
+translated explicitly to Fin16 opcode indices; SWAP16 reaches word17. An
+exchange lookup/set lemma connects the existing two implementations without
+introducing another evaluator. Index zero really faults in the IR; a larger
+index can succeed in the IR while this native component returns None, so no
+global source refusal or deep-index lowering is inferred.
+
+V2 frame constructors use actual peaks1 for DUP and0 for SWAP/POP. They
+preserve every external suffix and prove capacity for every arithmetically
+admitted suffix, including the always-admitted empty suffix. Composition
+uses the actual intermediate stack length and the maximum of both declared
+peaks after height adjustment. Existing successful step-height/frame laws
+yield a generic successful-program consumer with conservative peak equal to
+instruction count; this need not be minimal and can restrict its room domain.
+Native constructors retain tight peaks, admitting full-height SWAP/POP. No
+legacy conditional capacity field is used.
+
+Controls cover native depth16, arbitrary caller machines, protected nonempty
+tails, both end opcode bytes, wrong indices, shortages and corrupted tails.
+DUP at input height1023 and SWAP/POP at1024 are inhabited. Overfull results
+are excluded for any V2 certificate. A DUP/POP trace whose final height fits
+but whose intermediate height is1025 cannot have a V2 certificate for that
+code, regardless of its declared peak. Safe composition supplies every-prefix
+bounds, and the generic consumer inhabits a numeric-compiler frame certificate.
+Mixed numeric/stack sequence integration, larger-index lowering, structured
+control and executable-byte composition are not established by this module.
+
+The existing compileNumeric remains numeric-only; these native certificates do
+not silently extend its coverage. The generic ofRun constructor consumes an
+actual successful Scalar.run proof, rather than proving compiler correctness
+on its own. Independent read-only finder and skeptic reviews found no semantic
+defect. The finder requested an explicit proposition type for one local bound
+in the overflow rejection; that proof-style annotation has been added.

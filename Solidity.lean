@@ -645,6 +645,7 @@ import Solidity.Backend.Selection.ScalarSequenceFrameControls
 import Solidity.Backend.Selection.ScalarSequenceFrames
 import Solidity.Backend.Selection.ScalarSequenceResources
 import Solidity.Backend.Selection.SignedSelection
+import Solidity.Backend.Selection.StackSelection
 import Solidity.Backend.Selection.UnsignedSelection
 import Solidity.Backend.StorageOps.AbsentRootQueries
 import Solidity.Backend.StorageOps.AggregatePop
