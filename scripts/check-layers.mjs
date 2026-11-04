@@ -12,6 +12,7 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(LocalItemFailure|Checks\.LocalItemFailure)$/, // Indexed statement and context-growing item failure classification.
   /^Solidity\.Yul\.(LocalBoolFailure|Checks\.LocalBoolFailure)$/, // Exact failure classification for certified local Boolean evaluators.
   /^Solidity\.Yul\.(LocalDefaultNoGuard|Checks\.LocalDefaultNoGuard)$/, // Omitted-guard consumers of actual scoped runners.
   /^Solidity\.Yul\.(LocalDefaultPostIter|Checks\.LocalDefaultPostIter)$/, // Actual scoped for-iterations with discarded post values.

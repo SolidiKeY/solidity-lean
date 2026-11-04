@@ -2435,6 +2435,7 @@ import Solidity.Yul.Checks.LocalDefaultPostIter
 import Solidity.Yul.Checks.LocalDefaultUnchecked
 import Solidity.Yul.Checks.LocalDefaultWhile
 import Solidity.Yul.Checks.LocalExprStatement
+import Solidity.Yul.Checks.LocalItemFailure
 import Solidity.Yul.Checks.LocalItemWorld
 import Solidity.Yul.Checks.LocalOperations
 import Solidity.Yul.Checks.LocalProjection
@@ -2646,6 +2647,7 @@ import Solidity.Yul.LocalDefaultPostIter
 import Solidity.Yul.LocalDefaultUnchecked
 import Solidity.Yul.LocalDefaultWhile
 import Solidity.Yul.LocalExprStatement
+import Solidity.Yul.LocalItemFailure
 import Solidity.Yul.LocalItemWorld
 import Solidity.Yul.LocalOperations
 import Solidity.Yul.LocalProjection

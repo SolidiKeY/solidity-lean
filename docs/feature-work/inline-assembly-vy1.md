@@ -937,3 +937,17 @@ types are unchanged. Broader P16 and final lane validation remain open.
 
 Scoped diagnostics, touched builds and independent finder/skeptic reviews pass;
 all seven reported theorem axiom sets contain only standard Lean axioms.
+
+### Context-growing item failures
+
+LocalItemFailure extends timeout classification to actual expression statements,
+Boolean initialization and certified Boolean/default item lists, at all fuel
+and arbitrary raw inputs. List theorems quantify the halted result's actual
+reached context and locals; initializer failure retains the input context with
+its partial writes. Controls expose grown timeout contexts, normal completion
+and precisely scoped negative halt/certificate cases. Source, evaluators and
+state types are unchanged. This classifies halted outcomes only; general
+embedding, loop adequacy and final lane validation remain open.
+
+Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
+All eleven reported axiom sets contain only standard Lean axioms.

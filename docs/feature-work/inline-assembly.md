@@ -273,3 +273,5 @@ VY1: scoped default for-iterations with Boolean posts have concrete Source agree
 VY1: H22 rebased with H21 registries; omitted-guard default iterations reuse actual Source transport and have concrete scoped agreement/purity/noncompletion. Full P16 remains open.
 
 VY1: local Boolean expression/control failures are proved to be timeouts for all raw inputs and fuel; see [lane handoff](inline-assembly-vy1.md#boolean-failure-classification). General P16 remains open.
+
+VY1: actual statement/initialization and context-growing item failures are proved to be timeouts without erasing reached locals; see [lane handoff](inline-assembly-vy1.md#context-growing-item-failures). General P16 remains open.

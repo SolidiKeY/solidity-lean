@@ -73,3 +73,5 @@
 | `Yul/LocalDefaultNoGuard.lean` | Concrete default-scoped omitted-guard iterations using existing Source transport. |
 
 | `Yul/LocalBoolFailure.lean`, `Yul/Checks/LocalBoolFailure.lean` | All-fuel raw Boolean expression/control error classification and dirty-state refusal/branch controls. |
+
+| `Yul/LocalItemFailure.lean`, `Yul/Checks/LocalItemFailure.lean` | Statement, initialization and context-growing Boolean/default item failure classification with retained-context controls. |
