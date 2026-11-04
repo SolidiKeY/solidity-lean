@@ -30473,6 +30473,72 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.capacity_shift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_lift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.framed_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.instruction_lift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.trace_shift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.actual_update": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.caller_capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.caller_preserved": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.every_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.overflow_is_not_underflow": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.trace": [
+  "Quot.sound",
+  "propext"
+ ],
  "tests/upstream/ByteLiterals.lean:literal_ignores_ambient_append": [],
  "tests/upstream/ByteLiterals.lean:long_literal_exact": [],
  "tests/upstream/ByteLiterals.lean:long_literal_not_truncated": [],
