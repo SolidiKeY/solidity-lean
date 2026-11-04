@@ -1155,3 +1155,23 @@ admission. Broader body/post certificates and general P16 remain open.
 Independent read-only finder/skeptic reviews found no issues. Both per-file
 diagnostics report zero errors; nine scoped axiom reports contain only Lean
 standard axioms. Final lane and external compiler/EVM validation remain open.
+
+
+### Initializer and post-loop congruence
+
+`LocalBoolForPostRepresentation.forLoop` concretely composes the existing
+initializer, guarded post-iteration and normal-only scope-closing laws for
+every fuel and related typed input frame. The original initializer, guard,
+post and scoped-body certificates and their actual contexts remain required.
+Normal completion removes only the initializer local; failures retain their
+exact reached context, halt reason, related full locals and equal world.
+Nine controls distinguish scoped-counter updates from surviving outer writes,
+ignored false/true post values, skipped posts, initializer writes, body versus
+post failure frames and dirty projection refusal. An intrinsic for statement
+with a side-effecting failing post is inhabited.
+No evaluator, Source type, readback or admission changes occur; broader
+certificates, general P16 and full-lane validation remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both modules
+have zero diagnostic errors; ten scoped axiom reports use only Lean standard
+axioms. Final lane and external compiler/EVM validation remain open.
