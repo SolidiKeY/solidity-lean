@@ -111,3 +111,5 @@
 | `Bridge/SolidityBridge/Yul/ScopedForAdequacy{,Controls}.lean` | Exact-output iff and all-horizon source noncompletion iff selected-model fault for actual closed normal scope/switch FOR packets; genuine literal-true unending compiler witness. Denotational model only, not native/G24/resource adequacy. |
 
 | `Bridge/SolidityBridge/Yul/ScopedForPrefixes{,Controls}.lean` | Actual scope/switch FOR finite model macro-turn prefixes with exact raw locals/caller/full-frame preservation; separate concrete prelude execution, universal unending prefixes and bounded modular-wrap controls. Not fetched/native prefixes or G24/resource adequacy. |
+
+| `Yul/Compilation/ShapeCapacity{,Controls}.lean` | Constructive actual scalar execution from intrinsic CodeShape, generic caller framing and static height lifting, exact all-boundary shifted capacity; actual last-slot dirty update and underflow/peak-overflow separation. Target preparation, not native/G24 adequacy. |

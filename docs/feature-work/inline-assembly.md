@@ -414,3 +414,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 closed scoped FOR: exact raw-output iff and all-horizon noncompletion correspondence for actual packets; genuine unending literal-true scoped/switch witness, never runtime-executed. See [lane handoff](inline-assembly-vy3.md#closed-scoped-for-result-and-noncompletion-equivalence). This remains mathematical-model preparation, not full G24/native adequacy.
 
 - VY3 finite scoped FOR prefixes: actual selected condition/body/post turns preserve exact raw locals/caller/full machine frame; actual prelude is proved separately. Universal unending prefixes and bounded third-turn wrap witness are kernel/model results, not native/G24 completion. See [lane handoff](inline-assembly-vy3.md#finite-scoped-for-macro-turn-prefixes).
+
+- VY3 target shape: actual execution/caller framing is derived from existing intrinsic CodeShape; exact shifted all-prefix capacity remains independent. Last-slot dirty update and underflow/peak-overflow controls are kernel target preparation, not native/G24 adequacy. See [lane handoff](inline-assembly-vy3.md#constructive-target-shape-and-caller-capacity).
