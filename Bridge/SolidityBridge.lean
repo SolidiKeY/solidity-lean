@@ -385,6 +385,8 @@ import SolidityBridge.Yul.ScopedForAdequacyControls
 import SolidityBridge.Yul.ScopedForCompletion
 import SolidityBridge.Yul.ScopedForCompletionControls
 import SolidityBridge.Yul.ScopedForControls
+import SolidityBridge.Yul.ScopedForPrefixes
+import SolidityBridge.Yul.ScopedForPrefixesControls
 import SolidityBridge.Yul.ScopedForReflection
 import SolidityBridge.Yul.ScopedForReflectionControls
 import SolidityBridge.Yul.ScopedSwitch

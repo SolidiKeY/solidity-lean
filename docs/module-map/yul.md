@@ -109,3 +109,5 @@
 | `Bridge/SolidityBridge/Yul/ScopedForReflection{,Controls}.lean` | Actual scope/switch FOR finite target-to-original-source reflection; source horizon recovered from target, exact raw locals/caller/full model frame and pending0. Model/native capacity separation and order refusals; no G24/native adequacy. |
 
 | `Bridge/SolidityBridge/Yul/ScopedForAdequacy{,Controls}.lean` | Exact-output iff and all-horizon source noncompletion iff selected-model fault for actual closed normal scope/switch FOR packets; genuine literal-true unending compiler witness. Denotational model only, not native/G24/resource adequacy. |
+
+| `Bridge/SolidityBridge/Yul/ScopedForPrefixes{,Controls}.lean` | Actual scope/switch FOR finite model macro-turn prefixes with exact raw locals/caller/full-frame preservation; separate concrete prelude execution, universal unending prefixes and bounded modular-wrap controls. Not fetched/native prefixes or G24/resource adequacy. |
