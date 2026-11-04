@@ -258,3 +258,12 @@ are empty; populated dynamic construction, Source graph/layout refinement,
 guarded recursive graphs and runtime checked failures remain separate. Neither
 reviewer used Lean/build/server/edits. All three modules have zero MCP errors
 and warnings; checkpoint gates and scoped axiom reports remain required.
+
+## Runtime-length reference construction
+
+`RuntimeArrayInterface.lean` fixes production-selected child defaults and the
+complete runtime-parent cost: length+1+length*childCost. Feasibility is attached
+to the entire construction, avoiding an unnecessary fitting-child condition
+when the parent is empty. It extends the existing default/reference-array
+framework; the signature precedes implementation. Source graph admission,
+physical byte refinement and runtime size-failure selection remain separate.

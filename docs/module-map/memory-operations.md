@@ -181,3 +181,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedDefaultInterface.lean` | Production-selected nested-array default builder with a real fitting allocator witness; no new compiler or admission filter. |
 | `Backend/MemoryCopies/NestedDefaults.lean` | Total production selection for fixed dimensions around empty dynamic defaults, exact cost and existing allocator-growth execution. |
 | `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |
+| `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Production-selected child defaults with complete runtime-parent allocation demand and a real fitting input; no unused-child feasibility condition. |
