@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.SignedInstructionCertificates
 import Solidity.Yul.Compilation.ProducerStatements
+import Solidity.Yul.Compilation.ProducerExpressions
 import Solidity.Backend.Selection.FramedLoweringInterface
 /-! Concrete leaf producer for the published framed lowering contract. Every
 actual successful selected numeric run is reflected, with exact final machine
