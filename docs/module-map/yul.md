@@ -80,3 +80,5 @@
 | `Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean` | Kernel-inhabited exact syntax/preparation/lowering plus packet reconstruction under the explicit remaining decoder equality; conditional constructors reused by the concrete NJ1 attachment. |
 
 | `Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean` | Exact original NJ1 decoder equality and unconditional fixed-fixture packet/compilation/source/model witnesses; existing decoder child equations, unchanged bounds20/16. |
+
+| `Bridge/SolidityBridge/Yul/LoweredWhile{,Controls}.lean` | Actual `lowerWhile` emission to finite structured/model execution with exact pre-body/final guards; original pure AST leaf compiler witnesses, prefix/caller preservation and separate capacity/refusal controls. Not a Source FOR-loop or native/resource theorem. |

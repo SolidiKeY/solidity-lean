@@ -386,3 +386,5 @@ compilation and source endpoints. Its model theorem retains the actual
 represented-stack premise; a fixed low-fuel refusal is also proved. Bounds and
 observations are unchanged. Full lane/source/native obligations remain open;
 see [the lane record](inline-assembly-vy3.md).
+
+- VY3 finite emitted while: `SolidityBridge.Yul.LoweredWhile` derives exact finite structured/model runs from real emitted slice certificates with explicit pre-body/final guard premises and arbitrary prefix/caller preservation. Original AST leaf compiler controls are inhabited; Source FOR/native/resource/full-lane adequacy remains open. See [VY3](inline-assembly-vy3.md#finite-emitted-while-execution).

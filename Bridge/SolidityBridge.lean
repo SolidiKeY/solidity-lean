@@ -345,6 +345,8 @@ import SolidityBridge.Yul.LoopRealization
 import SolidityBridge.Yul.LoopRealizationControls
 import SolidityBridge.Yul.LoopSelection
 import SolidityBridge.Yul.LoopSelectionControls
+import SolidityBridge.Yul.LoweredWhile
+import SolidityBridge.Yul.LoweredWhileControls
 import SolidityBridge.Yul.NestedSwitch
 import SolidityBridge.Yul.NestedSwitchControls
 import SolidityBridge.Yul.OccurrenceControl

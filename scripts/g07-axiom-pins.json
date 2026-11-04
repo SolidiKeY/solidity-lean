@@ -1586,6 +1586,38 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.parts": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.slices": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhileControls.lean:SolidityBridge.Yul.LoweredWhile.Controls.two_turns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhileControls.lean:SolidityBridge.Yul.LoweredWhile.Controls.two_turns_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhileControls.lean:SolidityBridge.Yul.LoweredWhile.Controls.zero_turns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/NestedSwitch.lean:SolidityBridge.Yul.NestedSwitch.branch": [
   "Quot.sound",
   "propext"

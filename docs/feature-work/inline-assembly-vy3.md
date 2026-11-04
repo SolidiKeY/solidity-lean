@@ -1208,3 +1208,32 @@ a named kernel witness. No new external solc/EVM evidence is claimed.
 Body admission, independent JSON specification/completeness, source attachment/
 MemOK, Source/G24/views/readback, native/resource/world/trace correspondence
 and final joint gates remain unfinished. Closing NJ1 does not complete VY3.
+
+
+### Finite emitted while execution
+
+`SolidityBridge.Yul.LoweredWhile` closes the target-only execution gap of the
+existing `lowerWhile` emitter. `parts` recovers its actual condition/body
+programs; `slices` and `structured` derive the complete finite `StructuredExec`
+run from the existing lowering certificates. For every `j < count` the exact
+guard at `Nat.repeat update j locals` must be nonzero, and the guard at `count`
+must be zero. These are explicit finite-exit premises, not assumed slice runs.
+The theorem preserves every newer-prefix/caller word and all nonselected locals
+that the supplied update preserves. `model` transports that actual result
+through a real selected realization with its represented-stack premise.
+
+Controls compile the original intrinsic local condition and subtraction
+assignment, inhabit zero/two-turn proofs with arbitrary caller tails and a
+two-word newer prefix, and retain dirty words in both scopes. The original leaf
+source certificates are checked; no whole Source FOR-loop theorem follows.
+Shifted last-slot accessibility, RHS temporary-word refusal, underflow and
+scalar success at height1024 with failed capacity remain distinct controls.
+Seven enforced axiom reports use only standard axioms. Independent read-only
+finder and skeptic reviews found no confirmed findings; bare audit reports were
+pinned before committing. No AST, evaluator, calling convention, limit,
+admission rule, manifest or expected verdict changed.
+
+This is Original Backfill A/B target preparation. Whole original FOR/source
+horizons, termination/divergence, source/G24/views, native/charged/capacity/world
+correspondence, frontend admission and final joint gates remain open. NJ1's
+previous exact fixed-fixture attachment remains complete.
