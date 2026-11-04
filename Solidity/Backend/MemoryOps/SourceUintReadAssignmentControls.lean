@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceUintReadAssignment
+import Solidity.Backend.MemoryOps.SourceUintReadSequence
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -405,6 +405,254 @@ theorem endpoint_rejection (p : Roadmap.Pipeline) (badRHS : Bool) :
   rcases targetResult with ⟨o,target,impossible,_⟩ | ⟨_,run⟩
   · cases impossible
   · exact run
+
+private def chainOut : Heap H := (out (u 9)).set left (MObj.setElem .dyn ((out (u 9)).get left) 1 (u 9))
+private def chainSource : Source.EMState E0 Γ :=
+  ((z false 1 (u 9)).1,{(z false 1 (u 9)).2 with heap := (z false 1 (u 9)).2.heap.write 0 (sourceUintMemory ((old.set 0 (u 9)).set 1 (u 9))) (by rfl)})
+private def chainTarget := writeMachine (target false 1 (u 9)) 18 w[9]
+
+private theorem out_elems (v : PrimTy.uint.Denote) : MObj.elems .dyn ((out v).get left)=old.set 0 v := by
+  unfold out
+  rw [Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn]
+  rfl
+
+private theorem chain_mid_at : SourceUintMemoryAt (z false 1 (u 9)) 0 (out (u 9)) left .dyn := by
+  unfold SourceUintMemoryAt z out
+  rw [Source.Heap.write_get,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn]
+  rfl
+
+private theorem chain_source_first (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceUintReadAssign dr sr di si)).run (sy false 0 1)=
+      (.ok (.val (sourceUint (u 9))),z false 1 (u 9)) := by
+  rw [sourceUintReadAssign,Source.evalE,Source.Hoare.run_bind]
+  rw [(src_at false 0 1).eval_index (G0 p) F0 (fuel+1) sr si (u 1) rfl rfl
+    (by simp only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)]
+  simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn]
+  rw [Source.Hoare.run_bind,(dst_at false 0 1).eval_index_loc (G0 p) F0 (fuel+1) dr di (u 0) rfl rfl
+    (by simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)]
+  obtain ⟨ht,wr⟩ := source_uint_write (sy false 0 1) 0 old
+    (by simpa only [SourceUintMemoryAt,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using dst_at false 0 1) 0 (by decide) (u 9)
+  change ((Source.memSet 0 0 (sourceUint (u 9))) >>= fun _ => pure (Source.RVal.val (sourceUint (u 9)))).run _=_
+  rw [Source.Hoare.run_bind,wr]
+  rfl
+
+private theorem chain_source_second (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceUintReadAssign dr dr si di)).run (z false 1 (u 9))=
+      (.ok (.val (sourceUint (u 9))),chainSource) := by
+  rw [sourceUintReadAssign,Source.evalE,Source.Hoare.run_bind]
+  have hlen : (out (u 9)).len left .dyn=3 := by
+    change (MObj.elems .dyn ((out (u 9)).get left)).length=3
+    rw [out_elems,List.length_set]
+    rfl
+  rw [chain_mid_at.eval_index (G0 p) F0 (fuel+1) dr di (u 0) rfl rfl (by rw [hlen];decide)]
+  simp only [out_elems,show (u 0).val.toNat=0 from by decide,old,List.set,List.getElem_cons_zero]
+  rw [Source.Hoare.run_bind,chain_mid_at.eval_index_loc (G0 p) F0 (fuel+1) dr si (u 1) rfl rfl (by rw [hlen];decide)]
+  obtain ⟨ht,wr⟩ := source_uint_write (z false 1 (u 9)) 0 (old.set 0 (u 9))
+    (by unfold z;rw [Source.Heap.write_get]) 1 (by decide) (u 9)
+  change ((Source.memSet 0 1 (sourceUint (u 9))) >>= fun _ => pure (Source.RVal.val (sourceUint (u 9)))).run _=_
+  rw [Source.Hoare.run_bind,wr]
+  rfl
+
+private theorem chain_word_first :
+    run (uintReadAssignCode (C := C) 1 dt st it jt) (machine false 0 1)=.ok (target false 1 (u 9)) 0 := by
+  rw [code_shape,run_append_ok (read_run (machine false 0 1) (wmod 24) (wmod 1) (wmod 9)
+    (by decide) (by decide) rfl rfl rfl rfl)]
+  exact write_run _ _ rfl rfl rfl
+
+private theorem chain_word_second_abstract (m : Machine)
+    (hp : m.mem 3=w[16]) (hi : m.mem 6=w[0]) (hk : m.mem 5=w[1])
+    (hh : m.mem 16=w[3]) (hv : m.mem 17=w[9]) :
+    run (uintReadAssignCode (C := C) 1 dt dt jt it) m=.ok (writeMachine m 18 w[9]) 0 := by
+  have shape : uintReadAssignCode (C := C) 1 dt dt jt it=
+      ([.mload 3] ++ [.mload 6] ++ Objects.readCode (.dyn : ArrTy A (.prim .uint))) ++
+      ([.mload 3] ++ [.mload 5] ++ Objects.writeCode (.dyn : ArrTy A (.prim .uint))) := rfl
+  have read : run ([.mload 3] ++ [.mload 6] ++ Objects.readCode (.dyn : ArrTy A (.prim .uint))) m=
+      .ok (m.push w[9]) 0 := by
+    change run ([.mload 3] ++ ([.mload 6] ++ Objects.readCode (.dyn : ArrTy A (.prim .uint)))) m=_
+    rw [run_append_ok (show run [.mload 3] m=.ok (m.push w[16]) 0 from by change Out.ok (m.push (m.mem 3)) 0=_;rw [hp])]
+    rw [run_append_ok (show run [.mload 6] (m.push w[16])=.ok ((m.push w[16]).push w[0]) 0 from by change Out.ok ((m.push w[16]).push (m.mem 6)) 0=_;rw [hi])]
+    have addr := arrayAddrStack_run m ⟨16,by decide⟩ ⟨0,by decide⟩ 3 (by decide) hh
+    rw [if_pos (by decide)] at addr
+    change run (arrayAddrStackCode ++ [.mloadAt]) ((m.push w[16]).push w[0])=_
+    rw [run_append_ok addr]
+    simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt (show 16+1+0<W from by decide),Out.ok_bind,exec_nil,hv,Machine.next]
+  rw [shape,run_append_ok read]
+  change run ([.mload 3] ++ ([.mload 5] ++ Objects.writeCode (.dyn : ArrTy A (.prim .uint)))) (m.push w[9])=_
+  rw [run_append_ok (show run [.mload 3] (m.push w[9])=.ok ((m.push w[9]).push w[16]) 0 from by change Out.ok ((m.push w[9]).push (m.mem 3)) 0=_;rw [hp])]
+  rw [run_append_ok (show run [.mload 5] ((m.push w[9]).push w[16])=.ok (((m.push w[9]).push w[16]).push w[1]) 0 from by change Out.ok (((m.push w[9]).push w[16]).push (m.mem 5)) 0=_;rw [hk])]
+  have addr := arrayAddrStack_run (m.push w[9]) ⟨16,by decide⟩ ⟨1,by decide⟩ 3 (by decide) hh
+  rw [if_pos (by decide)] at addr
+  change run (arrayAddrStackCode ++ [.mstoreAt]) (((m.push w[9]).push w[16]).push w[1])=_
+  rw [run_append_ok addr]
+  simp only [run,Machine.push,exec_cons_zero,Instr.step,wmod_of_lt (show 16+1+1<W from by decide),Out.ok_bind,exec_nil,writeMachine]
+
+private theorem chain_word_second : run (uintReadAssignCode (C := C) 1 dt dt jt it) (target false 1 (u 9))=.ok chainTarget 0 :=
+  chain_word_second_abstract _ rfl rfl rfl rfl rfl
+
+/-- A materially changed INITIAL RHS (RIGHT[1]=9) first replaces LEFT[0]=7;
+the second statement reads that actual reached nine into LEFT[1], not the old
+seven. Both pipelines execute one Source Items, native Prog and word append. -/
+theorem reached_chain_client (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.execS (G0 p) F0 (fuel+6) nps none (.expr (sourceUintReadAssign dr sr di si) :
+      Source.RStmt E0 [] false .body Γ Γ) (sy false 0 1).1).run (.nil,(sy false 0 1).2)=
+        (.ok (.normal (sy false 0 1).1),(.nil,(z false 1 (u 9)).2)) ∧
+    (Source.execS (G0 p) F0 (fuel+5) nps none (.expr (sourceUintReadAssign dr dr si di) :
+      Source.RStmt E0 [] false .body Γ Γ) (z false 1 (u 9)).1).run (.nil,(z false 1 (u 9)).2)=
+        (.ok (.normal (z false 1 (u 9)).1),(.nil,chainSource.2)) ∧
+    (Source.execItems (G0 p) F0 (fuel+7) nps none
+      (.stmt (.expr (sourceUintReadAssign dr sr di si)) (.stmt (.expr (sourceUintReadAssign dr dr si di)) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sy false 0 1).1).run (.nil,(sy false 0 1).2)=
+          (.ok (.normal (sy false 0 1).1),(.nil,chainSource.2)) ∧
+    Prog.run (state false 0 1) (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local it)))
+      (.val (.readMem (.index .dyn (.var st rfl) (.simple (.local jt))))))
+      (.cons (.assignMem (.index .dyn (.var dt rfl) (.simple (.local jt)))
+        (.val (.readMem (.index .dyn (.var dt rfl) (.simple (.local it)))))) .nil))=
+          .ok ⟨(state false 0 1).withHeap chainOut,List.prefix_refl _⟩ ∧
+    run (uintReadAssignCode (C := C) 1 dt st it jt) (machine false 0 1)=.ok (target false 1 (u 9)) 0 ∧
+    run (uintReadAssignCode (C := C) 1 dt dt jt it) (target false 1 (u 9))=.ok chainTarget 0 ∧
+    run (uintReadAssignCode (C := C) 1 dt st it jt ++ uintReadAssignCode (C := C) 1 dt dt jt it) (machine false 0 1)=.ok chainTarget 0 ∧
+    SourceUintMemoryAt (z false 1 (u 9)) 0 (out (u 9)) left .dyn ∧
+    SourceUintMemoryAt chainSource 0 chainOut left .dyn ∧
+    Source.MemOK E0 SH (z false 1 (u 9)) ∧ Source.MemOK E0 SH chainSource ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ) ((state false 0 1).withHeap (out (u 9))) base (target false 1 (u 9)) ∧
+    Objects.StateRepr 1 1 8 (Frag.init Δ) ((state false 0 1).withHeap chainOut) base chainTarget ∧
+    Objects.AllocatorRepr chainOut base 8 ⟨40,by decide⟩ chainTarget ∧
+    chainTarget.stack=[w[77],w[88]] := by
+  have result := source_uint_read_assign_chain_word (G0 p) F0 fuel nps (sy false 0 1) (state false 0 1)
+    left right 0 1 (dst_at false 0 1) (src_at false 0 1) dr sr di si si dt st it jt jt (u 0) (u 1) (u 1)
+    rfl rfl rfl rfl rfl rfl rfl rfl rfl rfl
+    (by simp only [Heap.len,state,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+    (by simp only [Heap.len,state,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)
+    (by simp only [Heap.len,state,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+    (initial_repr false 0 1) rfl rfl rfl SH (memOK false 0 1)
+  obtain ⟨mid,out',ym,z',mm,t,hw1,hit,hw2,ss1,ss2,items,prog,w1,w2,wapp,hr1,hr2,hm1,hm2,mok1,mok2,ly1,ly2,stack,alloc,el1,el2,other,addrs,ex,ev,logs,fn⟩ := result
+  simp only [state,Heap.get,Objs.get,hp,right,MObj.elems_dyn,show (u 1).val.toNat=1 from by decide,rhs,List.getElem_cons_succ,List.getElem_cons_zero] at hw1 hw2
+  have firstWrite : hp.writeAddr (.index left .dyn (u 0)) (u 9)=some (out (u 9)) := by
+    simp only [out,Heap.writeAddr,Heap.setIndex,Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn,MObj.setElem_dyn]
+    rw [show (u 0).val.toNat=0 from by decide]
+    simp only [show 0<old.length from by decide,↓reduceIte]
+  have midEq : mid=out (u 9) := Option.some.inj (hw1.symm.trans firstWrite)
+  subst mid
+  have secondWrite : (out (u 9)).writeAddr (.index left .dyn (u 1)) (u 9)=some chainOut := by
+    change (out (u 9)).setIndex left .dyn (u 1) (u 9)=some chainOut
+    unfold Heap.setIndex
+    rw [out_elems,show (u 1).val.toNat=1 from by decide]
+    simp only [show 1<(old.set 0 (u 9)).length from by decide,↓reduceIte]
+    rfl
+  have outEq : out'=chainOut := Option.some.inj (hw2.symm.trans secondWrite)
+  subst out'
+  have firstSource := source_expr_statement_run (G0 p) F0 (fuel+5) nps _ _ _ _ (chain_source_first p (fuel+1))
+  have midSourceEq : ym=z false 1 (u 9) :=
+    Prod.ext ly1 (congrArg (fun q => q.2.2) (ss1.symm.trans firstSource))
+  subst ym
+  have secondSource := source_expr_statement_run (G0 p) F0 (fuel+4) nps _ _ _ _ (chain_source_second p fuel)
+  have outSourceEq : z'=chainSource :=
+    Prod.ext ly2 (congrArg (fun q => q.2.2) (ss2.symm.trans secondSource))
+  subst z'
+  have midWordEq : mm=target false 1 (u 9) := (Evm.Out.ok.inj (w1.symm.trans chain_word_first)).1
+  subst mm
+  have outWordEq : t=chainTarget := (Evm.Out.ok.inj (w2.symm.trans chain_word_second)).1
+  subst t
+  exact ⟨ss1,ss2,items,prog,w1,w2,wapp,hr1,hr2,mok1,mok2,hm1,hm2,alloc _ (by decide) (allocator false 0 1),rfl⟩
+
+/-- Complete INITIAL/intermediate/final Source tables, native objects and all
+represented words; old reference identities/locals/world are not projected away. -/
+theorem reached_chain_vectors :
+    words (machine false 0 1)=[w[40],w[32],w[16],w[16],w[24],w[1],w[0],w[0],w[99],w[3],w[7],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words (target false 1 (u 9))=[w[40],w[32],w[16],w[16],w[24],w[1],w[0],w[0],w[99],w[3],w[9],w[0],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    words chainTarget=[w[40],w[32],w[16],w[16],w[24],w[1],w[0],w[0],w[99],w[3],w[9],w[9],.val wMax,w[3],w[2],w[9],w[1],w[2],w[8],w[9]] ∧
+    objects hp=[old,rhs,next] ∧ objects (out (u 9))=[old.set 0 (u 9),rhs,next] ∧
+    objects chainOut=[(old.set 0 (u 9)).set 1 (u 9),rhs,next] ∧
+    sourceObjects (sy false 0 1)=[some ⟨SA,sourceUintMemory old⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects (z false 1 (u 9))=[some ⟨SA,sourceUintMemory (old.set 0 (u 9))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    sourceObjects chainSource=[some ⟨SA,sourceUintMemory ((old.set 0 (u 9)).set 1 (u 9))⟩,some ⟨SA,sourceUintMemory rhs⟩,some ⟨SA,sourceUintMemory next⟩] ∧
+    chainSource.1=(sy false 0 1).1 ∧ chainSource.2.ex=(sy false 0 1).2.ex ∧
+    chainSource.2.events=(sy false 0 1).2.events ∧ chainSource.2.logs=(sy false 0 1).2.logs ∧
+    chainSource.2.fnLocals=(sy false 0 1).2.fnLocals ∧
+    (target false 1 (u 9)).stack=[w[77],w[88]] ∧ chainTarget.stack=[w[77],w[88]] ∧
+    TEnv.get dt (state false 0 1).env=some left ∧
+    TEnv.get (.there (.there (.there (.there .here))) : Idx Δ (.mem A)) (state false 0 1).env=some left := by
+  refine ⟨rfl,rfl,rfl,?_,?_,?_,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · simp only [objects,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn]
+  · simp only [objects,out,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+  · simp only [objects,chainOut,out,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,neighbor,MObj.elems_dyn,MObj.setElem_dyn]
+  · simp only [sourceObjects,z,Source.Heap.write_get,Source.Heap.write_other _ (show 1≠0 by decide),Source.Heap.write_other _ (show 2≠0 by decide)]
+    rfl
+  · simp only [sourceObjects,chainSource,z,Source.Heap.write_get,Source.Heap.write_other _ (show 1≠0 by decide),Source.Heap.write_other _ (show 2≠0 by decide)]
+    rfl
+
+/-- The actual read of the selected cell changes from seven to nine. Skipping
+propagation or using the frozen initial seven changes a complete output vector. -/
+theorem reached_chain_frozen_negative (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (sy false 0 1)=
+      (.ok (.val (sourceUint (u 7))),sy false 0 1) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local dr) (.local di) rfl)).run (z false 1 (u 9))=
+      (.ok (.val (sourceUint (u 9))),z false 1 (u 9)) ∧
+    words chainTarget≠words (target false 1 (u 9)) ∧
+    words chainTarget≠words (writeMachine (target false 1 (u 9)) 18 w[7]) := by
+  refine ⟨?_,?_,?_,?_⟩
+  · have rd := (dst_at false 0 1).eval_index (G0 p) F0 fuel dr di (u 0) rfl rfl
+      (by simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)
+    simpa only [Heap.get,Objs.get,hp,left,MObj.elems_dyn] using rd
+  · have rd := chain_mid_at.eval_index (G0 p) F0 fuel dr di (u 0) rfl rfl
+      (by change (u 0).val.toNat<(MObj.elems .dyn ((out (u 9)).get left)).length;rw [out_elems,List.length_set];decide)
+    simpa only [out_elems,show (u 0).val.toNat=0 from by decide,old,List.set,List.getElem_cons_zero] using rd
+  · intro h
+    have h18 := congrArg (fun xs => xs[11]?) h
+    change some w[9]=some w[0] at h18
+    cases h18
+  · intro h
+    have h18 := congrArg (fun xs => xs[11]?) h
+    change some w[9]=some w[7] at h18
+    cases h18
+
+private theorem chain_source_first_three (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) F0 3 (sourceUintReadAssign dr sr di si)).run (sy false 0 1)=
+      (.ok (.val (sourceUint (u 9))),z false 1 (u 9)) := by
+  rw [sourceUintReadAssign,Source.evalE,Source.Hoare.run_bind]
+  rw [(src_at false 0 1).eval_index (G0 p) F0 0 sr si (u 1) rfl rfl
+    (by simp only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn];decide)]
+  simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn]
+  rw [Source.Hoare.run_bind,(dst_at false 0 1).eval_index_loc (G0 p) F0 0 dr di (u 0) rfl rfl
+    (by simp only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn];decide)]
+  obtain ⟨ht,wr⟩ := source_uint_write (sy false 0 1) 0 old
+    (by simpa only [SourceUintMemoryAt,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using dst_at false 0 1) 0 (by decide) (u 9)
+  change ((Source.memSet 0 0 (sourceUint (u 9))) >>= fun _ => pure (Source.RVal.val (sourceUint (u 9)))).run _=_
+  rw [Source.Hoare.run_bind,wr]
+  rfl
+
+/-- Actual short Items horizon retains the materially changed first Source
+heap before the second statement times out. This is not a transaction rollback
+or a claim that the independently fueled native/word program also times out. -/
+theorem reached_chain_prefix_timeout (p : Roadmap.Pipeline) (nps : Nat) :
+    (Source.execS (G0 p) F0 4 nps none (.expr (sourceUintReadAssign dr sr di si) : Source.RStmt E0 [] false .body Γ Γ)
+      (sy false 0 1).1).run (.nil,(sy false 0 1).2)=(.ok (.normal (sy false 0 1).1),(.nil,(z false 1 (u 9)).2)) ∧
+    (Source.execItems (G0 p) F0 5 nps none
+      (.stmt (.expr (sourceUintReadAssign dr sr di si)) (.stmt (.expr (sourceUintReadAssign dr dr si di)) .nil) :
+        Source.RItems E0 [] false .body Γ Γ) (sy false 0 1).1).run (.nil,(sy false 0 1).2)=
+          (.error .timeout,(.nil,(z false 1 (u 9)).2)) := by
+  have first := source_expr_statement_run (G0 p) F0 3 nps _ _ _ _ (chain_source_first_three p)
+  have late : (Source.evalE (G0 p) F0 2 (sourceUintReadAssign dr dr si di)).run (z false 1 (u 9))=
+      (.error .timeout,z false 1 (u 9)) := by cases p <;> rfl
+  have second := source_expr_statement_error (G0 p) F0 2 nps _ _ _ _ late
+  have tail : (Source.execItems (G0 p) F0 4 nps none (.stmt (.expr (sourceUintReadAssign dr dr si di)) .nil :
+      Source.RItems E0 [] false .body Γ Γ) (z false 1 (u 9)).1).run (.nil,(z false 1 (u 9)).2)=
+        (.error .timeout,(.nil,(z false 1 (u 9)).2)) := by
+    rw [Source.execItems,Source.Hoare.run_bind,second]
+  refine ⟨first,?_⟩
+  rw [Source.execItems,Source.Hoare.run_bind,first]
+  change (Source.execItems (G0 p) F0 4 nps none (.stmt (.expr (sourceUintReadAssign dr dr si di)) .nil :
+    Source.RItems E0 [] false .body Γ Γ) (z false 1 (u 9)).1 >>= fun o => Source.EM.lift (o.up Γ)).run (.nil,(z false 1 (u 9)).2)=_
+  rw [Source.Hoare.run_bind,tail]
+
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reached_chain_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_frozen_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reached_chain_frozen_negative
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_prefix_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reached_chain_prefix_timeout
+/-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.reached_chain_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reached_chain_client
 
 /-- info: 'Solidity.Backend.MemoryOps.UintReadAssignmentControls.computed_rhs_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms computed_rhs_client

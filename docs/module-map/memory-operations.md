@@ -179,3 +179,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Backend/MemoryOps/SourceUintReadAssignment.lean` | Actual RHS-first indexed uint memory read assignment; Source/native/strong Objects frames and allocator transport. |
 | `Backend/MemoryOps/SourceUintReadAssignmentControls.lean` | Inhabited computed-RHS distinct/aliased clients, complete twenty-word/Source/native vectors and endpoint/timeout negatives. |
+
+| `Backend/MemoryOps/SourceUintReadSequence.lean` | Reached computed-RHS propagation: actual Source Items/native Prog/full Objects word append, initial bounds and composed allocator/world frames. |
