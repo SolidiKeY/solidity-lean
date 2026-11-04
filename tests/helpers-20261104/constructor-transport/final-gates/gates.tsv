@@ -1,0 +1,12 @@
+runtime	0	/bin/bash -c set\ -e\;\ printf\ \"MEMORY_MAX=\"\;\ cat\ /sys/fs/cgroup/memory.max\;\ printf\ \"SWAP_MAX=\"\;\ cat\ /sys/fs/cgroup/memory.swap.max\;\ lake\ --version\;\ lean\ --version\;\ lake\ env\ lean\ -j1\ --tstack=131072\ Solidity/KeySort.lean\;\ echo\ \"KeySort\ PASS\;\ RUNTIME_GATE_PASS\"
+packet-build	0	lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls
+axiom-pins	0	lake env lean -j1 --tstack=131072 tests/helpers-20261104/constructor-transport/AxiomPins.lean
+controls-mcp	0	/bin/bash -c export\ PATH=/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/bin:\$PATH\;\ export\ LEAN_LSP_MAX_OPEN_FILES=1\;\ trap\ \"python3\ scripts/coord-tools/lean-mcp\ stop\"\ EXIT\;\ python3\ scripts/coord-tools/lean-mcp\ diag\ Solidity/Lowering/V08/HelperPackets/ConstructorTransport/Controls.lean
+compiler	127	node tests/helpers-20261104/constructor-transport/compiler-control.cjs
+full-gate	127	/bin/bash run-lean.sh
+compiler-retry	0	node tests/helpers-20261104/constructor-transport/compiler-control.cjs
+full-gate-retry	1	bash run-lean.sh
+trust	0	static repository gate
+orphans	1	static repository gate
+doc-paths	0	static repository gate
+axiom-inventory	1	static repository gate

@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+for arg in "$@"; do
+  case "$arg" in -f|--file|--file=*) exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "$@";; esac
+done
+for arg in "$@"; do
+  case "$arg" in
+    serve) exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "$@" -j1 --tstack=131072;;
+    build|exe) exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake -f "${CTOR_SERIAL_CONFIG:-tests/helpers-20261104/constructor-transport/serial.toml}" "$@";;
+    env|lean|query|clean|new|init|update|serve) break;;
+  esac
+done
+exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "$@"
