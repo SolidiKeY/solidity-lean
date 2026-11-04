@@ -201,3 +201,21 @@ all original gate refusals and budgets. The success branch takes the actual
 gate result, initial image, stack and bounded span; it must derive execution,
 loaded bytes, saved tail and the exact existing post-image boundary. It assumes
 no desired value, run or reached state, nor a concrete byte-world producer.
+
+`MemoryLoadExecution.success` now supplies that linkage. It proves directly
+that the MLOAD gate changes gas without changing memory, active words or the
+stack, then reuses `MemoryCharged.load_charged`, `MemoryLoad.payload` and
+`MemoryLoadExtent.post_image`. The reached state and value are derived from
+actual execution. Existing error branches, gas charges, full reached-state
+formula and zero/one driver budgets are retained by the extended certificate.
+No desired run, code-realization producer or Source-origin premise is supplied.
+The post-image iff keeps the already-proved strict word-fit boundary explicit.
+`MemoryLoadControls` adds a real nonzero ordered charged load at gas 3 with two
+saved tail words and its P6 image, for either pipeline and arbitrary continuation
+fuel; gas 2 actually refuses despite a valid initial image. These are pinned
+logical-runtime checks, not external EVM tests or Source/compiler adequacy.
+Independent read-only finder and skeptic reviews passed with no findings. They
+confirmed the gate result is not an assumed run or poststate, inheritance keeps
+all original failure/resource equations, and both charged controls use inhabited
+initial images. The remaining full G40 and G46 correspondence obligations are
+unchanged; this checkpoint does not supply a complete lane gate or producer.
