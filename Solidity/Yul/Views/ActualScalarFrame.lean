@@ -72,4 +72,25 @@ theorem actualScalarWrite_outer_commit_rollback {E Γ} (F : Source.Fr) (s : Sour
   rw [actualScalarWrite_companion F s c v raw allowed r]
   exact companionRollback_outer_commit ⟨s.2.ex,r⟩ [RepeatedCellWrites.operation F c v]
     [RepeatedCellWrites.operation F d w] [] [] _ _ _ _ _
+theorem actualScalarWrite_registry_view {E Γ} (F : Source.Fr) (s : Source.EMState E Γ)
+    (cs : List (ScalarPath E.layout (E.lay F.this))) (c : ScalarPath E.layout (E.lay F.this))
+    (member : c∈cs) (separated : finiteSeparated cs) (raw : SlotView)
+    (view : finiteView cs (s.2.ex.world.accounts F.this).storage raw)
+    (value : Source.Val E.layout (E.cellTy c.path)) (persistent : E.transientRoot c.path=false)
+    (allowed : F.static=false) :
+    finiteView cs ((actualScalarWrite F c.path c.codec c.slot value raw s).1.2.2.ex.world.accounts F.this).storage
+      (actualScalarWrite F c.path c.codec c.slot value raw s).2 := by
+  first | (simp only;done) | decide | omega | rfl | skip
+  rw [actualScalarWrite_storage F c.path c.codec c.slot value raw s persistent allowed]
+  rw [actualScalarWrite_run F c.path c.codec c.slot value raw s persistent allowed]
+  exact PackedCellUpdate.view cs c member separated _ raw view value
+
+theorem actualScalarWrite_registry_complement {E Γ} (F : Source.Fr) (s : Source.EMState E Γ)
+    (cs : List (ScalarPath E.layout (E.lay F.this))) (c : ScalarPath E.layout (E.lay F.this))
+    (member : c∈cs) (raw : SlotView) (value : Source.Val E.layout (E.cellTy c.path))
+    (allowed : F.static=false) :
+    packedMask cs (actualScalarWrite F c.path c.codec c.slot value raw s).2=packedMask cs raw := by
+  first | (simp only;done) | decide | omega | rfl | skip
+  rw [actualScalarWrite_operation F s c value raw allowed]
+  exact PackedCellUpdate.complement cs c member value raw
 end Solidity.Yul.Views
