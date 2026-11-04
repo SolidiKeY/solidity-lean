@@ -338,6 +338,16 @@ copies and skipped failures; empty maximum-offset copies remain valid. Capacity
 failure denotes unsupported bounded-frame preparation, not a Source/Yul halt,
 native EVM failure or allocation verdict.
 
+`P6ResidualResume` uses the producer's existing `expandZero` and resumes only
+`checkedCopies`' pending suffix. The complete byte image, carried state/key and
+high-water accounting are unchanged by reservation; capacity grows by a word
+multiple. The two actual executed prefixes construct one chronological residual
+image and unchanged whole Source writeback. Insufficient reservation can still
+leave requests pending. Controls cross capacity512 into544, then copy from the
+newly written tail; access raises high-water to17. Replaying the accepted
+overlapping prefix changes byte232 from8 to7, unlike correct resumption. This is
+bounded representation preparation, not allocator reachability or EVM expansion.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
