@@ -690,3 +690,35 @@ remain partial: general locations, tuples, effects/failures and production are
 open. G18.01/G18.06 retain concrete producer, ordered child, representation and
 copy/delete/lifetime dependencies; delegated G18/G19 ownership is unchanged.
 Constructor coverage remains zero.
+
+## Unsigned division and remainder
+
+`UnsignedQuotRem` proves nine laws over existing Source and intrinsic values.
+For canonical unsigned operands and a nonzero denominator, truncating division
+is between zero and the numerator, and remainder is below the denominator.
+The output range is derived, not supplied; no narrowing is needed. Source
+intRes therefore succeeds in both checked settings. Reached-pair composition
+uses actual Source evalPair; local transport discharges it and derives target
+reads from initial IntegerLocalFamily alignment. Both pipelines are covered.
+
+Zero is covered separately, not excluded from admission: actual Source gives
+the divZero panic payload while the native intrinsic value returns plain revert.
+Their36-versus0-byte observation is an explicit boundary witness, not failure
+preservation. A guarded program must supply the payload; no target predicate,
+Source observation or failure projection is weakened here. General frontend
+selection, effectful operands and failure-program composition remain open.
+
+Fifteen inhabited clients cover all laws, alias repetitions, equal-content
+distinct cells, fresh contexts and live refs.2304 matrix executions span all32
+widths, both pipelines/checked settings/operators, zeros/extrema and ordinary
+pairs; reversed operands distinguish17/5=3 from5/17=0 and17%5=2 from5%17=5.
+Twenty-four queried inline guards pin every headline/client; the range law and
+its client use only propext/Quot.sound, others the standard three. Separate
+independent read-only finder/skeptic source reviews found no substantive issue.
+Operator normalization and control-parenthesis failures are retained in evidence.
+
+Feature arithmetic remains partial: catalog evidence originally names only
+Grammar.lean; propose these two owned modules as additional component evidence,
+without changing the global manifest/ledger. G16/G17/P12, G18.01 and Backfill A/B
+remain partial. G18.06 awaits ordered V16/V14 applications and concrete P8
+producers; G19 remains V17. No constructors or external compiler/EVM tests added.

@@ -88,3 +88,5 @@
 | `Lowering/V07/SignedComplementControls.lean` | Both checkedness modes/pipelines, all signed widths, live-context clients and missing-minus-one/reversed-operand controls. |
 | `Lowering/V07/SignedLocalUpdate.lean` | Actual unchecked local signed prefix/postfix increment/decrement with fresh old/result captures and derived alias-family updates. |
 | `Lowering/V07/SignedLocalUpdateControls.lean` | All signed widths, MAX/MIN wrap and missing-narrowing controls, mixed caller/context clients and actual pipeline observations. |
+| `Lowering/V07/UnsignedQuotRem.lean` | Actual unsigned division/remainder, derived result bounds and initial-family local transport; distinct Source/native zero observations. |
+| `Lowering/V07/UnsignedQuotRemControls.lean` | All widths/modes/pipelines, zero and reversed-operand controls, inhabited alias/context/live-reference clients and payload mismatch witness. |
