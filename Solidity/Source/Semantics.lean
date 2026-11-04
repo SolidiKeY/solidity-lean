@@ -202,6 +202,40 @@ def runTx (G : Glob E) (n : Nat) (q : Request) : EM E [] Outcome := do
   emitEvent (.tx q.sender q.target q.value q.timestamp q.input out)
   pure out
 
+/-- Execute an actual root transaction with the supplied immutable failure
+plan. Root frame checks surround actual credit/dispatch; remaining request or
+ancestor stops propagate after rollback and before finalization/receipt.
+Terminal receipts do not count toward body budgets. This is the same Source
+evaluator, not a second statement semantics. It deliberately leaves legacy
+`runTx` unchanged: adding a disabled option to that hot proof interface caused
+a measured checking regression. Request-fate entry/post-fee installation and
+fixed-plan session consistency remain separate obligations. -/
+def runTxWithPlan (G : Glob E) (n : Nat) (q : Request)
+    (points : Roadmap.Evm.FailurePoints) : EM E [] Outcome :=
+  let plan : FailureExecution.RuntimePlan := some points
+  FailureExecution.preflight plan do
+    let G := { G with timestamp := q.timestamp }
+    let m ← mark
+    let out ← match ← instanceAt G q.target with
+      | none => pure (Outcome.revert [])
+      | some c =>
+        let r ← attempt (FailureExecution.frame plan do
+          credit q.target q.value
+          let F : Fr := { this := q.target, sender := q.sender, value := q.value, static := false, contract := c, cd := q.input }
+          dispatch (plan := plan) G F n q.input)
+        modSt fun s => { s with heap := Heap.empty }
+        match r with
+        | .ok d => pure (.success d)
+        | .error (.revert d) => do
+          rollbackTo m
+          FailureExecution.preflight plan (pure (.revert d))
+        | .error h => halt h
+    FailureExecution.preflight plan do
+      modSt fun s => { s with ex := s.ex.endTx }
+      emitEvent (plan := none) (.tx q.sender q.target q.value q.timestamp q.input out)
+      pure out
+
+
 /-! ## Horizons -/
 
 /-- Whether a result completed (did not reach its horizon). -/

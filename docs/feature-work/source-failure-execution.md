@@ -342,3 +342,36 @@ Some-plan consistency or P8 realization is claimed. Full original24/six
 obligations remain open. Simple automation failures and the successful exact
 monad case proof are retained under
 `/workspace/vy5-composition/deploy-receipt-20261104/`.
+
+## Scheduled root transaction execution (2026-11-04)
+
+`Source.runTxWithPlan G horizon request points` executes the existing actual
+credit/dispatch/rollback/finalization operations inside a root frame and
+preflights remaining request/ancestor stops before finalization. Completed
+own-frame reverts finalize transient/journal state and emit a terminal receipt;
+propagated outer stops, timeout and stuck retain their distinct exceptional
+states without a receipt. Receipts stay outside body-event budgets.
+
+The legacy `runTx` declaration is byte-identical to its prior version. An
+optional-argument extension was rejected after controlled single-thread
+Horizon checking342.409527430→357.750699835s. The separate enabled operation
+checks at339.077745974s versus342.409527430s baseline; Semantics itself
+0.972184346→0.939854188s. Full records/source/import hashes are in the
+[measured record](vy5-transaction-timings.json) and
+`/workspace/vy5-composition/transaction-proof-20261104/`. The unchanged
+Horizon300s policy failure remains a failure; no runtime-gate pass follows.
+
+Fourteen both-pipeline kernel controls use the existing intrinsic PB program
+and explicit toy Fixed/strategy, not solc/EVM code: ordinary success; own cuts;
+zero horizon; exact outer-stop ownership; complete rollback/finalization state;
+missing-code heap retention; pre-entry stop; entered stuck-state retention;
+and full selector-plus32-byte panic data. The three previously failed
+whole-state rfl attempts now use the actual credited operation and
+ExecState.undo_apply, with unchanged conclusions. All failure logs remain.
+
+This root operation does not consume a request fate, install an arbitrary Nat
+post-fee balance, establish general cursor coherence/fixed-plan consistency,
+or create a P8 realization. callAddr's environment branch still lacks a
+scheduled frame entry; this is an explicit remaining H16 child. H18 session
+indexing, H19/immutable/funds release and all24 original/six full Y10
+combinations remain open. No new native comparison is claimed.
