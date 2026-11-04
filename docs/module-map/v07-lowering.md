@@ -94,3 +94,5 @@
 | `Lowering/V07/UnsignedQuotRemGuardControls.lean` | Guard metadata, all-width/mode/pipeline cases, live caller/context clients and exact wrong-code/plain-revert/drop controls. |
 | `Lowering/V07/UnsignedQuotRemEffects.lean` | Effectful assignment/read quotient and remainder transport with actual pipeline captures and panic payloads. |
 | `Lowering/V07/UnsignedQuotRemEffectsControls.lean` | Inhabited ordered alias, zero-divisor, context and mixed-reference controls. |
+| `Lowering/V07/UnsignedQuotRemPass.lean` | Exact published panic insertion for pure and effectful quotient/remainder clauses, with independent Source transport. |
+| `Lowering/V07/UnsignedQuotRemPassControls.lean` | Inhabited pass clients, alias/context controls and ordered payload negatives. |

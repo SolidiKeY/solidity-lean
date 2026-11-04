@@ -2227,6 +2227,8 @@ import Solidity.Lowering.V07.UnsignedQuotRemEffects
 import Solidity.Lowering.V07.UnsignedQuotRemEffectsControls
 import Solidity.Lowering.V07.UnsignedQuotRemGuard
 import Solidity.Lowering.V07.UnsignedQuotRemGuardControls
+import Solidity.Lowering.V07.UnsignedQuotRemPass
+import Solidity.Lowering.V07.UnsignedQuotRemPassControls
 import Solidity.Lowering.V07.UnsignedWidthCastControls
 import Solidity.Lowering.V07.UnsignedWidthCasts
 import Solidity.Lowering.V07.WordCastControls
