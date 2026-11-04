@@ -484,3 +484,15 @@ correspondence. General physical execution beyond that published slice, arbitrar
 frame/call/rollback adequacy, broader mixed and nested dynamic history, dirty-word
 transport, universal ownership, allocator reachability and compiler adequacy
 remain open.
+
+The `P6ByteReferenceReads` adapter proves actual Source length/read/write laws
+for both byte and string heap cells. Resolved memory-byte location formation
+has no current-length guard; read and write operations check bounds and retain
+the exact panic payload and whole state on failure. Successful byte writes
+preserve the real heap constructor and surrounding Source administration.
+The retained-region control obtains the two heaps from the existing sequential
+shrink/regrowth preparation: index 40 fails at length zero and reads the raw
+regrown payload at length 64. These synthetic heap/frame witnesses establish
+neither allocation reachability nor a historical successful index-40 access.
+General producer capture, arbitrary source/frame adequacy and the remaining
+original work/backfill obligations remain open.
