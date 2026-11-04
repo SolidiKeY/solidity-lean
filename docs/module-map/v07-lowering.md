@@ -136,3 +136,5 @@
 | `Lowering/V07/UdvtFixedBytesAssignmentControls.lean` | Real nominal metadata, all32 byte widths, mixed references and stale/truncation/nominal-refusal controls with exact guards. |
 | `Lowering/V07/FixedBytesComparisons.lean` | All six fixed-byte comparison clauses with actual assignment/read pipeline order and initial-derived caller transport. |
 | `Lowering/V07/FixedBytesComparisonControls.lean` | All-width/operator ordered observations, live-reference framing and executed uncaptured/reversed-capture negative programs. |
+| `Lowering/V07/IntegerConstants.lean` | Source integer literal conversion from existing range typing, actual native fresh capture/drop and exact caller framing. |
+| `Lowering/V07/IntegerConstantControls.lean` | All64 integer types, literal boundaries, mixed references and executed truncation/fraction/signedness controls with exact pins. |
