@@ -284,6 +284,8 @@ import Solidity.Backend.MemoryCopies.CanonicalSingletonInterface
 import Solidity.Backend.MemoryCopies.CheckedCapture
 import Solidity.Backend.MemoryCopies.CheckedCaptureControls
 import Solidity.Backend.MemoryCopies.CheckedCaptureInterface
+import Solidity.Backend.MemoryCopies.CheckedDefault
+import Solidity.Backend.MemoryCopies.CheckedDefaultControls
 import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
 import Solidity.Backend.MemoryCopies.CheckedMemoryArray
 import Solidity.Backend.MemoryCopies.CheckedMemoryArrayControls

@@ -315,3 +315,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedMemoryArray.lean` | Actual loaded-capacity guard and total fresh primitive-array copy execution. |
 | `Backend/MemoryCopies/CheckedMemoryArrayControls.lean` | Populated/empty/long copies, inhabited saturation refusals and last-fitting capacity controls. |
 | `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Production-selected default capacity guard and total allocation/refusal contract. |
+| `Backend/MemoryCopies/CheckedDefault.lean` | Actual production default selection with total guarded allocation/refusal and complete result transport. |
+| `Backend/MemoryCopies/CheckedDefaultControls.lean` | Inhabited nested defaults, impossible-capacity refusal and unused huge child controls. |
