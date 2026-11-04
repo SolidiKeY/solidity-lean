@@ -1,0 +1,3 @@
+# H28 retained timing parser, item 1
+
+Exact producer `0b532e62d19ed3bf881f7cf1caa6f2739f5c42b1` passed separate read-only finder and skeptic reviews and the unchanged coordinator-pinned 31-case acceptance, including the retained timing corpus. The same frozen black-box cases also pass against the imported parser on this combined tree. The exact scope-checking acceptance remains bound to the original producer snapshot. Parsed timing rows follow the literal frozen format; unsupported lines remain unparsed. This does not implement items 2/3, validate every historical log format, or assert Lean proof results.
