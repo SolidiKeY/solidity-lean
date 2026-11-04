@@ -656,9 +656,11 @@ import Solidity.Backend.PrimitivePackets.UnsignedDiv.Numeric
 import Solidity.Backend.PrimitivePackets.UnsignedDiv.Selection
 import Solidity.Backend.PrimitivePackets.UnsignedDiv.SourceOrigin
 import Solidity.Backend.PrimitivePackets.UnsignedDiv.Witness
+import Solidity.Backend.PrimitivePackets.UnsignedMul.Controls
 import Solidity.Backend.PrimitivePackets.UnsignedMul.Execution
 import Solidity.Backend.PrimitivePackets.UnsignedMul.Selection
 import Solidity.Backend.PrimitivePackets.UnsignedMul.WideControls
+import Solidity.Backend.PrimitivePackets.UnsignedMul.WidthControls
 import Solidity.Backend.Scalar.ArithmeticWidths
 import Solidity.Backend.Scalar.Axioms
 import Solidity.Backend.Scalar.Bitwise
