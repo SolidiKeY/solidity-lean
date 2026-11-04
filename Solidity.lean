@@ -2164,6 +2164,8 @@ import Solidity.Source.FailureConstructorControls
 import Solidity.Source.FailureCursor
 import Solidity.Source.FailureEventControls
 import Solidity.Source.FailureEventLaws
+import Solidity.Source.FailureFrameHorizon
+import Solidity.Source.FailureFrameHorizonControls
 import Solidity.Source.FailureMachine
 import Solidity.Source.FailureMachineControls
 import Solidity.Source.FailurePrimitives

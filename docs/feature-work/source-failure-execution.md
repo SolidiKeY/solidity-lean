@@ -405,3 +405,16 @@ The unchanged Horizon before/after300-second policy failures remain;
 OpenLoops also checked in343seconds (timing failure, kernel pass).
 No runtime-gate or whole-lane pass is claimed. Historical failing gates
 remain failures; this fresh doc-paths pass is a distinct current-tree check.
+
+### Frame consistency child
+
+FailureFrameHorizon proves actual check/event/frame Grow and frame Approx,
+using the existing Source.Horizon relations. Generic body Grow/Approx are
+explicit premises, not assumed execution agreement or full evaluator facts.
+The attempt continuation rethrows timeout without adding events; a concrete
+inhabited counterexample rejects a blanket Approx.attempt rule. Seven
+controls include actual event emission, exact caller/heap/full-state output,
+retainedDEAD bytes, timeout and outer-frame cutoff. Eleven generated exact
+standard-axiom guards pass. Source.Horizon and all evaluator bodies remain
+unchanged. This closes a primitive transport child only: planned evaluator
+mutual consistency/session/P8 realization and all24/six remain open.

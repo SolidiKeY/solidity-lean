@@ -99,3 +99,6 @@
 | `Source/FailureConstructorControls.lean` | H16 actual initializer/body CALL event cuts, rollback and seeded parent/request owner propagation; default-None horizon proofs retained. Root/session indexing and full adequacy remain open. |
 
 | `Source/FailureTransactionControls.lean` | H16 actual root dispatch plan, own-frame reverts versus outer-stop/timeout propagation, transient/journal finalization and complete state controls; request fate/funding/P8 adequacy remain open. |
+
+| `Source/FailureFrameHorizon.lean` | H16 actual frame/check/event Grow and frame Approx transport; explicit real body relations and rethrow-timeout continuation, not full planned evaluator consistency. |
+| `Source/FailureFrameHorizonControls.lean` | Inhabited event-prefix/heap/caller full-state frames, timeout/outer-cut controls and counterexample to blanket attempt approximation. |
