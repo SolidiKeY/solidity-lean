@@ -207,6 +207,24 @@ The routine outer wrapper is type-checked prose only in TERRA-TODO; twenty
 adapters remain unproved. General variable-shape capture, physical emission and
 compiler/world composition remain open.
 
+## Independently varying child lengths
+
+`SourceVaryingByteCapture.timeout_prefix` removes the common-inner-length
+premise from the preceding capture family. Every child has its own runtime
+length and payload. At original loop fuel `count+budget+3`, earlier children
+must satisfy `length(start+j) < count+budget-j`; the final child satisfies
+`budget ≤ length(start+count)`. These are actual matching-prefix fuel conditions,
+not an admitted-source cap. The proof derives each successful capture's padding
+and transports OLD header/byte reads across the resulting heap-only updates.
+
+Seven populated Source copy outcomes preserve complete headers, raw tails,
+heap contents, contexts and journals. Lengths 1/2/2 leave an older second byte
+outside the first captured object. A checked earlier-fuel counterexample shows
+why the success inequalities cannot be dropped. The routine outer wrapper is
+type-checked prose only; twenty-one Terra adapters remain unproved. General
+recursive shapes, eager target realization, physical allocation and compiler/
+world composition remain open.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

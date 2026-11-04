@@ -224,3 +224,32 @@ theorem copy_timeout_prefix :
 ```
 
 One adapter added to prior nineteen: twenty remain pending.
+
+## C173: varying-length outer capture wrapper
+
+Module: `Solidity.Lowering.StorageOps.SourceVaryingByteCapture`.
+Lemma: `copy_timeout_prefix`.
+Why routine: unfold the existing outer capture binds and apply the checked
+runtime prefix theorem at start0. Preserve both fuel inequalities and the exact
+heap payloads; add no destination/writable premise. This is a type-checked
+proposition only, not a compiled theorem or assumption.
+
+```lean
+theorem copy_timeout_prefix :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (src dst : Solidity.Source.SPath) (_different : src≠dst)
+ (count budget : Nat) (length : Nat → Nat) (payload : Nat → Nat → UInt8)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_enough : ∀ j<count,length j<count+budget-j) (_short : budget≤length count)
+ (_outerHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame src).run (locals,state)=(.ok (count+1),(locals,state)))
+ (_headers : ∀ j<count+1,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (src.go (.index j))).run (locals,state)=
+  (.ok (length j),(locals,state)))
+ (_reads : ∀ j<count+1,∀ k<length j,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame ((src.go (.index j)).go (.index k)) (.fixedBytes 1 (by decide))).run (locals,state)=
+  (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j k] rfl),(locals,state))),
+ (Solidity.Source.storeVal (E:=E) (Γ:=Γ) frame (count+budget+5) (.array .storage (.bytes .storage) none) dst
+  (Solidity.Source.Val.storRef (τ:=.array .storage (.bytes .storage) none) rfl src)).run (locals,state)=
+ (.error .timeout,(locals,(List.range' 0 count).foldl
+  (fun state j=>Solidity.Lowering.StorageOps.SourceNestedByteValues.allocateAt (length j) payload state j) state))
+```
+
+One added to prior twenty: twenty-one adapters remain pending.

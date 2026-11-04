@@ -1825,6 +1825,8 @@ import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumeric
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteNumericControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeletes
+import Solidity.Lowering.StorageOps.SourceVaryingByteCapture
+import Solidity.Lowering.StorageOps.SourceVaryingByteCaptureControls
 import Solidity.Lowering.StorageOps.SourceWordCommutation
 import Solidity.Lowering.StorageOps.SourceWordCommutationControls
 import Solidity.Lowering.StorageOps.SourceWordRead

@@ -101,3 +101,6 @@
 
 | `Lowering/StorageOps/SourceNestedByteValues.lean` | Actual distinct nonempty byte capture and runtime index allocation-prefix law at arbitrary common inner length |
 | `Lowering/StorageOps/SourceNestedByteValuesControls.lean` | Full nonempty capture outcomes/headers/heaps/journals, retained tails and wrong-order negative control |
+
+| `Lowering/StorageOps/SourceVaryingByteCapture.lean` | Actual capture prefixes with independent runtime child lengths, payloads and original per-child fuel conditions |
+| `Lowering/StorageOps/SourceVaryingByteCaptureControls.lean` | Complete variable-length copy outcomes, retained tails, heap/journal observations and necessary-fuel counterexample |
