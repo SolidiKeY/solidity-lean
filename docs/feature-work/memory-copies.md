@@ -295,3 +295,7 @@ and scoped axiom reports are required before accepting this increment.
 ## Typed traversal sibling freshness
 
 `TraversalInterface.lean` states freshness and strict sibling identity order for the actual `SVec.copyStToM` fold on arbitrary intrinsic reference values. It introduces no traversal, graph admission or shape filter. Signature precedes implementation; compiled storage-layout refinement remains open.
+
+`traversalFresh` proves the signature for every existing intrinsic map-free reference vector by recursion on its length, using existing copy equations, root freshness and prefix growth. Sibling roots are strictly ordered with no duplicate ids even for repeated values and nested contents. Controls copy equal trees with live child lengths2/0/64 after an old object, obtain roots4/8/9, reject4/4/9 and inhabit empty/populated certificates;64 nested values have distinct roots. This is sibling-root separation, not global descendant separation, Source graph admission, emitted storage-load traversal or physical layout.
+
+Independent finder and skeptic identified a fixture helper lacking its intrinsic length bound. That helper now requires the bound explicitly at concrete calls. Both re-reviewed and passed without Lean/server/build/writes. All three new modules have zero MCP errors and warnings. Structural recursion replaces unsupported mutual-type induction; no statement, exclusion or budget weakened. Standalone tactic probes passed omega and explicit transitivity. Checkpoint gates and scoped axiom reports are required before acceptance.

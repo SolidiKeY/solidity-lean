@@ -186,3 +186,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeArrayControls.lean` | Actual populated runtime lengths0/2/64, empty-any-child and same-code controls, scoped declaration execution and wrong-cursor rejection. |
 
 | `Backend/MemoryCopies/TraversalInterface.lean` | Fresh and strictly ordered sibling identities over the actual typed storage-copy vector fold. |
+| `Backend/MemoryCopies/TraversalFresh.lean` | Generic fresh strictly ordered sibling identities and nonaliasing from the existing typed storage-copy fold. |
+| `Backend/MemoryCopies/TraversalControls.lean` | Repeated populated nested trees after old ownership, empty/64 vectors and shared-identity negative control. |
