@@ -222,7 +222,7 @@ using installed Lake trace APIs agrees with an existing saved reference key;
 independent finder/skeptic reviews confirm the narrow result. The full gate
 remains outstanding; no success validator or full-gate pass is claimed.
 
-H26 lookup finds master still at6f, with no new producer stub for these
+At that cache check, H26 lookup found master still at6f, with no new producer stub for these
 obligations. The already imported `Selection/Premises.lean` signature is on
 master at3b6380b8f8243f3618b1a42456bba4e19aeefac3, and PremisesV2 at
 a2928672d59b179e55fddfee12c6228a29c8ad6b. The existing decoder consumer proofs
@@ -264,3 +264,12 @@ executes to35 bytes, retains the protected suffix and dirty high bits, and
 distinguishes wrong-slot and corrupted-tail results by independent byte
 evaluation. This inhabits the closed numeric fragment, not PendingG24 or
 PendingRepresentedSuccess. The latter producer obligations remain open.
+
+P20 implementation checkpoint5ba1918978652766c93ddd3634da554a31920a62
+passes all eight checkpoint gates and three per-file checks. The three
+files have18 scoped standard-only reports and no warnings; the library
+replays all483 exact Selection reports. Independent read-only finder and
+skeptic reviews pass, including the distinction between closed-fragment
+controls and the still-open PendingG24 link from VY3's P20 producer. No
+PendingRepresentedSuccess field is discharged. Full lane validation still
+requires matching verified cache readiness under the unchanged resource rules.
