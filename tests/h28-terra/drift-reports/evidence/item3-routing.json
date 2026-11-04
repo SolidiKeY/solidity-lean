@@ -1,0 +1,647 @@
+[
+  {
+    "occurrence": 1,
+    "diagnostic": "solkeycheck: READ DRIFT: storageRootWriteCopySource: file has [storage/value/fixed Struct], table has [storage/value/fixed StValue]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 2,
+    "diagnostic": "solkeycheck: READ DRIFT: storageFieldWriteCopySource: file has [storage/value/fixed Struct], table has [storage/value/fixed StValue]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 3,
+    "diagnostic": "solkeycheck: READ DRIFT: storageFieldReadStoreRoot: file has [storage/value/fixed Struct], table has [storage/value/fixed StValue]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 4,
+    "diagnostic": "solkeycheck: READ DRIFT: storageIndexReadMappingStoreRoot: file has [storage/value/fixed Struct], table has [storage/value/fixed StValue]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 5,
+    "diagnostic": "solkeycheck: READ DRIFT: storageIndexWriteMappingCopySource: file has [storage/value/fixed Struct], table has [storage/value/fixed StValue]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 6,
+    "diagnostic": "solkeycheck: READ DRIFT: storageIndexReadArrayStoreRoot: file has [storage/length/fixed int, storage/value/fixed Struct, storage/length/fixed int], table has [storage/length/fixed int, storage/value/fixed StValue, storage/length/fixed int]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 7,
+    "diagnostic": "solkeycheck: READ DRIFT: storageIndexWriteArrayCopySource: file has [storage/length/fixed int, storage/value/fixed Struct, storage/length/fixed int], table has [storage/length/fixed int, storage/value/fixed StValue, storage/length/fixed int]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 8,
+    "diagnostic": "solkeycheck: READ DRIFT: storagePushValueCopySource: file has [storage/length/fixed int, storage/value/fixed Struct, storage/length/fixed int], table has [storage/length/fixed int, storage/value/fixed StValue, storage/length/fixed int]",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 9,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryReferenceDeclFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 10,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryReferenceDeclFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 11,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryReferenceDeclFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 12,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryRootDeleteFreshRebind: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 13,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryRootDeleteFreshRebind: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 14,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryRootDeleteFreshRebind: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 15,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryArrayFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 16,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryArrayFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 17,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryArrayFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 18,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryArrayFreshAlloc: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 19,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryStorageCopy: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 20,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryStorageCopy: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 21,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryStorageCopy: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 22,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryStorageCopy: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 23,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryFieldDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 24,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryFieldDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 25,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryFieldDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 26,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryIndexDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 27,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryIndexDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 28,
+    "diagnostic": "solkeycheck: UNKNOWN TOKEN: memoryIndexDeleteReference: typedId<[alphaType<[..]>",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 29,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageRootWriteCopySourcePrim: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 30,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageFieldWriteCopySourcePrim: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 31,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageIndexReadMappingStoreRootPrim: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 32,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageIndexWriteMappingCopySourcePrim: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 33,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageIndexReadArrayStoreRootPrim: taclet reads 3 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 34,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageIndexWriteArrayCopySourcePrim: taclet reads 3 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 35,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storagePushValueCopySourcePrim: taclet reads 3 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 36,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: localValueDelete: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 37,
+    "diagnostic": "solkeycheck: UNANNOTATED READS: storageFieldReadStoreRootPrim: taclet reads 1 value(s) but has no annotation-table row",
+    "sourcesForReview": [
+      {
+        "path": "Solidity/SortCheck/Parser.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "Solidity/SortCheck/Annotations.lean",
+        "ownerHints": []
+      },
+      {
+        "path": "keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 38,
+    "diagnostic": "solkeycheck: 37 mismatch(es); run with --list to inspect the parsed reads",
+    "sourcesForReview": [
+      {
+        "path": "SolkeyCheck.lean",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  },
+  {
+    "occurrence": 39,
+    "diagnostic": "solkeycheck: parsed 389 taclets, 140 read-bearing, table covers 131",
+    "sourcesForReview": [
+      {
+        "path": "SolkeyCheck.lean",
+        "ownerHints": []
+      }
+    ],
+    "verdict": "owner-review-required"
+  }
+]
