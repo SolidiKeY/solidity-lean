@@ -56,7 +56,7 @@
                 "body": {
                   "id": 22,
                   "nodeType": "Block",
-                  "src": "78:51:0",
+                  "src": "77:51:0",
                   "statements": [
                     {
                       "assignments": [
@@ -68,10 +68,10 @@
                           "id": 8,
                           "mutability": "mutable",
                           "name": "m",
-                          "nameLocation": "94:1:0",
+                          "nameLocation": "93:1:0",
                           "nodeType": "VariableDeclaration",
                           "scope": 22,
-                          "src": "80:15:0",
+                          "src": "79:15:0",
                           "stateVariable": false,
                           "storageLocation": "memory",
                           "typeDescriptions": {
@@ -83,7 +83,7 @@
                               "id": 6,
                               "name": "bool",
                               "nodeType": "ElementaryTypeName",
-                              "src": "80:4:0",
+                              "src": "79:4:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -91,7 +91,7 @@
                             },
                             "id": 7,
                             "nodeType": "ArrayTypeName",
-                            "src": "80:6:0",
+                            "src": "79:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_bool_$dyn_storage_ptr",
                               "typeString": "bool[]"
@@ -112,7 +112,7 @@
                             "kind": "number",
                             "lValueRequested": false,
                             "nodeType": "Literal",
-                            "src": "109:1:0",
+                            "src": "108:1:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_rational_1_by_1",
                               "typeString": "int_const 1"
@@ -133,7 +133,7 @@
                           "isPure": true,
                           "lValueRequested": false,
                           "nodeType": "NewExpression",
-                          "src": "98:10:0",
+                          "src": "97:10:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_objectcreation_pure$_t_uint256_$returns$_t_array$_t_bool_$dyn_memory_ptr_$",
                             "typeString": "function (uint256) pure returns (bool[] memory)"
@@ -143,7 +143,7 @@
                               "id": 9,
                               "name": "bool",
                               "nodeType": "ElementaryTypeName",
-                              "src": "102:4:0",
+                              "src": "101:4:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -151,7 +151,7 @@
                             },
                             "id": 10,
                             "nodeType": "ArrayTypeName",
-                            "src": "102:6:0",
+                            "src": "101:6:0",
                             "typeDescriptions": {
                               "typeIdentifier": "t_array$_t_bool_$dyn_storage_ptr",
                               "typeString": "bool[]"
@@ -167,7 +167,7 @@
                         "nameLocations": [],
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "98:13:0",
+                        "src": "97:13:0",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_bool_$dyn_memory_ptr",
@@ -175,7 +175,7 @@
                         }
                       },
                       "nodeType": "VariableDeclarationStatement",
-                      "src": "80:31:0"
+                      "src": "79:31:0"
                     },
                     {
                       "expression": {
@@ -189,7 +189,7 @@
                             "nodeType": "UnaryOperation",
                             "operator": "!",
                             "prefix": true,
-                            "src": "120:5:0",
+                            "src": "119:5:0",
                             "subExpression": {
                               "baseExpression": {
                                 "id": 16,
@@ -197,7 +197,7 @@
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
                                 "referencedDeclaration": 8,
-                                "src": "121:1:0",
+                                "src": "120:1:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_array$_t_bool_$dyn_memory_ptr",
                                   "typeString": "bool[] memory"
@@ -213,7 +213,7 @@
                                 "kind": "number",
                                 "lValueRequested": false,
                                 "nodeType": "Literal",
-                                "src": "123:1:0",
+                                "src": "122:1:0",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_rational_0_by_1",
                                   "typeString": "int_const 0"
@@ -225,7 +225,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "nodeType": "IndexAccess",
-                              "src": "121:4:0",
+                              "src": "120:4:0",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_bool",
                                 "typeString": "bool"
@@ -249,7 +249,7 @@
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
                           "referencedDeclaration": 4294967293,
-                          "src": "113:6:0",
+                          "src": "112:6:0",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_assert_pure$_t_bool_$returns$__$",
                             "typeString": "function (bool) pure"
@@ -264,7 +264,7 @@
                         "nameLocations": [],
                         "names": [],
                         "nodeType": "FunctionCall",
-                        "src": "113:13:0",
+                        "src": "112:13:0",
                         "tryCall": false,
                         "typeDescriptions": {
                           "typeIdentifier": "t_tuple$__$",
@@ -273,7 +273,7 @@
                       },
                       "id": 21,
                       "nodeType": "ExpressionStatement",
-                      "src": "113:13:0"
+                      "src": "112:13:0"
                     }
                   ]
                 },
@@ -283,34 +283,34 @@
                 "kind": "function",
                 "modifiers": [],
                 "name": "identity",
-                "nameLocation": "55:8:0",
+                "nameLocation": "54:8:0",
                 "nodeType": "FunctionDefinition",
                 "parameters": {
                   "id": 2,
                   "nodeType": "ParameterList",
                   "parameters": [],
-                  "src": "63:2:0"
+                  "src": "62:2:0"
                 },
                 "returnParameters": {
                   "id": 3,
                   "nodeType": "ParameterList",
                   "parameters": [],
-                  "src": "78:0:0"
+                  "src": "77:0:0"
                 },
                 "scope": 24,
-                "src": "46:83:0",
+                "src": "45:83:0",
                 "stateMutability": "pure",
                 "virtual": false,
                 "visibility": "public"
               }
             ],
             "scope": 25,
-            "src": "25:106:0",
+            "src": "25:105:0",
             "usedErrors": [],
             "usedEvents": []
           }
         ],
-        "src": "0:132:0"
+        "src": "0:131:0"
       },
       "id": 0
     }

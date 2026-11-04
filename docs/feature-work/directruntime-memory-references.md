@@ -101,8 +101,8 @@ certificates and development proofs do not relax that boundary.
 ## Validation and resources
 
 `evidence/fixtures.log`: exit 0; 72 valid fixtures, eight compiler-invalid controls,
-six generated malformed controls; recorded wall 2.2827517 s and peak RSS
-165988 KiB. `/usr/bin/time` was absent on an initial attempt; Node's monotonic
+six generated malformed controls; recorded wall 2.163698924 s and peak RSS
+166884 KiB. `/usr/bin/time` was absent on an initial attempt; Node's monotonic
 clock/resourceUsage supplies these metrics. The shell retry exited 0.
 No malformed AST was admitted or verified by this run.
 
@@ -161,3 +161,7 @@ Lightweight gates: JavaScript syntax, `node scripts/check-layers.mjs`,
 562 core modules with zero reaching elaborator or checked parser adapters.
 The doc-path gate reports pre-existing ambiguous basename references but no
 missing reference failure. `git diff --check` passed.
+
+The initial staged whitespace check found trailing spaces before diamond-source
+newlines. The generator was corrected and all fixtures regenerated; the final
+base-to-head whitespace gate passes. No semantic body or expected verdict changed.

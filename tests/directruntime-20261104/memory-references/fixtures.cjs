@@ -38,7 +38,7 @@ const write = (p,s) => { fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writ
 const rows=[];
 for (const [id,body,outcome,state='',mutability='pure',prefix=''] of cases) {
  for (const modality of ['box','diamond']) {
-  const source = `pragma solidity ^0.8.34; contract Identity { ${state}${modality === 'box' ? '/// @custom:key box\n' : '\n'}function identity() public ${mutability} { ${prefix}${body} } }\n`;
+  const source = `pragma solidity ^0.8.34; contract Identity {${state ? ' '+state : ''}${modality === 'box' ? ' /// @custom:key box\n' : '\n'}function identity() public ${mutability} { ${prefix}${body} } }\n`;
   const stem = `${id}.${modality}`;
   write(path.join(root,'sources',stem+'.sol'),source);
   for (const viaIR of [false,true]) {
