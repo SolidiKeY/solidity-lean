@@ -201,3 +201,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceConstruction.lean` | Proved Source leaf lift and fixed-array closure with recursive exact object counts, sufficient horizons, parent-last identity and full state framing. |
 | `Backend/MemoryCopies/SourceConstructionControls.lean` | Actual nested bytes/string/dynamic defaults, unused large child under empty parent, populated-state frame and wrong-count control. |
 | `Backend/MemoryCopies/SourceFieldsInterface.lean` | Actual Source primitive/reference value and heterogeneous field default construction obligations, indexed by existing types and layout. |
+| `Backend/MemoryCopies/SourceFields.lean` | Actual primitive/reference Source defaults, heterogeneous field composition and layout-indexed struct construction with exact counts and framing. |
+| `Backend/MemoryCopies/SourceFieldsControls.lean` | Declared mixed bytes-array/string struct and dynamically self-referential struct defaults, child contents, partial timeout and wrong-root controls. |
