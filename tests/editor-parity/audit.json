@@ -8,7 +8,7 @@
   "independentDiscovery": {
     "method": "A separate read-only reviewer inspected upstream source, manifest, documentation and tests before reading the first inventory.",
     "initialEntries": 71,
-    "reconciledEntries": 88,
+    "reconciledEntries": 93,
     "addedFamilies": [
       "Runtime-only status-bar command",
       "Project discovery, ownership, includes and solver options",
@@ -22,7 +22,14 @@
       "Plugin handlers, startup failures and assertion splitting"
     ],
     "evidence": "docs/dafny-editor-features.json",
-    "limitation": "Source discovery does not establish local runtime support. No additional runtime passes were awarded by the audit."
+    "limitation": "Source discovery does not establish local runtime support. No additional runtime passes were awarded by the audit.",
+    "registrationLedger": "docs/dafny-editor-audit.json",
+    "latestAudit": {
+      "testSourceFiles": 99,
+      "registrationSites": 609,
+      "allUnportedSites": "unexamined",
+      "method": "Read-only skeptic rediscovered features before reading the inventory; separate source scanner enumerated test files and registration sites before inventory reconciliation."
+    }
   },
   "finderReview": [
     {
@@ -76,10 +83,82 @@
     "runtimeScope": "CPU-active process counts cover the entire suite, including concurrent projects, cancellation and restart; they do not establish exact simultaneous instructions."
   },
   "remainingWork": [
+    "Dafny-specific proof code actions, protocol/UI granularity, ghost highlighting and positioned model traces",
+    "Assertion-level scheduling, cache-policy parity and representative complex proof scaling",
+    "Solver-quiescence cancellation, comprehensive restarts, large projects, contention and settings transitions",
+    "Fresh paired local-proof and new VS Code API/DOM measurements in a provisioned environment"
+  ],
+  "historicalRemainingWork": [
     "General completion, navigation, rename, formatting and code actions in the local extension",
     "Dafny custom LSP methods, gutter and positioned model traces",
     "Persistent local verification caches and configurable within-file worker scheduling",
     "Solver-quiescence cancellation, complex long-running proofs and assertion-split scaling",
     "Comprehensive project, configuration, restart and visual-theme scenarios"
-  ]
+  ],
+  "harnessIntegrityReview": {
+    "reviewers": [
+      "read-only finder",
+      "read-only skeptic"
+    ],
+    "usedLeanServer": false,
+    "findingsAndRepairs": [
+      {
+        "finding": "Failed launch metrics affected medians and parallel scaling",
+        "repair": "Exclude failed timing samples, retain failures and timeout rates",
+        "regression": "failed launches cannot improve latency or manufacture parallel scaling"
+      },
+      {
+        "finding": "Non-initial scenarios accepted terminal failures as proofs",
+        "repair": "Check expected statuses and exact local function identity set in every proof scenario",
+        "regression": "every verification scenario must check expected proof outcomes, not just terminal counts"
+      },
+      {
+        "finding": "Fresh inconsistent scenario/check/aggregate reports could pass",
+        "repair": "Validate identities, unique IDs, passed checks and aggregate status",
+        "regression": "fresh report identity cannot conceal inconsistent or invented scenario passes"
+      },
+      {
+        "finding": "Empty and truncated protocol recordings appeared observed",
+        "repair": "Finalize framing; distinguish empty, partial and corrupt recordings; stop recording at finalization",
+        "regression": "empty, unfinalized and corrupt recordings cannot certify an observed protocol"
+      },
+      {
+        "finding": "Source inventory mapped untested APIs to unrelated scenario passes",
+        "repair": "Map providers to targeted editor/stdio scenarios; leave code-action evidence unexamined"
+      },
+      {
+        "finding": "Dafny service edits could overlap measured proof work",
+        "repair": "Run editor service edits after proof metrics; stdio uses Never and explicit native symbol scheduling"
+      },
+      {
+        "finding": "Stdio shutdown and nonzero exits did not affect success",
+        "repair": "Require shutdown acknowledgement, graceful exit zero, bounded version probe and owned-process cleanup",
+        "regressions": [
+          "stdio provider successes cannot hide nonzero-exit",
+          "stdio provider successes cannot hide ignored-shutdown"
+        ]
+      },
+      {
+        "finding": "Stdio memory reserve incompatible with ordinary CI hosts",
+        "repair": "Recorded configurable memory reserve/cap; CI explicitly chooses 2048 MiB reserve"
+      },
+      {
+        "finding": "Shape-only hover and navigation assertions could accept unrelated values",
+        "repair": "Require meaningful hover text and exact declaration/reference/rename ranges and replacement text",
+        "regression": "service observations reject empty hover, wrong navigation and arbitrary rename edits"
+      }
+    ],
+    "freshResults": "tests/editor-parity/stdio-baseline.json",
+    "remainingScope": "Changed editor-host scenarios are reviewed but not executed here; stdio does not establish UI behavior or full parity."
+  },
+  "finalReadOnlyReview": {
+    "finder": "No remaining material issues after fixes; lifecycle, limits, bounded probes and exact provider assertions verified by inspection.",
+    "skeptic": "Fresh results and explicit unexamined scope match evidence; corrected default direct-vs-certified architecture paragraph."
+  },
+  "unresolvedPerformanceInvestigation": {
+    "scenario": "concurrent-requests",
+    "result": "Local eight-hover batch slower than Dafny across repeated trials; synchronous generation fingerprint scans measured separately as a plausible contributor.",
+    "evidence": "tests/editor-parity/stdio-baseline.json#localConcurrencyInvestigation",
+    "status": "partial: cause investigated; production freshness validation not altered"
+  }
 }

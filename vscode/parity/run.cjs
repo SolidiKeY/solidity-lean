@@ -6,7 +6,7 @@ const {resolve,join,dirname} = require('node:path');
 const {tmpdir,cpus,totalmem,release} = require('node:os');
 const {performance} = require('node:perf_hooks');
 const {randomUUID,createHash} = require('node:crypto');
-const {ProcessSampler,summarize,differences,normalize,scaling,protocol} = require('./core.cjs');
+const {ProcessSampler,summarize,differences,normalize,scaling,protocol,hostEvidenceErrors} = require('./core.cjs');
 const {terminateTree} = require('../src/backend.cjs');
 const renderer=require('./renderer.cjs');
 const repo=resolve(__dirname,'../..');
@@ -27,6 +27,7 @@ function parse(args) {
   for(const key of ['trials','warmups','obligations','timeoutMs','operationTimeoutMs']) if(!Number.isSafeInteger(options[key])||options[key]<(key==='warmups'?0:1)) throw new Error('Invalid '+key);
   if(options.workers.some(v=>!Number.isSafeInteger(v)||v<1||v>32)) throw new Error('Invalid workers');
   if(options.targets.some(t=>!['dafny','local'].includes(t))) throw new Error('Invalid target');
+  if(options.targets.includes('local')&&options.workers.some(w=>w>4))throw new Error('Local workers must be between 1 and 4');
   if(options.cache.some(t=>!['none','basic','advanced'].includes(t))) throw new Error('Invalid cache');
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
@@ -147,8 +148,8 @@ async function launch(config,options) {
     probe.observedDuringVerification=probe.started>=begin&&probe.finished<=end;
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
-  if(result&&(result.runId!==config.runId||result.target!==config.target||result.schemaVersion!==1||!Array.isArray(result.scenarios)||!result.checks?.includes('initial-verification'))) {
-    error='Host evidence is stale, incomplete or belongs to another launch';result=undefined;
+  if(result&&hostEvidenceErrors(result,config).length) {
+    error='Host evidence is stale, incomplete or inconsistent: '+hostEvidenceErrors(result,config).join('; ');result=undefined;
   }
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
   const run={target:config.target,workers:config.workers,cache:config.cache,suite:options.suite||'full',trial:config.trial,warmup:config.warmup,

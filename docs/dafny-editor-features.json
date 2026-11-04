@@ -12,8 +12,8 @@
     }
   },
   "discovery": {
-    "featureCount": 88,
-    "featureIdsSha256": "99752737fe9f94319ece4a02bc7d8b7a50f4365080e2eca90654d7e4641c4ff0"
+    "featureCount": 93,
+    "featureIdsSha256": "a02dddc2c809e102fe47940a377eb909686dc809f84e1765740a3f126a884d04"
   },
   "sources": [
     {
@@ -165,6 +165,46 @@
       "repository": "dafny-lang/dafny",
       "path": "Source/DafnyLanguageServer.Test/Performance/ThreadUsageTest.cs",
       "sha256": "2a23ff032dd54100ce5b42d0df590b985d7bfb66b270d0eadc367a27bfaa4440"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/CodeActions/CodeActionsTest.cs",
+      "sha256": "126980ccf85f1dbb39af98ef25f50babcc6958eabb71520df69f711816a705ac"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/SymbolMigrationTest.cs",
+      "sha256": "67d83c43d196b3eeb6e2436b678f6ce174b3b0a4cdda119cbdd3646819b65298"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Synchronization/LookupMigrationTest.cs",
+      "sha256": "7c7bf9748d3fda291a4a399f35ec890a218876c0df6f39e77d8cc783f962316a"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Various/DiagnosticMigrationTest.cs",
+      "sha256": "253c9ffb40e1fe0a14030c567a22f7f16cb12893a661d6fac394befcd123ee46"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Various/ResourceUsageTest.cs",
+      "sha256": "4319b88afe7ef29330c24eb0e01be428b3528ae9a9835cf785d30f2da3b3dfac"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Various/StandardLibraryTest.cs",
+      "sha256": "1677cdfa6bf97b48aab043340a190197b54f0efc1f162eb1f056161e6ed8b0b7"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Refinement/RefinementTests.cs",
+      "sha256": "d61561e26651a31bf1b27c01a0ca70ac66e4b64f62a845f5348d8a578d3bf009"
+    },
+    {
+      "repository": "dafny-lang/dafny",
+      "path": "Source/DafnyLanguageServer.Test/Lookup/HoverTest.cs",
+      "sha256": "40f95c3cd72acef186e6ea7adea7aed2e77e8858e1e43f819bcbaa18f5711e5b"
     },
     {
       "repository": "dafny-lang/ide-vscode",
@@ -1608,7 +1648,8 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "symbols-and-formatting",
+          "document-symbols"
         ],
         "testEvidence": []
       }
@@ -1668,7 +1709,8 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "language-services-callsite",
+          "definition"
         ],
         "testEvidence": []
       }
@@ -1701,7 +1743,8 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "language-services-callsite",
+          "references"
         ],
         "testEvidence": []
       }
@@ -1734,7 +1777,8 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "language-services-callsite",
+          "rename"
         ],
         "testEvidence": []
       }
@@ -1767,7 +1811,9 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "language-services-callsite",
+          "completion",
+          "completion-after-full-replacement"
         ],
         "testEvidence": []
       }
@@ -1800,7 +1846,9 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "language-services-callsite",
+          "signature-help",
+          "signature-active-parameter"
         ],
         "testEvidence": []
       }
@@ -1857,9 +1905,7 @@
           "vscode/src/project.cjs",
           "vscode/src/solidity-text.cjs"
         ],
-        "scenarioIds": [
-          "language-services-callsite"
-        ],
+        "scenarioIds": [],
         "testEvidence": []
       }
     },
@@ -1891,7 +1937,8 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "symbols-and-formatting",
+          "formatting"
         ],
         "testEvidence": []
       }
@@ -1949,7 +1996,7 @@
           "vscode/src/solidity-text.cjs"
         ],
         "scenarioIds": [
-          "language-services-callsite"
+          "workspace-symbols"
         ],
         "testEvidence": []
       }
@@ -2561,6 +2608,146 @@
       ],
       "detail": {
         "scope": "thread-retention"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:proof-code-actions-and-resolution",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/CodeActions/CodeActionsTest.cs",
+          "sha256": "126980ccf85f1dbb39af98ef25f50babcc6958eabb71520df69f711816a705ac"
+        }
+      ],
+      "detail": {
+        "scope": "proof-code-actions-and-resolution"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:symbol-lookup-and-diagnostic-migration",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/SymbolMigrationTest.cs",
+          "sha256": "67d83c43d196b3eeb6e2436b678f6ce174b3b0a4cdda119cbdd3646819b65298"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Synchronization/LookupMigrationTest.cs",
+          "sha256": "7c7bf9748d3fda291a4a399f35ec890a218876c0df6f39e77d8cc783f962316a"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Various/DiagnosticMigrationTest.cs",
+          "sha256": "253c9ffb40e1fe0a14030c567a22f7f16cb12893a661d6fac394befcd123ee46"
+        }
+      ],
+      "detail": {
+        "scope": "symbol-lookup-and-diagnostic-migration"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:solver-process-retention",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Various/ResourceUsageTest.cs",
+          "sha256": "4319b88afe7ef29330c24eb0e01be428b3528ae9a9835cf785d30f2da3b3dfac"
+        }
+      ],
+      "detail": {
+        "scope": "solver-process-retention"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:stdlib-and-refinement-navigation",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Various/StandardLibraryTest.cs",
+          "sha256": "1677cdfa6bf97b48aab043340a190197b54f0efc1f162eb1f056161e6ed8b0b7"
+        },
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Refinement/RefinementTests.cs",
+          "sha256": "d61561e26651a31bf1b27c01a0ca70ac66e4b64f62a845f5348d8a578d3bf009"
+        }
+      ],
+      "detail": {
+        "scope": "stdlib-and-refinement-navigation"
+      },
+      "assessment": {
+        "status": "unexamined",
+        "reason": "Source discovery only; exact behavior has not been tested.",
+        "localSource": [
+          "vscode/src/extension.cjs",
+          "vscode/src/backend.cjs",
+          "vscode/src/model.cjs"
+        ],
+        "scenarioIds": [],
+        "testEvidence": []
+      }
+    },
+    {
+      "id": "behavior:hover-before-verification-completes",
+      "kind": "independent-audit-family",
+      "upstream": [
+        {
+          "repository": "dafny-lang/dafny",
+          "path": "Source/DafnyLanguageServer.Test/Lookup/HoverTest.cs",
+          "sha256": "40f95c3cd72acef186e6ea7adea7aed2e77e8858e1e43f819bcbaa18f5711e5b"
+        }
+      ],
+      "detail": {
+        "scope": "hover-before-verification-completes"
       },
       "assessment": {
         "status": "unexamined",

@@ -40,6 +40,7 @@
   "scripts": {
     "test": "node --test test/*.test.cjs",
     "parity": "node parity/run.cjs",
-    "parity:check": "node parity/discover.cjs --check"
+    "parity:stdio": "node parity/stdio.cjs",
+    "parity:check": "node parity/discover.cjs --check && node parity/audit.cjs --check"
   }
 }

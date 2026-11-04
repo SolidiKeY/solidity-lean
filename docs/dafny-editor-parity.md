@@ -2,7 +2,7 @@
 
 This audit compares the official Dafny extension with `vscode/`, the Solidity
 Lean verification extension. Full parity is not established. The
-[editor inventory](dafny-editor-features.json) records 88 discovered capabilities,
+[editor inventory](dafny-editor-features.json) records 93 discovered capabilities,
 including explicit missing and unexamined work. This inventory is separate from
 the [language and verification inventory](dafny-parity.md).
 
@@ -22,10 +22,13 @@ the production extension's Node requirement is unchanged.
 The production local extension now starts `vscode/src/lsp-server.cjs` and
 synchronizes versioned in-memory Solidity buffers over standard LSP stdio.
 A separate compiler worker retains the pinned solc WASM module. A bounded pool
-of 1–4 proof workers each keeps one Lean language server and generated document
-alive, reusing imported modules on edits. Workers parallelize exact function selections and files; assertions within one
-function remain serial. The server uses the existing
-`solc_import` and `#solkey_test` commands and kernel-checked certificates.
+of 1–4 proof workers can use the compact generated-C/WASM verifier for admitted
+fragments. General frontend checks retain a Lean language server and generated
+document, reusing imported modules on edits. Workers parallelize exact function
+selections and files; assertions within one function remain serial. Default IDE
+checks return direct verifier decisions without per-result certificates. Explicit
+`certify: true` requests use the `solc_import`/`#solkey_test` pipeline with
+kernel-checked certificates.
 It retains source hashes, compiler pins, import-gap diagnostics and counterexample
 validation. Dependency changes invalidate live sessions and checked reports.
 
@@ -209,6 +212,97 @@ records missing/partial/unexamined statuses separately. The read-only skeptic
 review rediscovered upstream features before reading the first inventory,
 adding the missing runtime command and the explicit families described above.
 Neither review used the Lean server or established extra runtime passes.
+
+## Harness integrity and stdio comparison (2026-11-03)
+
+Repository discovery located the existing CommonJS extension, stdio LSP, solc
+analysis worker, bounded proof-worker pool, persistent Lean sessions, optional
+generated-C/WASM verifier, Node tests, Electron launcher and CI. Additions reuse
+`vscode/parity/`, `vscode/test/`, this guide and `tests/editor-parity/`, with no
+package dependency or core Lean import.
+
+Read-only finder and skeptic reviews reproduced false-pass and measurement
+defects. Both independently reviewed the final changes without Lean. Repairs:
+
+- Every proof scenario requires expected outcomes and the exact local `f0`
+  through `fN` obligation set. Terminal errors and unknowns cannot count as
+  proofs; unknowns cannot count as demonstrated refutations.
+- Failed launches remain in failure/resource/timeout reports but cannot
+  contribute latency samples or scaling. Host reports require consistent
+  identities, unique scenario IDs, checks and aggregate status.
+- Byte-frame finalization distinguishes empty, incomplete and corrupt protocol
+  recordings. None can certify observed compatibility.
+- Paired call-site checks assert actual definition/reference ranges, rename
+  replacement text/ranges, minimal-edit member completion and meaningful hover.
+  Signature help at the opening parenthesis and second argument are separate.
+- Editor service edits run after proof measurements. Stdio disables automatic
+  Dafny verification and explicitly schedules native verification symbols, so
+  service edits cannot leave competing proof jobs in measured phases.
+- Stdio requires graceful shutdown and exit zero, checks process ownership,
+  bounds version probes and records configurable resource guards. CI explicitly
+  selects its smaller available-memory reserve.
+
+The skeptic rediscovered five additional families: proof code actions and lazy
+resolution; symbol/lookup/diagnostic migration; solver retention; standard-library
+and refinement navigation; and hover before verification finishes. Their added
+inventory entries remain unexamined. The independent
+[test ledger](dafny-editor-audit.json) enumerates 99 tracked upstream test files
+and 609 registration sites before reconciling paths with the feature inventory.
+Registrations include TypeScript suites and unexpanded parameterized tests.
+Every unported registration remains **unexamined**. Offline and immutable-source
+CI gates check the ledger; its size is not a count of passing tests.
+
+For machines without Electron or an X display:
+
+```sh
+LEAN_NUM_THREADS=1 node vscode/parity/stdio.cjs \
+  --dafny /absolute/path/to/dafny --scope services \
+  --workers 1,2,4 --trials 5 --warmups 1 \
+  --output /absolute/path/to/new-stdio-results
+```
+
+Services scope exercises real initialization, document/workspace symbols,
+definitions, references, hover, completion, signature help, rename, formatting
+invocation, concurrent requests, rapid edits and server lifecycle. It does not
+run the local verifier. Full scope additionally requires a freshly built backend
+and exercises true/false postconditions, incremental verification, current-version
+stale-diagnostic checks and concurrent files. Configure `SOLKEY_ROOT` and Lean
+as for the editor harness. Both transports use the same global run lock.
+`--memory-max-mib` defaults to 4096 and `--memory-reserve-mib` to 12288;
+build resource requirements apply separately.
+
+Outputs retain `report.json`, `summary.md`, native JSON-RPC responses/traces,
+events, process samples, phase windows, configuration and server logs. Phases
+with too few CPU samples remain unexamined. CPU deltas within a sample window
+do not prove simultaneous instructions. Stdio startup measures launch through
+initialization; full proof timings include explicit symbol discovery/scheduling.
+These are separate from editor activation and automatic verification metrics.
+
+The [fresh measured record](../tests/editor-parity/stdio-baseline.md) and
+[JSON results](../tests/editor-parity/stdio-baseline.json) preserve observations
+and limits. The reduced [Dafny](../tests/editor-parity/services.dfy) and
+[Solidity](../tests/editor-parity/services.sol) fixtures are shared by both
+transports. Dafny retains member completion after a minimal insertion but loses
+it after full replacement with incomplete code; the local server handles both.
+Dafny returns opening-parenthesis signature help but no second-argument result
+in this fixture. These remain explicit partial statuses and native differences.
+
+The official VS Code download returned HTTP 403 under this environment's
+network policy. Changed editor/DOM scenarios were reviewed but have not run
+here. This environment also lacks the systemd user scope required by repository
+instructions for heavy builds, so no fresh local backend build or local proof
+performance comparison is claimed. Fresh paired service runs use real solc;
+reference-only proof runs use real Dafny/Z3. Earlier editor/proof baselines
+remain historical evidence.
+
+Manual `editor-parity` CI offers `editor` and `stdio` transports and builds the
+current local backend before full comparisons. Stdio has no VS Code API, DOM,
+accessibility or renderer measurements, and lacks cancellation, restart,
+counterexample and settings-transition scenarios. Long-running proofs, large
+projects, resource contention, assertion-level scaling, equivalent solver limits,
+isolated solver/VC timings and cold-page-cache behavior remain open. Formatter
+response shape does not establish correct applied edits. No full parity claim
+is made by either transport.
 
 ## Historical CLI baseline
 

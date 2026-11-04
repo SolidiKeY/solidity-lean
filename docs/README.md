@@ -19,7 +19,7 @@ history is in git.
 | [simp-performance.md](simp-performance.md) | Simplifier profiles, guarded joined preparation, measured gains and completeness limits. |
 | [browser-simple-benchmarks.md](browser-simple-benchmarks.md) | Matched small-program SolKey/native/browser timings, audit optimization and remaining cold/simplifier costs. |
 | [web-ide.md](web-ide.md) | Offline static browser workbench, WASM runtime, storage contract and real-editor comparison. |
-| [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor comparison harness, feature discovery, measurements and completeness limits. |
+| [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor and stdio comparison harnesses, independent feature/test discovery, measurements and completeness limits. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
 | [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 18 VM lanes of eight to ten hours covering 118 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
