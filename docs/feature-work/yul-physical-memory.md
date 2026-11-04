@@ -1017,3 +1017,13 @@ incoming `LocalsOK`, without an empty/no-alias condition. Controls distinguish
 caller aliases to root0 from nonempty child references to roots5/1. They retain
 the same successful heap prefix on a late error; general call/rollback policies
 and evaluator coverage remain separate obligations.
+
+`BytePlanHash` composes actual multi-root writes with the existing checked
+memory-keccak expression at evaluator horizon `n+4`. Preserved heap typing and
+owner shape derive the final byte contents; the complete reached map derives
+the exact physical preimage, using the same approved `G.fixed` hash. A write
+error stops before hashing and retains its complete prefix state. Controls
+cover repeated writes, caller-local restoration and stale/header/padded input
+differences without hash injectivity. The initial typed bytes local/object
+premises remain explicit; other hash producers and target opcode/resource
+correspondence remain open.
