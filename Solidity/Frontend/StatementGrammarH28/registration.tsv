@@ -56,3 +56,4 @@ Solidity.Frontend.StatementGrammarH28.FixtureControls.Case44	Finite constructor 
 Solidity.Frontend.StatementGrammarH28.ElsePosition	Unique intrinsic nearest-else attachment positions
 Solidity.Frontend.StatementGrammarH28.TokenRoot	Actual yield fixed-head non-simple root discrimination
 Solidity.Frontend.StatementGrammarH28.MixedSplit	Intrinsic mixed block and control token boundary splitting
+Solidity.Frontend.StatementGrammarH28.NestedCoverage	Recursive intrinsic block and control parser fuel coverage

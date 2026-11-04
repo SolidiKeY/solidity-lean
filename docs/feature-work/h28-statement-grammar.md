@@ -760,3 +760,77 @@ splitting, simple-root discrimination, token-level conditional uniqueness/
 association, remaining universal compound fuel coverage, full repository
 gates, whole-scope reviews/acceptance and final handoff. SG-CEX-01 remains
 OPEN/REFUTED. This is a completed backfill checkpoint, not whole-goal completion.
+
+
+## Checkpoint K: recursive intrinsic block parser fuel and balance
+
+NestedCoverage.lean extends the existing arbitrary-length empty-return,
+break and continue lists with recursively nested ordinary block items and
+intrinsically permitted unchecked block items. NestedItems is indexed by
+existing Syn lists, concrete tokens and a syntax-derived depth budget.
+Its six constructors are nil, the three leaf-cons forms, blockCons and
+uncheckedCons. Ordinary nesting adds three to the child budget, unchecked
+nesting adds two, and max joins child and tail budgets. This is a relation
+on intrinsic syntax, not a replacement tree. leaf_to_nested includes every
+previous LeafItems witness at depth zero.
+
+nested_items_at proves actual manyAux success for every fuel at least d+3,
+with arbitrary list lengths. Each child success is derived recursively;
+no parser monotonicity or successful parse is assumed by the final coverage
+statements. itemCount <= token length independently proves the existing
+parser's token-derived many loop fuel sufficient, including its stopping
+step. nested_block_coverage proves block success at n+d+4;
+nested_block_stmt_coverage and nested_unchecked_coverage prove their wrappers
+at n+d+5, for arbitrary excess n and suffix/layout/EOF state. These are
+sufficient bounds, not claimed minimal. Internal token locations remain
+synthetic zero; arbitrary source-position/lexer adequacy is not proved.
+
+The same relation derives actual flattened list yields, exact block yields
+for arbitrary layout, and brace balance. nested_block_boundary combines them
+into the existing BlockBoundary relation. Thus concrete parser inputs come
+from actual intrinsic yields; no successful parse is mocked or assumed.
+Expressions and expression uniqueness are absent from this fragment.
+
+Controls prove towers of arbitrary natural depth n have syntax budget 3*n
+and successful block/unchecked-wrapper parses at the corresponding bounds.
+An inhabited mixed tree combines a return block and an unchecked block
+containing an ordinary block with break and continue, exercising all six
+relation constructors and both intrinsic unchecked states. Exact actual
+yield, balanced boundary, and nonempty else suffix/fragment layout/EOF15
+are retained. Nested unchecked remains refused for every positive item fuel
+and arbitrary tower depth. One nested block at fuel3 has a checked nesting
+error; this is a specific underfuel example, not minimality of our bound.
+The universal syntax lemmas cover arbitrary width as well as depth.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/NestedCoverage.lean | pass, final leaf bridge/yield/balance | /workspace/h28-statement-grammar-evidence/run-1793808260451720665 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.NestedCoverage | pass; 2.66s timed wall, RSS 434764 KiB | /workspace/h28-statement-grammar-evidence/run-1793808277516743204 |
+| runtime.py diag tests/h28-sol/statement-grammar/NestedCoverageControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793808338858253573 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/NestedCoverage.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793808368388471314 |
+| runtime.py gate tests/h28-sol/statement-grammar/NestedCoverageControls.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793808393175860915 |
+
+All 17 printed source theorem axiom sets are saved in the gate log.
+leaf_to_nested, keyword_semi_balanced and nested_tokens_balanced have no
+axioms. locatedInput_append uses propext. step_unchecked_of_coverage uses
+Quot.sound. The remaining 12 use propext and Quot.sound. Control signatures
+and axiom sets are also printed. No custom axiom, unsafe/native_decide,
+heartbeat raise, producer change or expression premise was introduced.
+Separate read-only finder and skeptic pass source and all controls, without
+Lean/server/builds. No mathematical or scope finding remained.
+
+Retained attempts: run-1793807897050297869 exposed indexed nil reduction and
+nested monad composition; run-1793807951844514120 confirmed composition was
+not definitional. The checked proof separately proves stmt/item results and
+retains the stateful bind structure. run-1793808049281093695 needed explicit
+nil observation equations. run-1793808155290987961 needed singleton-flatten/
+append normalization for unchecked yield. run-1793808318123966475 needed
+append_nil in the universal tower witness. All failures remain retained.
+The module is locally registered; frozen/shared producer files stay unchanged.
+
+This completes recursive block/control coverage and balance, strengthening
+assigned backfill. All-syntax/atom balance, general mixed statement splitting,
+simple-root discrimination, token-level conditional uniqueness/association,
+remaining compound statement universal fuel coverage, full repository gates
+and whole-scope reviews/acceptance remain unfinished. SG-CEX-01 remains
+OPEN/REFUTED; the original persistent goal remains active and incomplete.
