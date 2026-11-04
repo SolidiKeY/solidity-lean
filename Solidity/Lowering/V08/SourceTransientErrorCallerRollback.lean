@@ -158,8 +158,8 @@ theorem all_retained (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
     staticFresh pipeline bytes = timeoutFresh pipeline bytes ∧
-    ((staticFresh pipeline bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((staticFresh pipeline bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((staticFresh pipeline bytes).ex.world.accounts sender).balance = 93 ∧
+    ((staticFresh pipeline bytes).ex.world.accounts self).balance = 7 ∧
     ((staticFresh pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((staticFresh pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((staticFresh pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

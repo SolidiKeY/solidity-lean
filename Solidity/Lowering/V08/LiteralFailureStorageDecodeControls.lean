@@ -19,7 +19,7 @@ def populated : St environment :=
  {empty with
   heap := (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [9,7]⟩).1
   ex := empty.ex.run [.account frame.this (fun account =>
-   {account with balance := ⟨43,by decide +kernel⟩, storage := ((account.storage.write path (.int 2 (by decide +kernel))).write (path.go (.index 0)) (.fixedBytes [255] rfl)).write (path.go (.index 1)) (.fixedBytes [7] rfl)})]}
+   {account with balance := 43, storage := ((account.storage.write path (.int 2 (by decide +kernel))).write (path.go (.index 0)) (.fixedBytes [255] rfl)).write (path.go (.index 1)) (.fixedBytes [7] rfl)})]}
 
 def caller : Locals environment.layout [.bytes .memory,.bool] :=
  .cons (.memRef rfl 0) (.cons (.bool true) .nil)

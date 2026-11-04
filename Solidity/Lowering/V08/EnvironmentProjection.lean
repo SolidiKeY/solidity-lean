@@ -20,6 +20,11 @@ def liftWord (word : Roadmap.Word) : Semantics.Word :=
     simp only [PrimTy.inRange, decide_eq_true_eq]
     exact ⟨Int.natCast_nonneg _, Int.ofNat_lt.mpr word.isLt⟩⟩
 
+/-- Explicit modular observation of exact Source money. Lossless equality
+requires a separately established range invariant; this is not a ledger. -/
+def liftBalance (balance : Source.Monetary.Balance) : Semantics.Word :=
+  liftWord (Source.Monetary.wordView balance)
+
 def lowerWord (word : Semantics.Word) : Roadmap.Word :=
   ⟨word.1.toNat, by
     have bound := word.2
@@ -30,6 +35,14 @@ def lowerWord (word : Semantics.Word) : Roadmap.Word :=
 theorem lower_lift_word (word : Roadmap.Word) : lowerWord (liftWord word) = word := by
   apply Fin.ext
   exact Int.toNat_natCast _
+
+theorem lower_lift_balance (balance : Source.Monetary.Balance) :
+    lowerWord (liftBalance balance) = Source.Monetary.wordView balance :=
+  lower_lift_word _
+
+theorem lower_lift_balance_exact (balance : Source.Monetary.Balance)
+    (fit : Source.Monetary.Fits balance) : (lowerWord (liftBalance balance)).val = balance := by
+  simp only [lower_lift_balance, Source.Monetary.wordView_exact _ fit]
 
 theorem lift_lower_word (word : Semantics.Word) : liftWord (lowerWord word) = word := by
   apply Subtype.ext
@@ -86,11 +99,11 @@ is not the external session ledger; this is NOT a universal balance semantics.
 Use sessionFunds below to include the supplied G01 external ledger. -/
 def fundsOf {D : Source.Layout} {L : Roadmap.Address → Source.SPath → Source.STy}
     (world : Source.World D L) : ContractWorld.Address → Semantics.Word :=
-  fun address => liftWord (world.accounts (lowerAddress address)).balance
+  fun address => liftBalance (world.accounts (lowerAddress address)).balance
 
 theorem funds_at_source_address {D : Source.Layout} {L : Roadmap.Address → Source.SPath → Source.STy}
     (world : Source.World D L) (address : Roadmap.Address) :
-    fundsOf world (liftAddress address) = liftWord (world.accounts address).balance := by
+    fundsOf world (liftAddress address) = liftBalance (world.accounts address).balance := by
   unfold fundsOf
   rw [lower_lift_address]
 
@@ -105,7 +118,7 @@ theorem balance_projection {D : Source.Layout} {L : Roadmap.Address → Source.S
     {K : Type} {contracts : K → Contract} (source : Source.World D L)
     (target : ContractWorld.World contracts) (address : Roadmap.Address) :
     (withSourceFunds source target).balance (liftAddress address) =
-      liftWord (source.accounts address).balance := funds_at_source_address source address
+      liftBalance (source.accounts address).balance := funds_at_source_address source address
 
 /-- Installed source accounts supply their own balance. Other addresses use
 G01's supplied fixed external ledger and session opening balances/history.
@@ -116,7 +129,7 @@ def sessionFunds {D : Source.Layout} {L : Roadmap.Address → Source.SPath → S
     (history : List Roadmap.Event) : ContractWorld.Address → Semantics.Word := fun address =>
   let sourceAddress := lowerAddress address
   if (source.accounts sourceAddress).code.isSome then
-    liftWord (source.accounts sourceAddress).balance
+    liftBalance (source.accounts sourceAddress).balance
   else liftWord (fixed.ledger environment.balance history sourceAddress)
 
 /-- Installed-account reads never substitute an external-ledger value. -/
@@ -125,7 +138,7 @@ theorem session_funds_installed {D : Source.Layout}
     (fixed : Roadmap.Fixed) (environment : Roadmap.SessionEnv) (history : List Roadmap.Event)
     (address : Roadmap.Address) (installed : (source.accounts address).code.isSome = true) :
     sessionFunds source fixed environment history (liftAddress address) =
-      liftWord (source.accounts address).balance := by
+      liftBalance (source.accounts address).balance := by
   unfold sessionFunds
   dsimp only
   rw [lower_lift_address]
@@ -170,7 +183,7 @@ def stateEnvironment {D : Source.Layout} {L : Roadmap.Address → Source.SPath �
     (state : State C Γ) : State C Γ :=
   { state with
     tx := ((requestContext request responses).tx (target.atTime (liftWord request.timestamp)) (liftAddress request.target))
-    selfBalance := liftWord (source.accounts request.target).balance }
+    selfBalance := liftBalance (source.accounts request.target).balance }
 
 /-- The actual typed environment expressions expose exactly the five projected
 observations; no source-expression evaluation equation is assumed. -/
@@ -189,7 +202,7 @@ theorem expression_observations {D : Source.Layout}
     (Val.simple (.env .selfAddress rfl) : Val C Γ .uint).evalT projected =
       .ok (liftAddress request.target).1 ∧
     (Val.simple (.env .selfBalance rfl) : Val C Γ .uint).evalT projected =
-      .ok (liftWord (source.accounts request.target).balance) :=
+      .ok (liftBalance (source.accounts request.target).balance) :=
   ⟨rfl, rfl, rfl, rfl, rfl⟩
 
 /-- Source endTx and actual intrinsic transactionEntry commute with this

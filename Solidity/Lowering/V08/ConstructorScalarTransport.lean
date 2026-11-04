@@ -200,7 +200,7 @@ def sourceObservation (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes) (n : Int) (
   match result.1 with
   | .ok () =>
     let value ← (result.2.2.ex.world.accounts frame.this).storage.read savedDecl.path
-    pure ((result.2.2.ex.world.accounts frame.this).balance.val,value.key)
+    pure ((result.2.2.ex.world.accounts frame.this).balance,value.key)
   | _ => none
 
 /-- Shared numeric balance/value observation only. Target installation is

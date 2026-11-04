@@ -20,7 +20,7 @@ def object (bytes : Roadmap.Bytes) (asString : Bool) : Σ τ, Data environment.l
  if asString then ⟨.string .memory,.string bytes⟩ else ⟨.bytes .memory,.bytes bytes⟩
 def state (bytes : Roadmap.Bytes) (asString : Bool) : St environment :=
  {empty with heap := (((Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [9,7]⟩).1).alloc (object bytes asString)).1
-             ex := empty.ex.run [.account frame.this (fun account => {account with balance:=⟨73,by decide +kernel⟩,nonce:=4})]}
+             ex := empty.ex.run [.account frame.this (fun account => {account with balance := 73,nonce:=4})]}
 def older : Locals environment.layout [.bytes .memory,.bool] :=
  .cons (.memRef rfl 0) (.cons (.bool true) .nil)
 

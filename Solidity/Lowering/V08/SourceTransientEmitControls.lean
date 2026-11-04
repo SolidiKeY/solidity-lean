@@ -135,8 +135,8 @@ theorem wrong_actual_order (pipeline : Roadmap.Pipeline) :
     (congrArg (fun result => result.2.2) same))
 
 theorem complete_vector (pipeline : Roadmap.Pipeline) :
-    ((completed pipeline).ex.world.accounts sender).balance.val = 93 ∧
-    ((completed pipeline).ex.world.accounts self).balance.val = 7 ∧
+    ((completed pipeline).ex.world.accounts sender).balance = 93 ∧
+    ((completed pipeline).ex.world.accounts self).balance = 7 ∧
     ((completed pipeline).ex.world.accounts self).code = some 0 ∧
     ((completed pipeline).ex.world.accounts self).nonce = 1 ∧
     ((completed pipeline).ex.world.accounts self).storage.read saved = some (.bool true) ∧

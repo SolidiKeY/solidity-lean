@@ -30,7 +30,7 @@ def target : ContractWorld.World catalog :=
   { accounts := fun address =>
       if address = EnvironmentProjection.liftAddress SourceEnvironmentControls.self
       then some ⟨(), store true true⟩ else none
-    funds := fun address => EnvironmentProjection.liftWord
+    funds := fun address => EnvironmentProjection.liftBalance
       (SourceEnvironmentControls.populated.ex.world.accounts
         (EnvironmentProjection.lowerAddress address)).balance }
 

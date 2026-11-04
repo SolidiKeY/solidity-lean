@@ -111,7 +111,7 @@ theorem paid_end_world (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
   Source.endTx_world (paid pipeline bytes).ex
 
 def paymentObservation (state : Source.St E) :=
-  ((state.ex.world.accounts sender).balance.val,(state.ex.world.accounts self).balance.val,
+  ((state.ex.world.accounts sender).balance,(state.ex.world.accounts self).balance,
    (state.ex.transient.cells self).read scratch,(state.ex.transient.cells sender).read scratch,
    state.ex.journal.length)
 
@@ -166,8 +166,8 @@ theorem all_memory_retained (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes
     ⟨rfl,rfl,rfl,rfl⟩,⟨rfl,rfl,rfl,rfl⟩⟩
 
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((paid pipeline bytes).ex.world.accounts sender).balance.val = 88 ∧
-    ((paid pipeline bytes).ex.world.accounts self).balance.val = 12 ∧
+    ((paid pipeline bytes).ex.world.accounts sender).balance = 88 ∧
+    ((paid pipeline bytes).ex.world.accounts self).balance = 12 ∧
     ((paid pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((paid pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((paid pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -220,7 +220,7 @@ theorem skipped_payment (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
   rw [transfer_success]
   intro same
   have states := Option.some.inj same
-  have balances := congrArg (fun state => (state.world.accounts sender).balance.val) states
+  have balances := congrArg (fun state => (state.world.accounts sender).balance) states
   change 88 = 93 at balances
   cases balances
 
@@ -240,12 +240,12 @@ theorem end_is_not_payment_rollback (pipeline : Roadmap.Pipeline) (bytes : Roadm
   constructor
   · intro same
     have balances := congrArg (fun state : Source.St E =>
-      (state.ex.world.accounts sender).balance.val) same
+      (state.ex.world.accounts sender).balance) same
     change 88 = 93 at balances
     cases balances
   · intro same
     have balances := congrArg (fun state : Source.St E =>
-      (state.ex.world.accounts sender).balance.val) same
+      (state.ex.world.accounts sender).balance) same
     change 88 = 93 at balances
     cases balances
 

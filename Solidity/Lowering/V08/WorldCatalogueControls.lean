@@ -102,7 +102,7 @@ theorem source_installed_balance (pipeline : Roadmap.Pipeline) (static : Bool) :
 
 theorem wrong_raw_funds (pipeline : Roadmap.Pipeline) :
     ((world pipeline).balance (EnvironmentProjection.liftAddress SourceEnvironmentControls.sender)).1 ≠
-      (SourceEnvironmentControls.populated.ex.world.accounts SourceEnvironmentControls.sender).balance.val := by
+      (SourceEnvironmentControls.populated.ex.world.accounts SourceEnvironmentControls.sender).balance := by
   change (100 : Int) ≠ 93
   decide +kernel
 

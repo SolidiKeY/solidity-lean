@@ -103,3 +103,36 @@ read-file migrations plus other constructors and representation bridges. Full
 H19 ledger/reachability, H16/P8 realization, immutable/funds release and all
 original24 obligations/six Source combinations remain open. No fresh native
 comparison, combined release gate or whole-lane completion is claimed.
+
+## V08 account-consumer batch (2026-11-04)
+
+44 existing V08 modules are migrated:37 inventoried direct account-balance
+reads plus seven projection/constructor fixture dependencies. Numeric amounts,
+full state vectors, traces, revert/timeout distinctions and proof budgets remain
+unchanged. Source core modules are not edited in this increment.
+
+EnvironmentProjection exposes `liftBalance = liftWord ∘ Monetary.wordView`.
+Existing target observation laws use this explicit projection with no new range
+premise. The new `lower_lift_balance_exact` has an explicit Fits premise; the
+external session ledger stays unchanged. Generated signatures pin the new two
+laws to standard propext/Quot.sound and contain checked wide2^256→Word0 and
+non-Fits controls. These are projections, not a universal monetary ledger or
+Source/EVM reachability proof.
+
+The first38-file focused batch had34 passes and four failures. Actual dependent
+errors identified WorldReset's old projection and conditional/compact Fin
+account constructors in ProjectionControls/LibraryPremises. Those and five
+additional constructor fixtures were migrated; every one of the final44
+changed modules has a matching-source per-file exit0. Original failure logs
+and their dependent axiom-error cascades remain preserved separately. No
+failed gate is relabelled passed. Independent read-only finder and skeptic
+approved the complete migration scope without findings; neither executed
+Lean/tests.
+
+Evidence: `/workspace/vy5-composition/natural-v08-20261104/`. The original
+57-file read inventory now has41 migrated entries, leaving16 inventoried
+read migrations plus other constructors/representation bridges. Combined
+Source/H19 release, external ledger/range/reachability, H16/P8 realization,
+immutable/funds release and all24 original Y10 obligations/six combinations
+remain open. Full-lane gates are not inferred from this consumer batch.
+No fresh native comparison or original goal status change is claimed.

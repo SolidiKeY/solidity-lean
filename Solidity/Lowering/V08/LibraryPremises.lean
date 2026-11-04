@@ -198,8 +198,8 @@ def link : Roadmap.Address := ⟨4,by decide +kernel⟩
 def populated (bytes : Roadmap.Bytes) : Source.St Env :=
   {Source.St.init Env with
     ex:=(Source.St.init Env).ex.run [
-      .account sender (fun a => {a with balance:=⟨93,by decide +kernel⟩,nonce:=3}),
-      .account self (fun a => {a with balance:=⟨7,by decide +kernel⟩,nonce:=1,code:=some 0,storage:=a.storage.write saved (.bool true)}),
+      .account sender (fun a => {a with balance := 93,nonce:=3}),
+      .account self (fun a => {a with balance := 7,nonce:=1,code:=some 0,storage:=a.storage.write saved (.bool true)}),
       .account link (fun a => {a with nonce:=1,code:=some 1}),
       .transient self (fun t => t.write scratch (.bool true)),
       .transient sender (fun t => t.write scratch (.bool true))]
@@ -231,10 +231,10 @@ theorem source_client (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
 
 /-- Ordered observations complement, rather than replace, full state equality. -/
 theorem populated_vector (bytes : Roadmap.Bytes) :
-    ((populated bytes).ex.world.accounts sender).balance.val = 93 := rfl
+    ((populated bytes).ex.world.accounts sender).balance = 93 := rfl
 
 theorem retained_fields (bytes : Roadmap.Bytes) :
-    ((populated bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((populated bytes).ex.world.accounts self).balance = 7 ∧
     ((populated bytes).ex.world.accounts self).nonce = 1 ∧
     ((populated bytes).ex.world.accounts self).code = some 0 ∧
     ((populated bytes).ex.world.accounts link).nonce = 1 ∧
