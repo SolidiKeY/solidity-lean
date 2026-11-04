@@ -1492,3 +1492,32 @@ shares the private result's physical cell; arbitrary result marshalling remains
 open. No failure state, rollback, world correspondence, unconditional fragile
 liveness or full runtime-frame completion follows. Frozen interfaces and the
 existing source controls are unchanged.
+
+### Scalar unwind horizons
+
+`RuntimeFrameV3ScalarPrefixes.running_prefix` transports the live result,
+restored parent locals and actual representation through every running
+`Evm.loopIterN` horizon. It consumes the reached representation and saved
+payloads, derives each checked scalar parent step and preserves protected
+words and zero source-allocation growth. `ScalarStop.complete` executes the
+final false guard with the same code image and proves stability at every
+later horizon. The horizon is an observation index, not an admission cutoff;
+the existing no-wrap and frame premises remain explicit.
+
+The registered client reuses the actual populated native descent and adds
+executed bottom-marker initialization. Every running horizon zero through
+three and every stopped horizon from four onward is inhabited. Its running
+and completed observations use the same final machine, including the entire
+ordered twenty-word snapshot, both old object intervals, saved parent pairs,
+protected stack, live scalar and both allocation/runtime cursor cells. Real
+allocator ownership is derived at every running horizon. Wrong horizon,
+scalar, alias, runtime cursor and halted-class controls retain their baselines.
+The new bottom marker is an explicit initialization; earlier snapshots are
+unchanged.
+
+Intermediate typed `sourceAt` views are not a native partial-return trace.
+The client additionally matches the full native scalar-body endpoint to this
+one-image target result; general recursive compiler selection, arbitrary
+source body transport, admission/profile provenance and a complete frozen V3
+producer remain open. No failed state, rollback, world relation or physical
+EVM execution is inferred.
