@@ -1364,3 +1364,26 @@ family and its parameter frame. Full caller-target export, other recursive
 results/control, all-outcome behavior, approved-domain provenance and
 byte/world correspondence remain open. Frozen interfaces and previous
 observations are unchanged.
+
+
+### Invalid first write before allocating recursive entry
+
+`MutatingFailure.write_failure` derives out-of-bounds failure from the actual
+receiver, index and value evaluation. `source_failure` and `call_failure`
+propagate this bare revert through every positive native quotation and actual
+evaluated entry arguments. The populated native-call control discharges its
+argument premise; depth zero remains exhausted.
+
+`target_suffix` consumes the public-selected write certificate at the reached
+`StateRepr`, with its actual static frame need. Its nonallocating input is
+derived from that constructor. The failure absorbs the allocating entry and
+any following instructions. `target_image` applies the same completed image
+as the successful mutating control, including its paired unwind. The bad
+input has counter three and a two-element array; the successful counter-two
+control retains its existing complete snapshot and growth proof. Neither
+allocator ownership nor room for the unreachable private allocation is a
+premise of the failure theorem.
+
+This proves a represented callee-image endpoint, not public recursive call
+selection or target argument/export compilation. Error outputs provide no
+failed state, frontier, rollback, payload or absence-of-effects claim.
