@@ -256,3 +256,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CanonicalRebindInterface.lean` | Canonical singleton storage-copy rebinding with complete allocator, old-object preservation and strict fresh identity. |
 | `Backend/MemoryCopies/CanonicalRebind.lean` | Actual canonical storage-copy local rebind, complete reached ownership, old-object preservation, strict freshness and source/target refusal. |
 | `Backend/MemoryCopies/CanonicalRebindControls.lean` | Two populated old aliases, arbitrary copied uint, preserved other alias, actual alias-versus-copy observations and failed-path controls. |
+| `Backend/MemoryCopies/PrimitiveArrayInterface.lean` | Arbitrary finite populated primitive-array resolved-value copy using existing allocator/stores, typed word relation and nonvacuous V2/root-gap certificates. |
