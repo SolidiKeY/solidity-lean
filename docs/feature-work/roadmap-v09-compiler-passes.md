@@ -620,6 +620,22 @@ charging an unreachable suffix. These are intrinsic allocation-cell laws, not
 public gas/session prefixes or full Source/bytecode adequacy. Independent
 read-only source reviews are recorded in the checkpoint handoff.
 
+## Executed allocating join
+
+`MemoryJoinedAllocation` completes the allocating suffix admitted by
+`MemoryJoinCost`. The actual intrinsic allocation output comes from the
+published `newArray_decl` theorem. Its reached full Input then supplies actual
+suffix execution. The public joined compiler retains both stage outputs and
+maps, the whole joined MappedOutput with the same final map, old-reference
+identity and exact nine-cell growth from cursor16 to25 for all saved tails.
+
+Controls select the whole public `Memory.compileProg` result and observe all
+16 ordered cells: old locals/aliases, old array headers/elements, independent
+zero cell, the fresh reference/header/zero elements and final cursor. Stale
+initial map, wrong reference/cursor and saved-tail corruption are rejected.
+These are inhabited intrinsic and abstract-Instr results; independent Source
+lowering, public gas/session/ABI and external EVM adequacy remain open.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

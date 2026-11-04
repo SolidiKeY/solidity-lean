@@ -76,3 +76,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryJoinCost.lean` | Exact reached allocation-cell cost for intrinsic/public compiler joins and suffix capacity transport. |
 | `Backend/Passes/MemoryJoinCostControls.lean` | Inhabited5+4 allocation budget with actual selected-map suffix Input and unreachable allocation failure control. |
 | `Backend/Passes/MemoryJoinCostPins.lean` | Standard-only axiom guards for exact allocation-prefix composition. |
+| `Backend/Passes/MemoryJoinedAllocation.lean` | Actual public joined allocation execution with full output, both maps, old-reference identity and nine-cell growth. |
+| `Backend/Passes/MemoryJoinedAllocationControls.lean` | Complete fresh-array/old-state observations, public selection, saved tails and map/cursor negatives. |
+| `Backend/Passes/MemoryJoinedAllocationPins.lean` | Exact standard-only axioms for joined allocation execution and controls. |
