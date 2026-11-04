@@ -443,6 +443,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/ConstantDepth/Rank.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Trace.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryRevert.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
