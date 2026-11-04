@@ -16,6 +16,7 @@ const CORE = [
   /^Solidity\.Yul\.(LocalPostHorizon|Checks\.LocalPostHorizon)$/, // Concrete post/do-while finite-horizon laws.
   /^Solidity\.Yul\.(LocalLoopFailure|Checks\.LocalLoopFailure)$/, // Concrete scope/loop timeout and Source horizon laws.
   /^Solidity\.Yul\.(LocalItemFailure|Checks\.LocalItemFailure)$/, // Indexed statement and context-growing item failure classification.
+  /^Solidity\.Yul\.(LocalBoolControlRepresentation|Checks\.LocalBoolControlRepresentation)$/, // Exact-word control congruence.
   /^Solidity\.Yul\.(LocalBoolRepresentation|Checks\.LocalBoolRepresentation)$/, // Exact-word local Boolean proof relation.
   /^Solidity\.Yul\.(LocalBoolFailure|Checks\.LocalBoolFailure)$/, // Exact failure classification for certified local Boolean evaluators.
   /^Solidity\.Yul\.(LocalDefaultNoGuard|Checks\.LocalDefaultNoGuard)$/, // Omitted-guard consumers of actual scoped runners.

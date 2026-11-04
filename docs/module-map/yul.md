@@ -85,3 +85,5 @@
 | `Yul/Interfaces/P16.lean` | Import-only intrinsic syntax and bounded raw-local Source adapter contract freeze; no general producer instance. |
 
 | `Yul/LocalBoolRepresentation.lean`, `Yul/Checks/LocalBoolRepresentation.lean` | Exact-word Boolean representation relation and all-fuel four-form expression congruence; dirty-word/projection/error controls. |
+
+| `Yul/LocalBoolControlRepresentation.lean`, `Yul/Checks/LocalBoolControlRepresentation.lean` | All-fuel exact-word six-form control congruence; skipped writes, dirty observations and retained timeout updates. |

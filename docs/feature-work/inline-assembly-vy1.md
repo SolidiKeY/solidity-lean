@@ -1036,3 +1036,23 @@ Independent read-only finder/skeptic reviews found no issues. Both per-file
 diagnostics report zero errors; all 15 scoped axiom reports use only Lean
 standard axioms. Full-lane gates and external compiler/EVM validation are not
 claimed for this proof-only increment.
+
+
+### Exact-word control congruence
+
+`LocalBoolControlRepresentation.control` extends the existing exact-word
+relation to all six `LocalBoolControl.Supported` constructors for every fuel
+and related typed local state. Short-circuit and conditional branches agree
+because the guard words agree; errors retain their exact tag, local updates
+retain the indexed relation, and the complete world remains equal.
+Seven controls exercise skipped writes, retained raw word 2, conditional
+mutation, a write retained before timeout, zero fuel, non-clean raw projection
+and distinct raw observations despite equal truthiness. The conditional
+assignment/read certificate is inhabited.
+This does not establish constructor-sensitive `clean?` equivalence, Source
+admission/readback, general statement embedding or full-lane completion.
+No Source or runtime definitions change.
+
+Independent read-only finder/skeptic reviews found no issues. Both per-file
+diagnostics report zero errors; eight scoped axiom reports contain only Lean
+standard axioms. Final lane gates and external compiler/EVM tests remain open.

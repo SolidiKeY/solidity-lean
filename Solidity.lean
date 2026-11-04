@@ -2409,6 +2409,7 @@ import Solidity.Yul.Checks.LocalBlockDivergence
 import Solidity.Yul.Checks.LocalBlockLogic
 import Solidity.Yul.Checks.LocalBoolBinding
 import Solidity.Yul.Checks.LocalBoolControl
+import Solidity.Yul.Checks.LocalBoolControlRepresentation
 import Solidity.Yul.Checks.LocalBoolDivergence
 import Solidity.Yul.Checks.LocalBoolDoDivergence
 import Solidity.Yul.Checks.LocalBoolDoWhile
@@ -2623,6 +2624,7 @@ import Solidity.Yul.LocalBoolBinding
 import Solidity.Yul.LocalBoolControl
 import Solidity.Yul.LocalBoolControlAgreement
 import Solidity.Yul.LocalBoolControlEvidence
+import Solidity.Yul.LocalBoolControlRepresentation
 import Solidity.Yul.LocalBoolControlSource
 import Solidity.Yul.LocalBoolDivergence
 import Solidity.Yul.LocalBoolDoDivergence
