@@ -1,3 +1,4 @@
+import Solidity.Backend.MemoryOps.SourceRawUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
 import Solidity.Backend.MemoryOps.SourceCalldataUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataUintMutation
@@ -1226,4 +1227,192 @@ theorem mixed_copy_reached_reads (p : Roadmap.Pipeline) (fuel : Nat) :
 /-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.mixed_copy_reached_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms mixed_copy_reached_reads
+private def rawFrame : Source.Fr := {F0 with cd := [171,205,239]++Source.natBytes 32 7++Source.natBytes 32 42}
+private def rawShort : Source.Fr := {F0 with cd := [171,205,239]++Source.natBytes 32 7}
+private def rawPayload : List PrimTy.uint.Denote := [u 7,u 42]
+private theorem rawValues : CalldataPackets.RawUint.payload rawFrame 3 2=rawPayload := by decide
+private def rawPair := hp.alloc (R := A) (⟨rawPayload,by decide⟩ : MObj H A)
+private def rawMid (k : PrimTy.uint.Denote) : Source.EMState E0 BΓ :=
+  ((bInput 3 2 k).1.set bDst (.memRef rfl 2),
+    {(bInput 3 2 k).2 with heap := ((bInput 3 2 k).2.heap.alloc ⟨SU,sourceUintMemory rawPayload⟩).1})
+private def rawDone : Source.EMState E0 BΓ :=
+  ((rawMid (u 1)).1,{(rawMid (u 1)).2 with heap := (rawMid (u 1)).2.heap.write 2 (sourceUintMemory [u 7,u 0]) (by rfl)})
+private def rawHeap : Heap (H++[A]) := rawPair.1.set rawPair.2
+  (MObj.setElem .dyn (rawPair.1.get rawPair.2) 1 (PrimTy.dflt .uint))
+private theorem rawAt : SourceUintMemoryAt (rawMid (u 1)) 2 rawPair.1 rawPair.2 .dyn := by
+  unfold SourceUintMemoryAt rawPair
+  rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+  rw [List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+  rfl
+
+/-- Actual nonzero-offset bytes produce both unequal words, then the SAME
+Source Items program deletes42 through the new root while old aliases survive. -/
+theorem raw_delete_program (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) rawFrame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 3 2 (u 1))=
+      (.ok (.val (.memRef rfl 2)),rawMid (u 1)) ∧
+    (Source.evalE (G0 p) rawFrame (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run (rawMid (u 1))=(.ok Source.RVal.unit,rawDone) ∧
+    (Source.execItems (G0 p) rawFrame (fuel+6) nps none dProgram (bInput 3 2 (u 1)).1).run (.nil,(bInput 3 2 (u 1)).2)=
+      (.ok (.normal rawDone.1),(.nil,rawDone.2)) ∧
+    rawPair.1.writeAddr (.index rawPair.2 .dyn (u 1)) (PrimTy.dflt .uint)=some rawHeap ∧
+    SourceUintMemoryAt rawDone 2 rawHeap rawPair.2 .dyn ∧ Source.MemOK E0 SH rawDone ∧
+    Heap.Keeps (List.prefix_append H [A]) hp rawHeap ∧
+    SourceUintMemoryAt rawDone 0 rawHeap (left.wk (List.prefix_append H [A])) .dyn ∧
+    SourceUintMemoryAt rawDone 1 rawHeap (right.wk (List.prefix_append H [A])) .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := source_raw_uint_bind_delete (bInput 3 2 (u 1)) hp (G0 p) rawFrame fuel nps
+      bDst bSrc bIndex 3 2 (u 1) rfl rfl (by decide) (by decide) SH (bMemOK 3 2 (u 1))
+    rw [rawValues] at result
+    obtain ⟨valid,native,zs,first,second,program,adapter,hw,new,mok,keep,values,occupied,locals,ex,events,logs,fn⟩ := result
+    have size : (u 1).1.toNat<(MObj.elems .dyn (rawPair.1.get rawPair.2)).length := by
+      unfold rawPair
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.length_map];decide
+    have nativeRun : rawPair.1.writeAddr (.index rawPair.2 .dyn (u 1)) (PrimTy.dflt .uint)=some rawHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,size,↓reduceIte];rfl
+    have sameNative : native=rawHeap := Option.some.inj (hw.symm.trans nativeRun)
+    subst native
+    obtain ⟨ht,write⟩ := source_uint_write (rawMid (u 1)) 2 rawPayload (by rfl) 1 (by decide) (PrimTy.dflt .uint)
+    have actualWrite : (Source.deleteLoc (E := E0) (Γ := BΓ) rawFrame (fuel+2) (τ := .int .u256) (.mem 2 1)).run (rawMid (u 1))=(.ok (),rawDone) := write
+    have actual := rawAt.eval_delete_of_run (G0 p) rawFrame fuel bDst bIndex (u 1) rfl rfl size actualWrite
+    have sameSource : zs=rawDone := congrArg Prod.snd (second.symm.trans actual)
+    subst zs
+    have oldInitial : SourceUintMemoryAt (bInput 3 2 (u 1)) 0 hp left .dyn := old_at 3 2
+    have neighborInitial : SourceUintMemoryAt (bInput 3 2 (u 1)) 1 hp right .dyn := neighbor_at 3 2
+    exact ⟨first,second,program,nativeRun,new,mok,keep,oldInitial.transport keep occupied,neighborInitial.transport keep occupied⟩
+
+/-- Complete ordered Source object/local tables and typed contents at input,
+copy prefix and final delete; no projected word target image is invented. -/
+theorem raw_delete_vectors :
+    [(bInput 3 2 (u 1)).2.heap.get 0,(bInput 3 2 (u 1)).2.heap.get 1,(bInput 3 2 (u 1)).2.heap.get 2,(bInput 3 2 (u 1)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,none,none] ∧
+    [(rawMid (u 1)).2.heap.get 0,(rawMid (u 1)).2.heap.get 1,(rawMid (u 1)).2.heap.get 2,(rawMid (u 1)).2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory [u 7,u 42]⟩,none] ∧
+    [rawDone.2.heap.get 0,rawDone.2.heap.get 1,rawDone.2.heap.get 2,rawDone.2.heap.get 3]=
+      [some ⟨SU,sourceUintMemory old⟩,some ⟨SU,sourceUintMemory neighbor⟩,some ⟨SU,sourceUintMemory [u 7,u 0]⟩,none] ∧
+    (bInput 3 2 (u 1)).1=.cons (sourceUint (u 1)) (.cons (.cdRef rfl 3 2)
+      (.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    rawDone.1=.cons (sourceUint (u 1)) (.cons (.cdRef rfl 3 2)
+      (.cons (.memRef rfl 2) (.cons (.memRef rfl 0) (.cons (.memRef rfl 1) .nil)))) ∧
+    (rawMid (u 1)).1=rawDone.1 ∧
+    (MObj.elems .dyn (rawHeap.get (left.wk (List.prefix_append H [A]))),
+     MObj.elems .dyn (rawHeap.get (right.wk (List.prefix_append H [A]))),MObj.elems .dyn (rawHeap.get rawPair.2))=
+      (old,neighbor,[u 7,u 0]) ∧
+    (rawPair.2.id,(bInput 3 2 (u 1)).2.heap.next,(rawMid (u 1)).2.heap.next,rawDone.2.heap.next)=(2,2,3,3) ∧
+    (rawDone.2.ex,rawDone.2.events,rawDone.2.logs,rawDone.2.fnLocals)=
+      ((bInput 3 2 (u 1)).2.ex,(bInput 3 2 (u 1)).2.events,(bInput 3 2 (u 1)).2.logs,(bInput 3 2 (u 1)).2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,?_,rfl,rfl⟩
+    simp only [rawHeap,rawPair,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,MObj.elems_dyn,MObj.setElem_dyn]
+    rfl
+
+/-- Endpoint2 rejects only AFTER the actual copied root was bound. -/
+theorem raw_delete_endpoint (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    (Source.evalE (G0 p) rawFrame (fuel+4) (sourceUintCalldataBind bDst bSrc)).run (bInput 3 2 (u 2))=
+      (.ok (.val (.memRef rfl 2)),rawMid (u 2)) ∧
+    (Source.evalE (G0 p) rawFrame (fuel+3) (sourceUintIndexedDelete bDst bIndex)).run (rawMid (u 2))=
+      (.error (.revert (Source.panicData .index)),rawMid (u 2)) ∧
+    (Source.execItems (G0 p) rawFrame (fuel+6) nps none dProgram (bInput 3 2 (u 2)).1).run (.nil,(bInput 3 2 (u 2)).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(rawMid (u 2)).2)) ∧
+    rawPair.1.writeAddr (.index rawPair.2 .dyn (u 2)) (PrimTy.dflt .uint)=none ∧
+    SourceUintMemoryAt (rawMid (u 2)) 2 rawPair.1 rawPair.2 .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := source_raw_uint_bind_delete_bounds (bInput 3 2 (u 2)) hp (G0 p) rawFrame fuel nps
+      bDst bSrc bIndex 3 2 (u 2) rfl rfl (by decide) (by decide) SH (bMemOK 3 2 (u 2))
+    rw [rawValues] at result
+    obtain ⟨valid,first,second,program,adapter,hw,new,rest⟩ := result
+    exact ⟨first,second,program,hw,new⟩
+
+/-- Standalone short copies really zero-pad; this is NOT entry rejection. -/
+theorem raw_short_padding : CalldataPackets.RawUint.payload rawShort 3 2=[u 7,u 0] ∧
+    (Source.cdToMem (E := E0) (Γ := BΓ) rawShort SU 3 2).run (bInput 3 2 (u 1))=
+      (.ok (.val (.memRef rfl 2)),((bInput 3 2 (u 1)).1,
+        {(bInput 3 2 (u 1)).2 with heap := ((bInput 3 2 (u 1)).2.heap.alloc ⟨SU,sourceUintMemory [u 7,u 0]⟩).1})) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have values : CalldataPackets.RawUint.payload rawShort 3 2=[u 7,u 0] := by decide
+    refine ⟨values,?_⟩
+    rw [CalldataPackets.RawUint.copy_run,values]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_delete_program
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_delete_vectors
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_delete_endpoint
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_short_padding' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_short_padding
+
+/-- Actual prefix/read and final/read distinguish skipped deletion and stale
+root selection; all reads are existing Source syntax on the reached heaps. -/
+theorem raw_delete_reads (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) rawFrame (fuel+2) (.indexArray (.local bDst) (.local bIndex) rfl)).run (rawMid (u 1))=
+      (.ok (.val (sourceUint (u 42))),rawMid (u 1)) ∧
+    (Source.evalE (G0 p) rawFrame (fuel+2) (.indexArray (.local bDst) (.local bIndex) rfl)).run rawDone=
+      (.ok (.val (sourceUint (u 0))),rawDone) ∧
+    (Source.evalE (G0 p) rawFrame (fuel+2) (.indexArray (.local bAlias) (.local bIndex) rfl)).run rawDone=
+      (.ok (.val (sourceUint (u 0))),rawDone) ∧
+    (sourceUint (D := E0.layout) (u 42))≠sourceUint (u 0) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have values : MObj.elems .dyn (rawPair.1.get rawPair.2)=[u 7,u 42] := by
+      unfold rawPair
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+      rfl
+    have beforeBound : (u 1).1.toNat<rawPair.1.len rawPair.2 .dyn := by
+      change (u 1).1.toNat<(MObj.elems .dyn (rawPair.1.get rawPair.2)).length
+      rw [values];decide
+    have client := raw_delete_program p 0 0
+    have after := client.2.2.2.2.1
+    have oldAlias := client.2.2.2.2.2.2.2.1
+    have keep : Heap.Keeps (List.prefix_append H [A]) hp rawHeap := client.2.2.2.2.2.2.1
+    have afterValues : MObj.elems .dyn (rawHeap.get rawPair.2)=[u 7,u 0] := by
+      unfold rawHeap
+      rw [Heap.get_set_same,MObj.elems_setElem,values];rfl
+    have afterBound : (u 1).1.toNat<rawHeap.len rawPair.2 .dyn := by
+      change (u 1).1.toNat<(MObj.elems .dyn (rawHeap.get rawPair.2)).length
+      rw [afterValues];decide
+    have oldValues : MObj.elems .dyn (rawHeap.get (left.wk (List.prefix_append H [A])))=old := by
+      rw [keep left,MObj.elems_wk,MObj.elems_dyn,List.map_id'' (f := MVal.wk (List.prefix_append H [A]) (.prim .uint)) (fun _ => rfl)]
+      rfl
+    have oldBound : (u 1).1.toNat<rawHeap.len (left.wk (List.prefix_append H [A])) .dyn := by
+      change (u 1).1.toNat<(MObj.elems .dyn (rawHeap.get (left.wk (List.prefix_append H [A])))).length
+      rw [oldValues];decide
+    have a := rawAt.eval_index (G0 p) rawFrame fuel bDst bIndex (u 1) rfl rfl beforeBound
+    have b := after.eval_index (G0 p) rawFrame fuel bDst bIndex (u 1) rfl rfl afterBound
+    have c := oldAlias.eval_index (G0 p) rawFrame fuel bAlias bIndex (u 1) rfl rfl oldBound
+    have different : (sourceUint (D := E0.layout) (u 42))≠sourceUint (u 0) := by
+      intro same
+      have converted := congrArg (fun v : Source.Val E0.layout (.int .u256) => calldataUint (.val v)) same
+      exact (by decide : u 42≠u 0) (by simpa only [calldataUint_sourceUint] using converted)
+    refine ⟨?_,?_,?_,different⟩
+    · simpa only [values,List.getElem_cons_succ,List.getElem_cons_zero] using a
+    · simpa only [afterValues,List.getElem_cons_succ,List.getElem_cons_zero] using b
+    · simpa only [oldValues,old,List.getElem_cons_succ,List.getElem_cons_zero] using c
+
+/-- Horizon5 retains the ACTUAL copy/bind prefix before suffix timeout.
+The Items outcome exposes globals, not a returned local environment. -/
+theorem raw_delete_late_timeout (p : Roadmap.Pipeline) (nps : Nat) :
+    (Source.execItems (G0 p) rawFrame 5 nps none dProgram (bInput 3 2 (u 1)).1).run (.nil,(bInput 3 2 (u 1)).2)=
+      (.error .timeout,(.nil,(rawMid (u 1)).2)) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have first : (Source.evalE (G0 p) rawFrame 3 (sourceUintCalldataBind bDst bSrc)).run (bInput 3 2 (u 1))=
+        (.ok (.val (.memRef rfl 2)),rawMid (u 1)) := by
+      rw [source_cd_uint_bind_run (G0 p) rawFrame 0 (bInput 3 2 (u 1)) bDst bSrc 3 2 rfl,
+        source_cd_uint_values_raw]
+      dsimp only
+      rw [source_uint_payload_sourceUint,rawValues]
+      rfl
+    have statement := source_expr_statement_run (G0 p) rawFrame 3 nps _ _ _ _ first
+    rw [dProgram,Source.execItems,Source.Hoare.run_bind,statement]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_delete_reads
+/-- info: 'Solidity.Backend.MemoryOps.UintCopyControls.raw_delete_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_delete_late_timeout
+
 end Solidity.Backend.MemoryOps.UintCopyControls

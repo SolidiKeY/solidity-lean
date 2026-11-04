@@ -372,6 +372,7 @@ import Solidity.Backend.MemoryOps.SourceNestedDelete
 import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedSelect
+import Solidity.Backend.MemoryOps.SourceRawUintDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
