@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import resource
 import sys
+import tempfile
 
 SPEC = importlib.util.spec_from_file_location('v17_compact', Path(__file__).with_name('roadmap-v17-compact-json.py'))
 C = importlib.util.module_from_spec(SPEC)
@@ -31,7 +32,12 @@ def parse(raw):
     return json.loads(raw.decode('utf-8'), object_pairs_hook=C.unique_object, parse_constant=C.forbidden_constant)
 
 
-def verify(receipt, receipt_sha256, compact, syntax):
+def verify(receipt, receipt_sha256, compact, syntax, original_input=None,
+           original_member=None, original_archive_sha256=None):
+    C.require(original_input is not None or (original_member is None and original_archive_sha256 is None),
+              'original locator requires original input')
+    C.require((original_member is None) == (original_archive_sha256 is None),
+              'original member/archive pin must be paired')
     paths = [Path(p).absolute() for p in (receipt, compact, syntax)]
     C.require([p.name for p in paths] == ['receipt.json', 'compact.json', 'syntax.unverified.json']
               and len({p.parent for p in paths}) == 1, 'unpublished or unlinked attachment paths')
@@ -64,11 +70,28 @@ def verify(receipt, receipt_sha256, compact, syntax):
     out = io.BytesIO()
     C.compact(io.BytesIO(separated), out, meta['syntaxSha256'])
     C.require(out.getvalue() == raw, 'syntax/compact byte disagreement')
-    return dict(schema=1, status='data-only', accountingOnly=True, attachmentsConsistent=True,
+    result = dict(schema=1, status='data-only', accountingOnly=True, attachmentsConsistent=True,
                 receiptSha256=receipt_sha256, compactSha256=meta['compactSha256'],
                 originalInputSha256=meta['inputSha256'], originalInputRechecked=False,
                 boundary='Pinned attachments only; original execution, revision, imports and proof claims remain unauthenticated.',
                 **FLAGS)
+    if original_input is not None:
+        # Reuse the producer's bounded byte/syntax/identity/archive checks;
+        # do not add a second parser or reinterpret native/proof fields.
+        with tempfile.TemporaryDirectory(prefix='v17-original-recheck-') as tmp:
+            reproduced = C.execute(argparse.Namespace(input=str(original_input), sha256=meta['inputSha256'],
+                member=original_member, archive_sha256=original_archive_sha256,
+                out=str(Path(tmp) / 'recomputed')))
+            C.require(reproduced['bytes'] == meta, 'original/reported compaction disagreement')
+            C.require(reproduced['status'] == 'data-only' and all(reproduced[k] is False for k in FLAGS),
+                      'recomputed evidence promotion')
+            result.update(originalInputRechecked=True, originalInputEvidence=dict(
+                input=str(Path(original_input).absolute()), member=original_member,
+                archiveSha256=original_archive_sha256, bytes=reproduced['bytes'],
+                historicalFileIdentityAuthenticated=False))
+        result['boundary'] = ('Original bytes and pinned attachments agree; historical execution, revision, '
+                              'imports, selectors and proof claims remain unauthenticated.')
+    return result
 
 
 def main():
@@ -78,9 +101,12 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('receipt', 'receipt-sha256', 'compact', 'syntax'):
         parser.add_argument('--' + name, required=True)
+    for name in ('original-input', 'original-member', 'original-archive-sha256'):
+        parser.add_argument('--' + name)
     args = parser.parse_args()
     try:
-        print(json.dumps(verify(args.receipt, args.receipt_sha256, args.compact, args.syntax), sort_keys=True))
+        print(json.dumps(verify(args.receipt, args.receipt_sha256, args.compact, args.syntax,
+                                args.original_input, args.original_member, args.original_archive_sha256), sort_keys=True))
         return 0
     except Exception as error:
         print(json.dumps(dict(status='error', error=type(error).__name__ + ': ' + str(error), **FLAGS)))
