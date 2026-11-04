@@ -463,6 +463,21 @@ without UTF-8 validation. Actual owner observation and heap-type distinction are
 proved; both surrounding byte objects and the whole view survive. This extends
 same-length payload support, not string indexing, growth or allocator adequacy.
 
+`P6RetainedRegionCopy` extends selected byte/string copying to headers and
+original retained regions. It keeps the reached frame on preparation `None`;
+for this selected family only, failure is exactly overflow of the decoded
+rounded footprint beyond original capacity. Whole-view success also requires
+the destination to be empty or contained in the actual original region.
+Current occupied roots, addresses and footprint bounds transport through real
+retained lineage to derive original separation and protect other objects.
+Actual Source writes, refreshed views, coverage/IDs, layout and typing facts
+are constructed. The kernel two-step witness shrinks a33byte string to zero,
+then uses that actual result's refreshed inventory/history to prepare regrowth
+to64. Finite controls observe the original33bytes plus31nonzero padding bytes,
+reject current32byte capacity as an origin, and retain a copied65header on
+original-capacity failure. These are preparation outcomes, not language refusal,
+deallocation, cleaning or allocator/call-rollback adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
