@@ -158,3 +158,18 @@ with no findings and without Lean/server use. They confirmed exact merge parents
 unchanged precompile inputs, passing inventory/12 controls and the retained cache
 blocker. Evidence and current handoff: `evidence/dependency-adoption.md` and
 `evidence/dependency-adoption-gates.log`.
+
+## Published dependency adoption, 2026-11-04
+
+Adopted exact origin/master `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`
+via merge `46a0d1cbd77dd0a5fb7cece924b4c277c1f0ccc2`, preserving prior lane
+head `465a25548d51b7485fdfd988cff717019d2a97bd`. Relevant precompile inputs
+are unchanged; this published increment contains no precompile lane artifacts.
+Source inventory, 12 controls and `register.sh --check` pass. Generated roots
+were already current; no new roots, module-map rows or composition were added.
+Separate read-only finder/skeptic adoption reviews pass without findings or
+Lean/server use. Coordinator-reported full integration passes are not a local
+runtime gate or B16 proof. Mathlib delivery remains separately pending, and
+`Mathlib/Data/Nat/Log.olean` is still absent. No original obligation is discharged
+by this adoption. Current handoff and evidence: `evidence/dependency-adoption-20261104.md`
+and `evidence/dependency-adoption-20261104-gates.log`. No new question is raised.
