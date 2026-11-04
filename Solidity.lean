@@ -1930,6 +1930,8 @@ import Solidity.Lowering.V08.LiteralFailureEffectDecode
 import Solidity.Lowering.V08.LiteralFailureEffectDecodeControls
 import Solidity.Lowering.V08.LiteralFailureEncodedRethrow
 import Solidity.Lowering.V08.LiteralFailureEncodedRethrowControls
+import Solidity.Lowering.V08.LiteralFailureLocatedFields
+import Solidity.Lowering.V08.LiteralFailureLocatedFieldsControls
 import Solidity.Lowering.V08.LiteralFailureLowering
 import Solidity.Lowering.V08.LiteralFailureMemoryReason
 import Solidity.Lowering.V08.LiteralFailureMemoryReasonControls

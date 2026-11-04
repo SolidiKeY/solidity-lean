@@ -475,3 +475,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureSliceChain.lean` | Arbitrary finite actual typed slice-chain evaluation, explicit fuel, standard encoding and invalid-extension consumers. |
 | `Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean` | Populated mixed explicit/omitted-end chain, complete packets, failure extensions, skipped allocating tails and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureLocatedFields.lean` | Arbitrary supported memory/scalar/calldata interleavings; actual encoder-part derivation, ABI layout and allocation-preserved evidence. |
+| `Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean` | Eight-field mixed-location execution, aliases, complete packets, typed-kind/wire distinction and failure/fuel controls. |
