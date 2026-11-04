@@ -3418,6 +3418,8 @@ import Solidity.Yul.Views.StructArray
 import Solidity.Yul.Views.StructConstructorControls
 import Solidity.Yul.Views.StructConstructorFields
 import Solidity.Yul.Views.StructConstructorRun
+import Solidity.Yul.Views.TransientCellUpdate
+import Solidity.Yul.Views.TransientCellUpdateControls
 import Solidity.Yul.Views.TransientSlotControls
 import Solidity.Yul.Views.TransientSlots
 import Solidity.Yul.Views.Widths

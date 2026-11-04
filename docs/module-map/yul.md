@@ -107,3 +107,4 @@
 | `Yul/Views/RetainedCallerHeaders{,Controls}` | Declaration-traced saved-child dynamic header registrations in actual prepared source inventories, with pre-alignment cursor, physical slot and typed-length controls. |
 | `Yul/Views/RetainedLiveCoverage{,Controls}` | Successful source traversal derives actual header lengths and all generated live fields across child/image inventories; dormant payload and roots-only loss controls. |
 | `Yul/Views/PackedCellUpdate{,Controls}` | Actual typed persistent scalar writes preserve complete canonical finite packed views and the entire complementary raw map, with full reencoding and padding/static controls. |
+| `Yul/Views/TransientCellUpdate{,Controls}` | Actual typed transient writes preserve finite packed agreement and original complement, with persistent isolation, rollback/reset and declared-root padding/account controls. |

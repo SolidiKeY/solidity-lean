@@ -671,3 +671,13 @@ nonstatic premises explicit. Controls write retained uint16 payload99 to42,
 preserve high padding and neighboring88, and retain exact static refusal.
 Unchanged writeback is identity on the already-written store, not the original
 setter's administration. Changing ownership and dirty-owned adequacy remain open.
+
+`TransientCellUpdate` reuses the finite packed-cell proof for actual transient
+`Source.setCell`. It derives complete reencoding with the original complement,
+persistent-world isolation, exact static refusal and paired rollback. Existing
+endTx resets logical transient defaults, residual cells and both journals while
+preserving persistent words; no zero-encoding law for arbitrary codecs is assumed.
+Controls use the actual declared transient uint16 root after nontrivial source
+prefixes, preserve padding and unknown slot99, read back7, preserve another account
+and restore/reset through real frame operations. This admits no transient aggregate
+or dirty-owned representation and proves no general transaction admission.
