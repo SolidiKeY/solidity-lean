@@ -885,3 +885,12 @@ index still panics under the current length. Current-shape recomputation would
 choose free pointer 192 and is distinguished explicitly. These helper executions
 do not establish high-level program reachability, shared-zero/interior/dirty-owned
 representations or target allocator refinement.
+
+`StructWordStore` derives a field's updated `MemoryFields` encoding from actual
+`DataList.setNth`, retaining its field-type checks. One raw `mstore` then decodes
+to the complete actual struct `writeLoc` result through existing canonical
+codecs. Selected-struct encoding with unchanged complementary bytes reconstructs
+the patched map. Heterogeneous controls update a pointer, boolean and uint256,
+preserve sibling aliases and padding, and distinguish a wrong-type Source write
+from dirty-bool canonical preparation None. Whole-heap changed-image refresh,
+target opcode execution and general dirty assembly transport remain open.
