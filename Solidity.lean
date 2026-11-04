@@ -3251,6 +3251,8 @@ import Solidity.Yul.Views.RecursiveStorageExtent
 import Solidity.Yul.Views.RecursiveStorageSpec
 import Solidity.Yul.Views.RecursiveStorageTrace
 import Solidity.Yul.Views.Regions
+import Solidity.Yul.Views.RepeatedCellWrites
+import Solidity.Yul.Views.RepeatedCellWritesControls
 import Solidity.Yul.Views.ResidualControls
 import Solidity.Yul.Views.ResidualHeapGeometry
 import Solidity.Yul.Views.ResidualJournal

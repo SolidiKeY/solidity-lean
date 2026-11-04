@@ -690,3 +690,13 @@ per-operation frame inputs, not a proof that an executing frame changes mode.
 Controls use both banks at slot0, read2/7 on success and2/old0xabcd on late refusal,
 and observe persistent survival/transient reset at endTx. This is finite typed
 operation composition, not general call, dirty-owned or changing-layout adequacy.
+
+`RepeatedCellWrites` composes arbitrary finite lists of typed values through actual
+`Source.setCell`, using one fixed frame and the declaration's computed bank. The
+physical fold reuses the existing field patch. Its complete finite view and raw
+reencoding retain the original complement; rollback uses the same chronological
+Source operations. Owner Hoare laws preserve every original-H `MemOK` on success
+and halt. Duplicate writes retain real undo entries, equal-value static writes
+refuse, and empty traces remain pure. Controls cover both banks and nonzero
+padding. This proves same represented-path composition, not changing ownership,
+arbitrary path/program coverage or dirty-owned adequacy, and imposes no trace cap.

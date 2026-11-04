@@ -109,3 +109,4 @@
 | `Yul/Views/PackedCellUpdate{,Controls}` | Actual typed persistent scalar writes preserve complete canonical finite packed views and the entire complementary raw map, with full reencoding and padding/static controls. |
 | `Yul/Views/TransientCellUpdate{,Controls}` | Actual typed transient writes preserve finite packed agreement and original complement, with persistent isolation, rollback/reset and declared-root padding/account controls. |
 | `Yul/Views/MixedCellSequence{,Controls}` | One actual persistent/transient typed Source bind with same-state complete bank reconstructions, precise static prefixes and paired rollback; equal-slot bank controls. |
+| `Yul/Views/RepeatedCellWrites{,Controls}` | Arbitrary finite actual same-field typed Source writes in the computed bank, full raw reconstruction with original complement, every-H safety, rollback and duplicate/static controls. |
