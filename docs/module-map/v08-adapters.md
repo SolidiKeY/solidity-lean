@@ -519,3 +519,18 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailureCopiedReason.lean` | Actual eager calldata-string require conversion, exact success/failure state and Error readback. |
 | `Lowering/V08/LiteralFailureCopiedReasonControls.lean` | Populated copied-reason, static/local, full-word old-field and tight-fuel controls with complete packets. |
+
+| `Lowering/V08/LiteralFailureArithmeticReason.lean` | Actual division/modulo failure with effectful denominator and exact panic bytes. |
+| `Lowering/V08/LiteralFailureArithmeticReasonControls.lean` | Populated division/modulo panic, operand effects, distinct panic classes and insufficient-fuel controls. |
+| `Lowering/V08/LiteralFailureMemoryRevert.lean` | Actual direct Source revert with an assigned heap-backed string reason. |
+| `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Heap-backed reason aliasing, complete revert execution and insufficient-fuel controls. |
+| `Lowering/V08/LiteralFailureOverflowReason.lean` | Typed checked/unchecked addition at signed and unsigned range boundaries. |
+| `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Signed/unsigned overflow and wrapping, boundary success and distinct panic-class controls. |
+| `Lowering/V08/LiteralFailureReasonSequence.lean` | Actual Source sequencing and propagation of effectful memory-backed reason statements. |
+| `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | First failure, skipped continuation, changed/stale references and timeout sequencing controls. |
+| `Lowering/V08/LiteralFailureReferenceReturn.lean` | Actual single memory-byte return, hidden return-slot extraction and existing encoded-return transport. |
+| `Lowering/V08/LiteralFailureReferenceReturnControls.lean` | Populated byte-reference return, extraction, actual encoding and conditional target-slice controls. |
+| `Lowering/V08/LiteralFailureScalarOverflow.lean` | Source uint256 addition overflow consumed by the actual checked scalar test. |
+| `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Maximum-word overflow, retained scalar operands, raw wrapping and positive boundary controls. |
+| `Lowering/V08/LiteralFailureStatementReason.lean` | Actual Source statement endpoints for effectful heap-backed require/revert reasons. |
+| `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Populated require/revert success and failure states, static-frame variants and stale-pointer negatives. |
