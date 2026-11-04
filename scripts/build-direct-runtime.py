@@ -11,6 +11,8 @@ if os.environ.get('DIRECT_RUNTIME_FULL')=='1':
     raise ValueError('Full Lean runtime is not an ordinary verifier; use a separate optional certification pipeline')
 for override in ['EMCC_CFLAGS','EM_COMPILER_WRAPPER','EM_LLVM_ROOT','EM_BINARYEN_ROOT']:
     if os.environ.get(override):raise ValueError('Unpinned compiler override: '+override)
+if not os.environ.get('EM_CONFIG') or not pathlib.Path(os.environ['EM_CONFIG']).is_file():
+    raise ValueError('Pinned WASM builds require an explicit EM_CONFIG file')
 prefix, stage, output = map(lambda x:pathlib.Path(x).resolve(),sys.argv[1:])
 output.mkdir(parents=True,exist_ok=True)
 emcc=os.environ.get('EMCC','emcc')

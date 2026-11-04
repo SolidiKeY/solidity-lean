@@ -37,6 +37,8 @@ class ProvenanceTests(unittest.TestCase):
         self.assertIn(message,result.stderr)
     def test_full_runtime_refused_before_toolchain(self):
         self.rejection('build-direct-runtime.py','DIRECT_RUNTIME_FULL','1','not an ordinary verifier')
+    def test_implicit_emscripten_config_refused(self):
+        self.rejection('build-direct-runtime.py','EM_CONFIG','','require an explicit EM_CONFIG')
     def test_native_overrides_refused_before_toolchain(self):
         for name in ['LEAN_CC','LEAN_SYSROOT','CPATH']:
             with self.subTest(name=name):self.rejection('build-direct-native.py',name,'/different','Unpinned compiler override: '+name)
