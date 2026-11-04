@@ -309,3 +309,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TypedCapture.lean` | Actual captured-array execution with derived capacity and complete heap/allocator transport. |
 | `Backend/MemoryCopies/TypedCaptureControls.lean` | Primitive overlaps, dynamic cross-object writes, shallow reference identities, alias/frame and negative controls. |
 | `Backend/MemoryCopies/CheckedCaptureInterface.lean` | Guarded typed capture success/refusal contracts using actual dynamic headers and fixed lengths. |
+| `Backend/MemoryCopies/CheckedCapture.lean` | Actual checked typed-capture guards, allocator-derived bounds, success and refusal execution. |
+| `Backend/MemoryCopies/CheckedCaptureControls.lean` | Inhabited overlap/reference/dynamic execution and bounds refusal controls. |
