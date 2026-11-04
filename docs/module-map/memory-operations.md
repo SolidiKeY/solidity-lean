@@ -247,3 +247,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintAliasWriteRead.lean` | Contents-derived strong scalar read and actual alias/write/read-into-local Source Items/native Prog/full word append, including result/index aliasing. |
 
 | `Solidity/Backend/MemoryOps/SourceUintAliasReadReject.lean` | Actual four-statement alias/write/read/index-rejection composition with retained successful prefix. |
+
+| `Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean` | Existing arbitrary emitted byte stores across Environment and failure slices, live REVERT and disjoint full-word frames. |
+| `Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Populated full-byte/word vectors, actual overlapping order, empty and unsupported boundaries. |
