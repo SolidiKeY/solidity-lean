@@ -267,6 +267,7 @@ import Solidity.Backend.LabelExec.Packets
 import Solidity.Backend.LabelExec.Placement
 import Solidity.Backend.LabelExec.ScalarTransfer
 import Solidity.Backend.LabelExec.Step
+import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.DeepCopyContents
 import Solidity.Backend.MemoryCopies.HeapContents

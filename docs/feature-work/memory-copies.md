@@ -198,3 +198,13 @@ MCP errors/warnings are zero; checkpoint gates and scoped axiom audit follow.
 The compiled G33 failure path still needs H16/VY5 S03-PANIC41 finalization;
 a host capacity rejection is not substituted for that behavior. Full G33/G35
 compiled defaults/copies/traversal/composition remain open.
+
+## Allocation-panic emission boundary
+
+`AllocationPanicInterface.lean` fixes an actual Source operation and complete
+reached state alongside the published panic emitter's byte-exact target slice.
+It reuses `Failure.emit` and V08 `panicInput`/`panic_checked`, without another
+encoder or compiler framework. `Panic41Premise` remains the explicit H16/S03
+boundary; size selection and allocation finalization are not inferred from it.
+The signature precedes proofs. Source oversized-length controls will use the
+existing independently derived length check, not assume the desired failure.
