@@ -1,5 +1,8 @@
 # Inline assembly VY3: Yul compilation combinators
 
+The opening inventory records the initial target-only checkpoint. Later sections
+record its source/compiler extensions and the obligations that remain open.
+
 `Yul/Compilation/**`, from the vy3-compilation lane. Target-side combinators
 over the existing backend stack model (`Backend/Scalar/Heights`,
 `Backend/Control`, `Backend/Passes/Stack`); no Yul AST or VY1 semantics is
@@ -1276,3 +1279,44 @@ Full Y08.01 logical Source/G24/views/functions/early-flow/divergence, general FO
 dispatch, Y08.02 native opcode/world/resource composition, frontend attachment,
 remaining backfill and final joint gates remain unfinished. NJ1 stays complete
 for its earlier fixed synthetic fixture.
+
+
+### Direct MSTORE/view composition
+
+`SolidityBridge.Yul.DirectMemory` emits value-PUSH, address-PUSH, MSTORE using
+existing target instructions. Its actual byte-addressed `runSlice` execution
+agrees with VY2 `mstore` for every initial byte map and caller. The target's
+existing encoder and producer bytes are proved equal; no word/layout/state
+semantics is replaced. Selected code retains the materializer's exact
+`address + 32 ≤ 2^256` domain. Under that premise the three-instruction store
+refines the earlier 96-instruction byte materializer. Instruction counts are
+static controls, not gas claims.
+
+`view_read_after_store` concerns the producer view's `mload`; it does not execute
+target MLOAD (which this unchanged target slice refuses). `image_preserved`
+frames an actual intrinsic `MemoryImage p d` when its whole span is disjoint
+from the written32bytes. This preserves that supplied image, not global MemOK,
+heap ownership or logical writeback. Canonical hashing composes the direct
+store with the existing `withKeccak` adapter, without any collision premise or
+claim about other Fixed instances.
+
+`capacity_iff` derives necessary and sufficient `caller.length + 2 ≤ 1024` for
+all four actual `runSlice` instruction prefixes. It does not substitute the
+numeric `Scalar.stackBound` predicate, whose executor refuses MSTORE. Kernel
+controls inhabit exact1022room and1023refusal, unaligned dirty-word refinement,
+view reads and typed-image framing. Other controls distinguish big endian,
+zero/max words, operand reversal, missing operands, header aliasing, word-end
+selection, unsupported target MLOAD/SSTORE, hashing and oversized local success.
+
+The published `SolidityBridge.AccessBridge.HostWriteControls` counterexample
+still blocks general pinned native writer/image closure at host-sized gaps.
+The local Nat-map theorem is not that native writer theorem: selection still
+admits2^64, and an explicit control preserves its local semantics without a
+host-size exclusion. No native/charged correctness, admission or premise is
+weakened to hide the counterexample. No owner implementation is edited.
+
+Independent read-only finder/skeptic reviews found no confirmed findings.
+Sixteen standard-only axiom reports are enforced. The freshly published master
+was adopted while preserving the old checkpoint; generated roots remain the
+only registration path. Full Y08.01/02, frontend, remaining backfill and joint
+validation remain open. No new external solc/native-EVM evidence is claimed.

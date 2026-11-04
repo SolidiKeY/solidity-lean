@@ -84,3 +84,5 @@
 | `Bridge/SolidityBridge/Yul/LoweredWhile{,Controls}.lean` | Actual `lowerWhile` emission to finite structured/model execution with exact pre-body/final guards; original pure AST leaf compiler witnesses, prefix/caller preservation and separate capacity/refusal controls. Not a Source FOR-loop or native/resource theorem. |
 
 | `Bridge/SolidityBridge/Yul/NormalFor{,Controls}.lean` | Original intrinsic closed Yul normal FOR component preparation/emission; finite original evalLoop/for_ horizon proofs and matching structured/model execution, with explicit guards. Body-before-post dirty-word witness; not logical Source/G24 or native adequacy. |
+
+| `Bridge/SolidityBridge/Yul/DirectMemory{,Controls}.lean` | Direct MSTORE versus VY2 byte view/materializer; real typed-image framing and canonical hash composition; exact all-prefix local capacity. Native host-writer/global MemOK/Source-G24 closure remains open. |

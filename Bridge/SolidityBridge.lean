@@ -332,6 +332,8 @@ import SolidityBridge.Yul.ControlCompleteness
 import SolidityBridge.Yul.ControlCompletenessControls
 import SolidityBridge.Yul.ControlRealization
 import SolidityBridge.Yul.ControlRealizationControls
+import SolidityBridge.Yul.DirectMemory
+import SolidityBridge.Yul.DirectMemoryControls
 import SolidityBridge.Yul.ExpSelection
 import SolidityBridge.Yul.ExpSelectionControls
 import SolidityBridge.Yul.FrameCertificatesV2
