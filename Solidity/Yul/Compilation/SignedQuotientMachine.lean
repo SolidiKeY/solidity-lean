@@ -32,6 +32,8 @@ theorem sdiv_run (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.Word) :
     Evm.Out.ok {m with stack := coreWord ((Scalar.binary .SDIV).getD (fun _ _ => 0) a b) :: coreWord a :: coreWord b :: tail} 0 at producer
   rw [producer,Evm.Out.ok_bind]
   rfl
+/-- info: 'Solidity.Yul.Compilation.SignedQuotientMachine.sdiv_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms sdiv_run
 
 def smodExpr : Expr [] [] 2 1 :=
@@ -58,5 +60,7 @@ theorem smod_run (a b : Scalar.Word) (m : Evm.Machine) (tail : List Evm.Word) :
     Evm.Out.ok {m with stack := coreWord ((Scalar.binary .SMOD).getD (fun _ _ => 0) a b) :: coreWord a :: coreWord b :: tail} 0 at producer
   rw [producer,Evm.Out.ok_bind]
   rfl
+/-- info: 'Solidity.Yul.Compilation.SignedQuotientMachine.smod_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms smod_run
 end Solidity.Yul.Compilation.SignedQuotientMachine
