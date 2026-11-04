@@ -525,3 +525,44 @@ duplicates/overlap and recursive value callees remain possible. The result is
 finite proof construction, not automatic graph recognition, global runtime
 acyclicity, termination or compiler/EVM refinement. General memory-body shapes
 remain outside the initialized-return certificate.
+
+
+## Ready local-rebinding prefixes
+
+`Progress.ReadyRebinding` adds non-stuckness for same-type local assignments
+whose RHS has `ReadyExpr` admission and whose result has `PlainResultType`
+(value types or memory references). It follows actual RHS evaluation, local
+location resolution, plain extraction and the existing local writer. The joint
+result uses the existing `Preservation.BodyExpr.rebind` theorem, retaining
+`MemOK` and result-reference validity on success and `MemOK` on every halt.
+
+`RebindingItems` admits finite local-rebinding prefixes ending in an unchanged
+`ReadyItems` sequence. Its preservation admission is derived, not assumed.
+Actual item, modifier-free body, internal-call and call-expression progress are
+proved, with the existing body selection, layout, default-return and value-call
+premises. The elaboration adapter consumes P9's existing checked value catalogue;
+it still requires the rebinding certificate and selected body/frame metadata.
+There is no automatic prefix recognizer or new memory-call recursion.
+
+`ReadyRebindingControls` supplies a direct intrinsic runtime body and program,
+not an elaborated source unit. In both pipelines, one parameter is rebound to
+fresh object 2 while a second alias returns old object 0. The actual call and
+call expression restore the caller locals and function-local state, retain the
+return-default allocation and fresh allocation, preserve the old object's value
+7 and expose zero in the new object. The consumer applies joint preservation
+to inhabited input memory. Further controls retain allocation-panic and
+zero-horizon outcomes, old ready-expression refusal of this assignment, and
+calldata exclusion from plain extraction. Progress does not mean success.
+
+Support is finite certified rebinding prefixes over the existing indexed syntax.
+Arbitrary nested assignment RHS, general body/graph recognition, whole-unit
+coverage, recursive memory bodies, termination, physical base-map refinement and
+compiler/EVM correctness remain outside this result. No shared evaluator,
+existing certificate, allocation-input or halt policy changed.
+
+Validation target is `Solidity.Source.Progress.ReadyRebindingControls`. With
+serial Lean `-j1`, `Elab.async=false` and the existing resource guard, the focused
+check passed in 4.464 seconds with 523,563,008 bytes peak aggregate RSS. Printed
+axioms are only `propext`, `Classical.choice` and `Quot.sound`. Independent
+read-only finder and skeptic reviews found no confirmed defect. The earlier
+full-checkpoint timeout remains failed; no unchanged full retry is claimed.

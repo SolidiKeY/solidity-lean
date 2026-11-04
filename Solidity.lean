@@ -2370,6 +2370,8 @@ import Solidity.Source.Progress.ReadyExpressionControls
 import Solidity.Source.Progress.ReadyExpressions
 import Solidity.Source.Progress.ReadyProgram
 import Solidity.Source.Progress.ReadyProgramControls
+import Solidity.Source.Progress.ReadyRebinding
+import Solidity.Source.Progress.ReadyRebindingControls
 import Solidity.Source.Progress.ReadyReturnControls
 import Solidity.Source.Progress.ReadyReturns
 import Solidity.Source.Progress.ReadyScopeControls

@@ -518,3 +518,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/LogicalGuard.lean` | Actual short-circuit Source Boolean-local require and public checked memory selection/run. |
 | `Backend/FailurePaths/LogicalGuardControls.lean` | Inhabited logical guards in both pipelines, saved stack, target-only skipped-invalid-RHS and fault/revert distinctions. |
+
+| `Source/Progress/ReadyRebinding.lean` | Finite ready local-rebinding prefixes and actual Source body/call progress paired with reference preservation. |
+| `Source/Progress/ReadyRebindingControls.lean` | Inhabited parameter rebinding, distinct old/fresh aliases, caller restoration, heap persistence and panic/refusal controls. |
