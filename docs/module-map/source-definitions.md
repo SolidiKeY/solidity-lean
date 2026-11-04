@@ -114,3 +114,5 @@
 | `Source/MonetaryAuthority.lean` | H25 exact-money authority representation, actual journal/request-scope adapters, lossless Word-request funding saturation and checked balance conversion; G01 settlement/session review pending. |
 
 | `Source/MonetaryAuthoritySource.lean` | H25 authority journal write/undo and exact post-fee request-scope adapters; depends on owner-held H16/H19 core changes, not G01 settlement/session wiring. |
+
+| `Source/MonetaryExecution.lean` | Exact actual credit/debit execution, explicit current-and-saved range preservation and wide-money refusal/success controls; not whole-program reachability. |

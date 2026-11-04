@@ -222,3 +222,18 @@ The first library failure2187s and pin-drift failure remain recorded unchanged.
 Readonly certificate owner review and full Source timing acceptance remain
 integration requirements; H25 G01 review/session wiring, balance reachability
 and all original24 obligations/six combinations remain open.
+
+
+Actual monetary execution increment (2026-11-04): MonetaryExecution proves six
+laws directly from Source.credit/debit, including exact full-state results,
+current-and-saved-account range preservation, credit refusal at2^256 and
+successful zero debit retaining2^256. Initial range is explicit; successful
+debit alone does not imply it. No Source implementation, helper-reserved
+arithmetic, shared ledger, observation or budget changed. Standard axiom sets
+are pinned. Read-only finder and skeptic reviews found no issues. Focused
+per-file checks pass; initial syntax/normalization failures remain retained in
+/workspace/vy5-composition/monetary-execution-20261104. No fresh native test,
+whole-program reachable-balance theorem, H25 settlement/session wiring or
+original24-obligation/six-combination closure is claimed. Combined gates are
+not rerun for this focused increment; prior corrected checkpoint remains
+attributed to its tested tree.
