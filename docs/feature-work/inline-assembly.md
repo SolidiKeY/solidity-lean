@@ -301,3 +301,5 @@ VY1: checked-u8 terminal horizon stability and timeout controls; see [lane hando
 VY1: checked-u8 comparison terminal horizon stability and pipeline/timeout controls; see [lane handoff](inline-assembly-vy1.md#checked-uint8-comparison-horizons). Full lane remains open.
 
 VY1: Boolean full-run terminal horizon stability and selected/skipped branch controls; see [lane handoff](inline-assembly-vy1.md#boolean-terminal-horizons). Full lane remains open.
+
+VY1: concrete comparison/Boolean conditional terminal horizon composition; see [lane handoff](inline-assembly-vy1.md#mixed-comparison-and-boolean-conditional-horizons). Full lane remains open.

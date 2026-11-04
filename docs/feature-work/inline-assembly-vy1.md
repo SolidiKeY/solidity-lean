@@ -1339,3 +1339,28 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Twelve scoped axiom reports use only Lean standard
 axioms. Failed automation/branch reductions and the initial incomplete refusal
 proof are retained as raw evidence; no statements or budgets were changed.
+
+### Mixed comparison and Boolean conditional horizons
+
+`LocalCompareHorizon.successor` and `extension` prove exact full-run equality
+for the existing comparison/Boolean conditional after one or arbitrary added
+fuel levels, when the original result is not timeout. They compose concrete
+`LocalU8CompareHorizon.successor` and `LocalBoolHorizon.successor` bodies:
+comparison stability fixes the actual result and intermediate raw frame before
+the same truth choice; only the selected branch needs its derived terminality
+fact. No assumed child simulation or new execution interface is introduced.
+Ten controls reuse inhabited side-effecting certificates. They preserve exact
+legacy clean-false versus via-IR raw-one results and updated numeric frames,
+arithmetic panic before branch execution, pipeline-specific partial writes,
+timeout-to-success change, and failed dirty-value clean projection.
+This is concrete local horizon composition, not general P16, arbitrary Source
+embedding/readback, divergence, admission or Source-to-EVM adequacy. Existing
+Source checked-frame premises, observations and certificates remain unchanged.
+No Source/ExtCall/evaluator edits or proof-budget changes. Full VY1 and final
+gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, root and layer
+checks pass. Twelve scoped axiom reports use only Lean standard axioms.
+Raw failed automation and the misspelled panic-reference attempt are preserved;
+the actual PanicCode correction changes no expected behavior or proof budget.
