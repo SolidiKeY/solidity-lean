@@ -1,4 +1,42 @@
 {
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.active_extent_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.charged_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.charged_initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.charged_post_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.gap_cast_zero": [
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.large_gap_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean:SolidityBridge.AccessBridge.HostWriteControls.post_image_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean:SolidityBridge.AccessBridge.MemoryCharged.budget_one": [
   "Classical.choice",
   "Quot.sound",
