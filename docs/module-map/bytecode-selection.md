@@ -106,3 +106,6 @@
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean` | H8 consumers of the published H7 logical padding supplier. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | H8 original-runtime consumers of the published H7 bounded scanner. |
 | `Bridge/SolidityBridge/AccessBridge/Calldata.lean` | Actual CALLDATALOAD payload and charged execution over the existing pinned state/driver, reusing its decoder, byte readers and H7 padding. |
+| `Bridge/SolidityBridge/AccessBridge/ByteWorldInterface.lean` | H26 paired-load consumer signature over exact P6 byte-world producer and initial native image; no concrete producer. |
+| `Bridge/SolidityBridge/AccessBridge/ByteWorldLoad.lean` | Conditional transport from initial word/byte images to intrinsic load, byte program and pinned MLOAD serialization. |
+| `Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean` | Inhabited all-word/pipeline images, saved-tail conditional use, literal refusal and resource-domain controls. |

@@ -126,3 +126,23 @@ explicit. Concrete byte-program realization and Source provenance are not
 supplied by this interface. The published RawUint Source proof modules are
 reused rather than reimplemented; their helper branch and omitted consumer/doc
 remain preserved.
+
+`ByteWorldLoad.paired_load` now proves that consumer contract, reusing the
+published `Producer.load_at` for the intrinsic load, conditional byte-target
+run and preserved word frame. Existing pinned `MemoryLoad.payload` and byte
+roundtrip proofs derive the native reader and complete ordered 32-byte
+serialization from the same initial image. Native serialization equals
+`Semantics.wordBytes` of the initial word; native numeric equality to that word
+is not established independently here. Neither an encoder inverse, concrete
+byte-load code realization nor Source/compiler origin is assumed implicitly.
+Native physical bytes are unchanged; post-active-word representation remains
+a separate obligation. Existing charged/failure certificates are unchanged.
+
+`ByteWorldLoadControls.lean` constructs actual initial P6/native and numeric-word
+images for every finite word in either pipeline, with distinct saved tails.
+Its paired use remains explicitly conditional on the pending producer. The
+literal byte-slice MLOAD refusal is not a native MLOAD refusal or an
+impossibility proof for all programs; the oversized-tail control concerns the
+contract domain, not native overflow execution. Independent read-only finder
+and skeptic reviews found no semantic gap. The finder's reuse request was
+fixed by consuming `Producer.load_at` instead of repeating its proof.
