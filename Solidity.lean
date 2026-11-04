@@ -2163,6 +2163,8 @@ import Solidity.Lowering.V07.EnumUnsignedCasts
 import Solidity.Lowering.V07.FieldCompleteness
 import Solidity.Lowering.V07.FixedBytesAssignment
 import Solidity.Lowering.V07.FixedBytesAssignmentControls
+import Solidity.Lowering.V07.FixedBytesComparisonControls
+import Solidity.Lowering.V07.FixedBytesComparisons
 import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls

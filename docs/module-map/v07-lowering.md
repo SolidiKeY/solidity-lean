@@ -134,3 +134,5 @@
 | `Lowering/V07/FixedBytesAssignmentControls.lean` | All32 widths, mixed references, leading-zero/width-key collision, stale-read and executed truncation controls with exact guards. |
 | `Lowering/V07/UdvtFixedBytesAssignment.lean` | Fixed-byte-underlying UDVT same-tag assignment, canonical UInt capture and exact width-indexed content observation. |
 | `Lowering/V07/UdvtFixedBytesAssignmentControls.lean` | Real nominal metadata, all32 byte widths, mixed references and stale/truncation/nominal-refusal controls with exact guards. |
+| `Lowering/V07/FixedBytesComparisons.lean` | All six fixed-byte comparison clauses with actual assignment/read pipeline order and initial-derived caller transport. |
+| `Lowering/V07/FixedBytesComparisonControls.lean` | All-width/operator ordered observations, live-reference framing and executed uncaptured/reversed-capture negative programs. |
