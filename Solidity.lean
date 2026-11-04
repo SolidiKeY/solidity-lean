@@ -2507,6 +2507,8 @@ import Solidity.Yul.Compilation.ControlLowering
 import Solidity.Yul.Compilation.ControlLoweringControls
 import Solidity.Yul.Compilation.ExponentMachine
 import Solidity.Yul.Compilation.ExponentMachineControls
+import Solidity.Yul.Compilation.ExpressionShapes
+import Solidity.Yul.Compilation.ExpressionShapesControls
 import Solidity.Yul.Compilation.LocalScopeLowering
 import Solidity.Yul.Compilation.LocalScopeLoweringControls
 import Solidity.Yul.Compilation.MachineAdapter

@@ -31601,5 +31601,67 @@
  "Solidity/Yul/Compilation/ShapeCapacityControls.lean:Solidity.Yul.Compilation.ShapeCapacity.Controls.trace": [
   "Quot.sound",
   "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.local_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.actual_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.capacity_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.overflow_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.shifted_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapesControls.lean:Solidity.Yul.Compilation.ExpressionShapes.Controls.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
  ]
 }

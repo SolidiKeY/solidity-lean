@@ -416,3 +416,5 @@ see [the lane record](inline-assembly-vy3.md).
 - VY3 finite scoped FOR prefixes: actual selected condition/body/post turns preserve exact raw locals/caller/full machine frame; actual prelude is proved separately. Universal unending prefixes and bounded third-turn wrap witness are kernel/model results, not native/G24 completion. See [lane handoff](inline-assembly-vy3.md#finite-scoped-for-macro-turn-prefixes).
 
 - VY3 target shape: actual execution/caller framing is derived from existing intrinsic CodeShape; exact shifted all-prefix capacity remains independent. Last-slot dirty update and underflow/peak-overflow controls are kernel target preparation, not native/G24 adequacy. See [lane handoff](inline-assembly-vy3.md#constructive-target-shape-and-caller-capacity).
+
+- VY3 pure-expression operand shapes: actual literal/local/binary emissions, original intrinsic subtraction visitor/source/target witness, shifted DUP16 and exact raw/caller/capacity controls. Explicit primitive-row and child-metadata premises remain; no full G24/native coverage. See [lane handoff](inline-assembly-vy3.md#actual-pure-expression-operand-certificates).

@@ -113,3 +113,5 @@
 | `Bridge/SolidityBridge/Yul/ScopedForPrefixes{,Controls}.lean` | Actual scope/switch FOR finite model macro-turn prefixes with exact raw locals/caller/full-frame preservation; separate concrete prelude execution, universal unending prefixes and bounded modular-wrap controls. Not fetched/native prefixes or G24/resource adequacy. |
 
 | `Yul/Compilation/ShapeCapacity{,Controls}.lean` | Constructive actual scalar execution from intrinsic CodeShape, generic caller framing and static height lifting, exact all-boundary shifted capacity; actual last-slot dirty update and underflow/peak-overflow separation. Target preparation, not native/G24 adequacy. |
+
+| `Yul/Compilation/ExpressionShapes{,Controls}.lean` | Actual literal/local/binary emitted-code operand certificates, with explicit primitive row and child metadata; original intrinsic SUB visitor/source/target, shifted DUP16, raw order/caller and capacity-versus-underflow controls. Not full native/G24/compiler coverage. |
