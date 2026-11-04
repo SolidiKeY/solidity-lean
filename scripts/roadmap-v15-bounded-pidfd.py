@@ -22,9 +22,9 @@ def proc_launch(pid):
     ident['exe']=str((Path('/proc')/str(pid)/'exe').resolve(strict=True))
     return ident
 
-def kernel_dead(fd):
+def kernel_dead(fd, timeout_ms=0):
     poll=select.poll();poll.register(fd,select.POLLIN)
-    events=poll.poll(0)
+    events=poll.poll(timeout_ms)
     if not events:return False
     if len(events)!=1 or events[0][0]!=fd:raise GuardError('invalid pidfd event')
     mask=events[0][1]
@@ -34,9 +34,10 @@ def kernel_dead(fd):
 
 class TerminalTracker:
     def __init__(self,journal,exe=SDK,comm='lean',identity=proc_identity,launch=proc_launch,
-                 opener=os.pidfd_open,dead=kernel_dead,closer=os.close):
+                 opener=os.pidfd_open,dead=kernel_dead,closer=os.close,wait_dead=None):
         self.journal=journal;self.exe=str(Path(exe).resolve());self.comm=comm
         self.identity=identity;self.launch=launch;self.opener=opener;self.dead=dead;self.closer=closer;self.bound={}
+        self.wait_dead=wait_dead or (lambda fd: kernel_dead(fd, 50))
     def record(self,event,**data):self.journal(dict(event=event,**data))
     def bind(self,pid,argv):
         first=self.launch(pid)
@@ -50,10 +51,17 @@ class TerminalTracker:
             self.closer(fd);raise
         self.bound[pid]=dict(fd=fd,identity=first)
         self.record('pidfd-bound',pid=pid,identity=first)
-    def terminated(self,pid):
+    def terminated(self,pid,allow_wait=False):
         entry=self.bound.get(pid)
         if entry is None:raise GuardError('unbound blank-command process')
-        if not self.dead(entry['fd']):raise GuardError('blank-command process is not kernel-terminal')
+        if not self.dead(entry['fd']):
+            if not allow_wait:raise GuardError('blank-command process is not kernel-terminal')
+            # Linux may clear mm/argv before signalling the pidfd during exit.
+            # Wait at most50ms on the already identity-bound kernel handle; no
+            # workload is resumed or blank/live process accepted on timeout.
+            self.record('terminal-wait',pid=pid,timeoutMs=50)
+            if not self.wait_dead(entry['fd']):raise GuardError('blank-command process is not kernel-terminal')
+            if not self.dead(entry['fd']):raise GuardError('terminal readiness not confirmed')
         try:current=self.identity(pid)
         except FileNotFoundError:current=None
         if current is not None and (current['start']!=entry['identity']['start'] or current['comm']!=self.comm or current['state'] not in ('Z','X','x')):
@@ -77,7 +85,7 @@ class TerminalTracker:
                 kept.append(row);continue
             if int(elapsed)>=300:raise GuardError('Lean reached300s limit')
             if argv=='['+self.comm+']' and int(rss)==0:
-                self.terminated(pid)
+                self.terminated(pid,allow_wait=True)
                 continue
             if '-j1' not in argv.split():
                 # Preserve the original serial guard: do not excuse any bad argv.

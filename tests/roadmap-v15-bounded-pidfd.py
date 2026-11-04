@@ -13,7 +13,7 @@ class Tests(unittest.TestCase):
   def identity(pid):
    if self.current is None:raise FileNotFoundError()
    return dict(self.current)
-  self.t=m.TerminalTracker(self.events.append,exe='/sdk/lean',identity=identity,launch=identity,opener=lambda pid,flags:7,dead=lambda fd:self.dead,closer=self.closed.append)
+  self.t=m.TerminalTracker(self.events.append,exe='/sdk/lean',identity=identity,launch=identity,opener=lambda pid,flags:7,dead=lambda fd:self.dead,closer=self.closed.append,wait_dead=lambda fd:False)
  def top(self,args='/sdk/lean -j1 f.lean',rss=100):return HEADER+f'42 2 {rss} R lean {args}\n'
  def bind(self):self.assertEqual(self.t.snapshot(self.top()),self.top())
  def test_live_bound(self):self.bind();self.assertEqual(self.events[0]['event'],'pidfd-bound')
@@ -75,6 +75,38 @@ class Tests(unittest.TestCase):
  def test_terminal_below_boundary(self):
   self.bind();self.dead=True;self.current=None
   self.assertEqual(self.t.snapshot(self.top('[lean]',0).replace('42 2 ','42 299 ')),HEADER)
+ def test_exit_transition_waits_for_kernel(self):
+  self.bind()
+  def finish(fd):
+   self.assertEqual(fd,7);self.dead=True;self.current['state']='Z';return True
+  self.t.wait_dead=finish
+  self.assertEqual(self.t.snapshot(self.top('[lean]',0)),HEADER)
+  self.assertEqual(self.closed,[7])
+  self.assertTrue(any(x['event']=='terminal-wait' and x['timeoutMs']==50 for x in self.events))
+ def test_wait_error_rejected(self):
+  self.bind()
+  def bad(fd):raise PermissionError('poll denied')
+  self.t.wait_dead=bad
+  with self.assertRaises(PermissionError):self.t.snapshot(self.top('[lean]',0))
+ def test_wait_cannot_forge_readiness(self):
+  self.bind();self.t.wait_dead=lambda fd:True
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top('[lean]',0))
+ def test_wait_does_not_accept_live_identity(self):
+  self.bind()
+  def ready(fd):self.dead=True;return True
+  self.t.wait_dead=ready
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top('[lean]',0))
+ def test_zombie_does_not_wait(self):
+  self.bind();calls=[]
+  self.t.wait_dead=lambda fd:calls.append(fd) or True
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top().replace(' R lean ', ' Z lean '))
+  self.assertEqual(calls,[])
+ def test_reuse_during_wait_rejected(self):
+  self.bind()
+  def reuse(fd):
+   self.dead=True;self.current['state']='Z';self.current['start']+=1;return True
+  self.t.wait_dead=reuse
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top('[lean]',0))
  def test_unchanged_limits(self):
   self.assertEqual((m.base.CAP,m.base.RESERVE),(12884901888,4294967296))
 if __name__=='__main__':unittest.main()
