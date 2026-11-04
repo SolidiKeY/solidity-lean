@@ -93,6 +93,7 @@ import Solidity.Examples.DecisionNumericCompiler
 import Solidity.Examples.DecisionNumericCoverage
 import Solidity.Examples.DecisionNumericFlatten
 import Solidity.Examples.DecisionNumericFormula
+import Solidity.Examples.DecisionNumericFuel
 import Solidity.Examples.DecisionNumericGround
 import Solidity.Examples.DecisionNumericGroundSource
 import Solidity.Examples.DecisionNumericLogic

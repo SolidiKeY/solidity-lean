@@ -1057,6 +1057,7 @@ import Solidity.Calculus.DecisionNumericCompiler
 import Solidity.Calculus.DecisionNumericCoverage
 import Solidity.Calculus.DecisionNumericFlatten
 import Solidity.Calculus.DecisionNumericFormula
+import Solidity.Calculus.DecisionNumericFuel
 import Solidity.Calculus.DecisionNumericGround
 import Solidity.Calculus.DecisionNumericGroundSource
 import Solidity.Calculus.DecisionNumericLogic

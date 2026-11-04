@@ -1517,3 +1517,12 @@ real fixed-object unequal reads and halted program equality remain false control
 The dynamic source classifiers and their fixed-binder refusals are unchanged.
 This closes the reproduced fixed given-heap reflexive-read gap, not general fixed
 arrays, prefixes or the exhaustive Residue theorem. See the VA1 handoff.
+
+M7-next numeric resource converse: `Calculus/DecisionNumericFuel.lean` proves
+that successful numeric term/formula flattening consumes exactly the structural
+node count. For the existing `LFml.UIntQF P E` grammar, at every budget and
+starting index, `flattenFormulaAt?` succeeds exactly when the formula's nodes
+fit. `Examples/DecisionNumericFuel.lean` certifies adjacent511/512-node cases,
+quantifier refusal and error-sequence traversal. This characterizes the existing
+flattener stage; whole-source preparation, coverage and the global511-node
+pipeline bound remain separate obligations. No production limit changed.

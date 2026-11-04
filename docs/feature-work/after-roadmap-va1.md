@@ -4968,3 +4968,65 @@ No EVM test or whole-lane completion is claimed.
 Independent read-only finder and skeptic reviews found no proof/scope issues
 and approved this incremental checkpoint. Neither used Lean or a server. Exact
 review receipts are in normalization-residue-next/independent-reviews.json.
+
+## Numeric fuel converse checkpoint · 2026-11-04
+
+Adopted published master6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 in merge
+793c0bc7e31705d5af7a72d046c39bdbf8926c5f. The accepted producer snapshot
+8744e543 remains an ancestor. Master's imported DecisionUIntConstant/UIntSyntax
+are byte-identical to that snapshot. The sole module-map conflict retained the
+owned detailed rows without duplicates. The unchanged upstream V08 blank-EOF
+whitespace failure is retained in post-6f3eedf0/upstream-whitespace.json.
+
+New `Calculus/DecisionNumericFuel.lean` proves successful traversal consumes
+exactly the term/formula node count. Its explicit public signatures quantify
+over intrinsic terms/formulas, the existing Num/UIntQF grammar, arbitrary
+depth/shared fuel/start and the actual successful dependent result. No supplied
+coverage or semantic-validity certificate is assumed. The public theorem
+`numeric_formula_flattenAt_iff_nodes`, for every `φ.UIntQF P E`, budget and
+start, states `(flattenFormulaAt? budget start φ).isSome = true ↔
+φ.nodes ≤ budget`. Its reverse direction reuses the existing sufficiency proof;
+the new forward direction derives the bound from exact consumption. The
+strictly-below-node theorem proves actual Option refusal. The typed signature
+and immutable module hashes are exported in the checkpoint interface package.
+
+The concrete client uses a real uint parameter:511-node conjunction and its
+512-node negation. Kernel proofs quantify over every budget/start, in addition
+to concrete511 success/512 refusal. An existing generic API call at512 is a
+mathematical control, not increased production admission. A quantified formula
+remains refused; the error-sequence control confirms both syntactic children
+consume fuel despite semantic failure. No existing pin or observation changed.
+
+Automation attempts precede hand proof steps and are retained. Initial literal
+reduction/virtual-overlay errors, missing dependency artifacts, and an ambiguous
+error sort are retained as failures; canonical source fixes pass. No sorry,
+admit, new axiom, native trust shortcut, default/model/predicate edit, proof or
+time budget increase was introduced. All printed public theorem/control axiom
+sets contain only propext, Classical.choice and Quot.sound.
+
+Focused verification: both files have zero MCP errors; repository per-file
+kernel checks pass in2s and5s; the consumer builds in5.6s. Fresh KeySort parses
+377 taclets,131 read-bearing, covers131 and matches the pinned rules. Actual
+Lean4.24.0 and Lake5.0.0-src+797c613 were observed. The final bounded job exits0
+in25.678s, memory.max12884901888 and swap.max0, with one thread/explicit-j1 and
+the original writer lock. Sampled aggregate RSS peaks at3065376KiB, cgroup
+peak1349992448bytes; effective host/parent available memory stays above
+7243173888bytes, exceeding the4GiB reserve. No LSP/build overlap.
+Raw commands, MCP attempts, diagnostics, axiom prints, gates and resource samples
+are in `/workspace/va1-evidence/numeric-fuel-necessity-next`.
+
+This closes the numeric-flattener necessity component only. Global meaningful
+Residue/DecisionTheorem-prime/exhaustive target-Covered/hash bridge, remaining
+AU02 arrays/memory/halting-OR/approved program-free boundary, whole-source511
+bound, baseline/backfill and T1–T7 remain open; AU05 remains next and unstarted.
+Full combined build/TestSuite/strict timing/reverse closure/final audits remain
+pending. The existing predicates, exact hash premises and8bbd counterexample
+remain unchanged. This is kernel proof of a syntactic traversal boundary, not
+an EVM test or whole-lane completeness claim.
+
+Independent read-only finder and skeptic both pass with no confirmed findings;
+neither used Lean/server/build or wrote files. Exact receipts are retained in
+numeric-fuel-necessity-next/independent-reviews.json. Static checkpoint audits
+pass: trust0findings, orphans0, layers0, roots current, doc paths resolve,
+axiom pins0errors/unrecorded changes and strict automatic classification. The
+strict classification is not the pending cumulative timing/full-build gate.

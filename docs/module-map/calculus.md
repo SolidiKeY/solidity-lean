@@ -294,3 +294,4 @@
 | `Calculus/FixedArrayFloor.lean` | Same-length fixed storage-vector reconstruction, optional reads at all indices and typed path continuations, finite block/exterior-read equivalence; reuses MemFloor index laws without extending coverage. |
 | `Calculus/FixedArrayRoot.lean` | Fixed-vector flooring lifted to one typed storage root, exact optional element paths, retained/other-root observations and non-storage state frame; no classifier change. |
 | `Calculus/DecisionNormalizationResidue.lean` | Decidable two-uint-prefix source-budget reason, typed recognizer and proof of failure at the existing normalizer budget. |
+| `Calculus/DecisionNumericFuel.lean` | Necessary and sufficient formula-node fuel for the existing intrinsic numeric flattener; exact successful shared-fuel consumption, without changing the pipeline limit. |
