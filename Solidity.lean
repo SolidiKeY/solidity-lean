@@ -2592,6 +2592,8 @@ import Solidity.Yul.Compilation.NormalNumericTransport
 import Solidity.Yul.Compilation.NormalNumericTransportControls
 import Solidity.Yul.Compilation.NormalStackControls
 import Solidity.Yul.Compilation.NormalStackTransport
+import Solidity.Yul.Compilation.NormalWordTransport
+import Solidity.Yul.Compilation.NormalWordTransportControls
 import Solidity.Yul.Compilation.NumericExecution
 import Solidity.Yul.Compilation.NumericExecutionControls
 import Solidity.Yul.Compilation.NumericMachine
