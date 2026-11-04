@@ -303,3 +303,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/ForwardOverlap.lean` | Shared forward-loop execution, unread-source invariant and V11 checked snapshot-model agreement. |
 | `Backend/MemoryCopies/ForwardOverlapControls.lean` | Actual left/self/empty/long overlap executions, boundary cells and rightward corruption counterexample. |
 | `Backend/MemoryCopies/RangeOverlapInterface.lean` | Descending and runtime-direction-selected word-copy contracts for both overlap directions. |
+| `Backend/MemoryCopies/RangeOverlap.lean` | Descending invariant and runtime direction selection with actual snapshot and checked-list agreement. |
+| `Backend/MemoryCopies/RangeOverlapControls.lean` | Both overlap directions, repaired corruption, self/empty/64-word/disjoint copies and endpoint controls. |
