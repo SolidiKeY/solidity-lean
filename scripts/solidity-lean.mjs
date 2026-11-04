@@ -4,6 +4,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runSolidityTests, runTool, testsPassed } from './test-solidity.mjs';
+import { parseAtoms, policyOf, rowAssumptions, targetProfile, applyPolicy } from './solidity-lean-assumptions.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const VERSION = readFileSync(resolve(ROOT, 'lakefile.toml'), 'utf8').match(/^version = "([^"]+)"/m)[1];
@@ -24,6 +25,16 @@ Source options:
   --solkey DIR          Solkey checkout (also SOLKEY_ROOT)
   --soljson DIR         Directory containing its pinned Solidity compiler
   --no-build            Use already built Lean modules
+
+Verify options:
+  --require KEY=VALUE   Report a row proved only if it holds under this reading
+  --deny KEY=VALUE      Refuse this reading; a row holding only under it is
+                       reported refused, never proved (both repeatable, or
+                       comma-separated). Keys and values:
+                         callback=noCallback|withCallback
+                         overflow=default|checked|ignoring
+                         tails=solc|clean   order=legacy|viaIR
+                         hash=opaque        zeroAddress=noCode
 
 Inspect options:
   --show WHAT           obligation (default), goals, or tree
@@ -108,13 +119,14 @@ export function parseArgs(args) {
   const source = ['--contract', '--function', '--solkey', '--soljson'];
   const allowed = new Set([...common, ...(command === 'rules' ? ['--key'] : source),
     ...(['verify', 'list', 'inspect'].includes(command) ? ['--self-address'] : []),
-    ...(command === 'inspect' ? ['--show'] : []), ...(command === 'run' ? ['--arg', '--state'] : [])]);
+    ...(command === 'inspect' ? ['--show'] : []), ...(command === 'run' ? ['--arg', '--state'] : []),
+    ...(command === 'verify' ? ['--require', '--deny'] : [])]);
   for (let i=0; i<rest.length; i++) {
     const flag = rest[i];
     if (flag === '--') { paths.push(...rest.slice(i+1)); break; }
     if (!flag.startsWith('-')) { paths.push(flag); continue; }
     if (!allowed.has(flag)) throw new Error(`unknown option for ${command}: ${flag}`);
-    if (seen.has(flag) && flag !== '--arg') throw new Error(`duplicate option: ${flag}`);
+    if (seen.has(flag) && !['--arg', '--require', '--deny'].includes(flag)) throw new Error(`duplicate option: ${flag}`);
     seen.add(flag);
     if (flag === '--json') { options.json = true; continue; }
     if (flag === '--no-build') { options.build = false; continue; }
@@ -124,11 +136,13 @@ export function parseArgs(args) {
     else if (flag === '--self-address') options.selfAddress = integer(value, flag, false, 160);
     else if (flag === '--arg') (options.args ??= []).push(argument(value));
     else if (flag === '--state') options.state = startState(value);
+    else if (flag === '--require' || flag === '--deny') (options[flag.slice(2)] ??= []).push(...parseAtoms(value, flag));
     else options[flag.slice(2)] = value;
   }
   if (command === 'rules') {
     if (paths.length) throw new Error('rules check takes --key FILE, not source paths');
   } else if (!paths.length) throw new Error(`${command} needs at least one Solidity file or directory`);
+  if (options.require || options.deny) options.policy = policyOf(options.require ?? [], options.deny ?? []);
   if (command === 'run' && !options.function) throw new Error('run needs --function NAME or SIG');
   if (command === 'inspect' && !['obligation', 'goals', 'tree'].includes(options.show ?? 'obligation'))
     throw new Error('--show must be obligation, goals, or tree');
@@ -161,10 +175,25 @@ function rulesReport(options) {
   }
 }
 
-function envelope(command, report) {
+function envelope(command, report, policy) {
   const summary = {};
   for (const r of report.results) summary[r.status] = (summary[r.status] ?? 0) + 1;
-  return {schemaVersion:1, version:VERSION, command, ...report, summary};
+  return {schemaVersion:1, version:VERSION, command, ...(policy ? {policy:{require:policy.require, deny:policy.deny}} : {}),
+    ...report, summary};
+}
+
+/** The assumption report (O10) and target profile (O13) of every source row;
+ * under `--require`/`--deny`, a proved row no admitted record covers becomes
+ * `refused` (`Solidity/Calculus/Assumptions.lean`, `Policy.verdict`). */
+export function annotate(command, report, options = {}) {
+  if (!['verify', 'list', 'inspect'].includes(command)) return report;
+  const profile = targetProfile(options);
+  const results = report.results.map(row => {
+    const assumptions = rowAssumptions(row);
+    const annotated = {...row, assumptions, profile};
+    return command === 'verify' && options.policy ? applyPolicy(annotated, options.policy) : annotated;
+  });
+  return {...report, results};
 }
 
 export function main(args) {
@@ -174,7 +203,7 @@ export function main(args) {
     if (parsed.help) { console.log(HELP); return 0; }
     if (parsed.version) { console.log(`solidity-lean ${VERSION}`); return 0; }
     const {command, options, paths} = parsed;
-    const report = command === 'rules' ? rulesReport(options) : runSolidityTests(paths, {
+    const raw = command === 'rules' ? rulesReport(options) : runSolidityTests(paths, {
       ...options, list:command === 'list',
       ...(['inspect', 'run'].includes(command) ? {action:command} : {}),
       onProgress: part => {
@@ -182,7 +211,8 @@ export function main(args) {
       },
     });
     if (process.stderr.isTTY) process.stderr.write('\r\x1b[K');
-    const result = envelope(command, report);
+    const report = annotate(command, raw, options);
+    const result = envelope(command, report, options.policy);
     if (options.json) console.log(JSON.stringify(result, null, 2));
     else {
       for (const r of report.results) {
@@ -197,7 +227,7 @@ export function main(args) {
   } catch (e) {
     const optionArgs = args.slice(0, args.indexOf('--') < 0 ? args.length : args.indexOf('--'));
     if (parsed?.options?.json || optionArgs.includes('--json')) console.log(JSON.stringify(envelope(parsed?.command ?? args[0] ?? null,
-      {results:[], errors:[{stage:'setup', reason:e.message, ...(e.tool ? {tool:e.tool} : {})}]}), null, 2));
+      {results:[], errors:[{stage:'setup', reason:e.message, ...(e.tool ? {tool:e.tool} : {})}]}, parsed?.options?.policy), null, 2));
     else console.error(`solidity-lean: ${e.message}`);
     return 2;
   }

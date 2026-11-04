@@ -89,6 +89,7 @@ import Solidity.Examples.Tactics.AnonLocalCapture
 import Solidity.Examples.Tactics.ApplySteps
 import Solidity.Examples.Tactics.ArrayScans
 import Solidity.Examples.Tactics.ArrayShapeCopy
+import Solidity.Examples.Tactics.Assumptions
 import Solidity.Examples.Tactics.AuditRepairs
 import Solidity.Examples.Tactics.Boundaries
 import Solidity.Examples.Tactics.Branch

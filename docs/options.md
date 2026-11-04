@@ -26,6 +26,8 @@ can never be read as one under another.
 | O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
+| O10 | assumption record of a verdict; `verify --require/--deny` (Lean-only) | done |
+| O13 | target profile (solc version, pipeline, EVM fork) in result rows (Lean-only; fork a stub until VS4's S6.1) | partial |
 
 ## O1. Who calls back (bug 5)
 
@@ -712,3 +714,69 @@ evaluation, a calculus proof and an imported contract.
 
 A failing read is saved before later explicit guards (`captureBefore`),
 for binary operands and argument lists in either schedule.
+
+## O10. The assumption record of a verdict (Lean-only)
+
+solkey has no counterpart: its only option is `transferSemantics`, and the
+defaults below are its readings, so no TestSuite count moves.
+
+**The record** (`Assumptions`, `Calculus/Assumptions.lean`) names one
+reading per option: `callback` (O1/O7: the payment flag of `ValidC`, `false`
+being `transferSemantics:noCallback` with fix 5A), `overflow` (`default`,
+`checked`, `ignoring`: O2/O5, a label of how the source's arithmetic was
+elaborated, the blocks being in the formula already), `tail` (O6,
+`TailMode`), `order` (O9, `OrderReading`, read off `C.evalOrder`), `hash`
+(`opaque`: `keccakBytes`, irreducible, no collision resistance) and
+`zeroAddress` (`noCode`, O8).  The last two are the model's only readings.
+`ValidA I a φ` is the validity the record selects: the contract's order is
+the record's, and `ValidC I (a.tail.wrap φ) a.callback`.  As every option
+here, the record is an argument of the statement.  The runner's statements
+are cases: `validA_iff_validT` (a calling-back obligation, `ValidT`) and
+`validA_of_validTail` (a plain one, `⊢ N.f.problem` or its `.clean` form,
+where nothing calls back).
+
+**Entailment and policies.** `Assumptions.Entails a b` is a proved
+implication (`ValidA.weaken`): equal records, or `.solc` tails weakened to
+`.clean` (`ValidTail.clean_of_solc`).  A `Policy` requires and denies
+readings (`Atom`); `Policy.admits` holds when some record the row entails is
+allowed, and `Policy.verdict` keeps a proved row proved exactly then
+(`verdict_proved_iff`, `admits_sound`).  A row that holds only under refused
+records is never reported proved (`Policy.verdict_refused`); `ProvedRow`
+packages the proof with its admission.
+
+**The CLI** (`docs/cli.md`): `verify --require KEY=VALUE --deny KEY=VALUE`;
+each source row carries `assumptions`, and under a policy `policy` (the
+admitted record, or the refused readings) and status `refused` in place of
+`proved`.  `scripts/solidity-lean-assumptions.mjs` mirrors the Lean
+definitions; the decision table is pinned on both sides
+(`Examples/Tactics/Assumptions.lean`, `table_verdicts`;
+`scripts/solidity-lean.test.mjs`, `POLICY_TABLE`).  Witnesses and controls:
+`pushRead_validA_clean` / `pushRead_not_validA_solc`,
+`withdrawUnsafe_validA` / `withdrawUnsafe_not_validA_callback`,
+`not_validA_viaIR`.
+
+**Not done.** The record of a row is derived by the CLI from what the runner
+reports (`reading`) and what it always does (no callbacks for payments,
+legacy order, no overflow block): `Frontend/Testing.lean` does not emit it,
+and does not emit a `ValidA` theorem.  `callback` is the existing flag;
+VC2's caller-model lattice (O11) replaces it and adds its weakening to
+`Entails`.  No row records that its proof is independent of the hash or of
+address `0`, so denying either refuses every row.
+
+## O13. The target profile (Lean-only)
+
+`TargetProfile` (`Calculus/Assumptions.lean`) bundles the solc version, the
+pipeline (`Pipeline.legacy`/`viaIR`, which selects the O9 order:
+`Pipeline.order`, `TargetProfile.fits`, `evalOrder_of_fits`) and the EVM
+fork.  `TargetProfile.pinned` is solkey's compiler (0.8.34), legacy, Osaka.
+The CLI writes `profile` on each source row: `solc` from the compiler file
+solkey's build pins (`ext.soljsonFile`, the one `scripts/solc-ast.mjs`
+loads; `null` without a checkout), `pipeline` `legacy` and `evmFork`
+`osaka` (the compiler's `evmVersion`).
+
+**Partial.** `Pipeline` and `EvmForkStub` (Osaka only) stand in for VS4's
+compiler parameter (S5.1) and fork parameter (S6.1,
+`docs/feature-work/semantics-extensions.md`), which were not pushed when
+this landed.  Adapting replaces both by VS4's types; there is no second fork
+parameter.  The runner (`scripts/test-solidity.mjs`) neither passes
+`--via-ir` nor reports the fixture header's `solcVersion` per row.

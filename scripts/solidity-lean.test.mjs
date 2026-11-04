@@ -1,11 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
-import {mkdtempSync, writeFileSync, rmSync, copyFileSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, writeFileSync, rmSync, copyFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {resolve, join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {parseArgs, reportExitCode, VERSION} from './solidity-lean.mjs';
+import {annotate, parseArgs, reportExitCode, VERSION} from './solidity-lean.mjs';
+import {MODES, admitted, applyPolicy, parseAtoms, pinnedSolc, policyOf, rowAssumptions, targetProfile} from './solidity-lean-assumptions.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const binary = resolve(ROOT, '.lake/build/bin/solidity-lean');
@@ -48,6 +49,82 @@ test('exit policy keeps pending proofs distinct from successful inspection', () 
   assert.equal(reportExitCode('inspect', {results:[], errors:[{stage:'discovery'}]}), 2);
 });
 
+// The decision table `Solidity/Examples/Tactics/Assumptions.lean` pins with
+// `decide` on `Policy.verdict`: [require, deny, row tails, expected verdict].
+const POLICY_TABLE = [
+  [[], [], 'solc', 'proved'],
+  [[], ['tails=clean'], 'clean', 'refused'],
+  [[], ['tails=clean'], 'solc', 'proved'],
+  [[], ['tails=solc'], 'solc', 'proved'],
+  [[], ['tails=solc'], 'clean', 'proved'],
+  [['tails=solc'], [], 'clean', 'refused'],
+  [['tails=clean'], ['tails=solc'], 'solc', 'proved'],
+  [['callback=withCallback'], [], 'solc', 'refused'],
+  [['callback=noCallback'], ['overflow=ignoring'], 'clean', 'proved'],
+  [[], ['zeroAddress=noCode'], 'solc', 'refused'],
+  [[], ['hash=opaque'], 'clean', 'refused'],
+  [['order=viaIR'], [], 'solc', 'refused'],
+  [['order=legacy'], ['callback=withCallback', 'overflow=checked'], 'solc', 'proved'],
+];
+
+test('assumption policy: parsing, the shared decision table, and refusal reasons', () => {
+  assert.deepEqual(parseAtoms('tails=clean,callback=noCallback'),
+    [{key:'tails', value:'clean'}, {key:'callback', value:'noCallback'}]);
+  for (const bad of ['tails', 'tails=dirty', 'wat=solc', 'tails=clean,', '=clean'])
+    assert.throws(() => parseAtoms(bad));
+  assert.throws(() => policyOf(parseAtoms('tails=solc'), parseAtoms('tails=solc')), /both required and denied/);
+  assert.throws(() => policyOf(parseAtoms('tails=solc,tails=clean')), /required as both/);
+  const parsed = parseArgs(['verify', 'x.sol', '--deny', 'tails=clean', '--deny', 'hash=opaque', '--require', 'order=legacy']);
+  assert.deepEqual(parsed.options.policy.deny, ['tails=clean', 'hash=opaque']);
+  assert.deepEqual(parsed.options.policy.require, ['order=legacy']);
+  for (const args of [['list', 'x', '--deny', 'tails=clean'], ['inspect', 'x', '--require', 'tails=solc'],
+    ['verify', 'x', '--deny'], ['verify', 'x', '--deny', 'tails=wat'],
+    ['verify', 'x', '--require', 'tails=solc', '--deny', 'tails=solc']]) assert.throws(() => parseArgs(args));
+  for (const [require, deny, tails, expected] of POLICY_TABLE) {
+    const policy = policyOf(require.flatMap(a => parseAtoms(a)), deny.flatMap(a => parseAtoms(a)));
+    const row = {status:'proved', reason:'', assumptions:rowAssumptions({reading:tails})};
+    const out = applyPolicy(row, policy);
+    assert.equal(out.status, expected, JSON.stringify({require, deny, tails}));
+    assert.equal(out.policy.admitted, expected === 'proved');
+    if (expected === 'refused') {
+      assert.ok(out.policy.refused.length > 0);
+      assert.match(out.reason, /holds only under refused assumptions/);
+    } else for (const [key, value] of Object.entries(out.policy.under))
+      assert.ok(!policy.denied.has(`${key}=${value}`) && MODES[key].includes(value));
+    // Negative control: a row that is not proved is never promoted.
+    for (const status of ['pending', 'unsupported', 'error'])
+      assert.equal(applyPolicy({...row, status}, policy).status, status);
+  }
+  // A clean row under a denial of clean tails is never proved (Policy.verdict_refused).
+  const refused = annotate('verify', {results:[{status:'proved', reading:'clean'}], errors:[]},
+    {policy:policyOf([], parseAtoms('tails=clean'))});
+  assert.equal(refused.results[0].status, 'refused');
+  assert.deepEqual(refused.results[0].policy.refused, ['tails=clean']);
+  assert.equal(reportExitCode('verify', refused), 1);
+  assert.equal(admitted(policyOf([], parseAtoms('tails=solc')), rowAssumptions({reading:'solc'})).tails, 'clean');
+});
+
+test('every source row carries its assumption record and target profile', () => {
+  const report = {results:[{status:'proved', reading:'solc'}, {status:'ready', reading:'clean'}], errors:[]};
+  for (const command of ['verify', 'list', 'inspect']) {
+    const out = annotate(command, report, {});
+    assert.deepEqual(out.results[1].assumptions, {callback:'noCallback', overflow:'default', tails:'clean',
+      order:'legacy', hash:'opaque', zeroAddress:'noCode'});
+    assert.equal(out.results[0].profile.pipeline, 'legacy');
+    assert.equal(out.results[0].profile.evmFork, 'osaka');
+    assert.equal(out.results[0].policy, undefined);
+  }
+  assert.equal(annotate('run', report, {}).results[0].assumptions, undefined);
+  const dir = mkdtempSync(join(tmpdir(), 'solkey-pin-'));
+  try {
+    assert.equal(pinnedSolc({solkey:dir}), null);
+    const gradle = join(dir, 'keyext.solidity.core');
+    mkdirSync(gradle);
+    writeFileSync(join(gradle, 'build.gradle'), 'ext.soljsonFile = "soljson-v0.8.34+commit.80d5c536.js"\n');
+    assert.deepEqual(targetProfile({solkey:dir}), {solc:'0.8.34+commit.80d5c536', pipeline:'legacy', evmFork:'osaka'});
+  } finally { rmSync(dir, {recursive:true, force:true}); }
+});
+
 test('native help, version, and invocation errors work outside the checkout', () => {
   for (const args of [['--help'], ['--version']]) {
     const p = spawnSync(binary, args, {cwd:tmpdir(), encoding:'utf8'});
@@ -73,6 +150,17 @@ test('native verification retains checked positives, open goals, and import gaps
   assert.equal(listed.results[0].signature, 'overloaded(uint)');
   assert.equal(listed.results[0].status, 'ready');
   cli(['verify', source, '--function', 'missing', '--no-build'], 2);
+  assert.equal(positive.results[0].assumptions.tails, positive.results[0].reading);
+  assert.equal(positive.results[0].profile.evmFork, 'osaka');
+  const clean = resolve(ROOT, 'tests/solc/CliClean.sol');
+  const cleanRow = cli(['verify', clean, '--no-build']).results[0];
+  assert.equal(cleanRow.status, 'proved');
+  assert.equal(cleanRow.assumptions.tails, 'clean');
+  const denied = cli(['verify', clean, '--no-build', '--deny', 'tails=clean'], 1);
+  assert.equal(denied.results[0].status, 'refused');
+  assert.deepEqual(denied.policy, {require:[], deny:['tails=clean']});
+  assert.equal(cli(['verify', source, '--function', 'passes', '--no-build', '--deny', 'tails=solc']).results[0].policy.under.tails, 'clean');
+  cli(['verify', source, '--function', 'passes', '--no-build', '--require', 'tails=solc', '--deny', 'tails=solc'], 2);
 });
 
 test('inspection exposes source premises, specified obligations, goals, and structured trees', () => {

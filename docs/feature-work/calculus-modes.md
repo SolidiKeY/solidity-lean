@@ -41,4 +41,48 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 
 ## Handoffs
 
-None yet.
+### VC1 (inventory, O10, O13) — 2026-11-05
+
+**Inventory (step 0).** Reused, not redefined: `TailMode`/`ValidTail`,
+`ValidTail.clean_of_solc` (`Calculus/TailMode.lean`); `ValidC`, `TransferSem`,
+`ValidT`, `validC_false_iff` (`Calculus/CallbackHolds.lean`); `OFMode`
+(`Syntax/Raw.lean`, the blocks' modes; the record's `OverflowReading` adds
+`default`, neither block); `EvalOrder`/`EvalOrder.viaIR`/`Contract.evalOrder`
+(`Syntax/Raw.lean`, O9); `keccakBytes` (`Semantics/Heap.lean`, irreducible,
+no collision resistance); O8's address-`0` reading (`TRun.tryCall`). Rows:
+`#solkey_test` (`Frontend/Testing.lean`) writes `reading` (the tail mode,
+`contractTailMode`) and states a calling-back obligation as
+`ValidT (.noCallback invariant[N])`, a plain one as `⊢ N.f.problem`
+(O7); `scripts/test-solidity.mjs` adds `source`, `contract`, `sourceHash`,
+`range`; `scripts/solidity-lean.mjs` wraps them in the schema-1 envelope
+(`docs/cli.md`). Compiler: `scripts/solc-ast.mjs` loads solkey's pinned
+`ext.soljsonFile` (0.8.34; 0.8.38 is also an audited pin), `viaIR: false`
+unless `--via-ir`, `evmVersion` default `osaka`; the fixture header records
+`solcVersion`, which rows do not carry. `Bridge/` and `Solidity/Tools/` hold
+no assumption or profile record; no fork type exists (Osaka appears only as
+pinned constants, `Stipend/Rule.lean` `osakaCold`, `Yul/*`). VS4's branch
+`cloud/semantics-20261105/nondeterminism` was not on origin.
+
+**O10, done.** `Solidity/Calculus/Assumptions.lean`: `Assumptions`,
+`ValidA`, `Entails`/`ValidA.weaken`, `Policy`/`verdict`
+(`verdict_proved_iff`, `verdict_refused`, `admits_sound`), `ProvedRow`;
+the runner's statements as cases (`validA_iff_validT`,
+`validA_of_validTail`). Witnesses and controls:
+`Examples/Tactics/Assumptions.lean`. CLI: `--require`/`--deny`,
+`assumptions`/`policy` per row, status `refused`
+(`scripts/solidity-lean-assumptions.mjs`, mirrored decision table in
+`scripts/solidity-lean.test.mjs`). Docs: options.md O10, cli.md, correctness.md.
+
+**O13, partial (stub).** `TargetProfile` over stubs `Pipeline` and
+`EvmForkStub` (Osaka); rows carry `profile`. Adaptation once VS4's S5.1/S6.1
+land: replace `Pipeline` by S5.1's compiler parameter and `EvmForkStub` by
+S6.1's fork type (keep `TargetProfile.fits`/`evalOrder_of_fits`), and read
+the fork from that parameter in the CLI.
+
+**Requests to other owners.**
+- `Frontend/Testing.lean` / `scripts/test-solidity.mjs` owner: emit the row's
+  record from Lean (whether the obligation called back, its order), and the
+  fixture header's `solcVersion` per row; the CLI derives both today.
+- VC2: replace `Assumptions.callback` by the caller model and add its
+  weakening theorem as a case of `Assumptions.Entails` (and to
+  `weakenings` in `scripts/solidity-lean-assumptions.mjs`).

@@ -1008,6 +1008,7 @@ import Solidity.Calculus.ArrayCut
 import Solidity.Calculus.ArrayFold
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.Assumptions
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.BitArith
 import Solidity.Calculus.Blocks

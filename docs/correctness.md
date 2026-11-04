@@ -40,6 +40,17 @@ in the [lifetime layer](lifetime.md). Its `AG`, `EF` and `AGEF` describe
 transaction-boundary safety and possible reachability; commits require actual
 successful outcomes, so an exhausted diamond does not witness reachability.
 
+## Assumption records
+
+A verdict's readings (callbacks, overflow, tails, order, hash, address `0`)
+are one record, `Assumptions` (`Calculus/Assumptions.lean`,
+[options.md](options.md) O10), and `ValidA I a φ` the validity it selects:
+`ValidC I` of the formula under the record's tail premise and payment flag,
+for a contract elaborated in the record's order. `ValidT` and `ValidTail`
+statements are cases (`validA_iff_validT`, `validA_of_validTail`). A policy
+reports a row proved only under a record it accepts
+(`Policy.verdict_proved_iff`, `Policy.admits_sound`).
+
 ## Model choices behind the statements
 
 - **Payments.** Transfers and sends check both available funds and the
