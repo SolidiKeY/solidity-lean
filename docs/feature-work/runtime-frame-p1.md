@@ -1621,3 +1621,12 @@ This repairs the demonstrated reserve obstruction and supplies a V2 producer for
 This is an inhabited return-consumption composition for the selected scalar family. It supplies no general recursive compiler selection, original-source approved-domain provenance, full-signature/world transport or physical byte/journal correspondence. The existing fixed interfaces and earlier fixture observations are unchanged.
 
 `RuntimeFrameV3ScalarContinuationRevert` checks the distinct failure phase after a successful recursive return. The returned three becomes an invalid index into the old length-two array. The publicly selected suffix yields exact bare target revert; `returned_then_reverted` records the genuine successful midpoint and subsequent failure. This does not reconstruct a failed state, prove rollback, identify external payload bytes or assert absence of earlier effects.
+
+
+### Re-entry after a growing caller continuation
+
+`RuntimeFrameReturnReentry` derives a second frozen Entry from the actual reached representation, restored cursor and allocator growth of a completed return. The resource conditions remain explicit: equal pointer/local-limit layout, bounded next workspace and arena demand, the next context's control floor, its result-frame bound and genuine initial summed allocation input. `after_return` obtains the dynamic fields from the same `Returned` witness; neither theorem assumes a second Entry or target simulation.
+
+`RuntimeFrameV3ScalarReentry` packages the actual mutation/allocation prefix and discharges those conditions at its reached state. The next publicly selected argument reads old-array element zero after its change from seven to three. `RuntimeFrameV3ScalarReentryEndpoint` composes the real source programs and target images, preserving the stack, source representation, bases and total allocator growth four. The pre-existing private object and the new object at base 22 survive the second call; the allocator remains 26. Complete source objects and the 26-word target snapshot are checked, including private workspace reuse and stale-count, wrong-frontier and wrong-object negatives.
+
+These results establish frame re-entry and an inhabited scalar-family composition. General recursive source-body selection, approved-profile provenance, full-domain coverage and world/physical adequacy remain separate obligations. Exhausted source quotations are distinguished from successful calls; no failed state or rollback relation is inferred.
