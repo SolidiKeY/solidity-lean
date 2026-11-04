@@ -240,6 +240,8 @@ import SolidityBridge.RoadmapV15.P10.NonbranchTables
 import SolidityBridge.RoadmapV15.P10.PopConsumer
 import SolidityBridge.RoadmapV15.P10.PopControls
 import SolidityBridge.RoadmapV15.P10.PowerControls
+import SolidityBridge.RoadmapV15.P10.PublishedBitwise
+import SolidityBridge.RoadmapV15.P10.PublishedBitwiseControls
 import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
 import SolidityBridge.RoadmapV15.P10.PushDecoderControls
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds

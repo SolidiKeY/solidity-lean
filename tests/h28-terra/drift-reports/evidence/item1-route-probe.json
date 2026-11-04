@@ -1,0 +1,49 @@
+{
+  "input": {
+    "files": [
+      {
+        "path": "A.lean",
+        "text": "G15 G15 G18.01 G9999"
+      },
+      {
+        "path": "B.lean",
+        "text": "G150 G15.2 G15-extra"
+      }
+    ],
+    "ownership": [
+      {
+        "id": "G15",
+        "owner": "example",
+        "status": "in-progress"
+      },
+      {
+        "id": "G18.01",
+        "owner": "example2",
+        "status": "in-progress"
+      }
+    ]
+  },
+  "output": [
+    {
+      "path": "A.lean",
+      "ownerHints": [
+        {
+          "id": "G15",
+          "owner": "example",
+          "status": "in-progress"
+        },
+        {
+          "id": "G18.01",
+          "owner": "example2",
+          "status": "in-progress"
+        }
+      ],
+      "verdict": "lexical-hint-owner-review-required"
+    },
+    {
+      "path": "B.lean",
+      "ownerHints": [],
+      "verdict": "unassigned-owner-review-required"
+    }
+  ]
+}
