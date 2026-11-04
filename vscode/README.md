@@ -205,3 +205,10 @@ latency and worker-count trials. See
 commands, report formats and known gaps. `npm run parity:check` validates the
 source inventory offline; `npm test` includes harness regression tests. This
 comparison does not establish full feature or solver parity.
+
+`npm run parity:stdio -- --dafny /path/to/dafny --output /path/to/new-results`
+runs the real servers without Electron. It defaults to language-service checks;
+`--scope full` adds verification and requires a freshly built local backend.
+`parity:check` also checks the independent upstream test-discovery ledger. The
+manual editor-parity workflow offers both transports. Stdio results do not
+establish VS Code UI behavior.

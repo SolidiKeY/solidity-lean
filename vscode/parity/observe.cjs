@@ -8,7 +8,7 @@ const {sep}=require('node:path');
 
 /** Observe calls on real VS Code objects. No mocked renderer or verifier. */
 function observe(vscode, record, extensionPath, tracePath) {
-  const controllers = [], profiles = [], decorations = [];
+  const controllers = [], profiles = [], decorations = [], finalizers=[];
   function instrument(object, handlers) {
     return new Proxy(object, {get(target,key) {
       if (handlers[key]) return handlers[key];
@@ -53,8 +53,16 @@ function observe(vscode, record, extensionPath, tracePath) {
     if(tracePath&&(args[1]?.includes('server')||args[1]?.some(a=>typeof a==='string'&&a.endsWith('lsp-server.cjs')))&&child.stdin&&child.stdout) {
       const parser=direction=>{
         const frames=new LspFrames();
+        let finalized=false;
         frames.on('message',message=>appendFileSync(tracePath,JSON.stringify({time:Date.now(),direction,message})+'\n'));
-        return chunk=>{try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}};
+        const finish=()=>{
+          if(finalized)return;finalized=true;
+          try{frames.end();appendFileSync(tracePath,JSON.stringify({direction,framingFinalized:true})+'\n');}
+          catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}
+        };
+        finalizers.push(finish);
+        (direction==='server'?child.stdout:child.stdin).once(direction==='server'?'end':'finish',finish);
+        return chunk=>{if(finalized)return;try{frames.push(Buffer.isBuffer(chunk)?chunk:Buffer.from(chunk));}catch(error){appendFileSync(tracePath,JSON.stringify({direction,error:error.message})+'\n');}};
       };
       child.stdout.on('data',parser('server'));
       const outgoing=parser('client'),write=child.stdin.write.bind(child.stdin);
@@ -72,6 +80,6 @@ function observe(vscode, record, extensionPath, tracePath) {
   const registration = vscode.languages.onDidChangeDiagnostics(event => {
     for (const uri of event.uris) record('diagnostics',{uri:uri.toString(),diagnostics:vscode.languages.getDiagnostics(uri)});
   });
-  return {controllers,profiles,decorations,restore() { Module._load = original; registration.dispose(); }};
+  return {controllers,profiles,decorations,restore() { finalizers.forEach(f=>f());Module._load = original; registration.dispose(); }};
 }
 module.exports = {observe};
