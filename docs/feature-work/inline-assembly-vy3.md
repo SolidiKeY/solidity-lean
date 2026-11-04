@@ -1364,3 +1364,42 @@ Source/G24/views/readback/functions, early-flow/divergence, native/expansion
 capacity/world correspondence, frontend admission or full joint validation.
 The published native host-writer counterexample and earlier partial gates
 remain open. No new external solc/native-EVM evidence is claimed.
+
+
+### All-horizon FOR noncompletion and finite model turns
+
+`SolidityBridge.Yul.ForPrefixes.source_loop_never` and `source_never` prove
+original closed-source noncompletion at every horizon when the actual compiled
+guard stays nonzero under every post-after-body iteration. Existing completed-
+run uniqueness identifies each actual condition/body/post/prelude result with
+its real compiler source certificate, including horizons below component fuel.
+No minimum source horizon or assumed desired whole-loop result is introduced.
+The normal component and forever-guard premises remain explicit.
+
+`macro_prefix` derives each actual model turn from the real condition Slice,
+body Realization and emitted compiler blocks. It proves exact `loopIterN`
+continuation after every finite turn count, preserving newer words, arbitrary
+numeric callers and all nonstack machine fields. These are denotational child
+macro-turns, not fetched/native instruction prefixes. The existing model
+represents no finite loop outcome by `.fault`; `model_loop_no_finite_outcome`
+uses that definition. It does not assert exceptional native halt, source panic
+or revert, or change any observations to equate them.
+
+The concrete original branch-bearing FOR now has a genuine unending witness:
+flag0 keeps its body from decrementing counter99, while post increments the
+accumulator. An inductively derived counter/flag invariant supplies forever
+guards, source noncompletion for all fuel, exact target continuation for all
+counts and the whole actual selected-program denotation including its prelude.
+Only a three-turn model prefix is evaluated. The previous high-flag terminating
+witness constructively refutes the forever premise; it still terminates by its
+unchanged prior theorem. No unending target is evaluated or inferred merely
+from a finite timeout.
+
+Independent read-only finder/skeptic reviews found no confirmed findings.
+Eleven new standard-only axiom reports are enforced. No AST/state, observation,
+fixture budget/verdict or existing source/compiler contract changed. This
+closes these pure normal-component source/model facts, not full logical
+Solidity Source/G24/view/function/early-flow/divergence refinement, native
+prefix/charged/capacity/world correspondence, frontend admission or final
+joint validation. The native host-writer counterexample remains open. No new
+external solc/native-EVM tests are claimed.

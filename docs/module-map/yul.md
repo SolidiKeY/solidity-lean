@@ -89,3 +89,5 @@
 
 | `Bridge/SolidityBridge/Yul/ForSource.lean` | Shared original finite-loop source law with explicit normal body/post laws; concretely discharged by NormalFor and StructuredFor. No new source syntax or state. |
 | `Bridge/SolidityBridge/Yul/StructuredFor{,Controls}.lean` | Branch/sequence-aware original FOR component compilation, finite closed-source/structured/model proofs; actual high-only-word branch and zero-exit witnesses. Full G24/native/admission/early-flow/divergence remains open. |
+
+| `Bridge/SolidityBridge/Yul/ForPrefixes{,Controls}.lean` | Actual compiled FOR all-horizon source noncompletion and exact finite model macro-turn transport; real branch-bearing invariant, caller/frame preservation and whole selected noncompletion denotation. Not native prefixes/exception correspondence or general Source-G24. |
