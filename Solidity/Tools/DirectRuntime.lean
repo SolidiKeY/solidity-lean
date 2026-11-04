@@ -1,6 +1,7 @@
 import Solidity.Frontend.Testing
 import Solidity.Calculus.AnonLocalCapture
 import Solidity.Frontend.ExecutableAst.Shared.Translate
+import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 
 /-! Import-free executable entry point. Compiler JSON is decoded to the existing
 surface syntax, then the existing intrinsic elaborator constructs `Fml C []`.
@@ -9,21 +10,13 @@ namespace Solidity.Tools.DirectRuntime
 open Lean Solidity.Frontend
 open Solidity.Frontend.ExecutableAst.Shared
 
-/-- Plain assertion obligations use the same scoped source elaborator and
-box/diamond reading as `solc_scoped_problems`. Everything here is executable;
-no Lean expression, declaration or environment is constructed. -/
-private def assertionObligation (C : Contract) (name : String) (box : Bool) : Except String (Fml C []) := do
-  let some d := Semantics.lookupBy name C.funs | throw "missing function"
-  unless d.rets.isEmpty do throw "plain return obligation"
-  let ctx ← d.paramCtx
-  let (raw, st) ← (lowerBodyLoops [] 0 d.body).runFrom { funs := C.funs }
-    (ctx, RawStmt.maxIdxs d.body + 1)
-  let raw ← lowerReturns [] raw
-  let ⟨_, program⟩ ← (elabProgAtS.go C 0 raw st (source := true)).mapError (·.2)
-  let Γ := ECtx.toNCtx st.1
-  let m := if box then Modality.box else .diamond
-  return Fml.closeN true Γ (.imp (Problem.callPre C Γ false [] false [] true)
-    (.imp (Fml.wt C) (.modal m program .nil .tt)))
+/-- Pin the shared executable builder to the existing producer helpers.
+No producer implementation is copied and no Lean environment is constructed. -/
+private def buildObligation (C : Contract) (name : String) (specified box : Bool) :
+    Except String (Fml C []) :=
+  Solidity.Frontend.ExecutableAst.Shared.obligation lowerBodyLoops
+    (fun C Γ => Problem.callPre C Γ false [] false [] true)
+    C name specified box
 
 private structure Stronger {C : Contract} {Γ : Ctx} (φ : Fml C Γ) where
   formula : Fml C Γ
@@ -135,15 +128,13 @@ def check (request : Json) : Except String Json := do
       else match (do
         let (_, d) ← function reader n avoid
         let C := { base with funs := [(name, d)] }
-        let φ ← if specified then specObligation C name
-          else assertionObligation C name (clauses.any (·.kind == "box"))
+        let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
         if listing then return Json.mkObj [("status", toJson "ready"), ("reason", toJson "")]
         let result := compiledResult C φ
         if (result.getObjValAs? String "status").toOption == some "pending" && hasAnnotatedLoop d.body then
           let d := { d with body := unrollLoops d.body }
           let C := { base with funs := [(name, d)] }
-          let φ ← if specified then specObligation C name
-            else assertionObligation C name (clauses.any (·.kind == "box"))
+          let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
           return compiledResult C φ
         return result) with
       | .ok result => result

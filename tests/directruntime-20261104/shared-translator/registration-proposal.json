@@ -10,6 +10,11 @@
       "module": "Solidity.Frontend.ExecutableAst.Shared.Translate",
       "area": "docs/module-map/frontend.md",
       "row": "Extracted executable AST reader and recursive extension steps; default fragment/refusals preserved."
+    },
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Intrinsic",
+      "area": "docs/module-map/frontend.md",
+      "row": "Existing intrinsic formula builders with explicit producer loop-lowering/entry-precondition callbacks; a new reference guard preserves the default AST fragment refusal."
     }
   ]
 }
