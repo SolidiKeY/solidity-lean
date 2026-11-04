@@ -457,3 +457,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean` | Actual bool-kind standard ABI encoding before a supported mixed memory tail; G38/error/expression consumers. |
 | `Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean` | Boolean local, shared/distinct strings, allocation/failure controls and exact packed-width distinction. |
+
+| `Solidity/Lowering/V08/LiteralFailureTypedFields.lean` | Synchronized Source/ABI field evidence, constructive normalization, generic standard encoding and allocation preservation. |
+| `Solidity/Lowering/V08/LiteralFailureTypedFieldsControls.lean` | Seven-field, three-bool actual execution controls, typed kind corruption, aliases, allocation and late failures. |

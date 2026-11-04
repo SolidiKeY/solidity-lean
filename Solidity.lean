@@ -1970,6 +1970,8 @@ import Solidity.Lowering.V08.LiteralFailureStringPrefix
 import Solidity.Lowering.V08.LiteralFailureStringPrefixControls
 import Solidity.Lowering.V08.LiteralFailureTupleAbort
 import Solidity.Lowering.V08.LiteralFailureTupleAbortControls
+import Solidity.Lowering.V08.LiteralFailureTypedFields
+import Solidity.Lowering.V08.LiteralFailureTypedFieldsControls
 import Solidity.Lowering.V08.LocalCallableTransport
 import Solidity.Lowering.V08.MetadataControls
 import Solidity.Lowering.V08.NestedControls
