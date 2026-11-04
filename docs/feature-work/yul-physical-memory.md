@@ -327,6 +327,17 @@ maximum-offset empty requests preserve earlier payload/accounting. These are
 boundary writeback laws, not instrumentation of arbitrary Source computations
 or a native MCOPY/compiler/allocator theorem.
 
+`P6ResidualCapacity.checkedCopies` computes those capacity premises instead of
+requiring a caller proof for the whole request list. It retains the actual
+successful frame prefix and exact pending suffix at the first unready request.
+The accepted prefix and its room proofs are constructed, then identified with
+`runCopies`; its full view, Source identity, reserved validity and carrier facts
+follow. The pending head is proved unready against reached capacity. Controls
+separate source/destination failures and discriminate lost prefixes, clipped
+copies and skipped failures; empty maximum-offset copies remain valid. Capacity
+failure denotes unsupported bounded-frame preparation, not a Source/Yul halt,
+native EVM failure or allocation verdict.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
