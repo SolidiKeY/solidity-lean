@@ -32,13 +32,15 @@ proof uses it, never derived from a machine model.
 
 ## Open
 
-- **Revert data in formulas** — closed by VS1 S6.2 (2026-11-05): a modal
-  formula reads its run's revert data, `dl!{ [ P ] φ ↯ ψ }`
+- **Revert data in formulas** — partly closed by VS1 S6.2: a modal formula
+  reads its run's revert data semantically, `dl!{ [ P ] φ ↯ ψ }`
   (`Semantics/CtxEquiv/RevertFml.lean`, notation and printers in
   `Calculus/SurfaceRevert.lean`, examples in
   `Examples/Tactics/RevertFormulas.lean`); see "Revert data", *Read in
-  formulas*.  What is still open there is the calculus: no taclet produces or
-  consumes the new modality, so its goals are proved semantically.
+  formulas*.  Still open: the calculus (no taclet produces or consumes the
+  modality, and a computed or rethrown reason is still bound as any bytes by
+  `Fml.allocAll`), the data the model drops outside a self-call frame
+  (string reasons, custom errors, panics), and logs (not modelled, X07).
 - **Callbacks.** A diamond over a loop whose body calls back never holds
   (`holdsC_diamond_loop`, `docs/options.md` O3): refused, not open. An
   `allocAll` goal whose rest calls back has no `ProvesC` rule; the callback
@@ -442,19 +444,31 @@ out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
 (`THalt.revertData?`: `revert` is `[]`, `revertWith d` is `d`) the data
 predicate `ψ` (`DataPred`: `_`, `none`, exact bytes, `Error("m")`,
 `Error(_)`, `Panic(c)`, a selector, Boolean combinations), any other halt
-what the modality asks already, never a panic.  It is a conservative
+what the modality asks already (the box accepts divergence and exhaustion,
+the diamond exhaustion), never a panic.  So `⟨ P ⟩ false ↯ ψ` says that `P`
+reverts with data satisfying `ψ`, or exhausts.  It is a conservative
 extension: `[ P ] φ ↯ _` is `[ P ] φ` and `⟨ P ⟩ φ ↯ none` is `⟨ P ⟩ φ`
 (`revModal_box_any`, `revModal_diamond_none`).  It is a separate formula
 layer (`RFml`) over `Fml`, so no rule, closer or fold of `Fml` changes; the
 price is that the calculus has no taclet for it, and a goal is proved from
 the run (`revModal_of_revert`, `revModal_revertBytes`, `revModal_of_ok`).
-It reads the data the model computes, so a top-level `revert("m")` reads
-`[]` (literal errors keep the empty-data lowering outside a self-call
-frame, below); a byte-literal reason reads its `Error` data.  At the ABI
-boundary the data is `Outcome.revert`'s (`THalt.toOutcome?`,
-`DataPred.outcome`), the observation of `Semantics/CtxEquiv/Basic.lean`.
-Logs are not modelled as observations yet (X07); when they are, they join
-the event type of the contextual relations, not this modality.
+`↯` applies to a formula whose head is a modality; the notation refuses
+anything else.
+
+It reads the data the model computes, which outside a self-call frame
+(or `retainFailureData`) is less than solc's: `revert("m")`,
+`require(c, "m")` and `revert E(…)` revert with `[]`; a failed read, an
+out-of-bounds index, an empty `pop` and a checked overflow revert with `[]`
+where solc returns `Panic(0x32)` and the like (`docs/solc-alignment.md`);
+`assert` is a panic, which neither modality accepts, so
+`⟨ assert(false); ⟩ false ↯ Panic(1)` is false at top level.  A byte-literal
+reason (`revert(hex"…")`, the solc import's form) reads its `Error` data in
+every frame.  The controls pin each reading.  At the ABI boundary the data
+is what `Outcome.revert` would carry (`THalt.toOutcome?`); a panic has no
+outcome there, and no theorem yet relates a run's `RFml` to a session's
+outcomes in `Semantics/CtxEquiv/Basic.lean`.  Logs are not modelled as
+observations (X07); when they are, they join the event type of the
+contextual relations, not this modality.
 
 **Left open.**
 - A memory operand has no static pattern (`RevPart.pat?` is `none`), so
