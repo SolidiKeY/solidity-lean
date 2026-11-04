@@ -233,3 +233,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStoredFresh.lean` | Actual load success inversion, positive parent-last reference copies, distinct repeated copies, retained first state and canonical traversal laws. |
 | `Backend/MemoryCopies/SourceStoredFreshControls.lean` | Populated/empty/64-child repeated struct copies, retained payloads/lengths, exact horizons, partial second timeout and shared-root rejection. |
 | `Backend/MemoryCopies/CopyPathInterface.lean` | Existing typed Path observations below copied heaps: full live contents and fresh allocation-range reference bounds. |
+| `Backend/MemoryCopies/CopyPaths.lean` | Live typed-path contents and absence, fresh descendant bounds, preserving-growth transport and cross-copy reference separation. |
+| `Backend/MemoryCopies/CopyPathControls.lean` | Nested/fixed/struct and empty/64-child path observations, shadow/overrun rejection and distinct descendant controls. |
