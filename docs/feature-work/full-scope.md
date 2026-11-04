@@ -150,3 +150,5 @@ Register new modules with `scripts/coord-tools/register.sh` and add
 ## Handoffs
 
 None yet.
+
+Structural metatheory beside this plan (contextual equivalence, upgradeability, mutability, progress, nondeterminism split) is planned in [semantics-extensions.md](semantics-extensions.md).
