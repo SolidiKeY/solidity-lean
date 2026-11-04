@@ -18,8 +18,8 @@ def initProof : RawSequence.Supported ctx [] false ⟨true,false⟩ initItems :=
  .cons (.expression (.assign .here (.base (.literal true)))) .nil
 def witness : Nonempty (RawSequence.Supported ctx [] false ⟨true,false⟩ initItems) := ⟨initProof⟩
 
-/- The additional dirtyMutatingPrefix fuel-6 conjunction remains an unproved
-control obligation; no expected result or proof budget was changed. -/
+/- The original dirtyMutatingPrefix fuel-6 conjunction is checked separately
+in Solidity.Yul.Checks.RawPureInitPrefix, with unchanged results and budget. -/
 theorem rawPostFamily : ∀ (fuel : Nat) (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawPureInitTimeout.ctx), (Solidity.Yul.RawSourceForPost.Initialized.run (Solidity.Yul.RawSourceAdapter.body (Solidity.Yul.RawLoopBody.Supported.plain Solidity.Yul.Checks.RawPureInitTimeout.initProof)) (.base (.literal true)) Solidity.Yul.Checks.RawPureInitTimeout.writeFalse (Solidity.Yul.RawSourceAdapter.body Solidity.Yul.Checks.RawPureInitTimeout.Old.mutatingContinue) fuel state).1 = .error .timeout := by
   intro fuel state
   exact Solidity.Yul.RawPureInitTimeout.raw_post_timeout Solidity.Yul.Checks.RawPureInitTimeout.ctx [] false false Solidity.Yul.Checks.RawPureInitTimeout.initItems Solidity.Yul.Checks.RawPureInitTimeout.initProof _ Solidity.Yul.Checks.RawPureInitTimeout.Old.mutatingContinue (by rfl) _ Solidity.Yul.Checks.RawPureInitTimeout.writeFalse fuel state
@@ -54,7 +54,7 @@ theorem initializerCounterexample : ∀ (glob : Solidity.Source.Glob Solidity.Yu
 theorem dirtyRefusal : Solidity.Yul.RawCoherent.coherent Solidity.Yul.Checks.RawPureInitTimeout.dirty = false := by
   exact Solidity.Yul.Checks.RawPureInitTimeout.Old.dirtyInput.1
 
-/-- Initializer stage only; the separate full-loop dirty-prefix goal remains open. -/
+/-- Initializer stage only; the loop prefix is checked in RawPureInitPrefix. -/
 theorem initializerPrefix : (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).1 = .ok () ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.flag).val = 1 ∧ (Solidity.Yul.RawFrame.view (Solidity.Yul.RawSequence.block Solidity.Yul.Checks.RawPureInitTimeout.initProof 5 Solidity.Yul.Checks.RawPureInitTimeout.dirty).2 Solidity.Yul.Checks.RawStatementHorizon.small).val = 257 := by
   exact ⟨rfl,rfl,rfl⟩
 
