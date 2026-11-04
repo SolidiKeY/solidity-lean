@@ -761,17 +761,17 @@ def emitEvent {Γ : RCtx} (e : Event)
 /-- Crediting an instance (a callback's value from outside, an
 environment credit), journaled. -/
 def credit {Γ : RCtx} (a : Address) (v : Word) : EM E Γ Unit := do
-  let b := ((← st).ex.world.accounts a).balance.val
-  if h : b + v.val < 2 ^ 256 then
-    modSt fun s => { s with ex := s.ex.apply (.account a fun x => x.withBalance ⟨b + v.val, h⟩) }
+  let b := ((← st).ex.world.accounts a).balance
+  if _h : b + v.val < 2 ^ 256 then
+    modSt fun s => { s with ex := s.ex.apply (.account a fun x => x.withBalance (b + v.val)) }
   else halt (.revert [])
 
 /-- Debiting an instance (value sent outside), journaled; `none` when it
 cannot afford it. -/
 def debit {Γ : RCtx} (a : Address) (v : Word) : EM E Γ Bool := do
-  let b := ((← st).ex.world.accounts a).balance.val
-  if h : v.val ≤ b then
-    modSt fun s => { s with ex := s.ex.apply (.account a fun x => x.withBalance ⟨b - v.val, by omega⟩) }
+  let b := ((← st).ex.world.accounts a).balance
+  if _h : v.val ≤ b then
+    modSt fun s => { s with ex := s.ex.apply (.account a fun x => x.withBalance (b - v.val)) }
     pure true
   else pure false
 
@@ -961,7 +961,7 @@ def evalE (G : Glob E) (F : Fr) (n : Nat) {Γ : RCtx} {τ : STy} (e : RExpr E Γ
     | .address x =>
       let s ← st
       let w := match (s.ex.world.accounts x).code with
-        | some _ => (s.ex.world.accounts x).balance
+        | some _ => Monetary.wordView (s.ex.world.accounts x).balance
         | none => G.fixed.ledger G.balance0 s.events x
       return .val (intWrap IntTy.u256 w.val)
   | .builtin (τ := τ) b args _ => evalBuiltin (plan := plan) G F n b args τ
@@ -1474,7 +1474,7 @@ def callAddr (G : Glob E) (F : Fr) (n : Nat) (a : Address) (v : Word) (input : B
     match ← instanceAt G a with
     | some c =>
       let m ← mark
-      let ok ← if a = F.this then pure (decide (v.val ≤ ((← st).ex.world.accounts a).balance.val))
+      let ok ← if a = F.this then pure (decide (v.val ≤ ((← st).ex.world.accounts a).balance))
         else do
           match (← st).ex.transfer F.this a v with
           | some ex' => modSt fun s => { s with ex := ex' }; pure true

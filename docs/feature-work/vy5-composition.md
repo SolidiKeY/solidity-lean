@@ -182,3 +182,12 @@ Request admission increment: actual Source.FailureExecution.requestValueScope
 reuses unchanged requestScope with exact-Nat sender-value admission. See
 [source failure execution](source-failure-execution.md#request-value-admission-child)
 and vy5-request-admission-timings.json. This is not Session/P8/Y10 closure.
+
+## H19 natural-account interface (2026-11-04)
+
+The actual Source Account/transfer/credit/debit/deployment Nat migration and
+explicit current-and-saved-account range laws are an owner-held interface step;
+see [scope, timings and pending consumers](vy5-natural-account.md). Measured
+checking time did not increase noticeably; the pre-existing Horizon timing
+policy failure remains. Full consumer/ledger/reachability and combined
+validation are pending. All 24 original obligations and six combinations stay open.

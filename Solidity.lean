@@ -2189,6 +2189,7 @@ import Solidity.Source.Ledger
 import Solidity.Source.Machine
 import Solidity.Source.Monetary
 import Solidity.Source.MonetaryLaws
+import Solidity.Source.MonetaryWorld
 import Solidity.Source.Observe
 import Solidity.Source.Overloads
 import Solidity.Source.Preservation.AllocationControls

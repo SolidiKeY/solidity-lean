@@ -1,0 +1,82 @@
+[
+  {
+    "module": "Solidity/Source/World.lean",
+    "beforeSeconds": 0.6422360659998958,
+    "afterSeconds": 0.5951572340127314,
+    "beforeSHA256": "9f8b9ceb73d7123a4506a6f6f42eba5ee09e30c9157d7b92d485fef3773bbe76",
+    "afterSHA256": "bd707e56fdbd210dd1fa053a32d0c7965bd151cb84568adc472df9c8e3d3cbab",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Machine.lean",
+    "beforeSeconds": 1.673698503000196,
+    "afterSeconds": 1.6423579770053038,
+    "beforeSHA256": "ae28407e59e7b7115f46bc00bf6f7c17c0dfdd1ccdd9bc90543036ddff583904",
+    "afterSHA256": "ae28407e59e7b7115f46bc00bf6f7c17c0dfdd1ccdd9bc90543036ddff583904",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Eval.lean",
+    "beforeSeconds": 8.08393169199553,
+    "afterSeconds": 8.008962542007794,
+    "beforeSHA256": "0c306521ccb1f0b635aac7227154acb68116a9620e0adcd4e2ae2a2343ca7b44",
+    "afterSHA256": "b68b7248c82e8b4ea9e0324ba54c1182e0d63ee8a111f23effda09bb20e1174b",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Semantics.lean",
+    "beforeSeconds": 0.9683205429973896,
+    "afterSeconds": 0.9489694700023392,
+    "beforeSHA256": "cbbb51950454c2f1884e644ad00bfcc560a1e6ba28482b7c0dc3f876d769fa62",
+    "afterSHA256": "b22b8708cb8241b814c01f5eaae9143bd0a9dcd64bcfc5e38eb9ef407bf4d352",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Horizon.lean",
+    "beforeSeconds": 346.9558801499952,
+    "afterSeconds": 340.92376859800424,
+    "beforeSHA256": "43ec3e6cf3450fa117a6816cbcb1fb5ee4382adc065a0e4a2bc7c1f4ec4c60dd",
+    "afterSHA256": "43ec3e6cf3450fa117a6816cbcb1fb5ee4382adc065a0e4a2bc7c1f4ec4c60dd",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "fail (pre-existing)"
+  },
+  {
+    "module": "Solidity/Source/HorizonDeploy.lean",
+    "beforeSeconds": 8.887858039001003,
+    "afterSeconds": 8.84899888599466,
+    "beforeSHA256": "ea72b085442795d463b71d315c3af764e4fd6170329febb94e2d6906b7ec8d34",
+    "afterSHA256": "ea72b085442795d463b71d315c3af764e4fd6170329febb94e2d6906b7ec8d34",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Session.lean",
+    "beforeSeconds": 2.230821086006472,
+    "afterSeconds": 2.207386221009074,
+    "beforeSHA256": "ec4373d4e60dd72ff08c79fd62da1611ebd520d66273a49ce89f010adcd8a3ba",
+    "afterSHA256": "ec4373d4e60dd72ff08c79fd62da1611ebd520d66273a49ce89f010adcd8a3ba",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  },
+  {
+    "module": "Solidity/Source/Funds.lean",
+    "beforeSeconds": 0.24182194301101845,
+    "afterSeconds": 0.2460591819981346,
+    "beforeSHA256": "2e9d81a3303b516fe65b13cf0d060484e6e93a70c829cfe1d4f848f97a8dd58e",
+    "afterSHA256": "2e9d81a3303b516fe65b13cf0d060484e6e93a70c829cfe1d4f848f97a8dd58e",
+    "beforeExit": 0,
+    "afterExit": 0,
+    "module300SecondPolicy": "pass"
+  }
+]

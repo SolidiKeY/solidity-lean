@@ -156,10 +156,10 @@ ABI-encoded constructor arguments; its outcome. -/
 def deploy (G : Glob E) (n : Nat) (c : String) (addr sender : Address) (value : Word) (args : Bytes)
     (plan : FailureExecution.RuntimePlan := none) : EM E [] Outcome := do
   let m ← mark
-  let old := ((← st).ex.world.accounts addr).balance.val
-  if hb : old + value.val < 2 ^ 256 then
+  let old := ((← st).ex.world.accounts addr).balance
+  if _hb : old + value.val < 2 ^ 256 then
     modSt fun s => { s with ex := s.ex.apply (.account addr fun _ =>
-      { balance := ⟨old + value.val, hb⟩, nonce := 1, code := none, storage := Storage.empty }) }
+      { balance := old + value.val, nonce := 1, code := none, storage := Storage.empty }) }
   else halt (.revert [])
   let F : Fr := { this := addr, sender := sender, value := value, static := false, contract := c }
   let ps := ((G.prog.ctor c).map RBody.ps).getD []
