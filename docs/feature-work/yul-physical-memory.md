@@ -383,6 +383,16 @@ without assuming successful preparation. This uses the explicit codec image;
 it does not identify that image with all generated-image or arbitrary-copy
 preparations, nor supply allocator or compiler correspondence.
 
+`P6CopySource` identifies the real `Source.heapPut` action from prepared entry
+identity and exact dependent decoded data. A sibling equal to its actual current
+cell makes no administrative change. The concrete changed-copy proof runs both
+actual actions and identifies the entire resulting Source state with a specified
+`Heap.write`; it does not stop at an unspecified existential output. Kernel
+`indexLoc`/`readLoc` checks show both aliases now read-1 at the changed index,
+where the initial state read32767. The byte sibling remains its exact original
+typed cell and every initial owner typing survives. This is the concrete two-root
+copy result, not arbitrary Source-call or compiler adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

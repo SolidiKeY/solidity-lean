@@ -80,3 +80,4 @@
 | `Yul/Adapters/P6ResidualReserve{,Controls}` | Least sufficient pending-copy word reservation, constructive checked completion and chronological whole-map/Source closure. |
 | `Yul/Adapters/P6SnapshotCopy{,Controls}` | Actual P6 copies into owned regions with retained reached frames, canonical Source synchronization, complete reencoding and owner MemOK transport. |
 | `Yul/Adapters/P6CopyPreparation{,Controls}` | Canonical nominal update existence from copied words and a concrete changed-field kernel Source/full-map witness on a two-root codec image. |
+| `Yul/Adapters/P6CopySource{,Controls}` | Exact prepared Source actions and concrete whole-state/alias result for an owned P6 copy, with typed sibling identity and every-H safety. |
