@@ -50,7 +50,11 @@ field `block.difficulty` reads exists (`difficulty_has`).
 environment plus the block environment of each action, indexed as
 `SessionEnv.requests` indexes actions, so the block cannot change inside a
 transaction. The chain premise `EnvChoice.Chain` (non-decreasing `number`
-and `timestamp`, constant `chainid`) is part of `EnvChoice.Allowed`.
+and `timestamp`, constant `chainid`) is adopted by `SplitSpec.forked` and the
+controls. `ForkedSplit.Allowed` is a field, so a language may state a weaker
+premise. `Chain` does not relate timestamps within one block number, and
+`EnvChoice.block`'s timestamp is not yet related to G01's
+`Request.timestamp`; X02 picks one.
 `ForkedSplit` reads `EnvChoice F`, and `ForkedSplit.at F` is a split
 language. The fork is a third kind of input, a setting both sides share
 (as `EvmSpec.pin`), neither environment nor compiler output. `HoldsOn` asks
@@ -66,8 +70,9 @@ open Solidity.Roadmap
 
 /-! ## Forks and their choices -/
 
-/-- Named forks, in order, and `custom` for drafts and controls. Only
-`osaka` has an instance that claims to be the fork. -/
+/-- Named forks, in order, and `custom` for drafts and controls. Only the
+`osaka` instance claims to be its fork; `prague` is tagged `.prague` but
+covers only the fields listed in its docstring. -/
 inductive Fork where
   | london
   | paris

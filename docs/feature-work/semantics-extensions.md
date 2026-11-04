@@ -117,8 +117,10 @@ source reads no D1 value yet, so it declares none and is confined
 at an allowed environment (`envA_allowed`). A constant hash makes the
 creation address computable (`createAddress_zero`). In the run, `g()`
 returns `++x + x` after `x = 1`: `3` under legacy and `4` via IR
-(`order_legacy`, `order_viaIR`). So "completes with 3 or not at all" fails
-under both pipelines (`order_not_both`). The split source is non-vacuous at
+(`order_legacy`, `order_viaIR`). So "completes with 3 or not at all" holds
+for the legacy run but is not a `HoldsBoth` statement (`order_not_both`).
+The contract is deployed at address `0`, the creation address under the
+constant hash. The split source is non-vacuous at
 every choice (`sourceSplit_nonVacuous`), so no choice rescues an
 always-reverting target (`sourceSplit_refutes`).
 
@@ -182,7 +184,9 @@ Osaka is `ForkSpec.osaka`. It agrees with:
 `EnvChoice F` adds the block of each action to `SessionEnv`, indexed like
 `requests`, so the block cannot change inside a transaction. Its `Allowed`
 includes the chain premise `EnvChoice.Chain`: non-decreasing number and
-timestamp, and constant chain id. `ForkedSplit` takes the fork as a
+timestamp, and constant chain id. `SplitSpec.forked` and the controls
+adopt that premise, but `ForkedSplit.Allowed` is a field, so a language may
+state less. `ForkedSplit` takes the fork as a
 parameter, and `HoldsOn` quantifies a list of forks. Controls:
 
 - `slotnum_osaka` and `slotnum_withSlotnum_not` give one statement that
@@ -200,16 +204,21 @@ are in `ForkAgreement.lean`.
 `Quot.sound`. There is no `sorry`, no new axiom and no `maxHeartbeats`
 change.
 
-**Reviews.** A read-only finder and a skeptic (no Lean server) reviewed the
+**Reviews.** A read-only re-check after the fixes confirmed the first
+four items below and the docstring fixes. It found wording residue (fixed:
+the `prague` tag, the `order_not_both` reading, the address-`0` remark) and
+two notes now listed as limitations (the free oracle field, the
+timestamps). Before that, a read-only finder and a skeptic (no Lean server) reviewed the
 first push. Their confirmed findings were fixed as follows:
 
 - The read predicate of `Confined` was free, so the check could not fail.
   It is now the language's declared `readsD1`.
 - The oracle in `SoundAtOracle` was a free argument. It is now part of an
   `OracleTarget`, with a refutation control.
-- The source witness ran at a disallowed environment and at address `0`,
-  outside `sourceSplit`. It now runs `sourceSplit` itself at an allowed
-  environment, with `order_not_both` and non-vacuity.
+- The source witness ran at a disallowed environment, outside
+  `sourceSplit`. It now runs `sourceSplit` itself at an allowed environment
+  (still at address `0`, which `sessionAt` computes there), with
+  `order_not_both` and non-vacuity.
 - `Fork.lean` imported Yul and `Lean` modules. It now imports neither, and
   the agreements moved to `ForkAgreement.lean`.
 - Drafts and controls carried the `osaka` or `amsterdam` tag. They are now
@@ -253,6 +262,13 @@ Findings kept as limitations are listed below.
   keeps (`osaka_d2_pin`).
 
 **Limitations.**
+
+- `OracleTarget.oracle` is a field. Nothing ties it to the target's runs
+  until the EVM side defines it (X03), and `circular_rescues` shows what a
+  freely chosen oracle allows.
+- `EnvChoice.Chain` does not relate timestamps within one block number.
+  `EnvChoice.block`'s timestamp is not related to G01's
+  `Request.timestamp`; X02 chooses one.
 
 - The intrinsic layer is not split: `Contract.evalOrder` is chosen at
   elaboration.

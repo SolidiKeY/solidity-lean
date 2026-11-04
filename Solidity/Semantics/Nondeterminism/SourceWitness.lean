@@ -10,12 +10,15 @@ Kernel-checked sessions of `sourceSplit` itself, at an allowed environment:
   answers success at once.
 - The fixed parameters use a constant hash (`zeroFixed`), so the creation
   address that `sessionAt` computes reduces to `0` in the kernel
-  (`createAddress_zero`). Every selector is then `0x00000000`, and dispatch
+  (`createAddress_zero`), so the contract is deployed at address `0` and
+  requests go there; `SessionEnv.ZeroHasNoCode` speaks of accounts outside
+  the system only, so this is consistent. Every selector is then `0x00000000`, and dispatch
   picks the one function with a body.
 - `orderProg`'s `g()` returns `++x + x` after `x = 1`: `3` under legacy and
   `4` via IR (`order_legacy`, `order_viaIR`). So the property "completes
-  with `3` or not at all" fails under both pipelines (`order_not_both`),
-  while its legacy run gives `3`.
+  with `3` or not at all" is not a `HoldsBoth` statement
+  (`order_not_both`: the via-IR run gives `4`), while its legacy run gives
+  `3`.
 - `constProg`'s `g()` returns `7` under either pipeline, and a request with
   empty call data reverts (no `receive` or fallback). So `sourceSplit EB` is
   non-vacuous at every choice (`sourceSplit_nonVacuous`, through
