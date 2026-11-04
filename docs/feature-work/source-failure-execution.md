@@ -375,3 +375,13 @@ or create a P8 realization. callAddr's environment branch still lacks a
 scheduled frame entry; this is an explicit remaining H16 child. H18 session
 indexing, H19/immutable/funds release and all24 original/six full Y10
 combinations remain open. No new native comparison is claimed.
+
+The combined touched gate exposed14 direct-state proof applications in eight
+consumers where the previously added optional evalE plan needed an explicit
+legacy None. G19 AssignmentReturnFlag (V17), Readonly ReadStatement
+(readonly-external), and six Yul local/control adapters (VY1) were migrated
+only inside proofs. Statements, premises, programs, observations and budgets
+are unchanged; all eight per-file checks pass. The original touched failure
+and deliberately stopped failed checkpoint (exit137, no OOM/resource stop)
+remain separate failures. Exact filenames/owners and receipts are under
+`transaction-proof-20261104/consumer-migrations.json`.
