@@ -315,6 +315,8 @@ import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.SourceLeafArrays
 import Solidity.Backend.MemoryCopies.SourceLeafControls
 import Solidity.Backend.MemoryCopies.SourceLeafInterface
+import Solidity.Backend.MemoryCopies.SourceNestedBytes
+import Solidity.Backend.MemoryCopies.SourceNestedBytesControls
 import Solidity.Backend.MemoryCopies.SourceNestedBytesInterface
 import Solidity.Backend.MemoryCopies.SourceRootCopies
 import Solidity.Backend.MemoryCopies.SourceSize
