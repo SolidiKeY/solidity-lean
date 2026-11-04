@@ -1,46 +1,63 @@
 import Solidity.Semantics.Nondeterminism.Split
-import Solidity.Yul.Views.Inputs
-import Solidity.Language.Features
 
 /-!
 # The fork parameter (S6.1)
 
-D2 pins Osaka. Its choices are the gas constants, the code-size and
-transaction-gas limits, the precompile table, the call depth and the
-`blockhash` window, together with the block fields the fork defines (no
-`block.slotnum` before Amsterdam). These are fields of a `ForkSpec`, not
-constants, and `ForkSpec.osaka` is one instance. Its agreement with the
-existing Osaka choices is proved by `rfl`:
+D2 pins Osaka. Its choices are fields of a `ForkSpec`, and `ForkSpec.osaka`
+is one instance:
 
-- the G06 pin: `osaka_pin` (`Evm.osaka`) and `osaka_idealized_pin`
-  (`Evm.pinned`, the four recorded idealizations);
-- EIP-150's forwarding rule: `osaka_forward` (`Evm.allButOne64`);
-- the precompile table: `osaka_precompiles` (all of `Evm.Precompile`);
-- the Yul view of the environment: `ofViews_field` and `osaka_blockhash`
-  (`Yul.Views.Environment`, `Yul.Views.blockhash`);
-- the stipend rule: `ForkSpec.osaka_stipendRule` in
-  `Solidity/Semantics/Nondeterminism/ForkStipend.lean` (`Stipend.rule`).
+- the block fields the fork defines (no `block.slotnum` before Amsterdam,
+  and `block.difficulty` reading `prevrandao` from Paris, EIP-4399);
+- the precompile table;
+- the code-size limits (EIP-170, EIP-3860), the transaction gas cap
+  (EIP-7825) and the block gas limit;
+- the call depth and stack limit;
+- the gas constants the source rules read;
+- the `blockhash` window;
+- the stipend rule's constants.
+
+Osaka agrees with the existing Osaka choices by `rfl`: the G06 pin
+(`osaka_pin`), the G01/G06 idealized pin (`osaka_idealized_pin`),
+EIP-150's forwarding (`osaka_forward`), and the precompile table
+(`osaka_precompiles`). The Yul view and `Language.BlockField` agreements are
+in `Solidity/Semantics/Nondeterminism/ForkAgreement.lean`, and the stipend
+rule's in `Solidity/Semantics/Nondeterminism/ForkStipend.lean`.
+
+**What is a parameter, and what is not.** The parameter is a record. Only
+the stipend rule (`ForkStipend.lean`) and the controls read it so far. The
+cold and warm access costs and the `SSTORE` sentry are recorded for X03 and
+read by nothing yet. The rest of D2's schedule is not a field: memory
+expansion, refunds, code deposit, creation and intrinsic costs, precompile
+gas (`Evm.Fixed.precompileGas`), and opcode availability (for example `CLZ`,
+EIP-7939). `Evm.Fork` has one constructor, so `pin?` is `none` off Osaka.
 
 **Block fields are intrinsic to the fork.** A `BlockEnv F` reads a field
-only with a proof that `F` has it (`BlockEnv.read`). So `block.slotnum` under
-Osaka is not a value that happens to be absent: it has no reading
-(`osaka_no_slotnum`, `BlockEnv.field?_slotnum_osaka`). Under
-`osakaWithSlotnum` it reads the environment's value. That instance is Osaka
-plus EIP-7843's `SLOTNUM`, the field solc gates on Amsterdam; Amsterdam's
-other changes are not modelled. `prague` is the fork before Osaka. It lacks
-the P-256 precompile (EIP-7951) and EIP-7825's transaction gas cap.
+only with a proof that `F` has it (`BlockEnv.read`); `blobhash` is gated on
+`blobbasefee`, both Cancun's (EIP-4844, EIP-7516). So `block.slotnum` under
+Osaka has no reading at all (`osaka_no_slotnum`, `field?_slotnum_osaka`).
+`ForkSpec` carries two invariants: `number` and `timestamp` exist, and the
+field `block.difficulty` reads exists (`difficulty_has`).
+
+**Instances other than Osaka are contrast only.**
+
+- `prague` is Osaka without the P-256 precompile (EIP-7951) and without the
+  EIP-7825 cap. Osaka's other changes (`CLZ`, the MODEXP bounds and
+  repricing of EIP-7823/EIP-7883) are not fields, so they are not undone.
+- `osakaWithSlotnum` is Osaka plus EIP-7843's `SLOTNUM`, tagged `.custom`.
+  It is not Amsterdam.
 
 **Block fields stay environment.** `EnvChoice F` is G01's session
-environment plus a block environment after each history. A `ForkedSplit`
-reads it, and `ForkedSplit.at F` is a split language whose environment is
-`EnvChoice F`. So the fork is a third kind of input: neither quantified with
-the environment nor produced by the compiler, but a setting both sides
-share, as `EvmSpec.pin` is. `HoldsOn` asks for a list of forks.
+environment plus the block environment of each action, indexed as
+`SessionEnv.requests` indexes actions, so the block cannot change inside a
+transaction. The chain premise `EnvChoice.Chain` (non-decreasing `number`
+and `timestamp`, constant `chainid`) is part of `EnvChoice.Allowed`.
+`ForkedSplit` reads `EnvChoice F`, and `ForkedSplit.at F` is a split
+language. The fork is a third kind of input, a setting both sides share
+(as `EvmSpec.pin`), neither environment nor compiler output. `HoldsOn` asks
+for every fork of a list.
 
-The block environment is what X02 adds to the source. The fields mirror
-`Yul.Views.EnvRead` and `Language.BlockField`. `ForkSpec.ofBlockField` maps a
-`block.*` member to its field, so `block.difficulty` reads `prevrandao` when
-`difficultyReadsPrevrandao` holds (EIP-4399).
+The module imports only `Split.lean`, the G01 contracts and the G06
+interface, so a source module may import it once G07's whitelist names it.
 -/
 
 namespace Solidity.Semantics.Nondeterminism
@@ -49,7 +66,8 @@ open Solidity.Roadmap
 
 /-! ## Forks and their choices -/
 
-/-- Named forks, in order. Only `prague`, `osaka` and `amsterdam` have instances here. -/
+/-- Named forks, in order, and `custom` for drafts and controls. Only
+`osaka` has an instance that claims to be the fork. -/
 inductive Fork where
   | london
   | paris
@@ -58,6 +76,7 @@ inductive Fork where
   | prague
   | osaka
   | amsterdam
+  | custom
   deriving DecidableEq, Repr
 
 /-- The G06 fork, where G06 has one (only Osaka today). -/
@@ -81,7 +100,8 @@ inductive EnvField where
   | gasprice
   deriving DecidableEq, Repr
 
-/-- The gas numbers of a fork's schedule the source rules read. -/
+/-- Gas constants of a fork's schedule. Only `callStipend` and
+`forwardDivisor` are read so far. -/
 structure GasConstants where
   /-- A cold `SLOAD` (EIP-2929). -/
   coldSload : Nat
@@ -97,8 +117,11 @@ structure GasConstants where
   forwardDivisor : Nat
   deriving DecidableEq, Repr
 
-/-- **A fork**: its block fields, precompiles, limits and gas constants.
-`number` and `timestamp` exist in every fork. -/
+/-- The field `block.difficulty` reads. -/
+def difficultyField (readsPrevrandao : Bool) : EnvField :=
+  if readsPrevrandao then .prevrandao else .difficulty
+
+/-- **A fork**: its block fields, precompiles, limits and gas constants. -/
 structure ForkSpec where
   fork : Fork
   has : EnvField → Bool
@@ -106,6 +129,8 @@ structure ForkSpec where
   timestamp_has : has .timestamp = true
   /-- `block.difficulty` reads `prevrandao` (EIP-4399, from Paris). -/
   difficultyReadsPrevrandao : Bool
+  /-- The field `block.difficulty` reads exists. -/
+  difficulty_has : has (difficultyField difficultyReadsPrevrandao) = true
   precompile : Evm.Precompile → Bool
   runtimeCodeLimit : Option Nat
   initcodeLimit : Option Nat
@@ -116,7 +141,8 @@ structure ForkSpec where
   gas : GasConstants
   /-- `blockhash` answers for the previous `blockhashWindow` blocks. -/
   blockhashWindow : Nat
-  /-- The stipend rule's gas per node and reserve (`Stipend.CostModel`). -/
+  /-- The stipend rule's gas per node and reserve (`Stipend.CostModel`):
+  design constants of the source rule for this fork's cold costs. -/
   stipendUnit : Nat
   stipendReserve : Nat
 
@@ -144,6 +170,7 @@ def osaka : ForkSpec where
   number_has := rfl
   timestamp_has := rfl
   difficultyReadsPrevrandao := true
+  difficulty_has := rfl
   precompile _ := true
   runtimeCodeLimit := some 24576
   initcodeLimit := some 49152
@@ -156,28 +183,45 @@ def osaka : ForkSpec where
   stipendUnit := 50
   stipendReserve := 300
 
-/-- **Prague**: no P-256 precompile (EIP-7951) and no transaction gas cap
-(EIP-7825), both Osaka's. -/
+/-- **Prague**, as far as the fields reach: no P-256 precompile (EIP-7951)
+and no transaction gas cap (EIP-7825). -/
 def prague : ForkSpec :=
   { osaka with
     fork := .prague
     precompile := fun p => p != .p256Verify
     txGasCap := none }
 
-/-- **Osaka with `SLOTNUM`** (EIP-7843, which solc gates on Amsterdam).
-Amsterdam's other changes are not modelled. -/
+/-- **Osaka with `SLOTNUM`** (EIP-7843, which solc gates on Amsterdam). Not
+Amsterdam. -/
 def osakaWithSlotnum : ForkSpec :=
   { osaka with
-    fork := .amsterdam
+    fork := .custom
     has := fun f => f == .slotnum || osakaHas f
     number_has := rfl
-    timestamp_has := rfl }
+    timestamp_has := rfl
+    difficulty_has := rfl }
 
-/-- The four recorded idealizations of G01 Q2 and G06 Q2. -/
+/-- A pre-Paris-like control: `block.difficulty` reads its own field and
+`prevrandao` does not exist. -/
+def difficultyControl : ForkSpec :=
+  { osaka with
+    fork := .custom
+    has := fun f => f != .prevrandao && f != .slotnum
+    number_has := rfl
+    timestamp_has := rfl
+    difficultyReadsPrevrandao := false
+    difficulty_has := rfl }
+
+/-- The four idealizations of G01 Q2 and G06 Q2 (`Evm.pinned`). -/
 def idealize (F : ForkSpec) : ForkSpec :=
   { F with runtimeCodeLimit := none, initcodeLimit := none, txGasCap := none, blockGasLimited := false }
 
-/-- The G06 pin of a fork G06 knows. -/
+/-- D2's reading: code-size limits stay (as creation failures); only the
+transaction cap and the block gas limit are idealized. -/
+def d2 (F : ForkSpec) : ForkSpec :=
+  { F with txGasCap := none, blockGasLimited := false }
+
+/-- The G06 pin of a fork G06 knows, from the fields. -/
 def pin? (F : ForkSpec) : Option Evm.Pin :=
   F.fork.toEvm?.map fun f =>
     { fork := f, runtimeCodeLimit := F.runtimeCodeLimit, initcodeLimit := F.initcodeLimit,
@@ -187,23 +231,16 @@ def pin? (F : ForkSpec) : Option Evm.Pin :=
 /-- The gas a call forwards at most. -/
 def forward (F : ForkSpec) (g : Nat) : Nat := g - g / F.gas.forwardDivisor
 
-/-- The field a `block.*` member reads. -/
-def ofBlockField (F : ForkSpec) : Language.BlockField → EnvField
-  | .coinbase => .coinbase
-  | .difficulty => if F.difficultyReadsPrevrandao then .prevrandao else .difficulty
-  | .prevrandao => .prevrandao
-  | .number => .number
-  | .gaslimit => .gaslimit
-  | .chainid => .chainid
-  | .basefee => .basefee
-  | .blobbasefee => .blobbasefee
-  | .slotnum => .slotnum
-
 /-! ### Osaka is an instance -/
 
 theorem osaka_pin : osaka.pin? = some Evm.osaka := rfl
 
 theorem osaka_idealized_pin : osaka.idealize.pin? = some Evm.pinned := rfl
+
+/-- D2's pin keeps the code-size limits that `Evm.pinned` idealizes. -/
+theorem osaka_d2_pin :
+    osaka.d2.pin? = some { Evm.pinned with runtimeCodeLimit := some 24576, initcodeLimit := some 49152 } :=
+  rfl
 
 theorem osaka_forward (g : Nat) : osaka.forward g = Evm.allButOne64 g := rfl
 
@@ -216,20 +253,12 @@ theorem osaka_no_slotnum : osaka.has .slotnum = false := rfl
 
 theorem osakaWithSlotnum_slotnum : osakaWithSlotnum.has .slotnum = true := rfl
 
-/-- `block.difficulty` reads `prevrandao` under Osaka. -/
-theorem osaka_difficulty : osaka.ofBlockField .difficulty = .prevrandao := rfl
-
-/-- Negative control: without EIP-4399 it reads its own field. -/
-theorem preParis_difficulty :
-    ({ osaka with difficultyReadsPrevrandao := false } : ForkSpec).ofBlockField .difficulty = .difficulty :=
-  rfl
-
 /-- Negative controls: Prague is not Osaka. -/
 theorem prague_differs : prague.precompile .p256Verify = false ∧ prague.txGasCap = none ∧
     prague.pin? = none :=
   ⟨rfl, rfl, rfl⟩
 
-/-- Only the slotnum field separates the Amsterdam draft from Osaka. -/
+/-- Only the slotnum field separates the draft from Osaka. -/
 theorem osakaWithSlotnum_has (f : EnvField) (hf : f ≠ .slotnum) :
     osakaWithSlotnum.has f = osaka.has f := by
   cases f <;> first | rfl | exact absurd rfl hf
@@ -256,21 +285,21 @@ def number (e : BlockEnv F) : Word := e.read .number F.number_has
 /-- `block.timestamp`. -/
 def timestamp (e : BlockEnv F) : Word := e.read .timestamp F.timestamp_has
 
+/-- `block.difficulty`: the field the fork reads for it. -/
+def difficulty (e : BlockEnv F) : Word := e.read _ F.difficulty_has
+
 /-- A field, where the fork has it. -/
 def field? (e : BlockEnv F) (f : EnvField) : Option Word :=
   if h : F.has f = true then some (e.read f h) else none
-
-/-- A `block.*` member, where the fork has its field. -/
-def blockField? (e : BlockEnv F) (b : Language.BlockField) : Option Word :=
-  e.field? (F.ofBlockField b)
 
 /-- `blockhash(q)`: the previous `F.blockhashWindow` blocks only. -/
 def blockhash (e : BlockEnv F) (q : Word) : Word :=
   if q.val < e.number.val ∧ e.number.val - q.val ≤ F.blockhashWindow then e.historicalHash q
   else ⟨0, by decide⟩
 
-/-- `blobhash(i)`. -/
-def blobhash (e : BlockEnv F) (i : Word) : Word := e.blobHashes[i.val]?.getD ⟨0, by decide⟩
+/-- `blobhash(i)`, where the fork has blobs (gated on `blobbasefee`). -/
+def blobhash? (e : BlockEnv F) (i : Word) : Option Word :=
+  if F.has .blobbasefee = true then some (e.blobHashes[i.val]?.getD ⟨0, by decide⟩) else none
 
 /-- Every field at one word (an inhabited witness for every fork). -/
 def const (F : ForkSpec) (w : Word) : BlockEnv F := ⟨fun _ _ => w, fun _ => w, []⟩
@@ -284,78 +313,46 @@ theorem field?_of_not_has (e : BlockEnv F) {f : EnvField} (h : F.has f = false) 
   simp only [field?, h, Bool.false_eq_true, dif_neg, not_false_eq_true]
 
 /-- **Under Osaka, `block.slotnum` has no reading.** -/
-theorem field?_slotnum_osaka (e : BlockEnv ForkSpec.osaka) : e.blockField? .slotnum = none :=
+theorem field?_slotnum_osaka (e : BlockEnv ForkSpec.osaka) : e.field? .slotnum = none :=
   e.field?_of_not_has ForkSpec.osaka_no_slotnum
 
-/-- Under the Amsterdam draft it reads the environment. -/
+/-- Under the draft it reads the environment. -/
 theorem field?_slotnum_withSlotnum (e : BlockEnv ForkSpec.osakaWithSlotnum) :
-    e.blockField? .slotnum = some (e.read .slotnum rfl) :=
+    e.field? .slotnum = some (e.read .slotnum rfl) :=
   e.field?_of_has rfl
 
+/-- `block.difficulty` is `prevrandao` under Osaka. -/
+theorem difficulty_osaka (e : BlockEnv ForkSpec.osaka) : e.difficulty = e.read .prevrandao rfl := rfl
+
+/-- Negative control: under the pre-Paris control it is its own field. -/
+theorem difficulty_control (e : BlockEnv ForkSpec.difficultyControl) :
+    e.difficulty = e.read .difficulty rfl ∧ e.field? .prevrandao = none :=
+  ⟨rfl, e.field?_of_not_has rfl⟩
+
 end BlockEnv
-
-/-! ### Osaka's block environment is the Yul view's -/
-
-/-- The field of a Yul environment read. -/
-def EnvField.ofRead : Yul.Views.EnvRead → EnvField
-  | .coinbase => .coinbase
-  | .number => .number
-  | .timestamp => .timestamp
-  | .prevrandao => .prevrandao
-  | .gaslimit => .gaslimit
-  | .chainid => .chainid
-  | .basefee => .basefee
-  | .blobbasefee => .blobbasefee
-  | .origin => .origin
-  | .gasprice => .gasprice
-
-/-- The Yul read of an Osaka field. -/
-def EnvField.toRead : (f : EnvField) → ForkSpec.osaka.has f = true → Yul.Views.EnvRead
-  | .coinbase, _ => .coinbase
-  | .number, _ => .number
-  | .timestamp, _ => .timestamp
-  | .prevrandao, _ => .prevrandao
-  | .gaslimit, _ => .gaslimit
-  | .chainid, _ => .chainid
-  | .basefee, _ => .basefee
-  | .blobbasefee, _ => .blobbasefee
-  | .origin, _ => .origin
-  | .gasprice, _ => .gasprice
-  | .difficulty, h => absurd h (by decide)
-  | .slotnum, h => absurd h (by decide)
-
-/-- The Osaka block environment of a Yul environment. -/
-def BlockEnv.ofViews (v : Yul.Views.Environment) : BlockEnv ForkSpec.osaka where
-  read f h := v.read (f.toRead h)
-  historicalHash := v.historicalHash
-  blobHashes := v.blobHashes
-
-theorem ofViews_has (r : Yul.Views.EnvRead) : ForkSpec.osaka.has (EnvField.ofRead r) = true := by
-  cases r <;> rfl
-
-/-- **Every Yul read is the Osaka field.** -/
-theorem ofViews_field (v : Yul.Views.Environment) (r : Yul.Views.EnvRead) :
-    (BlockEnv.ofViews v).field? (EnvField.ofRead r) = some (v.read r) := by
-  rw [BlockEnv.field?_of_has _ (ofViews_has r)]
-  cases r <;> rfl
-
-/-- **Osaka's `blockhash` is the Yul view's.** -/
-theorem osaka_blockhash (v : Yul.Views.Environment) (q : Word) :
-    (BlockEnv.ofViews v).blockhash q = Yul.Views.blockhash v q := rfl
-
-theorem osaka_blobhash (v : Yul.Views.Environment) (i : Word) :
-    (BlockEnv.ofViews v).blobhash i = Yul.Views.blobhash v i := rfl
 
 /-! ## The environment with block fields, and forked split languages -/
 
 /-- **The environment under fork `F`**: G01's session environment and the
-block inputs of the transaction after each history. -/
+block inputs of each action (indexed as `SessionEnv.requests`). -/
 structure EnvChoice (F : ForkSpec) where
   session : SessionEnv
-  block : List Event → BlockEnv F
+  block : Nat → BlockEnv F
 
-/-- An environment is allowed when its session is. -/
-def EnvChoice.Allowed {F : ForkSpec} (e : EnvChoice F) : Prop := e.session.Allowed
+/-- **The chain premise**: block numbers and timestamps do not decrease
+from action to action, and the chain id is constant. -/
+def EnvChoice.Chain {F : ForkSpec} (e : EnvChoice F) : Prop :=
+  ∀ i j, i ≤ j → (e.block i).number.val ≤ (e.block j).number.val ∧
+    (e.block i).timestamp.val ≤ (e.block j).timestamp.val ∧
+    (e.block i).field? .chainid = (e.block j).field? .chainid
+
+/-- An environment is allowed when its session is and the chain premise holds. -/
+def EnvChoice.Allowed {F : ForkSpec} (e : EnvChoice F) : Prop := e.session.Allowed ∧ e.Chain
+
+/-- One block for every action meets the chain premise. -/
+theorem EnvChoice.chain_const {F : ForkSpec} (s : SessionEnv) (b : BlockEnv F) :
+    (⟨s, fun _ => b⟩ : EnvChoice F).Chain :=
+  fun _ _ _ => ⟨Nat.le_refl _, Nat.le_refl _, rfl⟩
 
 /-- **A split language with a fork parameter.** -/
 structure ForkedSplit where
@@ -366,6 +363,7 @@ structure ForkedSplit where
   Admissible : ForkSpec → Res → Prop
   sem : (F : ForkSpec) → CompilerChoice → Prog → EnvChoice F → Prefixes Res Event Outcome
   consistent : ∀ F c p e, @Prefixes.Consistent Res Event Outcome resLE (sem F c p e)
+  readsD1 : Prog → Bool
 
 namespace ForkedSplit
 
@@ -381,6 +379,7 @@ def «at» (F : ForkSpec) : SplitSpec where
   Admissible := L.Admissible F
   sem := L.sem F
   consistent := L.consistent F
+  readsD1 := L.readsD1
 
 /-- **Under both pipelines, at every fork of a list.** -/
 def HoldsOn (forks : List ForkSpec) (art : ForkSpec → Pipeline → Artifact) (p : L.Prog)
@@ -399,11 +398,12 @@ theorem HoldsOn.osaka {forks : List ForkSpec} {art : ForkSpec → Pipeline → A
     (L.at ForkSpec.osaka).HoldsBoth (art ForkSpec.osaka) p Φ :=
   h _ hm
 
-/-- A fork-blind program with the same allowed sessions and bounds at every
-fork: Osaka suffices. -/
+/-- A fork-blind program whose allowed sessions and bounds are allowed at
+Osaka: Osaka suffices. -/
 theorem holdsOn_of_forkBlind {forks : List ForkSpec} {art : Pipeline → Artifact} {p : L.Prog}
     {Φ : Prefix Event Outcome → Prop} (hb : L.ForkBlind p)
-    (hal : ∀ F (e : EnvChoice F), L.Allowed F e → L.Allowed ForkSpec.osaka ⟨e.session, fun _ => BlockEnv.const _ ⟨0, by decide⟩⟩)
+    (hal : ∀ F (e : EnvChoice F), L.Allowed F e →
+      L.Allowed ForkSpec.osaka ⟨e.session, fun _ => BlockEnv.const _ ⟨0, by decide⟩⟩)
     (had : ∀ F r, L.Admissible F r → L.Admissible ForkSpec.osaka r)
     (h : (L.at ForkSpec.osaka).HoldsBoth art p Φ) : L.HoldsOn forks (fun _ => art) p Φ := by
   intro F _ q g e he r hr
@@ -417,15 +417,17 @@ theorem holdsOn_of_forkBlind {forks : List ForkSpec} {art : Pipeline → Artifac
 end ForkedSplit
 
 /-- **A session-only split language, at every fork**: it reads the session
-of the environment only. -/
+of the environment only; an environment is allowed when the chain premise
+holds and its session is allowed. -/
 def SplitSpec.forked (L : SplitSpec) (toEnv : SessionEnv → L.Env) : ForkedSplit where
   Prog := L.Prog
   Res := L.Res
   resLE := L.resLE
-  Allowed _ e := L.Allowed (toEnv e.session)
+  Allowed _ e := e.Chain ∧ L.Allowed (toEnv e.session)
   Admissible _ := L.Admissible
   sem _ c p e := L.sem c p (toEnv e.session)
   consistent _ c p e := L.consistent c p (toEnv e.session)
+  readsD1 := L.readsD1
 
 theorem SplitSpec.forked_blind (L : SplitSpec) (toEnv : SessionEnv → L.Env) (p : L.Prog) :
     (L.forked toEnv).ForkBlind p := by
@@ -439,18 +441,19 @@ namespace ForkControls
 
 open ForkSpec
 
-/-- A language whose run reads `block.slotnum` when the fork has it:
-success with the field's low byte, a revert where it has none. -/
+/-- A language whose run reads `block.slotnum` of the first action when the
+fork has it: success with the field's low byte, a revert where it has none. -/
 def slotnumLang : ForkedSplit where
   Prog := Unit
   Res := Nat
   resLE := inferInstance
-  Allowed _ _ := True
+  Allowed _ e := e.Chain
   Admissible _ _ := True
-  sem _ _ _ e _ := ⟨[], some (match (e.block []).blockField? .slotnum with
+  sem _ _ _ e _ := ⟨[], some (match (e.block 0).field? .slotnum with
     | some w => .success [UInt8.ofNat w.val]
     | none => .revert [])⟩
   consistent _ _ _ _ _ _ _ := Prefix.Le.refl _
+  readsD1 _ := false
 
 def reverts (x : Prefix Event Outcome) : Prop := x.final = some (.revert [])
 
@@ -460,6 +463,9 @@ def envAt (F : ForkSpec) (w : Word) : EnvChoice F :=
      deployArgs := [], balance := fun _ => ⟨0, by decide⟩, hasCode := fun _ _ => false,
      requests := fun _ _ => none, callee := fun _ => .answer (.success []) },
    fun _ => BlockEnv.const F w⟩
+
+theorem envAt_allowed (F : ForkSpec) (w : Word) : (envAt F w).session.Allowed ∧ (envAt F w).Chain :=
+  ⟨⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩, EnvChoice.chain_const _ _⟩
 
 /-- Under Osaka every run reverts: there is no slotnum to read. -/
 theorem slotnum_osaka : slotnumLang.HoldsOn [osaka] (fun _ _ => Artifact.empty) () reverts := by
@@ -473,7 +479,8 @@ theorem slotnum_withSlotnum_not :
     ¬ slotnumLang.HoldsOn [osaka, osakaWithSlotnum] (fun _ _ => Artifact.empty) () reverts := by
   intro h
   have := h osakaWithSlotnum (List.Mem.tail _ (List.Mem.head _))
-    .legacy (GasOracle.const ⟨0, by decide⟩) (envAt _ ⟨5, by decide⟩) trivial (0 : Nat) trivial
+    .legacy (GasOracle.const ⟨0, by decide⟩) (envAt _ ⟨5, by decide⟩) (envAt_allowed _ _).2
+    (0 : Nat) trivial
   simp only [reverts, slotnumLang, ForkedSplit.at, BlockEnv.field?_slotnum_withSlotnum] at this
   cases this
 
@@ -484,16 +491,16 @@ end Solidity.Semantics.Nondeterminism
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkSpec.osaka_pin
 /-- info: 'Solidity.Semantics.Nondeterminism.ForkSpec.osaka_idealized_pin' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkSpec.osaka_idealized_pin
+/-- info: 'Solidity.Semantics.Nondeterminism.ForkSpec.osaka_d2_pin' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkSpec.osaka_d2_pin
 /-- info: 'Solidity.Semantics.Nondeterminism.ForkSpec.prague_differs' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkSpec.prague_differs
 /-- info: 'Solidity.Semantics.Nondeterminism.ForkSpec.osakaWithSlotnum_has' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkSpec.osakaWithSlotnum_has
 /-- info: 'Solidity.Semantics.Nondeterminism.BlockEnv.field?_slotnum_osaka' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.BlockEnv.field?_slotnum_osaka
-/-- info: 'Solidity.Semantics.Nondeterminism.ofViews_field' depends on axioms: [propext] -/
-#guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ofViews_field
-/-- info: 'Solidity.Semantics.Nondeterminism.osaka_blockhash' depends on axioms: [propext] -/
-#guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.osaka_blockhash
+/-- info: 'Solidity.Semantics.Nondeterminism.BlockEnv.difficulty_control' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.BlockEnv.difficulty_control
 /-- info: 'Solidity.Semantics.Nondeterminism.ForkedSplit.holdsOn_of_forkBlind' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Semantics.Nondeterminism.ForkedSplit.holdsOn_of_forkBlind
 /-- info: 'Solidity.Semantics.Nondeterminism.ForkControls.slotnum_osaka' depends on axioms: [propext] -/

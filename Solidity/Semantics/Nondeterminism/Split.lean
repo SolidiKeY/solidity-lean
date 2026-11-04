@@ -17,16 +17,29 @@ must not be confused in a theorem:
   evaluation order (O9, `Pipeline.order` in `Solidity/Roadmap/TypedRun.lean`),
   the artifact table (G00 Q5, `Artifact`), and the gas values of D1
   (`gasleft()`, `gas`, `msize`, `pc`), which a gas oracle supplies. A theorem
-  names the choice it is stated at (`CompilerChoice`). The choice is neither
-  universally quantified with the environment nor chosen existentially
-  after the environment.
+  names the choice it is stated at (`CompilerChoice`). The choice is one
+  value fixed before the environment: it may not depend on the environment
+  (`Controls.envToy_no_choice` in `Pipelines.lean`).
 
 `SplitSpec` is a G01 `Lang Event Outcome` family indexed by a
 `CompilerChoice`. `SplitSpec.at c` is the ordinary language at one choice.
 `Holds` quantifies the environment and the bound universally at a fixed
 choice. `HoldsFor` fixes the pipeline and artifact and quantifies every
 oracle, because gas values are unknown to a user-facing statement.
-`HoldsBoth` asks for both pipelines, each with its own artifact.
+`HoldsBoth` asks for both pipelines, each with its own artifact. In these
+two user-facing forms the choice is quantified universally, like the
+environment. That is sound, since a statement must hold whatever the
+compiler chose. The split has content where the compiler fixes the choice:
+refinement at the compiler's choice, and the oracle the target supplies
+(`Pipelines.lean`). The artifact function `art` of `HoldsBoth` is any table
+per pipeline. The composition instantiates it with the compiler's output for
+that pipeline and optimizer setting; the optimizer setting is not a field,
+so there is one `art` per setting.
+
+Each split language declares which programs read a D1 value
+(`SplitSpec.readsD1`), a Boolean fixed with the language. D1's confinement
+(`SplitSpec.Confined`) is checked against that predicate, so a language
+cannot pass the check by choosing the predicate afterwards.
 `Solidity/Semantics/Nondeterminism/Pipelines.lean` (S5.2) relates these
 forms and checks D1's non-circularity against the parameter.
 
@@ -44,7 +57,7 @@ open Solidity.Roadmap
 /-- The D1 reads a gas oracle answers: the values that depend on the
 compiled code's gas, memory and program counter. Own `codesize` and
 `codecopy`, `creationCode` and `runtimeCode` read the artifact table
-instead (`ArtifactRead`). -/
+instead. -/
 inductive OracleRead where
   | gasleft
   | gas
@@ -52,17 +65,11 @@ inductive OracleRead where
   | pc
   deriving DecidableEq, Repr
 
-/-- The D1 reads the artifact table answers. -/
-inductive ArtifactRead where
-  | codesize
-  | codecopy
-  | creationCode
-  | runtimeCode
-  deriving DecidableEq, Repr
-
 /-- **A gas oracle** (D1): the word the target execution reports for the
 `n`-th oracle read of kind `k` after the observable history `h`. The target
-run supplies it; the source semantics only reads it. -/
+run supplies it; the source semantics only reads it. Any function is an
+oracle: nothing requires `gasleft` to decrease or `msize` to be a multiple
+of 32, so `HoldsFor` cannot prove such facts (a recorded limitation). -/
 structure GasOracle where
   read : List Event → Nat → OracleRead → Word
 
@@ -97,6 +104,9 @@ structure SplitSpec where
   Admissible : Res → Prop
   sem : CompilerChoice → Prog → Env → Prefixes Res Event Outcome
   consistent : ∀ c p e, @Prefixes.Consistent Res Event Outcome resLE (sem c p e)
+  /-- The programs that read a D1 value (`gasleft`, `gas`, `msize`, `pc`,
+  own code, `type(C)` code), declared with the language. -/
+  readsD1 : Prog → Bool
 
 namespace SplitSpec
 
@@ -199,13 +209,15 @@ end SplitSpec
 is a split language. -/
 @[reducible] def SplitSpec.ofFamily (Prog Env Res : Type) [inst : LE Res] (Allowed : Env → Prop)
     (Admissible : Res → Prop) (sem : CompilerChoice → Prog → Env → Prefixes Res Event Outcome)
-    (consistent : ∀ c p e, @Prefixes.Consistent Res Event Outcome inst (sem c p e)) : SplitSpec :=
-  ⟨Prog, Env, Res, inst, Allowed, Admissible, sem, consistent⟩
+    (consistent : ∀ c p e, @Prefixes.Consistent Res Event Outcome inst (sem c p e))
+    (readsD1 : Prog → Bool) : SplitSpec :=
+  ⟨Prog, Env, Res, inst, Allowed, Admissible, sem, consistent, readsD1⟩
 
 /-- A G01 language with no compiler-dependent value is the split language
-that reads none of the choice. -/
+that reads none of the choice; no program reads a D1 value. -/
 def SplitSpec.const (L : Lang Event Outcome) : SplitSpec :=
-  ⟨L.Prog, L.Env, L.Res, L.resLE, L.Allowed, L.Admissible, fun _ => L.sem, fun _ => L.consistent⟩
+  ⟨L.Prog, L.Env, L.Res, L.resLE, L.Allowed, L.Admissible, fun _ => L.sem, fun _ => L.consistent,
+    fun _ => false⟩
 
 theorem SplitSpec.const_blind (L : Lang Event Outcome) (p : L.Prog) :
     (SplitSpec.const L).PipelineBlind p ∧ (SplitSpec.const L).OracleBlind p ∧

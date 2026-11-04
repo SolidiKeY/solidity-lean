@@ -30,7 +30,7 @@ theorem osaka_costModel : osaka.costModel = osakaCold := rfl
 theorem osaka_stipendRule (C : Contract) : osaka.stipendRule C = rule C := rfl
 
 /-- A fork with no stipend. -/
-def noStipend : ForkSpec := { osaka with gas := { GasConstants.osaka with callStipend := 0 } }
+def noStipend : ForkSpec := { osaka with fork := .custom, gas := { GasConstants.osaka with callStipend := 0 } }
 
 /-- The empty `receive` body. -/
 def emptyBody (C : Contract) : Body C := ⟨(.nil : Prog C [] [])⟩
