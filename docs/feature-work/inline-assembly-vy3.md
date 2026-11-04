@@ -939,3 +939,30 @@ Focused/per-file kernel checks, both per-file MCP diagnostics, touched imports,
 trust/layer/registration/docs and global axiom pins pass. Two guarded axiom
 reports use standard axioms only. Broad library/optional-root/final gates remain
 open; prior resource and runtime-interruption failures are retained.
+
+### Checked JSON to recursive structured compilation
+
+`SolidityBridge.Yul.StructuredJson.checkCompile` now composes the real checked
+word JSON producer, recursive compiler and existing structured model selector.
+Its certificates retain the exact checked tree, horizon, emitted block and
+selected code. General laws prove same-horizon closed-word evaluation and
+whole mathematical machine identity for every represented numeric caller
+suffix after local retirement. Capacity remains separate.
+
+The actual checker/compiler result is witnessed for a true conditional around
+the existing let-7/add-9/multiply-3 JSON fixture. Its outer decoder derives the
+real child decoder certificate at the corresponding structural bound, with
+unchanged metadata/safety/preparation checks. Controls observe the actual
+conditional guard and model/caller fields, refusals and oversized model
+success. The prior scalar-only API keeps its old refusal; the structured API
+accepts its checked conditional. No existing verdict or admission is changed.
+
+Independent read-only finder and skeptic reviews found no confirmed defect.
+This is synthetic JSON/kernel-model evidence, not external solc/EVM evidence,
+Body dispatch/admission, Source attachment/MemOK, open raw-local readback,
+complete Source/G24/physical views or native/world/resource/trace adequacy.
+
+Focused/per-file kernel checks, two per-file MCP diagnostics, touched imports,
+trust/layers/generated roots/docs/module-map and global axiom-pin checks pass.
+Three guarded reports use standard axioms. Full library/Bridge/final gates
+remain open with prior raw resource/interruption failures retained.

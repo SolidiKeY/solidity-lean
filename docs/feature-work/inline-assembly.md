@@ -330,3 +330,8 @@ VY3 recursive-compiler handoff: original Yul scopes now recurse under branches
 and sequences with same-horizon source and structured target proofs. The
 [lane record](inline-assembly-vy3.md) retains unsupported constructs and the
 separate G24/native/frontend/final-validation obligations.
+
+VY3 checked-JSON handoff: actual checked word JSON now feeds recursive normal
+structured compilation with source/model proofs and a conditional arithmetic
+witness. [VY3](inline-assembly-vy3.md) records the separate admission, Source/G24,
+native and final joint-validation obligations.

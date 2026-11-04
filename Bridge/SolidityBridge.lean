@@ -371,6 +371,8 @@ import SolidityBridge.Yul.SignextendPlacement
 import SolidityBridge.Yul.SignextendPlacementControls
 import SolidityBridge.Yul.StackSelection
 import SolidityBridge.Yul.StackSelectionControls
+import SolidityBridge.Yul.StructuredJson
+import SolidityBridge.Yul.StructuredJsonControls
 import SolidityBridge.Yul.StructuredSource
 import SolidityBridge.Yul.StructuredSourceControls
 import SolidityBridge.Yul.UnarySelection

@@ -64,3 +64,5 @@
 | `Bridge/SolidityBridge/Yul/ScopedControl.lean`, `Bridge/SolidityBridge/Yul/ScopedControlControls.lean` | Original Yul let/zero scopes with concrete normal structured bodies; exact source/target prefix entry and retirement, arbitrary caller tail and explicit depth-zero domain. |
 
 | `Bridge/SolidityBridge/Yul/RecursiveScopes.lean`, `Bridge/SolidityBridge/Yul/RecursiveScopesControls.lean` | Original context/horizon-indexed recursive scope/branch/sequence compiler; same-horizon source and structured execution proofs with caller-tail preservation. |
+
+| `Bridge/SolidityBridge/Yul/StructuredJson.lean`, `Bridge/SolidityBridge/Yul/StructuredJsonControls.lean` | Actual checked JSON to recursive normal structured compilation; same-horizon source/model certificates and synthetic conditional/arithmetic controls, separate admission/native/G24 obligations. |
