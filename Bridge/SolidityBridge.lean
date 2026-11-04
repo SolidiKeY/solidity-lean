@@ -9,6 +9,9 @@ import SolidityBridge.AccessBridge.ByteWorldLoadControls
 import SolidityBridge.AccessBridge.ByteWorldNumeric
 import SolidityBridge.AccessBridge.ByteWorldNumericInterface
 import SolidityBridge.AccessBridge.Calldata
+import SolidityBridge.AccessBridge.EmptyCopy
+import SolidityBridge.AccessBridge.EmptyCopyControls
+import SolidityBridge.AccessBridge.EmptyCopyInterface
 import SolidityBridge.AccessBridge.HeadSize
 import SolidityBridge.AccessBridge.HeadSizeControls
 import SolidityBridge.AccessBridge.HeadSizeInterface

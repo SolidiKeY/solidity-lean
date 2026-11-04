@@ -480,3 +480,23 @@ explicit and were not inferred from the operand specification.
 copy family with arbitrary source and destination words, explicit initial
 stack/gas/capacity and exact reached state/continuation. Nonzero copies and
 Source/compiler adequacy remain open.
+
+`AccessBridge/EmptyCopy.lean` proves the actual pinned zero-length CALLDATACOPY
+is the identity on shared state for every source and destination word. It
+derives the real gate from initial stack/gas/capacity, proves zero expansion
+and exact three-gas charge, and uses the existing charged driver and X law to
+obtain the complete reached state and continuation. No desired run/poststate
+is supplied. P6 frame images and empty-span touch survive the accounting and
+stack changes. The certificate inherits all existing charged failure/budget
+contracts. Controls inhabit either pipeline and test offset `2^64`, maximal
+source, unequal saved words, dirty protected bytes, exact gas/PC/active extent,
+insufficient gas and short fuel. Zero length is a proved family case; nonzero
+native copy/store preservation, compiler selection and Source/world adequacy
+remain open, with the host-writer counterexample unchanged. Bridge diagnostics
+remained unavailable; after stopping the server, focused serial builds checked
+proofs and controls without budget increases or concurrent Lean jobs.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked the actual all-offset identity, derived gate/charge, complete
+execution/continuation, connection of the P6 post-image to the same reached
+state, and extreme/dirty-byte/refusal controls. Both confirmed the zero-length
+family does not imply nonzero physical write or Source/compiler adequacy.

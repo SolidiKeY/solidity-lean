@@ -137,3 +137,6 @@
 | `Backend/AbiEntry/TailGuardControls.lean` | Individual refusals, accepted signed offset, raw empty-array reference and inhabited/capacity controls. |
 | `Backend/AbiEntry/RawTailGuard.lean` | All-input raw-byte numeric agreement and exact length-prefixed semantic reference result without supplied load facts. |
 | `Backend/AbiEntry/RawTailGuardControls.lean` | Raw malformed/empty-array, actual signed-offset acceptance and beyond-word stride controls. |
+| `Bridge/SolidityBridge/AccessBridge/EmptyCopyInterface.lean` | Arbitrary-offset zero-length CALLDATACOPY charged execution contract retaining inherited failures. |
+| `Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean` | Actual zero-copy identity, zero expansion/three-gas execution, continuation and preserved P6 empty-touch image. |
+| `Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean` | Host-gap/maximal offset, protected dirty memory, either-pipeline image and gas/fuel refusal controls. |
