@@ -315,6 +315,18 @@ frame identity at maximum Word offsets are checked. Frame carrier state/key
 remain separate from logical Source state. No MCOPY opcode, allocator, gas or
 whole-program theorem is supplied.
 
+`P6ResidualSequence` executes arbitrary finite lists of those existing requests.
+Each step transports the remaining capacity premises through actual capacity
+identity and reads the newly reached frame. Full images agree with chronological
+`residualCopies`; actual Source writeback and reserved validity hold at every
+input prefix. Prefix length selects input rather than imposing a resource cap.
+Carrier state/key/capacity persist, while output `Fits` uses reached accounting.
+Controls copy owned bytes to 300 and then from 300 to 310, distinguishing fresh source
+bytes from zeros in the initial frame. Reversed order differs, and interspersed
+maximum-offset empty requests preserve earlier payload/accounting. These are
+boundary writeback laws, not instrumentation of arbitrary Source computations
+or a native MCOPY/compiler/allocator theorem.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
