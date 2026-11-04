@@ -2390,6 +2390,10 @@ import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
+import Solidity.Theory.Mutability.Assignable
+import Solidity.Theory.Mutability.Payable
+import Solidity.Theory.Mutability.Pure
+import Solidity.Theory.Mutability.View
 import Solidity.Theory.Segs
 import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Typed.Mem

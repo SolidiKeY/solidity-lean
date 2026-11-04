@@ -3,6 +3,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Calculus.Close
 import Solidity.Calculus.Sound
+import Solidity.Theory.Mutability.Closer
 
 /-! Typed transient effects, ordinary source integration and calculus controls. -/
 
@@ -114,20 +115,39 @@ theorem false_persistent_transient : successive ≠ .ok (7, 7, 3) := by decide +
 /-- A static call may read; a direct or descendant transient write fails. -/
 theorem static_read : observe (Program.selfCall .view true (Program.read count)) =
     .ok (PrimTy.dflt .uint, 0, 0) := by decide +kernel +kernel
+/-- The per-example frame checks below are instances of the mutability
+metatheorems (`Theory/Mutability/View.lean`, S3.3): a static or read-only
+write, a `pure` read and a read-only call of a `nonpayable` callee revert for
+every cell, value and entry state. -/
 theorem static_write : Program.run (Program.write count nine) { static := true } initial =
-    .error .revert := rfl
+    .error .revert := Theory.Mutability.Transient.Program.write_static count nine rfl initial
 theorem inherited_static_write : observe (Program.selfCall .nonpayable true
     (Program.selfCall .nonpayable false (Program.write count nine))) = .error .revert := by
   decide +kernel
 theorem static_ordinary_write : observe (Program.selfCall .nonpayable true
     (ordinary put3 (by decide +kernel +kernel))) = .error .revert := by decide +kernel +kernel
 theorem view_write : Program.run (Program.write count nine) { mutability := .view } initial =
-    .error .revert := rfl
+    .error .revert :=
+  Theory.Mutability.Transient.Program.write_readOnly count nine (by decide) initial
 theorem pure_read : Program.run (Program.read count) { mutability := .pure } initial =
-    .error .revert := rfl
+    .error .revert := Theory.Mutability.Transient.Program.read_pure count rfl initial
 theorem view_mutable_call : Program.run
     (Program.selfCall .nonpayable false (Program.pure (C := C) (L := layout) ()))
-    { mutability := .view } initial = .error .revert := rfl
+    { mutability := .view } initial = .error .revert :=
+  Theory.Mutability.Transient.Program.selfCall_nonpayable_readOnly _ false (by decide) initial
+
+/-- A `view` reentry that reads the caller's transient write: the frame (both
+stores kept) comes from the metatheorem, not from running the example. -/
+theorem view_reentry_frame (s : FrameState C layout) :
+    Holds .box (Program.selfCall .view false (Program.read count))
+      (fun _ t => t.cells = s.cells ∧
+        Theory.Mutability.globals t.base = Theory.Mutability.globals s.base)
+      { mutability := .view } s :=
+  Theory.Mutability.Transient.holds_frame (by decide) (by
+    intro h
+    change (if Program.permits .view .view then _ else _) = _ at h
+    simp only [Program.permits] at h
+    cases h)
 
 /-- Divergence and resource exhaustion do not become successful catch results. -/
 theorem divergence_not_caught : observe (Program.attempt

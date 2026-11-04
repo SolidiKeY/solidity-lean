@@ -177,6 +177,7 @@ import Solidity.Examples.Tactics.Memory
 import Solidity.Examples.Tactics.MemoryPush
 import Solidity.Examples.Tactics.MemoryReturns
 import Solidity.Examples.Tactics.ModularArithmetic
+import Solidity.Examples.Tactics.Mutability
 import Solidity.Examples.Tactics.NativeDeferred
 import Solidity.Examples.Tactics.NativeDeferredCallback
 import Solidity.Examples.Tactics.NativeDeferredSource
