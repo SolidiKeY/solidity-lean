@@ -439,6 +439,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/SignedMod/Selection.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/SignedMod/Source.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/NumericLiteralProofs/WordTable/Part00.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Fragments.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

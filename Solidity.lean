@@ -1536,6 +1536,7 @@ import Solidity.Frontend.Checked.TypePrintText
 import Solidity.Frontend.Checked.UnitExamples
 import Solidity.Frontend.Cli
 import Solidity.Frontend.CreationTryImport
+import Solidity.Frontend.ExpressionUniqueness.Fragments
 import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
