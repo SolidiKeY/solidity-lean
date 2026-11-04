@@ -66,6 +66,13 @@ def provenance_paths():
             *sorted((stage/'lib/lean').glob('*.a')),
             stage/'libuv/src/libuv/libuv.a',stage.parent.parent/'gmp-wasm64/lib/libgmp.a']
 provenance=helper.snapshot_files(provenance_paths())
+# Pinning the SDK's tool set should not keep unused tool binaries resident
+# throughout compilation. This only advises clean pages; bytes are unchanged.
+if hasattr(os,'posix_fadvise'):
+    for tool in configured_tools:
+        with tool.open('rb') as stream:
+            os.posix_fadvise(stream.fileno(),0,0,os.POSIX_FADV_DONTNEED)
+
 if provenance[str(config_path)]!=config_initial:raise ValueError('Emscripten config changed during discovery')
 if any(provenance[p]!=digest for p,digest in compiler_identity.items()):raise ValueError('Compiler changed before snapshot')
 headers_check=hashlib.sha256()
