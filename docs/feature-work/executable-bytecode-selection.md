@@ -120,8 +120,9 @@ machine frame, all 33 big-endian bytes of a two-byte value, incorrect value/byte
 order, corrupted tails and symbolic-literal component refusal. selectLiteral is
 only this component: None does not classify another IR constructor's execution
 or a complete compiler's verdict. Physical admission still needs V2 capacity.
-Other numeric IR operations, sequence selection, general stack/frame lowering,
-whole labelled control execution and assembly composition remain open.
+The numeric and sequence components below extend this literal component.
+General stack/frame lowering, whole labelled control and assembly composition
+remain open.
 
 ## H21/H22 compatibility review
 
@@ -146,8 +147,9 @@ Controls execute wraparound at the 256-bit boundary with arbitrary suffixes,
 transport it to arbitrary complete IR caller frames, reject missing operands,
 wrong results and corrupted tails, and check the emitted opcode bytes.
 selectArithmetic covers only ADD/MUL/SUB/EXP; absence for another instruction does not
-classify its source execution. Remaining arithmetic operations, instruction
-sequences, general stack/control lowering and assembly composition remain open.
+classify its source execution. Further numeric and sequence components are
+described below; general stack/control lowering and assembly composition
+remain open.
 
 Independent read-only finder and skeptic reviews passed the ADD/MUL component
 and controls without confirmed findings. Both checked actual runner equality,
@@ -182,8 +184,8 @@ underflow and wrong-result controls. Additional controls distinguish unsigned
 high-bit comparisons, full-width complement and both Boolean outcomes, reject
 corrupted suffixes and check all eight opcode bytes. A local ADD absence is
 paired with its existing arithmetic selection, so component absence is not
-presented as a whole-selector or source refusal. The components below cover division, shifts and signed operations. Instruction
-sequences and the remaining stack/control/composition queue remain open.
+presented as a whole-selector or source refusal. The components below cover division, shifts and signed operations. The sequence component below extends this numeric coverage; the remaining
+stack/control/composition queue is still open.
 
 Independent read-only finder and skeptic reviews passed this component and
 its controls without confirmed findings, including unsigned ordering, flag
@@ -209,8 +211,8 @@ full-width unsigned values, counts 0/255/256/maximum, SHL overflow, logical SHR,
 corrupted suffixes and all four opcode bytes. Component absence is paired with
 another component's supported selection. Independent read-only finder and
 skeptic reviews passed without confirmed findings; no hidden divisor, count,
-capacity or source-coverage premise was introduced. Signed selection is described below; instruction sequences and the
-stack/control/composition queue remain open.
+capacity or source-coverage premise was introduced. Signed and sequence selection are described below; the
+stack/control/composition queue remains open.
 
 ## Signed numeric component
 
@@ -233,3 +235,28 @@ adequacy and byte-runtime correspondence remain separate obligations.
 Independent read-only finder and skeptic reviews passed this component and
 controls without confirmed findings, including local discharge of every range
 obligation and inclusion of zero divisors and raw minimum-word overflow.
+
+## Numeric instruction sequences
+
+NumericSequence.lean dispatches the numeric PUSH and all twenty numeric
+operation constructors to their existing certificates. A support predicate
+characterizes this component over the frozen IR type; it is not a source
+refusal predicate. compileNumeric concatenates the actual expansions in IR
+order. A total equation of the existing Evm.run and Scalar.run runners proves
+both successful execution with every nonstack IR field preserved and faults
+at any instruction position. The existing StructuredExec code case then
+yields an inhabitant of LoweringCertificate for the selected straight-line
+code, with no assumed target result or new evaluator.
+
+Controls instantiate a nonempty five-instruction, 101-byte lowering and run it
+over arbitrary suffixes and complete caller machines. Wrong-order results,
+corrupted tails and both early and late underflows are rejected. A component
+refusal paired with an actual IR revert keeps these observations distinct.
+These are numeric straight-line certificates: stack-manipulation lowering,
+physical capacity, structured branch/loop realization, source adequacy and
+executable-byte composition remain separate obligations.
+
+Independent read-only finder and skeptic reviews passed the selector, total
+sequence equation, existing-contract inhabitant and controls without findings.
+They checked actual intermediate stacks, zero skips, frame threading, early
+and late faults, and separation from capacity and fetched-byte execution.
