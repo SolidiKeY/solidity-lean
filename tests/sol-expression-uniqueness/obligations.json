@@ -15,19 +15,19 @@
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Arbitrary expression-closure balance and top-level comma freedom are derived from certificates. Enclosing/grouping and certified comma-component spans reconstruct. Arbitrary mirrored stack/skip and last-marker token lemmas proved."
+    "evidence": "Balanced delimiter, comma and completion-state invariants are derived from actual yields. Operand-sensitive additive skip/last-cut lemmas cover arbitrary lengths. Complete conditional-colon and high-root decomposition remain open."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Joint loose markers and non-minus binary rank markers are derived from original certificates. Nine left families select last markers, power selects first; lower/higher root disjointness and enum operators reconstruct. Rank10 operand state and complete operand/colon/high-root spans remain open."
+    "evidence": "All ordinary binary ranks2\u201312, including operand-sensitive rank10, have certificate-derived root markers, lower/higher disjointness and binary root-level equality. Complete operand/colon/high-root spans remain open."
   },
   {
     "id": "EU-05",
     "obligation": "all operator associativity and precedence boundaries",
     "status": "partial",
-    "evidence": "All refusal/association boundary families remain proved. Arbitrary non-minus binary marker orientation and lower/higher precedence-root disjointness added; full same-yield tree associativity/precedence, rank10 and remaining boundaries stay open."
+    "evidence": "All original refusals retained. Arbitrary all-binary root-level precedence separation and marker associativity orientation proved, including unary/binary minus handling. Complete same-yield child/tree association and remaining boundary acceptance stay open."
   },
   {
     "id": "EU-06",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Inhabited arbitrary-depth prefix family refutes only raw rank10 freedom, with grouping shielding control. All root-marker theorems quantify arbitrary subtrees/operators. Earlier holes/nesting/middle-assignment controls retained. Full boundary acceptance remains open."
+    "evidence": "Both AddOps and arbitrary right-prefix depth have exact inhabited certificates/outer-marker controls; unary prefixes pass unfinished additive scan and deliberately fail finished-entry scan. Earlier arbitrary families retained. Full boundary acceptance stays open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "27 modules and461 source declarations have exact kernel standard-only axiom pins and source signatures; raw wrapped messages preserved."
+    "evidence": "35 modules/607 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at27 frozen registrations; trust3699zero/layers559zero pass; central axiom inventory zero errors but461 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at35 frozen registrations; trust3707zero/layers559zero pass; central axiom inventory zero errors but607 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted binary selector, root/rank/operator and prefix countercontrol proofs with no defects; no Lean server/edits. See evidence/reviews-binary.json."
+    "evidence": "Separate finder/skeptic accepted completion/additive state, all-constructor certificate proofs, all-binary root-rank result and arbitrary controls without defects or Lean-server use. See evidence/reviews-additive.json."
   },
   {
     "id": "EU-14",

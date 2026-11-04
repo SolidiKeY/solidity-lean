@@ -1,3 +1,7 @@
+import Solidity.Frontend.ExpressionUniqueness.AddControls
+import Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra
+import Solidity.Frontend.ExpressionUniqueness.AddRoot
+import Solidity.Frontend.ExpressionUniqueness.AddScan
 import Solidity.Frontend.ExpressionUniqueness.AttributeBalance
 import Solidity.Frontend.ExpressionUniqueness.BinaryControls
 import Solidity.Frontend.ExpressionUniqueness.BinaryFreeAlgebra
@@ -5,10 +9,12 @@ import Solidity.Frontend.ExpressionUniqueness.BinaryRank
 import Solidity.Frontend.ExpressionUniqueness.BinaryRoot
 import Solidity.Frontend.ExpressionUniqueness.CommaFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction
+import Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionBalance
 import Solidity.Frontend.ExpressionUniqueness.ExpressionBinaryFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionCommaFree
 import Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree
+import Solidity.Frontend.ExpressionUniqueness.ExpressionMode
 import Solidity.Frontend.ExpressionUniqueness.Families
 import Solidity.Frontend.ExpressionUniqueness.Fixtures
 import Solidity.Frontend.ExpressionUniqueness.Fragments
@@ -16,6 +22,8 @@ import Solidity.Frontend.ExpressionUniqueness.Grouping
 import Solidity.Frontend.ExpressionUniqueness.LowControls
 import Solidity.Frontend.ExpressionUniqueness.LowFreeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.LowRoot
+import Solidity.Frontend.ExpressionUniqueness.OperandMode
+import Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra
 import Solidity.Frontend.ExpressionUniqueness.Primary
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.ExpressionUniqueness.ReverseSplit
@@ -25,6 +33,168 @@ import Solidity.Frontend.ExpressionUniqueness.TokenSplit
 import Solidity.Frontend.ExpressionUniqueness.YieldBalance
 import Solidity.Frontend.ExpressionUniqueness.YieldShape
 
+#check Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree
+#check Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_lastAdd_none
+#print axioms Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_lastAdd_none
+#check Solidity.Frontend.ExpressionUniqueness.finished_prefix_is_selected
+#print axioms Solidity.Frontend.ExpressionUniqueness.finished_prefix_is_selected
+#check Solidity.Frontend.ExpressionUniqueness.add_prec_join
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_prec_join
+#check Solidity.Frontend.ExpressionUniqueness.add_yield_join
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_yield_join
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefixTokens
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefixTokens
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_prec
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_prec
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_yield
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_yield
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_certified
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_certified
+#check Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_outer_marker
+#print axioms Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_outer_marker
+#check Solidity.Frontend.ExpressionUniqueness.AddFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddFree
+#check Solidity.Frontend.ExpressionUniqueness.AddStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddStable
+#check Solidity.Frontend.ExpressionUniqueness.AddPrefix
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddPrefix
+#check Solidity.Frontend.ExpressionUniqueness.AddReset
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddReset
+#check Solidity.Frontend.ExpressionUniqueness.AddDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddDone
+#check Solidity.Frontend.ExpressionUniqueness.AddStableItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddStableItems
+#check Solidity.Frontend.ExpressionUniqueness.addDone_free
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_free
+#check Solidity.Frontend.ExpressionUniqueness.addDone_stable
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_stable
+#check Solidity.Frontend.ExpressionUniqueness.addStable_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_nil
+#check Solidity.Frontend.ExpressionUniqueness.addStableItems_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStableItems_nil
+#check Solidity.Frontend.ExpressionUniqueness.addStableItems_tail
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStableItems_tail
+#check Solidity.Frontend.ExpressionUniqueness.addStable_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_append
+#check Solidity.Frontend.ExpressionUniqueness.addDone_stable_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_stable_append
+#check Solidity.Frontend.ExpressionUniqueness.addFree_stable_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addFree_stable_append
+#check Solidity.Frontend.ExpressionUniqueness.addPrefix_free_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addPrefix_free_append
+#check Solidity.Frontend.ExpressionUniqueness.addReset_free_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addReset_free_append
+#check Solidity.Frontend.ExpressionUniqueness.addFree_binary
+#print axioms Solidity.Frontend.ExpressionUniqueness.addFree_binary
+#check Solidity.Frontend.ExpressionUniqueness.addStable_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_atom
+#check Solidity.Frontend.ExpressionUniqueness.addDone_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_atom
+#check Solidity.Frontend.ExpressionUniqueness.addDone_parens
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_parens
+#check Solidity.Frontend.ExpressionUniqueness.addDone_braces
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_braces
+#check Solidity.Frontend.ExpressionUniqueness.addDone_square
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_square
+#check Solidity.Frontend.ExpressionUniqueness.addStable_flatMap
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_flatMap
+#check Solidity.Frontend.ExpressionUniqueness.addStable_of_atoms
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_of_atoms
+#check Solidity.Frontend.ExpressionUniqueness.addDone_map_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_map_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.addDone_idt
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_idt
+#check Solidity.Frontend.ExpressionUniqueness.addReset_period
+#print axioms Solidity.Frontend.ExpressionUniqueness.addReset_period
+#check Solidity.Frontend.ExpressionUniqueness.addDone_path
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_path
+#check Solidity.Frontend.ExpressionUniqueness.addDone_elem
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDone_elem
+#check Solidity.Frontend.ExpressionUniqueness.addStable_visibility
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_visibility
+#check Solidity.Frontend.ExpressionUniqueness.addStable_mutability
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_mutability
+#check Solidity.Frontend.ExpressionUniqueness.addStable_optToks
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_optToks
+#check Solidity.Frontend.ExpressionUniqueness.addPrefix_prefix
+#print axioms Solidity.Frontend.ExpressionUniqueness.addPrefix_prefix
+#check Solidity.Frontend.ExpressionUniqueness.addStable_suffix
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_suffix
+#check Solidity.Frontend.ExpressionUniqueness.addReset_mul
+#print axioms Solidity.Frontend.ExpressionUniqueness.addReset_mul
+#check Solidity.Frontend.ExpressionUniqueness.addReset_exp
+#print axioms Solidity.Frontend.ExpressionUniqueness.addReset_exp
+#check Solidity.Frontend.ExpressionUniqueness.addPrefix_new
+#print axioms Solidity.Frontend.ExpressionUniqueness.addPrefix_new
+#check Solidity.Frontend.ExpressionUniqueness.fragsP_addDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_addDone
+#check Solidity.Frontend.ExpressionUniqueness.litP_addDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.litP_addDone
+#check Solidity.Frontend.ExpressionUniqueness.AddStableAttrs
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddStableAttrs
+#check Solidity.Frontend.ExpressionUniqueness.addStableAttrs_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStableAttrs_append
+#check Solidity.Frontend.ExpressionUniqueness.addStable_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.addStable_single
+#check Solidity.Frontend.ExpressionUniqueness.arrange_addStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.arrange_addStable
+#check Solidity.Frontend.ExpressionUniqueness.attrsP_addStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_addStable
+#check Solidity.Frontend.ExpressionUniqueness.LastAddIs
+#print axioms Solidity.Frontend.ExpressionUniqueness.LastAddIs
+#check Solidity.Frontend.ExpressionUniqueness.add_yield_lastAdd
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_yield_lastAdd
+#check Solidity.Frontend.ExpressionUniqueness.derives_lastAdd
+#print axioms Solidity.Frontend.ExpressionUniqueness.derives_lastAdd
+#check Solidity.Frontend.ExpressionUniqueness.add_derives_lastAdd
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_derives_lastAdd
+#check Solidity.Frontend.ExpressionUniqueness.add_punct_injective
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_punct_injective
+#check Solidity.Frontend.ExpressionUniqueness.add_operator_reconstructed
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_operator_reconstructed
+#check Solidity.Frontend.ExpressionUniqueness.expr_level_ten_cases
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_level_ten_cases
+#check Solidity.Frontend.ExpressionUniqueness.add_higher_root_disjoint
+#print axioms Solidity.Frontend.ExpressionUniqueness.add_higher_root_disjoint
+#check Solidity.Frontend.ExpressionUniqueness.binary_higher_root_disjoint
+#print axioms Solidity.Frontend.ExpressionUniqueness.binary_higher_root_disjoint
+#check Solidity.Frontend.ExpressionUniqueness.certified_binary_root_levels_equal
+#print axioms Solidity.Frontend.ExpressionUniqueness.certified_binary_root_levels_equal
+#check Solidity.Frontend.ExpressionUniqueness.addHit
+#print axioms Solidity.Frontend.ExpressionUniqueness.addHit
+#check Solidity.Frontend.ExpressionUniqueness.addSkip
+#print axioms Solidity.Frontend.ExpressionUniqueness.addSkip
+#check Solidity.Frontend.ExpressionUniqueness.addScan
+#print axioms Solidity.Frontend.ExpressionUniqueness.addScan
+#check Solidity.Frontend.ExpressionUniqueness.lastAdd
+#print axioms Solidity.Frontend.ExpressionUniqueness.lastAdd
+#check Solidity.Frontend.ExpressionUniqueness.addHit_inside
+#print axioms Solidity.Frontend.ExpressionUniqueness.addHit_inside
+#check Solidity.Frontend.ExpressionUniqueness.addHit_open
+#print axioms Solidity.Frontend.ExpressionUniqueness.addHit_open
+#check Solidity.Frontend.ExpressionUniqueness.addSkip_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.addSkip_append
+#check Solidity.Frontend.ExpressionUniqueness.addSkip_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.addSkip_atom
+#check Solidity.Frontend.ExpressionUniqueness.addSkip_context
+#print axioms Solidity.Frontend.ExpressionUniqueness.addSkip_context
+#check Solidity.Frontend.ExpressionUniqueness.addSkip_enclose
+#print axioms Solidity.Frontend.ExpressionUniqueness.addSkip_enclose
+#check Solidity.Frontend.ExpressionUniqueness.modeRun_of_addSkip
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeRun_of_addSkip
+#check Solidity.Frontend.ExpressionUniqueness.addScan_of_addSkip
+#print axioms Solidity.Frontend.ExpressionUniqueness.addScan_of_addSkip
+#check Solidity.Frontend.ExpressionUniqueness.addScan_suffix_found
+#print axioms Solidity.Frontend.ExpressionUniqueness.addScan_suffix_found
+#check Solidity.Frontend.ExpressionUniqueness.lastAdd_marker
+#print axioms Solidity.Frontend.ExpressionUniqueness.lastAdd_marker
+#check Solidity.Frontend.ExpressionUniqueness.lastAdd_none_of_skip
+#print axioms Solidity.Frontend.ExpressionUniqueness.lastAdd_none_of_skip
+#check Solidity.Frontend.ExpressionUniqueness.lastAdd_cut_unique
+#print axioms Solidity.Frontend.ExpressionUniqueness.lastAdd_cut_unique
 #check Solidity.Frontend.ExpressionUniqueness.BalancedAttrs
 #print axioms Solidity.Frontend.ExpressionUniqueness.BalancedAttrs
 #check Solidity.Frontend.ExpressionUniqueness.balancedAttrs_append
@@ -287,6 +457,26 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 #print axioms Solidity.Frontend.ExpressionUniqueness.parens_prefix_unique
 #check Solidity.Frontend.ExpressionUniqueness.expression_parens_prefix_unique
 #print axioms Solidity.Frontend.ExpressionUniqueness.expression_parens_prefix_unique
+#check Solidity.Frontend.ExpressionUniqueness.AddFreeItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddFreeItems
+#check Solidity.Frontend.ExpressionUniqueness.AddDoneItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddDoneItems
+#check Solidity.Frontend.ExpressionUniqueness.addFreeItems_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.addFreeItems_single
+#check Solidity.Frontend.ExpressionUniqueness.addDoneItems_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.addDoneItems_single
+#check Solidity.Frontend.ExpressionUniqueness.AddYieldProperty
+#print axioms Solidity.Frontend.ExpressionUniqueness.AddYieldProperty
+#check Solidity.Frontend.ExpressionUniqueness.expression_add_property
+#print axioms Solidity.Frontend.ExpressionUniqueness.expression_add_property
+#check Solidity.Frontend.ExpressionUniqueness.high_expr_yield_addFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_yield_addFree
+#check Solidity.Frontend.ExpressionUniqueness.type_yield_addDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_addDone
+#check Solidity.Frontend.ExpressionUniqueness.callArgs_yield_addDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.callArgs_yield_addDone
+#check Solidity.Frontend.ExpressionUniqueness.high_expr_derives_addFree
+#print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_derives_addFree
 #check Solidity.Frontend.ExpressionUniqueness.ExpressionCategory
 #print axioms Solidity.Frontend.ExpressionUniqueness.ExpressionCategory
 #check Solidity.Frontend.ExpressionUniqueness.balanced_mapping_key
@@ -333,6 +523,22 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 #print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_lowFree
 #check Solidity.Frontend.ExpressionUniqueness.high_expr_derives_lowFree
 #print axioms Solidity.Frontend.ExpressionUniqueness.high_expr_derives_lowFree
+#check Solidity.Frontend.ExpressionUniqueness.ModeDoneItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeDoneItems
+#check Solidity.Frontend.ExpressionUniqueness.modeDoneItems_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDoneItems_single
+#check Solidity.Frontend.ExpressionUniqueness.ModeYieldProperty
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeYieldProperty
+#check Solidity.Frontend.ExpressionUniqueness.expression_mode_property
+#print axioms Solidity.Frontend.ExpressionUniqueness.expression_mode_property
+#check Solidity.Frontend.ExpressionUniqueness.expr_yield_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_yield_modeDone
+#check Solidity.Frontend.ExpressionUniqueness.type_yield_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.type_yield_modeDone
+#check Solidity.Frontend.ExpressionUniqueness.callArgs_yield_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.callArgs_yield_modeDone
+#check Solidity.Frontend.ExpressionUniqueness.expr_derives_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.expr_derives_modeDone
 #check Solidity.Frontend.ExpressionUniqueness.negFamily
 #print axioms Solidity.Frontend.ExpressionUniqueness.negFamily
 #check Solidity.Frontend.ExpressionUniqueness.negTokens
@@ -609,6 +815,100 @@ import Solidity.Frontend.ExpressionUniqueness.YieldShape
 #print axioms Solidity.Frontend.ExpressionUniqueness.expr_level_below_two_cases
 #check Solidity.Frontend.ExpressionUniqueness.certified_firstLow_none_iff
 #print axioms Solidity.Frontend.ExpressionUniqueness.certified_firstLow_none_iff
+#check Solidity.Frontend.ExpressionUniqueness.ModeState
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeState
+#check Solidity.Frontend.ExpressionUniqueness.modeToken
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeToken
+#check Solidity.Frontend.ExpressionUniqueness.modeStep
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStep
+#check Solidity.Frontend.ExpressionUniqueness.modeRun
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeRun
+#check Solidity.Frontend.ExpressionUniqueness.ModeAny
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeAny
+#check Solidity.Frontend.ExpressionUniqueness.ModeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeDone
+#check Solidity.Frontend.ExpressionUniqueness.ModeStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeStable
+#check Solidity.Frontend.ExpressionUniqueness.append_stack_not_empty
+#print axioms Solidity.Frontend.ExpressionUniqueness.append_stack_not_empty
+#check Solidity.Frontend.ExpressionUniqueness.modeStep_open
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStep_open
+#check Solidity.Frontend.ExpressionUniqueness.modeStep_close
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStep_close
+#check Solidity.Frontend.ExpressionUniqueness.modeStep_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStep_atom
+#check Solidity.Frontend.ExpressionUniqueness.modeStep_context
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStep_context
+#check Solidity.Frontend.ExpressionUniqueness.modeRun_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeRun_append
+#check Solidity.Frontend.ExpressionUniqueness.modeRun_context
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeRun_context
+#check Solidity.Frontend.ExpressionUniqueness.modeRun_of_run
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeRun_of_run
+#check Solidity.Frontend.ExpressionUniqueness.balanced_modeAny
+#print axioms Solidity.Frontend.ExpressionUniqueness.balanced_modeAny
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_enclose
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_enclose
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_append
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_stable
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_stable
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_nil
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_append
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_stable_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_stable_append
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_atom
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_atom
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_atom
+#check Solidity.Frontend.ExpressionUniqueness.ModeStableItems
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeStableItems
+#check Solidity.Frontend.ExpressionUniqueness.modeStableItems_nil
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStableItems_nil
+#check Solidity.Frontend.ExpressionUniqueness.modeStableItems_tail
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStableItems_tail
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_flatMap
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_flatMap
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_of_atoms
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_of_atoms
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_map_nonempty
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_map_nonempty
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_parens
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_parens
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_braces
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_braces
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_square
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_square
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_idt
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_idt
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_path
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_path
+#check Solidity.Frontend.ExpressionUniqueness.modeDone_elem
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeDone_elem
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_visibility
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_visibility
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_mutability
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_mutability
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_dataLoc
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_dataLoc
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_optToks
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_optToks
+#check Solidity.Frontend.ExpressionUniqueness.fragsP_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.fragsP_modeDone
+#check Solidity.Frontend.ExpressionUniqueness.litP_modeDone
+#print axioms Solidity.Frontend.ExpressionUniqueness.litP_modeDone
+#check Solidity.Frontend.ExpressionUniqueness.ModeStableAttrs
+#print axioms Solidity.Frontend.ExpressionUniqueness.ModeStableAttrs
+#check Solidity.Frontend.ExpressionUniqueness.modeStableAttrs_append
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStableAttrs_append
+#check Solidity.Frontend.ExpressionUniqueness.modeStable_single
+#print axioms Solidity.Frontend.ExpressionUniqueness.modeStable_single
+#check Solidity.Frontend.ExpressionUniqueness.arrange_modeStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.arrange_modeStable
+#check Solidity.Frontend.ExpressionUniqueness.attrsP_modeStable
+#print axioms Solidity.Frontend.ExpressionUniqueness.attrsP_modeStable
 #check Solidity.Frontend.ExpressionUniqueness.derives_pure_yield
 #print axioms Solidity.Frontend.ExpressionUniqueness.derives_pure_yield
 #check Solidity.Frontend.ExpressionUniqueness.derives_ident

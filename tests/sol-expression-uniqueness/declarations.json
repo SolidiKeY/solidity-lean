@@ -1,5 +1,491 @@
 [
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_addFree",
+    "source_signature": "theorem arbitrary_prefix_addFree (n : Nat) (name : String) : AddFree (negTokens (n + 1) name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arbitrary_prefix_lastAdd_none",
+    "source_signature": "theorem arbitrary_prefix_lastAdd_none (n : Nat) (name : String) :\n    lastAdd (negTokens (n + 1) name) = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.finished_prefix_is_selected",
+    "source_signature": "theorem finished_prefix_is_selected (n : Nat) (name : String) :\n    addSkip ([], true) (negTokens (n + 1) name) = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_prec_join",
+    "source_signature": "theorem add_prec_join (op : AddOp) (a b : Syn .expr) (ha : a.prec = true) (hb : b.prec = true)\n    (hla : 10 \u2264 a.level) (hlb : 11 \u2264 b.level) : (Syn.addSub op a b).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_yield_join",
+    "source_signature": "theorem add_yield_join (op : AddOp) (a b : Syn .expr) (initial middle rest : List Choice)\n    (xs ys : List (List Tok)) (ha : a.yield initial = some (xs, middle))\n    (hb : b.yield middle = some (ys, rest)) :\n    (Syn.addSub op a b).yield initial = some ([xs.flatten ++ pu op.punct ++ ys.flatten], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix",
+    "source_signature": "def mixedAddPrefix (op : AddOp) (n : Nat) : Syn .expr"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefixTokens",
+    "source_signature": "def mixedAddPrefixTokens (op : AddOp) (n : Nat) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_prec",
+    "source_signature": "theorem mixedAddPrefix_prec (op : AddOp) (n : Nat) : (mixedAddPrefix op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_yield",
+    "source_signature": "theorem mixedAddPrefix_yield (op : AddOp) (n : Nat) (rest : List Choice) :\n    (mixedAddPrefix op n).yield rest = some ([mixedAddPrefixTokens op n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_certified",
+    "source_signature": "theorem mixedAddPrefix_certified (op : AddOp) (n : Nat) :\n    (mixedAddPrefix op n).Derives (mixedAddPrefixTokens op n) \u2227 (mixedAddPrefix op n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mixedAddPrefix_outer_marker",
+    "source_signature": "theorem mixedAddPrefix_outer_marker (op : AddOp) (n : Nat) :\n    lastAdd (mixedAddPrefixTokens op n) = some (1, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddFree",
+    "source_signature": "def AddFree (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddStable",
+    "source_signature": "def AddStable (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddPrefix",
+    "source_signature": "def AddPrefix (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddReset",
+    "source_signature": "def AddReset (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddDone",
+    "source_signature": "def AddDone (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddStableItems",
+    "source_signature": "def AddStableItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_free",
+    "source_signature": "theorem addDone_free {ts : List Tok} (h : AddDone ts) : AddFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_stable",
+    "source_signature": "theorem addDone_stable {ts : List Tok} (h : AddDone ts) : AddStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_nil",
+    "source_signature": "theorem addStable_nil : AddStable []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStableItems_nil",
+    "source_signature": "theorem addStableItems_nil : AddStableItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStableItems_tail",
+    "source_signature": "theorem addStableItems_tail {ts : List Tok} {items : List (List Tok)}\n    (h : AddStableItems (ts :: items)) : AddStableItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_append",
+    "source_signature": "theorem addStable_append {xs ys : List Tok} (hx : AddStable xs) (hy : AddStable ys) :\n    AddStable (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_stable_append",
+    "source_signature": "theorem addDone_stable_append {xs ys : List Tok} (hx : AddDone xs) (hy : AddStable ys) :\n    AddDone (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addFree_stable_append",
+    "source_signature": "theorem addFree_stable_append {xs ys : List Tok} (hx : AddFree xs) (hy : AddStable ys) :\n    AddFree (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addPrefix_free_append",
+    "source_signature": "theorem addPrefix_free_append {xs ys : List Tok} (hx : AddPrefix xs) (hy : AddFree ys) :\n    AddFree (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addReset_free_append",
+    "source_signature": "theorem addReset_free_append {xs ys : List Tok} (hx : AddReset xs) (hy : AddFree ys) :\n    AddStable (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addFree_binary",
+    "source_signature": "theorem addFree_binary {xs op ys : List Tok} (hx : AddFree xs) (ho : AddReset op)\n    (hy : AddFree ys) : AddFree (xs ++ op ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_atom",
+    "source_signature": "theorem addStable_atom (t : Tok) (hb : bracket t = none) (hh : addHit ([], true) t = false)\n    (hm : modeToken true t = true) : AddStable [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_atom",
+    "source_signature": "theorem addDone_atom (t : Tok) (hb : bracket t = none)\n    (hh : \u2200 finished, addHit ([], finished) t = false)\n    (hm : \u2200 finished, modeToken finished t = true) : AddDone [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_parens",
+    "source_signature": "theorem addDone_parens {ts : List Tok} (h : Balanced ts) : AddDone (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_braces",
+    "source_signature": "theorem addDone_braces {ts : List Tok} (h : Balanced ts) : AddDone (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_square",
+    "source_signature": "theorem addDone_square {ts : List Tok} (h : Balanced ts) :\n    AddDone (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_flatMap",
+    "source_signature": "theorem addStable_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 AddStable (f x)) : AddStable (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_of_atoms",
+    "source_signature": "theorem addStable_of_atoms (ts : List Tok)\n    (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 addHit ([], true) t = false \u2227 modeToken true t = true) :\n    AddStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_map_nonempty",
+    "source_signature": "theorem addDone_map_nonempty {\u03b1 : Type} (xs : List \u03b1) (mk : \u03b1 \u2192 Tok) (hne : xs \u2260 [])\n    (hb : \u2200 x, bracket (mk x) = none) (hh : \u2200 x finished, addHit ([], finished) (mk x) = false)\n    (hm : \u2200 x finished, modeToken finished (mk x) = true) : AddDone (xs.map mk)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_idt",
+    "source_signature": "theorem addDone_idt (name : String) : AddDone (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addReset_period",
+    "source_signature": "theorem addReset_period : AddReset (pu .period)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_path",
+    "source_signature": "theorem addDone_path (path : IdPath) : AddDone path.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDone_elem",
+    "source_signature": "theorem addDone_elem (e : Elem) : AddDone e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_visibility",
+    "source_signature": "theorem addStable_visibility (v : Visibility) : AddStable v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_mutability",
+    "source_signature": "theorem addStable_mutability (m : Mutability) : AddStable m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_optToks",
+    "source_signature": "theorem addStable_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 x, AddStable (f x))\n    (value : Option \u03b1) : AddStable (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addPrefix_prefix",
+    "source_signature": "theorem addPrefix_prefix (op : PrefixOp) : AddPrefix op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_suffix",
+    "source_signature": "theorem addStable_suffix (op : SuffixOp) : AddStable (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addReset_mul",
+    "source_signature": "theorem addReset_mul (op : MulOp) : AddReset (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addReset_exp",
+    "source_signature": "theorem addReset_exp : AddReset (pu .exp)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addPrefix_new",
+    "source_signature": "theorem addPrefix_new : AddPrefix (tk .new)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_addDone",
+    "source_signature": "theorem fragsP_addDone (mk : Bytes \u2192 Tok) (hb : \u2200 bs, bracket (mk bs) = none)\n    (hh : \u2200 bs finished, addHit ([], finished) (mk bs) = false)\n    (hm : \u2200 bs finished, modeToken finished (mk bs) = true) (bs : Bytes) :\n    Produces (fragsP mk bs) AddDone"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_addDone",
+    "source_signature": "theorem litP_addDone (l : Lit) : Produces (litP l) AddDone"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddStableAttrs",
+    "source_signature": "def AddStableAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStableAttrs_append",
+    "source_signature": "theorem addStableAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : AddStableAttrs xs) (hy : AddStableAttrs ys) : AddStableAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addStable_single",
+    "source_signature": "theorem addStable_single (slot : Slot) (ts : List Tok) (h : AddStable ts) :\n    AddStableAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_addStable",
+    "source_signature": "theorem arrange_addStable (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : AddStableAttrs singles)\n    (hm : AddStableItems mods) (h : arrange order singles mods = some ts) : AddStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddFreeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_addStable",
+    "source_signature": "theorem attrsP_addStable (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : AddStableAttrs singles) (hm : AddStableItems mods) :\n    Produces (attrsP singles mods order) AddStable"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.LastAddIs",
+    "source_signature": "def LastAddIs (marker : Tok) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_yield_lastAdd",
+    "source_signature": "theorem add_yield_lastAdd (op : AddOp) (a b : Syn .expr)\n    (hp : (Syn.addSub op a b).prec = true) :\n    Produces (Syn.addSub op a b).yield (LastAddIs (.punct op.punct))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.derives_lastAdd",
+    "source_signature": "theorem derives_lastAdd (e : Syn .expr) (ts : List Tok) (marker : Tok)\n    (hy : Produces e.yield (LastAddIs marker)) (hd : e.Derives ts) :\n    \u2203 position, lastAdd ts = some (position, marker)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_derives_lastAdd",
+    "source_signature": "theorem add_derives_lastAdd (op : AddOp) (a b : Syn .expr) (ts : List Tok)\n    (hp : (Syn.addSub op a b).prec = true) (hd : (Syn.addSub op a b).Derives ts) :\n    \u2203 position, lastAdd ts = some (position, .punct op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_punct_injective",
+    "source_signature": "theorem add_punct_injective (op op' : AddOp) (h : op.punct = op'.punct) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_operator_reconstructed",
+    "source_signature": "theorem add_operator_reconstructed (op op' : AddOp) (a b c d : Syn .expr) (ts : List Tok)\n    (ha : (Syn.addSub op a b).prec = true) (hb : (Syn.addSub op' c d).prec = true)\n    (da : (Syn.addSub op a b).Derives ts) (db : (Syn.addSub op' c d).Derives ts) : op = op'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_ten_cases",
+    "source_signature": "theorem expr_level_ten_cases (e : Syn .expr) (hl : e.level = 10) :\n    \u2203 op a b, e = Syn.addSub op a b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.add_higher_root_disjoint",
+    "source_signature": "theorem add_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (hal : a.level = 10) (higher : 10 < b.level) (ha : a.prec = true) (hb : b.prec = true)\n    (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.binary_higher_root_disjoint",
+    "source_signature": "theorem binary_higher_root_disjoint (a b : Syn .expr) (ts : List Tok)\n    (hmin : 2 \u2264 a.level) (hmax : a.level \u2264 12) (higher : a.level < b.level)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) : False"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddRoot",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.certified_binary_root_levels_equal",
+    "source_signature": "theorem certified_binary_root_levels_equal (a b : Syn .expr) (ts : List Tok)\n    (amin : 2 \u2264 a.level) (amax : a.level \u2264 12) (bmin : 2 \u2264 b.level) (bmax : b.level \u2264 12)\n    (ha : a.prec = true) (hb : b.prec = true) (da : a.Derives ts) (db : b.Derives ts) :\n    a.level = b.level"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addHit",
+    "source_signature": "def addHit (state : ModeState) (t : Tok) : Bool"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSkip",
+    "source_signature": "def addSkip (state : ModeState) : List Tok \u2192 Option ModeState\n  | [] => some state\n  | t :: ts => if addHit state t then none\n    else (modeStep state t).bind fun next => addSkip next ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addScan",
+    "source_signature": "def addScan (state : ModeState) : List Tok \u2192 Option (ModeState \u00d7 Option (Nat \u00d7 Tok))\n  | [] => some (state, none)\n  | t :: ts => (modeStep state t).bind fun next =>\n    (addScan next ts).map fun result => (result.1,\n      match result.2 with\n      | some found => some (offset 1 found)\n      | none => if addHit state t then some (0, t) else none)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastAdd",
+    "source_signature": "def lastAdd (ts : List Tok) : Option (Nat \u00d7 Tok)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addHit_inside",
+    "source_signature": "theorem addHit_inside (stack tail : List Bracket) (finished : Bool) (t : Tok)\n    (hne : tail \u2260 []) : addHit (stack ++ tail, finished) t = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addHit_open",
+    "source_signature": "theorem addHit_open (k : Bracket) (finished : Bool) :\n    addHit ([], finished) (openTok k) = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSkip_append",
+    "source_signature": "theorem addSkip_append (xs ys : List Tok) (state : ModeState) :\n    addSkip state (xs ++ ys) = (addSkip state xs).bind (fun next => addSkip next ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSkip_atom",
+    "source_signature": "theorem addSkip_atom (t : Tok) (finished : Bool) (hb : bracket t = none)\n    (hit : addHit ([], finished) t = false) :\n    addSkip ([], finished) [t] = some ([], modeToken finished t)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSkip_context",
+    "source_signature": "theorem addSkip_context (ts : List Tok) (s next tail : List Bracket) (finished : Bool)\n    (hne : tail \u2260 []) (h : run s ts = some next) :\n    addSkip (s ++ tail, finished) ts = some (next ++ tail, finished)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addSkip_enclose",
+    "source_signature": "theorem addSkip_enclose (k : Bracket) (ts : List Tok) (finished : Bool) (h : Balanced ts) :\n    addSkip ([], finished) (openTok k :: (ts ++ [closeTok k])) = some ([], true)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeRun_of_addSkip",
+    "source_signature": "theorem modeRun_of_addSkip (ts : List Tok) (state final : ModeState)\n    (h : addSkip state ts = some final) : modeRun state ts = some final"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addScan_of_addSkip",
+    "source_signature": "theorem addScan_of_addSkip (ts : List Tok) (state final : ModeState)\n    (h : addSkip state ts = some final) : addScan state ts = some (final, none)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addScan_suffix_found",
+    "source_signature": "theorem addScan_suffix_found (xs ys : List Tok) (state middle final : ModeState)\n    (position : Nat) (marker : Tok) (hr : modeRun state xs = some middle)\n    (hs : addScan middle ys = some (final, some (position, marker))) :\n    addScan state (xs ++ ys) = some (final, some (position + xs.length, marker))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastAdd_marker",
+    "source_signature": "theorem lastAdd_marker (xs ys : List Tok) (marker : Tok)\n    (hx : ModeDone xs) (hy : addSkip ([], false) ys = some ([], true))\n    (hstep : modeStep ([], true) marker = some ([], false))\n    (hit : addHit ([], true) marker = true) :\n    lastAdd (xs ++ marker :: ys) = some (xs.length, marker)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastAdd_none_of_skip",
+    "source_signature": "theorem lastAdd_none_of_skip (ts : List Tok) (final : ModeState)\n    (h : addSkip ([], false) ts = some final) : lastAdd ts = none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AddScan",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.lastAdd_cut_unique",
+    "source_signature": "theorem lastAdd_cut_unique (xs ys xs' ys' : List Tok) (marker marker' : Tok)\n    (hx : ModeDone xs) (hx' : ModeDone xs')\n    (hy : addSkip ([], false) ys = some ([], true))\n    (hy' : addSkip ([], false) ys' = some ([], true))\n    (hm : modeStep ([], true) marker = some ([], false))\n    (hm' : modeStep ([], true) marker' = some ([], false))\n    (hit : addHit ([], true) marker = true) (hit' : addHit ([], true) marker' = true)\n    (he : xs ++ marker :: ys = xs' ++ marker' :: ys') :\n    xs = xs' \u2227 marker = marker' \u2227 ys = ys'"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.AttributeBalance",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.BalancedAttrs",
@@ -786,6 +1272,66 @@
     "source_signature": "theorem expression_parens_prefix_unique (a b : Syn .expr) (xs ys tail tail' : List Tok)\n    (ha : a.Derives xs) (hb : b.Derives ys)\n    (heq : parens xs ++ tail = parens ys ++ tail') : xs = ys \u2227 tail = tail'"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddFreeItems",
+    "source_signature": "def AddFreeItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddDoneItems",
+    "source_signature": "def AddDoneItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addFreeItems_single",
+    "source_signature": "theorem addFreeItems_single {ts : List Tok} (h : AddFree ts) : AddFreeItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.addDoneItems_single",
+    "source_signature": "theorem addDoneItems_single {ts : List Tok} (h : AddDone ts) : AddDoneItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AddYieldProperty",
+    "source_signature": "def AddYieldProperty {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_add_property",
+    "source_signature": "theorem expression_add_property {c : Cat} (e : Syn c) : AddYieldProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_yield_addFree",
+    "source_signature": "theorem high_expr_yield_addFree (e : Syn .expr) (hp : e.prec = true) (hl : 10 < e.level) :\n    Produces e.yield AddFreeItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_addDone",
+    "source_signature": "theorem type_yield_addDone (ty : Syn .typeName) : Produces ty.yield AddDoneItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.callArgs_yield_addDone",
+    "source_signature": "theorem callArgs_yield_addDone (args : Syn .callArgs) : Produces args.yield AddDoneItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_addFree",
+    "source_signature": "theorem high_expr_derives_addFree (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hl : 10 < e.level) (hd : e.Derives ts) : AddFree ts"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionBalance",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.ExpressionCategory",
@@ -922,6 +1468,54 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.high_expr_derives_lowFree",
     "source_signature": "theorem high_expr_derives_lowFree (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hl : 2 \u2264 e.level) (hd : e.Derives ts) : LowFree ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeDoneItems",
+    "source_signature": "def ModeDoneItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDoneItems_single",
+    "source_signature": "theorem modeDoneItems_single {ts : List Tok} (h : ModeDone ts) : ModeDoneItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeYieldProperty",
+    "source_signature": "def ModeYieldProperty {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expression_mode_property",
+    "source_signature": "theorem expression_mode_property {c : Cat} (e : Syn c) : ModeYieldProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_modeDone",
+    "source_signature": "theorem expr_yield_modeDone (e : Syn .expr) : Produces e.yield ModeDoneItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_modeDone",
+    "source_signature": "theorem type_yield_modeDone (ty : Syn .typeName) : Produces ty.yield ModeDoneItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.callArgs_yield_modeDone",
+    "source_signature": "theorem callArgs_yield_modeDone (args : Syn .callArgs) : Produces args.yield ModeDoneItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_derives_modeDone",
+    "source_signature": "theorem expr_derives_modeDone (e : Syn .expr) (ts : List Tok) (hd : e.Derives ts) : ModeDone ts"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Families",
@@ -1750,6 +2344,288 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.certified_firstLow_none_iff",
     "source_signature": "theorem certified_firstLow_none_iff (e : Syn .expr) (ts : List Tok)\n    (hp : e.prec = true) (hd : e.Derives ts) :\n    firstTop lowMarker [] ts = none \u2194 2 \u2264 e.level"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeState",
+    "source_signature": "def ModeState : Type"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeToken",
+    "source_signature": "def modeToken (finished : Bool) : Tok \u2192 Bool\n  | .punct .inc | .punct .dec => finished\n  | .punct _ => false\n  | .kw .new | .kw .delete => false\n  | _ => true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStep",
+    "source_signature": "def modeStep (state : ModeState) (t : Tok) : Option ModeState"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeRun",
+    "source_signature": "def modeRun (state : ModeState) : List Tok \u2192 Option ModeState\n  | [] => some state\n  | t :: ts => (modeStep state t).bind fun next => modeRun next ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeAny",
+    "source_signature": "def ModeAny (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeDone",
+    "source_signature": "def ModeDone (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeStable",
+    "source_signature": "def ModeStable (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.append_stack_not_empty",
+    "source_signature": "theorem append_stack_not_empty (xs tail : List Bracket) (hne : tail \u2260 []) :\n    (xs ++ tail).isEmpty = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStep_open",
+    "source_signature": "theorem modeStep_open (k : Bracket) (stack : List Bracket) (finished : Bool) :\n    modeStep (stack, finished) (openTok k) = some (k :: stack, finished)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStep_close",
+    "source_signature": "theorem modeStep_close (k : Bracket) (stack : List Bracket) (finished : Bool) :\n    modeStep (k :: stack, finished) (closeTok k) =\n      some (stack, if stack.isEmpty then true else finished)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStep_atom",
+    "source_signature": "theorem modeStep_atom (t : Tok) (hb : bracket t = none) (finished : Bool) :\n    modeStep ([], finished) t = some ([], modeToken finished t)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStep_context",
+    "source_signature": "theorem modeStep_context (t : Tok) (s next tail : List Bracket) (finished : Bool)\n    (hne : tail \u2260 []) (hs : step s t = some next) :\n    modeStep (s ++ tail, finished) t = some (next ++ tail, finished)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeRun_append",
+    "source_signature": "theorem modeRun_append (xs ys : List Tok) (state : ModeState) :\n    modeRun state (xs ++ ys) = (modeRun state xs).bind (fun next => modeRun next ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeRun_context",
+    "source_signature": "theorem modeRun_context (ts : List Tok) (s next tail : List Bracket) (finished : Bool)\n    (hne : tail \u2260 []) (h : run s ts = some next) :\n    modeRun (s ++ tail, finished) ts = some (next ++ tail, finished)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeRun_of_run",
+    "source_signature": "theorem modeRun_of_run (ts : List Tok) (s next : List Bracket) (finished : Bool)\n    (h : run s ts = some next) : \u2203 result, modeRun (s, finished) ts = some (next, result)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.balanced_modeAny",
+    "source_signature": "theorem balanced_modeAny (ts : List Tok) (h : Balanced ts) : ModeAny ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_enclose",
+    "source_signature": "theorem modeDone_enclose (k : Bracket) (ts : List Tok) (h : Balanced ts) :\n    ModeDone (openTok k :: (ts ++ [closeTok k]))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_append",
+    "source_signature": "theorem modeDone_append {xs ys : List Tok} (hx : ModeAny xs) (hy : ModeDone ys) :\n    ModeDone (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_stable",
+    "source_signature": "theorem modeDone_stable (ts : List Tok) (h : ModeDone ts) : ModeStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_nil",
+    "source_signature": "theorem modeStable_nil : ModeStable []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_append",
+    "source_signature": "theorem modeStable_append {xs ys : List Tok} (hx : ModeStable xs) (hy : ModeStable ys) :\n    ModeStable (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_stable_append",
+    "source_signature": "theorem modeDone_stable_append {xs ys : List Tok} (hx : ModeDone xs) (hy : ModeStable ys) :\n    ModeDone (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_atom",
+    "source_signature": "theorem modeDone_atom (t : Tok) (hb : bracket t = none)\n    (ht : \u2200 finished, modeToken finished t = true) : ModeDone [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandMode",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_atom",
+    "source_signature": "theorem modeStable_atom (t : Tok) (hb : bracket t = none)\n    (ht : modeToken true t = true) : ModeStable [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeStableItems",
+    "source_signature": "def ModeStableItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStableItems_nil",
+    "source_signature": "theorem modeStableItems_nil : ModeStableItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStableItems_tail",
+    "source_signature": "theorem modeStableItems_tail {ts : List Tok} {items : List (List Tok)}\n    (h : ModeStableItems (ts :: items)) : ModeStableItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_flatMap",
+    "source_signature": "theorem modeStable_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 ModeStable (f x)) : ModeStable (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_of_atoms",
+    "source_signature": "theorem modeStable_of_atoms (ts : List Tok)\n    (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 modeToken true t = true) : ModeStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_map_nonempty",
+    "source_signature": "theorem modeDone_map_nonempty {\u03b1 : Type} (xs : List \u03b1) (mk : \u03b1 \u2192 Tok) (hne : xs \u2260 [])\n    (hb : \u2200 x, bracket (mk x) = none) (hm : \u2200 x finished, modeToken finished (mk x) = true) :\n    ModeDone (xs.map mk)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_parens",
+    "source_signature": "theorem modeDone_parens {ts : List Tok} (h : Balanced ts) : ModeDone (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_braces",
+    "source_signature": "theorem modeDone_braces {ts : List Tok} (h : Balanced ts) : ModeDone (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_square",
+    "source_signature": "theorem modeDone_square {ts : List Tok} (h : Balanced ts) :\n    ModeDone (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_idt",
+    "source_signature": "theorem modeDone_idt (name : String) : ModeDone (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_path",
+    "source_signature": "theorem modeDone_path (path : IdPath) : ModeDone path.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeDone_elem",
+    "source_signature": "theorem modeDone_elem (e : Elem) : ModeDone e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_visibility",
+    "source_signature": "theorem modeStable_visibility (v : Visibility) : ModeStable v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_mutability",
+    "source_signature": "theorem modeStable_mutability (m : Mutability) : ModeStable m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_dataLoc",
+    "source_signature": "theorem modeStable_dataLoc (l : DataLoc) : ModeStable l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_optToks",
+    "source_signature": "theorem modeStable_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 x, ModeStable (f x))\n    (value : Option \u03b1) : ModeStable (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_modeDone",
+    "source_signature": "theorem fragsP_modeDone (mk : Bytes \u2192 Tok) (hb : \u2200 bs, bracket (mk bs) = none)\n    (hm : \u2200 bs finished, modeToken finished (mk bs) = true) (bs : Bytes) :\n    Produces (fragsP mk bs) ModeDone"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_modeDone",
+    "source_signature": "theorem litP_modeDone (l : Lit) : Produces (litP l) ModeDone"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ModeStableAttrs",
+    "source_signature": "def ModeStableAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStableAttrs_append",
+    "source_signature": "theorem modeStableAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : ModeStableAttrs xs) (hy : ModeStableAttrs ys) : ModeStableAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.modeStable_single",
+    "source_signature": "theorem modeStable_single (slot : Slot) (ts : List Tok) (h : ModeStable ts) :\n    ModeStableAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_modeStable",
+    "source_signature": "theorem arrange_modeStable (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : ModeStableAttrs singles)\n    (hm : ModeStableItems mods) (h : arrange order singles mods = some ts) : ModeStable ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.OperandModeAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_modeStable",
+    "source_signature": "theorem attrsP_modeStable (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : ModeStableAttrs singles) (hm : ModeStableItems mods) :\n    Produces (attrsP singles mods order) ModeStable"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Primary",

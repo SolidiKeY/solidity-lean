@@ -115,7 +115,7 @@
     "level": 10,
     "precNode": "a.level >= 10 and b.level >= 11",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open: operand-state treatment of prefix/binary subtraction required; inhabited arbitrary raw-selector countercontrol recorded without narrowing the original target",
+    "root_reconstruction": "partial: operand-sensitive last marker, additive operator reconstruction and all-binary higher-root disjointness proved; complete operand spans remain open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },

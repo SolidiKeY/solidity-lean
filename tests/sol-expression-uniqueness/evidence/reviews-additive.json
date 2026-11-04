@@ -1,0 +1,20 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial operand-sensitive additive checkpoint; no confirmed defects.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "foundations": "Completion from either initial bit proved for all29 expression roots/types/callargs and arbitrary actual layouts. Nonempty fragments and actual stable attributes covered. State contains no AST.",
+    "results": "High expression additive freedom explicitly starts unfinished. Additive root left completion/right freedom derived internally; arbitrary earlier left hits allowed. Combined disjointness/equal binary ranks cover2\u201312, with AddOp reconstruction and inhabited arbitrary right-prefix controls.",
+    "precision": "Finished-entry unary prefix intentionally selected; completion is not freeness or grammar recognition. Complete operand/colon/high-root/recursive tree uniqueness and public theorem remain open.",
+    "final_metadata": "Independent current checkpoint and corruption controls pass at35 modules/607 declarations; metadata accepted with no remaining findings."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial operand-sensitive additive checkpoint; no confirmed defects.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "foundations": "Completion from either initial bit proved for all29 expression roots/types/callargs and arbitrary actual layouts. Nonempty fragments and actual stable attributes covered. State contains no AST.",
+    "results": "High expression additive freedom explicitly starts unfinished. Additive root left completion/right freedom derived internally; arbitrary earlier left hits allowed. Combined disjointness/equal binary ranks cover2\u201312, with AddOp reconstruction and inhabited arbitrary right-prefix controls.",
+    "precision": "Finished-entry unary prefix intentionally selected; completion is not freeness or grammar recognition. Complete operand/colon/high-root/recursive tree uniqueness and public theorem remain open.",
+    "final_metadata": "Independent current checkpoint and corruption controls pass at35 modules/607 declarations; metadata accepted with no remaining findings."
+  }
+]
