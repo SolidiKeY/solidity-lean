@@ -250,3 +250,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean` | Existing arbitrary emitted byte stores across Environment and failure slices, live REVERT and disjoint full-word frames. |
 | `Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Populated full-byte/word vectors, actual overlapping order, empty and unsupported boundaries. |
+
+| `Solidity/Backend/MemoryOps/PhysicalByteStack.lean` | Existing checked stack guard for arbitrary emitted byte materialization; transient peak and reached live REVERT. |

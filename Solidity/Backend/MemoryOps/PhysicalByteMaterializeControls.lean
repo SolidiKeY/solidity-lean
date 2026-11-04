@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.PhysicalByteMaterialize
+import Solidity.Backend.MemoryOps.PhysicalByteStack
 
 /-! Inhabited complete-byte observations for the real materializer. These two
 backend byte APIs have no Source pipeline parameter. No Source execution,
@@ -102,4 +102,69 @@ theorem boundaries (frame : Environment.Frame) :
 #guard_msgs (whitespace := lax) in #print axioms overlap
 /-- info: 'Solidity.Backend.MemoryOps.Physical.MaterializeControls.boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms boundaries
+/-- Checked execution reaches the existing 1024-word peak and preserves all
+caller words and the same populated byte/word footprint. One more input word
+rejects checkedRun although unchecked run still returns the actual live bytes. -/
+theorem stack_capacity (suffix : Backend.Program) :
+    Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix))
+      ⟨a::n::List.replicate 1020 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=
+      some (⟨List.replicate 1020 (⟨42,by decide⟩ : Roadmap.Word),reached⟩,some (.revert payload)) ∧
+    Failure.Slice.checkedRun (Environment.materialize 31 payload++(.op .REVERT::suffix))
+      ⟨a::n::List.replicate 1021 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=none ∧
+    Failure.Slice.run (Environment.materialize 31 payload++(.op .REVERT::suffix))
+      ⟨a::n::List.replicate 1021 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=
+      some (⟨List.replicate 1021 (⟨42,by decide⟩ : Roadmap.Word),reached⟩,some (.revert payload)) ∧
+    WordFrame machine reached (fun c => c=2) ∧
+    Environment.readMemory reached 30 6=[5,7,0,255,5,5] ∧
+    Environment.readMemory reached 64 32=Semantics.wordBytes high.val := by
+  first
+  | solve | simp only [] | omega
+  | have checked := materialize_checked_revert payload a n (List.replicate 1020 ⟨42,by decide⟩) bytes suffix
+        rfl (by decide) (by simp only [List.length_replicate];decide)
+    have rejected := materialize_stack_1023 7 [0,255] 31
+        (a::n::List.replicate 1021 ⟨42,by decide⟩) bytes (.op .REVERT::suffix)
+        (by simp only [List.length_cons,List.length_replicate])
+    have unchecked := materialize_suffix payload 31 (a::n::List.replicate 1021 ⟨42,by decide⟩) bytes
+        (.op .REVERT::suffix) (by decide)
+    rw [revert_live] at unchecked
+    have readback : Environment.readMemory reached a.val n.val=payload := by rfl
+    change Failure.Slice.run _ _=some (⟨_,reached⟩,some (.revert (Environment.readMemory reached a.val n.val))) at unchecked
+    rw [readback] at unchecked
+    have fr := initial.materialize_outside 31 payload (by intro c hc;subst c;decide)
+    have complete : Environment.readMemory reached 64 32=Semantics.wordBytes high.val := by
+      obtain ⟨w,hw,hb⟩ := fr.cells 2 rfl
+      change Word.val high=Word.val w at hw
+      rw [←Word.val.inj hw] at hb
+      exact hb
+    exact ⟨checked.2,rejected.2,unchecked,fr,by decide,complete⟩
+
+/-- Empty materialization has no transient PUSH peak: 1024 input words pass,
+1025 fail the already-published initial stack guard. No Source admission claim. -/
+theorem empty_stack_boundary :
+    Failure.Slice.checkedRun (Environment.materialize 31 [])
+      ⟨List.replicate 1024 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=
+      some (⟨List.replicate 1024 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩,none) ∧
+    Failure.Slice.checkedRun (Environment.materialize 31 [])
+      ⟨List.replicate 1025 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=none := by
+  first
+  | solve | simp only [Environment.materialize,Failure.Slice.checkedRun,Failure.Slice.stackSafe,
+      List.length_replicate,Failure.Slice.run] | decide | omega
+  | have pass : Failure.Slice.stackSafe [] ⟨List.replicate 1024 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=true := by
+      change decide ((List.replicate 1024 (⟨42,by decide⟩ : Roadmap.Word)).length≤1024)=true
+      rw [List.length_replicate]
+      rfl
+    have fail : Failure.Slice.stackSafe [] ⟨List.replicate 1025 (⟨42,by decide⟩ : Roadmap.Word),bytes⟩=false := by
+      change decide ((List.replicate 1025 (⟨42,by decide⟩ : Roadmap.Word)).length≤1024)=false
+      rw [List.length_replicate]
+      rfl
+    constructor
+    · rw [Environment.materialize,Failure.Slice.checkedRun,if_pos pass]
+      rfl
+    · rw [Environment.materialize,Failure.Slice.checkedRun,fail]
+      rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.MaterializeControls.stack_capacity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms stack_capacity
+/-- info: 'Solidity.Backend.MemoryOps.Physical.MaterializeControls.empty_stack_boundary' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_stack_boundary
 end Solidity.Backend.MemoryOps.Physical.MaterializeControls
