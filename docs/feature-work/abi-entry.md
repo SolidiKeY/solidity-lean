@@ -582,3 +582,7 @@ virtual-body/signature eligibility and collision order, reused hash-prefix value
 proof, and actual public-compiler execution. Both confirmed the synthetic
 fixture and short-input mismatch do not certify Keccak, deployment admission,
 body execution or full ABI entry behavior.
+
+`PayableRoutesInterface.lean` specifies first-match per-entry value gating.
+A matched non-payable row rejects value rather than trying later collisions;
+a no-match label remains separate from Solidity special-function execution.
