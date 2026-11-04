@@ -51,8 +51,8 @@ def committed {Γ Γ' : Ctx} (σ : State C Γ) : TRes (Out C σ.H Γ') → Globa
   | .error _ => globals σ
 
 /-- Read-only mutabilities: `pure` and `view`. -/
-theorem readOnly_view : (Mutability.view) ≠ .nonpayable := by decide
-theorem readOnly_pure : (Mutability.pure) ≠ .nonpayable := by decide
+theorem view_ne_nonpayable : (Mutability.view) ≠ .nonpayable := by decide
+theorem pure_ne_nonpayable : (Mutability.pure) ≠ .nonpayable := by decide
 
 /-- A frame of a read-only mutability keeps the globals. -/
 theorem frame_globals {μ : Mutability} {Γ Δ : Ctx} {σ : State C Γ} {τ : State C Δ}
@@ -77,7 +77,7 @@ balances in every outcome (`uint x; function get() view returns (uint) {
 return x; }`). -/
 theorem Prog.committed_view {Γ Γ' : Ctx} (P : Prog C Γ Γ') (hw : Prog.within .view P = true)
     (σ : State C Γ) : committed σ (Prog.run σ P) = globals σ :=
-  Prog.committed_readOnly P hw readOnly_view σ
+  Prog.committed_readOnly P hw view_ne_nonpayable σ
 
 /-- A successful read-only run, field by field: the storage (both regions), the
 ledger and the balance are the entry's. -/
@@ -117,14 +117,28 @@ theorem permits_readOnly {m μ : Mutability} (h : Program.permits m μ = true)
   cases m <;> cases μ <;> simp only [Program.permits] at h <;> first
     | exact absurd rfl hm | decide | exact absurd h (by decide)
 
-/-- **A read-only frame of the transient layer keeps both stores.**  In a
-`view` context (`Context.mutability` `pure` or `view`), a successful run of
+/-- A context that may change no state: static (`STATICCALL`, inherited), or
+of a read-only mutability. -/
+def ReadOnlyCtx (ctx : Context) : Prop := ctx.static = true ∨ ctx.mutability ≠ .nonpayable
+
+/-- A read-only or static caller's callee context is static. -/
+theorem calleeContext_static {ctx : Context} (hro : ReadOnlyCtx ctx) (μ : Mutability)
+    (forced : Bool) : (Program.calleeContext ctx μ forced).static = true := by
+  change (ctx.static || forced || (ctx.mutability != .nonpayable) || (μ != .nonpayable)) = true
+  rcases hro with hs | hμ
+  · simp only [hs, Bool.true_or]
+  · have hne : (ctx.mutability != .nonpayable) = true := by
+      simpa only [bne_iff_ne, ne_eq] using hμ
+    simp only [hne, Bool.or_true, Bool.true_or]
+
+/-- **A read-only or static frame of the transient layer keeps both stores.**
+In a static context, or a `view`/`pure` one, a successful run of
 any effect tree (transient reads and writes, ordinary fragments, nested
 self-calls, caught failures) ends with the entry's transient cells and the
 entry's persistent globals: `function peek() view returns (uint) { return
 count; }` over `uint transient count`. -/
-theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L α)
-    {ctx : Context} {s t : FrameState C L} {v : α} (hμ : ctx.mutability ≠ .nonpayable)
+theorem Program.static_preserves_all {L : Layout} {α : Type} (body : Program C L α)
+    {ctx : Context} {s t : FrameState C L} {v : α} (hμ : ReadOnlyCtx ctx)
     (success : Program.run body ctx s = .ok (v, t)) :
     t.cells = s.cells ∧ globals t.base = globals s.base := by
   induction body generalizing ctx s t with
@@ -155,9 +169,13 @@ theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L 
   | write i value =>
     change (if ctx.mutability != .nonpayable || ctx.static then Except.error THalt.revert
       else Except.ok ((), { s with cells := Store.set i value s.cells })) = .ok (v, t) at success
-    have hne : (ctx.mutability != .nonpayable) = true := by
-      simpa only [bne_iff_ne, ne_eq] using hμ
-    simp only [hne, Bool.true_or, if_true] at success
+    have hne : (ctx.mutability != .nonpayable || ctx.static) = true := by
+      rcases hμ with hs | hm
+      · simp only [hs, Bool.or_true]
+      · have h' : (ctx.mutability != .nonpayable) = true := by
+          simpa only [bne_iff_ne, ne_eq] using hm
+        simp only [h', Bool.true_or]
+    simp only [hne, if_true] at success
     cases success
   | ordinary μ P within =>
     change (if Program.ordinaryAllowed ctx μ P then
@@ -165,15 +183,20 @@ theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L 
       else Except.error THalt.revert) = .ok (v, t) at success
     split at success
     · rename_i allowed
-      have hp : Program.permits ctx.mutability μ = true := by
-        simp only [Program.ordinaryAllowed, Bool.and_eq_true] at allowed
-        exact allowed.1
+      simp only [Program.ordinaryAllowed, Bool.and_eq_true] at allowed
       cases ran : P.run s.base with
       | error e => rw [ran] at success; cases success
       | ok o =>
         rw [ran] at success
         cases success
-        exact ⟨rfl, frame_globals (Prog.run_frame P within 0 ran).1 (permits_readOnly hp hμ)⟩
+        refine ⟨rfl, ?_⟩
+        rcases hμ with hs | hm
+        · have hv : Prog.within .view P = true := by
+            have h2 := allowed.2
+            simp only [hs, Bool.not_true, Bool.false_or] at h2
+            exact h2
+          exact frame_globals (Prog.run_frame P hv 0 ran).1 view_ne_nonpayable
+        · exact frame_globals (Prog.run_frame P within 0 ran).1 (permits_readOnly allowed.1 hm)
     · cases success
   | selfCall μ forced body ih =>
     change (if Program.permits ctx.mutability μ then
@@ -188,7 +211,7 @@ theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L 
         rw [ran] at success
         cases success
         obtain ⟨h₁, h₂⟩ := ih (ctx := Program.calleeContext ctx μ forced) (s := s.enterSelf)
-          (t := child) (v := v) (permits_readOnly hp hμ) ran
+          (t := child) (v := v) (Or.inl (calleeContext_static hμ μ forced)) ran
         refine ⟨h₁, ?_⟩
         have e : globals (s.resume child).base = globals child.base := rfl
         rw [e, h₂]
@@ -211,6 +234,15 @@ theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L 
       cases success
       exact ih hμ ran
 
+/-- **A read-only frame of the transient layer keeps both stores.**  In a
+`view` context (`Context.mutability` `pure` or `view`): `function peek() view
+returns (uint) { return count; }` over `uint transient count`. -/
+theorem Program.readOnly_preserves {L : Layout} {α : Type} (body : Program C L α)
+    {ctx : Context} {s t : FrameState C L} {v : α} (hμ : ctx.mutability ≠ .nonpayable)
+    (success : Program.run body ctx s = .ok (v, t)) :
+    t.cells = s.cells ∧ globals t.base = globals s.base :=
+  Program.static_preserves_all body (Or.inr hμ) success
+
 /-- A transient write in a read-only context reverts, whatever the cell and
 value (`function f() view { count = 1; }` is rejected at run time here as
 solc rejects it statically). -/
@@ -222,6 +254,20 @@ theorem Program.write_readOnly {L : Layout} {p : PrimTy} (i : Slot L p) (value :
   have hne : (ctx.mutability != .nonpayable) = true := by
     simpa only [bne_iff_ne, ne_eq] using hμ
   simp only [hne, Bool.true_or, if_true]
+
+/-- An ordinary fragment that is not `view` reverts in a static context
+(`STATICCALL` to a function that writes `saved`). -/
+theorem Program.ordinary_static {L : Layout} (μ : Mutability) (P : Prog C [] [])
+    (within : Prog.within μ P = true) (hv : Prog.within .view P = false) {ctx : Context}
+    (hs : ctx.static = true) (s : FrameState C L) :
+    Program.run (Program.ordinary μ P within) ctx s = .error .revert := by
+  change (if Program.ordinaryAllowed ctx μ P then
+    (do let o ← P.run s.base; Except.ok ((), { s with base := o.st }))
+    else Except.error THalt.revert) = _
+  have h : Program.ordinaryAllowed ctx μ P = false := by
+    simp only [Program.ordinaryAllowed, hs, hv, Bool.not_true, Bool.or_self, Bool.and_false]
+  rw [h]
+  rfl
 
 /-- A transient write in a static context reverts. -/
 theorem Program.write_static {L : Layout} {p : PrimTy} (i : Slot L p) (value : p.Denote)

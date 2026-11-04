@@ -56,12 +56,12 @@ namespace Transient
 
 open Solidity.Transient
 
-/-- **The transient layer's modal fact, with its frame.**  In a read-only
-context, a proved `Holds m body post` strengthens to one whose postcondition
+/-- **The transient layer's modal fact, with its frame.**  In a read-only or
+static context (`ReadOnlyCtx`), a proved `Holds m body post` strengthens to one whose postcondition
 also says both stores are the entry's. -/
 theorem holds_readOnly {L : Layout} {α : Type} {m : Modality} {body : Program C L α}
     {post : α → FrameState C L → Prop} {ctx : Context} {s : FrameState C L}
-    (hμ : ctx.mutability ≠ .nonpayable) (proved : Holds m body post ctx s) :
+    (hμ : ReadOnlyCtx ctx) (proved : Holds m body post ctx s) :
     Holds m body (fun v t => post v t ∧ t.cells = s.cells ∧ globals t.base = globals s.base)
       ctx s := by
   unfold Holds at proved ⊢
@@ -72,12 +72,13 @@ theorem holds_readOnly {L : Layout} {α : Type} {m : Modality} {body : Program C
   | ok result =>
     obtain ⟨v, t⟩ := result
     rw [ran] at proved
-    exact ⟨⟨proved.1, Program.readOnly_preserves body hμ ran⟩, proved.2⟩
+    exact ⟨⟨proved.1, Program.static_preserves_all body hμ ran⟩, proved.2⟩
 
-/-- The frame alone, for any read-only body that does not panic: `Holds .box`
+/-- The frame alone, for any body in a read-only or static context that
+does not panic (`STATICCALL` to `function peek() view`): `Holds .box`
 with `post := True` is the halt policy only. -/
 theorem holds_frame {L : Layout} {α : Type} {body : Program C L α} {ctx : Context}
-    {s : FrameState C L} (hμ : ctx.mutability ≠ .nonpayable)
+    {s : FrameState C L} (hμ : ReadOnlyCtx ctx)
     (noPanic : Program.run body ctx s ≠ .error .panic) :
     Holds .box body (fun _ t => t.cells = s.cells ∧ globals t.base = globals s.base) ctx s := by
   have h : Holds .box body (fun _ _ => True) ctx s := by

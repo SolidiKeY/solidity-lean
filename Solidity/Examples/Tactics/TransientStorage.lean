@@ -116,21 +116,33 @@ theorem false_persistent_transient : successive ≠ .ok (7, 7, 3) := by decide +
 theorem static_read : observe (Program.selfCall .view true (Program.read count)) =
     .ok (PrimTy.dflt .uint, 0, 0) := by decide +kernel +kernel
 /-- The per-example frame checks below are instances of the mutability
-metatheorems (`Theory/Mutability/View.lean`, S3.3): a static or read-only
+metatheorems (`Theory/Mutability/View.lean`; the frame of `view_reentry_frame` from `Theory/Mutability/Closer.lean`, S3.3): a static or read-only
 write, a `pure` read and a read-only call of a `nonpayable` callee revert for
 every cell, value and entry state. -/
 theorem static_write : Program.run (Program.write count nine) { static := true } initial =
     .error .revert := Theory.Mutability.Transient.Program.write_static count nine rfl initial
+/-- A static `this.f()` whose nested call writes `count = 9;` reverts. -/
 theorem inherited_static_write : observe (Program.selfCall .nonpayable true
     (Program.selfCall .nonpayable false (Program.write count nine))) = .error .revert := by
   decide +kernel
+/-- A static `this.f()` whose body runs `saved = 3;` reverts. -/
 theorem static_ordinary_write : observe (Program.selfCall .nonpayable true
     (ordinary put3 (by decide +kernel +kernel))) = .error .revert := by decide +kernel +kernel
+/-- `this.f{static}()` where `f` writes `saved = 3;`: the static callee's
+ordinary write reverts in every entry state (`Program.ordinary_static`). -/
+theorem static_ordinary_write_all (s : FrameState C layout) :
+    Program.run (ordinary put3 (by decide +kernel +kernel)) { static := true } s =
+      .error .revert :=
+  Theory.Mutability.Transient.Program.ordinary_static .nonpayable put3 _ (by decide +kernel) rfl s
+/-- `count = 9;` in a `view` function reverts (`Program.write_readOnly`). -/
 theorem view_write : Program.run (Program.write count nine) { mutability := .view } initial =
     .error .revert :=
   Theory.Mutability.Transient.Program.write_readOnly count nine (by decide) initial
+/-- Reading `count` in a `pure` function reverts (`Program.read_pure`). -/
 theorem pure_read : Program.run (Program.read count) { mutability := .pure } initial =
     .error .revert := Theory.Mutability.Transient.Program.read_pure count rfl initial
+/-- A `view` function calling a `nonpayable` one reverts
+(`Program.selfCall_nonpayable_readOnly`). -/
 theorem view_mutable_call : Program.run
     (Program.selfCall .nonpayable false (Program.pure (C := C) (L := layout) ()))
     { mutability := .view } initial = .error .revert :=
@@ -143,7 +155,7 @@ theorem view_reentry_frame (s : FrameState C layout) :
       (fun _ t => t.cells = s.cells ∧
         Theory.Mutability.globals t.base = Theory.Mutability.globals s.base)
       { mutability := .view } s :=
-  Theory.Mutability.Transient.holds_frame (by decide) (by
+  Theory.Mutability.Transient.holds_frame (Or.inr (by decide)) (by
     intro h
     change (if Program.permits .view .view then _ else _) = _ at h
     simp only [Program.permits] at h

@@ -15,8 +15,17 @@ the flag and checks it before the body runs, so the body is irrelevant:
 * one transaction of a lifetime model, `Lifetime.System.run`;
 * a deployment, `Contract.deployT` (the constructor's `payable`);
 * a frame of the contract world, `ContractWorld.World.enter` and
-  `World.callFrame` (a static frame refuses value too);
+  `World.callFrame`; a static frame refuses value too (`World.enter_static`);
 * a transaction of the transient layer, `Transient.Program.transact`.
+
+Not covered here: `World.create` (its frame, `World.deployFrame`, is
+private to `Semantics/ContractWorld.lean`; it enters through `World.enter`
+with the constructor's flag, so `World.enter_nonpayable` is its step),
+`World.deployLibrary`, and the ABI dispatch of `Semantics/Dispatch.lean` and
+`Semantics/AbiEntry*.lean`, which model no `callvalue` check.  The flag of a
+`Lifetime.System` action or a `ContractWorld.Entry` is the model's: no
+theorem here ties it to the declared `FunDecl.payable` (a constructor's,
+`Contract.ctor`, is read directly by `deployT`).
 
 `msg.value > 0` is `tx.msgValue.1 ≠ 0` (a `uint` is non-negative).
 -/
@@ -73,6 +82,21 @@ theorem World.enter_nonpayable (w : World contracts) {k : K} (self : Address)
   · rfl
   · have h : ((!false || ctx.isStatic) && ctx.value.1 != 0) = true := by
       simpa only [Bool.not_false, Bool.true_or, Bool.true_and, bne_iff_ne, ne_eq] using hv
+    simp only [h, if_true]
+
+omit [DecidableEq K] in
+/-- **Entering a static frame with value reverts**, payable or not
+(`STATICCALL` carries no value). -/
+theorem World.enter_static (w : World contracts) {k : K} (self : Address)
+    (ctx : ContractWorld.Context) (st : Storage (contracts k)) (payable : Bool)
+    (hs : ctx.isStatic = true) (hv : ctx.value.1 ≠ 0) :
+    w.enter self ctx st payable = .error .revert := by
+  unfold World.enter
+  split
+  · rfl
+  · have h : ((!payable || ctx.isStatic) && ctx.value.1 != 0) = true := by
+      have hv' : (ctx.value.1 != 0) = true := by simpa only [bne_iff_ne, ne_eq] using hv
+      simp only [hs, Bool.or_true, hv', Bool.and_self]
     simp only [h, if_true]
 
 /-- **A call frame of a non-payable entry reverts on value**, whatever the

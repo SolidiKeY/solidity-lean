@@ -224,7 +224,7 @@ theorem CallRet.enterT_withOutside {Γ Γ' rs ps : Ctx} (w : Outside C) (ret : C
 section Progs
 
 /-- The `within .pure` of a statement that only `nonpayable` admits. -/
-theorem pure_ne_nonpayable : (Mutability.pure == .nonpayable) = false := rfl
+theorem pure_beq_nonpayable : (Mutability.pure == .nonpayable) = false := rfl
 
 /-- A call whose arguments read no state, with no memory return, of a body
 that commutes with replacing the outside, commutes with it too. -/
@@ -323,7 +323,7 @@ theorem Stmt.run_withOutside : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') → Stmt.w
   | _, _, .callReceiverPush .., h, _, _ => absurd h Bool.false_ne_true
   | _, _, .catchData .., h, _, _ => absurd h Bool.false_ne_true
   | _, _, .tryCall .., h, _, _ => by
-    simp only [Stmt.within, pure_ne_nonpayable, Bool.false_and, Bool.false_eq_true] at h
+    simp only [Stmt.within, pure_beq_nonpayable, Bool.false_and, Bool.false_eq_true] at h
   | _, _, .ite c thn els, h, σ, w => by
     have h' : (c.readsIn .pure && Prog.within .pure thn && Prog.within .pure els) = true := h
     simp only [Bool.and_eq_true] at h'
@@ -458,7 +458,7 @@ theorem Prog.pure_outside {Γ Γ' : Ctx} {P : Prog C Γ Γ'} (hw : Prog.within .
     {σ : State C Γ} {o : Out C σ.H Γ'} (h : Prog.run σ P = .ok o) :
     outside o.st = outside σ := by
   have hg := (Prog.run_frame P hw 0 h).1
-  have hk := hg.keeps readOnly_pure
-  simp only [outside, hk.1, hk.2, hg.selfBalance readOnly_pure, hg.tx]
+  have hk := hg.keeps pure_ne_nonpayable
+  simp only [outside, hk.1, hk.2, hg.selfBalance pure_ne_nonpayable, hg.tx]
 
 end Solidity.Theory.Mutability

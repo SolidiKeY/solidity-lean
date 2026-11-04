@@ -23,12 +23,15 @@ def arith : Prog C [] [.val .uint] := sol[C]{ uint y = 2; y = y * 3; assert(y ==
 /-- A `nonpayable` body: writes `saved`. -/
 def put5 : Prog C [] [] := sol[C]{ saved = 5; }
 
+/-- `require(saved == 0);` is `view`. -/
 theorem peek_view : Prog.within .view peek = true := by decide +kernel
+/-- `uint y = 2; y = y * 3; assert(y == 6);` is `pure`. -/
 theorem arith_pure : Prog.within .pure arith = true := by decide +kernel
 
 /-- Negative controls of the classifier: a write is not `view`, a storage read
 is not `pure`. -/
 theorem put5_not_view : Prog.within .view put5 = false := by decide +kernel
+/-- `require(saved == 0);` reads storage: not `pure`. -/
 theorem peek_not_pure : Prog.within .pure peek = false := by decide +kernel
 
 /-- The storage after `saved = 5;`. -/
@@ -87,6 +90,7 @@ theorem peek_depends : isOkB (Prog.run (State.init C) peek) = true ∧
 def entry (payable : Bool) : Lifetime.System C Unit Unit :=
   { deploy := fun _ => .nil, call := fun _ => put5, payable := fun _ => payable }
 
+/-- A transaction paying 1 wei to address 1. -/
 def paid : TTx := { msgValue := ⟨1, rfl⟩, selfAddress := ⟨1, rfl⟩ }
 
 /-- **Witness**: the non-payable entry, called with value, reverts. -/
@@ -101,6 +105,52 @@ example : isOkB ((entry true).run (Lifetime.World.ofState (State.init C)) () pai
 /-- **Negative control**: without value the non-payable entry commits. -/
 example : isOkB ((entry false).run (Lifetime.World.ofState (State.init C)) ()
     { selfAddress := ⟨1, rfl⟩ }) = true := by
+  decide +kernel
+
+/-! ## Transient-layer payable: witness and control -/
+
+/-- **Witness**: a non-payable transient-layer transaction with value
+reverts, whatever its effects. -/
+theorem transact_reverts :
+    Transient.Program.transact (L := []) (Transient.Program.pure (C := C) ())
+      (Lifetime.World.ofState (State.init C)) paid false {} = .error .revert :=
+  transact_nonpayable _ _ paid {} (by decide)
+
+/-- **Negative control**: the payable transaction commits. -/
+example : isOkB (Transient.Program.transact (L := []) (Transient.Program.pure (C := C) ())
+    (Lifetime.World.ofState (State.init C)) paid true {}) = true := by decide +kernel
+
+/-! ## Assignable (S3.2): witness and control -/
+
+/-- `uint a; uint b;` -/
+def D : Contract := contract!{ uint a; uint b; }
+
+/-- `a = 1;` writes the root `a` only. -/
+def setA : Prog D [] [] := sol[D]{ a = 1; }
+
+/-- **Witness**: `a = 1;` under `assignable a;` passes the check. -/
+theorem setA_check : assignableCheck setA [.root "a"] = true := by decide +kernel
+
+/-- **Negative control**: under `assignable b;` it does not. -/
+theorem setA_check_b : assignableCheck setA [.root "b"] = false := by decide +kernel
+
+/-- The reference to `b`, and to `a`. -/
+def refB : SRef D (.prim .uint) := SRef.ofRoot "b" rfl
+def refA : SRef D (.prim .uint) := SRef.ofRoot "a" rfl
+
+/-- The run of `a = 1;` from the initial state, as an `Out` (it returns). -/
+theorem setA_ok : isOkB (Prog.run (State.init D) setA) = true := by decide +kernel
+
+/-- **Witness**: every run of `a = 1;` keeps `b` (theorem, any state). -/
+theorem setA_keeps_b (σ : State D []) {o : Out D σ.H []} (h : Prog.run σ setA = .ok o) :
+    o.st.storage.find refB = σ.storage.find refB :=
+  (assignableCheck_sound setA_check h).find refB (by decide)
+
+/-- **Negative control**: the root the clause names does change, so the frame
+is not vacuous: after `a = 1;` from the initial state `a` reads `1`, not `0`. -/
+theorem setA_changes_a :
+    ((Prog.run (State.init D) setA).toOption.map (·.st.storage.find refA)) ≠
+      some ((State.init D).storage.find refA) := by
   decide +kernel
 
 end Solidity.Examples.Tactics.Mutability
@@ -157,3 +207,17 @@ info: 'Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable' depe
 #guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.holds_readOnly
 /-- info: 'Solidity.Theory.Mutability.Transient.holds_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.holds_frame
+/--
+info: 'Solidity.Theory.Mutability.Transient.Program.static_preserves_all' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.Program.static_preserves_all
+/--
+info: 'Solidity.Theory.Mutability.Transient.Program.ordinary_static' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in #print axioms Solidity.Theory.Mutability.Transient.Program.ordinary_static
+/-- info: 'Solidity.Theory.Mutability.ContractWorld.World.enter_static' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Theory.Mutability.ContractWorld.World.enter_static

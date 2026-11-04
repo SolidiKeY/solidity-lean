@@ -114,7 +114,7 @@ theorem assignableCheck_sound {Γ Γ' : Ctx} {P : Prog C Γ Γ'} {locs : List Sp
   unfold assignableCheck at hc
   rw [Bool.or_eq_true] at hc
   rcases hc with hv | hm
-  · exact Prog.frames_readOnly hv readOnly_view _ h
+  · exact Prog.frames_readOnly hv view_ne_nonpayable _ h
   · cases hs : Prog.storeAt P with
     | none => rw [hs] at hm; cases hm
     | some M =>
