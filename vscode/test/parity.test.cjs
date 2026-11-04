@@ -4,10 +4,10 @@ const assert=require('node:assert/strict');
 const {mkdtempSync,writeFileSync,readFileSync,rmSync,mkdirSync}=require('node:fs');
 const {tmpdir}=require('node:os');
 const {join,resolve}=require('node:path');
-const {LspFrames,statistics,normalize,differences,summarize,ProcessSampler}=require('../parity/core.cjs');
+const {LspFrames,statistics,normalize,differences,summarize,scaling,protocol,hostEvidenceErrors,ProcessSampler}=require('../parity/core.cjs');
 const {validate,scan}=require('../parity/discover.cjs');
 const {parse,launch}=require('../parity/run.cjs');
-const {workload}=require('../parity/workloads.cjs');
+const {workload,verificationOutcomes,servicesWorkload,assertServiceResponse}=require('../parity/workloads.cjs');
 const {observe}=require('../parity/observe.cjs');
 const {activity}=require('../parity/analyze.cjs');
 
@@ -39,6 +39,59 @@ test('statistics use median and nearest-rank p95; failed trials remain visible',
     {target:'local',workers:1,cache:'none',warmup:true,status:'passed',result:{metrics:{hoverMs:100}}}];
   const [group]=summarize(runs);assert.equal(group.trials,2);assert.equal(group.timeoutRate,.5);assert.equal(group.failures,1);assert.equal(group.metrics.hoverMs.median,4);
 });
+test('failed launches cannot improve latency or manufacture parallel scaling',()=>{
+  const runs=[{target:'local',workers:1,cache:'none',status:'passed',result:{metrics:{initialVerificationMs:1000}}},
+    {target:'local',workers:1,cache:'none',status:'broken',result:{metrics:{initialVerificationMs:1}}},
+    {target:'local',workers:2,cache:'none',status:'timeout',result:{metrics:{initialVerificationMs:1}}}];
+  const groups=summarize(runs);
+  assert.equal(groups[0].metrics.initialVerificationMs.median,1000);assert.equal(groups[0].validTrials,1);
+  assert.equal(groups[0].excludedTimingTrials,1);assert.equal(groups[1].metrics.initialVerificationMs.n,0);
+  assert.equal(scaling(groups)[1].speedup,null);assert.equal(groups[1].timeoutRate,1);
+});
+test('every verification scenario must check expected proof outcomes, not just terminal counts',()=>{
+  const local=status=>({errors:[],results:[{function:'f0',status}]}),dafny=status=>({namedVerifiables:[{status}]});
+  for(const status of ['pending','refuted','unsupported','error'])assert.throws(()=>verificationOutcomes('local',local(status),1),/Expected proved/);
+  assert.throws(()=>verificationOutcomes('dafny',dafny(4),1),/Expected proved/);
+  assert.throws(()=>verificationOutcomes('dafny',dafny(2),1),/Expected proved/);
+  verificationOutcomes('local',local('proved'),1);verificationOutcomes('dafny',dafny(5),1);
+  verificationOutcomes('local',local('refuted'),1,'failed');verificationOutcomes('dafny',dafny(4),1,'failed');
+  assert.throws(()=>verificationOutcomes('local',local('pending'),1,'failed'),/Expected failed/);
+  assert.throws(()=>verificationOutcomes('local',{errors:[],results:[{function:'f0',status:'proved'},{function:'f0',status:'proved'}]},2),/unique/);
+  assert.throws(()=>verificationOutcomes('local',{errors:[],results:[{function:'f99',status:'proved'}]},1),/exact paired/);
+});
+test('service observations reject empty hover, wrong navigation and arbitrary rename edits',()=>{
+  const fixture=servicesWorkload('dafny'),uri='file:///services.dfy';
+  assert.throws(()=>assertServiceResponse('hover',fixture,uri,{contents:[]}),/nonempty/);
+  assert.throws(()=>assertServiceResponse('hover',fixture,uri,{contents:{}}),/nonempty/);
+  assert.throws(()=>assertServiceResponse('definition',fixture,uri,{uri,range:fixture.callRange}),/exact declaration/);
+  assert.throws(()=>assertServiceResponse('rename',fixture,uri,{changes:{[uri]:[{range:fixture.callRange,newText:'wrong'},{range:fixture.declarationRange,newText:'wrong'}]}}),/replacement text/);
+});
+test('fresh report identity cannot conceal inconsistent or invented scenario passes',()=>{
+  const config={runId:'fresh',target:'local'},base={schemaVersion:1,...config,status:'passed',scenarios:[{id:'initial-verification',status:'passed'}],checks:['initial-verification']};
+  assert.deepEqual(hostEvidenceErrors(base,config),[]);
+  for(const change of [{scenarios:[]},{scenarios:[{id:'initial-verification',status:'broken'}]},
+    {scenarios:[...base.scenarios,...base.scenarios]},{checks:['initial-verification','invented']}])assert.ok(hostEvidenceErrors({...base,...change},config).length);
+  const timedOut={...base,status:'timeout',checks:[],scenarios:[{id:'initial-verification',status:'timeout'}]};
+  assert.deepEqual(hostEvidenceErrors(timedOut,config),[],'legitimate failure evidence must be retained');
+});
+test('empty, unfinalized and corrupt recordings cannot certify an observed protocol',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'parity-trace-')),file=join(dir,'lsp.jsonl');
+  try{
+    writeFileSync(file,'');assert.equal(protocol(file).status,'unexamined');
+    const message={direction:'server',message:{jsonrpc:'2.0',method:'initialized',params:{}}};
+    writeFileSync(file,JSON.stringify(message)+'\n');assert.equal(protocol(file).status,'partial');
+    writeFileSync(file,[message,{direction:'server',framingFinalized:true},{direction:'client',framingFinalized:true}].map(r=>JSON.stringify(r)).join('\n'));
+    assert.equal(protocol(file).status,'observed');
+    require('node:fs').appendFileSync(file,'\n'+JSON.stringify({direction:'server',error:'Truncated LSP frame'}));
+    assert.equal(protocol(file).status,'broken');
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test('independent audit keeps all upstream registration sites explicitly unexamined',()=>{
+  const {validate}=require('../parity/audit.cjs');
+  const audit=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-audit.json'),'utf8'));
+  assert.deepEqual(validate(audit),[]);audit.testFiles[0].cases.push({id:'fake',status:'complete',runtimeEvidence:[]});
+  assert.ok(validate(audit).length);
+});
 test('unsupported and untested capabilities cannot be marked complete',()=>{
   const inventory=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
   assert.deepEqual(validate(inventory),[]);
@@ -53,7 +106,8 @@ test('inventory shrinkage and invented upstream evidence fail the offline gate',
   assert.ok(validate(tampered).some(e=>e.includes('unregistered upstream evidence')));
 });
 test('runner rejects ambiguous options and invalid benchmark dimensions',()=>{
-  for(const args of [['--trials','0'],['--workers','0'],['--workers','1,1'],['--cache','pretend'],['--targets','fake'],['--targets','local,local'],['--obligations','1001'],['--unknown','x'],['--code']]) assert.throws(()=>parse(args));
+  for(const args of [['--trials','0'],['--workers','0'],['--workers','5'],['--workers','1,1'],['--cache','pretend'],['--targets','fake'],['--targets','local,local'],['--obligations','1001'],['--unknown','x'],['--code']]) assert.throws(()=>parse(args));
+  assert.deepEqual(parse(['--targets','dafny','--workers','8']).workers,[8]);
   assert.deepEqual(parse(['--workers','1,2,4']).workers,[1,2,4]);
   assert.throws(()=>workload('local',0));assert.match(workload('local',2,true),/@custom:key ensures \\result == 2/);
   assert.match(workload('dafny',2,true),/ensures r == 2/);

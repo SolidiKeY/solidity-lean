@@ -12,15 +12,15 @@ function activity(resources) {
   for(const sample of resources.samples||[]) {
     let solvers=0,solverCpu=0,leanCpu=0;
     for(const process of sample.processes) {
-      const previous=old.get(process.pid),active=previous!==undefined&&process.ticks>previous;
+      const previous=old.get(process.pid),active=previous!==undefined&&previous.start===process.start&&process.ticks>previous.ticks;
       if(/^z3(?:-|$)/.test(process.name)){solvers++;if(active)solverCpu++;}
       if(process.name==='lean'&&active)leanCpu++;
-      old.set(process.pid,process.ticks);
+      old.set(process.pid,{start:process.start,ticks:process.ticks});
     }
     peakSolvers=Math.max(peakSolvers,solvers);activeSolvers=Math.max(activeSolvers,solverCpu);activeLean=Math.max(activeLean,leanCpu);
   }
   return {status:'observed',peakLivingSolverProcesses:peakSolvers,maxCpuActiveSolverProcesses:activeSolvers,maxCpuActiveLeanProcesses:activeLean,
-    scope:'Entire scenario suite. Distinct processes accrued ticks in the same sample interval; this does not prove simultaneous instructions or isolate the initial-verification phase.'};
+    scope:'Supplied sample window. Distinct processes accrued ticks in the same sample interval; this does not prove simultaneous instructions or isolate solver time.'};
 }
 function build(paths,invalidatedPaths=[]) {
   const datasets=paths.map(path=>{

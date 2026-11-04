@@ -189,3 +189,14 @@ The local structured IR implementation is ready for review, but final validation
 remains open. The sealed handoff records actual commands, source bindings,
 resource evidence and the ownership approval needed to resolve that blocker.
 No RUNTIME_GATE_PASS or whole-assignment completion is claimed.
+
+## Published master adoption
+
+The lane adopts published master 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5.
+Its accepted Selection increment imports only LiteralSelection and its controls
+from producer effc78df; it does not integrate or validate the remaining lane.
+All local Selection source files are unchanged by this adoption. Generated
+roots are regenerated and the area map retains each module exactly once.
+The imported nonvacuity audit is historical at its frozen input, not an audit
+of these later producers. The source/Bridge premises and full lane validation
+obligations above remain open; announced cache delivery is still pending.

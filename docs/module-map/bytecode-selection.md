@@ -60,3 +60,4 @@
 | `Backend/Selection/IRLoopLowering.lean` | Recursive actual IR loop lowering in both directions using finite witnesses derived from loopRun and complete intermediate frames. |
 | `Backend/Selection/StructuredIRComposition.lean` | Checked assembly factory consuming recursively constructed framed lowering and existing shape/room, preserving assembly refusal. |
 | `Backend/Selection/StructuredIRControls.lean` | Closed nested IR-loop/branch byte compositions, independent named IR-turn witnesses, false-arm/wrong-distance and frame/escaping-skip/underflow controls. |
+| `Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
