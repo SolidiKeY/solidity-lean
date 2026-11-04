@@ -698,3 +698,65 @@ token splitting, simple-root discrimination, token-level conditional
 uniqueness/association, remaining universal compound fuel coverage, full
 repository gates and whole-scope acceptance/reviews/handoff. SG-CEX-01
 remains OPEN/REFUTED. The persistent goal remains active and incomplete.
+
+
+## Checkpoint J: mixed self-delimiting block/control splitting
+
+MixedSplit.lean strengthens balanced-block decomposition to arbitrary finite
+mixed sequences of balanced braced blocks, unchecked braced blocks and empty
+return/break/continue leaves. Chunk is a token-boundary predicate, not an AST.
+IntrinsicItemChunks is indexed by existing intrinsic item lists and records
+their exact successful yield/layout plus the boundary of every segment.
+Its nil/cons construction threads the actual intermediate layout and uses
+the existing list-yield composition theorem.
+
+chunk_frame proves a deterministic suffix scanner returns the exact remainder
+for every represented segment and arbitrary tail. This proves nonemptiness,
+unique prefix/remainder splitting and arbitrary-length mixed token-segment
+list uniqueness, including empty/nonempty list cases. intrinsic_mixed_split
+transfers the segment conclusion to actual intrinsic item yields across
+contexts/layouts. It does not conclude AST equality, parsing success or
+general mixed statement-list completeness. Expression-bearing unbraced
+statements remain outside this proved fragment; their original obligation
+is still open, not replaced by a new exclusion or premise.
+
+The inhabited control is an actual five-item indexed list containing an
+empty return, nested block, unchecked block, break and continue. Its yield
+is exact for arbitrary residual layout, and controls also exhibit a concrete
+nonempty fragment layout and arbitrary suffix. All five boundary alternatives
+are inhabited. No resegmentation into different Chunk segments is possible.
+Early-close tokens and merged control statements are proved not one Chunk.
+A valid valued return is explicitly outside this scanner's empty-return
+fragment: its scanner none is not a Solidity grammar or parser refusal.
+Both reviewers requested that wording correction and verified the fix.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/MixedSplit.lean | pass, final warning fix | /workspace/h28-statement-grammar-evidence/run-1793807614109706221 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.MixedSplit | pass, final source | /workspace/h28-statement-grammar-evidence/run-1793807633409190259 |
+| runtime.py diag tests/h28-sol/statement-grammar/MixedSplitControls.lean | pass, final wording | /workspace/h28-statement-grammar-evidence/run-1793807563037886302 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/MixedSplit.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793807646135234261 |
+| runtime.py gate tests/h28-sol/statement-grammar/MixedSplitControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793807596879600409 |
+
+The initial build took 0.75s timed wall and RSS 407336 KiB. Exact final timing,
+RSS, input hashes and process samples are in the final run directory.
+chunk_frame, chunk_nonempty and intrinsic_chunks_cons use propext;
+intrinsic_chunks_nil has no axioms. chunk_split, mixed_chunks_unique and
+intrinsic_mixed_split use propext and Quot.sound. Exact control axiom sets
+and public signatures are in source/gate logs. No custom axiom, budget raise,
+unsafe/native_decide, expression uniqueness or parser-success assumption was
+introduced. The first source attempt used an unavailable List lemma name
+(run-1793807355145339665); the actual core empty-append lemma fixed it.
+The first control attempt left an empty-tail membership alternative
+(run-1793807505258809796); explicit not_mem_nil/or_false fixed it.
+The initial successful source gate retained an unused-binder warning; the
+binder was renamed, then diagnostics/build/gate rerun without disabling any
+linter. All prior receipts remain retained. Separate read-only finder and
+skeptic pass source and inhabited controls without Lean/server/builds.
+The module is registered locally only.
+
+Remaining full scope: arbitrary syntax/atom balance, general mixed statement
+splitting, simple-root discrimination, token-level conditional uniqueness/
+association, remaining universal compound fuel coverage, full repository
+gates, whole-scope reviews/acceptance and final handoff. SG-CEX-01 remains
+OPEN/REFUTED. This is a completed backfill checkpoint, not whole-goal completion.

@@ -55,3 +55,4 @@ Solidity.Frontend.StatementGrammarH28.FixtureControls.Case43	Finite constructor 
 Solidity.Frontend.StatementGrammarH28.FixtureControls.Case44	Finite constructor fixture kernel certificate and inventory
 Solidity.Frontend.StatementGrammarH28.ElsePosition	Unique intrinsic nearest-else attachment positions
 Solidity.Frontend.StatementGrammarH28.TokenRoot	Actual yield fixed-head non-simple root discrimination
+Solidity.Frontend.StatementGrammarH28.MixedSplit	Intrinsic mixed block and control token boundary splitting
