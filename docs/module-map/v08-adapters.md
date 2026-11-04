@@ -465,3 +465,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Backend/StructuredFlow/WhileBreakCompiler.lean` | Mapped assignment-condition/immediate-break Source certificate to the existing scoped physical compiler. |
 | `Solidity/Backend/StructuredFlow/WhileBreakCompilerControls.lean` | Inhabited pipeline/value/fuel controls and visible false-condition/omitted-code/wrong-base negatives. |
+
+| `Backend/StructuredFlow/ReturnTailCompiler.lean` | Actual compiler of mapped captured-return selection and a conditionally suppressed primitive caller assignment. |
+| `Backend/StructuredFlow/ReturnTailCompilerControls.lean` | Inhabited true/false write controls, eager/omitted suffix negatives and caller-condition/private-selector alias observation. |
