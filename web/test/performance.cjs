@@ -39,7 +39,7 @@ async function main(){
     }
     await verify('cold proof including library preparation',expected);
     report.firstResultMs=performance.now()-start;
-    const libraries=await page.evaluate(async()=>(await(await fetch('/lean/manifest.json')).json()).libraries);
+    const libraries=report.trials[0].timings.kernelChecks.length?await page.evaluate(async()=>(await(await fetch('/lean/manifest.json')).json()).libraries):[];
     report.serializedLibraryBytes=libraries.reduce((sum,entry)=>sum+entry.size,0);
     assert.ok(report.serializedLibraryBytes<2500000000,'the browser library footprint must stay below the old broad-import build');
     for(const check of report.trials[0].timings.kernelChecks){
@@ -80,7 +80,7 @@ contract CalldataViews {
 }`);
       await solidityIDE.language('textDocument/documentSymbol',solidityIDE.editor.getModel());
     });
-    await verify(calldataProofs?'calldata proof-search regression':'calldata admission only (listing, no proof execution)',[['localAlias',calldataProofs?'proved':'ready'],['sliceRead',calldataProofs?'proved':'ready'],['writesCopy','unsupported']],{listing:!calldataProofs});
+    await verify(calldataProofs?'calldata certified regression':'unsupported calldata remains unknown without starting Lean',[['localAlias',calldataProofs?'proved':'unsupported'],['sliceRead',calldataProofs?'proved':'unsupported'],['writesCopy','unsupported']],{listing:!calldataProofs,certify:calldataProofs});
     assert.deepEqual(report.errors,[]);assert.deepEqual(report.external,[]);report.passed=true;
   }catch(error){
     report.failure=error.stack;

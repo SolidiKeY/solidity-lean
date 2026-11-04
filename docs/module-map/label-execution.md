@@ -52,3 +52,4 @@
 - Yul/LocalBoolIfElse.lean and Yul/Checks/LocalBoolIfElse.lean: conditional selection of independently indexed item scopes with concrete clean Source agreement.
 | `Yul/Adapters/AllocatedComputedFrame{,Controls}` | Actual allocation to complete canonical physical frame and whole-source unchanged writeback, with derived enlarged-heap support. |
 | `Yul/Adapters/P6CalldataHash{,Controls}` | Actual calldata conversion/allocation, bounded P6 copy and target KECCAK256 composition with explicit per-input concrete hash premise. |
+| `Bridge/SolidityBridge/HashBridge/QueryPrepend.lean` | Bounded revert-outcome-specs checkpoint; typed scope and retained premises are in the module. |

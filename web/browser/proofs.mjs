@@ -4,6 +4,7 @@ import {sourceLocations,sourceRange,sourceWitness} from '../../scripts/source-lo
 
 import {VerifierWorker} from './verifier-worker.mjs';
 import {prepareDirect,checkDirect,cancelDirect,abandonDirect} from './direct.mjs';
+import {unknownResult} from '../../vscode/src/direct-model.cjs';
 let legacy,sequence=0,progress;
 const jobs=new Set();
 function cancelJobs(){for(const job of jobs)job.cancelled=true;}
@@ -12,7 +13,7 @@ export function abandonProofs(reason){cancelJobs();legacy?.abandon(reason);aband
 async function prepareLegacyProofs(){legacy??=new VerifierWorker('/kernel-worker.js',progress);return legacy.boot();}
 export async function prepareProofs(onProgress){
   if(onProgress)progress=onProgress;
-  return await prepareDirect(progress)||await prepareLegacyProofs();
+  return await prepareDirect(progress)||{kind:'compiled-verifier-unavailable',version:'4.24.0'};
 }
 export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=600000}){
   const job={cancelled:false};jobs.add(job);
@@ -34,10 +35,13 @@ export async function verifyInBrowser({compiled,text,name,options={},timeoutMs=6
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
     live();
-    const direct=await checkDirect(contract,options,Math.max(1,deadline-Date.now()));
+    const direct=await checkDirect(contract,options,Math.max(1,deadline-Date.now())) ||
+      (options.certify!==true&&!options.auditPreconditions
+        ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
     live();
     if(direct){
       directChecks.push({contract:contract.name,...direct.timings});
+      errors.push(...(direct.errors||[]).map(error=>({source,contract:contract.name,...error})));
       for(const row of direct.results){
         const range=locate(contract.name,row);
         results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),...(row.counterexample?{counterexample:sourceWitness(primary,contract.name,row)}:{})});

@@ -281,6 +281,24 @@
 | `Backend/InternalFlow/RuntimeFrameResultAgreement.lean` | Successful-output agreement under existing typed result and execution operators, with no failed-state or termination assertion. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingCoherence.lean` | Exact allocating-family source-return coherence at all quotation pairs and a populated all-sufficient-index caller control. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingPrefixes.lean` | Actual allocating fixed-image running prefixes, reached active parameter frames and exact allocator growth, with populated horizon/stop/countercontrols. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingResume.lean` | Proved residual source continuation for allocating target prefixes and exact completed-source/reached-heap coupling, with native caller identity controls. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingHistory.lean` | Actual allocating descent saved-parent payload history and protected low-frame exterior. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingReturn.lean` | Matched completed-source and target allocating unwind endpoint with exact growth and populated controls. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingFailure.lean` | Actual allocation-before-read-failure source/native-call and target image transport, with represented intermediate and halt controls. |
+| `Backend/InternalFlow/RuntimeFrameV3CallerReframe.lean` | Caller-local reconstruction over reached heap/globals, with an inhabited base-one allocating recursive call endpoint. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarArgument.lean` | Actual nonidentity scalar argument entry, stack-held caller save and allocating recursive return restoration. |
+| `Backend/InternalFlow/RuntimeFrameV3MemoryArgument.lean` | Distinct memory argument entry, real two-word caller stack save and typed allocating recursive return restoration. |
+| `Backend/InternalFlow/RuntimeFrameV3ArgumentEntry.lean` | General exact typed argument output and checked entry/caller frames, with public compiler success/failure clients and derived scratch safety. |
+| `Backend/InternalFlow/RuntimeFrameV3ArgumentCall.lean` | Actual public compiled argument prefix composed with a source-coupled allocating recursive return and retained caller frame. |
+| `Backend/InternalFlow/RuntimeFrameV3ArgumentCalleeFailure.lean` | Actual checked argument entry and reached capacity transport allocation-before-read bare revert, with a populated successful intermediate and suffix controls. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingZero.lean` | Generic zero-counter image and arbitrary-caller checked-prefix composition without unreachable allocation ownership, with a populated no-owner control. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingArguments.lean` | Arbitrary-context positive allocating argument/call composition with real reached capacity, caller export and complete inhabited endpoint. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingQuotations.lean` | All sufficient source quotations share the actual allocating argument/call target endpoint, with exact shallow exhaustion and mismatch controls. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOutcome.lean` | Uniform zero, allocating return and first-read failure with source-reached demand, adequate quotation and returning-path-only frame obligations. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveIngress.lean` | Emitted cursor-to-bottom setup preserves frozen Entry/capacity and couples actual recursive return without an initial bottom sentinel premise. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingEmission.lean` | One state-budgeted allocating recursive image with universal Entry return/bare-revert proofs, real V2 producer and explicit remaining V3 domain duties. |
+| `Backend/InternalFlow/RuntimeFrameV3EmissionPrefixes.lean` | Actual emission Entry to native/target allocating descent horizons, saved parents, exact growth and stable stopped child before unwind. |
+| `Backend/InternalFlow/RuntimeFrameV3EmissionUnwind.lean` | Actual allocating emission Entry to represented paired-unwind parent horizons, exact growth, full populated observations and stable final guard. |
 | `Backend/InternalDispatch.lean`, `Backend/InternalDispatch/Typed.lean`, `Backend/InternalDispatch/Agreement.lean`, `Backend/InternalDispatch/Chain.lean` | G37.03/P4 typed dispatch tables, full-signature checks and the typed equality-guard chain (not emitted bytecode). |
 | `Backend/InternalDispatch/FrozenV1.lean`, `Backend/InternalDispatch/FrozenV2.lean`, `Backend/InternalDispatch/FrozenV3.lean` | Dispatch consumers of the frozen P1 v1–v3 `Pending*` families; v3 transports an approved input through profile agreement and coverage. |
 | `Backend/InternalDispatch/Controls.lean`, `Backend/InternalDispatch/FrozenV1Controls.lean`, `Backend/InternalDispatch/FrozenV2Controls.lean`, `Backend/InternalDispatch/FrozenV3Controls.lean` | Source-backed selector controls and refusals; empty-domain refusal for v3. |
@@ -355,5 +373,29 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/P8/SourceProgramAcceptance.lean`, `SourceProgramAcceptanceControls.lean` | Exact actual elaborator success-bit laws and the full original kernel contract-control conjunction; ordered expectations unchanged. |
 | `Lowering/P8/EntryRoots.lean`, `EntryRootControls.lean` | Actual function/receive/fallback selector registration and supplied-Program controls; selected and special-entry root coverage, not executed-entry or full admission adequacy. |
 | `Lowering/P8/SourceObservationAdmission.lean`, `SourceObservationControls.lean` | All-output actual source elaboration followed by an observation guard proved redundant (`accept_eq_upstream`); composed independent ProgramSite soundness, not full feature/profile adequacy. |
+| `Lowering/P8/DeclarationGraphAdmission.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Lowering/P8/DeclarationGraphCheck.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Lowering/P8/DeclarationGraphControls.lean` | Bounded memory-storage-copy checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FunctionValues/RuntimeConstruction.lean` | Bounded memory-reference-structs checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FailurePaths/TransientCallback.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module. |
+| `Backend/FailurePaths/TransientSharing.lean` | Bounded memory-internal-calls checkpoint; scope and retained premises are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained premises are in the module. |
+| `Backend/Executable/ConstructorArgumentObservations.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained premises are in the module. |
+| `Backend/Executable/ConstructorLocalArguments.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained premises are in the module. |
+| `Backend/StructuredFlow/MappedCondition.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
+| `Backend/StructuredFlow/MappedConditionControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/G19/AssignmentReturnFlag.lean` | Bounded v17-validation-release checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/SourceMemoryKeccak.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained premises are in the module. |
+| `Calculus/StaticInvocation.lean` | Bounded readonly-external checkpoint; typed scope and retained premises are in the module. |
+| `Semantics/StaticInvocation.lean` | Bounded readonly-external checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureDynamicReturn.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureDynamicReturnControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureReturnSlots.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureTupleAbort.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
+| `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained premises are in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
