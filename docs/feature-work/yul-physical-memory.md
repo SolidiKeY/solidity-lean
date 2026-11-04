@@ -731,3 +731,14 @@ encoding. Controls cover Inner[2][2] followed by uint128[3] and mixed ordered ro
 absent cells and explicitly written defaults retain their distinct complete stores.
 This proof recursion adds no planner or depth cap and does not admit transient
 aggregates or synthesize unavailable function defaults. Broader adequacy is open.
+
+`CellWritesCalldataHash` binds finite actual Source setters to the actual calldata
+keccak evaluator. The setter result supplies its unchanged local reference; the
+successful builtin allocates exactly one clipped-payload object and preserves both
+reconstructed storage banks. Same-Fixed physical copying/hash agreement covers
+the payload, and owner safety holds at every original heap typing. Low hash
+horizons retain the completed write prefix without allocation; static setter
+failure stops before hashing. Controls combine mixed writes, two calldata aliases
+and an oversized reference, distinguishing clipped3-byte and padded5-byte inputs.
+This does not establish ABI-entry provenance, allocator header/FMP realization,
+whole Source-statement fuel transport or Source/Yul/compiler adequacy.
