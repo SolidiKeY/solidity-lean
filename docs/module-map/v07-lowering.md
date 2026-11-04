@@ -130,3 +130,5 @@
 | `Lowering/V07/UdvtBoolAssignmentControls.lean` | Inhabited mixed-reference Boolean matrix, self/capture extension, stale-read and nominal-refusal controls with exact guards. |
 | `Lowering/V07/UdvtAddressAssignment.lean` | Address-underlying UDVT same-tag assignment with canonical UInt capture and initial-derived caller-context transport. |
 | `Lowering/V07/UdvtAddressAssignmentControls.lean` | Both payable flags, 160-bit boundaries, mixed references and executed wrong-narrowing/stale/nominal controls with exact guards. |
+| `Lowering/V07/FixedBytesAssignment.lean` | Same-width bytesN assignment, canonical UInt capture and exact width-indexed byte-content recovery using published byte laws. |
+| `Lowering/V07/FixedBytesAssignmentControls.lean` | All32 widths, mixed references, leading-zero/width-key collision, stale-read and executed truncation controls with exact guards. |
