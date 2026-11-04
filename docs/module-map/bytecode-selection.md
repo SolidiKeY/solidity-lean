@@ -142,3 +142,6 @@
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionInterface.lean` | Fetched charged MSIZE/P6 image-preserving execution and continuation contract. |
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecution.lean` | Initial-image-derived MSIZE value, complete saved stack and preserved post-image, reusing P10 execution. |
 | `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionControls.lean` | Either-pipeline inhabited execution, arbitrary reserved capacity, wrong-active and short-fuel controls. |
+| `Backend/AbiEntry/TailGuardInterface.lean` | Composed signed-offset, dynamic-length and modular-region numeric guard contract. |
+| `Backend/AbiEntry/TailGuard.lean` | Single actual numeric program for the three guards, exact semantic reference classification and explicit V2 capacity. |
+| `Backend/AbiEntry/TailGuardControls.lean` | Individual refusals, accepted signed offset, raw empty-array reference and inhabited/capacity controls. |

@@ -426,3 +426,25 @@ and preservation of inherited failures and remaining compiler/Source boundaries.
 reference guard with exact signed offset, length-limit and modular region
 predicates. The runtime size operand is shared explicitly; loading and native
 conditional branching remain separate.
+
+`TailGuard.lean` composes the existing offset, length and region programs into
+one actual numeric program with shared size input, preserved arbitrary suffix
+and explicit one-extra-word capacity. Zero-based SWAP rotation and a duplicated
+length retain inputs for the later checks; final ANDs combine their Boolean
+flags. The exact semantic `tailRef` result is success with its original wrapped
+address/length or `.revert`, under explicit initial operand-to-input facts and
+length-prefixed shape. No successful decode/poststate is a premise. These
+representation facts are not new global admission restrictions: full native
+loading, unbounded metadata coverage and Source-input coverage remain open.
+Evaluating pure numeric checks together does not certify native load/failure
+ordering. Controls preserve each predicate refusal, noncanonical signed-offset
+acceptance, raw zero-filled empty-array success, suffix and stack refusal; the
+raw control proves its representation facts directly from bytes. This is a
+composed numeric guard/reference result, not fetched native branching, whole
+ABI aggregate decoding or full entry dispatch/composition. Existing failure
+bytes and all producer boundaries remain unchanged.
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked actual rotation/DUP/AND execution, shared size, non-vacuous capacity,
+signed/modular preservation, exact initial-representation-based reference result
+and raw control. They confirmed native load/error ordering and full coverage
+are explicitly left open rather than inferred from pure-check conjunction.
