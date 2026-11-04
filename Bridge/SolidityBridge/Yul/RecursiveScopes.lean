@@ -138,7 +138,7 @@ theorem Derivation.source :
       rfl
     · rw [if_neg (fun h => zero (truth.mp h)),ih]
       simp only [if_neg zero]
-  
+
   | letOne initializer body ih =>
     change (do
       let values ← evalExpr _ .nil True.intro _ initializer.profile (ProducerExpressions.sourceLocals locals)

@@ -325,3 +325,8 @@ feeds scoped scalar compilation, and original let/zero scopes compose with
 normal structured bodies. General kernel laws and synthetic controls are in
 [the VY3 lane record](inline-assembly-vy3.md); complete Source/G24/native and
 frontend adequacy, broad imports and final lane validation remain open.
+
+VY3 recursive-compiler handoff: original Yul scopes now recurse under branches
+and sequences with same-horizon source and structured target proofs. The
+[lane record](inline-assembly-vy3.md) retains unsupported constructs and the
+separate G24/native/frontend/final-validation obligations.
