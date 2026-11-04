@@ -2236,6 +2236,8 @@ import Solidity.Lowering.V07.SignedWordAddition
 import Solidity.Lowering.V07.SignedWordMultiplication
 import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
+import Solidity.Lowering.V07.UdvtAddressAssignment
+import Solidity.Lowering.V07.UdvtAddressAssignmentControls
 import Solidity.Lowering.V07.UdvtAssignment
 import Solidity.Lowering.V07.UdvtAssignmentControls
 import Solidity.Lowering.V07.UdvtBoolAssignment

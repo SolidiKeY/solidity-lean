@@ -128,3 +128,5 @@
 | `Lowering/V07/UdvtAssignmentControls.lean` | Real two-tag UDVT metadata, mixed-reference and all64 integer-type controls with nominal-erasure/stale-read negatives and exact guards. |
 | `Lowering/V07/UdvtBoolAssignment.lean` | Boolean-underlying UDVT same-tag assignment and initial-derived full mapped caller transport. |
 | `Lowering/V07/UdvtBoolAssignmentControls.lean` | Inhabited mixed-reference Boolean matrix, self/capture extension, stale-read and nominal-refusal controls with exact guards. |
+| `Lowering/V07/UdvtAddressAssignment.lean` | Address-underlying UDVT same-tag assignment with canonical UInt capture and initial-derived caller-context transport. |
+| `Lowering/V07/UdvtAddressAssignmentControls.lean` | Both payable flags, 160-bit boundaries, mixed references and executed wrong-narrowing/stale/nominal controls with exact guards. |
