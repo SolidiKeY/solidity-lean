@@ -153,3 +153,5 @@
 | `Yul/Compilation/SignedExecution{,Controls}.lean` | General existing SignedMachine success transport consuming concrete signed producers plus WordExecution; original-source/compiler consumers, signed corner cases, dirty words, dependent writes, symbolic framing and shifted DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |
 
 | `Yul/Compilation/WhileWordExecution{,Controls}.lean` | Concrete unchanged word-selected lowerWhile turns, finite running prefixes/exits, whole model execution and all-prefix model fault; actual emitter consumer without abstract realization, raw-word counter/NOT/zero/boundary controls. No source-divergence/native/resource/G24 adequacy. |
+
+| `Bridge/SolidityBridge/Yul/WordForExecution{,Controls}.lean` | Existing original normal FOR source theorem composed with concrete WordControl-selected prelude/loop execution, without abstract realization callback; general raw-local/newer/symbolic-tail, ordered post, horizon and access controls. Native/resource/Source-G24 closure remains separate. |

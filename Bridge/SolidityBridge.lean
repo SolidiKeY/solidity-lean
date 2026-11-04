@@ -419,6 +419,8 @@ import SolidityBridge.Yul.SwitchControl
 import SolidityBridge.Yul.SwitchControlControls
 import SolidityBridge.Yul.UnarySelection
 import SolidityBridge.Yul.UnarySelectionControls
+import SolidityBridge.Yul.WordForExecution
+import SolidityBridge.Yul.WordForExecutionControls
 import SolidityBridge.Yul.WriteSelection
 import SolidityBridge.Yul.WriteSelectionControls
 import SolidityBridge.YulWorld.Returndata
