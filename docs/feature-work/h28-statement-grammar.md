@@ -197,3 +197,62 @@ Checkpoint B is accepted only as this local contract increment. Balanced
 block/list token splitting, token-root discrimination, attachment-position and
 parse/yield uniqueness, compound syntax-derived parser completeness, solc
 fixtures and final acceptance remain pending. The full goal remains active.
+
+## Checkpoint C: concrete control-leaf parser coverage
+
+LeafCoverage.lean proves equations of the actual existing stmt parser for
+break, continue and return without an expression. Success preserves arbitrary
+suffix tokens, reversed layout state and EOF; keyword/semicolon source ranges
+are arbitrary. Sufficient fuel comes directly from syntax and the actual
+calls: n+1 for break/continue and n+2 for empty return. No successful parse is
+assumed. Universal zero-fuel rejection and empty-return fuel-1 rejection show
+these leaf bounds are minimal. Outside-loop controls reject break/continue
+at the keyword offset; return underfuel reports the semicolon offset after
+consuming the keyword. Actual Syn.yield equations connect each manual token
+prefix to its corresponding intrinsic constructor and preserve layout.
+This is token-parser coverage, not lexer validity, solc acceptance or whole
+statement completeness. Expression-bearing return and compound constructors
+remain pending.
+
+Finder and skeptic independently reviewed these equations and the inhabited
+controls without Lean/server/build use. Finder requested nonempty suffix and
+layout/EOF states, both unchecked values, zero-fuel controls and actual yield
+connections. Those were added. Both final narrow verdicts pass with no
+remaining findings. Controls use a nonempty else suffix, nonempty layout and
+nonzero offsets to test preservation and boundary/error positions.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/LeafCoverage.lean | pass, zero errors | /workspace/h28-statement-grammar-evidence/run-1793796966865579471 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.LeafCoverage | pass; 0.65s timed wall; peak RSS 398788 KiB | /workspace/h28-statement-grammar-evidence/run-1793796989518189752 |
+| runtime.py diag tests/h28-sol/statement-grammar/LeafCoverageControls.lean | pass, zero errors | /workspace/h28-statement-grammar-evidence/run-1793797022103617313 |
+| runtime.py gate tests/h28-sol/statement-grammar/LeafCoverageControls.lean | pass; 0.32s timed wall; peak RSS 377904 KiB | /workspace/h28-statement-grammar-evidence/run-1793797045186775409 |
+
+All ten public theorems printed `does not depend on any axioms`: break_coverage,
+continue_coverage, empty_return_coverage, break_outside_loop,
+continue_outside_loop, empty_return_underfuel, control_zero_fuel, break_yield,
+continue_yield and empty_return_yield. Exact signatures and premises are in
+the immutable module source, with input hashes in the evidence manifests.
+No false target or semantic exclusion has been silently discharged.
+
+## Current queue accounting and next work
+
+| Original obligation | Current evidence / remaining work |
+| --- | --- |
+| Every statement/block constructor and grammar alternative inventory | recorded, including embedded Yul and non-expression parser dependencies |
+| Intrinsic shape/token-boundary relations | intrinsic root and open-spine relations proved; token-boundary relations pending |
+| Balanced block/list splitting | pending, including backfill strengthening |
+| Nearest-else association | existing local no-capture contract proved; unique attachment/token decomposition pending |
+| Simple/block/loop/control token-root discrimination | syntactic root discrimination proved; token-root discrimination pending |
+| Parse/yield uniqueness under precedence/layout | pending; SOL-EU excluded; no new expression-uniqueness premise asserted |
+| Concrete parser completeness with syntax-derived fuel | break/continue/empty return proved; all other constructors and dependencies pending |
+| Constructor-complete kernel controls | narrow root, dangling-else and three leaf controls pass; full variants pending |
+| Positive/negative return-expression/unchecked/try variants | pending |
+| solc 0.8.38 grammar fixtures | pending; no external solc result claimed |
+| Full repository gates and scope-complete acceptance | pending; per-file gates do not replace final gates |
+| Finder/skeptic and immutable handoff | narrow A/B/C increments reviewed; complete-assignment review and final seal pending |
+
+Next: balanced block/list token decomposition and token-boundary invariants,
+then recursive constructor parser fuel/completeness and remaining controls.
+All original constraints, frozen inputs and other owners remain binding. The
+persistent goal is not marked complete or replaced. No push, merge or PR.

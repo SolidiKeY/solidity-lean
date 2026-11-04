@@ -1,3 +1,4 @@
 module	purpose
 Solidity.Frontend.StatementGrammarH28.Shape	Intrinsic statement root classification and inhabited controls
 Solidity.Frontend.StatementGrammarH28.NearestElse	Intrinsic open-if spine and existing nearest-else contract
+Solidity.Frontend.StatementGrammarH28.LeafCoverage	Concrete control-leaf parser coverage, yields and structural fuel bounds
