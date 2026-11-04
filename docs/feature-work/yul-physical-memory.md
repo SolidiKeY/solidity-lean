@@ -681,3 +681,12 @@ Controls use the actual declared transient uint16 root after nontrivial source
 prefixes, preserve padding and unknown slot99, read back7, preserve another account
 and restore/reset through real frame operations. This admits no transient aggregate
 or dirty-owned representation and proves no general transaction admission.
+
+`MixedCellSequence` reconstructs both finite raw banks from one actual Source
+bind of a persistent setter and a transient setter. Each uses its original
+complement and real bank/separation/view premises. Exact first/late static
+outcomes and paired rollback use those same operations. Static flags are explicit
+per-operation frame inputs, not a proof that an executing frame changes mode.
+Controls use both banks at slot0, read2/7 on success and2/old0xabcd on late refusal,
+and observe persistent survival/transient reset at endTx. This is finite typed
+operation composition, not general call, dirty-owned or changing-layout adequacy.

@@ -3062,6 +3062,8 @@ import Solidity.Yul.Views.MemoryLayout
 import Solidity.Yul.Views.MemoryScalarCodec
 import Solidity.Yul.Views.MemoryScalarControls
 import Solidity.Yul.Views.MemoryTransport
+import Solidity.Yul.Views.MixedCellSequence
+import Solidity.Yul.Views.MixedCellSequenceControls
 import Solidity.Yul.Views.MixedHeapControls
 import Solidity.Yul.Views.MixedHeapOrder
 import Solidity.Yul.Views.MixedHeapOrderControls
