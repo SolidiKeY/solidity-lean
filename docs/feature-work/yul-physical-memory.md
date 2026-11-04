@@ -608,3 +608,13 @@ distinguish the prefix padding word from the initial residual packed tail. These
 laws do not restore arbitrary caller locals, heap or logs and do not instrument
 general call execution. Canonical preparation, capture completeness and general
 source/frame adequacy remain explicit unfinished obligations.
+
+`RetainedAliasTransaction` composes the actual two-program Source bind with
+`EM.modSt` using `ExecState.endTx`; its complementary journal closes only after
+that source success. Complete persistent reconstruction follows from the same
+checked second plan. Transient state and both journals reset, while locals, heap,
+logs, events and function locals survive the finalizer. Every original heap
+typing remains safe on success and halt. A late-static control retains a genuinely
+nonempty source undo prefix and the first complete map, so premature finalization
+is rejected. This explicit success-finalization fragment is not `runTx`, transaction
+admission, failure rollback or general source/call instrumentation.
