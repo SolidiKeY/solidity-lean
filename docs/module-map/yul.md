@@ -64,3 +64,5 @@
 | `Yul/Interfaces/P16.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Checks/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
