@@ -242,3 +242,10 @@ and a payable/nonzero refusal of a false revert claim are checked.
 Independent read-only finder and skeptic reviews passed with no findings. They
 confirmed actual public selection, arbitrary selected-result execution, complete
 successful machine preservation, and the explicit intrinsic-only boundary.
+
+`ValueGateBodyInterface.lean` states actual public-compiler selection and exact
+intrinsic execution for a value gate followed by any typed body admitted by the
+existing core classifier, including context-changing bodies. This is a supported
+compiler family, not an exclusion from the original full G40 obligation. It
+assumes neither a desired body outcome nor a compiled artifact or run. Native
+failure bytes/resources and Source entry/provenance remain separate.
