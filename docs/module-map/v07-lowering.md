@@ -112,3 +112,5 @@
 | `Lowering/V07/EnumConversionControls.lean` | Real enum-declaration, mixed-reference, alias, full-panic and oversized-layout countercontrols. |
 | `Lowering/V07/EnumGuard.lean` | Native enum range guard and actual assignment/capture success/panic transport, including zero/full word capacities. |
 | `Lowering/V07/EnumGuardControls.lean` | Inhabited guarded enum, reached-state order, prefix and zero/full-capacity controls with exact pins. |
+| `Lowering/V07/UnsignedEnumGuard.lean` | Approved unsigned-width Source enum conversions reuse the existing native guard, with initial-derived success/failure transport. |
+| `Lowering/V07/UnsignedEnumGuardControls.lean` | Inhabited narrow-width alias, context and maximum-bound controls across all 32 widths. |

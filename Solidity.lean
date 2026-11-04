@@ -2232,6 +2232,8 @@ import Solidity.Lowering.V07.UnsignedCastControls
 import Solidity.Lowering.V07.UnsignedCasts
 import Solidity.Lowering.V07.UnsignedComplement
 import Solidity.Lowering.V07.UnsignedComplementControls
+import Solidity.Lowering.V07.UnsignedEnumGuard
+import Solidity.Lowering.V07.UnsignedEnumGuardControls
 import Solidity.Lowering.V07.UnsignedLocalUpdate
 import Solidity.Lowering.V07.UnsignedLocalUpdateControls
 import Solidity.Lowering.V07.UnsignedMultiplication
