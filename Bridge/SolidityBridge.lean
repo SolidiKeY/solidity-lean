@@ -282,6 +282,8 @@ import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrder
 import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrderControls
 import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
 import SolidityBridge.RoadmapV15.P10.PushDecoderControls
+import SolidityBridge.RoadmapV15.P10.PushFamily
+import SolidityBridge.RoadmapV15.P10.PushFamilyControls
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBoundsControls
 import SolidityBridge.RoadmapV15.P10.SelfBalanceControls
