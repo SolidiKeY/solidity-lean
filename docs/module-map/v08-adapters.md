@@ -499,3 +499,5 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |

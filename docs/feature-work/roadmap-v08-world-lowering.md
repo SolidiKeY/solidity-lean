@@ -3943,3 +3943,16 @@ The published feature-catalogue/HashingNames split justified a new bounded Decis
 ### H24 admission companion
 
 Creation and library premise inputs now consume the published `DeclarationGraphAdmission.Producer`, retaining its original P8a producer through `.base` and the exact H15 declaration-graph admission/refusal obligation. The two consumers and their import closure kernel-check with all 27 existing axiom guards unchanged. This supplies no producer inhabitant or new constructor/body/frame/whole-unit adequacy.
+
+### Unsigned update callable arguments
+
+`UnsignedUpdateCallable` consumes V07's actual local update execution and captured
+operand before the selected Source integer echo body. Prefix returns the wrapped
+new value; postfix returns the old value, while both retain the changed caller
+local. Initial read/alias alignment derives the post-local relation. The populated
+uint8 clients cover both pipelines, static mode, 255 increment/0 decrement,
+subsequent caller reads, unrelated target locals/live heap aliases, exact low-fuel
+timeouts and wrong-return/snapshot negatives. Complete Source machine equality
+retains all existing account, transient, heap, journal, event/log and fnLocals
+observations. This is argument/caller-local transport, not compiled target callee,
+canonical SourceSpec/admission, ABI/body/frame or bytecode adequacy.
