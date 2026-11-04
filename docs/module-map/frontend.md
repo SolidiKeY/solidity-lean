@@ -107,3 +107,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/TypeGrammarH28/Layouts.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExecutableAst/Shared/Boundary.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExecutableAst/Shared/Translate.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Hex.lean` | Bounded hexadecimal-body grammar and encoding checkpoint; full literal parsing remains open. |
+| `Frontend/LiteralGrammarH28/HexEncoding.lean` | Bounded hexadecimal-body grammar and encoding checkpoint; full literal parsing remains open. |
