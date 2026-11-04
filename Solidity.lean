@@ -2571,6 +2571,8 @@ import Solidity.Yul.Compilation.SignedQuotientMachineControls
 import Solidity.Yul.Compilation.Slices
 import Solidity.Yul.Compilation.SlotSemantics
 import Solidity.Yul.Compilation.SlotSemanticsControls
+import Solidity.Yul.Compilation.StatementVisitorShapes
+import Solidity.Yul.Compilation.StatementVisitorShapesControls
 import Solidity.Yul.Compilation.UnaryBranch
 import Solidity.Yul.Compilation.UnaryBranchControls
 import Solidity.Yul.Compilation.UnaryMachine
