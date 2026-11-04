@@ -296,6 +296,8 @@ import Solidity.Backend.MemoryCopies.CheckedPathCopyInterface
 import Solidity.Backend.MemoryCopies.CheckedReference
 import Solidity.Backend.MemoryCopies.CheckedReferenceControls
 import Solidity.Backend.MemoryCopies.CheckedReferenceInterface
+import Solidity.Backend.MemoryCopies.CheckedStorageArray
+import Solidity.Backend.MemoryCopies.CheckedStorageArrayControls
 import Solidity.Backend.MemoryCopies.CheckedStorageArrayInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.CopyPathControls
