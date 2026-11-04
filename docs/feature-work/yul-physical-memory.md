@@ -1264,3 +1264,12 @@ existing six-object heap with shared children and preserve a nonzero unwritten
 tail. Placement/history, owner `MemOK`, profile support and physical bounds stay
 explicit. Object separation does not establish reserved-word safety, source
 operation admission, allocation provenance or concrete invocation adequacy.
+
+`HeapOutputReserved.preserve` protects the free-pointer and zero-word bytes
+`[64,128)` from the actual returned prefix. Scratch bytes stay unrestricted;
+`preserve_interval` includes empty returns independently of requested extent.
+Controls start with genuine `ReservedOK` and show safe/empty outputs preserve
+it without cleaning. A separate output writes byte `96` to `1`: the complete
+six-object Source state still writes back unchanged, but `ReservedOK` fails.
+Thus object-complement separation and Source identity do not imply reserved
+safety, source admission or general shared-zero representation adequacy.
