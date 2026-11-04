@@ -2511,6 +2511,7 @@ import Solidity.Yul.Checks.LocalDefaultPostRepresentation
 import Solidity.Yul.Checks.LocalDefaultRepresentation
 import Solidity.Yul.Checks.LocalDefaultUnchecked
 import Solidity.Yul.Checks.LocalDefaultWhile
+import Solidity.Yul.Checks.LocalDoWhileHorizon
 import Solidity.Yul.Checks.LocalExprStatement
 import Solidity.Yul.Checks.LocalIfHorizon
 import Solidity.Yul.Checks.LocalItemFailure
@@ -2750,6 +2751,7 @@ import Solidity.Yul.LocalDefaultPostRepresentation
 import Solidity.Yul.LocalDefaultRepresentation
 import Solidity.Yul.LocalDefaultUnchecked
 import Solidity.Yul.LocalDefaultWhile
+import Solidity.Yul.LocalDoWhileHorizon
 import Solidity.Yul.LocalExprStatement
 import Solidity.Yul.LocalIfHorizon
 import Solidity.Yul.LocalItemFailure

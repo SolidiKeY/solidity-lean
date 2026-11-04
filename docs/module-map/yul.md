@@ -134,3 +134,5 @@
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Yul/LocalWhileHorizon.lean`, `Yul/Checks/LocalWhileHorizon.lean` | Exact completed recursive while horizon stability using concrete guard/body laws; mutating scoped iteration and partial-write controls. |
+
+| `Yul/LocalDoWhileHorizon.lean`, `Yul/Checks/LocalDoWhileHorizon.lean` | Exact completed body-first do/while horizon stability with concrete restored-body/guard producers and two-iteration controls. |

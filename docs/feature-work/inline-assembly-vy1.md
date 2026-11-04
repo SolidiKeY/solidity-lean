@@ -1509,3 +1509,28 @@ and layer checks pass. Twelve scoped axiom reports use only Lean standard
 axioms. Raw failed automation, redundant-rewrite and reserved fixture-name
 attempts are retained separately; statements, observations and budgets were
 not weakened or increased.
+
+### Body-first do/while completed horizons
+
+`LocalDoWhileHorizon.successor` and `extension` preserve the identical final
+caller raw frame after actual normal completion of the existing default-scoped
+do/while. Fuel induction first stabilizes the actual restored body through
+`LocalDefaultHorizon.blockSuccessor`, then the actual guard through
+`LocalBoolHorizon.successor`, before recursing from the exact postguard state.
+No supplied child simulation or termination law replaces those concrete bodies.
+Eleven controls reuse the prior mutating body and add an inhabited toggling
+uint8-scoped body requiring two iterations to complete. They cover exact
+extra-fuel final frames, body execution under a false guard, first/second
+iteration timeout frames, timeout-to-completion change, zero fuel, the existing
+restricted literal-true noncompletion law and projection after an explicit
+existing Boolean write. No implicit cleanup/readback rule is introduced.
+These are completed-run laws for existing certificates. Timeout stability,
+general divergence/control, readback, admission and full Source/compiler
+adequacy remain open. Source/ExtCall/evaluators/layouts, observations and
+proof budgets are unchanged. General P16/full VY1 and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Thirteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation attempts remain distinct from passing
+gates; no checking/proof limits were increased.
