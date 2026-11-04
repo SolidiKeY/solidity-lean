@@ -321,3 +321,33 @@ resource/proof flags. Original timeout, instrumentation and driver failures rema
 raw evidence. All jobs remain serial under the original12GiB/no-swap180s limits.
 
 H26 checkpoint: touched/library/trust/orphan/layer/root/docs gates pass on the published-base candidate. Axiom inventory reports 0 errors and 41 unrecorded standard-only records (3 from this stub,38 from older private audits). Exact published-base comparison has0 errors/notes. The reserved global inventory is unchanged; the stub-only three-record delta is supplied for coordinator registration. This gate remains failed until that reconciliation.
+
+
+### Constructor-frame selection consumer (2026-11-04)
+
+`ConstructorFrameSelection` consumes the published `ArgumentEntry.endpoint`
+from master `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. An already-reached
+five-local caller supplies arguments 1 then 9, skipping a memory-reference local.
+The actual `Calls.compile` result emits loads5/3 and stores6/7. It derives need7,
+room1+7≤16 and zero allocation cost, rather than assuming target preservation.
+`endpoint` retains the complete new frame, restricted original caller, stack,
+base extension and allocator growth on the same actually executed output.
+`observations`, `wrong_order` and `preserved_contents` check distinct results,
+stack77 and populated old objects. `insufficient_room` is a certificate capacity
+negative, not an execution-refusal theorem.
+
+Finder and independent skeptic accepted the selection/endpoint proof and asked
+for explicit order/caller controls; these were added and checked. Automation
+scratch attempts, focused builds and scoped axiom output are retained. Endpoint
+uses only propext/Classical.choice/Quot.sound; the two control guards use no
+axioms. This is a native intrinsic declaration/frame client. Joint Source-frame
+numeric/heap lowering, constructor-body lowering, account/world and fetched-byte
+execution are still open; no P1 PROFILE claim or pending producer instance is
+supplied. G43/H19/H25, G36.03/V12 G37 and helper G18/VY5 dependencies remain.
+G45 implementation ownership remains reassigned/master-owned.
+
+Checkpoint gate: touched/library/trust/layers/roots/doc-paths passed. Initial
+orphans failed on three task scratch probes; these were moved intact to evidence
+and the focused orphan check rerun. Axiom-pins remains FAIL with zero errors and
+44 unrecorded standard-only changes (three from this audit); global inventory is
+reserved. Raw exit1 is preserved and is not a full checkpoint pass.

@@ -202,3 +202,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnInterfaceV1.lean` | H26 generated kernel-return fields and nonempty execution-witness shape; no producer instance. |
 | `Backend/Executable/CreationReturnInterfaceV1Controls.lean` | Genuine nonempty input witness and empty-domain/reverted-outcome controls, not a pending-law implementation. |
 | `Backend/Executable/CreationReturnInterfaceV1Audit.lean` | Complete interface types and standard-axiom guards. |
+| `Backend/Executable/ConstructorFrameSelection.lean` | Concrete checked constructor-argument declaration client: derived frame room, complete caller restoration and order/old-heap controls; native memory-machine scope. |
+| `Backend/Executable/ConstructorFrameSelectionAudit.lean` | Exact endpoint signature and scoped standard-axiom guards. |
