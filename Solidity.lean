@@ -609,6 +609,11 @@ import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
 import Solidity.Backend.Passes.WidthApplication
+import Solidity.Backend.PrimitivePackets.CheckedAdd.Agreement
+import Solidity.Backend.PrimitivePackets.CheckedAdd.Controls
+import Solidity.Backend.PrimitivePackets.CheckedAdd.Selected
+import Solidity.Backend.PrimitivePackets.CheckedAdd.Source
+import Solidity.Backend.PrimitivePackets.CheckedAdd.Target
 import Solidity.Backend.PrimitivePackets.Shifts.Controls
 import Solidity.Backend.PrimitivePackets.Shifts.General
 import Solidity.Backend.PrimitivePackets.Shifts.Transport
