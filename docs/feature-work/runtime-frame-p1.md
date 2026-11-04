@@ -1468,3 +1468,27 @@ P8 operational realization or full approved-profile coverage. An empty or
 emitter-derived relation cannot be cited as original-profile evidence. Those
 obligations remain open, as do the concrete runtime and recursive producers.
 The existing frozen V3 call/fixed-thunk/recursive contracts are reused unchanged.
+
+### Scalar parent return and populated caller
+
+`RuntimeFrameV3ScalarParentRestore.restore` recovers the saved reference and
+counter while retaining the live scalar result. `RuntimeFrameV3ScalarUnwind`
+uses the published checked expression compiler to increment that result,
+with an explicit no-overflow bound, and derives the reached representation,
+stack preservation and zero source-allocation transport.
+
+The registered facts and endpoint modules derive all three saved parent pairs
+from actual native descent. The caller client saves its old scalar before
+argument setup, returns scalar three through the checked increments, reloads
+that saved scalar and reconstructs the whole caller representation. Its
+controls couple all successful native quotation indices above three to that
+same target endpoint and derive the complete ordered caller, payload and heap
+observations by projection. Shallow quotations remain exhausted, distinct
+from bare revert.
+
+This is an explicit populated countdown image, not a public general recursive
+compiler selection or an approved-domain producer. The concrete destination
+shares the private result's physical cell; arbitrary result marshalling remains
+open. No failure state, rollback, world correspondence, unconditional fragile
+liveness or full runtime-frame completion follows. Frozen interfaces and the
+existing source controls are unchanged.
