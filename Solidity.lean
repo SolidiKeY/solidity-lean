@@ -24,6 +24,9 @@ import Solidity.Backend.AbiEntry.LengthCheckInterface
 import Solidity.Backend.AbiEntry.OffsetChecks
 import Solidity.Backend.AbiEntry.OffsetChecksControls
 import Solidity.Backend.AbiEntry.OffsetChecksInterface
+import Solidity.Backend.AbiEntry.PayableRoutes
+import Solidity.Backend.AbiEntry.PayableRoutesControls
+import Solidity.Backend.AbiEntry.PayableRoutesInterface
 import Solidity.Backend.AbiEntry.Premises
 import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
 import Solidity.Backend.AbiEntry.Premises.CalldataViews

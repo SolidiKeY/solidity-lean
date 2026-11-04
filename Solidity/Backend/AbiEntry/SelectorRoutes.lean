@@ -102,6 +102,25 @@ theorem executed (C : Contract) (base : Nat) (table : RouteTable) (fallback : Fi
   rw [same]
   exact run_route C base table fallback machine selector initial
 
+/-- Public constructor adapters for other entry families in the same compiler. -/
+def selectorCondition (C : Contract) (tag : Fin W) : Val C RouteCtx .bool := condition C tag
+def writeLabel (C : Contract) (label : Fin W) : Prog C RouteCtx RouteCtx := assignLabel C label
+
+theorem condition_in (C : Contract) (tag : Fin W) (frag : Frag RouteCtx) :
+    valIn frag (selectorCondition C tag)=true := rfl
+
+theorem write_core (C : Contract) (label : Fin W) (frag : Frag RouteCtx) :
+    inFragP frag (writeLabel C label)=some frag := rfl
+
+theorem condition_code (C : Contract) (base : Nat) (tag : Fin W) :
+    compileVal base (selectorCondition C tag)=[.mload base,.push (.val tag),.eq] := by
+  change ([.mload base,.push (.val (wmod (toWord (tag.val : Int)))),.eq] : List Instr)=_
+  rw [literal_word]
+
+theorem write_code (C : Contract) (base : Nat) (label : Fin W) :
+    compileProg base (writeLabel C label)=[.push (.val label),.mstore (base+1)] :=
+  nil_code C base label
+
 def certificate : Interface.SelectorRoutesCertificate route where
   selected := fun C base table fallback => ⟨compiled C base table fallback,selected C base table fallback⟩
   executed := executed
@@ -116,4 +135,12 @@ def certificate : Interface.SelectorRoutesCertificate route where
 #guard_msgs (whitespace := lax) in #print axioms executed
 /-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.certificate' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms certificate
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_in' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms condition_in
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_core' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms write_core
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.condition_code' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms condition_code
+/-- info: 'Solidity.Backend.AbiEntry.SelectorRoutes.write_code' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms write_code
 end Solidity.Backend.AbiEntry.SelectorRoutes

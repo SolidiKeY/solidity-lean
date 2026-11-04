@@ -149,3 +149,6 @@
 | `Backend/AbiEntry/SourceRoutesInterface.lean` | Ordinary Source lookup from raw selector to checked route-result contract. |
 | `Backend/AbiEntry/SourceRoutes.lean` | Input-independent tables from actual exposed declarations/body/signatures and exact Source pickFn/runtime agreement. |
 | `Backend/AbiEntry/SourceRoutesControls.lean` | Both-pipeline Source body-less/collision filtering, actual compiled route/miss and short-input mismatch controls. |
+| `Backend/AbiEntry/PayableRoutesInterface.lean` | Checked first-match routing with per-entry payability and terminal value rejection. |
+| `Backend/AbiEntry/PayableRoutes.lean` | Public compiler selection and actual IR execution, reusing the existing value gate inside matched branches. |
+| `Backend/AbiEntry/PayableRoutesControls.lean` | Zero/nonzero value, payable collision/nonmatch priority, protected state and malformed-selector controls. |

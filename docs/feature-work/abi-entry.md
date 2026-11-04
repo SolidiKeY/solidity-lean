@@ -586,3 +586,25 @@ body execution or full ABI entry behavior.
 `PayableRoutesInterface.lean` specifies first-match per-entry value gating.
 A matched non-payable row rejects value rather than trying later collisions;
 a no-match label remains separate from Solidity special-function execution.
+
+`PayableRoutes.lean` inserts the existing checked value gate inside each
+matching selector branch of a typed route table. Public compiler admission and
+selection are proved for every table, then actual emitted IR execution derives
+the first row's label or terminal `.revert` according to that row's payability
+and the initial call value. It never retries a later colliding row after a
+rejection, nor checks a nonmatching row's value gate. The no-match label is
+written without imposing a global value rule; it is not Solidity fallback
+execution. Constructor adapters reuse the existing selector test/result write.
+Controls cover zero-value nonpayable success, all nonzero-value rejection,
+a later payable match and no-match label for arbitrary value, a payable duplicate
+that cannot bypass rejection, protected memory/stack/value and malformed-cell
+fault. Only the result cell changes on success, with zero pending skip.
+Connecting row flags to Source mutability, native loading/realization, exact
+byte-level failure output, special functions and ABI body composition remain
+open. Newly adopted master control realization explicitly retains native and
+Source/G24 boundaries, so it does not silently discharge these obligations.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+Both checked public compiler selection, branch skip lengths, terminal collision
+rejection, per-row value checks, protected state and the explicit remaining
+Source/native/body boundaries; neither used a Lean server or build.
