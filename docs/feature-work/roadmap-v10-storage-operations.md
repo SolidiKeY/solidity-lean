@@ -154,6 +154,21 @@ The generic capture-to-prepared adapter is type-validated but unproved in
 TERRA-TODO; sixteen routine adapters now remain pending. Packed representation,
 Source address compilation and emitted/world composition remain open.
 
+## Byte capture failure barrier
+
+`SourceByteStorageBarrier.load_timeout` proves exact full-state preservation at
+arbitrary insufficient capture fuel and nonzero starts, under valid OLD byte
+reads. No writable frame or destination hypothesis is needed. Malformed source
+reads can instead fail earlier; the read premise cannot be dropped.
+
+Populated controls pin all ten actual storage-reference failure/self cases and
+four byte-capture outcomes. Missing-destination and static checks follow valid
+capture; zero-fuel timeout precedes the self-copy shortcut. Complete ordered
+state/context/journal rows and shifted/static witnesses retain earlier shadows.
+The two routine memory/copy wrappers are type-checked statements only in
+TERRA-TODO; eighteen adapters remain pending. This is a capture barrier, not
+implicit rollback or a Source-to-target compiler theorem.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

@@ -92,3 +92,6 @@
 | `Lowering/StorageOps/SourceByteStorageClear.lean` | All-fuel actual primitive byte-clear operation transport to checked scalar range |
 | `Lowering/StorageOps/SourceByteStoragePrepared.lean` | Exact byte payload/clear-prefix/header-last phase execution at runtime lengths |
 | `Lowering/StorageOps/SourceByteStoragePreparedControls.lean` | Actual storRef byte-copy outcomes, ordered journals, raw/default/live aliases and retained shadows |
+
+| `Lowering/StorageOps/SourceByteStorageBarrier.lean` | Arbitrary-fuel byte capture timeout with OLD-read premises and exact full-state preservation |
+| `Lowering/StorageOps/SourceByteStorageBarrierControls.lean` | Static/shifted witnesses, complete capture/destination/malformed/self ordering and unchanged journals |

@@ -135,3 +135,40 @@ theorem prepared_copy :
 
 This adds one routine adapter to the prior fifteen: sixteen remain pending.
 The statement does not discharge generic storRef composition.
+
+## C170: byte-capture barrier adapters
+
+Module: `Solidity.Lowering.StorageOps.SourceByteStorageBarrier`.
+Lemmas: `memory_timeout`, `copy_timeout`.
+Why routine: unfold the existing loadMem/header bind once and apply the checked
+`load_timeout`; unfold the distinct-path storRef bind once and apply that
+memory adapter. No writable/destination/header/type hypothesis may be added.
+The OLD valid-source read premises are material; malformed sources can fail
+earlier. These proposition types are checked only, not proved or registered.
+
+```lean
+theorem memory_timeout :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (path : Solidity.Source.SPath)
+ (fuel count : Nat) (payload : Nat → UInt8)
+ (initial : Solidity.Source.Locals E.layout Γ × Solidity.Source.St E)
+ (_short : fuel≤count+1)
+ (_header : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame path).run initial=(.ok count,initial))
+ (_reads : ∀ j<count,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame (path.go (.index j)) (.fixedBytes 1 (by decide))).run initial=
+  (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j] rfl),initial)),
+ (Solidity.Source.loadMem (E:=E) (Γ:=Γ) frame fuel (.bytes .memory) path).run initial=(.error .timeout,initial)
+
+theorem copy_timeout :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (src dst : Solidity.Source.SPath)
+ (fuel count : Nat) (payload : Nat → UInt8)
+ (initial : Solidity.Source.Locals E.layout Γ × Solidity.Source.St E)
+ (_different : src≠dst) (_short : fuel≤count+2)
+ (_header : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame src).run initial=(.ok count,initial))
+ (_reads : ∀ j<count,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame (src.go (.index j)) (.fixedBytes 1 (by decide))).run initial=
+  (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j] rfl),initial)),
+ (Solidity.Source.storeVal (E:=E) (Γ:=Γ) frame fuel (.bytes .storage) dst
+   (Solidity.Source.Val.storRef (τ:=.bytes .storage) rfl src)).run initial=(.error .timeout,initial)
+```
+
+Two adapters added to the prior sixteen: eighteen remain pending.

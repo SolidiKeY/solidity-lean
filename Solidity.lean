@@ -1778,6 +1778,8 @@ import Solidity.Lowering.StorageOps.SourceBoolFixedStorageCopyTargetControls
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopy
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTarget
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTargetControls
+import Solidity.Lowering.StorageOps.SourceByteStorageBarrier
+import Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls
 import Solidity.Lowering.StorageOps.SourceByteStorageClear
 import Solidity.Lowering.StorageOps.SourceByteStorageCopy
 import Solidity.Lowering.StorageOps.SourceByteStorageCopyControls
