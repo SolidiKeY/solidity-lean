@@ -340,3 +340,11 @@ VY3 switch handoff: original case-list compilation now has same-horizon source
 and structured target proofs with one selector evaluation and exact retirement.
 [VY3](inline-assembly-vy3.md) records the root-component domain and separate
 recursive-visitor, Source/G24/native and final-validation obligations.
+
+
+VY3 ordered switch composition: `SolidityBridge.Yul.SwitchControl` adds an
+original-AST sequence/conditional visitor, with constructive exact-horizon
+source and whole-block target proofs. Reviewed controls show a second switch
+reads the first switch's updated locals, preserving dirty words and callers.
+Lexical-scope/case-body switch compilation and full Source/G24/native/final
+gates remain open; see [the lane record](inline-assembly-vy3.md).

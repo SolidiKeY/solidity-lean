@@ -998,3 +998,33 @@ scoped/global trust, layer/root/docs/module-map and five guarded standard axiom
 pins pass. Full library/Bridge/final gates remain open with prior raw resource
 and runtime-interruption failures preserved; unchanged failed full operations
 were not repeated for this optional component.
+
+
+### Ordered switch composition
+
+`SolidityBridge.Yul.SwitchControl` compiles the original sequence and
+conditional constructors around actual `SwitchCompilation` certificates and
+`RecursiveScopes` leaves. Its evidence is indexed by the unchanged original
+statement, context and source horizon. Explicit generalized recursors retain
+G0. Both `Derivation.source` and `Derivation.structured` are constructive:
+source evaluation uses the exact child horizon, and target emission implies
+whole-block execution on every local vector and identical arbitrary caller
+tail. Sequential induction uses the first body's updated locals for the
+second body; it never assumes a desired execution. Two guarded axiom reports
+contain only the standard axioms.
+
+Controls distinguish sequential dispatch from stale-state execution: the
+first switch changes selector1 to3 and accumulator11 to21, then a conditional
+second switch produces147. Zero skips that dispatch; a dirty nonzero guard
+takes it. Full dirty selector bits, caller words and machine fields remain
+observable. Nested sequence/conditional uses, source execution, insufficient
+fuel, inaccessible slots, actual underflow and oversized mathematical success
+are checked. Switches inside case bodies or lexical scopes still refuse;
+this visitor does not claim their admission or recursive compilation.
+
+Independent read-only finder and skeptic reviews found no confirmed findings.
+Focused/per-file kernel checks, two MCP diagnostics, trust/layer/root/docs and
+axiom inventory checks pass. The core-only touched tool reports no targets
+for this Bridge-only change; the explicit focused build supplies its import
+check. Earlier broad library/Bridge failures and full-lane obligations remain
+open. No new external solc/EVM evidence or Source/G24/native adequacy is claimed.

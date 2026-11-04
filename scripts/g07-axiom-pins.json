@@ -2120,6 +2120,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/SwitchControl.lean:SolidityBridge.Yul.SwitchControl.Derivation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SwitchControl.lean:SolidityBridge.Yul.SwitchControl.Derivation.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/UnarySelectionControls.lean:SolidityBridge.Yul.UnarySelection.bridge_step": [
   "Classical.choice",
   "Quot.sound",

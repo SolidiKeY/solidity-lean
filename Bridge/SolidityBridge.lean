@@ -377,6 +377,8 @@ import SolidityBridge.Yul.StructuredSource
 import SolidityBridge.Yul.StructuredSourceControls
 import SolidityBridge.Yul.SwitchCompilation
 import SolidityBridge.Yul.SwitchCompilationControls
+import SolidityBridge.Yul.SwitchControl
+import SolidityBridge.Yul.SwitchControlControls
 import SolidityBridge.Yul.UnarySelection
 import SolidityBridge.Yul.UnarySelectionControls
 import SolidityBridge.Yul.WriteSelection
