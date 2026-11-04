@@ -2846,6 +2846,8 @@ import Solidity.Yul.Views.AllocationSequence
 import Solidity.Yul.Views.AllocationSequenceControls
 import Solidity.Yul.Views.AllocationViewImages
 import Solidity.Yul.Views.ArrayStruct
+import Solidity.Yul.Views.ArrayWordHeap
+import Solidity.Yul.Views.ArrayWordHeapControls
 import Solidity.Yul.Views.ArrayWordStore
 import Solidity.Yul.Views.ArrayWordStoreControls
 import Solidity.Yul.Views.ByteHeapRealization

@@ -861,3 +861,15 @@ new/sibling payloads and unknown bytes, and reject wrong logical-ID/byte-offset
 preparations. This equality concerns the selected array plus complementary bytes;
 refreshed whole-heap changed-image reconstruction and target opcode execution
 remain separate obligations.
+
+`ArrayWordHeap` extends one-word array stores to the complete generated heap.
+The changed array's image uses the new codec word; real separation and typed
+transport preserve every other object's reads. These derived reads establish
+whole-map encoding identity, complete coverage and unchanged whole Source
+writeback for the actual post-write state, together with owner safety and
+reserved-word transport. Controls tie the same new-pointer consumer to its
+four-object heap, distinguish parent word 128 from 288, and preserve an unknown
+tail byte 99. Initial MemOK, supported types, complete old reads and actual
+codecs remain premises. Final `retainInitial` begins at the resulting heap;
+arbitrary earlier retained-lineage extension, shared-zero/interior/dirty-owned
+representations and target opcode execution remain open.
