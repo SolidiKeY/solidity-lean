@@ -228,3 +228,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintSliceNative.lean` | Actual byte-derived uint slice expression and guarded paired Source/native allocation with old-object/map frames. |
 
 | `Solidity/Backend/MemoryOps/SourceUintSliceBinding.lean` | Actual uint slice-result local binding and reached successful/rejecting Items deletion with native allocation/write and old-object frames. |
+
+| `Solidity/Backend/MemoryOps/SourceUintSliceCompound.lean` | Byte-derived slice binding followed by actual reached compound addition or checked overflow, with Items execution and heap/world frames. |
