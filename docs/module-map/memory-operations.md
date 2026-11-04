@@ -192,3 +192,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/AliasBinding.lean` | Actual selected pointer compiler followed by alias-local store, deriving exact source/target success or bounds refusal. |
 | `Backend/MemoryCopies/AliasBindingControls.lean` | Populated indexed-alias source/target observations, bounds refusal and fresh-pointer/empty-code negative controls. |
 | `Backend/MemoryCopies/RuntimeRebindInterface.lean` | Allocating runtime-array rebind outcome with exact scoped/target execution and old-object versus fresh-root separation. |
+| `Backend/MemoryCopies/RuntimeRebind.lean` | Existing allocating runtime rebind execution plus universal old-object preservation and fresh-root distinction. |
+| `Backend/MemoryCopies/RuntimeRebindControls.lean` | Actual declaration-then-rebind composition over populated ownership, retained old parent and empty/long/wrong-cursor/skipped-code controls. |

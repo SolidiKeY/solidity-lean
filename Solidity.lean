@@ -294,6 +294,8 @@ import Solidity.Backend.MemoryCopies.TraversalInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayControls
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrays
+import Solidity.Backend.MemoryCopies.RuntimeRebind
+import Solidity.Backend.MemoryCopies.RuntimeRebindControls
 import Solidity.Backend.MemoryCopies.RuntimeRebindInterface
 import Solidity.Backend.MemoryCopies.SourceControls
 import Solidity.Backend.MemoryCopies.SourceDefaultFrames
