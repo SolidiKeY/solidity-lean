@@ -2859,6 +2859,8 @@ import Solidity.Yul.Views.ByteElementStoreControls
 import Solidity.Yul.Views.ByteHeapRealization
 import Solidity.Yul.Views.ByteHeapRealizationControls
 import Solidity.Yul.Views.ByteObjects
+import Solidity.Yul.Views.ByteWriteSequence
+import Solidity.Yul.Views.ByteWriteSequenceControls
 import Solidity.Yul.Views.Bytes
 import Solidity.Yul.Views.CalldataHashBinding
 import Solidity.Yul.Views.CalldataHashBindingControls

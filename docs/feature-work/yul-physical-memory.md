@@ -986,3 +986,14 @@ reads come from the first complete map. Four aliases recover old bytes and
 nonzero padding made live by growth, with an unrelated third object preserved.
 Preparation `None` beyond original capacity remains distinct from a language
 verdict. No resize syntax, cleaning or target execution policy is introduced.
+
+`ByteWriteSequence` executes every byte-write request through actual
+`Source.writeLoc`. Its physical companion patches only on source success and
+stops on the exact first error. Source projection holds for every input state;
+for an actual bytes/string root, all finite plans derive complete reached-store
+views, whole Source writeback and original allocation history, including late
+bounds failures. Each successful step supplies the next step's reads. Controls
+compose prior regrowth with repeated/cross-word writes, late Panic0x32 and a
+skipped suffix, preserving aliases and caller locals in an empty child context.
+This fixed-root adapter adds no evaluator, admission fragment, runtime cap,
+automatic rollback or target execution theorem.
