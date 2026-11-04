@@ -1442,3 +1442,44 @@ root frontend dispatch, early-flow/function/native instruction-prefix/resource
 or view adequacy. Full Y08.01/Y08.02, frontend/joint artifacts, remaining original
 backfill and full lane validation remain open. No admission, manifest, canonical
 rethrow, observation, proof budget or producer-owner implementation changed.
+
+
+### Finite FOR target-to-source reflection
+
+`SolidityBridge.Yul.StructuredUnique.output_unique` proves determinism of the
+unchanged finite `StructuredExec` relation, including actual branch and loop
+constructors. `ForReflection.loop_complete` then inverts actual emitted FOR-loop
+execution. The real scalar condition law identifies its full-word guard and
+unchanged locals; target uniqueness against actual compiler body/post execution
+fixes each next local vector. The finite target derivation supplies the count,
+all pre-body nonzero guards, the first zero guard and exact final stack. These
+facts are conclusions, not additional run/count premises.
+
+`source_of_structured` reflects the actual prelude once and constructs original
+closed-word FOR evaluation at `base + count + 2`. The bounds `af, cf, pf, bf ≤ base`
+are explicit real component horizon bounds. `source_of_model` consumes any actual
+successful selected mathematical-model run, uses its existing classifier, and
+derives source completion, the exact returned stack/nonstack machine frame and
+pending-skip count zero. Neither a source run nor desired intermediate/target
+result is assumed. Actual compiler emissions and selected code, normal component
+certificates, numeric initial stack representation and the stated horizon bounds
+remain necessary. This complements the forward `ForCompletion` proof without
+asserting a native/source observational equivalence.
+
+Inhabited branch-bearing and zero-guard controls reuse real selected program
+successes with three locals, two newer words, arbitrary caller tail and dirty/high
+words. Source-result locals change exactly as the source; newer/caller/unchanged
+flag words and nonstack machine fields are preserved. A nonzero pending count is
+refused; the prior true infinite witness cannot provide a successful model run
+(no unending execution is evaluated). Another witness has 1025 input stack words:
+its mathematical-model success coexists with the actual condition code's failed
+`Scalar.stackBound` check. This is not whole-block/native capacity adequacy.
+Nine actual standard-axiom reports are enforced. Independent read-only finder
+and skeptic reviews of the final producers, controls and metadata found no
+confirmed findings; neither reviewer used Lean/server/tests.
+
+Full logical Solidity Source/G24/views/functions/early-flow/root dispatch and dirty
+readback, native/charged/decoder/physical-origin/world/resource closure, frontend
+attachment, original backfill remainder and full lane/joint validation remain
+open. Source/target definitions, admission, exclusions, observation and proof
+budgets are unchanged; no prerequisite-owner files were edited.

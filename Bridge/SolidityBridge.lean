@@ -340,6 +340,8 @@ import SolidityBridge.Yul.ForCompletion
 import SolidityBridge.Yul.ForCompletionControls
 import SolidityBridge.Yul.ForPrefixes
 import SolidityBridge.Yul.ForPrefixesControls
+import SolidityBridge.Yul.ForReflection
+import SolidityBridge.Yul.ForReflectionControls
 import SolidityBridge.Yul.ForSource
 import SolidityBridge.Yul.FrameCertificatesV2
 import SolidityBridge.Yul.FrameCertificatesV2Controls
@@ -395,6 +397,7 @@ import SolidityBridge.Yul.StructuredSourceControls
 import SolidityBridge.Yul.StructuredSwitchJsonControls
 import SolidityBridge.Yul.StructuredSwitchJsonKernelAttachment
 import SolidityBridge.Yul.StructuredSwitchJsonKernelControls
+import SolidityBridge.Yul.StructuredUnique
 import SolidityBridge.Yul.SwitchCompilation
 import SolidityBridge.Yul.SwitchCompilationControls
 import SolidityBridge.Yul.SwitchControl

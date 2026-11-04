@@ -93,3 +93,6 @@
 | `Bridge/SolidityBridge/Yul/ForPrefixes{,Controls}.lean` | Actual compiled FOR all-horizon source noncompletion and exact finite model macro-turn transport; real branch-bearing invariant, caller/frame preservation and whole selected noncompletion denotation. Not native prefixes/exception correspondence or general Source-G24. |
 
 | `Bridge/SolidityBridge/Yul/ForCompletion{,Controls}.lean` | Extract first-zero count/normal output from any actual successful original FOR horizon; exact source-output to real emission/selected model transport without caller-supplied stopping count. Branch/zero/horizon/noncompletion controls; no native/G24/capacity adequacy. |
+
+| `Bridge/SolidityBridge/Yul/StructuredUnique.lean` | Determinism of the unchanged finite StructuredExec relation, including branches/loops; no new target evaluator. |
+| `Bridge/SolidityBridge/Yul/ForReflection{,Controls}.lean` | Recover guard/count/exact locals from actual finite FOR target evidence, then original source completion from structured/selected model success; full frame/pending-zero and noncompletion/capacity controls. Not native/G24 adequacy. |
