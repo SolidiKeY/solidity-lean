@@ -1198,3 +1198,24 @@ allocation support, general P16 and full-lane validation remain open.
 Independent read-only finder/skeptic reviews found no issues. Both modules
 have zero diagnostic errors; fifteen scoped axiom reports use only Lean
 standard axioms. Final lane and external compiler/EVM validation remain open.
+
+
+### Independently indexed default control congruence
+
+`LocalDefaultControlRepresentation.ifElse`, `whileLoop` and `doWhileLoop`
+prove exact-word congruence for the existing heterogeneous default-scope
+runners at every fuel. The conditional retains independent yes/no output
+contexts; no equality of their declaration prefixes is required. Actual guard
+effects, selected scope, predecessor recursion horizons and guard-first versus
+body-first order remain unchanged. Halted results retain exact reached
+contexts/reasons, related full locals and equal worlds.
+Eleven controls exercise uint8 versus uint256 branch prefixes, scope closure,
+guard writes, loop order/recursion and dirty projection refusal. A negative
+control holds surviving words, error and world fixed while refusing to relate
+different reached prefix types. The intrinsic conditional witness is inhabited.
+No Source/runtime/readback/admission changes occur. Original default/Boolean
+certificates remain required; broader certificates and general P16 remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both modules
+have zero diagnostic errors; fourteen scoped axiom reports use only Lean
+standard axioms. Final lane and external compiler/EVM validation remain open.

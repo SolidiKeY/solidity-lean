@@ -101,3 +101,5 @@
 | `Yul/LocalBoolForPostRepresentation.lean`, `Yul/Checks/LocalBoolForPostRepresentation.lean` | All-fuel Boolean initializer/guard/post for congruence with precise scope and outer-write controls. |
 
 | `Yul/LocalDefaultRepresentation.lean`, `Yul/Checks/LocalDefaultRepresentation.lean` | All-fuel heterogeneous default/scope/unchecked congruence with related clean/raw frames and unequal projection controls. |
+
+| `Yul/LocalDefaultControlRepresentation.lean`, `Yul/Checks/LocalDefaultControlRepresentation.lean` | All-fuel independently indexed default branch/loop congruence with typed failure-prefix controls. |

@@ -2435,6 +2435,7 @@ import Solidity.Yul.Checks.LocalBoolWhile
 import Solidity.Yul.Checks.LocalBoolWhileRepresentation
 import Solidity.Yul.Checks.LocalCompareControl
 import Solidity.Yul.Checks.LocalDefaultBinding
+import Solidity.Yul.Checks.LocalDefaultControlRepresentation
 import Solidity.Yul.Checks.LocalDefaultDoWhile
 import Solidity.Yul.Checks.LocalDefaultIfElse
 import Solidity.Yul.Checks.LocalDefaultItems
@@ -2660,6 +2661,7 @@ import Solidity.Yul.LocalBoolWhileRepresentation
 import Solidity.Yul.LocalCompareControl
 import Solidity.Yul.LocalCoordinates
 import Solidity.Yul.LocalDefaultBinding
+import Solidity.Yul.LocalDefaultControlRepresentation
 import Solidity.Yul.LocalDefaultDoWhile
 import Solidity.Yul.LocalDefaultIfElse
 import Solidity.Yul.LocalDefaultItems
