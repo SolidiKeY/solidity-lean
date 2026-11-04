@@ -285,3 +285,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeMemoryArray.lean` | Actual runtime header/payload loop deep copying primitive memory arrays with ownership-derived separation. |
 | `Backend/MemoryCopies/RuntimeMemoryArrayControls.lean` | Populated/empty/64-element runtime deep-copy controls preserving old aliases and rejecting shallow results. |
 | `Backend/MemoryCopies/MemoryPathCopyInterface.lean` | Existing selected-pointer contracts for deep-copy execution/refusal and binding a fresh primitive array. |
+| `Backend/MemoryCopies/MemoryPathCopy.lean` | Actual selected-pointer copy/refusal and fresh binding with complete state/allocator transport. |
+| `Backend/MemoryCopies/MemoryPathCopyControls.lean` | Local empty/pair/64 and indexed copy controls, Source alias distinction, preserved aliases and path refusal. |
