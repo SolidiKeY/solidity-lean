@@ -71,3 +71,5 @@
 | `Yul/LocalDefaultDoWhile.lean`, `Yul/Checks/LocalDefaultDoWhile.lean` | body-first default scopes, Source agreement, raw purity and finite-normal exclusion. |
 | `Yul/LocalDefaultPostIter.lean`, `Yul/Checks/LocalDefaultPostIter.lean` | scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity. |
 | `Yul/LocalDefaultNoGuard.lean` | Concrete default-scoped omitted-guard iterations using existing Source transport. |
+
+| `Yul/LocalBoolFailure.lean`, `Yul/Checks/LocalBoolFailure.lean` | All-fuel raw Boolean expression/control error classification and dirty-state refusal/branch controls. |

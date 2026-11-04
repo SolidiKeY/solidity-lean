@@ -2413,6 +2413,7 @@ import Solidity.Yul.Checks.LocalBoolDivergence
 import Solidity.Yul.Checks.LocalBoolDoDivergence
 import Solidity.Yul.Checks.LocalBoolDoWhile
 import Solidity.Yul.Checks.LocalBoolExpr
+import Solidity.Yul.Checks.LocalBoolFailure
 import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.Checks.LocalBoolForNoGuard
 import Solidity.Yul.Checks.LocalBoolForPost
@@ -2621,6 +2622,7 @@ import Solidity.Yul.LocalBoolDivergence
 import Solidity.Yul.LocalBoolDoDivergence
 import Solidity.Yul.LocalBoolDoWhile
 import Solidity.Yul.LocalBoolExpr
+import Solidity.Yul.LocalBoolFailure
 import Solidity.Yul.LocalBoolFor
 import Solidity.Yul.LocalBoolForNoGuard
 import Solidity.Yul.LocalBoolForPost

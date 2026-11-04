@@ -923,3 +923,17 @@ Review found and corrected two conflict-resolution defects in the shared
 checker and module map; both full upstream files are preserved with only
 existing lane rows appended. Independent re-review found no remaining issues.
 No Source or scoped-syntax definitions were changed by the lane.
+
+### Boolean failure classification
+
+LocalBoolFailure proves that errors from the existing four-form expression
+certificate and its short-circuit/control extension are exactly horizon
+timeouts, for every fuel and raw local state. No clean-state premise is used.
+Controls retain writes before timeout and dirty words across skipped branches;
+they distinguish timeout from revert and refuse an unsupported base certificate.
+This classifies returned errors only: it does not prove termination, loop
+divergence, general Source embedding or compiler adequacy. Evaluators and Source
+types are unchanged. Broader P16 and final lane validation remain open.
+
+Scoped diagnostics, touched builds and independent finder/skeptic reviews pass;
+all seven reported theorem axiom sets contain only standard Lean axioms.

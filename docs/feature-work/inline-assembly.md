@@ -271,3 +271,5 @@ VY1: body-first default-scope loops now have concrete Source agreement, raw worl
 VY1: scoped default for-iterations with Boolean posts have concrete Source agreement, raw purity and post-value-discard controls; full P16 remains open.
 
 VY1: H22 rebased with H21 registries; omitted-guard default iterations reuse actual Source transport and have concrete scoped agreement/purity/noncompletion. Full P16 remains open.
+
+VY1: local Boolean expression/control failures are proved to be timeouts for all raw inputs and fuel; see [lane handoff](inline-assembly-vy1.md#boolean-failure-classification). General P16 remains open.
