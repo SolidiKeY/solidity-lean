@@ -249,3 +249,23 @@ existing core classifier, including context-changing bodies. This is a supported
 compiler family, not an exclusion from the original full G40 obligation. It
 assumes neither a desired body outcome nor a compiled artifact or run. Native
 failure bytes/resources and Source entry/provenance remain separate.
+`ValueGateBody.lean` constructs that typed prefix through the existing public
+compiler. Both the body and guarded whole are actually selected, and any such
+selected results satisfy exact intrinsic composition: allowed values run the
+body on the unchanged input machine; rejected values revert before the suffix.
+The result retains the body's complete outcome, including fault, revert and
+residual skip. It reuses the prior value-gate proof and existing run-append
+laws rather than assuming body execution. The core-classifier premise is the
+actual existing check for this supported family, not a new Source/profile
+admission or a supplied compiled-body result.
+Controls select a context-growing scalar declaration, prove its genuine fresh
+word-memory mutation, preserve the old cell and two saved stack words, and
+exercise zero/payable execution versus nonzero rejection. Raw fault and skip
+controls belong only to the arbitrary-suffix helper; they do not pretend those
+suffixes have been admitted by the typed-body compiler. Full G40 decoding,
+selector dispatch, memory-body/profile closure and Source/native failure-byte
+adequacy remain open.
+Independent read-only finder and skeptic reviews passed with no findings. They
+confirmed genuine public selection, no assumed body execution, complete outcome
+preservation and non-vacuous mutation controls. Both distinguished the supported
+core family from the remaining full G40/profile obligation.

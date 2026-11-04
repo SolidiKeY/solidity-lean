@@ -119,3 +119,6 @@
 | `Backend/AbiEntry/ValueGateInterface.lean` | Intrinsic payable/non-payable gate contracts indexed by actual public compiler selection. |
 | `Backend/AbiEntry/ValueGate.lean` | Typed require/value-check family, checked compiler selection and exact whole-machine intrinsic execution. |
 | `Backend/AbiEntry/ValueGateControls.lean` | Inhabited context, saved-tail/protected-memory and all-word payable/nonzero rejection controls. |
+| `Backend/AbiEntry/ValueGateBodyInterface.lean` | Actual checked compiler selection and exact body-result composition signatures for core-classified typed bodies. |
+| `Backend/AbiEntry/ValueGateBody.lean` | Public compiler selection of typed guarded bodies and preservation of their entire intrinsic outcome. |
+| `Backend/AbiEntry/ValueGateBodyControls.lean` | Context-growing mutation, protected memory/tail, blocked body and raw fault/skip controls. |
