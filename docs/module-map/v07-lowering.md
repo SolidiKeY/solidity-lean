@@ -108,3 +108,5 @@
 | `Lowering/V07/AddressComparisonControls.lean` | Inhabited address comparison, context-extension and ordered negative controls with exact axiom guards. |
 | `Lowering/V07/AddressQualifiers.lean` | Actual payable/explicit-erasure assignment transport from canonical initial context alignment. |
 | `Lowering/V07/AddressQualifierControls.lean` | Inhabited both-qualifier, mixed-reference, composition and capture controls. |
+| `Lowering/V07/EnumConversions.lean` | Existing enum/uint256 successful assignment transport and exact Source-only invalid-cast observations, with explicit representation obligations. |
+| `Lowering/V07/EnumConversionControls.lean` | Real enum-declaration, mixed-reference, alias, full-panic and oversized-layout countercontrols. |

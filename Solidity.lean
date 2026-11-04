@@ -2150,6 +2150,8 @@ import Solidity.Lowering.V07.DoubleControls
 import Solidity.Lowering.V07.DoubleNegativeControls
 import Solidity.Lowering.V07.DoubleSubtraction
 import Solidity.Lowering.V07.EffectfulCondition
+import Solidity.Lowering.V07.EnumConversionControls
+import Solidity.Lowering.V07.EnumConversions
 import Solidity.Lowering.V07.FieldCompleteness
 import Solidity.Lowering.V07.FixedBytesAssignment
 import Solidity.Lowering.V07.FixedBytesAssignmentControls
