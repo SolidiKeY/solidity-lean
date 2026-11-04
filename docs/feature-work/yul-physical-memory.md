@@ -793,3 +793,15 @@ from a payload-only copy. Initial image reads, supported old types, owner MemOK,
 reserved memory and exact computed Word extent remain genuine premises. The
 computed placement is not proved to be the target allocator's selection, nor
 does this discharge general allocation refinement or retained-history extension.
+
+`AllocationRefresh` prepares a fresh computed placement after actual allocation.
+It agrees with incremental coordinates on occupied objects and the free pointer,
+while intentionally allowing unused future coordinates to differ. Existing typed
+image forwarding derives all refreshed reads, including pointer-valued members.
+`resume` uses these derived reads for a second incremental encoding and proves
+one actual two-allocation Source sequence, whole-map reconstruction, unchanged
+whole-state writeback and owner safety. Controls retain two nonzero paddings and
+an unknown tail, actual old/new source bytes, and the existing max-one stride
+for a zero-footprint mathematical object. Initial canonical support, owner
+validity, old reads and exact Word extents remain premises. Target allocator
+selection and general retained-history/refinement remain open.
