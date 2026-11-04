@@ -229,3 +229,4 @@
 | `Calculus/TermEq.lean` | Terms compared: equal in the Theory (`Tm.Theq`, the rewrites' premise), structurally across sorts (`Tm.beqR`, recursor with `match` twin, the typed symbols by their codes `Op1Code` …, `IndexTy.eq`, `ArrTy.eq`), and the locals a literal value term reads (`Tm.litVarsS`). |
 | `Calculus/DecisionUIntConstant.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Calculus/DecisionUIntSyntax.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Calculus/SolkeyAgreementH28/Freshness.lean` | Bounded solkey-ports checkpoint; typed scope and retained obligations are stated in the module. |
