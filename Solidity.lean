@@ -396,6 +396,9 @@ import Solidity.Backend.MemoryOps.StructDefaults.SourcePair
 import Solidity.Backend.MemoryOps.StructDefaults.Word
 import Solidity.Backend.MemoryOps.StructDefaults.WordControls
 import Solidity.Backend.Opcode
+import Solidity.Backend.Passes.AllocatedReferenceRead
+import Solidity.Backend.Passes.AllocatedReferenceReadControls
+import Solidity.Backend.Passes.AllocatedReferenceReadPins
 import Solidity.Backend.Passes.AllocatingCapture
 import Solidity.Backend.Passes.AllocatingControls
 import Solidity.Backend.Passes.AllocatingMiddle

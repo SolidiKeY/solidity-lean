@@ -636,6 +636,22 @@ initial map, wrong reference/cursor and saved-tail corruption are rejected.
 These are inhabited intrinsic and abstract-Instr results; independent Source
 lowering, public gas/session/ABI and external EVM adequacy remain open.
 
+## Consume the actual new reference
+
+`AllocatedReferenceRead` consumes the new array from `MemoryJoinedAllocation`
+using its actual reached selected map and full representation. Both readers
+are selected by public `Memory.compileVal`: index2 of the new length3 array
+returns zero, while index2 of the old length2 alias reverts. Intrinsic prefix
+and value sequencing and actual emitted append executions are proved without
+an assumed read result or preservation conclusion. The word and map precede
+all saved tails; the full successful allocation output is retained before
+both the success and reached failure alternatives.
+
+Controls preserve all 16 allocation observations. A corrupt instruction suffix
+keeps the returned zero but deletes caller99, distinguishing full saved-tail
+preservation from top-word-only checking. These remain intrinsic/abstract-Instr
+results, not independent Source lowering, public ABI or gas/session adequacy.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

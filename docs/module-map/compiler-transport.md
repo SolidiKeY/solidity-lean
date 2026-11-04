@@ -79,3 +79,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryJoinedAllocation.lean` | Actual public joined allocation execution with full output, both maps, old-reference identity and nine-cell growth. |
 | `Backend/Passes/MemoryJoinedAllocationControls.lean` | Complete fresh-array/old-state observations, public selection, saved tails and map/cursor negatives. |
 | `Backend/Passes/MemoryJoinedAllocationPins.lean` | Exact standard-only axioms for joined allocation execution and controls. |
+| `Backend/Passes/AllocatedReferenceRead.lean` | Actual selected-map fresh-reference reader and reached old-alias bounds failure after allocating join. |
+| `Backend/Passes/AllocatedReferenceReadControls.lean` | Complete memory observations, returned-word/saved-tail controls and public receiver selection. |
+| `Backend/Passes/AllocatedReferenceReadPins.lean` | Exact standard-only axioms for post-allocation value sequencing. |
