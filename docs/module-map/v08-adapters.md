@@ -231,6 +231,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean` | H7-checked charged fetched ADDRESS, CALLER and CALLVALUE, whole native State/X continuation and explicit resource bounds. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | H7-checked populated invocation controls: complete expected States, distinct identities, legal capacity and gas/fuel/overflow ordering. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironment.lean` | Charged fetched TIMESTAMP and SELFBALANCE at arbitrary emitted sites, exact costs2/5 and whole-State/X observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SelfBalanceTransport.lean` | Canonical code-owner ledger view and G31 SELFBALANCE slice/fetched correspondence. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SelfBalanceControls.lean` | Direct source/fetched API client, distinct owner/stack/candidate views and maximum-address boundary. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironmentControls.lean` | Populated owner-ledger/time controls, raw word wrapping and absent-account behavior, capacity/resource order and complete ordered States. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadata.lean` | Charged native COINBASE/NUMBER/PREVRANDAO/GASLIMIT/BASEFEE reads for arbitrary supplied arrays, paired with unchanged six-opcode environment-slice refusals. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadataControls.lean` | Distinct populated header values, raw number wrapping, complete ordered States and gas/fuel/capacity/refusal controls. |

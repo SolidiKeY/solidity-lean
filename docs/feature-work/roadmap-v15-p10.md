@@ -1558,3 +1558,23 @@ obligations open.
 Review identified evaluator-only coverage of the new API. Direct populated
 clients now instantiate both the charged fetched/frame law and the low160 alias
 law, alongside the independent complete-state and returned-word-cold controls.
+
+## Code-owner balance view
+
+`SelfBalanceTransport` derives the G31 view's self address and funds from the
+actual native code owner and account map. The bounded-address word roundtrip
+justifies the source account lookup. The source slice composes with the existing
+charged fetched SELFBALANCE theorem under its gas, stack and fuel bounds; the
+native state, memory and return buffers are preserved apart from the documented
+machine updates. Source/world entry provenance remains open.
+
+`SelfBalanceControls` directly consumes this API and the existing independent
+expected record. Native owner 7 has balance 29; stack top 11 names balance 41,
+while a deliberately mismatched candidate frame supplies 999. The canonical
+view returns 29. Gas drops from 9 to 4 and PC advances from 3 to 4, preserving the
+complete ordered spill and populated buffers. A maximum-160-bit-address client
+exercises the roundtrip law. Existing native fetched/absent-account controls are
+reused; this does not establish full Osaka, source or account-world adequacy.
+
+Review strengthened the wrong-balance control to keep the identical tail and
+length, isolating 29 versus 41 rather than a stack-size difference.

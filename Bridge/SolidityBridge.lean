@@ -260,6 +260,8 @@ import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
 import SolidityBridge.RoadmapV15.P10.PushDecoderControls
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBoundsControls
+import SolidityBridge.RoadmapV15.P10.SelfBalanceControls
+import SolidityBridge.RoadmapV15.P10.SelfBalanceTransport
 import SolidityBridge.RoadmapV15.P10.SignExtensionAllWitness
 import SolidityBridge.RoadmapV15.P10.SignExtensionConsumer
 import SolidityBridge.RoadmapV15.P10.SignExtensionControls
