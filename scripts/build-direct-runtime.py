@@ -34,6 +34,17 @@ if not compiler.is_file():
     import shutil
     compiler=pathlib.Path(shutil.which(emcc) or emcc).resolve()
 clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/clang')))
+configured=json.loads(subprocess.check_output([sys.executable,'-c',
+    "import sys,json; sys.path.insert(0,sys.argv[1]); from tools import config,shared; "
+    "print(json.dumps(dict(clang=shared.CLANG_CC,ar=shared.LLVM_AR,nm=shared.LLVM_NM,ld=shared.WASM_LD,"
+    "binaryen=config.BINARYEN_ROOT,node=config.NODE_JS,wrapper=config.COMPILER_WRAPPER)))",
+    str(compiler.parent)],text=True))
+if pathlib.Path(configured['clang']).resolve()!=clang.resolve():raise ValueError('Configured clang differs from the pinned compiler')
+if configured['wrapper']:raise ValueError('Configured compiler wrappers are not supported')
+configured_tools=[pathlib.Path(configured[n]) for n in ['clang','ar','nm','ld']]
+configured_tools+=sorted(p for p in (pathlib.Path(configured['binaryen'])/'bin').iterdir() if p.is_file())
+node=configured['node']
+configured_tools.append(pathlib.Path(node[0] if isinstance(node,list) else node))
 compiler_identity={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [compiler,compiler.with_suffix('.py'),clang]}
 emcc=str(compiler)
 compiler_version=subprocess.check_output([emcc,'--version'],text=True).strip()
@@ -44,7 +55,7 @@ build_identity=hashlib.sha256(json.dumps({'compiler':compiler_identity,'version'
 
 def provenance_paths():
     return [pathlib.Path(__file__).resolve(),closure_path,bridge_path,root/'lean-toolchain',root/'lakefile.toml',
-            *map(pathlib.Path,compiler_identity),prefix/'bin/lean',prefix/'bin/lake',
+            *map(pathlib.Path,compiler_identity),*configured_tools,prefix/'bin/lean',prefix/'bin/lake',
             *sorted(compiler.parent.rglob('*.py')),
             *([pathlib.Path(os.environ['EM_CONFIG'])] if os.environ.get('EM_CONFIG') else []),
             *sorted((prefix/'include').rglob('*.h')),
@@ -137,7 +148,7 @@ for name,_,source,expected in inputs:
     if helper.file_sha256(source)!=expected:raise ValueError('Generated source changed during link: '+name)
 helper.verify_snapshot(provenance,provenance_paths())
 runtime_libraries={str(p):provenance[str(p)] for p in [*libraries,gmp]}
-manifest={'toolchain':toolchain,'sourceFiles':source_files,'bridgeSha256':hashlib.sha256(bridge_bytes).hexdigest(),'closureScriptSha256':hashlib.sha256(closure_bytes).hexdigest(),'buildInputs':provenance,'runtimeLibraries':runtime_libraries,'optimization':'-O2','version':1,'leanCommit':commit,'stageSourceCommit':stage_commit,'compiler':compiler_identity,'compilerVersion':compiler_version,'leanHeadersSha256':headers.hexdigest(),'modules':sources,'closure':closure,
+manifest={'toolchain':toolchain,'sourceFiles':source_files,'bridgeSha256':hashlib.sha256(bridge_bytes).hexdigest(),'closureScriptSha256':hashlib.sha256(closure_bytes).hexdigest(),'buildInputs':provenance,'runtimeLibraries':runtime_libraries,'optimization':'-O2','version':1,'leanCommit':commit,'stageSourceCommit':stage_commit,'compiler':compiler_identity,'compilerVersion':compiler_version,'configuredTools':configured,'leanHeadersSha256':headers.hexdigest(),'modules':sources,'closure':closure,
  'javascript':hashlib.sha256((link_output/'direct.js').read_bytes()).hexdigest(),
  'wasm':hashlib.sha256((link_output/'direct.wasm').read_bytes()).hexdigest(),
  'wasmBytes':(link_output/'direct.wasm').stat().st_size}
