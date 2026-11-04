@@ -393,3 +393,15 @@ inventory is10files/16sites; independent finder/skeptic confirm statements and
 meaning unchanged. The in-progress checkpoint was deliberately stopped
 before these known failures, retaining its touched pass and interrupted
 library result separately. No resource cap or proof budget changed.
+
+The combined checkpoint at `0f540adbe63b24f39c7fff283f603e3d5c628a81`
+exited0: touched1268jobs, library3317jobs, examples/TestSuite811jobs,
+trust/layers/roots/orphans/doc-paths/axiom-pins all pass. Strict automation
+also exits0. Exact logs and immutable incremental handoff are under
+`/workspace/vy5-composition/transaction-proof-20261104/final`. Adopted
+monitoring records a transport sampling gap, unchanged12GiB/no-swap cap,
+peak observed RSS9053368320 and minimum available RAM8334987264bytes.
+The unchanged Horizon before/after300-second policy failures remain;
+OpenLoops also checked in343seconds (timing failure, kernel pass).
+No runtime-gate or whole-lane pass is claimed. Historical failing gates
+remain failures; this fresh doc-paths pass is a distinct current-tree check.
