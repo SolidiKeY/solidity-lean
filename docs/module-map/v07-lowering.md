@@ -119,3 +119,5 @@
 | `Lowering/V07/EnumUnsignedCastControls.lean` | Inhabited mixed-reference, all-width, capture-extension and incorrect caller-narrowing controls with exact axiom guards. |
 | `Lowering/V07/EnumSignedWord.lean` | Actual enum-to-int256 assignment/sign-result transport, deriving full caller-context alignment from initial relations. |
 | `Lowering/V07/EnumSignedWordControls.lean` | Inhabited mixed-reference, sign-boundary, capture-extension and stale/truncation controls with exact axiom guards. |
+| `Lowering/V07/EnumSignedCasts.lean` | Enum assignment-to-signed-width transport through existing sign and narrowing laws; original caller ordinal preserved. |
+| `Lowering/V07/EnumSignedCastControls.lean` | Proved256-member Source enum witness, negative int8 assignments, all-width/mathematical boundaries and exact axiom guards. |

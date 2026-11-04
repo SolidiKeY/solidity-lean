@@ -2154,6 +2154,8 @@ import Solidity.Lowering.V07.EnumConversionControls
 import Solidity.Lowering.V07.EnumConversions
 import Solidity.Lowering.V07.EnumGuard
 import Solidity.Lowering.V07.EnumGuardControls
+import Solidity.Lowering.V07.EnumSignedCastControls
+import Solidity.Lowering.V07.EnumSignedCasts
 import Solidity.Lowering.V07.EnumSignedWord
 import Solidity.Lowering.V07.EnumSignedWordControls
 import Solidity.Lowering.V07.EnumUnsignedCastControls
