@@ -1019,6 +1019,8 @@ import Solidity.Calculus.DecideLang
 import Solidity.Calculus.DecideScoped
 import Solidity.Calculus.DecideTyped
 import Solidity.Calculus.Decision
+import Solidity.Calculus.DecisionUIntConstant
+import Solidity.Calculus.DecisionUIntSyntax
 import Solidity.Calculus.DeclarationFacts
 import Solidity.Calculus.DeclarationReduction
 import Solidity.Calculus.DeclarationStaticReduction
