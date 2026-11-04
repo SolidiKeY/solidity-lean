@@ -229,3 +229,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceDefaultHorizonInterface.lean` | Exact non-timeout default traversal observation/state preservation under additional interpreter fuel. |
 | `Backend/MemoryCopies/SourceDefaultHorizon.lean` | Generic default traversal fuel extension and exact canonical results for existing reference/value/field construction certificates. |
 | `Backend/MemoryCopies/SourceDefaultHorizonControls.lean` | Guarded recursive defaults, fixed bytes/string children, scalar/empty/64-child stability, refusal and partial-timeout controls. |
+| `Backend/MemoryCopies/SourceStoredFreshInterface.lean` | Fresh parent-last reference certificates and exact distinct repeated Source storage-copy obligations. |

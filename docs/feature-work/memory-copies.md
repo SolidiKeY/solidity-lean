@@ -447,3 +447,7 @@ Own declared Node has an empty dynamic array of Node, bytes[2] and string. Defau
 Independent read-only finder/skeptic passed with no findings; neither used Lean/server/builds or wrote files. All three files have zero MCP errors/warnings; direct main and control proofs passed first attempt. Passing MCP baseline normalization and standalone successor-fuel probes, with failed alternatives, are retained. Checkpoint gates and scoped axiom receipts remain required before acceptance.
 
 These are exact initialized-result and observation laws, not general termination/admission, physical allocation room, Source-to-EVM refinement or checked size/gas failure semantics. The lower non-timeout condition remains necessary; successful constructor bridges obtain it from actual existing execution certificates. Full G33/G35, general compiler selection, storage-copy compilation, five-location composition and final lane-end run-lean remain open. No public interface, Source/H16 file, premise, exclusion, proof budget or trust expansion is made. VY5 S03-PANIC41, V11 G34/G35.02/.03 and V10 G27.05 boundaries remain unchanged, alongside remaining local work.
+
+## Fresh repeated Source storage copies
+
+`SourceStoredFreshInterface.lean` strengthens the existing stored-value proof family with a positive reference allocation count, a fresh parent allocated last, and two actual loadElem runs with distinct roots and retained first-root contents. No new copy evaluator or storage-success premise is introduced.

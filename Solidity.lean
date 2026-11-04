@@ -337,6 +337,7 @@ import Solidity.Backend.MemoryCopies.SourceStoredElementsInterface
 import Solidity.Backend.MemoryCopies.SourceStoredFields
 import Solidity.Backend.MemoryCopies.SourceStoredFieldsControls
 import Solidity.Backend.MemoryCopies.SourceStoredFieldsInterface
+import Solidity.Backend.MemoryCopies.SourceStoredFreshInterface
 import Solidity.Backend.MemoryCopies.SourceStoredReferences
 import Solidity.Backend.MemoryCopies.SourceStoredReferencesControls
 import Solidity.Backend.MemoryCopies.SourceStoredReferencesInterface
