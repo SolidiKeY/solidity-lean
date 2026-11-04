@@ -103,3 +103,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/C3Exactness/Linearization.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/StatementGrammarH28/ElsePosition.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/StatementGrammarH28/NearestElse.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/Counterexamples.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/TypeGrammarH28/Layouts.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
