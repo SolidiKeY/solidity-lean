@@ -281,6 +281,7 @@ import Solidity.Backend.MemoryCopies.CanonicalRebindInterface
 import Solidity.Backend.MemoryCopies.CanonicalSingleton
 import Solidity.Backend.MemoryCopies.CanonicalSingletonControls
 import Solidity.Backend.MemoryCopies.CanonicalSingletonInterface
+import Solidity.Backend.MemoryCopies.CheckedCaptureInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.CopyPathControls
 import Solidity.Backend.MemoryCopies.CopyPathInterface
