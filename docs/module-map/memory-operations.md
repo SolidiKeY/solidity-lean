@@ -321,3 +321,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedReference.lean` | Actual division-based full-demand guard and total reference-array default execution. |
 | `Backend/MemoryCopies/CheckedReferenceControls.lean` | Nested runtime defaults, unused oversized children and inhabited quotient-boundary controls. |
 | `Backend/MemoryCopies/CheckedPathCopyInterface.lean` | Selected memory-path checked fresh-copy/binding contracts without a room premise. |
+| `Backend/MemoryCopies/CheckedPathCopy.lean` | Total selected-path checked copying, state adoption and fresh local binding. |
+| `Backend/MemoryCopies/CheckedPathCopyControls.lean` | Populated/empty/long/indexed binding, aliases, path refusal and inhabited capacity refusal. |
