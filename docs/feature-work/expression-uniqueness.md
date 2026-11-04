@@ -42,9 +42,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 917 source declarations with source signatures;
+`declarations.json` enumerates all 1007 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The fifty-eight modules are proposed for coordinator registration, with module-map rows,
+The sixty-nine modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -138,7 +138,18 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ArgumentWords` | Actual expr/namedArg list components are nonempty; full comma-vector uniqueness permits empty lists and handles the generic empty-word collision. |
 | `ArgumentSpans` | Positional/named arguments are disjoint and reconstruct their actual component vectors, including empty lists. |
 | `PostfixControls` | Arbitrary mixedall5postfix tower has exact inhabited certificates and family identity; arbitrary optional holes refute false nonemptiness generalization. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 917 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `PostfixRootKind` | Actual level15 words reconstruct exactly all five postfix constructor families; scalar tags dispatch through existing Source.Ctor. |
+| `TypePrefixAlgebra` | Arbitrary maximal token-run and balanced square-spine cuts with concrete finite follower conditions. |
+| `AttributeTokens` | Actual arbitrary function-type attribute orders produce only the existing visibility/mutability keyword run. |
+| `TypeYieldSplit` | Actual mapping/array/function type executions recover fields and layout states; fn attributes/params/returns invariants are derived. |
+| `TypeSpine` | Existing intrinsic non-array type node plus balanced dimension-token words reconstruct any successful type yield. |
+| `TypeAtomStart` | Existing non-array type families distinguish their token heads using Source.Ctor dispatch. |
+| `ElementaryPathPrefix` | Address/payable and arbitrary path words reconstruct maximal prefixes at concrete followers. |
+| `FnTypePrefix` | Parameter, attribute and optional returns word cuts reconstruct at arbitrary layouts; whole function prefix follows. |
+| `TypeAtomPrefix` | All four existing non-array type families have actual maximal word-prefix cuts. |
+| `TypePrefix` | Arbitrary type words reconstruct maximal prefixes from actual atom/spine executions and concrete followers. |
+| `TypePrefixControls` | Arbitrary array/new witnesses; original direct-new-index refusal rejects a kernel-proved raw collision; follower countercontrols. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1007 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -179,13 +190,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-postfix-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-typeprefix-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-postfix-final.inside.json`. It took 38.161475 seconds, child peak RSS
-260780 KiB, exact container peak 856805376 bytes, minimum parent headroom
-15530790912 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-typeprefix-final.inside.json`. It took 32.480578 seconds, child peak RSS
+262700 KiB, exact container peak 855166976 bytes, minimum parent headroom
+9682665472 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -197,10 +208,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these fifty-eight modules lack central root imports. The orphan gate
-reported the same fifty-eight. Source trust passed (3730 sources, zero findings), and
+check: exactly these sixty-nine modules lack central root imports. The orphan gate
+reported the same sixty-nine. Source trust passed (3741 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 917 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 1007 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -535,7 +546,54 @@ Initial indexed-induction, token normalization and overloaded-negation attempts
 remain retained. One unused mirror simp argument was removed; final kernel
 signature logs have no owned warning. Independent read-only finder/skeptic source
 reviews accepted this partial checkpoint without defects or Lean-server use;
-records are in `evidence/reviews-postfix.json`. Current-source acceptance and
+records are in `evidence/reviews-postfix.json`. That checkpoint source acceptance and
 917 exact standard-only axiom pins pass. Fresh published-master verification
 hashes all8pinnedinputs and the integrated Fragments against this checkout;
 all match (`evidence/published-master-verification.json`).
+
+
+## Postfix kind and type-prefix checkpoint
+
+Eleven modules add90 declarations, giving69modules and1007 declarations. Actual
+postfix words now identify all five existing constructor families: trailing
+tokens separate call/options/member/square forms, and the conditional-colon
+proof separates index/slice. No precedence assumption is needed once both
+roots have level15. The15versus16 distinction remains open.
+
+Actual type execution decomposes into an existing non-array Syn.typeName node
+and balanced dimension-token words; this is not a second AST. All elementary
+values including address/payable, arbitrary identifier paths, mapping enclosure
+and function parameter/attribute/returns words have maximal prefix cuts. Actual
+function layouts supply the attribute keyword run and balanced payloads; no
+canonical attribute order is assumed. Arbitrary array spines then reconstruct
+full type prefixes. TypeAtomBoundary/TypeBoundary are explicit finite TOKEN
+follower conditions of these intermediate lemmas. They are not producer or
+global uniqueness premises. Deriving them inside the original certified
+primary/postfix context is still OPEN, as are recursive type/tree identity and
+the original public theorem/corollary. No original target was narrowed.
+
+The arbitrary array/new families are inhabited with exact tokens. A kernel proof
+shows the raw new-array/direct-new-index token collision, while the ORIGINAL
+certificate rejects the direct-new-index tree. This is not a certified ambiguity
+and does not change any expected refusal. Square/payable/view follower controls
+show why maximal helper cuts need their concrete boundaries. These are intrinsic
+controls, separate from the unchanged130external parsing observations.
+
+The skeptic identified direct indexed Syn matches in three scalar classifiers
+under [Gate G0](../intrinsic.md#gate-g0-kernel-evaluated-code). They were replaced
+with dispatch on the existing unindexed Source.Ctor result, with explicit imports.
+Source/Ctor itself remains frozen and retains its inherited matcher/cost; no
+match-free dependency closure, new exemption or speed improvement is claimed.
+The source history contained only S00 creation/review commits (2aec5be9 and
+cccc1086), so no speed-motivated implementation was undone. The user was warned
+before the potential reduction-cost change. Both read-only reviewers accepted
+the corrected route; final diagnostics/kernel gates cover the final definitions.
+Old/new command timings are retained but cache differences prevent a speed claim.
+
+All eleven modules pass final diagnostics and actual kernel signature/axiom
+gates, with1007exact standard-only pins and no owned warning. Failed dependent
+match/type-annotation/normalization and edit-script attempts remain retained;
+unused simp arguments were removed. Independent finder/skeptic source verdicts
+and the G0 resolution are in `evidence/reviews-typeprefix.json`. Full primary
+root reconstruction and recursive expression/type/list/argument uniqueness,
+parseCat corollary and registration-dependent full gates remain open.

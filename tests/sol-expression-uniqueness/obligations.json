@@ -9,19 +9,19 @@
     "id": "EU-02",
     "obligation": "layout erasure and fragments reconstruction",
     "status": "partial",
-    "evidence": "Arbitrary fragments/literal reconstruction plus expression-category layout extension/trimming proved: every successful partial expression yield has a genuine fully consumed Derives witness for its flattened word. Type attribute/tree identity remains open."
+    "evidence": "Layout extension/trimming and fragment/literal reconstruction retained. Actual fnType order/params/attribute/returns executions and keyword runs derived for arbitrary successful layouts; type field/tree identity remains open."
   },
   {
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Arbitrary balanced first/last enclosure, comma, operand-state and conditional-counter cuts proved and derived from actual yields. All5postfix child word spans reconstruct; maximal primary/new-type decomposition remains open."
+    "evidence": "Arbitrary maximal token runs, elementary/path/function prefixes and balanced type-array spines reconstruct word cuts under concrete follower conditions. Deriving type followers inside certified primary contexts remains open."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Rootlevels agree whenever either<=14. All5postfix families recover actual child words/states; index/slice and positional/named roots separate. Complete postfix cross-root and15versus16 classification remain open."
+    "evidence": "Rootlevels agree through14 and all5postfix families reconstruct when bothlevel15. Maximal type-word prefix cuts have explicit finite token-boundary helpers; original certified15vs16/primary link and recursive identity remain open."
   },
   {
     "id": "EU-05",
@@ -33,7 +33,7 @@
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
     "status": "partial",
-    "evidence": "Literal/optional/grouping results retained; all5postfix actual child spans, member/namedArg names and positional/named component vectors now reconstruct. Recursive type/list/argument/tree identity and primary/postfix cross-root classification remain open."
+    "evidence": "Existing postfix/arg/name spans retained; all type words have actual atom/spine decomposition and elementary/path/mapping/fn prefix cuts at arbitrary lengths/layouts. Full primary and recursive type/list/argument/tree identity remain open."
   },
   {
     "id": "EU-07",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary mixedpostfix tower uses all5constructors/step with inhabited exact originalcerts,14n+1length and familyuniqueness. Arbitrary optional-hole words refute a false extension of argument nonemptiness. Prior families retained; full boundary acceptance remains open."
+    "evidence": "Arbitrary array type/new families have exact inhabited certificates. Kernel rawnewarray/directnewindex wordcollision is rejected by ORIGINAL indexnewprecfalse. Array/payable/view followercountercontrols retain necessary helper boundaries; not a certifiedambiguity. Prior families retained."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "58 modules/917 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "69 modules/1007 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at58 pinned-local frozen registrations; trust3730zero/layers559zero pass; central axiom inventory zero errors but917 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at69 pinned-local frozen registrations; trust3741zero/layers559zero pass; central axiom inventory zero errors but1007 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted trailing cuts, all5postfix spans, address/name reconstruction, exhaustive first-token closure, argument vectors/disjointness and arbitrary mixed/hole controls. No defects or Lean-server use. See evidence/reviews-postfix.json."
+    "evidence": "Finder/skeptic accepted math; G0 direct indexed scalar classifier finding fixed through existing unindexed Source.Ctor API and independently accepted. Final currentdefinitions diagnostics/kernel pass. See evidence/reviews-typeprefix.json."
   },
   {
     "id": "EU-14",

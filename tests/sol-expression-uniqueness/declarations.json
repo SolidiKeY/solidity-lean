@@ -612,6 +612,84 @@
     "source_signature": "theorem attrsP_balanced (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : BalancedAttrs singles) (hm : BalancedItems mods) :\n    Produces (attrsP singles mods order) Balanced"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TokenItems",
+    "source_signature": "def TokenItems (p : Tok \u2192 Bool) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TokenAttrs",
+    "source_signature": "def TokenAttrs (p : Tok \u2192 Bool) (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.allTokens_nil",
+    "source_signature": "theorem allTokens_nil (p : Tok \u2192 Bool) : AllTokens p []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.allTokens_append",
+    "source_signature": "theorem allTokens_append (p : Tok \u2192 Bool) (xs ys : List Tok) (hx : AllTokens p xs) (hy : AllTokens p ys) :\n    AllTokens p (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenItems_nil",
+    "source_signature": "theorem tokenItems_nil (p : Tok \u2192 Bool) : TokenItems p []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenAttrs_append",
+    "source_signature": "theorem tokenAttrs_append (p : Tok \u2192 Bool) (xs ys : List (Slot \u00d7 List Tok))\n    (hx : TokenAttrs p xs) (hy : TokenAttrs p ys) : TokenAttrs p (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenAttrs_single",
+    "source_signature": "theorem tokenAttrs_single (p : Tok \u2192 Bool) (slot : Slot) (word : List Tok) (h : AllTokens p word) :\n    TokenAttrs p (single slot word)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_allTokens",
+    "source_signature": "theorem arrange_allTokens (p : Tok \u2192 Bool) (order : List Slot)\n    (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok)) (word : List Tok)\n    (hs : TokenAttrs p singles) (hm : TokenItems p mods) (h : arrange order singles mods = some word) :\n    AllTokens p word"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_allTokens",
+    "source_signature": "theorem attrsP_allTokens (p : Tok \u2192 Bool) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (order : List Slot) (hs : TokenAttrs p singles) (hm : TokenItems p mods) :\n    Produces (attrsP singles mods order) (AllTokens p)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.allTokens_visibility",
+    "source_signature": "theorem allTokens_visibility (v : Visibility) : AllTokens typeAttributeToken v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.allTokens_mutability",
+    "source_signature": "theorem allTokens_mutability (m : Mutability) : AllTokens typeAttributeToken m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.allTokens_optToks",
+    "source_signature": "theorem allTokens_optToks {\u03b1 : Type} (p : Tok \u2192 Bool) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 a, AllTokens p (f a)) (value : Option \u03b1) : AllTokens p (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.AttributeTokens",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_typeAttributes",
+    "source_signature": "theorem attrsP_typeAttributes (vis : Option Visibility) (mu : Option Mutability) (order : List Slot) :\n    Produces (attrsP (single .vis (optToks Visibility.toks vis) ++\n      single .mutab (optToks Mutability.toks mu)) [] order) (AllTokens typeAttributeToken)"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.BinaryControls",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.successor_prefix_not_binary_ten_free",
@@ -1920,6 +1998,36 @@
     "source_signature": "theorem expression_parens_prefix_unique (a b : Syn .expr) (xs ys tail tail' : List Tok)\n    (ha : a.Derives xs) (hb : b.Derives ys)\n    (heq : parens xs ++ tail = parens ys ++ tail') : xs = ys \u2227 tail = tail'"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ElementaryPathPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenBoundary_not_selected",
+    "source_signature": "theorem tokenBoundary_not_selected (p : Tok \u2192 Bool) (tail : List Tok) (hb : TokenBoundary p tail)\n    (token : Tok) (hit : p token = true) (rest : List Tok) : tail \u2260 token :: rest"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ElementaryPathPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.elem_tokens_shape",
+    "source_signature": "theorem elem_tokens_shape (e : Elem) : e = .addressPayable \u2228 e.toks = [.elem e]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ElementaryPathPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.elementary_type_prefix_unique",
+    "source_signature": "theorem elementary_type_prefix_unique (e f : Elem) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : e.toks ++ tail = f.toks ++ tail') : e.toks = f.toks \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ElementaryPathPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.path_pieces_prefix_unique",
+    "source_signature": "theorem path_pieces_prefix_unique (xs ys : List String) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : xs.flatMap (fun name => [Tok.punct .period, .ident name]) ++ tail =\n      ys.flatMap (fun name => [Tok.punct .period, .ident name]) ++ tail') :\n    xs.flatMap (fun name => [Tok.punct .period, .ident name]) =\n      ys.flatMap (fun name => [Tok.punct .period, .ident name]) \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ElementaryPathPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.path_type_prefix_unique",
+    "source_signature": "theorem path_type_prefix_unique (p q : IdPath) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : p.toks ++ tail = q.toks ++ tail') : p.toks = q.toks \u2227 tail = tail'"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionAddFree",
     "kind": "def",
     "name": "Solidity.Frontend.ExpressionUniqueness.AddFreeItems",
@@ -2554,6 +2662,48 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.postfix_call_fixture",
     "source_signature": "theorem postfix_call_fixture : expressionError \"a++()\" = some refusalMessage"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAttribute_of_forbidden_false",
+    "source_signature": "theorem typeAttribute_of_forbidden_false (t : Tok) (h : typeAtomForbidden t = false) :\n    typeAttributeToken t = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtomBoundary_attributes",
+    "source_signature": "theorem typeAtomBoundary_attributes (tail : List Tok) (hb : TypeAtomBoundary tail) :\n    TokenBoundary typeAttributeToken tail"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenBoundary_cons",
+    "source_signature": "theorem tokenBoundary_cons (p : Tok \u2192 Bool) (token : Tok) (rest : List Tok) (hp : p token = false) :\n    TokenBoundary p (token :: rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_returns_attribute_boundary",
+    "source_signature": "theorem type_returns_attribute_boundary (rs : List (List Tok)) (tail : List Tok)\n    (hb : TypeAtomBoundary tail) : TokenBoundary typeAttributeToken\n      ((if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs)) ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_returns_prefix_unique",
+    "source_signature": "theorem type_returns_prefix_unique (rs rs' : List (List Tok)) (tail tail' : List Tok)\n    (hr : Balanced (commaSep rs)) (hr' : Balanced (commaSep rs'))\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs)) ++ tail =\n      (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs')) ++ tail') :\n    (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs)) =\n      (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs')) \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fn_type_word_parts_unique",
+    "source_signature": "theorem fn_type_word_parts_unique (ps ps' attrs attrs' : List Tok)\n    (rs rs' : List (List Tok)) (tail tail' : List Tok)\n    (hp : Balanced ps) (hp' : Balanced ps')\n    (ha : AllTokens typeAttributeToken attrs) (ha' : AllTokens typeAttributeToken attrs')\n    (hr : Balanced (commaSep rs)) (hr' : Balanced (commaSep rs'))\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : (tk .function ++ parens ps ++ attrs ++\n        (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs))) ++ tail =\n      (tk .function ++ parens ps' ++ attrs' ++\n        (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs'))) ++ tail') :\n    ps = ps' \u2227 attrs = attrs' \u2227\n      (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs)) =\n        (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs')) \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.FnTypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fn_type_word_prefix_unique",
+    "source_signature": "theorem fn_type_word_prefix_unique (ps ps' attrs attrs' : List Tok)\n    (rs rs' : List (List Tok)) (tail tail' : List Tok)\n    (hp : Balanced ps) (hp' : Balanced ps')\n    (ha : AllTokens typeAttributeToken attrs) (ha' : AllTokens typeAttributeToken attrs')\n    (hr : Balanced (commaSep rs)) (hr' : Balanced (commaSep rs'))\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (words : (tk .function ++ parens ps ++ attrs ++\n        (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs))) ++ tail =\n      (tk .function ++ parens ps' ++ attrs' ++\n        (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs'))) ++ tail') :\n    (tk .function ++ parens ps ++ attrs ++\n        (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs))) =\n      (tk .function ++ parens ps' ++ attrs' ++\n        (if rs'.isEmpty then [] else tk .returns ++ parens (commaSep rs'))) \u2227 tail = tail'"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.Fragments",
@@ -3586,6 +3736,90 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.expressionList_empty_component_impossible",
     "source_signature": "theorem expressionList_empty_component_impossible (initial final : List Choice) :\n    \u00ac \u2203 args : Syn (.list .expr), args.yield initial = some ([[]], final)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfixRootKind",
+    "source_signature": "def postfixRootKind (e : Syn .expr) : Nat"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfixEndCode",
+    "source_signature": "def postfixEndCode : Nat \u2192 Nat\n  | 0 | 1 => 0 | 2 => 3 | 3 => 1 | 4 => 2 | _ => 4"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenEndClass",
+    "source_signature": "def tokenEndClass : Tok \u2192 Nat\n  | .punct .rbrack => 0 | .punct .rbrace => 1 | .punct .rparen => 2\n  | .ident _ | .elem .address => 3 | _ => 4"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.PostfixEnd",
+    "source_signature": "def PostfixEnd (tag : Nat) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.final_token_unique",
+    "source_signature": "theorem final_token_unique (xs ys : List Tok) (t u : Tok) (he : xs ++ [t] = ys ++ [u]) : t = u"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfixEnd_unique",
+    "source_signature": "theorem postfixEnd_unique (tag tag' : Nat) (items items' : List (List Tok))\n    (h : PostfixEnd tag items) (h' : PostfixEnd tag' items')\n    (words : items.flatten = items'.flatten) : tag = tag'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.index_yield_postfixEnd",
+    "source_signature": "theorem index_yield_postfixEnd (base : Syn .expr) (index : Syn (.opt .expr))\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.index base index).yield initial = some (items, final)) : PostfixEnd 0 items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.slice_yield_postfixEnd",
+    "source_signature": "theorem slice_yield_postfixEnd (base : Syn .expr) (start stop : Syn (.opt .expr))\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.slice base start stop).yield initial = some (items, final)) : PostfixEnd 0 items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.member_yield_postfixEnd",
+    "source_signature": "theorem member_yield_postfixEnd (base : Syn .expr) (name : String)\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.member base name).yield initial = some (items, final)) : PostfixEnd 3 items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.options_yield_postfixEnd",
+    "source_signature": "theorem options_yield_postfixEnd (base : Syn .expr) (first : Syn .namedArg) (args : Syn (.list .namedArg))\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.callOptions base first args).yield initial = some (items, final)) : PostfixEnd 1 items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.call_yield_postfixEnd",
+    "source_signature": "theorem call_yield_postfixEnd (base : Syn .expr) (args : Syn .callArgs)\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.call base args).yield initial = some (items, final)) : PostfixEnd 2 items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_level_fifteen_cases",
+    "source_signature": "theorem expr_level_fifteen_cases (e : Syn .expr) (hl : e.level = 15) :\n    (\u2203 base index, e = Syn.index base index) \u2228\n    (\u2203 base start stop, e = Syn.slice base start stop) \u2228\n    (\u2203 base name, e = Syn.member base name) \u2228\n    (\u2203 base first args, e = Syn.callOptions base first args) \u2228\n    (\u2203 base args, e = Syn.call base args)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.postfix_yield_end",
+    "source_signature": "theorem postfix_yield_end (e : Syn .expr) (initial final : List Choice) (items : List (List Tok))\n    (hl : e.level = 15) (hy : e.yield initial = some (items, final)) :\n    PostfixEnd (postfixEndCode (postfixRootKind e)) items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.PostfixRootKind",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.partial_postfix_root_kinds_equal",
+    "source_signature": "theorem partial_postfix_root_kinds_equal (a b : Syn .expr)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok))\n    (ha : a.level = 15) (hb : b.level = 15)\n    (hy : a.yield initial = some (items, final)) (hy' : b.yield initial' = some (items', final'))\n    (words : items.flatten = items'.flatten) : postfixRootKind a = postfixRootKind b"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.PostfixSpans",
@@ -4690,6 +4924,312 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.firstTop_cut_unique",
     "source_signature": "theorem firstTop_cut_unique (p : Tok \u2192 Bool) (xs ys xs' ys' : List Tok) (t t' : Tok)\n    (hx : skip p [] xs = some []) (hx' : skip p [] xs' = some [])\n    (ht : p t = true) (ht' : p t' = true)\n    (heq : xs ++ t :: ys = xs' ++ t' :: ys') :\n    xs = xs' \u2227 t = t' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.elem_type_yield_prefix_unique",
+    "source_signature": "theorem elem_type_yield_prefix_unique (e f : Elem)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (hy : (Syn.elem e).yield initial = some (items, final))\n    (hy' : (Syn.elem f).yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.user_type_yield_prefix_unique",
+    "source_signature": "theorem user_type_yield_prefix_unique (p q : IdPath)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (hy : (Syn.userType p).yield initial = some (items, final))\n    (hy' : (Syn.userType q).yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mapping_type_actual_parens",
+    "source_signature": "theorem mapping_type_actual_parens (key : MapKey) (kn : Option String)\n    (value : Syn .typeName) (vn : Option String) (initial final : List Choice)\n    (items : List (List Tok)) (hy : (Syn.mapping key kn value vn).yield initial = some (items, final)) :\n    \u2203 payload, Balanced payload \u2227 items = [tk .mapping ++ parens payload]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mapping_type_yield_prefix_unique",
+    "source_signature": "theorem mapping_type_yield_prefix_unique (key key' : MapKey) (kn kn' : Option String)\n    (value value' : Syn .typeName) (vn vn' : Option String)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (hy : (Syn.mapping key kn value vn).yield initial = some (items, final))\n    (hy' : (Syn.mapping key' kn' value' vn').yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fn_type_yield_prefix_unique",
+    "source_signature": "theorem fn_type_yield_prefix_unique (params params' : Syn (.list .param))\n    (vis vis' : Option Visibility) (mu mu' : Option Mutability) (returns returns' : Syn (.list .param))\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (hy : (Syn.fnType params vis mu returns).yield initial = some (items, final))\n    (hy' : (Syn.fnType params' vis' mu' returns').yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtom_cases",
+    "source_signature": "theorem typeAtom_cases (e : Syn .typeName) (ha : isTypeAtom e = true) :\n    (\u2203 value, e = Syn.elem value) \u2228 (\u2203 path, e = Syn.userType path) \u2228\n    (\u2203 key kn value vn, e = Syn.mapping key kn value vn) \u2228\n    (\u2203 params vis mu returns, e = Syn.fnType params vis mu returns)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomPrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_atom_yield_prefix_unique",
+    "source_signature": "theorem type_atom_yield_prefix_unique (a b : Syn .typeName)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (atomA : isTypeAtom a = true) (atomB : isTypeAtom b = true)\n    (hb : TypeAtomBoundary tail) (hb' : TypeAtomBoundary tail')\n    (hy : a.yield initial = some (items, final)) (hy' : b.yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomStart",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtomKind",
+    "source_signature": "def typeAtomKind (ty : Syn .typeName) : Nat"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomStart",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeTokenClass",
+    "source_signature": "def typeTokenClass : Tok \u2192 Nat\n  | .elem _ => 0 | .ident _ => 1 | .kw .mapping => 2 | .kw .function => 3 | _ => 4"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomStart",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TypeStart",
+    "source_signature": "def TypeStart (tag : Nat) (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomStart",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtom_yield_start",
+    "source_signature": "theorem typeAtom_yield_start (ty : Syn .typeName) (initial final : List Choice)\n    (items : List (List Tok)) (atom : isTypeAtom ty = true)\n    (hy : ty.yield initial = some (items, final)) : TypeStart (typeAtomKind ty) items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeAtomStart",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtom_prefix_kinds_equal",
+    "source_signature": "theorem typeAtom_prefix_kinds_equal (a b : Syn .typeName)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (ha : isTypeAtom a = true) (hb : isTypeAtom b = true)\n    (hy : a.yield initial = some (items, final)) (hy' : b.yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') : typeAtomKind a = typeAtomKind b"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefix",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_prefix_unique",
+    "source_signature": "theorem type_yield_prefix_unique (a b : Syn .typeName)\n    (initial final initial' final' : List Choice) (items items' : List (List Tok)) (tail tail' : List Tok)\n    (hb : TypeBoundary tail) (hb' : TypeBoundary tail')\n    (hy : a.yield initial = some (items, final)) (hy' : b.yield initial' = some (items', final'))\n    (words : items.flatten ++ tail = items'.flatten ++ tail') :\n    items.flatten = items'.flatten \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.AllTokens",
+    "source_signature": "def AllTokens (p : Tok \u2192 Bool) (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TokenBoundary",
+    "source_signature": "def TokenBoundary (p : Tok \u2192 Bool) (tail : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.tokenBoundary_nil",
+    "source_signature": "theorem tokenBoundary_nil (p : Tok \u2192 Bool) : TokenBoundary p []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.maximal_token_run_unique",
+    "source_signature": "theorem maximal_token_run_unique (p : Tok \u2192 Bool) (xs ys tail tail' : List Tok)\n    (hx : AllTokens p xs) (hy : AllTokens p ys)\n    (hb : TokenBoundary p tail) (hb' : TokenBoundary p tail')\n    (he : xs ++ tail = ys ++ tail') : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords",
+    "source_signature": "def squareWords (payloads : List (List Tok)) : List Tok"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.isLeftSquare",
+    "source_signature": "def isLeftSquare : Tok \u2192 Bool\n  | .punct .lbrack => true\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords_nil",
+    "source_signature": "theorem squareWords_nil : squareWords [] = []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords_cons",
+    "source_signature": "theorem squareWords_cons (payload : List Tok) (rest : List (List Tok)) :\n    squareWords (payload :: rest) = pu .lbrack ++ payload ++ pu .rbrack ++ squareWords rest"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords_append",
+    "source_signature": "theorem squareWords_append (xs ys : List (List Tok)) :\n    squareWords (xs ++ ys) = squareWords xs ++ squareWords ys"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords_boundary",
+    "source_signature": "theorem squareWords_boundary (p : Tok \u2192 Bool) (payloads : List (List Tok)) (tail : List Tok)\n    (hp : p (.punct .lbrack) = false) (hb : TokenBoundary p tail) :\n    TokenBoundary p (squareWords payloads ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.squareWords_cut_unique",
+    "source_signature": "theorem squareWords_cut_unique (xs ys : List (List Tok)) (tail tail' : List Tok)\n    (hx : BalancedItems xs) (hy : BalancedItems ys)\n    (hb : TokenBoundary isLeftSquare tail) (hb' : TokenBoundary isLeftSquare tail')\n    (he : squareWords xs ++ tail = squareWords ys ++ tail') : xs = ys \u2227 tail = tail'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAttributeToken",
+    "source_signature": "def typeAttributeToken : Tok \u2192 Bool\n  | .kw .internal | .kw .external | .kw .public_ | .kw .private_\n  | .kw .pure | .kw .view | .kw .payable => true\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtomForbidden",
+    "source_signature": "def typeAtomForbidden : Tok \u2192 Bool\n  | .punct .period | .kw .returns => true\n  | t => typeAttributeToken t"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TypeAtomBoundary",
+    "source_signature": "def TypeAtomBoundary (tail : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TypeBoundary",
+    "source_signature": "def TypeBoundary (tail : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.typeAtomBoundary_squareWords",
+    "source_signature": "theorem typeAtomBoundary_squareWords (payloads : List (List Tok)) (tail : List Tok)\n    (hb : TypeBoundary tail) : TypeAtomBoundary (squareWords payloads ++ tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeFamily",
+    "source_signature": "def arrayTypeFamily : Nat \u2192 Syn .typeName\n  | 0 => .elem .bool\n  | n + 1 => .array (arrayTypeFamily n) .none"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeTokens",
+    "source_signature": "def arrayTypeTokens : Nat \u2192 List Tok\n  | 0 => [.elem .bool]\n  | n + 1 => arrayTypeTokens n ++ [.punct .lbrack, .punct .rbrack]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeFamily_prec",
+    "source_signature": "theorem arrayTypeFamily_prec (n : Nat) : (arrayTypeFamily n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeFamily_yield",
+    "source_signature": "theorem arrayTypeFamily_yield (n : Nat) (rest : List Choice) :\n    (arrayTypeFamily n).yield rest = some ([arrayTypeTokens n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeFamily_derives",
+    "source_signature": "theorem arrayTypeFamily_derives (n : Nat) : (arrayTypeFamily n).Derives (arrayTypeTokens n)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeTokens_length",
+    "source_signature": "theorem arrayTypeTokens_length (n : Nat) : (arrayTypeTokens n).length = 2 * n + 1"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrayTypeFamily_tokens_injective",
+    "source_signature": "theorem arrayTypeFamily_tokens_injective (n m : Nat) (h : arrayTypeTokens n = arrayTypeTokens m) : n = m"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.nil_type_boundary",
+    "source_signature": "theorem nil_type_boundary : TypeBoundary []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.array_follow_boundary_refuted",
+    "source_signature": "theorem array_follow_boundary_refuted (tail : List Tok) : \u00ac TypeBoundary (.punct .lbrack :: tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.payable_follow_boundary_refuted",
+    "source_signature": "theorem payable_follow_boundary_refuted (tail : List Tok) : \u00ac TypeAtomBoundary (.kw .payable :: tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.view_follow_boundary_refuted",
+    "source_signature": "theorem view_follow_boundary_refuted (tail : List Tok) : \u00ac TypeAtomBoundary (.kw .view :: tail)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.raw_new_array_index_collision",
+    "source_signature": "theorem raw_new_array_index_collision (base : Syn .typeName) (length : Syn (.opt .expr)) :\n    (Syn.new (.array base length)).yield = (Syn.index (.new base) length).yield"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.raw_collision_direct_new_index_refused",
+    "source_signature": "theorem raw_collision_direct_new_index_refused (base : Syn .typeName) (length : Syn (.opt .expr)) :\n    (Syn.index (.new base) length).prec = false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypePrefixControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.new_arrayTypeFamily_certified",
+    "source_signature": "theorem new_arrayTypeFamily_certified (n : Nat) :\n    (Syn.new (arrayTypeFamily n)).Derives (tk .new ++ arrayTypeTokens n) \u2227\n      (Syn.new (arrayTypeFamily n)).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeSpine",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.isTypeAtom",
+    "source_signature": "def isTypeAtom (ty : Syn .typeName) : Bool"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeSpine",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.TypeSpineProperty",
+    "source_signature": "def TypeSpineProperty {c : Cat} (e : Syn c) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeSpine",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_spine_property",
+    "source_signature": "theorem type_spine_property {c : Cat} (e : Syn c) : TypeSpineProperty e"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeSpine",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.type_yield_spine",
+    "source_signature": "theorem type_yield_spine (e : Syn .typeName) (initial final : List Choice) (items : List (List Tok))\n    (hy : e.yield initial = some (items, final)) :\n    \u2203 atom atomItems atomFinal payloads,\n      isTypeAtom atom = true \u2227 atom.yield initial = some (atomItems, atomFinal) \u2227\n      BalancedItems payloads \u2227 items.flatten = atomItems.flatten ++ squareWords payloads"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeYieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.array_type_yield_parts",
+    "source_signature": "theorem array_type_yield_parts (base : Syn .typeName) (length : Syn (.opt .expr))\n    (initial final : List Choice) (items : List (List Tok))\n    (hy : (Syn.array base length).yield initial = some (items, final)) :\n    \u2203 xs ys middle, base.yield initial = some (xs, middle) \u2227 length.yield middle = some (ys, final) \u2227\n      items = [xs.flatten ++ pu .lbrack ++ ys.flatten ++ pu .rbrack]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeYieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.mapping_type_yield_parts",
+    "source_signature": "theorem mapping_type_yield_parts (key : MapKey) (keyName : Option String)\n    (value : Syn .typeName) (valueName : Option String) (initial final : List Choice)\n    (items : List (List Tok))\n    (hy : (Syn.mapping key keyName value valueName).yield initial = some (items, final)) :\n    \u2203 xs, value.yield initial = some (xs, final) \u2227\n      items = [tk .mapping ++ parens ((match key with | .elem e _ => e.toks | .path p => p.toks) ++\n        optToks idt keyName ++ pu .doubleArrow ++ xs.flatten ++ optToks idt valueName)]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeYieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fn_type_yield_parts",
+    "source_signature": "theorem fn_type_yield_parts (params : Syn (.list .param)) (vis : Option Visibility)\n    (mu : Option Mutability) (returns : Syn (.list .param)) (initial final : List Choice)\n    (items : List (List Tok))\n    (hy : (Syn.fnType params vis mu returns).yield initial = some (items, final)) :\n    \u2203 order ps attrs rs afterOrder afterParams afterAttrs,\n      popAttrs initial = some (order, afterOrder) \u2227 params.yield afterOrder = some (ps, afterParams) \u2227\n      attrsP (single .vis (optToks Visibility.toks vis) ++ single .mutab (optToks Mutability.toks mu))\n        [] order afterParams = some (attrs, afterAttrs) \u2227 returns.yield afterAttrs = some (rs, final) \u2227\n      items = [tk .function ++ parens (commaSep ps) ++ attrs ++\n        (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs))]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.TypeYieldSplit",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fn_type_actual_attribute_run",
+    "source_signature": "theorem fn_type_actual_attribute_run (params : Syn (.list .param)) (vis : Option Visibility)\n    (mu : Option Mutability) (returns : Syn (.list .param)) (initial final : List Choice)\n    (items : List (List Tok))\n    (hy : (Syn.fnType params vis mu returns).yield initial = some (items, final)) :\n    \u2203 ps attrs rs, Balanced (commaSep ps) \u2227 AllTokens typeAttributeToken attrs \u2227 Balanced (commaSep rs) \u2227\n      items = [tk .function ++ parens (commaSep ps) ++ attrs ++\n        (if rs.isEmpty then [] else tk .returns ++ parens (commaSep rs))]"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.UnaryControls",

@@ -5,7 +5,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open",
+    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_index (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -15,7 +15,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open",
+    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_slice (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -25,7 +25,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew; address uses Tok.elem address",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base word/state and arbitrary member name reconstruct, including special address spelling. Cross-root classification and recursive identity remain open",
+    "root_reconstruction": "partial: actual base word/state and arbitrary member name reconstruct, including special address spelling. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_member (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -35,7 +35,7 @@
     "level": 15,
     "precNode": "base.level >= 15; at least one named argument",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base/first-argument words and individual tail-argument vector reconstruct through balanced braces and comma cuts. Cross-root classification and recursive identity remain open",
+    "root_reconstruction": "partial: actual base/first-argument words and individual tail-argument vector reconstruct through balanced braces and comma cuts. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_callOptions (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -45,7 +45,7 @@
     "level": 15,
     "precNode": "base.level >= 15",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base and argument words/states reconstruct through trailing parentheses; positional/named argument constructors are disjoint and each recovers its actual component word vector, including empty lists. Cross-root/recursive identity remain open",
+    "root_reconstruction": "partial: actual base and argument words/states reconstruct through trailing parentheses; positional/named argument constructors are disjoint and each recovers its actual component word vector, including empty lists. Cross-root/recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_call (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -225,7 +225,7 @@
     "level": 16,
     "precNode": "true",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: arbitrary actual type maximal-prefix cuts proved under concrete token followers; deriving those followers from original certified primary/postfix context remains open. Raw new-array/index collision has original direct-new-index refusal, not certified ambiguity",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_new (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },

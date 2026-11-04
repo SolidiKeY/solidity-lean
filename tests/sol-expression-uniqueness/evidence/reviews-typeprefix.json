@@ -1,0 +1,22 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial postfix-kind/type-prefix source math; G0 finding resolved with no remaining source findings.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "results": "All5actualpostfixkind equality, existingSyn atom+balancedtoken spine, arbitrary elementary/path/mapping/fn attribute/returns prefix cuts accepted. Concrete followers remainhelperconditions, notproducer/globalpremises; certifiedprimarylinkOPEN. Rawnewcollision pairedwithoriginalrefusal; arbitrary arrays/new controls inhabited.",
+    "finding": "G0:3newscalar indexedSynmatches.",
+    "resolution": "All3now match existing unindexed Source.Ctor via e.ctor/ty.ctor with explicitimports; noSourceedit/exemptionclaim. FrozenSyn.ctor inheritedmatchercost remains. Userwarned/historychecked; finaldiagnostics/kernelrerunPASS69/1007.",
+    "limitations": "Originalcertifiedfollowers/15vs16/recursive/publictreeproof andfullgates remainopen.",
+    "final_metadata": "Independent checkpoint/corruption controls PASS69/1007; finalCtor definitions/current signatures/pins/sourcehashes align. G0remediation accurately limited to ownedcode; inheritedmatcher remains. Actual69registration/3741trust/1007pin outcomes retained. Helperboundary/certifiedlinkOPEN andrawnotcertifiedambiguity distinctions accepted; no remaining findings."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial postfix-kind/type-prefix source math; G0 finding resolved with no remaining source findings.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "results": "All5actualpostfixkind equality, existingSyn atom+balancedtoken spine, arbitrary elementary/path/mapping/fn attribute/returns prefix cuts accepted. Concrete followers remainhelperconditions, notproducer/globalpremises; certifiedprimarylinkOPEN. Rawnewcollision pairedwithoriginalrefusal; arbitrary arrays/new controls inhabited.",
+    "finding": "G0:3newscalar indexedSynmatches.",
+    "resolution": "All3now match existing unindexed Source.Ctor via e.ctor/ty.ctor with explicitimports; noSourceedit/exemptionclaim. FrozenSyn.ctor inheritedmatchercost remains. Userwarned/historychecked; finaldiagnostics/kernelrerunPASS69/1007.",
+    "limitations": "Originalcertifiedfollowers/15vs16/recursive/publictreeproof andfullgates remainopen.",
+    "final_metadata": "Independent checkpoint/corruption controls PASS69/1007; finalCtor definitions/current signatures/pins/sourcehashes align. G0remediation accurately limited to ownedcode; inheritedmatcher remains. Actual69registration/3741trust/1007pin outcomes retained. Helperboundary/certifiedlinkOPEN andrawnotcertifiedambiguity distinctions accepted; no remaining findings."
+  }
+]

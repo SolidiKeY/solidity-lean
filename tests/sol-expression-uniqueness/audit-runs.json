@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-postfix-final",
-  "proof_gate_dir": "checkpoint-gates-postfix-final",
-  "signature_stem": "signature-audit-postfix-final",
-  "signature_gate_dir": "signature-gates-postfix-final"
+  "proof_stem": "checkpoint-proof-typeprefix-final",
+  "proof_gate_dir": "checkpoint-gates-typeprefix-final",
+  "signature_stem": "signature-audit-typeprefix-final",
+  "signature_gate_dir": "signature-gates-typeprefix-final"
 }
