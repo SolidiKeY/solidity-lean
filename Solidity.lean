@@ -2477,6 +2477,8 @@ import Solidity.Yul.Adapters.RawPhysicalAnyImageControls
 import Solidity.Yul.Adapters.RawPhysicalCalldata
 import Solidity.Yul.Adapters.RawPhysicalCalldataControls
 import Solidity.Yul.Adapters.RawPhysicalControls
+import Solidity.Yul.Adapters.RawPhysicalHash
+import Solidity.Yul.Adapters.RawPhysicalHashControls
 import Solidity.Yul.Adapters.RawPhysicalInterior
 import Solidity.Yul.Adapters.RawPhysicalInteriorControls
 import Solidity.Yul.Adapters.RawPhysicalInventory

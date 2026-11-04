@@ -155,3 +155,4 @@
 | `Yul/Adapters/RawPhysicalAnyImage{,Controls}` | Universal arbitrary raw-byte image decode/reencode and finite-frame identity, applied to actual bounded overlapping/cross-cell P6 snapshot copies with derived reached room. |
 | `Yul/Adapters/RawPhysicalCalldata{,Controls}` | Actual Fr.cd copy into arbitrary raw-local images, with derived complete frame writeback and exact raw-word versus typed Source decoder success/error boundaries. |
 | `Yul/Adapters/SourceEnvironmentSlice{,Controls}` | Actual Source magic/balance reads paired with executed environment instruction slices, preserving ordered values/state/memory/tails and post-operand balance snapshots without claiming independent ledger or compiler adequacy. |
+| `Yul/Adapters/RawPhysicalHash{,Controls}` | Actual KECCAK/PUSH/MSTORE digest writeback into a complete raw-local image, retaining the old overlapping input snapshot and explicit P6 read/store access accounting. |

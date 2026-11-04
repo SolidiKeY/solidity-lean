@@ -1196,3 +1196,18 @@ full-width value, history/code-selected balances, late timeout prefixes and
 mismatched-ledger/order negatives. These are the existing gas-free local slices;
 stack/gas/fuel resource correspondence, independent runtime-ledger agreement,
 whole-world execution and compiler adequacy remain open.
+
+
+`RawPhysicalHash` executes the published KECCAK256/PUSH256/MSTORE slice and
+writes its full digest into a raw-local cell. The preimage is the original P6
+snapshot, including when the destination overlaps that input. Existing raw-word
+update laws derive complete reencoding/readback and preserved sibling/residual
+bytes. `storeHash` records the input read through P6 `touch` as well as the
+actual destination store; exact rounded extents and empty-input behavior remain
+visible. Controls pin the old cross-cell preimage, output cell, target bytes,
+stack tail, empty maximum-offset input and nonzero padding. A separate fixture
+requires input-read accounting to grow from six words to eight while store-only
+accounting stays at six. Preimage negatives assume no hash injectivity.
+These are gas-free instruction-slice/physical-frame laws; Word-end nonwrapping,
+resource adequacy, ordinary dirty Source readback and whole compiler/world
+composition are not supplied.
