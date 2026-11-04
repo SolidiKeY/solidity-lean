@@ -152,3 +152,5 @@
 | `Yul/RawStatementHorizon.lean`, `Yul/Checks/RawStatementHorizon.lean` | Concrete raw/coherence-aware statement horizon stability with exact dirty-frame retention and projection/timeout controls. |
 
 | `Yul/RawSequenceHorizon.lean`, `Yul/Checks/RawSequenceHorizon.lean` | Concrete same-context raw sequence/block stability; partial-stage, dirty-cell witness and clean Source controls. |
+
+| `Yul/RawLoopBodyHorizon.lean`, `Yul/Checks/RawLoopBodyHorizon.lean` | Concrete raw condition/control-body stability; dirty truth, break/continue, selected/skipped body and clean Source controls. |

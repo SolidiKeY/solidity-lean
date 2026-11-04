@@ -1764,3 +1764,33 @@ and layer checks pass. Fourteen scoped axiom reports use only Lean standard
 axioms. Raw failed standard automation, the brute-force heartbeat failure and
 intermediate witness rewrite/indentation failures remain separate from passing
 checks. No control statement, expected outcome or proof/checking limit changed.
+
+### Completed raw condition and loop-body horizons
+
+`RawLoopBodyHorizon.conditionSuccessor` and `conditionExtension` preserve
+the full actual condition result and captured raw frame after non-timeout.
+`successor` and `extension` prove the same for existing certified loop
+bodies: actual sequence blocks, skip, break, continue and conditional bodies.
+They use the concrete expression/sequence horizon producers. Conditional
+induction fixes the actual condition result and frame first, then applies
+the child induction only on the selected true branch. No coherence, projection,
+supplied simulation or abstract adapter-stability law is assumed.
+Eleven controls reuse the mixed dirty frame and the distinct conditional-write
+sequence. Raw Boolean word 2 selects true and retains 2; selected break/continue
+complete at fuel 2 with the untouched narrow word 257. A false-writing condition
+skips the deep body and completes at 3. The selected sequence times out at 10
+with a partial false write and completes at 11 with true; entire completed
+condition/body frames remain identical at every larger horizon. Zero/condition
+timeout controls retain their exact behavior. A separate all-fuel concrete
+Source agreement control requires the existing clean-start coherence boundary.
+These same-context certified bodies add no arbitrary statements, loop
+iteration/return coverage, dirty Source readback, admission or compiler
+adequacy. Source/ExtCall/evaluators/layouts, observations, expected outcomes
+and proof budgets are unchanged. Full VY1/general P16 and final gates remain
+open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; focused Lean, generated-root
+and layer checks pass. Fifteen scoped axiom reports use only Lean standard
+axioms. Raw failed standard automation remains distinct from passing concrete
+proofs and gates; no statements, outcomes or proof/checking limits changed.
