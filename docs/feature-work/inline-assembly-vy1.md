@@ -915,3 +915,11 @@ roots and documentation checks. The axiom-pin gate failed on an unrecorded
 Mathlib cache test pin outside the lane; its raw failure is retained, not
 reported as a pass. Eight adapter laws and six controls have only standard
 Lean axioms. Independent finder/skeptic reviews reported no findings.
+
+The lane adopts the published integration dependency. Post-rebase touched
+checks passed (169 jobs), and both omitted-guard files have zero diagnostics.
+The upstream cache-scan correction yields 6,343 axiom pins with zero drift.
+Review found and corrected two conflict-resolution defects in the shared
+checker and module map; both full upstream files are preserved with only
+existing lane rows appended. Independent re-review found no remaining issues.
+No Source or scoped-syntax definitions were changed by the lane.

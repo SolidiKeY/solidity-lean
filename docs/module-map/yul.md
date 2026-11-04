@@ -34,36 +34,40 @@
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](../feature-work/inline-assembly-vy4.md)). |
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](../feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
-
+| `Yul/Views/NominalInventory.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryLaws.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/Yul/ControlCompleteness.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/Yul/ControlRealization.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/Yul/QuotientControl.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/Yul/QuotientControlControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
+| `Bridge/SolidityBridge/Yul/QuotientSelection.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
+| `Yul/World/SelfDestructBuiltin.lean` | Bounded vy4-world checkpoint; typed scope and retained premises are in the module. |
+| `Yul/World/SelfDestructBuiltinControls.lean` | Positive and negative controls for the SelfDestructBuiltin binding; exclusions are stated in the binding module. |
+| `Yul/Checks/LocalBoolDivergence.lean` | Constant-true noncompletion and false-condition/timeout controls from inhabited scoped bodies. |
+| `Yul/Checks/LocalBoolWhile.lean` | Fuel-boundary, condition-effect, repeated-state and clean Source loop controls. |
+| `Yul/LocalBoolDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained premises are in the module. |
+| `Yul/LocalBoolWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Checks/LocalBoolFor.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolFor.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/Yul/BranchModel.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/Yul/BranchModelControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLocalAlias.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLocalAliasControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/LocalBoolWhile.lean`, `Yul/Checks/LocalBoolWhile.lean` | fuelled Boolean scope iteration and all-fuel clean Source agreement. |
-
 | `Yul/LocalBoolDivergence.lean`, `Yul/Checks/LocalBoolDivergence.lean` | universal no-normal-completion laws for literal-true certified scoped loops. |
-
 | `Yul/LocalBoolDoWhile.lean`, `Yul/Checks/LocalBoolDoWhile.lean` | body-first scoped iteration and concrete all-fuel clean Source agreement. |
-
 | `Yul/LocalBoolDoDivergence.lean`, `Yul/Checks/LocalBoolDoDivergence.lean` | constant-true do/while noncompletion laws and guard controls. |
-
 | `Yul/LocalBoolFor.lean`, `Yul/Checks/LocalBoolFor.lean` | Boolean initializer and context-growing for-body scope composition, without post. |
-
 | `Yul/LocalBoolPostIter.lean`, `Yul/LocalBoolForPost.lean`, `Yul/Checks/LocalBoolForPost.lean` | scoped for posts and initializer composition. |
-
 | `Yul/LocalBoolForNoGuard.lean`, `Yul/Checks/LocalBoolForNoGuard.lean` | exact omitted-guard Source transport and concrete scoped adapters. |
-
 | `Yul/LocalBoolUnchecked.lean`, `Yul/Checks/LocalBoolUnchecked.lean` | unchecked/ordinary Boolean item scope composition and concrete Source laws. |
-
 | `Yul/LocalDefaultBinding.lean`, `Yul/Checks/LocalDefaultBinding.lean` | constant-default declarations followed by certified local item bodies. |
-
 | `Yul/LocalDefaultItems.lean`, `Yul/Checks/LocalDefaultItems.lean` | certified heterogeneous constant-default declaration sequences and concrete Source item composition. |
-
 | `Yul/LocalDefaultUnchecked.lean`, `Yul/Checks/LocalDefaultUnchecked.lean` | unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition. |
-
 | `Yul/LocalItemWorld.lean`, `Yul/Checks/LocalItemWorld.lean` | universal raw-input world preservation for pure local item/default/unchecked execution. |
-
 | `Yul/LocalDefaultIfElse.lean`, `Yul/Checks/LocalDefaultIfElse.lean` | conditional default scopes, concrete Source agreement and raw world preservation. |
-
 | `Yul/LocalDefaultWhile.lean`, `Yul/Checks/LocalDefaultWhile.lean` | scoped default-loop Source agreement, raw purity and finite-normal exclusion. |
-
 | `Yul/LocalDefaultDoWhile.lean`, `Yul/Checks/LocalDefaultDoWhile.lean` | body-first default scopes, Source agreement, raw purity and finite-normal exclusion. |
-
 | `Yul/LocalDefaultPostIter.lean`, `Yul/Checks/LocalDefaultPostIter.lean` | scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity. |
 | `Yul/LocalDefaultNoGuard.lean` | Concrete default-scoped omitted-guard iterations using existing Source transport. |
