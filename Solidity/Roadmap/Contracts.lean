@@ -1102,3 +1102,183 @@ end Solidity.Roadmap
 #guard_msgs in #print axioms Solidity.Roadmap.Cert.comp
 /-- info: 'Solidity.Roadmap.PublicCorrectness.transfer' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Roadmap.PublicCorrectness.transfer
+
+
+/-!
+## H37 D1–D6: full-observation interfaces (X01)
+
+These are contract statements, not certificates for existing producers. The
+legacy six contracts above retain their names until their owners supply adapters.
+Every new X/O/T lane consumes `FullScope`; projecting to the legacy event type is
+not sufficient evidence for any full-scope checkpoint.
+-/
+namespace Solidity.Roadmap.FullScope
+
+/-- Byte-addressed EVM memory. The size is a byte count, never a word index. -/
+structure ByteMemory where
+  data : Word → UInt8
+  size : Nat
+  size_le : size ≤ 2 ^ 256
+  aligned : size % 32 = 0
+  unallocated_zero : ∀ address, size ≤ address.val → data address = 0
+
+/-- Solc's reserved byte ranges; allocation starts after the zero slot. -/
+def scratchEnd : Nat := 0x40
+def freePointer : Nat := 0x40
+def zeroSlot : Nat := 0x60
+def allocationStart : Nat := 0x80
+
+/-- A packed field fits within its physical 32-byte slot. -/
+structure PackedField where
+  slot : Word
+  offset : Fin 32
+  width : Fin 33
+  nonempty : 0 < width.val
+  fits : offset.val + width.val ≤ 32
+
+/-- D3: storage and transient locations are separate physical namespaces. -/
+inductive SlotSpace where
+  | storage | transient
+  deriving DecidableEq, Repr
+
+/-- D1's closed whitelist of target-dependent scalar queries. No arbitrary
+source expression or source result can be supplied by this interface. -/
+inductive ScalarQuery where
+  | gasleft | gas | msize | pc
+  deriving DecidableEq, Repr
+
+/-- The executing code's phase, including constructor code. -/
+inductive Phase where
+  | creation | runtime
+  deriving DecidableEq, Repr
+
+/-- A source code reference must name an actual entry of the artifact table. -/
+structure CodeRef (art : Artifact) where
+  unit : Fin art.contracts.length
+  phase : Phase
+
+/-- Only code bytes are read from the artifact table. -/
+def CodeRef.bytes {art : Artifact} (ref : CodeRef art) : Bytes :=
+  match ref.phase with
+  | .creation => (art.contracts[ref.unit]).initcode
+  | .runtime => (art.contracts[ref.unit]).runtime
+
+/-- Dynamic query identity includes its occurrence and executing code. -/
+structure Query (art : Artifact) where
+  code : CodeRef art
+  occurrence : Nat
+  kind : ScalarQuery
+
+/-- Supplied by the actual target execution, universally quantified by the
+source theorem. Agreement with that execution is a producer proof obligation. -/
+abbrev Oracle (art : Artifact) := Query art → Word
+
+/-- D1: a source run reads exactly this artifact and target oracle. -/
+structure Inputs where
+  artifact : Artifact
+  oracle : Oracle artifact
+
+/-- Ordered logs retain emitter, at most four topics and all data bytes. -/
+structure Log where
+  emitter : Address
+  topics : List Word
+  topics_le : topics.length ≤ 4
+  data : Bytes
+
+/-- All original events remain observations. Extra observations include raw
+bytes (already present in calls/answers), code, codehash, physical layout and
+D1 scalar values. Their order is the order of the prefix's event list. -/
+inductive Observation where
+  | session (event : Event)
+  | log (entry : Log)
+  | code (account : Address) (bytes : Bytes)
+  | codehash (account : Address) (hash : Word)
+  | slot (account : Address) (space : SlotSpace) (key value : Word)
+  | memory (address : Word) (value : UInt8)
+  | scalar (kind : ScalarQuery) (value : Word)
+
+/-- D6 erases only gas values. `msize` and `pc` remain exact observations. -/
+def Observation.withoutGas : Observation → Observation
+  | .scalar .gasleft _ => .scalar .gasleft 0
+  | .scalar .gas _ => .scalar .gas 0
+  | observation => observation
+
+/-- The sole optimizer observation quotient. Outcome bytes remain exact. -/
+def eraseGas (p : Prefix Observation Outcome) : Prefix Observation Outcome :=
+  ⟨p.events.map Observation.withoutGas, p.final⟩
+
+/-- D2 creation-size failures use Osaka's EIP-170/EIP-3860 limits, not the
+legacy idealized pin. Exact step gas/resource semantics remain owner obligations. -/
+def creationFits (initcode runtime : Bytes) : Prop :=
+  initcode.length ≤ 49152 ∧ runtime.length ≤ 24576
+
+/-- D4: entering an unsafe assembly block drops the invariant. Re-establishing
+it requires a proved writeback on each actual exit. No `MemOK` assumption is
+imposed on the input or on intermediate assembly states. -/
+structure UnsafeWriteback (State : Type) (MemOK : State → Prop)
+    (executes : State → State → Prop) (writeback : State → State)
+    (Corresponds : State → State → Prop) : Prop where
+  recovers : ∀ before after, executes before after → MemOK (writeback after)
+  corresponds : ∀ before after, executes before after → Corresponds after (writeback after)
+
+/-- D4's optimizer boundary: an unsafe block is unchanged, including its bytes.
+A producer must prove this equation for its actual optimizing transformation. -/
+def Opaque {Block : Type} (optimize : Block → Block) (isUnsafe : Block → Prop) : Prop :=
+  ∀ block, isUnsafe block → optimize block = block
+
+/-- Exact compilation/lowering contract for all new X/T lanes. Chain and
+crypto premises are expressed by the languages' guards and allowed environments;
+there is no new language exclusion in this interface. -/
+structure Exact (source target : Lang Observation Outcome) where
+  pass : Pass source target
+  certificate : Cert pass
+  total : ∀ program, pass.Dom program
+
+/-- D6's relation on runs. The public producer contract must instantiate
+these functions with the source meaning and actual output artifact's execution.
+This relation alone is not a compiler correctness certificate. -/
+def Optimizes {RS RT : Type} (AS : RS → Prop) (AT : RT → Prop)
+    (FS GS : RS → Prop) (GT : RT → Prop)
+    (source : Prefixes RS Observation Outcome)
+    (target : Prefixes RT Observation Outcome) : Prop :=
+  RefinesUnder AS AT FS GS GT (fun r => eraseGas (source r))
+    (fun r => eraseGas (target r))
+
+/-- D1/G07: a source evaluator has no compiler argument. Its code table and
+closed query oracle are explicit independent inputs. G07 must additionally audit
+its definition/import closure; this type alone does not prove non-circularity. -/
+structure Source where
+  Resolved : Type
+  lang : Lang Observation Outcome
+  meaning : Resolved → Inputs → lang.Prog
+
+/-- Target oracle linkage is stated against the actual compiled artifact,
+not an arbitrary oracle existentially selected to make refinement hold. -/
+def OracleAgreement (art : Artifact) (oracle targetRead : Oracle art) : Prop :=
+  ∀ query, oracle query = targetRead query
+
+/-- A target producer fixes its reader with its execution, before correctness
+is stated. `Inputs` is constructed from that reader, never chosen existentially
+by a correctness proof. The target owner must justify both definitions from its
+operational semantics. -/
+structure Target where
+  lang : Lang Observation Outcome
+  load : Artifact → lang.Prog
+  read : (art : Artifact) → lang.Env → lang.Res → Oracle art
+
+/-- One directional, actual-run obligation. The oracle is indexed by the
+actual target resource bound, so different initial gas supplies may return
+different values. This is only soundness, not the public two-sided contract:
+resource adequacy and source/target resource alignment remain mandatory. -/
+def ArtifactSound (source : Source) (target : Target)
+    (compile : source.Resolved → Artifact)
+    (environment : target.lang.Env → source.lang.Env) : Prop :=
+  ∀ resolved env rt, target.lang.Allowed env → target.lang.Admissible rt →
+    let art := compile resolved
+    target.lang.Guard (target.load art) env rt →
+    let program := source.meaning resolved ⟨art, target.read art env rt⟩
+    ∃ rs, source.lang.Admissible rs ∧
+      (eraseGas (target.lang.sem (target.load art) env rt)).Le
+        (eraseGas (source.lang.sem program (environment env) rs))
+
+end Solidity.Roadmap.FullScope
