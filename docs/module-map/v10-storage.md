@@ -119,3 +119,7 @@
 
 | `Lowering/StorageOps/SourceByteCommitFrames.lean` | Actual byte-operation/prefix read frames and structural OLD next-header transport |
 | `Lowering/StorageOps/SourceByteCommitFramesControls.lean` | OLD-header runtime commit client, complete prefix/journal observations and visited-header/malformed-query controls |
+
+| `Lowering/StorageOps/SourceCapturedBytePhase.lean` | Actual captured-byte child phase execution, including partial cleanup failure |
+| `Lowering/StorageOps/SourceCapturedByteTimeout.lean` | Runtime successful-child prefix followed by exact cleanup timeout from OLD header observations |
+| `Lowering/StorageOps/SourceCapturedByteTimeoutControls.lean` | Whole storage-reference failure, complete ordered journals, stale/older shadows and explicit rollback boundaries |

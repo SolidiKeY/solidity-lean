@@ -318,8 +318,27 @@ source shadows and captured objects. An unrelated malformed query keeps its
 failure; an already visited header changes from zero to two, showing why the
 outside-path condition matters. Ordinary Source liveness checks, numeric hash
 transport, physical execution and world composition remain separate obligations.
-The routine generic OLD-header wrapper is a type-checked statement for Terra;
-twenty-three adapters remain unproved.
+The routine generic OLD-header wrapper remains a type-checked statement for Terra.
+
+## Cleanup timeout after a runtime child prefix
+
+`SourceCapturedBytePhase.run_phase` derives captured-child execution from the
+existing heap and byte-copy semantics. `SourceCapturedByteTimeout.cleanup_timeout`
+proves an arbitrary successful child prefix followed by partial last-child
+cleanup. Captured-object, type and original per-child fuel conditions remain
+explicit. OLD destination headers suffice through the checked path frames.
+The exact failure state includes earlier commits and only the available stale
+tail prefix; neither the failing child header nor the outer header is committed.
+
+A populated whole storage-reference copy writes varying-length children before
+its last cleanup times out. Three of four stale bytes are cleared, an uncleared
+stale byte and an older shadow survive, and complete ordered journals are pinned.
+A successful phase control distinguishes the cleanup boundary. A separately
+invoked `rollbackTo` restores journaled state while captured heap objects remain;
+a rollback continuation after the failed bind is skipped. The original mark's
+heap component is not a heap-restoration guarantee. No Source semantics changed.
+The routine generic rollback wrapper is type-only for Terra; twenty-four
+adapters remain unproved. Physical target/caller rollback remains open.
 
 ## Remaining obligations
 

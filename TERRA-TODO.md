@@ -311,3 +311,35 @@ theorem commit_from_old_headers : ∀ {E : Solidity.Source.Env} {Γ : Solidity.S
 ```
 
 One routine adapter added; twenty-three remain pending.
+
+## C180: explicit rollback of the failed commit phase
+
+Module: `Solidity.Lowering.StorageOps.SourceCapturedByteTimeout`.
+Lemma: `rollback_cleanup_timeout`.
+Why routine: rewrite the checked `cleanup_timeout` outcome, expand the existing
+`rollbackTo` and apply `ExecState.journal_run`/`undoN_run`. Commit changes only
+`ex`, so heap equality follows from unchanged heap, not from restoration of the
+mark's heap field. This concerns the pre-COMMIT state with snapshots already
+captured, not a pre-capture caller state or physical target rollback.
+Type-checked proposition only; no compiled theorem, axiom or instance.
+
+```lean
+theorem rollback_cleanup_timeout : ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (_writable : frame.static=false) (dst : Solidity.Source.SPath)
+ (typed : ∀ i j, (.fixedBytes 1 (by decide) : Solidity.Source.STy)=E.cellTy ((dst.go (.index i)).go (.index j)))
+ (headerTyped : ∀ i, (.int Solidity.Source.IntTy.u256 : Solidity.Source.STy)=E.cellTy (dst.go (.index i)))
+ (payload : Nat → List UInt8) (oldLength : Nat → Nat) (start count budget first : Nat)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_captured : ∀ j<count+1,state.heap.get (first+j)=some ⟨.bytes .memory,Solidity.Source.Data.bytes (payload (start+j))⟩)
+ (_enough : ∀ j<count+1,(payload (start+j)).length≤count+1+budget-j)
+ (_cleanup : ∀ j<count,oldLength (start+j)-(payload (start+j)).length≤count+1+budget-j)
+ (_short : budget+1<oldLength (start+count)-(payload (start+count)).length)
+ (_headers : ∀ j<count+1,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (dst.go (.index (start+j)))).run (locals,state)=
+  (.ok (oldLength (start+j)),(locals,state))),
+ let outcome :=  (Solidity.Source.storeElems (E:=E) (Γ:=Γ) frame (count+budget+6) (.bytes .storage) dst start (count+1)
+  (fun j : Fin (count+1)=>Solidity.Source.Data.val (Solidity.Source.Val.memRef (D:=E.layout) (τ:=.bytes .memory) rfl (first+j.val)))).run (locals,state)
+ (Solidity.Source.rollbackTo (state.ex.journal.length,state.logs.length,state.heap) : Solidity.Source.EM E Γ Unit).run outcome.2=
+ (.ok (),(locals,state))
+```
+
+One routine adapter added; twenty-four remain pending.
