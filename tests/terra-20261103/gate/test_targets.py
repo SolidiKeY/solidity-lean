@@ -75,7 +75,16 @@ class Targets(unittest.TestCase):
         self.assertFalse(self.elan.exists(), "fixture touched host/toolchain elan")
         log = Path(self.env["GATE_LOGS"])
         self.assertEqual((log / "HEAD").read_text().strip(), self.base)
-        self.assertEqual((log / "gates.tsv").read_text().split("\t")[0], "PASS" if exit_code == 0 else "FAIL")
+        rows = (log / "gates.tsv").read_text().splitlines()
+        self.assertEqual(len(rows), 1)
+        fields = rows[0].split("\t")
+        self.assertEqual(len(fields), 5)
+        status = "PASS" if exit_code == 0 else "FAIL"
+        self.assertEqual(fields[:2], [status, "build-touched"])
+        self.assertTrue(fields[2].isdigit())
+        self.assertEqual(fields[3:], [str(log / "1.log"), "build_touched "])
+        self.assertEqual(result.stdout, f"{status} build-touched {fields[2]}s {log / '1.log'}\n")
+        self.assertEqual(result.stderr, "")
         targets = " ".join(sorted(expected)) if expected else "none"
         self.assertIn("targets: " + targets + "\n", (log / "1.log").read_text())
 
