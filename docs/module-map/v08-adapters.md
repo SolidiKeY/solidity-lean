@@ -493,3 +493,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailurePackedFields.lean` | Actual heterogeneous packed parts/encoding and converted-argument packet allocation. |
 | `Lowering/V08/LiteralFailurePackedFieldsControls.lean` | Populated packed fields, complete payloads, allocation and adjacent-boundary ambiguity controls. |
+
+| `Lowering/V08/LiteralFailureCopySelector.lean` | Actual selector-prefixed encoding after converted local arguments, with typed value injection and reached allocation. |
+| `Lowering/V08/LiteralFailureCopySelectorControls.lean` | Populated arbitrary-selector/copy/old-string/full-word controls and complete packets. |
