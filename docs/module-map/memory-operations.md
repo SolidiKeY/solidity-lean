@@ -276,3 +276,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimePathArrayControls.lean` | Runtime nested-path declarations/rebindings with two old aliases, distinct empty/pair/64-element data, source alias preservation and invalid-empty controls. |
 
 | `Solidity/Backend/MemoryCopies/PrimitiveArrayLiveInterface.lean` | Live primitive-array normalization certificate, including arbitrary storage shadows. |
+| `Solidity/Backend/MemoryCopies/PrimitiveArrayLive.lean` | Intrinsic live-array bound, copy/representation normalization and actual runtime-copy transport. |
+| `Solidity/Backend/MemoryCopies/PrimitiveArrayLiveControls.lean` | Arbitrary shadows, empty/long certificates and retained-source-slot runtime controls. |
