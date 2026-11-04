@@ -1,0 +1,51 @@
+--- a/Solidity.lean
++++ b/Solidity.lean
+@@ -1501,6 +1501,48 @@
+ import Solidity.Frontend.CreationTryImport
+ import Solidity.Frontend.Import
+ import Solidity.Frontend.LibraryTryImport
++import Solidity.Frontend.NumericLiteralProofs.Audit
++import Solidity.Frontend.NumericLiteralProofs.Backfill
++import Solidity.Frontend.NumericLiteralProofs.Classification
++import Solidity.Frontend.NumericLiteralProofs.Controls
++import Solidity.Frontend.NumericLiteralProofs.Digits
++import Solidity.Frontend.NumericLiteralProofs.Fixtures
++import Solidity.Frontend.NumericLiteralProofs.Refusals
++import Solidity.Frontend.NumericLiteralProofs.Span
++import Solidity.Frontend.NumericLiteralProofs.Spellings
++import Solidity.Frontend.NumericLiteralProofs.Underscores
++import Solidity.Frontend.NumericLiteralProofs.Values
++import Solidity.Frontend.NumericLiteralProofs.WordTable
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part05
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part06
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part07
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part08
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part09
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part10
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part11
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part12
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part13
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part14
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part15
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part16
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part17
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part18
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part19
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part20
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part21
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part22
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part23
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part24
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part25
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part26
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part27
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part28
++import Solidity.Frontend.NumericLiteralProofs.WordTable.Part29
+ import Solidity.Frontend.OverrideValidation.Attributes
+ import Solidity.Frontend.OverrideValidation.Graph
+ import Solidity.Frontend.OverrideValidation.Identity

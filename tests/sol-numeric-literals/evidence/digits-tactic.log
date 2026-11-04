@@ -1,0 +1,60 @@
+{
+  "items": [
+    {
+      "snippet": "unfold digitsTail; simp only [hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "message": "This simp argument is unused:\n  Bool.true_eq\n\nHint: Omit it from the simp argument list.\n  simp only [hd, B̵o̵o̵l̵.̵t̵r̵u̵e̵_̵e̵q̵,̵ ̵↓reduceIte, ih]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`",
+          "line": 39,
+          "column": 56,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    },
+    {
+      "snippet": "rename_i b r ds rest h; cases r <;> simp only [digitsTail, hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [
+        "case digit.nil\nraw ds✝ rest✝ : Bytes\nb : UInt8\nds rest : Bytes\nhd : isDigit b = true\nh : Tail [] ds rest\nih : digitsTail [] = (ds, rest)\n⊢ ([b], []) = (b :: ds, rest)"
+      ],
+      "diagnostics": [
+        {
+          "severity": "error",
+          "message": "unsolved goals\ncase digit.nil\nraw ds✝ rest✝ : Bytes\nb : UInt8\nds rest : Bytes\nhd : isDigit b = true\nh : Tail [] ds rest\nih : digitsTail [] = (ds, rest)\n⊢ ([b], []) = (b :: ds, rest)",
+          "line": 39,
+          "column": 19,
+          "lean_tags": [
+            "unsolvedGoals"
+          ]
+        },
+        {
+          "severity": "warning",
+          "message": "This simp argument is unused:\n  Bool.true_eq\n\nHint: Omit it from the simp argument list.\n  simp only [digitsTail, hd, B̵o̵o̵l̵.̵t̵r̵u̵e̵_̵e̵q̵,̵ ̵↓reduceIte, ih]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`",
+          "line": 39,
+          "column": 85,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    },
+    {
+      "snippet": "rw [digitsTail.eq_def]; simp only [hd, Bool.true_eq, ↓reduceIte, ih]",
+      "goals": [],
+      "diagnostics": [
+        {
+          "severity": "warning",
+          "message": "This simp argument is unused:\n  Bool.true_eq\n\nHint: Omit it from the simp argument list.\n  simp only [hd, B̵o̵o̵l̵.̵t̵r̵u̵e̵_̵e̵q̵,̵ ̵↓reduceIte, ih]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`",
+          "line": 39,
+          "column": 61,
+          "lean_tags": null
+        }
+      ],
+      "timed_out": false,
+      "proof_status": null
+    }
+  ]
+}

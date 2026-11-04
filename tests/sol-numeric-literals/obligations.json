@@ -1,0 +1,62 @@
+[
+  {
+    "id": "inventory",
+    "status": "done"
+  },
+  {
+    "id": "scanner-correspondence",
+    "status": "done"
+  },
+  {
+    "id": "erasure-and-values",
+    "status": "done"
+  },
+  {
+    "id": "token-classification",
+    "status": "done"
+  },
+  {
+    "id": "refusal-families",
+    "status": "done"
+  },
+  {
+    "id": "backfill",
+    "status": "done"
+  },
+  {
+    "id": "constructor-controls",
+    "status": "done"
+  },
+  {
+    "id": "compiler-fixtures",
+    "status": "done"
+  },
+  {
+    "id": "trust-inventory",
+    "status": "done"
+  },
+  {
+    "id": "independent-reviews",
+    "status": "done"
+  },
+  {
+    "id": "target-import-closure",
+    "status": "pending"
+  },
+  {
+    "id": "static-gates",
+    "status": "pending"
+  },
+  {
+    "id": "coordinator-registration",
+    "status": "blocked"
+  },
+  {
+    "id": "full-runtime-gate",
+    "status": "blocked"
+  },
+  {
+    "id": "immutable-handoff",
+    "status": "pending"
+  }
+]

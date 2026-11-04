@@ -1,19 +1,97 @@
 # Numeric literal proofs: SOL-NL / G08
 
-Status: blocked before proof implementation. This is an audited source inventory,
-not completion of checkpoint 1 or of the assignment. No new Lean declarations,
-axioms, theorem signatures, or kernel controls exist. All universal proof,
-compiler differential and final runtime gates remain open.
+Implementation acceptance passes; the assignment is not complete. The required
+full `run-lean.sh` gate stops at generated-root registration. The assignment
+reserves roots and module maps for coordinator integration, so this lane has not
+edited them. All 42 modules and their proposed rows/imports are listed in
+[registration.json](../../tests/sol-numeric-literals/registration.json); the exact
+root-only proposal is [registration.patch](../../tests/sol-numeric-literals/registration.patch).
+No push, merge, PR, producer edit or source representation change occurred.
 
-Batch: `solidity-sol2-20261104`, lane `numeric-literals`.
-Repository: `/workspace/solidity-lean`.
-Branch: `codex/solidity-sol2-20261104/numeric-literals`.
-Base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
-Fetched `origin/master` equals the base; merge-base ancestry check exited zero.
-The starting `work` branch was clean and was preserved. No push or merge.
-Exact source SHA256 pins: [source-pins.json](../../tests/sol-numeric-literals/source-pins.json).
-Setup commands, exits, durations and decisive outputs:
-[setup.json](../../tests/sol-numeric-literals/evidence/setup.json).
+Batch `solidity-sol2-20261104`, task `numeric-literals`.
+Repository `/workspace/solidity-lean`; branch
+`codex/solidity-sol2-20261104/numeric-literals`; base
+`6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. The clean starting `work` branch was
+preserved; fetched `origin/master` equals the base and its ancestry check passed.
+The final committed head and immutable artifact paths are recorded in the sealed
+handoff, rather than using a self-referential hash in this document.
+
+## Results and boundaries
+
+The relations `Tail`, `Digits`, `IntegerPart`, `FractionPart`, `Exponent`,
+`Decimal`, `HexDigits` and `Hexadecimal` are independent of `decNumber` and
+`hexNumber`. Universal iff theorems cover every byte list and output, with no
+extra input restrictions. `Tail` includes its leading underscore-plus-digit
+arm and exact unconsumed suffixes. Decimal results retain the exact mantissa,
+fractional digit count and signed exponent. Hex results retain exact digits
+and the existing deterministic `eip55` flag; there is no cryptographic claim.
+
+Whole decimal/hex underscore erasure preserves every NumLit field. The base-10
+accumulator and concatenation identities prove the integer/fraction scale law;
+the base-16 proof removes `toFin16`'s modulo on admitted digits. Decoder-to-value
+corollaries use the existing Source Q interpretation, including its unnormalised
+numerator and denominator. Refusal families are arbitrary-length, including
+leading zeros, all underscore positions, invalid hex bytes, empty hex, missing
+fraction/exponent digits, plus exponents and glued identifier-character suffixes.
+Both digit-headed and leading-period source-number paths are covered.
+
+Backfill proves exact consumed-prefix ranges, exact numeric-span reprinting for
+all bytes and both numeric modes, positive located numeric ranges and exact slice
+lengths, plus arbitrary-position glue and all-denomination separation. It leaves
+Source, lexer and token representations unchanged.
+
+The word-table exclusion needed for classification hit the unchanged 200000
+heartbeat budget when generated equation families were requested. A warned
+proof partition now uses 439 structural prefix lemmas in 30 small modules,
+with targeted outer conditional rewrites. Every tail is arbitrary length. All
+modules passed per-file diagnostics. Failed attempts and the unchanged 300-second
+diagnostic timeouts remain in evidence; none are passing gates.
+
+## Kernel controls, fixtures and trust
+
+[acceptance.json](../../tests/sol-numeric-literals/acceptance.json) enumerates all
+42 modules, 652 authored declarations, imports, source hashes, case families,
+constructor witnesses, scanner controls and required theorem names.
+[kernel-inventory.json](../../tests/sol-numeric-literals/kernel-inventory.json)
+records all 991 persistent declarations in imported owned modules, including
+generated constructors/recursors/equations, full signatures, universe parameters,
+safety metadata and actual transitive axiom sets. Audit itself has no authored
+declarations; `run_cmd` uses Lean's `withoutModifyingEnv` and does not persist its
+evaluation auxiliaries. No new axiom or unsafe declaration exists. The only
+partial entry is Lean's generated `underscoreOk._unsafe_rec` implementation
+helper: `isUnsafe=false`, axiom set empty; the kernel definition is safe.
+
+There are 32 inhabited constructor controls, including generated `below`
+constructors and the typed fixture record, 68 scanner-arm/boundary controls,
+and kernel checksum controls at lengths 39/40/41 and with mixed-case success and
+failure. `fixture_observations_pass` kernel-checks the complete typed Lean result
+for every one of the 42 fixed compiler spellings. The acceptance gate also
+rejects five concrete inventory mutations: deletion, axiom growth, unsafe flag,
+changed signature and duplicate declaration.
+
+The exact solc is `0.8.38+commit.1835d247.Emscripten.clang`, SHA256
+`6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`.
+[solc-0.8.38.json](../../tests/sol-numeric-literals/solc-0.8.38.json) fixes all compiler
+outcomes. [lean-fixtures.json](../../tests/sol-numeric-literals/lean-fixtures.json)
+fixes all typed Lean outcomes. [differential.json](../../tests/sol-numeric-literals/differential.json)
+compares all 42 rows and exact values for all 18 compiler-accepted rows. The
+frozen upstream baseline-20261028 is unchanged. These bounded external tests do
+not establish universal compiler parity or EIP-55 cryptographic correctness.
+
+All five lexical/compiler acceptance differences are retained, not excluded:
+
+| Spelling | Recorded boundary |
+| --- | --- |
+| `1.` | The lexer admits number then period; the compiler rejects the expression context. |
+| `_1` | The lexer admits an identifier; the compiler rejects an undeclared name. |
+| `1 uint8` | Separate number/type tokens are lexical; the compiler rejects the expression context. |
+| Yul `.1` | Period plus integer tokenize; raw yulNumber and the compiler refuse a numeric literal `.1`. |
+| `0x5aaeb6053F3E94C9b9A09f33669435E7Ef1BeAed` | The lexer retains a false checksum flag; the compiler diagnoses the checksum. |
+
+No decoder theorem is restricted to hide these observations. Whole-lexeme
+refusal must not be confused with rejection of a source fragment that may split
+into several tokens. Existing typing exclusions, including address-width and
+unit semantics, remain outside these lexical/value theorems.
 
 ## Inventory of the pinned implementation
 
@@ -99,90 +177,67 @@ including trivia; existing lex_locate proves the sliced range reclassifies
 and stop ≤ source.length. Backfill must strengthen exact consumption/range
 and denomination separation without modifying these representations.
 
-## Independent relation design ledger (not implemented)
+## Module and theorem map
 
-Use an inductive Tail relation indexed by input, emitted digits and leftover:
-empty; digit-cons; underscore-plus-digit; stopping non-digit with a condition
-that the underscore-plus-digit arm cannot fire. Stop cases must preserve the
-whole suffix. A nonempty Digits relation adds the mandatory initial digit.
-Do not rule out an underscore at the beginning of Tail. Prove iff for every
-input and output, not only suffixes chosen by an extra premise.
+| Area | Module / headline results |
+| --- | --- |
+| Decimal digits | `Digits.lean`: `tail_iff`, `digits_iff`, exact consumed prefixes, erasure and appended-stop behavior. |
+| Spelling | `Spellings.lean`: `hex_digits_iff`, `decimal_iff`, `hexadecimal_iff`; independent spelling relations and component correspondence. |
+| Values | `Values.lean`: whole erasure, `decimal_fold`, `digitsVal_append`, `hex_fold`, decoder-to-Source-value corollaries. |
+| Refusal | `Refusals.lean`, `Underscores.lean`: global/part-wise arbitrary-input refusal families. |
+| Classification | `WordTable/Part00.lean` through `Part29.lean`, `WordTable.lean`, `Classification.lean`: arbitrary-tail word exclusion and accepted-token spelling consequences. |
+| Source backfill | `Backfill.lean`, `Span.lean`: exact consumption/slices, glue errors and denomination separation. |
+| Validation | `Controls.lean`, `Fixtures.lean`, `Audit.lean`: inhabited controls, all paired fixture outcomes and environment inventory. |
 
-Use a separate inductive HexDigits relation with singleton, adjacent digit and
-underscore-separated digit constructors and nonempty remainder; preserve case.
-Its constructors use byte classes, never hexDigits or hexNumber calls.
-Decimal spelling constructors should compose Digits derivations for integer,
-fraction and signed exponent, carrying source spellings and exact outputs;
-require a nonempty mantissa digit sequence (zero values remain admitted) and
-the existing decoded-leading-zero condition.
-The boundary between Digits components must account for maximal leftover, not
-just an arbitrary concatenation. Hex spelling adds the exact 0x bytes and the
-existing deterministic eip55 flag. No correctness relation may be defined by
-calling decNumber/hexNumber. These are proposed shapes, not checked definitions.
+These short filenames are relative to `Solidity/Frontend/NumericLiteralProofs/`.
+Full signatures and actual axiom sets are in the inventory; the coordinator's
+registration manifest contains a row for every module.
 
-## Open obligations and acceptance ledger
+## Runtime and commands
 
-1. Finish checkpoint 1: independent inductive relations, complete formal arm
-   enumeration and inhabited controls. Inventory above alone does not pass.
-2. Prove arbitrary-input soundness/completeness for digitsTail, digits1,
-   hexDigits, decNumber, hexNumber with exact leftover, digit and value folds.
-   Prove underscore erasure and Source value interpretation. Preserve and state
-   deviations; do not repair a false converse by introducing an input restriction.
-3. Prove accepted numeric classification and arbitrary-length refusal families
-   for leading zero/octal-looking, bad underscores, empty hex, missing fraction
-   or exponent digits and glued suffixes, distinguishing whole lexeme vs source.
-4. Add constructor/arm-complete kernel controls, solc-0.8.38 differential fixtures,
-   scope-complete declaration/control/obligation checker and actual axiom pins.
-   The frozen baseline-20261028 has not been changed. No differential result exists.
-5. Complete the assigned consumption, source-range and denomination backfill.
-6. Run all permitted KeySort, target/import closure, trust, fixture and full
-   runtime gates under resource policy. No RUNTIME_GATE_PASS is claimed.
-7. Independently review all implemented proofs and controls, fix findings,
-   commit and seal the final proof packet. Current reviews cover inventory only.
+H26 resolved the historical systemd blocker using the approved Docker envelope.
+The setup-evidence commit is retained as honest history. The current worker uses
+Docker 28.4.0 / cgroup v2 and image
+`ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852`.
+Every check asserts memory.max=12884901888 and memory.swap.max=0, overrides
+activation's thread setting with LEAN_NUM_THREADS=1, uses explicit -j1 through
+the owned Lake configuration, holds the writer lock and monitors both parent
+cgroup and VM memory for the unchanged >=4 GiB reserve. No address-space limit
+substitutes for cgroup enforcement.
 
-[registration.json](../../tests/sol-numeric-literals/registration.json) has an
-empty module list because no Lean files were added. Shared roots, module maps,
-trust inventory and all producer/Source modules remain unchanged. A final
-acceptance checker must enumerate actual declarations; this ledger is not one.
+Lean is 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b;
+Lake is 5.0.0-src+797c613. The permitted KeySort per-file check passed with zero
+errors. No RUNTIME_GATE_PASS is claimed. Each check's exact command, outcome,
+wall time, cumulative container peak and minimum parent headroom is recorded in
+`tests/sol-numeric-literals/evidence/`. Later checks also stamp every proof source
+hash. The timed wrapper records Linux child maximum RSS separately; cumulative
+cgroup memory is not mislabeled as process RSS.
 
-## Runtime blocker / ESCALATE NL-RUNTIME-01
+The implementation gate is:
 
-Sources: assignment VM runtime constraints; AGENTS resource policy; setup.json.
-The required hard systemd scope cannot run: user bus environment is absent,
-and system scope reports PID 1 is not systemd. PID 1 is `tail`. Cgroup v2
-memory controls are root-owned and not delegated to this agent. sudo is absent.
-The inherited cgroup limit is 16 GiB, not the required 12 GiB; swap max is
-unbounded (current swap usage zero). Version queries and static checks ran;
-no Lean elaboration, LSP, Lake build or KeySort check was started. Peak RSS was
-not measured for setup probes and is recorded null, never as a proof-run metric.
-Assignment H1's 4 GiB reserve remains binding; no cap/reserve was weakened.
+```sh
+python3 scripts/check-sol-numeric-literals.py --implementation --self-test
+```
 
-Question: How should this VM obtain the mandatory 12 GiB, no-swap hard scope?
+The default command additionally refuses completion while any required ledger
+item remains open. It never updates pins. The private runtime/check.py runs these
+commands within the verified owned container. Compiler cache setup downloads the
+exact pinned file into ignored runtime/.cache and verifies the hash above.
 
-- Restore runtime support: provision systemd or delegate a cgroup with the
-  exact limits; resume the unchanged assignment on this branch.
-- Authorize a concrete equivalent hard-limit mechanism after it is supplied
-  for review: validate its enforcement before any Lean work; scope and all
-  theorem obligations stay unchanged.
-- Pause this lane: retain this audited inventory and all open obligations
-  until compliant runtime support is available.
+## Reviews and remaining obligations
 
-No option is preselected and no new permission is inferred. The active goal
-must be blocked, not complete, while this prerequisite is unavailable.
+Independent read-only finder and skeptic reviews used no Lean server. Initial
+reviews accepted scanner fidelity and universal correspondence; they requested
+whole-number erasure and raw byte-value bridges, which were implemented and
+subsequently accepted. The word-prefix coverage review verified all 439 cases
+without missing, extra, duplicate or forward references. Final review records
+and their resolutions are maintained in the evidence directory.
 
-## Independent read-only reviews and static gate boundary
-
-Finder and skeptic reviewed this inventory independently without a Lean server.
-Both verified all five source pins and accepted the blocked inventory. Finder
-requested the mantissa wording correction; skeptic also requested explicit bare
-fixed/ufixed behavior. Both corrections are applied above. Their review covers
-only this packet; it is not a review of unimplemented proofs or fixtures.
-Verdicts are saved in [reviews.json](../../tests/sol-numeric-literals/evidence/reviews.json).
-
-[static-gates.json](../../tests/sol-numeric-literals/evidence/static-gates.json)
-records trust (3672 sources, zero findings), existing axiom pins (6343 theorems,
-zero errors/unrecorded changes), reachability (3656 reachable, zero orphaned)
-and five matching source pins. Setup evidence also records layer and generated
-root checks passing. These are static repository checks, not kernel validation
-of new results. No new theorem axiom set exists to report. KeySort, numeric
-fixtures, full build and all formal assignment gates remain pending.
+[obligations.json](../../tests/sol-numeric-literals/obligations.json) is the complete
+ledger. The full runtime gate currently fails before Lake because all new root
+imports are intentionally pending coordinator registration. Shared roots,
+module-map files, trust inventory and every producer/frozen Source area remain
+untouched. The registration proposal is concrete and reviewable; after the
+coordinator applies it, the unchanged full gate and remaining integration checks
+must pass before the persistent goal can be complete. A partial checkpoint,
+implementation-only acceptance or failed full gate is not completion.
