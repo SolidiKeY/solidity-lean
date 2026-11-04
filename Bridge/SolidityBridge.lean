@@ -375,6 +375,8 @@ import SolidityBridge.Yul.StructuredJson
 import SolidityBridge.Yul.StructuredJsonControls
 import SolidityBridge.Yul.StructuredSource
 import SolidityBridge.Yul.StructuredSourceControls
+import SolidityBridge.Yul.SwitchCompilation
+import SolidityBridge.Yul.SwitchCompilationControls
 import SolidityBridge.Yul.UnarySelection
 import SolidityBridge.Yul.UnarySelectionControls
 import SolidityBridge.Yul.WriteSelection

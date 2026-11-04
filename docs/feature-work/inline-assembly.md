@@ -335,3 +335,8 @@ VY3 checked-JSON handoff: actual checked word JSON now feeds recursive normal
 structured compilation with source/model proofs and a conditional arithmetic
 witness. [VY3](inline-assembly-vy3.md) records the separate admission, Source/G24,
 native and final joint-validation obligations.
+
+VY3 switch handoff: original case-list compilation now has same-horizon source
+and structured target proofs with one selector evaluation and exact retirement.
+[VY3](inline-assembly-vy3.md) records the root-component domain and separate
+recursive-visitor, Source/G24/native and final-validation obligations.

@@ -966,3 +966,35 @@ Focused/per-file kernel checks, two per-file MCP diagnostics, touched imports,
 trust/layers/generated roots/docs/module-map and global axiom-pin checks pass.
 Three guarded reports use standard axioms. Full library/Bridge/final gates
 remain open with prior raw resource/interruption failures retained.
+
+### Original switch component
+
+`SolidityBridge.Yul.SwitchCompilation` compiles an original selector, intrinsic
+case list and fallback with actual existing normal scope/control bodies.
+Context/horizon-indexed case evidence follows the real per-arm fuel decrease.
+Five general laws derive concrete PUSH/DUP2/EQ behavior, case-list source and
+structured execution, and whole-switch source/structured composition. The
+selector is evaluated once, compared as a full word and removed before the
+chosen body or fallback; caller suffixes remain identical.
+
+Controls distinguish first, dirty, late and default matches, scoped updates,
+empty case dispatch, source evaluation and complete observed model fields.
+The first body changes the selector variable to a later case label without
+fallthrough. Live position15 succeeds while16 refuses emission. Existing JSON
+duplicate-label refusal remains intact. A new control initially assumed that
+`stackBound` certified DUP operands; the corrected paired controls show height
+capacity at zero while actual execution underflows. Raw failure is retained;
+the predicate, old verdicts and budgets are unchanged.
+
+Independent read-only finder and skeptic reviews found no confirmed defect.
+This is a root-switch component over existing recursive normal bodies, not a
+complete mutually recursive switch visitor or frontend admission. Nested-switch
+bodies, functions/loops/early flow, complete Source/G24/physical/readback and
+native/resource/world/trace adequacy remain open. Prefix bounds are not whole
+program physical-validity proofs; model controls are not external EVM tests.
+
+Focused/per-file kernel checks, both per-file MCP diagnostics, touched imports,
+scoped/global trust, layer/root/docs/module-map and five guarded standard axiom
+pins pass. Full library/Bridge/final gates remain open with prior raw resource
+and runtime-interruption failures preserved; unchanged failed full operations
+were not repeated for this optional component.
