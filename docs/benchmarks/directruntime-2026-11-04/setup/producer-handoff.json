@@ -18,6 +18,12 @@
       ],
       "evidence": "setup/reviews.json",
       "request": "Coordinated producer handoff must reject full/certification runtimes for ordinary requests and enforce complete source/bridge/closure provenance. D will not edit these unowned paths."
+    },
+    {
+      "paths": [
+        "web/tools/lean-wasm/build-direct.sh"
+      ],
+      "request": "Caller must explicitly export canonical EM_CONFIG for the hardened builder, as the owned adapter does; no unowned launcher edit applied."
     }
   ],
   "questions": [
@@ -27,7 +33,7 @@
         "queue 2-3",
         "committed-output-only boundary"
       ],
-      "question": "Where should this VM retrieve A committed translator interface and B/C controls?",
+      "question": "How should this VM retrieve A committed runtime migration and B/C controls, now that shared APIs are published but DirectRuntime remains unchanged?",
       "options": [
         "Supply committed SHAs with retrievable artifacts",
         "Keep integration pending until coordinator handoff"
@@ -49,15 +55,18 @@
     }
   ],
   "pendingOwnedWork": [
-    "Native complete compiler/header/runtime cache identity",
-    "Builder input snapshots and pre/post identity checks",
-    "Separate full runtime build mode from ordinary verification",
-    "Matched successful cold-native build metrics",
-    "After integration native/browser regressions and >=3-round performance",
-    "B/C controls and exact positive Identity diamond twin in both modalities",
-    "Final build, review and handoff gates"
+    "After A migration source-to-result native/browser matched performance and final gate suite",
+    "Exact B Identity positive diamond twin and controls, C controls, both modalities",
+    "Successful DirectRuntime MCP/final policy gates",
+    "Further boundary audits required after producer changes"
   ],
   "completedOwnedWork": [
-    "Reject missing l_/_init_l_ native callback roots; normalize iterator roots;10 synthetic tests;200-module extracted C unchanged before set-only normalization. Fresh rebuild/after measurements remain pending."
+    "Missing generated native callback roots fail closed, including iterator input",
+    "Native object keys pin selected compiler/header/static-runtime inputs; compiler overrides rejected",
+    "Both builders capture bridge/closure bytes and check initial/final input sets",
+    "Ordinary WASM builder rejects DIRECT_RUNTIME_FULL=1",
+    "WASM extraction isolated serially; successful fresh200-module build, exact baseline WASM",
+    "Fresh native249+14, browser249+13/14, audit and repeated sort evidence",
+    "Complete empty-native-output200-object compile/link288.991666s, then249fresh requests+14controls; Lean dependencies warm, exact binary matches audited candidate."
   ]
 }

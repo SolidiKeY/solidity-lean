@@ -1,0 +1,9 @@
+{
+  "delivery": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "headAtValidation": "55f5d2416a32608a8c000bca644673ead6c89a25",
+  "ownedLeanSourceChanges": false,
+  "workerTheoremAxiomSignatures": "No worker Lean edits relative to delivery; exact declarations/axioms unchanged. Coordinator-published producer changes are separately authorized, not new worker proof claims.",
+  "directRuntimeChangedFromPinnedBase": false,
+  "newWorkerLeanModules": [],
+  "runtimeGatePass": false
+}

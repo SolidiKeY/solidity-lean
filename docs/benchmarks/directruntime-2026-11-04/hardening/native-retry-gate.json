@@ -1,0 +1,21 @@
+{
+  "command": [
+    "bash",
+    "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+  ],
+  "exitCode": 0,
+  "wallSeconds": 225.84282980299758,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 4385718272,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 1751130112,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 1229152,
+  "cgroupPeakBytes": 2086002688,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+}

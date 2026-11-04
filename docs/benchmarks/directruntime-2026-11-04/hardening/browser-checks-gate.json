@@ -1,0 +1,21 @@
+{
+  "command": [
+    "bash",
+    "tests/directruntime-20261104/native-browser/hardening-browser-checks.sh"
+  ],
+  "exitCode": 0,
+  "wallSeconds": 58.17336056000204,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 5154459648,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 1369403392,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 142284,
+  "cgroupPeakBytes": 995958784,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+}

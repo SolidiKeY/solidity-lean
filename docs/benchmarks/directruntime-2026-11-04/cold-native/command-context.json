@@ -1,0 +1,30 @@
+{
+  "workingDirectory": "/workspace/solidity-lean",
+  "outerCommand": "flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock docker run ... ubuntu:24.04 bash -c <prepare cache then bounded command>",
+  "dockerLimits": [
+    "--memory=12g",
+    "--memory-swap=12g",
+    "--cpus=1",
+    "--user=1000:1000"
+  ],
+  "dockerEnvironment": {
+    "LEAN_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "LAKE_CACHE_DIR": "",
+    "NATIVE_BROWSER_NATIVE_OUTPUT": "/workspace/solidity-lean/.lake/native-browser-cold-native",
+    "NATIVE_BROWSER_REQUIRE_EMPTY": "1"
+  },
+  "buildInnerCommand": [
+    "python3",
+    "tests/directruntime-20261104/native-browser/bounded-command.py",
+    "docs/benchmarks/directruntime-2026-11-04/cold-native/build-gate.json",
+    "bash",
+    "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+  ],
+  "checkEnvironment": {
+    "NATIVE_BROWSER_NATIVE_OUTPUT": "/workspace/solidity-lean/.lake/native-browser-cold-native",
+    "NATIVE_BROWSER_CHECK_OUTPUT": "docs/benchmarks/directruntime-2026-11-04/cold-native"
+  },
+  "scopeEvidence": "build-gate.json; checks-gate.json",
+  "existingReceiptPolicy": "Do not replay into existing receipt/input destinations; preserve completed data."
+}

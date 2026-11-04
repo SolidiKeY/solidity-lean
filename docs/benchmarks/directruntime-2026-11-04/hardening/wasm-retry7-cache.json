@@ -1,0 +1,11 @@
+{
+  "uid": 1000,
+  "beforeOuterCurrentBytes": 10637762560,
+  "afterOuterCurrentBytes": 10384961536,
+  "afterRawHeadroomBytes": 6794907648,
+  "filesAdvised": 103272,
+  "fileBytesAdvised": 17511694418,
+  "errors": 0,
+  "wallSeconds": 6.760505739999644,
+  "boundary": "Preparation only; no compiler/Lean child started. Read-only fds, fsync and POSIX_FADV_DONTNEED on private public SDK files and public Lean libraries. No file deletion/content changes or threshold changes."
+}

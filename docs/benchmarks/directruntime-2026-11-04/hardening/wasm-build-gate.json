@@ -1,0 +1,21 @@
+{
+  "command": [
+    "bash",
+    "tests/directruntime-20261104/native-browser/hardening-wasm-build.sh"
+  ],
+  "exitCode": 1,
+  "wallSeconds": 0.20123389000218594,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 6633000960,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 27394048,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 25704,
+  "cgroupPeakBytes": 36139008,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+}

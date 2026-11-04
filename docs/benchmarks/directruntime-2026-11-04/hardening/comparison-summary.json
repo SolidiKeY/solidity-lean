@@ -1,0 +1,70 @@
+{
+  "nativeAst": {
+    "before": {
+      "functions": 83,
+      "rounds": 3,
+      "requests": 249,
+      "medianMs": 0.8389050000000111,
+      "p95Ms": 4.069481999999994,
+      "startupMs": 7.561709000000008
+    },
+    "hardening": {
+      "functions": 83,
+      "rounds": 3,
+      "requests": 249,
+      "medianMs": 0.8391660000002048,
+      "p95Ms": 4.0163540000003195,
+      "startupMs": 9.873351000000184
+    },
+    "medianRatio": 1.000311119852896,
+    "p95Ratio": 0.9869447757725248,
+    "startupRatio": 1.3057036445068402
+  },
+  "browser": {
+    "before": {
+      "functions": 83,
+      "rounds": 3,
+      "requests": 249,
+      "medianMs": 185.92237800000294,
+      "p95Ms": 224.38692400000218,
+      "startupMs": 3428.200938
+    },
+    "hardening": {
+      "functions": 83,
+      "rounds": 3,
+      "requests": 249,
+      "medianMs": 184.34459900000002,
+      "p95Ms": 228.49450799999977,
+      "startupMs": 3350.047615
+    },
+    "medianRatio": 0.9915137757112654,
+    "p95Ratio": 1.0183058082297056,
+    "startupRatio": 0.9772028173338071
+  },
+  "startupInvestigation": {
+    "before": {
+      "medianMs": 2.3814159999999944,
+      "p95Ms": 4.305062000000007,
+      "samples": 20
+    },
+    "hardening": {
+      "medianMs": 2.4776294999999955,
+      "p95Ms": 3.2179780000000022,
+      "samples": 20
+    }
+  },
+  "boundary": "Hardening comparison only; A runtime migration/B/C/Identity and source-to-result native LSP after measurements remain pending. Native AST latency excludes compiler. Browser includes fresh editor source-to-result. No whole-goal performance PASS.",
+  "nativeControls": {
+    "expected": 14,
+    "actual": 14,
+    "passed": true
+  },
+  "browserControls": {
+    "expectedRows": 14,
+    "actualRows": 13,
+    "attemptedGroups": 7,
+    "backendErrors": 1,
+    "passed": false
+  },
+  "runtimeGatePass": false
+}

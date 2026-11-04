@@ -1,6 +1,7 @@
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{createHash}=require('node:crypto');
-const root=path.resolve('.'),out=path.join(root,'docs/benchmarks/directruntime-2026-11-04/before');
+const root=path.resolve('.'),out=path.resolve(process.env.NATIVE_BROWSER_OUTPUT||'docs/benchmarks/directruntime-2026-11-04/before');
+const runtime=path.resolve(process.env.NATIVE_BROWSER_DIRECT||'.lake/native-browser-wasm/direct');
 const {chromium}=require(path.join(root,'web/node_modules/playwright'));
 const {createStaticServer}=require(path.join(root,'web/tools/serve-static.cjs'));
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -9,8 +10,8 @@ async function main(){
  assert.ok(!fs.existsSync(destination),'Refusing audit overwrite');
  const {compileFixture}=await import(path.join(root,'scripts/solc-ast.mjs'));
  const inputs=JSON.parse(fs.readFileSync(path.join(out,'inputs/inputs.json'),'utf8'));
- const manifest=JSON.parse(fs.readFileSync('.lake/native-browser-wasm/direct/build.json','utf8'));
- const bytes=fs.readFileSync('.lake/native-browser-wasm/direct/direct.wasm');
+ const manifest=JSON.parse(fs.readFileSync(path.join(runtime,'build.json'),'utf8'));
+ const bytes=fs.readFileSync(path.join(runtime,'direct.wasm'));
  assert.equal(sha(bytes),manifest.wasm);assert.notEqual(manifest.closure.full,true);
  const module=await WebAssembly.compile(bytes);
  const report={binarySha256:manifest.wasm,imports:WebAssembly.Module.imports(module),exports:WebAssembly.Module.exports(module),requests:[],assetRequests:[],workers:[],errors:[],failures:[],boundary:'Untimed real browser worker, exact serialized AST requests. Source hashes identify freshly compiled inputs; the binary does not attest source hashes. Independent from IDE latency and not a general semantic equivalence proof.'};
@@ -22,7 +23,7 @@ async function main(){
  const trials=[];
  const dir=path.join(out,'browser-control-completion-inputs');assert.ok(!fs.existsSync(dir));fs.mkdirSync(dir);
  const six=[['additionSimple',['pending','refuted']],['storageRootReadWrite',['pending','refuted']],['storageIndexRootMapping',['pending','refuted']],['whileCountsUp',['pending','refuted']],['invariantCountsToBound',['pending','refuted']],['requireFalseLiteral',['proved']]];
- const controls=six.map(([name,statuses])=>({name,text:fs.readFileSync(path.join(out,'existing-controls',name+'.sol'),'utf8'),expected:[[name,statuses]],selected:name}));
+ const controls=six.map(([name,statuses])=>({name,text:fs.readFileSync(path.join(root,'docs/benchmarks/directruntime-2026-11-04/before/existing-controls',name+'.sol'),'utf8'),expected:[[name,statuses]],selected:name}));
  controls.push({name:'fresh eight specifications',text:fs.readFileSync('tests/automation/ClosedSpecs.sol','utf8'),expected:[['maximum',['proved']],['falseMaximum',['refuted']],['storeMaximum',['proved']],['twoChoices',['proved']],['constantOne',['proved']],['falseConstant',['refuted']],['store',['proved']],['falseStore',['refuted']]]});
  for(const [i,c]of controls.entries()){
   const source=path.join(dir,'control-'+i+'.sol'),fixture=path.join(dir,'control-'+i+'.ast.json');fs.writeFileSync(source,c.text);

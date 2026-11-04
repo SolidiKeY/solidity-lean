@@ -1,204 +1,178 @@
-# Direct runtime native/browser lane — blocked fresh native/browser baseline
+# Native/browser lane — blocked integration, reviewed builder hardening
 
-Batch: `solidity-directruntime-20261104`; branch:
-`codex/solidity-directruntime-20261104/native-browser`.
-Repository: `/workspace/solidity-lean`.
-Pinned base: `b419c3cf4f642ae519b66bebc26cdf2f7cf93574`.
-Dispatch rendered-prompt SHA-256:
-`d24253025c9bec8f160834a4695112e2d8b112a2f2dda1f0ed0ec74f5b38e7e6`.
-The generated VM handoff records the full checkpoint head after commit.
-This is a reviewable checkpoint, **not completion** and not `RUNTIME_GATE_PASS`.
+Batch `solidity-directruntime-20261104`, branch
+`codex/solidity-directruntime-20261104/native-browser`, repository
+`/workspace/solidity-lean`. Original base:
+`b419c3cf4f642ae519b66bebc26cdf2f7cf93574`.
+The generated absolute VM handoff records the final full committed head.
+**Incomplete; no RUNTIME_GATE_PASS.** No push, PR or default-branch merge.
+
+## Published delivery and ownership
+
+Fetched and verified origin/master at
+`89373e34cdfd6bb5db7054b1c204d01edffc5fa7`; the original base is its ancestor.
+Merged that explicitly delivered coordinator commit into the owned branch without
+resetting either history. The shared Boundary/Translate APIs are present. Their
+published receipt names producer `fcdddfcc446b5004860875f772ff6033e60c745f` and
+explicitly leaves producer migration/parity incomplete. DirectRuntime is unchanged.
+No duplicate translator, producer migration or unowned loader edit was introduced.
+
+Worker changes relative to that delivery contain no Lean source edits: theorem and
+axiom signatures, proof budgets, premises and exclusions are unchanged by D.
+Published producer changes and their coordinator gate receipt are separate from
+this worker's evidence. No new worker Lean module or registration row is needed.
+The earlier setup/checkpoint-validation.json is a historical pre-delivery receipt,
+not a claim that the subsequent coordinator merge contains no Lean changes.
 
 ## Queue accounting
 
-| Work item | State |
+| Item | State |
 |---|---|
-| 1. Before integration, current 83-function baseline | Fresh native AST, native LSP and real browser 83 × 3 matrices passed. Cold native metrics incomplete; no A integration. |
-| 2. Closure/bridge audit and committed A integration | Static audits and current native evidence recorded; confirmed production fixes and A handoff pending. |
-| 3. Fresh native/browser B Identity, controls, C controls and existing regressions | Existing native suite/control evidence recorded. Existing browser controls have one stack-overflow failure. B/C sources and exact Identity diamond twin pending. |
-| 4. Matched after baseline, ≥3 rounds, performance and final handoff | Pending. No after measurement or slowdown verdict. |
+| 1. Fresh before83-function baseline | All three matrices recorded; original before cold-build timing remains incomplete; separate empty-output build now recorded. |
+| 2. Closure/bridge and A integration | Owned hardening implemented and freshly built; shared APIs delivered, runtime migration and unowned loader handoff pending. |
+| 3. Fresh producer and existing controls | Existing native14/14; browser13/14 plus one backend error. B/C and exact Identity diamond twin still missing. |
+| 4. Matched after/final gates | Hardening AST/browser comparison recorded; post-A native LSP/producer matrices and final gates pending. |
 
-## Current native evidence
+## Measurements and exact artifacts
 
-Evidence lives in `docs/benchmarks/directruntime-2026-11-04/`.
-Raw log/text/trace/TSV captures are committed as byte-preserving `.gz` archives;
-`raw-captures.json` pins both original and compressed hashes. The VM retains raw files.
-To restore or verify them, run
-`python3 tests/directruntime-20261104/native-browser/restore-raw-evidence.py`.
-An initial full whitespace check flagged raw CRs/command spaces; compressed originals
-preserve every observation while the derived CSV uses LF line endings.
-The immutable `before/inputs/` contains all 83 newly compiled Solidity workloads,
-source/AST/request hashes and unchanged harness identities. No historical verdict was used as a current result.
+Evidence root: `docs/benchmarks/directruntime-2026-11-04/`.
+Before evidence is immutable. Hardening candidates are a separate comparison,
+not a completed post-translator result. Medians are medians of83 per-function
+medians over3 rounds; p95 uses nearest rank. No cached verdict counts.
 
-- Primary native latency matrix: **249/249 proved**, 83 functions × 3 rounds.
-  Median of per-function medians: **0.838905 ms**; nearest-rank p95:
-  **4.069482 ms**. Process-ready startup: **7.561709 ms**.
-  These are precompiled-AST requests; Solidity compilation is separate.
-- A separate 249-request native-only resource run passed; peak child RSS:
-  **36,068 KiB**. Its throughput wall time is not a per-request latency measurement.
-- Existing direct controls: 14 executed on the fresh binary. Six ordinary controls
-  were freshly compiled; the initial eight specification cases used the committed AST.
-  An additional owned wrapper freshly compiled current `ClosedSpecs.sol` and passed
-  all eight exact specification verdicts (five proved, three refuted).
-  Thus fresh-source evidence covers all fourteen distinct existing controls.
-- Existing two synthetic closure tests and five additional closure regressions passed.
-  They test extraction mechanics, not Solidity semantic equivalence.
-- Native binary: **20,738,808 bytes**, SHA-256
-  `4ade5e55eae99ba7c45e39ab148de066858ea5897fecca9a8debcd371c03cfd5`.
-  Runtime path: `/workspace/solidity-lean/.lake/direct-native/direct-check`.
-- Native identity inventory pins current Lean sources, generated C, extracted C,
-  compiler executables, all Lean headers, runtime archives, bridge, binary and closure.
-  Native runtime source commit:
-  `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; source checkout is clean.
-- An independent untimed syscall run completed 249/249 requests, with no observed
-  serialized-environment reads or Lean/Lake subprocess execution.
-  Request-wire hashes identify the bytes actually sent; the binary does not attest
-  source hashes. Wrapper-assigned `environmentImports: 0` alone is not evidence.
+| Boundary | Before median / p95 ms | Hardening median / p95 ms | Requests each |
+|---|---|---|---|
+| Native precompiled AST | 0.838905 / 4.069482 | 0.839166 / 4.016354 | 249/249 |
+| Real Chromium source-to-result | 185.922378 / 224.386924 | 184.344599 / 228.494508 | 249/249 |
 
-## Commands, outcomes and failures
+Native AST excludes Solidity compilation; all83 hardening sources/ASTs were newly
+compiled and pinned. Browser submissions are live source edits with fresh compiler
+requests. Native LSP before was249/249 (median62.251926 ms, p9575.866278 ms,
+initialization127.573555 ms); its post-integration counterpart remains pending.
 
-Commands run from the repository. Bounded commands use Docker
-`--memory=12g --memory-swap=12g --cpus=1 --user=1000:1000`,
-`LEAN_NUM_THREADS=1`, explicit Lean `-j1` through the ignored alternate config,
-and the unchanged 4 GiB outer-cgroup reserve.
+Native AST median changed+0.0311%; browser median−0.85%, p95+1.83%.
+Single native process-ready startup rose7.561709→9.873351 ms (+30.57%). Work paused
+for investigation:20 alternating fresh-process pairs gave2.381416→2.477630 ms
+median (+4.04%), p954.305062→3.217978 ms. These are warm-filesystem process-startup
+measurements, not machine-cold results. The original >10% observation is retained;
+there is no blanket cold-start PASS. Browser startup3428.200938→3350.047615 ms.
 
-| Command / gate | Outcome and decisive evidence |
-|---|---|
-| `node tests/directruntime-20261104/native-browser/prepare-baseline.mjs` | PASS: 83 fresh workloads, inventory SHA `a4c66b77ffbdc4337be20a8822f176a4b22d50a91247b159acd8024969c11f43`; no verdicts. |
-| Bounded `bash scripts/coord-tools/gate.sh per-file Solidity/KeySort.lean` | PASS: per-file elaboration, `setup/keys/gates.tsv.gz`. This is **not** the 377-taclet frozen sort-conformance gate. |
-| First bounded `build-native-baseline.sh` | Lean target PASS: 337 jobs; 200 C modules compiled. Overall FAIL at bridge compilation because container `cc` alternatives link was absent. `before/native-build.log.gz`. Full cold-build wall/RSS was not captured; live guard started after launch. |
-| Guarded native retry, explicit GCC executable | PASS, exit 0, 24.143623 s, `before/native-link-retry.json`; reused fresh C objects, so not a successful cold-build timing. |
-| Guarded `native-baseline-checks.sh` | PASS, exit 0, 6.719507 s, `before/native-checks-gate.json`; 249 suite replies, 14 controls, 7 synthetic tests. |
-| Guarded `audit-native.py` | Coarse symbol gate FAIL, exit 1, `before/native-audit.json`; semantic replies 249/249, forbidden traced loads zero. See structural resolution below. |
-| `audit-native-stubs.py` | Separate structural receipt PASS: `before/native-stub-classification.json`; original failure preserved. |
-| Guarded `measure-native-resource.py` | PASS, `before/native-resource-gate.json` and `native-process-resource.json`; native-only RSS 36,068 KiB. |
-| Guarded `fresh-spec-controls.mjs` | PASS 8/8, `before/fresh-specs-gate.json`, `before/fresh-spec-controls/results.json`. |
-| First `build-wasm-baseline.sh` | Pinned image provisioned, then first GMP preflight REFUSED insufficient initial reserve. `before/wasm-build.log.gz`. No WASM runtime built. |
-| Python compile, Bash `-n`, Node `--check` for wrappers | PASS; no Lean server or proof claim. |
-| Real browser 83 × 3, smoke/offline and edit/staleness controls | PASS; browser-checks, browser-smoke and browser-edit-controls receipts. |
-| Browser complete negative controls | FAIL: 13/14 expected rows; one LFml.fitsM stack overflow. |
-| Frozen sort checker | PASS: 377 taclets, 131 read-bearing, table covers 131; annotations match. |
-| Per-file MCP | KeySort zero errors; DirectRuntime resource-stopped twice. Whole gate FAIL. |
-| Final build and matched after gates | PENDING. |
-
-Outer scope: 16 GiB, swap limit `max`, host swap zero. This is not the Lean gate
-scope. Verified inner scope: memory.max=12884901888, memory.swap.max=0.
-Lean 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-Lake 5.0.0-src+797c613. Outer CPU quota 4; bounded build quota 1.
-Node v24.19.0; Chromium 154.0.8037.57.
-
-The first WASM preflight's exact initial headroom was not persisted by runner v1;
-it remains **unknown**, with only the refusal log. Do not reconstruct a number.
-Runner v2 now atomically publishes non-overwriting preflight receipts with the
-actual observed value and `childStarted:false`; v1 is archived under
-`tests/directruntime-20261104/native-browser/history/`.
-`setup/runner-versions.json` attributes prior receipts to v1.
-`setup/cache-release.json` records POSIX_FADV_DONTNEED on owned disk artifacts,
-without deletion, global cache dropping, budget or threshold changes.
-
-## Structural classification and reviews
-
-The coarse audit flagged three 57-byte initializer symbols from frontend-named
-modules. Finder and skeptic independently inspected the actual binary, generated
-bodies and matching object keys. The three retained helpers implement UTF-8
-character membership, natural-number list membership and optional-natural equality.
-The initializers only return standard IO success, with allocation/heartbeat/OOM
-runtime calls. No frontend registration or state is initialized by these bodies.
-
-The separate receipt records all six exact bodies/disassemblies/callees, original
-and pruned C hashes, object hashes/keys, initializer-call-list links and unresolved
-Lean import checks. It preserves the original `passed:false` receipt and its hash.
-This is an artifact-specific, independently inspected structural conclusion;
-callee checks are **not** a general purity proof and there is no namespace exemption.
-
-Both read-only reviews used no Lean server. They confirmed source/request/object
-identities, found the headroom-guard, overwrite and fresh-control provenance gaps,
-and re-reviewed their fixes. Review records are in `setup/reviews.json`.
-They support the recorded partial checkpoint only; final browser review is recorded separately in setup/reviews.json.
-
-## Confirmed production work still to do
-
-1. Native object keys/manifests omit complete header/compiler/runtime provenance.
-   The external baseline inventory supplements this; production builders still need fixes.
-2. Missing generated `l_`/`_init_l_` native roots now fail closed. Ten synthetic tests
-   pass, including iterator roots; a bounded comparison preserved all 200 baseline
-   extracted C module hashes. Arbitrary other ABI roots still require link validation.
-   No rebuilt binary or after-performance result is claimed for this fix.
-3. Both builders need initial/snapshot/final bridge and closure-script identities.
-4. `DIRECT_RUNTIME_FULL=1` can produce an ordinary-loadable full runtime.
-   Keep certification separate; owned builder enforcement and coordinated handoff
-   to unowned browser/package/desktop loaders are required.
-5. Native leanc links broad archives by default. Continue final symbol/import and
-   runtime-load audits; a source-closure count alone is insufficient.
-
-No DirectRuntime, translator, Source/Core, shared root/map/trust-pin or unowned
-web/vscode producer file was edited. Ordinary trusted-verifier boundaries remain
-unchanged. No axioms, sorry, premises, exclusions, proof budgets or statements changed.
-No new Lean module exists; module-registration proposal: none. Central documentation
-may later link this lane document through the normal owner-integrated handoff.
-
-## Fresh browser and source-to-result evidence
-
-`before/matched-before-summary.json` records complete denominators and boundaries.
-Native LSP: 249/249, median of function medians 62.251926 ms, nearest-rank p95
-75.866278 ms, initialization 127.573555 ms. Real Chromium: 249/249,
-median 185.922378 ms, p95 224.386924 ms, startup 3428.200938 ms.
-These source-to-result figures include editor submission and differ from native AST latency.
-There is no after result or slowdown conclusion.
-
-The freshly built WASM is 16,378,154 bytes, SHA-256
+Native candidate:20,738,864 bytes, SHA-256
+`e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d`.
+WASM candidate:16,378,154 bytes, SHA-256
 `4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef`.
-The single HTML is 41,479,535 bytes. Source, compiler, bridge, runtime archive,
-asset and binary identities are recorded in before/wasm-build.json,
-wasm-runtime-source.json, html-build.json and web-asset-manifest.json.
-The SDK is pinned Emscripten 4.0.15. The final WASM builder passed in 306.244866 s,
-with sampled process RSS 2,643,546,112 bytes and minimum outer headroom
-4,537,155,584 bytes. Earlier failures/refusals remain in the gate ledger.
-GMP and the Lean runtime archive were freshly built separately.
-Lake optional artifact export was disabled with LAKE_CACHE_DIR="" to avoid cache
-copy pressure; no proof options changed. The same policy must hold for matched builds.
+Paths: `.lake/native-browser-hardening/native/direct-check` and
+`.lake/native-browser-hardening/direct/direct.wasm`.
+The complete WASM and all200 module records equal the before artifact exactly.
+Manifests, JavaScript/package identities and equivalence receipts are in hardening/.
+The old HTML is preserved under `.lake/native-browser-before-package/`.
 
-The unchanged website harness passed current-source specification, offline fresh-worker,
-wrong-specification and stale-green controls. The edit harness passed supported edits
-and unsupported calldata; cached retrieval checks are behavior checks, not fresh timings.
+## Implemented owned hardening
 
-## Required browser failure and owner handoff
+- Missing generated `l_`/`_init_l_` archive callback roots fail closed; iterator inputs
+  are materialized once. Other ABI roots still require linker validation.
+- Native cache keys pin the selected compiler/header/static-runtime inputs. Builders
+  reject inherited compiler/root/include/library overrides that bypass that identity.
+- Both builders execute captured closure/bridge bytes, pin initial selected file sets,
+  and reject final source/provenance changes. WASM link outputs stay private until
+  checks pass; the manifest is published last.
+- Effective Emscripten LLVM/Binaryen/node tools, explicit canonical EM_CONFIG, Python
+  interpreter and driver sources are pinned. The pinned Python entry is emcc.py,
+  invoked with-E, matching the SDK shell wrapper. The config probe also uses-E.
+- `DIRECT_RUNTIME_FULL=1` is rejected by the ordinary builder. Optional certification
+  remains separate; unowned ordinary loaders still need their coordinated safeguards.
+- WASM extraction now runs in a serial child using captured helper bytes and JSON
+  roots/pruned C. The child exits before compilation. This is build data, not a Lean
+  serialized environment shipped or loaded on ordinary requests.
 
-The completion diagnostic attempted seven groups covering fourteen expected rows.
-Thirteen rows returned the expected results; the false invariantCountsToBound control
-threw `RangeError: Maximum call stack size exceeded`. This is a **failed required gate**,
-not pending, unsupported, or admission success. The same fresh source returns pending
-on native. The initial wire audit stops at the error; its original incomplete report is
-preserved. browser-control-attempts.jsonl and browser-control-completion.json record
-all attempted groups, including the failed request before awaiting its result.
+Selected-tool provenance is not a universal hermetic-compiler proof. Native leanc
+still names broad archives; exact emitted code and runtime behavior are audited
+separately. No bridge/runtime semantics or generated C bytes changed in this checkpoint.
 
-A diagnostic symbol-map relink produced a byte-identical WASM, with unchanged source,
-fuel, compiler stack and default Chromium settings. The exact stack contains
-LFml.fitsM (Solidity/Calculus/ReadBounds.lean:75) and its generated closures.
-This identifies overflowing traversal frames, not the sole initiating cause or a proven
-repair. before/browser-stack-handoff.json pins frames, source and both backend results.
-D cannot edit ReadBounds/DirectRuntime/translator paths. No stack-size increase,
-control exclusion, catch-to-pass, kernel fallback or proof-budget change was used.
+## Gates, resources and retained failures
 
-Every bounded gate command, exit, wall and minimum headroom is indexed by
-setup/gate-ledger.json; raw logs retain decisive output. The actual frozen sort checker
-passed: `parsed 377 taclets, 131 read-bearing, table covers 131` and `OK — annotations match`.
-MCP KeySort reported zero errors, but DirectRuntime checks twice crossed the reserve
-and were killed; no successful DirectRuntime MCP or final policy gate is claimed.
-**RUNTIME_GATE_PASS remains pending.**
+All commands/exits/wall/RSS/headroom receipts are indexed by setup/gate-ledger.json.
+Raw logs/text/traces are byte-preserving `.gz` captures, with original/archive SHA-256
+in raw-captures.json. Restore/verify with
+`python3 tests/directruntime-20261104/native-browser/restore-raw-evidence.py`.
+No prior failure or completed verdict was overwritten.
 
-## Scope questions and resume obligations
+Each bounded gate verifies12 GiB memory.max, zero memory.swap.max, LEAN_NUM_THREADS=1,
+serial Lean-j1 config, and the unchanged4 GiB outer raw headroom reserve.
+The outer16 GiB/max-swap scope alone is insufficient; host swap reports zero.
+Cache preparation uses read-only descriptors and clean-page advice on private/public
+SDK/source/build files, without deletion, global cache dropping or threshold changes.
 
-Self-contained questions and mutually exclusive options are in setup/producer-handoff.json:
-Q-PRODUCERS requests retrievable A committed interface and B/C controls, or continued
-pending handoff. Q-BROWSER-STACK requests an owner-supplied committed repair, an owned
-bridge/compiler repair only if evidence establishes that cause, or continued blocked status.
-No authorization, exclusion or recommendation is inferred from silence.
+Actual toolchain output in hardening/validation.log:
+`Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)`;
+`Lake version 5.0.0-src+797c613 (Lean version 4.24.0)`.
+Node24.19.0, Chromium154.0.8037.57, Emscripten4.0.15.
 
-The narrow missing-generated-native-root hardening is implemented; the other production
-hardening above remains unfinished. Independent authorized work is not exhausted. Resume with independent
-owned fixes where possible, obtain the committed producer/stack resolutions, then run the
-exact positive Identity diamond twin and false/default/alias/zero/OOB controls on both fresh
-backends, C controls, existing regressions, complete cold-native metrics, matched ≥3-round
-after performance, final policy checks and independent reviews. Investigate >10% slowdown.
-The assignment is blocked and incomplete; no push, PR or merge was performed.
+- Native build first stopped at the reserve after158.411697 s. Successful retry:
+  225.842830 s, sampled process RSS1,751,130,112 bytes, minimum headroom4,385,718,272.
+  It reused completed objects and is not a complete successful cold-build timing.
+  A subsequent enforced-empty-output native build passed288.991666 s, RSS1,735,020,544,
+  minimum headroom4,707,598,336; all200 native objects and link were fresh. Lean
+  dependencies were warm (337-job target replay), not a fully cold Lean rebuild.
+  cold-native/command-context.json records the exact output/empty-check environment
+  selectors. Its binary exactly matches the audited candidate;249 fresh requests,14 controls
+  and18 tests passed again (median0.819917 ms, p953.760364 ms, startup6.557948 ms).
+- WASM setup errors (missing explicit config and mistaken shell-entry invocation)
+  and subsequent reserve stops remain recorded. GC alone did not resolve pressure.
+  Final isolated-extraction build passed259.666026 s, sampled process RSS1,469,034,496,
+  minimum headroom5,074,190,336. All200 extracted module records match before.
+- Fresh native249 matrix and14 controls passed. Eight provenance mutation/boundary
+  tests plus ten closure tests passed in hardening/validation-gate.json.
+- Fresh browser249 matrix, offline fresh-worker/spec smoke, edit/staleness and
+  unsupported-calldata controls passed. Cached retrieval checks are behavior controls,
+  never counted as fresh throughput or Identity non-vacuity evidence.
+- Actual frozen sort checker passed again: `parsed 377 taclets, 131 read-bearing,
+  table covers 131`; `OK — annotations match` the pinned solidityProgramRules.key.
+- Earlier DirectRuntime MCP checks stopped at the reserve twice; no successful
+  DirectRuntime MCP or final run-lean/TestSuite/full-policy gate is claimed here.
+
+## Ordinary runtime boundary and required failure
+
+The fresh native audit completed249/249 actual replies, with no observed .olean/.ilean
+loads or Lean/Lake subprocesses. Its29 allocated sections, entry and program-header
+layout equal the independently classified before binary. Original coarse audit failure
+(three frontend-named pure helper/init stubs) remains immutable. The separately named
+native-audit-bound receipt explicitly binds successful structural classification to the
+baseline binary and coarse-receipt hashes. This is artifact-specific external evidence,
+not a general purity or semantic-equivalence theorem or namespace exemption.
+
+Browser wire evidence pins fresh source/compiler/AST, serialized request bytes, actual
+WASM imports/exports and embedded assets. No forbidden environment/kernel assets were
+requested; compiledOnly is true and kernelBuild is null. Wrapper-assigned sourceHash or
+zero-import metadata alone is not proof; the binary does not attest source hashes.
+
+The fresh complete browser control diagnostic attempted7 groups/14 expected rows.
+Thirteen rows returned expected verdicts; invariantCountsToBound threw
+`RangeError: Maximum call stack size exceeded`. Its source and serialized request
+hash match the earlier failed control and the fresh native pending result. The actual
+worker error is not pending, unsupported, refuted or a passed negative control.
+The initial compiler-path setup failure is separate and preserved.
+
+The byte-identical diagnostic symbol map identifies LTm.fitsM/LFml.fitsM traversal
+activations in ReadBounds; hardening/browser-stack-handoff.json records exact frames.
+This does not prove a sole initiating phase or a repair. No Chrome stack override,
+fuel/budget change, catch-to-pass, control exclusion or kernel fallback was used.
+ReadBounds/DirectRuntime/translator are outside D's write ownership.
+
+## Reviews, questions and remaining work
+
+Independent read-only finder and skeptic, neither using Lean server, reviewed the
+closure, provenance, config/tool selection, process isolation and observed metrics.
+Confirmed findings were fixed, including iterator exhaustion and explicit classification
+receipt linkage. setup/reviews.json records their results. Full acceptance is withheld.
+
+Self-contained Q-PRODUCERS and Q-BROWSER-STACK, with mutually exclusive options, are in
+setup/producer-handoff.json. Shared APIs are now delivered, but A's committed runtime
+migration, B/C controls and the owner repair for the required stack failure remain
+pending. The unowned build launcher needs explicit EM_CONFIG; loader/package/desktop
+freshness/full-mode defenses require coordinated handoff, not silent D edits.
+
+Still required: the exact positive Identity diamond twin and false/default/alias/zero/OOB
+controls on both fresh backends; C controls; producer migration/parity; remaining cold-start/build comparison limits; matched post-integration native LSP/browser performance; successful
+per-file/final policy gates; final independent reviews and owner-integrated merge handoff.
+These blocked gates do not imply all future independent work is exhausted.

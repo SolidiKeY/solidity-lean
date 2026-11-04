@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 p=Path('.lake/native-browser-serial.toml')
 s=p.read_text()
-s=re.sub(r'(\[\[lean_exe\]\]\nname = "[^"]+"\n)',r'\1weakLeanArgs = ["--tstack=131072", "-j1"]\n',s)
+s=re.sub(r'(\[\[lean_exe\]\]\nname = "[^"]+"\n)(?!weakLeanArgs)',r'\1weakLeanArgs = ["--tstack=131072", "-j1"]\n',s)
 p.write_text(s)
 PY
 bash scripts/check-solkey.sh --key "$SOLKEY_RULES"

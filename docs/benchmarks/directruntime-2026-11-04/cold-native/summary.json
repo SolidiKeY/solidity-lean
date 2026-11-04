@@ -1,0 +1,36 @@
+{
+  "nativeOutputInitiallyAbsent": true,
+  "compiledNativeObjects": 200,
+  "leanDependencyArtifacts": "warm; 337-job target replayed",
+  "build": {
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/hardening-native-build.sh"
+    ],
+    "exitCode": 0,
+    "wallSeconds": 288.99166580100064,
+    "scope": {
+      "memoryMaxBytes": 12884901888,
+      "memorySwapMaxBytes": 0
+    },
+    "requiredOuterHeadroomBytes": 4294967296,
+    "minimumOuterHeadroomBytes": 4707598336,
+    "resourceStop": false,
+    "sampledContainerProcessRssPeakBytes": 1735020544,
+    "rssSamplingSeconds": 0.1,
+    "childRusageMaxRssKiB": 1228704,
+    "cgroupPeakBytes": 2084720640,
+    "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+    "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+  },
+  "nativeBinarySha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+  "auditedCandidateBinarySha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+  "byteIdenticalToAuditedCandidate": true,
+  "requests": 249,
+  "controls": 14,
+  "tests": 18,
+  "medianMs": 0.8199170000000322,
+  "p95Ms": 3.7603640000002088,
+  "startupMs": 6.557948000000124,
+  "boundary": "Complete empty-native-output C compile/link, followed by fresh-source249 requests and14 controls. Not a cold rebuild of Lean dependency artifacts; not a retroactive measurement of the failed original before build."
+}

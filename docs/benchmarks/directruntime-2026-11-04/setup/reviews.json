@@ -47,5 +47,10 @@
     "skeptic": "Current set callers sound; narrow missing generated prefix scope only; no binary/after acceptance implied.",
     "tests": "Original2 + owned8 synthetic tests pass. Exact current200-module extraction comparison passes; resource-stopped first attempt preserved.",
     "status": "Both independent final reviews confirm normalization fix; no remaining narrow finding. Full comparison receipt remains attributed to pre-normalization script hash."
+  },
+  "hardeningFinal": {
+    "finder": "Reviewed override/config/LLVM tool and child-extraction boundaries. Verified exact WASM/module equality, native/browser metrics and persistent backend failure. Found missing classification linkage checks; fixed and separately rerun.",
+    "skeptic": "Independent confirmation of metrics and13/14 failure denominator. Required classification passed/binary/coarse-receipt binding; fixed with native-audit-bound rerun. No runtime/whole-goal acceptance implied.",
+    "method": "Independent read-only finder/skeptic, no Lean server; no new final handoff finding. Separately reviewed completed empty-output native build, binary identity,249 requests/14 controls and warm-Lean boundary. Environment selectors saved in cold-native/command-context.json."
   }
 }
