@@ -284,3 +284,20 @@ mapping was produced. Full validation did not start. The allowance is used,
 prior red receipts are retained and no unchanged retry follows. A distinct
 resource repair requires the separate decision specified by H30; no theorem,
 gate or proof budget is weakened.
+
+## Published framed-interface adoption
+
+Published master89373e34cdfd6bb5db7054b1c204d01edffc5fa7 imports the unchanged
+FramedLoweringInterface from the reviewed1a9e1084 snapshot, at commit
+86e4708bf376db1f436ee18f525b618de0db3b85. Existing scalar/sequence/branch/loop
+proofs already consume this exact signature; no duplicate producer is added.
+This integration does not validate the remaining local implementation.
+MemoryCopies.SourceInterface is a compatibility import, while the new P12
+reference/condition, ABI word and frontend interfaces do not discharge this
+fragment's compiler/Bridge or resource obligations. No new matching producer
+is inferred from their pending fields.
+
+All local Selection Lean sources remain unchanged by this adoption. The H30
+failed prerequisite receipt and separate repair question remain open. The
+latest cache transport is separately pending; no unchanged heavy retry or
+resource-policy change is authorized by the publication alone.
