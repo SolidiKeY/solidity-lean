@@ -226,3 +226,12 @@ premise or vacuous concrete control. Finder noted two untyped local `have`s
 under H14; these were eliminated, and finder confirmed the fix. Neither review
 used Lean/build/server/edits. Both new modules have zero MCP errors/warnings.
 Checkpoint gates and scoped axiom reports are required separately.
+
+## Production selection for nested array defaults
+
+`NestedDefaultInterface.lean` states selection through the existing
+`ReferenceDefaults.compileDefault` for fixed dimensions around a dynamic-array
+default, including reference-valued base elements. The selected builder uses
+the existing V2 certificate and an actual fitting allocator input. This is
+intrinsic successful construction, not Source graph admission or total checked
+allocation failure. The signature precedes implementation.
