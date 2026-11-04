@@ -197,3 +197,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceRhsAssignment.lean` | Actual memory-writing assignment RHS before reached outer location; success/late bounds, one Source expression/statement, native Prog2 and discarded-result word append. |
 
 | `Backend/MemoryOps/SourceRhsValue.lean` | Actual Bool result reload after reached memory-writing RHS/outer assignment, source/native/word result relation, caller/heap/allocator frames and late-failure short-circuit. |
+
+| `Backend/MemoryOps/SourceShortCircuit.lean` | Actual lazy Boolean guard around effectful memory expressions: skipped writes/failures, reached success/error states, and existing word branch execution. |

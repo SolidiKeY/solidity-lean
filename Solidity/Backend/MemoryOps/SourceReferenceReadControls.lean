@@ -5,6 +5,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
+import Solidity.Backend.MemoryOps.SourceShortCircuit
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1775,5 +1776,197 @@ theorem complete_rhs_value_vectors (v : Bool) :
 #guard_msgs (whitespace := lax) in #print axioms rhs_expression_value_reject
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_value_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms complete_rhs_value_vectors
+
+
+private def guardedBody : Source.RExpr E0 RhsSΓ .bool :=
+  sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here
+private def guardedCode : List Instr :=
+  binaryCode .bool .and (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+    (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here)
+private def guardedNative : Stmt C RhsΓ RhsΓ :=
+  .ite (.simple (.local .here)) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil)) .nil
+
+/-- The false guard skips an actually mutating body in BOTH pipelines. The
+separate real unguarded run clears LEFT[0]; the guarded run retains all objects,
+locals, world and caller memory exactly. This is not a final-vector order test. -/
+theorem short_circuit_skip_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) guardedBody).run (valueSource false)=(.ok (.val (.bool false)),z) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+        (.ok (.val (.bool false)),valueSource false) ∧
+      Stmt.run (valueState false) guardedNative=.ok ⟨valueState false,List.prefix_refl _⟩ ∧
+      run guardedCode (valueWord false)=.ok ((valueWord false).push w[0]) 0 ∧
+      rhsViews z=valueTables false true ∧ rhsViews z≠rhsViews (valueSource false) ∧
+      SourceBoolMemoryAt (valueSource false) 0 hp left .dyn ∧ Source.MemOK E0 SH (valueSource false) ∧
+      StateRepr 1 1 8 rhsFrag (valueState false) base ((valueWord false).push w[0]) ∧
+      StructAllocatorRepr hp base 8 ⟨48,by decide⟩ ((valueWord false).push w[0]) ∧
+      words ((valueWord false).push w[0])=words (valueWord false) ∧
+      ((valueWord false).push w[0]).stack=[w[0],w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      rhs_expression_value_client p fuel false
+    have skipped := source_and_skip (G0 p) F0 (fuel+3) (valueSource false) .here guardedBody rfl
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (valueWord false)=.ok ((valueWord false).push (.val (bword false))) 0 := rfl
+    refine ⟨z,expr,skipped,?_,word_and_skip _ _ _ loaded,tables₂,?_,valueAt false,valueOK false,
+      (valueRepr false).push _,(valueAllocator false).stack _,rfl,rfl⟩
+    · rfl
+    · rw [tables₂]
+      intro he
+      have atZero := congrArg (fun xs : List (Option (Σ τ,Source.Data E0.layout τ)) => xs[0]?) he
+      have dataEq : (sourceBoolMemory [false,false,false] : Source.Data E0.layout SB)=sourceBoolMemory [true,false,false] :=
+        by
+          have same := Option.some.inj (Option.some.inj atZero)
+          injection same with ht hd
+      have observed := congrArg (fun d : Source.Data E0.layout SB => match d with
+        | .array n _ elems => if h : 0<n then (elems ⟨0,h⟩).asVal else .error (.stuck "empty")
+        | .val _ => .error (.stuck "pointer")) dataEq
+      change (Except.ok (Source.Val.bool false) : Source.R (Source.Val E0.layout .bool))=.ok (.bool true) at observed
+      cases observed
+
+/-- True enters the existing effectful body in BOTH pipelines. All derived
+Source frames and target allocator/stack facts come from that actual run. -/
+theorem short_circuit_enter_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (valueSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (valueSource true)=
+        (.ok (.val (.bool true)),z) ∧
+      Stmt.run (valueState true) guardedNative=.ok ⟨(valueState true).withHeap (valueFinalHeap true),List.prefix_refl _⟩ ∧
+      run guardedCode (valueWord true)=.ok ((valueFinalWord true).push w[1]) 0 ∧
+      rhsViews ym=valueTables true false ∧ rhsViews z=valueTables true true ∧
+      SourceBoolMemoryAt z 0 (valueFinalHeap true) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState true).withHeap (valueFinalHeap true)) base ((valueFinalWord true).push w[1]) ∧
+      z.1=(valueSource true).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource true).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource true).2.ex ∧ z.2.events=(valueSource true).2.events ∧ z.2.logs=(valueSource true).2.logs ∧ z.2.fnLocals=(valueSource true).2.fnLocals) ∧
+      ((valueFinalWord true).push w[1]).stack=[w[1],w[42]] ∧
+      StructAllocatorRepr (valueFinalHeap true) base 8 ⟨48,by decide⟩ ((valueFinalWord true).push w[1]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      rhs_expression_value_client p fuel true
+    have entered := source_and_enter (G0 p) F0 (fuel+3) (valueSource true) z .here guardedBody true rfl expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (valueWord true)=.ok ((valueWord true).push (.val (bword true))) 0 := rfl
+    refine ⟨ym,z,inner,entered,?_,(word_and_enter _ _ _ loaded).trans word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+    change ((Prog.run (valueState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+/-- True reaches the real changed RHS prefix and then the outer bounds error.
+The Source failure state retains the changed cell; symbolic word revert has no
+returned machine and no asserted panic bytes or transaction rollback. -/
+theorem short_circuit_reject_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      Stmt.run (rhsState true) guardedNative=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run guardedCode (rhsWord true)=.revert ∧
+      (∀ suffix,run (guardedCode ++ suffix) (rhsWord true)=.revert) ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,inner,expr,stmt,initialLoc,native,word₁,word₂,word,tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩ :=
+      rhs_late_effect_client p fuel
+    have entered := source_and_error (G0 p) F0 (fuel+3) (rhsSource true) ym .here guardedBody _ rfl expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (rhsWord true)=.ok ((rhsWord true).push (.val (bword true))) 0 := rfl
+    have bodyError : run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (rhsWord true)=.revert :=
+      Evm.run_append_revert word
+    have rejected : run guardedCode (rhsWord true)=.revert := (word_and_enter _ _ _ loaded).trans bodyError
+    refine ⟨ym,inner,entered,?_,word₁,rejected,(fun _ => Evm.run_append_revert rejected),tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩
+    change ((Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+/-- Horizon one cannot even read the guard. Horizon two can skip an arbitrary
+body on false but a true guard reaches the body's horizon-one timeout. -/
+theorem short_circuit_horizons (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) F0 1 (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+      (.error .timeout,valueSource false) ∧
+    (Source.evalE (G0 p) F0 2 (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+      (.ok (.val (.bool false)),valueSource false) ∧
+    (Source.evalE (G0 p) F0 2 (.binary .and (.local .here) guardedBody)).run (valueSource true)=
+      (.error .timeout,valueSource true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl⟩
+
+
+private def skippedBadSource : Source.EMState E0 RhsSΓ := ((rhsSource true).1.set .here (.bool false),(rhsSource true).2)
+private def skippedBadState := (rhsState true).setLocal (.here : Idx RhsΓ (.val .bool)) false
+private def skippedBadWord := writeMachine (rhsWord true) 7 w[0]
+private theorem skippedBadRepr : StateRepr 1 1 8 rhsFrag skippedBadState base skippedBadWord :=
+  (rhsRepr true).setVal .here false w[0] rfl
+private theorem skippedBadOK : Source.MemOK E0 SH skippedBadSource :=
+  ⟨⟨(rhsOK true).1.1,Source.LocalsOK.set (rhsSource true).1 .here (rhsOK true).1.2 trivial⟩,(rhsOK true).2⟩
+
+/-- An actually invalid outer index is skipped on false. The SAME initial
+source/native/word state has a separately derived real body rejection; it is
+not merely a known failing scalar substituted for a memory operation. -/
+theorem short_circuit_skip_invalid (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 RhsSΓ) (mm : Machine),
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run skippedBadSource=
+        (.ok (.val (.bool false)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) guardedBody).run skippedBadSource=(.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run skippedBadSource=
+        (.ok (.val (.bool false)),skippedBadSource) ∧
+      run (rhsCode (.there (.there tj))) skippedBadWord=.ok mm 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) skippedBadWord=.revert ∧
+      run guardedCode skippedBadWord=.ok (skippedBadWord.push w[0]) 0 ∧
+      SourceBoolMemoryAt ym 0 mid left .dyn ∧ Source.MemOK E0 SH ym ∧
+      rhsViews skippedBadSource=rhsViews (rhsSource true) ∧
+      words (skippedBadWord.push w[0])=[w[48],w[32],w[32],w[36],w[1],w[3],w[16],w[0],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+      (skippedBadWord.push w[0]).stack=[w[0],w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,hw,inner,expr,word₁,word₂,word,suffix,hr,mok,repr,locals,elems,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_value_bounds_word (G0 p) F0 fuel skippedBadState left (show SourceBoolMemoryAt skippedBadSource 0 hp left .dyn from left_at)
+        (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 3) (uintOfNat 1) false
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        skippedBadRepr SH skippedBadOK
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        skippedBadWord=.ok (skippedBadWord.push (.val (bword false))) 0 := rfl
+    exact ⟨mid,ym,mm,inner,expr,source_and_skip (G0 p) F0 (fuel+3) skippedBadSource .here guardedBody rfl,
+      word₁,word,word_and_skip _ _ _ loaded,hr,mok,rfl,rfl,rfl⟩
+
+/-- Full24-word guard outputs and all typed objects, tied to the named states
+in the actual clients above. Earlier complete source/prefix/final vectors are
+retained verbatim, including the true-error prefix with no final machine. -/
+theorem complete_short_circuit_vectors :
+    words ((valueWord false).push w[0])=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words ((valueFinalWord true).push w[1])=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words ((valueFinalWord true).push w[1])≠words ((valueWord false).push w[0]) ∧
+    views (valueState false).heap=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (valueFinalHeap true)=([true,true,false],[false,true,false],[0],[0,1,0],[]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,by decide,(complete_rhs_value_vectors false).2.1,(complete_rhs_value_vectors true).2.2.2.1⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_invalid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_skip_invalid
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_short_circuit_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_short_circuit_vectors
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_skip_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_enter_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_enter_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_horizons' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_horizons
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

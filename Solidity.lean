@@ -369,6 +369,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceWrite
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceSequence
+import Solidity.Backend.MemoryOps.SourceShortCircuit
 import Solidity.Backend.MemoryOps.SourceStructAlias
 import Solidity.Backend.MemoryOps.SourceStructAssignment
 import Solidity.Backend.MemoryOps.SourceStructChild
