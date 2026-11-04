@@ -385,3 +385,11 @@ are unchanged; all eight per-file checks pass. The original touched failure
 and deliberately stopped failed checkpoint (exit137, no OOM/resource stop)
 remain separate failures. Exact filenames/owners and receipts are under
 `transaction-proof-20261104/consumer-migrations.json`.
+
+Static follow-up found two more proof-side tuple applications in V11's
+SourceIndexedDelete and SourceSequence; both now select the same legacy None
+as their existing `.run y` premises. Their per-file checks pass. The full
+inventory is10files/16sites; independent finder/skeptic confirm statements and
+meaning unchanged. The in-progress checkpoint was deliberately stopped
+before these known failures, retaining its touched pass and interrupted
+library result separately. No resource cap or proof budget changed.
