@@ -199,3 +199,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceRhsValue.lean` | Actual Bool result reload after reached memory-writing RHS/outer assignment, source/native/word result relation, caller/heap/allocator frames and late-failure short-circuit. |
 
 | `Backend/MemoryOps/SourceShortCircuit.lean` | Actual lazy Boolean guard around effectful memory expressions: skipped writes/failures, reached success/error states, and existing word branch execution. |
+
+| `Backend/MemoryOps/PhysicalByteWorldInterface.lean` | Explicit pending static cell-indexed byte-load program contract over real runSlice, conditional initial WordFrame client and current literal MLOAD boundary; no concrete Producer. |
+| `Backend/MemoryOps/SourceConditional.lean` | Actual Source and word conditional selection with effectful branches, retained reached states and selected rejection. |

@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceConditional
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -1968,5 +1969,255 @@ theorem complete_short_circuit_vectors :
 #guard_msgs (whitespace := lax) in #print axioms short_circuit_reject_client
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_horizons' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms short_circuit_horizons
+
+
+private def choiceFalseMidHeap := hp.set left (MObj.setElem .dyn (hp.get left) 0 false)
+private def choiceFalseHeap := choiceFalseMidHeap.set left (MObj.setElem .dyn (choiceFalseMidHeap.get left) 1 false)
+private def choiceFalseMidWord := writeMachine (valueWord false) 17 w[0]
+private def choiceFalseWord := writeMachine choiceFalseMidWord 18 w[0]
+private theorem choiceFalseFirst : run (rhsCode (.there (.there ti))) (valueWord false)=.ok choiceFalseMidWord 0 := by
+  have codes : rhsCode (.there (.there ti))=[.mload 7,.mload 6,.mload 5] ++ writeArrayStackCode := rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 5] (valueWord false)=
+      .ok ((((valueWord false).push w[0]).push w[16]).push w[0]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((valueWord false).push w[0])
+    (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((valueWord false).push w[0]) (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (0 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+private theorem choiceFalseSecond : run (rhsCode (.there (.there tj))) choiceFalseMidWord=.ok choiceFalseWord 0 := by
+  have codes : rhsCode (.there (.there tj))=[.mload 7,.mload 6,.mload 4] ++ writeArrayStackCode := rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 4] choiceFalseMidWord=
+      .ok (((choiceFalseMidWord.push w[0]).push w[16]).push w[1]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq (choiceFalseMidWord.push w[0])
+    (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run (choiceFalseMidWord.push w[0]) (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (1 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- Real false branch: reversed reached write order (LEFT0 then LEFT1), not
+an independently assumed final state. The FIRST write materially clears LEFT0. -/
+theorem conditional_false_body_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there si)) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),z) ∧
+      Prog.run (valueState false) (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))=
+        .ok ⟨(valueState false).withHeap (choiceFalseHeap),List.prefix_refl _⟩ ∧
+      run (rhsCode (.there (.there ti))) (valueWord false)=.ok (choiceFalseMidWord) 0 ∧
+      run (rhsCode (.there (.there tj))) (choiceFalseMidWord)=.ok (choiceFalseWord) 0 ∧
+      run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool)) (choiceFalseWord)=
+        .ok ((choiceFalseWord).push (.val (bword false))) 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there tj)) (.there (.there ti)) .here) (valueWord false)=
+        .ok ((choiceFalseWord).push (.val (bword false))) 0 ∧
+      rhsViews ym=valueTables false true ∧ rhsViews z=valueTables false true ∧
+      SourceBoolMemoryAt z 0 (choiceFalseHeap) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState false).withHeap (choiceFalseHeap)) base ((choiceFalseWord).push (.val (bword false))) ∧
+      z.1=(valueSource false).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource false).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource false).2.ex ∧ z.2.events=(valueSource false).2.events ∧ z.2.logs=(valueSource false).2.logs ∧ z.2.fnLocals=(valueSource false).2.fnLocals) ∧
+      ((choiceFalseWord).push (.val (bword false))).stack=[.val (bword false),w[42]] ∧
+      StructAllocatorRepr (choiceFalseHeap) base 8 ⟨48,by decide⟩ ((choiceFalseWord).push (.val (bword false))) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,hw₁,hw₂,inner,expr,native,nval,word₁,word₂,reload,word,hr₁,hr₂,mok,repr,
+      locals,elems,other,addrs,next,effects,stack,mem,resultRep,alloc⟩ :=
+      rhs_assign_value_word (G0 p) F0 fuel (valueState false) left (valueAt false) (.there .here) (.there (.there si)) (.there (.there sj)) .here
+        (.there .here) (.there (.there tj)) (.there (.there ti)) .here (uintOfNat 1) (uintOfNat 0) false
+        rfl rfl rfl rfl rfl rfl rfl rfl (by change (uintOfNat 0).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide) (by change (uintOfNat 1).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide)
+        (valueRepr false) SH (valueOK false)
+    have known₁ : hp.writeAddr (.index left .dyn (uintOfNat 0)) false=some (choiceFalseMidHeap) := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 0<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he₁ : mid=choiceFalseMidHeap := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : (choiceFalseMidHeap).writeAddr (.index left .dyn (uintOfNat 1)) false=some (choiceFalseHeap) := by
+      have pos : 1<((choiceFalseMidHeap).get left).val.length := by
+        simp only [choiceFalseMidHeap,Heap.get_set_same,MObj.setElem_dyn,List.length_set];decide
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,MObj.elems_dyn,if_pos pos];rfl
+    have he₂ : out=choiceFalseHeap := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    have hm : mm=choiceFalseMidWord := (Evm.Out.ok.inj (word₁.symm.trans (choiceFalseFirst))).1
+    subst mm
+    have ht : target=choiceFalseWord := (Evm.Out.ok.inj (word₂.symm.trans (choiceFalseSecond))).1
+    subst target
+    have middleOther : ∀ a,a≠0 → ym.2.heap.get a=(valueSource false).2.heap.get a := by
+      obtain ⟨h,he⟩ := (valueAt false).assign_state (G0 p) F0 fuel (.there .here) (.there (.there sj)) .here (uintOfNat 0) false rfl rfl rfl
+        (by simp only [Heap.len,MObj.elems_dyn];decide) inner
+      intro a hn;rw [he];exact Source.Heap.write_other _ hn _ h
+    have tables₁ : rhsViews ym=valueTables false true := by
+      have leaf := hr₁
+      unfold SourceBoolMemoryAt at leaf
+      simp only [choiceFalseMidHeap,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,middleOther 1 (by decide),middleOther 2 (by decide),middleOther 3 (by decide),middleOther 4 (by decide)];rfl
+    have tables₂ : rhsViews z=valueTables false true := by
+      have leaf := hr₂
+      unfold SourceBoolMemoryAt at leaf
+      rw [elems] at leaf
+      simp only [MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    exact ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr₂,mok,repr,locals,addrs,next,effects,stack,
+      alloc _ (by decide) (valueAllocator false)⟩
+
+
+private def choiceNo : Source.RExpr E0 RhsSΓ .bool := sourceRhsAssign (.there .here) (.there (.there si)) (.there (.there sj)) .here
+private def choiceYesCode := rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here
+private def choiceNoCode := rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there tj)) (.there (.there ti)) .here
+private def choiceRead := compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool)
+private def choiceCode := conditionalCode choiceRead choiceYesCode choiceNoCode
+private def choiceHeap (v : Bool) := if v then valueFinalHeap true else choiceFalseHeap
+private def choiceWord (v : Bool) := if v then valueFinalWord true else choiceFalseWord
+private def choiceNative : Stmt C RhsΓ RhsΓ :=
+  .ite (.simple (.local .here)) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))
+    (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))
+
+/-- BOTH actual pipelines select different effectful branches, retaining every
+represented object's observations and the actual selected prefix. -/
+theorem conditional_memory_client (p : Roadmap.Pipeline) (fuel : Nat) (v : Bool) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (if v then sourceIndexedAssign (.there .here) (.there (.there si)) .here
+        else sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource v)=(.ok (.val (.bool v)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=(.ok (.val (.bool v)),z) ∧
+      Stmt.run (valueState v) choiceNative=.ok ⟨(valueState v).withHeap (choiceHeap v),List.prefix_refl _⟩ ∧
+      run choiceCode (valueWord v)=.ok ((choiceWord v).push (.val (bword v))) 0 ∧
+      rhsViews ym=(if v then valueTables true false else valueTables false true) ∧ rhsViews z=valueTables v true ∧
+      SourceBoolMemoryAt z 0 (choiceHeap v) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState v).withHeap (choiceHeap v)) base ((choiceWord v).push (.val (bword v))) ∧
+      z.1=(valueSource v).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource v).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource v).2.ex ∧ z.2.events=(valueSource v).2.events ∧ z.2.logs=(valueSource v).2.logs ∧ z.2.fnLocals=(valueSource v).2.fnLocals) ∧
+      ((choiceWord v).push (.val (bword v))).stack=[.val (bword v),w[42]] ∧
+      StructAllocatorRepr (choiceHeap v) base 8 ⟨48,by decide⟩ ((choiceWord v).push (.val (bword v))) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases v
+    · obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+        conditional_false_body_client p fuel
+      have select := source_cond_select (G0 p) F0 (fuel+3) (valueSource false) .here guardedBody choiceNo false rfl
+      have loaded : run choiceRead (valueWord false)=.ok ((valueWord false).push (.val (bword false))) 0 := rfl
+      refine ⟨ym,z,inner,select.trans expr,?_,(word_cond_false _ _ _ _ loaded).trans word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+      change ((Prog.run (valueState false) (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))).map
+        (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+      rw [native]
+      rfl
+    · obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+        rhs_expression_value_client p fuel true
+      have select := source_cond_select (G0 p) F0 (fuel+3) (valueSource true) .here guardedBody choiceNo true rfl
+      have loaded : run choiceRead (valueWord true)=.ok ((valueWord true).push (.val (bword true))) 0 := rfl
+      refine ⟨ym,z,inner,select.trans expr,?_,word_cond_true _ _ _ _ _ loaded word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+      change ((Prog.run (valueState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+        (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+      rw [native]
+      rfl
+
+/-- Actual selected rejection with a real changed prefix. The unselected
+local-value branch is not executed as an error handler or fallback. -/
+theorem conditional_memory_reject (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.cond (.local .here) guardedBody (.local .here))).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      Stmt.run (rhsState true) guardedNative=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run (conditionalCode choiceRead choiceYesCode choiceRead) (rhsWord true)=.revert ∧
+      (∀ suffix,run ((conditionalCode choiceRead choiceYesCode choiceRead) ++ suffix) (rhsWord true)=.revert) ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,inner,expr,stmt,initialLoc,native,word₁,word₂,word,tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩ :=
+      rhs_late_effect_client p fuel
+    have entered := (source_cond_select (G0 p) F0 (fuel+3) (rhsSource true) .here guardedBody (.local .here) true rfl).trans expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (rhsWord true)=.ok ((rhsWord true).push (.val (bword true))) 0 := rfl
+    have bodyError : run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (rhsWord true)=.revert :=
+      Evm.run_append_revert word
+    have rejected : run (conditionalCode choiceRead choiceYesCode choiceRead) (rhsWord true)=.revert := word_cond_true_error _ _ _ _ loaded bodyError
+    refine ⟨ym,inner,entered,?_,word₁,rejected,(fun _ => Evm.run_append_revert rejected),tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩
+    change ((Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+
+/-- SAME false initial state, actual alternate prefix executions: final
+commutation cannot establish branch/order correctness. Both complete Source
+prefix tables and every word distinguish the selected order. -/
+theorem conditional_wrong_order_prefix (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ selected other : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),selected) ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),other) ∧
+      rhsViews selected=valueTables false true ∧ rhsViews other=valueTables false false ∧
+      rhsViews selected≠rhsViews other ∧
+      run (rhsCode (.there (.there ti))) (valueWord false)=.ok choiceFalseMidWord 0 ∧
+      run (rhsCode (.there (.there tj))) (valueWord false)=.ok (valueMidWord false) 0 ∧
+      words choiceFalseMidWord≠words (valueMidWord false) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨selected,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      conditional_false_body_client p fuel
+    obtain ⟨other,zw,otherInner,otherExpr,otherNative,otherWord₁,otherWord₂,otherReload,otherWord,otherTables,rest⟩ :=
+      rhs_expression_value_client p fuel false
+    obtain ⟨oldFinal,oldRun,skipped,skipNative,skipWord,oldTable,oldDifferent,oldRest⟩ := short_circuit_skip_client p fuel
+    refine ⟨selected,other,inner,otherInner,tables₁,otherTables,?_,choiceFalseFirst,value_first_word false,by decide⟩
+    intro he
+    apply oldDifferent
+    calc rhsViews oldFinal=valueTables false true := oldTable
+         _=rhsViews selected := tables₁.symm
+         _=rhsViews other := he
+         _=valueTables false false := otherTables
+         _=rhsViews (valueSource false) := rfl
+
+/-- Complete additional false-branch target stages and typed objects. Source
+stages are the full five-object tables linked by conditional_memory_client;
+all earlier vectors, including the true branch, stay byte-preserved. -/
+theorem complete_conditional_vectors :
+    words choiceFalseMidWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[0],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words choiceFalseWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[0],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (choiceFalseWord.push w[0])=words choiceFalseWord ∧
+    views choiceFalseMidHeap=([false,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views choiceFalseHeap=([false,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    (choiceFalseWord.push w[0]).stack=[w[0],w[42]] ∧ choiceFalseWord.mem 0=w[48] ∧
+    ((valueFinalWord true).push w[1]).stack≠(choiceFalseWord.push w[0]).stack := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,by decide⟩
+    all_goals simp only [views,choiceFalseMidHeap,choiceFalseHeap,Heap.get,Objs.get,Heap.set,Objs.set,
+      hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil] <;> rfl
+
+/-- Low horizon times out before either selected body can write. This is a
+family-of-horizons observation, not minimal fuel or a source admission cap. -/
+theorem conditional_low_horizon (p : Roadmap.Pipeline) (v : Bool) :
+    (Source.evalE (G0 p) F0 1 (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=
+      (.error .timeout,valueSource v) ∧
+    (Source.evalE (G0 p) F0 2 (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=
+      (.error .timeout,valueSource v) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases v <;> exact ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_reject' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_memory_reject
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_wrong_order_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_wrong_order_prefix
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_conditional_vectors' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_conditional_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_low_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_low_horizon
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_false_body_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_false_body_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_memory_client
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

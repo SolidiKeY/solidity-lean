@@ -288,6 +288,7 @@ import Solidity.Backend.MemoryOps.PhysicalArrayReframe
 import Solidity.Backend.MemoryOps.PhysicalByteJournal
 import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
+import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface
 import Solidity.Backend.MemoryOps.PhysicalFrameImage
 import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
 import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
@@ -346,6 +347,7 @@ import Solidity.Backend.MemoryOps.SourceCalldataUintCopyControls
 import Solidity.Backend.MemoryOps.SourceCalldataUintDelete
 import Solidity.Backend.MemoryOps.SourceCalldataUintMutation
 import Solidity.Backend.MemoryOps.SourceCalldataUintTransfer
+import Solidity.Backend.MemoryOps.SourceConditional
 import Solidity.Backend.MemoryOps.SourceDeclaration
 import Solidity.Backend.MemoryOps.SourceDefault
 import Solidity.Backend.MemoryOps.SourceDelete
