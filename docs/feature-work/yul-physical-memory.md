@@ -393,6 +393,19 @@ where the initial state read32767. The byte sibling remains its exact original
 typed cell and every initial owner typing survives. This is the concrete two-root
 copy result, not arbitrary Source-call or compiler adequacy.
 
+`P6CopyHistory` runs finite lists of existing bounded source/destination spans,
+transporting them through actual capacity identity. Each copy precedes canonical
+synchronization; a successful result refreshes the actual Source state, retained
+placement and inventory for the next copy. Every initial owner typing, whole
+nonheap administration, inventory IDs and coverage survive successful prefixes.
+Completed sequences reconstruct the entire reached map from the initial view.
+On preparation `None`, Source retains its accepted prefix and the physically
+reached failed frame is kept. The first pending request has ALREADY copied;
+only the later suffix has not run. There is no blind pending-replay resume API.
+Controls distinguish late failure from reversed order and show an overlapping
+failed-copy replay changes byte129 from255 to0. This is synchronization of actual
+component copies, not Source/Yul failure, rollback or arbitrary program adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

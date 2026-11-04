@@ -81,3 +81,4 @@
 | `Yul/Adapters/P6SnapshotCopy{,Controls}` | Actual P6 copies into owned regions with retained reached frames, canonical Source synchronization, complete reencoding and owner MemOK transport. |
 | `Yul/Adapters/P6CopyPreparation{,Controls}` | Canonical nominal update existence from copied words and a concrete changed-field kernel Source/full-map witness on a two-root codec image. |
 | `Yul/Adapters/P6CopySource{,Controls}` | Exact prepared Source actions and concrete whole-state/alias result for an owned P6 copy, with typed sibling identity and every-H safety. |
+| `Yul/Adapters/P6CopyHistory{,Controls}` | Finite actual P6 copies with per-success Source/cursor refresh, exact stopped synchronization suffix and retained failed physical output. |
