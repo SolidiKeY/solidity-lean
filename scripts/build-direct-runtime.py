@@ -4,7 +4,7 @@ Usage: build-direct-runtime.py NATIVE_LEAN_PREFIX WASM_STAGE OUTPUT
 Set EMCC when emcc is not on PATH and EM_CONFIG to its explicit SDK config.
 Run under the repository memory guard.
 """
-import gc, hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
+import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 for override in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH']:
     if os.environ.get(override):
         raise ValueError('Unpinned compiler override: '+override)
@@ -107,10 +107,24 @@ if full:
 else:
     undefined=subprocess.check_output([configured['nm'],'--undefined-only','--format=posix',str(stage/'lib/lean/libleanrt.a')],text=True)
     native_roots=set(re.findall(r'^(\w+) U ',undefined,re.M))
-    inputs,closure=helper.extract(root,stage,native_roots=native_roots)
-    # collect()'s recursive visitor can retain its temporary source graph via
-    # a Python reference cycle. Only the extracted C buffers are needed below.
-    gc.collect()
+    # A separate serial process releases the large temporary parser graph and
+    # its allocator arenas before compilation. Pass the captured helper bytes,
+    # not a second read of mutable producer code.
+    extraction=pathlib.Path(tempfile.mkdtemp(prefix='extract-',dir=output))
+    captured=extraction/'closure.py';captured.write_bytes(closure_bytes)
+    roots_file=extraction/'roots.json';roots_file.write_text(json.dumps(sorted(native_roots)))
+    extracted=extraction/'inputs.json'
+    worker='''import json,pathlib,sys,types
+helper=types.ModuleType('closure')
+p=pathlib.Path(sys.argv[1]);exec(compile(p.read_bytes(),str(p),'exec'),helper.__dict__)
+inputs,closure=helper.extract(pathlib.Path(sys.argv[2]),pathlib.Path(sys.argv[3]),native_roots=json.loads(pathlib.Path(sys.argv[4]).read_text()))
+pathlib.Path(sys.argv[5]).write_text(json.dumps(dict(inputs=inputs,closure=closure),default=str))
+'''
+    subprocess.run([sys.executable,'-E','-c',worker,str(captured),str(root),str(stage),str(roots_file),str(extracted)],check=True)
+    payload=json.loads(extracted.read_text())
+    inputs=[(name,text,pathlib.Path(source),expected) for name,text,source,expected in payload['inputs']]
+    closure=payload['closure'];del payload
+    shutil.rmtree(extraction)
     if hasattr(os,'posix_fadvise'):
         # Extraction has finished reading these immutable originals. Compilers
         # consume the captured/pruned buffers, not the original source files.
