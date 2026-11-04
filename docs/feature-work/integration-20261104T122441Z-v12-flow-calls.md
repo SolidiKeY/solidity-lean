@@ -12,3 +12,5 @@ Separate read-only finder and skeptic reviews must pass before publication.
 Reviews use exact diff/dependency packets and read-only inspection where available.
 
 Independent finder and skeptic passed with no confirmed findings.
+
+Both reviewers identified a premature all-horizon claim in the module docstring. Corrected to retain child execution as an explicit premise; no proof or statement tokens changed.

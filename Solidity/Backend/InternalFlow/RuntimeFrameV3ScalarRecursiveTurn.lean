@@ -1,7 +1,7 @@
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep
 
 /-! Native scalar-return and turn equations for the real recursive family.
-Child execution premises are discharged by the all-horizon induction. -/
+Child execution remains an explicit premise for a subsequent all-horizon induction. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarRecursiveSource
 open Evm Evm.Memory RecursiveSource
 
