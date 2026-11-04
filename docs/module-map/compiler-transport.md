@@ -73,3 +73,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/CheckedAdditionSequenceSuccess.lean` | Two successful public checked-add captures with both actual mapped outputs and exact second-guard terminal iff. |
 | `Backend/Passes/CheckedAdditionSequenceSuccessControls.lean` | Dependent16→23 capture, complete cells/readback, both guards and negative controls. |
 | `Backend/Passes/CheckedAdditionSequenceSuccessPins.lean` | Exact standard-only axiom guards for successful checked-add sequencing. |
+| `Backend/Passes/MemoryJoinCost.lean` | Exact reached allocation-cell cost for intrinsic/public compiler joins and suffix capacity transport. |
+| `Backend/Passes/MemoryJoinCostControls.lean` | Inhabited5+4 allocation budget with actual selected-map suffix Input and unreachable allocation failure control. |
+| `Backend/Passes/MemoryJoinCostPins.lean` | Standard-only axiom guards for exact allocation-prefix composition. |

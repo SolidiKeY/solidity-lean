@@ -601,6 +601,25 @@ observations. Both guard cases are instantiated. Independent read-only source
 reviews found no defect; these remain intrinsic/memory-compiler results rather
 than Source declaration, public ABI or resource/session adequacy.
 
+## Reached allocation cost of public memory joins
+
+`MemoryJoinCost.cost_join` proves the exact existing allocation-cell cost of
+an intrinsic join. A successful prefix contributes the suffix cost at its actual
+typed output; a failed prefix contributes no suffix cost. `public_join` adds
+that equation to the actual public compiler selection/code-concatenation result.
+`suffix_allocation_input` transports the joined budget through actual prefix
+growth at the selected map; generic frame and representation obligations stay
+explicit.
+
+Controls derive a four-cell allocating suffix's full Input after an actual
+five-cell allocation prefix, with inhabited positive allocator ownership,
+cursor16→21 and total cost9. The original ordered prefix vector is retained.
+A typed revert prefix has cost0 and an actual target revert before the accepted
+five-cell allocation suffix. Wrong-total and skipped-allocation controls reject
+charging an unreachable suffix. These are intrinsic allocation-cell laws, not
+public gas/session prefixes or full Source/bytecode adequacy. Independent
+read-only source reviews are recorded in the checkpoint handoff.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
