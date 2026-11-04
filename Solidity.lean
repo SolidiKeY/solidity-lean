@@ -1601,6 +1601,8 @@ import Solidity.Lowering.G19.AssignmentForBreak
 import Solidity.Lowering.G19.AssignmentForBreakControls
 import Solidity.Lowering.G19.AssignmentForContinue
 import Solidity.Lowering.G19.AssignmentForContinueControls
+import Solidity.Lowering.G19.AssignmentForReturn
+import Solidity.Lowering.G19.AssignmentForReturnControls
 import Solidity.Lowering.G19.AssignmentReturnFlag
 import Solidity.Lowering.G19.AssignmentReturnFlagControls
 import Solidity.Lowering.G19.AssignmentWhileBreak
