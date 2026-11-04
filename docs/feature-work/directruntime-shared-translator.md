@@ -283,3 +283,50 @@ exact theorem/axiom comparisons and final full gates remain pending. The existin
 general SolcJson translation has not migrated, so no single-boundary completion
 or RUNTIME_GATE_PASS is claimed. Registration remains a central proposal; H30
 excludes generated roots/maps/trust pins from this lane. No push/PR/publication.
+
+## H35 VM validation and cache delivery blocker
+
+H35 requires owned-module build, axiom inventory and controls on this VM, then
+cache shipment before reporting a checkpoint done. The four owned modules built
+successfully at implementation713a0612 (340jobs); the new AxiomInventory file had
+zero per-file MCP errors. Eleven repository per-file gates passed, including all
+nine existing controls and current/exact-base axiom inspections. Lean4.24.0 and
+Lake5.0.0-src+797c613 were measured again. All heavy work used the existing
+12GiB/no-swap/1CPU/Lean-j1 scope with monitored4GiB outer reserve. An initial
+Lake-version invocation through the build shim failed before any build; the
+corrected pinned version command/build passed and both logs are retained.
+
+No named theorem was added or changed by the owned implementation. The inventory
+covers all32 explicitly declared public Shared structures/abbrevs/definitions and
+both runtime entrypoints. Current and pinned-base check/checkString each report
+exactly propext,Classical.choice,Quot.sound; no additional observed axiom name or
+sorryAx. The base validation source prefix is byte-identical to git-show b419,
+with only four inspection commands appended. Partial definitions are opaque to
+logical axiom traversal: this does not establish executable closure or source
+equivalence. Machine comparison and raw inspection output are in evidence/h35.
+
+The requested ship-cache.sh invocation used its documented SHIP_ALLOW_HEAD=1
+option and actual LAKE_CACHE_DIR. It prepared1737artifacts/583mappings, then exited1
+because coordinator poll-state.json was absent. vmexec.py is also unavailable
+on this worker. No remote transfer occurred and no successful script delivery
+receipt exists. A separately labelled local-verification receipt checks every
+archive artifact's size/SHA256 and exact member set; it is not shipment success.
+The pack is600359272bytes, SHA256
+cac02c95edef9190666bd7e11333438c348039e09251ed9415645fc14ddeb6f2.
+Its absolute path and manifests are in evidence/h35/cache-receipt.json.
+
+H35-CACHE asks whether the coordinator retrieves/relays this verified pack or
+provides a worker-side invocation/routing configuration. The self-contained
+question/options are saved in evidence/h35/scope-question.json. H35 checkpoint
+acceptance remains blocked until real delivery evidence; previously implemented
+checkpoints are not represented as H35-complete. Full assignment B/C/CR integration,
+complete construct/source/proof parity and native/WASM/final full gates remain open.
+No production file changed after implementation713a0612; this increment adds
+validation tooling/evidence only. No goal creation/reset, push, merge or publication.
+
+The final cache verifier also checks all583 mapping schemas/output-prefix
+references, duplicate-key consistency and the4owned mappings against actual
+build-trace outputs; receipt versions/exit/failure are derived from gate logs.
+This strengthened check passed in24.991s with19812KiB child maximum RSS. Source
+trace freshness relies on the preceding build gates. Independent finder/skeptic
+final reviews found no further defect; no delivery/installability claim follows.

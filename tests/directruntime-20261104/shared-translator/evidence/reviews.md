@@ -93,3 +93,24 @@ This is bounded refusal/inventory validation, not full producer admission,
 AST/Raw source preservation, or backend/runtime closure. Signed int complement
 remains a demonstrated raw-success/intrinsic-refusal normalization gap. Complete
 CR/B/C adoption, exact theorem/axiom signatures and final full gates remain open.
+
+## H35 inventory and cache packet review
+
+Independent finder and skeptic reviewed read-only without Lean/server use. All32
+explicit public Shared declarations plus2runtime entrypoints are inventoried.
+Exact-base validation copy preserves git-show source and only appends inspection
+commands. Current/base runtime axiom sets match; no new observed axiom or sorryAx.
+Partial definitions are opaque to logical axiom traversal: executable closure
+and source preservation do not follow. Eleven VM per-file gates and the fresh
+340-job owned build passed. The initial Lake version probe failed before build
+and its corrected invocation passed.
+
+Both reviewers required strict separation of ship-cache exit1 (missing coordinator
+routing, no transfer) from local archive verification. Initial receipt mapping
+counts/hardcoded metadata limits were strengthened: mapping schemas/prefix refs
+and4owned trace mappings are now checked; exit/failure/toolchain come from gate
+logs. Full archive+mapping recheck passed. Final independent reviews found no
+further verifier defect. Source-hash/trace freshness relies on the recorded
+build, not on colocating hashes in a receipt. Local consistency proves neither
+delivery, installed-cache compatibility nor executable closure. H35-CACHE remains
+pending and no H35 checkpoint completion is claimed.
