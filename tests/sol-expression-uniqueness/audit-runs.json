@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-primary-final",
-  "proof_gate_dir": "checkpoint-gates-primary-final",
-  "signature_stem": "signature-audit-primary-final",
-  "signature_gate_dir": "signature-gates-primary-final"
+  "proof_stem": "checkpoint-proof-recursive",
+  "proof_gate_dir": "checkpoint-gates-recursive",
+  "signature_stem": "signature-audit-recursive",
+  "signature_gate_dir": "signature-gates-recursive"
 }

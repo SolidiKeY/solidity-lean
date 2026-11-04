@@ -9,7 +9,7 @@
     "id": "EU-02",
     "obligation": "layout erasure and fragments reconstruction",
     "status": "partial",
-    "evidence": "Layout extension/trimming and fragment/literal reconstruction retained. Actual fnType order/params/attribute/returns executions and keyword runs derived for arbitrary successful layouts; type field/tree identity remains open."
+    "evidence": "Actual attribute layouts independently reconstruct optional visibility/mutability fields from exhaustive successful0/1/2field runs, no canonical order premise. Full closure induction remains open."
   },
   {
     "id": "EU-03",
@@ -33,7 +33,7 @@
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
     "status": "partial",
-    "evidence": "All9primary prefixes reconstruct from actual independent layouts; new type follower boundary now derived inside original certificate context. Recursive type/list/argument/expression identity remains open."
+    "evidence": "All5typeconstructors, parameter/namedArg/callArgs, list and opt.expr have structural identity steps using only actualchild IHs. Arbitrary array type families and optionalholevectors discharge their IHs against ANY certified competitor. Full mutual induction/expression assembly remains open."
   },
   {
     "id": "EU-07",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary postfix towers and new-array depths reconstruct root levels against any certified competitor. Direct-new square/period followers refuted, call/options permitted. Existing inhabited families/raw-refused collision retained."
+    "evidence": "Arbitraryarraydepth WordUnique againstANYcertifiedtypecompetitor, exactinhabitedfamilywitnesses, arbitraryoptionalholevectoridentity and rawflattenedlistcollision control. Earlier expression/boundary families retained."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "78 modules/1064 declarations inventoried with exact actual kernel signatures and standard-only axiom guards; final kernel gates pass without owned warnings."
+    "evidence": "92modules/1142declarations inventoried with exact actual kernel signatures and standard-only axiom guards; clean kernel/signature/MCP pass."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at78 pinned-local frozen registrations; trust3750zero/layers559zero pass; central axiom-source zero errors but1064unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/versions/KeySort/kernel/sourcehash gates pass. Global roots/orphans stop at92 pinned-local frozen registrations; trust3764zero/layers559zero pass; central axiom-source zero errors but1142unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Independent finder/skeptic source and metadata reviews accept partial root-level checkpoint after control follower mismatch and stale-current-summary findings were fixed. Both reran/checkpoint controls, no remaining findings, no Lean server/edits. See evidence/reviews-primary.json."
+    "evidence": "Independent finder/skeptic source and finalmetadata reviews accept14newrecursive/type modules, rerun checkpoint/corruption controls92/1142, no remaining findings and no Lean server/edits. See evidence/reviews-recursive.json."
   },
   {
     "id": "EU-14",

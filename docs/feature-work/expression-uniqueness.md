@@ -42,9 +42,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 1064 source declarations with source signatures;
+`declarations.json` enumerates all 1142 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The seventy-eight modules are proposed for coordinator registration, with module-map rows,
+The ninety-two modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -158,7 +158,21 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `PrimaryPrefix` | Exhaustive9primary families reconstruct actual word prefixes, including literal/unit crosscase disjointness; recursive tree identity remains open. |
 | `AllRootLevels` | All certified root levels0through16 reconstruct at independent actual layouts; primary spine and prefix cut derive15versus16 separation. |
 | `RootLevelControls` | Arbitrary postfix towers and new-array depths reconstruct levels against any certified competitor; direct-new square/period first followers refuted, call/options heads permitted without arbitrary-tail validity. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1064 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `RecursiveProperty` | Word/vector structural induction predicates on existing Syn; list vectors preserve holes. No public instance asserted. |
+| `ContainerIdentity` | Generic nil/cons vector identity and none/some.expr word identity using actual child IHs/nonempty expression words. |
+| `ArgumentIdentity` | Actual namedArg, positional and named argument identity steps from recovered names/vectors and structural children. |
+| `ContainerControls` | Arbitrary optional-hole vectors determine any certified competitor; raw flattening collision remains list-only. |
+| `ParameterIdentity` | Parameter type boundaries follow from actual optional location/name fields; exact fields and child IH recover identity. |
+| `ParameterWords` | Actual type/parameter words and arbitrary parameter-list components are nonempty via existing completion invariant. |
+| `TypeArrayIdentity` | Actual array/non-array type disjointness, array child-word cuts and structural array identity step. |
+| `AttributeOrderIdentity` | Arbitrary successful empty/one/two-field layout orders are exhaustive, with no assumed order length/canonical order. |
+| `AttributeFieldIdentity` | Disjoint token filters recover existing optional visibility/mutability fields under independent successful layouts. |
+| `FunctionTypeIdentity` | Actual function parameters/returns vectors and attribute fields reconstruct; structural listchild IHs give same-constructor identity. |
+| `TypeLeafIdentity` | Actual atom family classification, arbitrary elementary/path intrinsic leaf identity and function WordUnique against every type competitor. |
+| `MappingKeyIdentity` | Existing unindexed MapKey word prefix, key/name/arrow reconstruction and arbitrary elementary/path key identity. |
+| `MappingIdentity` | Actual key/value/name fields recover mapping identity using only structural valuechild IH, against all type competitors. |
+| `TypeIdentityControls` | Arbitrary array family WordUnique against ANY certified competitor, plus empty function type child-premise closure. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1142 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -199,13 +213,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-primary-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-recursive.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-primary-final.inside.json`. It took 34.485883 seconds, child peak RSS
-266808 KiB, exact container peak 850022400 bytes, minimum parent headroom
-9656848384 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-recursive.inside.json`. It took 38.326629 seconds, child peak RSS
+270236 KiB, exact container peak 861724672 bytes, minimum parent headroom
+9615880192 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -217,10 +231,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these seventy-eight modules lack central root imports. The orphan gate
-reported the same seventy-eight. Source trust passed (3750 sources, zero findings), and
+check: exactly these ninety-two modules lack central root imports. The orphan gate
+reported the same ninety-two. Source trust passed (3764 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 1064 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 1142 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -666,3 +680,63 @@ exact original base/branch/repository, full original patch/bundle, command
 exits/times/RSS/cgroup peaks and SHA256 manifest. Continue the original goal on
 the same branch: recursive tree identity, public uniqueness, accepted-tree
 corollary and full integration gates remain unfinished. No goal completion.
+
+
+## Recursive container and type identity checkpoint
+
+Fourteen new modules add78declarations, totaling92modules/1142declarations.
+WordUnique and VectorUnique are structural induction predicates on the original
+Syn categories, not a new AST or producer interface. Lists retain item vectors;
+empty optional tuple components cannot be flattened away. Generic list and
+optional expression steps, actual argument/name cuts and parameter optional
+location/name boundaries recover intrinsic identity from actual child IHs.
+The global mutual induction has not yet supplied all expression cases.
+
+Every one of the5typeconstructors now has an identity step against any certified
+type competitor, conditional only on structural identity for its actual children.
+Array/atom disjointness derives the original type spine/atom cut and nonempty
+dimensions. Elementary dimensions and identifier paths are arbitrary. Mapping
+keys use the existing unindexed MapKey; actual key-name/arrow/value-name syntax
+derives all concrete boundaries. Parameter nonemptiness follows from the existing
+unconditional operand completion invariant. Arbitrary successful attribute order
+lists invert to0/1/2existing fields without an assumed length or canonical order;
+disjoint token filters recover optional visibility/mutability independently of
+layout witnesses. Function params/returns vectors reconstruct, including empty
+vectors, before listchild IHs apply. These conditional steps are not a public
+uniqueness instance or a new global premise.
+
+Arbitrary arrayTypeFamily depths discharge all recursive identity premises and
+compare against ANY certified type competitor, not only another family member.
+Existing exact family certificates establish non-vacuity. Arbitrary optional-hole
+vectors similarly identify any certified competitor; their flattened word is
+empty for every length, a negative list control, not an expression ambiguity.
+All original refusals, observations, budgets and public target remain unchanged.
+Initial induction-context/Boolean-parenthesization, dependent MapKey match and
+append/filter normalization errors are retained. All1142exact standard-only axiom guards, actual kernel signatures and MCP
+checks pass without owned warnings. Versions/KeySort pass before RUNTIME_GATE_PASS
+under the unchanged hard memory/no-swap/thread/reserve limits. Checkpoint acceptance, corruption controls and documentation paths PASS. Full
+default acceptance exits1 ACCEPTANCE_OPEN; global roots/orphans stop at92frozen
+registrations before library/TestSuite build. Trust3764zero/layers559zero PASS;
+central source-axiom inventory has zeroerrors but1142unrecorded pins and exits1.
+Independent finder/skeptic final metadata reviews accept92/1142after separate
+checkpoint/corruption reruns, no remaining findings; public target remainsopen.
+
+
+### Recursive checkpoint handoff
+
+The substantive checkpoint contains all14newmodules, exact92/1142kernel
+type/axiom inventory, exhaustive registration proposals and actual bounded gate
+evidence. Separate read-only finder/skeptic source and metadata verdicts accept
+this partial work, no Lean server/edits; records are evidence/reviews-recursive.json.
+Signature-audit-recursive, checkpoint-proof-recursive, recursive-acceptance,
+recursive-controls and recursive-doc-paths PASS. Full/default acceptance remains
+exit1; actualglobalroot/orphan failures92 and central1142unrecorded standardpins
+are not waived. Trust3764zero/layers559zero PASS. Exact versions, KeySort before
+RUNTIME_GATE_PASS, sourcehashes/exits/times/RSS/cgrouppeaks and failed attempts are
+retained in commands-proof/evidence. The immutable packet records committed
+head/base/branch/repository, original patch/bundle and checksum manifest.
+
+Continue the same goal/branch: all expression constructor identity steps and the
+exhaustive mutual induction, public CertifiedYieldUnique, parseCat corollary,
+scope-complete final acceptance and registration-dependent full gates remainOPEN.
+No target/premise/exclusion/refusal/observation/budget change or goal completion.
