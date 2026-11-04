@@ -46,15 +46,23 @@ validity and existing layout and precedence contracts are not weakened.
 
 ## Queue and acceptance status
 
-1. Inventory and intrinsic shapes: in progress, not accepted.
-2. Balanced token/list splitting, nearest-else and token root discrimination:
-   pending. Shape discrimination alone is not token discrimination.
-3. Parse/yield uniqueness and syntax-derived sufficient parser fuel: pending.
-   No assumed successful parse may discharge completeness.
-4. Constructor-complete kernel controls, solc 0.8.38 positive/negative fixtures,
-   scope-complete acceptance, finder/skeptic reviews, final gates and seal:
-   pending.
-Backfill block/list and fuel strengthening: pending.
+1. Inventory and intrinsic shapes: constructor inventory and intrinsic root/
+   nearest-position results proved; final whole-scope acceptance pending.
+2. Splitting/root/association: recursive block/control balance, mixed boundary
+   splitting, intrinsic nearest position and non-simple token roots proved.
+   General atom balance, simple roots and token-level association await Q-ATOM.
+3. Parse/yield: recursive block/control completeness and actual yield uniqueness
+   proved; fixed-Boolean/empty-for compound coverage proved. Broad uniqueness/
+   profile completeness are refuted by SG-CEX-01 and retained OPEN/REFUTED.
+   General remaining statement composition awaits Q-ATOM; no successful parse
+   is assumed to discharge completeness.
+4. All 45 kernel and pinned solc fixture controls pass with 40 constructor
+   obligations. Per-checkpoint finder/skeptic reviews and sealed handoffs are
+   complete through M. Full repository gates and whole-scope acceptance remain
+   pending; the shared-roots gate fails until central integration.
+Assigned block/list/fuel backfill has been strengthened through K–M, including
+arbitrary width/depth, exact actual yields, balance and fragment uniqueness.
+The complete original assignment is not accepted or marked done.
 
 `Shape.lean` defines a finite root observation over existing indexed Syn,
 not a replacement AST. Its inhabited representatives are syntax witnesses,
@@ -964,3 +972,65 @@ splitting, simple-root discrimination, token-level conditional uniqueness/
 association, general compound expression/header/body fuel coverage, full
 repository gates and whole-scope reviews/acceptance. SG-CEX-01 remains
 OPEN/REFUTED. The original persistent goal remains active and incomplete.
+
+
+## Scope hold Q-ATOM: ownership of missing opaque-atom proofs
+
+Stable question ID: Q-ATOM. Sources: original G11 queue 2–3, the instruction
+"Expression subtrees are read-only atoms", and the prohibitions on weakening
+premises or changing producer interfaces. This hold is a scope interpretation
+question, not a failed Lean proof or an approval to add assumptions. The
+original goal and all original theorem obligations are preserved.
+
+Question: Does treating expression subtrees as read-only atoms permit this
+lane to prove local boundary/head/fuel lemmas by inspecting immutable existing
+expression/type/argument Syn and Print/Parser clauses, without expression
+uniqueness or producer changes, or must an owning lane supply a pinned proved
+atom interface before general statement composition resumes?
+
+Options (no recommendation or assumed approval):
+
+- Local proof-only boundary/fuel work: permit those lemmas inside the existing
+  H28 namespace, with immutable producers, all existing premises preserved and
+  SOL-EU still excluded. This permits the dependent general work to continue.
+- Keep expression atoms opaque: coordinator/owning lane supplies a proved,
+  pinned delimiter/head/structural-fuel API, then H28 resumes composition.
+  Dependent general results remain open while that API is unavailable.
+
+Two independent read-only audits found no existing API that removes this
+choice. Parser.lean defines expr/binary/unary/postLoop and token-count fuel,
+but proves no general structural fuel sufficiency. Print.lean defines yield,
+toks and Derives but no atom balance/head theorem. Prec.lean's proved
+prec_root extracts the node contract, not token boundaries. Check.lean's
+parseExpr_derives requires an already successful parse; using it as a
+completeness premise would violate the assignment. ExprExamples provides
+finite coverage only. docs/feature-work/frontend-parse.md lines 435–438 and
+587–589 explicitly leave general expression completeness/unambiguity open.
+Static inference and JSON-decoder theorems concern other judgments.
+Both audits used no Lean/server/builds and inferred no human authorization.
+Their exact scope evidence is saved in scope-audit-q-atom.json.
+
+The completed permitted backfill is committed and sealed through M; no
+expression-level induction, producer interface or new assumed atom contract
+was introduced during this hold. Remaining general balance/simple-root/
+compound fuel and token-association work stays explicitly unfinished.
+Questions or explanations alone do not authorize either option.
+
+Independent light static checks at 6a8d86b07d8c833c456842b8ebeaaa961c525736:
+
+| Command | Outcome | Evidence |
+| --- | --- | --- |
+| bash scripts/check-doc-paths.sh | pass, 11.13s, RSS 7076 KiB | static-scope-audit-1793810048961335110/doc-paths.log |
+| bash scripts/check-trust.sh | pass, 13.23s, RSS 337256 KiB; 3732 sources, 285 inventoried sites, 0 findings | static-scope-audit-1793810048961335110/trust.log |
+| node scripts/check-layers.mjs | pass, 0.40s, RSS 182548 KiB; 559 core modules, 0 forbidden reaches | static-scope-audit-1793810048961335110/layers.log |
+| bash scripts/coord-tools/register.sh --check | fail, 0.10s; stale shared roots missing H28 imports | static-scope-audit-1793810048961335110/roots.log |
+
+All paths above are under /workspace/h28-statement-grammar-evidence.
+The local registration manifest enumerates all 60 new source modules.
+Shared/generated roots remain unchanged as explicitly required; the failed
+roots gate is retained for central integration, never reported as PASS.
+These static checks are not the unrun full repository/Lean final gate.
+An earlier static timing setup failed because this host lacks /usr/bin/time;
+no gate ran in that attempt. Its failure record is sealed, and the actual
+checks use OS wait4 timing/RSS instead. Lean checks still use the established
+bounded Docker runtime and its /usr/bin/time, without changing proof budgets.
