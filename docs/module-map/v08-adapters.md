@@ -484,3 +484,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureStringConversion.lean` | Published allocation transport for typed fields/argument evidence; actual calldata-string copy before converted tails and custom errors. |
 | `Solidity/Lowering/V08/LiteralFailureStringConversionControls.lean` | StringMixed execution with real string/byte tags, old aliases, copied packets and zero/one/two-copy timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureCopySequence.lean` | Arbitrary supported local conversion sequences; actual identity/byte/string steps, reached values/fields, preservation and exact object counts. |
+| `Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean` | FieldMix7 with three interleaved copies, full error/copy outputs, old aliases and zero/one/two/three-copy timeout states. |

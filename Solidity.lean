@@ -1922,6 +1922,8 @@ import Solidity.Lowering.V08.LiteralFailureChoiceDecodeControls
 import Solidity.Lowering.V08.LiteralFailureControls
 import Solidity.Lowering.V08.LiteralFailureConvertedFields
 import Solidity.Lowering.V08.LiteralFailureConvertedFieldsControls
+import Solidity.Lowering.V08.LiteralFailureCopySequence
+import Solidity.Lowering.V08.LiteralFailureCopySequenceControls
 import Solidity.Lowering.V08.LiteralFailureDynamicError
 import Solidity.Lowering.V08.LiteralFailureDynamicErrorControls
 import Solidity.Lowering.V08.LiteralFailureDynamicListError
