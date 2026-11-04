@@ -15,13 +15,13 @@
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Arbitrary maximal token runs, elementary/path/function prefixes and balanced type-array spines reconstruct word cuts under concrete follower conditions. Deriving type followers inside certified primary contexts remains open."
+    "evidence": "Actual certified primary spines derive first-postfix followers internally, including original not-new restrictions. All9primary word-prefix cuts recover actual boundaries; all previous arbitrary delimiter helpers retained."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "Rootlevels agree through14 and all5postfix families reconstruct when bothlevel15. Maximal type-word prefix cuts have explicit finite token-boundary helpers; original certified15vs16/primary link and recursive identity remain open."
+    "evidence": "All certified root LEVELS0through16 reconstruct, including15vs16 from original primary spines. All5postfix kinds reconstruct at15 and9primary prefix families are exhaustive. Complete recursive root/tree identity remains open."
   },
   {
     "id": "EU-05",
@@ -33,7 +33,7 @@
     "id": "EU-06",
     "obligation": "primary/type/tuple/list/option/call argument uniqueness",
     "status": "partial",
-    "evidence": "Existing postfix/arg/name spans retained; all type words have actual atom/spine decomposition and elementary/path/mapping/fn prefix cuts at arbitrary lengths/layouts. Full primary and recursive type/list/argument/tree identity remain open."
+    "evidence": "All9primary prefixes reconstruct from actual independent layouts; new type follower boundary now derived inside original certificate context. Recursive type/list/argument/expression identity remains open."
   },
   {
     "id": "EU-07",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary array type/new families have exact inhabited certificates. Kernel rawnewarray/directnewindex wordcollision is rejected by ORIGINAL indexnewprecfalse. Array/payable/view followercountercontrols retain necessary helper boundaries; not a certifiedambiguity. Prior families retained."
+    "evidence": "Arbitrary postfix towers and new-array depths reconstruct root levels against any certified competitor. Direct-new square/period followers refuted, call/options permitted. Existing inhabited families/raw-refused collision retained."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "69 modules/1007 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "78 modules/1064 declarations inventoried with exact actual kernel signatures and standard-only axiom guards; final kernel gates pass without owned warnings."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at69 pinned-local frozen registrations; trust3741zero/layers559zero pass; central axiom inventory zero errors but1007 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at78 pinned-local frozen registrations; trust3750zero/layers559zero pass; central axiom-source zero errors but1064unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Finder/skeptic accepted math; G0 direct indexed scalar classifier finding fixed through existing unindexed Source.Ctor API and independently accepted. Final currentdefinitions diagnostics/kernel pass. See evidence/reviews-typeprefix.json."
+    "evidence": "Independent finder/skeptic source and metadata reviews accept partial root-level checkpoint after control follower mismatch and stale-current-summary findings were fixed. Both reran/checkpoint controls, no remaining findings, no Lean server/edits. See evidence/reviews-primary.json."
   },
   {
     "id": "EU-14",

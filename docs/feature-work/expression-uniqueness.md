@@ -2,7 +2,7 @@
 
 Status: substantive partial proof checkpoint. H26 resolved runtime setup on this
 same VM; EU-R1 is closed without changing limits. The full assignment is NOT
-complete. Expression root reconstruction, public uniqueness and the accepted-tree
+complete. Recursive expression tree reconstruction, public uniqueness and the accepted-tree
 corollary remain open. No ambiguity has been established.
 
 Base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
@@ -42,9 +42,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 1007 source declarations with source signatures;
+`declarations.json` enumerates all 1064 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The sixty-nine modules are proposed for coordinator registration, with module-map rows,
+The seventy-eight modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -81,7 +81,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 
 | Module | Actual result and remaining boundary |
 |---|---|
-| `TokenSplit` | Arbitrary-list delimiter execution, append and untouched-stack-suffix laws, equivalence of empty-stack balance and contextual balance, enclosure, mixed nesting, skipping enclosed markers and whole token-cut uniqueness. Deriving scanner hypotheses from every expression certificate remains open. |
+| `TokenSplit` | Arbitrary-list delimiter execution, append and untouched-stack-suffix laws, equivalence of empty-stack balance and contextual balance, enclosure, mixed nesting, skipping enclosed markers and whole token-cut uniqueness. Later expression-category modules derive the scanner hypotheses from actual certificates. |
 | `Refusals` | Whole-`Syn.prec` refusal for both prefix/postfix readings, both conditional-assignment readings, all postfix-base classes, direct-new alternatives and all left/right association classes, for arbitrary subtrees and parameterized operator values. These constrain trees; they do not reconstruct roots from tokens. |
 | `Families` | Unbounded certified negative-prefix family with exact yields and injectivity in depth; arbitrary-depth grouping precedence preservation. Its grouping-yield obligation is now discharged by `Grouping`. |
 | `Fragments` | Arbitrary-byte/length-list reconstruction, exact fragment count, independent-layout byte uniqueness, inhabited single and zero-length-leading fragment controls and distinct layouts. |
@@ -94,7 +94,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionBalance` | The expression/type/parameter/argument/list/option closure yields balanced items; `expr_derives_balanced` derives balance from the original token certificate. Arbitrary closing-token prefixes cannot be expression yields. |
 | `DelimiterReconstruction` | Enclosing payload and suffix spans are reconstructed from actual certificates; closing-selector skip facts are derived, not supplied as premises. |
 | `Grouping` | Actual group certificates invert to child certificates; group-prefix spans are unique. Arbitrary grouping depth has exact tokens, inhabited certification, token-depth injectivity and tree-depth injectivity for a fixed printable base. |
-| `ReverseSplit` | Mirrored step/run/skip reversal at arbitrary stacks, suffix-scanned last-marker cuts, inhabited arbitrary mixed nesting with hidden add markers, and an explicit malformed-word negative control. Operator-selector freedom from precedence remains open. |
+| `ReverseSplit` | Mirrored step/run/skip reversal at arbitrary stacks, suffix-scanned last-marker cuts, inhabited arbitrary mixed nesting with hidden add markers, and an explicit malformed-word negative control. Later precedence modules derive operator-selector freedom. |
 | `SeparatorSplit` | Actual commaSep injectivity on nonempty component vectors, allowing empty words; arbitrary hole-count reconstruction; explicit zero-vector versus single-empty collision. |
 | `CommaFreeAlgebra` | Comma-free token/item/attribute algebra; enclosures need only balanced interiors, allowing internal commas. |
 | `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
@@ -128,7 +128,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `UnaryRoot` | Actual prefix/suffix child words and operators reconstruct; prefix marker0, suffix markerpositive and higher absence distinguish roots. |
 | `UnaryControls` | All prefix/grouped-suffix operators have arbitrary-depth inhabited exact yields and markers, retaining ungrouped nesting refusals. |
 | `LayoutBoundary` | Existing printer extension/trimming composition and complete expression-category closure; actual partial expression yields obtain fully consumed Derives witnesses. |
-| `RootLevels` | Original certified root levels agree whenever either is<=14, also for independent partial layouts. Postfix15 versus primary16 remains open. |
+| `RootLevels` | Original certified root levels agree whenever either is<=14, also for independent partial layouts. AllRootLevels closes postfix15 versus primary16 from certified primary spines. |
 | `LastEnclosure` | Arbitrary trailing balanced enclosures reconstruct their payload and preceding word using the existing mirrored first-cut theorem. |
 | `PostfixYieldSplit` | Actual index/slice/call/options/namedArg executions invert into existing child states; callArgs gives its genuine balanced parentheses payload. |
 | `PostfixSpans` | Actual index/slice/call/options children reconstruct; index and slice roots are disjoint; options preserve the full tail word vector. |
@@ -149,11 +149,20 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `TypeAtomPrefix` | All four existing non-array type families have actual maximal word-prefix cuts. |
 | `TypePrefix` | Arbitrary type words reconstruct maximal prefixes from actual atom/spine executions and concrete followers. |
 | `TypePrefixControls` | Arbitrary array/new witnesses; original direct-new-index refusal rejects a kernel-proved raw collision; follower countercontrols. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1007 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `PostfixFollowers` | Concrete first-postfix token followers retain the original isNew guard; new followers derive TypeBoundary internally. |
+| `PrimarySpine` | All certified high expressions expose an existing level16primary, actual independent layout execution and exact postfix word; empty postfix words imply the original node is primary. |
+| `PrimaryYieldSplit` | All new/payable/meta/tuple/inline actual printer parts and balanced payloads recover existing child states. |
+| `LiteralPrefix` | Arbitrary same-kind literal token runs reconstruct maximal prefixes; unit denomination separates ordinary numeric literals under derived postfix followers. |
+| `PrimaryPrefixParts` | Scalar, keyword and balanced-enclosure primary prefix cuts; new types use the internally derived follower boundary. |
+| `PrimaryStart` | Existing unindexed Ctor and actual first-token classes distinguish primary families; literal/unit share a header class until the proved follower-sensitive cut. |
+| `PrimaryPrefix` | Exhaustive9primary families reconstruct actual word prefixes, including literal/unit crosscase disjointness; recursive tree identity remains open. |
+| `AllRootLevels` | All certified root levels0through16 reconstruct at independent actual layouts; primary spine and prefix cut derive15versus16 separation. |
+| `RootLevelControls` | Arbitrary postfix towers and new-array depths reconstruct levels against any certified competitor; direct-new square/period first followers refuted, call/options heads permitted without arbitrary-tail validity. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 1064 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
-skip facts from certificates, while arbitrary precedence-operator root
+skip facts from certificates, while recursive tree
 reconstruction remains open. Likewise
 `mkPayload` in a fragment helper is a token-constructor left-inverse condition;
 all three concrete string instantiations discharge it by `rfl`.
@@ -190,13 +199,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-typeprefix-final.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-primary-final.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-typeprefix-final.inside.json`. It took 32.480578 seconds, child peak RSS
-262700 KiB, exact container peak 855166976 bytes, minimum parent headroom
-9682665472 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-primary-final.inside.json`. It took 34.485883 seconds, child peak RSS
+266808 KiB, exact container peak 850022400 bytes, minimum parent headroom
+9656848384 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -208,10 +217,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these sixty-nine modules lack central root imports. The orphan gate
-reported the same sixty-nine. Source trust passed (3741 sources, zero findings), and
+check: exactly these seventy-eight modules lack central root imports. The orphan gate
+reported the same seventy-eight. Source trust passed (3750 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 1007 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 1064 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -220,8 +229,9 @@ They remain distinct from this passing partial proof checkpoint.
 
 ## Reviews and next work
 
-Separate read-only finder and skeptic reviews used no Lean server. Neither found
-an ambiguity or a defect in the helper proofs. They caught stale inventory-only
+Separate read-only finder and skeptic reviews used no Lean server. No certified
+ambiguity has been found. Review findings were fixed and rechecked; no remaining
+findings are reported for the current partial checkpoint. They caught stale inventory-only
 documentation/manifest/checker claims (F2/F3); these were replaced with the actual
 proof state and current-source evidence checks. Final review also found missing
 fixture-statement linkage (F4/S3) and unchecked signature-command success (S2).
@@ -232,17 +242,15 @@ and has explicit corruption controls for these findings. The earlier missing pin
 results are saved under the evidence directory; future proof checkpoints still
 require their own reviews.
 
-The expression-closure delimiter invariant and grouped/enclosed span reconstruction
-are now proved. The comma separator and joint loose/non-minus binary marker invariants are now
-derived from certificates. The rank-ten operand-state invariant is now proved. Conditional colon spans are now proved. Next complete high-root span
-decomposition and recursive child identities. A raw
-punctuation split is insufficient: `-` is both a prefix and binary token, and
-conditional middle expressions mask nested assignments/colons. Prove those facts;
-do not add a desired split, parse completeness or uniqueness as a premise.
-Then finish multi-component tuple/list reconstruction, primary cross-root disjointness, member/index/
-slice/call/options reconstruction and recursive type uniqueness, derive the public
-theorem and accepted-tree corollary, and complete full boundary controls and gates.
-The full sealed proof handoff remains open. Current artifacts are explicitly a
+All expression/category delimiter, comma, precedence-marker and operand-state
+invariants are derived from actual certificates. Conditional, unary, binary,
+postfix and argument word spans reconstruct, and all root levels0through16 agree.
+Primary prefix cuts now derive the new-type boundary in its original certified
+context. Next prove recursive identities for intrinsic types/parameters,
+optional/list components, arguments and expression children, then assemble the
+public theorem and parseCat accepted-tree corollary. Do not add a desired split,
+parse completeness or uniqueness as a premise. Full boundary acceptance and
+registration-dependent gates remain open. Current artifacts are explicitly a
 partial proof checkpoint. No push, merge, PR, producer edit or scope expansion.
 
 ## Balance and grouping checkpoint
@@ -597,3 +605,64 @@ unused simp arguments were removed. Independent finder/skeptic source verdicts
 and the G0 resolution are in `evidence/reviews-typeprefix.json`. Full primary
 root reconstruction and recursive expression/type/list/argument uniqueness,
 parseCat corollary and registration-dependent full gates remain open.
+
+
+## Primary prefixes and complete root levels checkpoint
+
+Nine modules add 57 declarations, totaling78 modules/1064 declarations.
+Actual certified high expressions expose an existing level16primary node and
+its exact executed token word, followed by actual postfix tokens. Original
+not-new checks derive first-follower restrictions internally; calls/options
+remain permitted for new bases. No second AST, desired span, desired uniqueness
+or new producer/target premise is introduced. Existing type boundary helpers are
+now discharged inside the original certified new-primary context.
+
+Every one of the9primary families has a maximal prefix cut from actual
+independent layouts. Literal fragments form arbitrary same-kind maximal runs;
+unit and ordinary numeric primaries are separated by the denomination token and
+actual postfix followers. Existing unindexed Ctor classifies primary roots; its
+inherited Source matcher/cost remains unchanged. Keyword/enclosure helpers and
+first-token classes give exhaustive primary-prefix reconstruction. These cuts
+with the certified primary spine close15versus16. All certified expression root
+LEVELS0through16 now agree for equal yields; this does not establish recursive
+tree identity. CertifiedYieldUnique and the parseCat corollary remain OPEN.
+
+Arbitrary postfix towers and new-array depths reconstruct levels against any
+certified competitor. Direct-new square/member first followers are refuted;
+call/options followers remain permitted at every depth. These intrinsic controls
+are separate from the unchanged130external parsing-only observations.
+
+A general levelbound simplification hit the unchanged200000heartbeat budget;
+29explicit closed constructor bounds fixed it without raising budgets. Earlier
+missing precedence import and control enclosure-versus-head mismatches remain
+retained in failed logs. Both independent source reviewers found the latter;
+direct token-follower constructors fix the proofs with statements unchanged.
+Final signatures and all1064exact standard-only axiom guards pass kernel and
+MCP checks without owned warnings. Actual Lean4.24.0/Lake5.0.0-src+797c613 and
+KeySort377/131 pass before RUNTIME_GATE_PASS under approved hard limits.
+Acceptance, metadata reviews and global gates are being refreshed. The
+call/options controls permit first-token followers only; they do not assert
+that an arbitrary tail is a valid call/options payload. No complete assignment
+claim is made here.
+
+
+### Primary checkpoint handoff
+
+Final independent finder and skeptic source/metadata verdicts accept this partial
+checkpoint after the follower-proof and stale-current-summary fixes. Their
+records are `tests/sol-expression-uniqueness/evidence/reviews-primary.json`.
+Final bounded commands are signature-audit-primary-final (kernel types/axioms),
+checkpoint-proof-primary-final (versions, KeySort, MCP and exact pin guards),
+primary-acceptance, primary-controls and primary-doc-paths-final: all PASS.
+The primary-full-acceptance command exits1 ACCEPTANCE_OPEN. Global run-lean and
+orphans exit1 at78frozen registrations before full library/TestSuite build;
+trust3750zero and layers559zero pass, central axiom-source has zero errors but
+1064unrecorded pins and exits1. These outcomes are preserved, not waived.
+
+The checkpoint commit contains actual proofs/tests and exhaustive78/1064
+registration/signature/axiom artifacts, all29constructor fixtures and8exactsource
+pins. The immutable packet beside this checkout records its full committed head,
+exact original base/branch/repository, full original patch/bundle, command
+exits/times/RSS/cgroup peaks and SHA256 manifest. Continue the original goal on
+the same branch: recursive tree identity, public uniqueness, accepted-tree
+corollary and full integration gates remain unfinished. No goal completion.

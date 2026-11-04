@@ -5,6 +5,7 @@
     "Solidity/Frontend/ExpressionUniqueness/AddFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/AddRoot.lean",
     "Solidity/Frontend/ExpressionUniqueness/AddScan.lean",
+    "Solidity/Frontend/ExpressionUniqueness/AllRootLevels.lean",
     "Solidity/Frontend/ExpressionUniqueness/ArgumentSpans.lean",
     "Solidity/Frontend/ExpressionUniqueness/ArgumentWords.lean",
     "Solidity/Frontend/ExpressionUniqueness/AttributeBalance.lean",
@@ -38,6 +39,7 @@
     "Solidity/Frontend/ExpressionUniqueness/Grouping.lean",
     "Solidity/Frontend/ExpressionUniqueness/LastEnclosure.lean",
     "Solidity/Frontend/ExpressionUniqueness/LayoutBoundary.lean",
+    "Solidity/Frontend/ExpressionUniqueness/LiteralPrefix.lean",
     "Solidity/Frontend/ExpressionUniqueness/LowControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/LowFreeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/LowRoot.lean",
@@ -45,12 +47,19 @@
     "Solidity/Frontend/ExpressionUniqueness/OperandMode.lean",
     "Solidity/Frontend/ExpressionUniqueness/OperandModeAlgebra.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixControls.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PostfixFollowers.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixRootKind.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixSpans.lean",
     "Solidity/Frontend/ExpressionUniqueness/PostfixYieldSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/Primary.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryPrefix.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryPrefixParts.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimarySpine.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryStart.lean",
+    "Solidity/Frontend/ExpressionUniqueness/PrimaryYieldSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/Refusals.lean",
     "Solidity/Frontend/ExpressionUniqueness/ReverseSplit.lean",
+    "Solidity/Frontend/ExpressionUniqueness/RootLevelControls.lean",
     "Solidity/Frontend/ExpressionUniqueness/RootLevels.lean",
     "Solidity/Frontend/ExpressionUniqueness/SeparatorSplit.lean",
     "Solidity/Frontend/ExpressionUniqueness/SpanControls.lean",
@@ -153,6 +162,10 @@
     "Solidity.Frontend.ExpressionUniqueness.lastAdd_marker",
     "Solidity.Frontend.ExpressionUniqueness.lastAdd_none_of_skip",
     "Solidity.Frontend.ExpressionUniqueness.lastAdd_cut_unique",
+    "Solidity.Frontend.ExpressionUniqueness.expression_level_bound",
+    "Solidity.Frontend.ExpressionUniqueness.postfix_primary_yield_disjoint",
+    "Solidity.Frontend.ExpressionUniqueness.partial_root_levels_equal",
+    "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
     "Solidity.Frontend.ExpressionUniqueness.positional_yield_parts",
     "Solidity.Frontend.ExpressionUniqueness.named_yield_parts",
     "Solidity.Frontend.ExpressionUniqueness.ArgumentVectorSpans",
@@ -561,6 +574,15 @@
     "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_layout",
     "Solidity.Frontend.ExpressionUniqueness.expression_yield_trim",
     "Solidity.Frontend.ExpressionUniqueness.expression_partial_derives",
+    "Solidity.Frontend.ExpressionUniqueness.literalTokenSelect",
+    "Solidity.Frontend.ExpressionUniqueness.fragsP_allTokens",
+    "Solidity.Frontend.ExpressionUniqueness.literalP_allTokens",
+    "Solidity.Frontend.ExpressionUniqueness.literal_yield_allTokens",
+    "Solidity.Frontend.ExpressionUniqueness.literal_prefix_kinds_equal",
+    "Solidity.Frontend.ExpressionUniqueness.literal_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.isDenomToken",
+    "Solidity.Frontend.ExpressionUniqueness.literal_unit_prefix_disjoint",
+    "Solidity.Frontend.ExpressionUniqueness.unit_yield_prefix_unique",
     "Solidity.Frontend.ExpressionUniqueness.assignment_yield_join",
     "Solidity.Frontend.ExpressionUniqueness.conditional_yield_join",
     "Solidity.Frontend.ExpressionUniqueness.assignment_prec_join",
@@ -695,6 +717,16 @@
     "Solidity.Frontend.ExpressionUniqueness.optionalHoles_yield",
     "Solidity.Frontend.ExpressionUniqueness.optionalHoles_nonemptyWords_refuted",
     "Solidity.Frontend.ExpressionUniqueness.expressionList_empty_component_impossible",
+    "Solidity.Frontend.ExpressionUniqueness.PostfixFollower",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_nil",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_parens",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_braces",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_square",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_period",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_append",
+    "Solidity.Frontend.ExpressionUniqueness.word_append_nonempty_right",
+    "Solidity.Frontend.ExpressionUniqueness.new_postfixFollower_typeBoundary",
+    "Solidity.Frontend.ExpressionUniqueness.postfixFollower_tokenBoundary",
     "Solidity.Frontend.ExpressionUniqueness.postfixRootKind",
     "Solidity.Frontend.ExpressionUniqueness.postfixEndCode",
     "Solidity.Frontend.ExpressionUniqueness.tokenEndClass",
@@ -747,6 +779,34 @@
     "Solidity.Frontend.ExpressionUniqueness.literal_head_kind",
     "Solidity.Frontend.ExpressionUniqueness.literal_kind_determined",
     "Solidity.Frontend.ExpressionUniqueness.literal_same_yield",
+    "Solidity.Frontend.ExpressionUniqueness.expr_level_sixteen_cases",
+    "Solidity.Frontend.ExpressionUniqueness.primary_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.ident_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.elem_expr_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.new_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.payable_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.meta_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.tuple_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.inline_yield_prefix_unique",
+    "Solidity.Frontend.ExpressionUniqueness.PrimarySpine",
+    "Solidity.Frontend.ExpressionUniqueness.PrimarySpineProperty",
+    "Solidity.Frontend.ExpressionUniqueness.primary_spine_property",
+    "Solidity.Frontend.ExpressionUniqueness.high_expr_primary_spine",
+    "Solidity.Frontend.ExpressionUniqueness.primaryRootKind",
+    "Solidity.Frontend.ExpressionUniqueness.primaryTokenKind",
+    "Solidity.Frontend.ExpressionUniqueness.PrimaryStart",
+    "Solidity.Frontend.ExpressionUniqueness.literalToken_primaryKind",
+    "Solidity.Frontend.ExpressionUniqueness.primary_yield_start",
+    "Solidity.Frontend.ExpressionUniqueness.primary_prefix_kinds_equal",
+    "Solidity.Frontend.ExpressionUniqueness.new_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.payable_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.meta_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.tuple_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.inline_yield_parts",
+    "Solidity.Frontend.ExpressionUniqueness.payable_actual_parens",
+    "Solidity.Frontend.ExpressionUniqueness.meta_actual_parens",
+    "Solidity.Frontend.ExpressionUniqueness.tuple_actual_parens",
+    "Solidity.Frontend.ExpressionUniqueness.inline_actual_square",
     "Solidity.Frontend.ExpressionUniqueness.refused_of_node_false",
     "Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused",
     "Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused",
@@ -796,6 +856,12 @@
     "Solidity.Frontend.ExpressionUniqueness.repeated_add_balanced",
     "Solidity.Frontend.ExpressionUniqueness.nested_add_markers_control",
     "Solidity.Frontend.ExpressionUniqueness.malformed_reverse_scan_control",
+    "Solidity.Frontend.ExpressionUniqueness.postfixTower_root_reconstructed",
+    "Solidity.Frontend.ExpressionUniqueness.new_array_root_reconstructed",
+    "Solidity.Frontend.ExpressionUniqueness.direct_new_square_follower_refuted",
+    "Solidity.Frontend.ExpressionUniqueness.direct_new_period_follower_refuted",
+    "Solidity.Frontend.ExpressionUniqueness.new_array_call_follower",
+    "Solidity.Frontend.ExpressionUniqueness.new_array_options_follower",
     "Solidity.Frontend.ExpressionUniqueness.expr_level_thirteen_cases",
     "Solidity.Frontend.ExpressionUniqueness.loose_higher_root_disjoint",
     "Solidity.Frontend.ExpressionUniqueness.through_unary_higher_root_disjoint",
@@ -1103,6 +1169,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/AllRootLevels.lean",
+      "description": "Reconstruct every certified expression precedence level"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/ArgumentSpans.lean",
       "description": "Positional and named argument constructors reconstruct their word vectors"
     },
@@ -1268,6 +1339,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/LiteralPrefix.lean",
+      "description": "Literal primary words reconstruct their maximal prefix"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/LowControls.lean",
       "description": "Inhabited loose-root controls with arbitrary conditional middle assignments"
     },
@@ -1303,6 +1379,11 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PostfixFollowers.lean",
+      "description": "Concrete followers of an existing primary expression"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/PostfixRootKind.lean",
       "description": "The five postfix constructor families reconstruct from actual words"
     },
@@ -1323,6 +1404,31 @@
     },
     {
       "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryPrefix.lean",
+      "description": "Reconstruct the complete primary token prefix"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryPrefixParts.lean",
+      "description": "Primary word-prefix cuts from actual intrinsic executions"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimarySpine.lean",
+      "description": "Certified high expressions expose an existing primary and actual postfix word"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryStart.lean",
+      "description": "Actual primary first-token classes"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/PrimaryYieldSplit.lean",
+      "description": "Actual primary printer components and balanced enclosures"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/Refusals.lean",
       "description": "Whole-certificate refusal and precedence boundary families"
     },
@@ -1330,6 +1436,11 @@
       "file": "docs/module-map/source-definitions.md",
       "module": "Frontend/ExpressionUniqueness/ReverseSplit.lean",
       "description": "Reverse delimiter scanning and last-marker reconstruction"
+    },
+    {
+      "file": "docs/module-map/source-definitions.md",
+      "module": "Frontend/ExpressionUniqueness/RootLevelControls.lean",
+      "description": "Arbitrary primary/postfix boundary controls"
     },
     {
       "file": "docs/module-map/source-definitions.md",
@@ -1436,7 +1547,7 @@
   "central_axiom_registration": {
     "file": "scripts/g07-axiom-pins.json",
     "source": "tests/sol-expression-uniqueness/axioms.json",
-    "count": 1007,
+    "count": 1064,
     "status": "pending coordinator integration; shared trust inventory frozen"
   },
   "published_integration": {

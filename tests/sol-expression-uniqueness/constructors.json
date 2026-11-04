@@ -5,7 +5,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
+    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_index (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -15,7 +15,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
+    "root_reconstruction": "partial: actual child words/layout states reconstruct from balanced trailing square cut; slice colon reconstructs with optional empty endpoints; index/slice roots are disjoint. Other postfix/primary root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_slice (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -25,7 +25,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew; address uses Tok.elem address",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base word/state and arbitrary member name reconstruct, including special address spelling. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
+    "root_reconstruction": "partial: actual base word/state and arbitrary member name reconstruct, including special address spelling. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_member (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -35,7 +35,7 @@
     "level": 15,
     "precNode": "base.level >= 15; at least one named argument",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base/first-argument words and individual tail-argument vector reconstruct through balanced braces and comma cuts. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
+    "root_reconstruction": "partial: actual base/first-argument words and individual tail-argument vector reconstruct through balanced braces and comma cuts. Cross-root classification and recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_callOptions (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -45,7 +45,7 @@
     "level": 15,
     "precNode": "base.level >= 15",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: actual base and argument words/states reconstruct through trailing parentheses; positional/named argument constructors are disjoint and each recovers its actual component word vector, including empty lists. Cross-root/recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15",
+    "root_reconstruction": "partial: actual base and argument words/states reconstruct through trailing parentheses; positional/named argument constructors are disjoint and each recovers its actual component word vector, including empty lists. Cross-root/recursive identity remain open; exact postfix constructor family now reconstructs whenever both roots have level15; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_call (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -55,7 +55,7 @@
     "level": 16,
     "precNode": "true",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_payableConv (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -65,7 +65,7 @@
     "level": 16,
     "precNode": "direct type is not elem addressPayable, mapping or fnType",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_metaType (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -75,7 +75,7 @@
     "level": 13,
     "precNode": "operand.level >= 13 and operand.level != 14",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unaryPrefix (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -85,7 +85,7 @@
     "level": 14,
     "precNode": "operand.level >= 15",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual yields reconstruct operator and child token word/execution; prefix position0 and suffix positive-position markers separate higher roots. Root levels agree through14; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unarySuffix (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -95,7 +95,7 @@
     "level": 12,
     "precNode": "a.level >= 13 and b.level >= 12",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_exp (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -105,7 +105,7 @@
     "level": 11,
     "precNode": "a.level >= 11 and b.level >= 12",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_mulDivMod (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -115,7 +115,7 @@
     "level": 10,
     "precNode": "a.level >= 10 and b.level >= 11",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -125,7 +125,7 @@
     "level": 9,
     "precNode": "a.level >= 9 and b.level >= 10",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_shift (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -135,7 +135,7 @@
     "level": 8,
     "precNode": "a.level >= 8 and b.level >= 9",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitAnd (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -145,7 +145,7 @@
     "level": 7,
     "precNode": "a.level >= 7 and b.level >= 8",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitXor (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -155,7 +155,7 @@
     "level": 6,
     "precNode": "a.level >= 6 and b.level >= 7",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitOr (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -165,7 +165,7 @@
     "level": 5,
     "precNode": "a.level >= 5 and b.level >= 6",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_order (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -175,7 +175,7 @@
     "level": 4,
     "precNode": "a.level >= 4 and b.level >= 5",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_equality (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -185,7 +185,7 @@
     "level": 3,
     "precNode": "a.level >= 3 and b.level >= 4",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_and (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -195,7 +195,7 @@
     "level": 2,
     "precNode": "a.level >= 2 and b.level >= 3",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_or (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -205,7 +205,7 @@
     "level": 1,
     "precNode": "c.level >= 2 and f.level >= 1; t unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificate and actual partial printer executions reconstruct condition/question and true/outer-colon/false spans, deriving low-marker freedom and paired conditional punctuation internally; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificate and actual partial printer executions reconstruct condition/question and true/outer-colon/false spans, deriving low-marker freedom and paired conditional punctuation internally; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_cond (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -215,7 +215,7 @@
     "level": 0,
     "precNode": "a.level >= 2; b unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open",
+    "root_reconstruction": "partial: original certificates and actual partial printer executions reconstruct both child token spans and intermediate layout states; operator values reconstruct where applicable; recursive child-tree identity remains open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_assign (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -225,7 +225,7 @@
     "level": 16,
     "precNode": "true",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: arbitrary actual type maximal-prefix cuts proved under concrete token followers; deriving those followers from original certified primary/postfix context remains open. Raw new-array/index collision has original direct-new-index refusal, not certified ambiguity",
+    "root_reconstruction": "partial: arbitrary actual type maximal-prefix cuts proved under concrete token followers; deriving those followers from original certified primary/postfix context remains open. Raw new-array/index collision has original direct-new-index refusal, not certified ambiguity; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_new (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -235,7 +235,7 @@
     "level": 16,
     "precNode": "true; first optional component always present in representation",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_tuple (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -245,7 +245,7 @@
     "level": 16,
     "precNode": "true; at least one expression",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_inlineArray (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -255,7 +255,7 @@
     "level": 16,
     "precNode": "true",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_ident (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -265,7 +265,7 @@
     "level": 16,
     "precNode": "true; fragments for str, hexStr, unicodeStr",
     "layout": "Choice.frags for string families; none for bool/num",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "literal_same_yield proves the Lit-vs-Lit case; cross-expression-root reconstruction open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_lit (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -275,7 +275,7 @@
     "level": 16,
     "precNode": "true",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_litUnit (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -285,7 +285,7 @@
     "level": 16,
     "precNode": "true; intrinsic proof e != addressPayable",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "open; certified_root_levels_equal now reconstructs every root LEVEL0through16; all9primary prefix families covered via actual source executions and certificate-derived followers. Recursive tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_elemType (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   }

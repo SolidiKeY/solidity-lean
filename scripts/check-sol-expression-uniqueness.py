@@ -115,7 +115,7 @@ def audit_checkpoint(modules, decls, axioms):
                 any(e["type"] == "ParserError" for e in row["errors"]), "compiler refusal stage differs")
     require(read("evidence/compiler-pinned.inside.json")["exit"] == 0, "external compiler command failed")
     print("CHECKPOINT_PASS: exact current proof sources, standard axiom pins, runtime and 130 external parsing controls")
-    print("Partial checkpoint only: expression root reconstruction and global uniqueness remain OPEN.")
+    print("Partial checkpoint only: recursive expression tree reconstruction and global uniqueness remain OPEN.")
 
 
 def main():
