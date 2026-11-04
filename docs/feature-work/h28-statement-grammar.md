@@ -834,3 +834,62 @@ simple-root discrimination, token-level conditional uniqueness/association,
 remaining compound statement universal fuel coverage, full repository gates
 and whole-scope reviews/acceptance remain unfinished. SG-CEX-01 remains
 OPEN/REFUTED; the original persistent goal remains active and incomplete.
+
+
+## Checkpoint L: actual-yield uniqueness of recursive block/control syntax
+
+NestedUnique.lean proves unconditional yield uniqueness within the recursive
+NestedItems fragment, independent of SOL-EU. Given two syntax witnesses with
+depth budgets d and e, nested_items_token_unique gives both actual block
+parser runs a common sufficient fuel d+e+4. The preceding coverage theorem
+derives both successes from syntax; determinism of that actual parser then
+recovers equality of the original intrinsic item lists. No successful parse
+or expression uniqueness is assumed in the final statement.
+
+nested_block_toks proves the canonical actual token yield.
+nested_block_derives_iff characterizes the existing Syn.Derives relation
+exactly: its words equal the witness's braced tokens. The proof accounts for
+the preserved residual layout, so complete toks success requires empty
+layout. nested_block_prefix_unique combines balanced-brace splitting with
+the common-fuel proof to recover both tree equality and suffix equality,
+for arbitrary nested fragment prefixes. nested_block_yield_unique transfers
+this to two actual Derives witnesses of one token stream.
+
+These are tree-equality results for the declared recursive control/block
+fragment, rather than only root or segment equality. They make no claim
+about expression-bearing statements, general dangling-else token association
+or whole-language uniqueness. SG-CEX-01 remains independently OPEN/REFUTED.
+No original theorem premise or exclusion has been weakened or replaced.
+
+Controls contain an inhabited nonempty nested/unchecked mixed tree and its
+actual positive derivation. A universal control recovers that tree from any
+represented candidate deriving its tokens. A nonempty else suffix is also
+recovered. Separate return and break lists have positive actual derivations
+and universally cannot share a yield. Two actual state-threaded yields retain
+different residual layouts, while a nonempty residual layout is proved to
+make toks return none. Thus neither the positive controls nor the uniqueness
+claims depend on an empty or false relation.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/NestedUnique.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793808604360768527 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.NestedUnique | pass; 0.54s timed wall, RSS 402776 KiB | /workspace/h28-statement-grammar-evidence/run-1793808640321070746 |
+| runtime.py diag tests/h28-sol/statement-grammar/NestedUniqueControls.lean | pass, final negative layout control | /workspace/h28-statement-grammar-evidence/run-1793808745156538439 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/NestedUnique.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793808758438462086 |
+| runtime.py gate tests/h28-sol/statement-grammar/NestedUniqueControls.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793808768513010504 |
+
+All five public source theorems use only propext and Quot.sound, as printed
+in the gate log; exact signatures and all control axiom sets are saved.
+No custom axiom, unsafe/native_decide, budget raise, producer interface change
+or expression premise was introduced. The negative layout control rewrite
+already closed its goal; run-1793808711098957163 rejected the redundant rfl,
+which was removed. The failed receipt is retained. Separate read-only finder
+and skeptic pass all source/control statements, without Lean/server/builds.
+Registration is local only.
+
+Remaining original scope includes all-syntax/atom balance, general mixed
+statement splitting, simple-root discrimination, token-level conditional
+uniqueness/association, remaining universal compound statement fuel coverage,
+full repository gates and whole-scope reviews/acceptance. Recursive block/
+control yield uniqueness is now proved, but it is not whole-language
+uniqueness. The original persistent goal remains active and incomplete.
