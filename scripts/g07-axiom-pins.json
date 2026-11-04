@@ -25604,6 +25604,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.array_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.copy_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.load_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.uniform_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceStorageCopyControls.lean:Solidity.Backend.StorageOps.SourceStorageCopy.Controls.certificate": [
   "Classical.choice",
   "Quot.sound",
