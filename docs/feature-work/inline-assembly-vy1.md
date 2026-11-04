@@ -1096,3 +1096,24 @@ full-lane completion.
 Independent read-only finder/skeptic reviews found no issues. Both per-file
 diagnostics report zero errors; fourteen scoped axiom reports contain only
 Lean standard axioms. Full-lane and external compiler/EVM checks remain open.
+
+
+### While and do/while exact-word congruence
+
+`LocalBoolWhileRepresentation.whileLoop` and `doWhileLoop` prove all-fuel
+congruence for the existing runners over related full local frames and equal
+worlds. Their original `LocalBoolControl.Supported` condition and
+`LocalBoolItems.Supported` scoped body certificates remain required.
+Guard-first versus body-first effects, predecessor recursion horizons and
+halted reached contexts/reasons are preserved. The body certificate remains
+restricted to its existing Boolean expressions/declarations; no new
+break/continue or general statement support is claimed.
+Eight controls distinguish false-guard while termination from body-first
+do/while timeout, recursive body timeouts, completed do/while scope restoration,
+guard writes, zero fuel and dirty projection refusal. An intrinsic scoped loop
+witness is inhabited. No Source/runtime definitions, readback policy or
+admission changes; general P16 and full-lane gates remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both modules
+have zero diagnostic errors and passing per-file checks; ten scoped axiom
+reports contain only Lean standard axioms. Final lane gates remain open.
