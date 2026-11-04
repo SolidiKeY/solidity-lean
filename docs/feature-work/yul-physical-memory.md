@@ -1284,3 +1284,14 @@ function cannot recover both identities. This does not select a new decoder or
 prove target allocation, write-alias behavior, initialization reachability, or
 whole shared-zero view/writeback adequacy. A corrupt-header control retains the
 boundary between physical bytes and Source observations.
+
+`SharedZeroLocalWriteback` preserves the identity already held by the actual
+Source local. Preparation checks pointer `96` and its zero header, then returns
+the retained typed value; `writeback` uses actual `writeLoc` and derives whole
+Source-state identity. Read agreement additionally requires the actual local
+binding and empty-object lookup. Controls preserve distinct IDs and a same-ID
+alias, including static local assignment, and reject wrong pointers or headers
+as preparation `None`. A forged-root control deliberately passes physical
+checks, demonstrating that they validate neither reference provenance nor
+emptiness. This is unchanged local writeback, not fresh pointer decoding,
+shared object writes, allocation refinement or complete shared-zero adequacy.
