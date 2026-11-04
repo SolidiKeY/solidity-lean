@@ -423,6 +423,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmTransport.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Roadmap/V16/NativeParentConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/ConditionalStatement.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/ConditionalStatementControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
