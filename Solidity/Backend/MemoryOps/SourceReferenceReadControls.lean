@@ -1,4 +1,5 @@
 import Solidity.Backend.MemoryOps.SourceReferenceRead
+import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
 import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 
@@ -586,5 +587,123 @@ theorem same_pointer_noop (p : Roadmap.Pipeline) (fuel nps : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms wrong_reference_negative
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms computed_reference_client
+
+private def deletedHeap (self : Bool) := (postHeap self).set right (MObj.setElem .dyn ((postHeap self).get right) 1 false)
+private def deletedWord (self : Bool) := writeMachine (postWord self) 26 (w[0])
+private def deletedSource (self : Bool) : List (Option (Σ τ : Source.STy, Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,false,false]⟩,
+   some ⟨SR,pdata (if self then [left] else [right])⟩,
+   some ⟨SR,pdata (if self then [right,right,left] else [left,right,left])⟩,some ⟨SR,pdata []⟩]
+
+/-- The SAME computed-pointer execution is followed by an actual reached
+nested delete. Both parent-alias cases and both declared pipelines are inhabited.
+RIGHT changes T to F; old LEFT and every parent/reference identity are retained. -/
+theorem computed_reference_delete_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (ym z : Source.EMState E0 SΓ),
+      (Source.execS (G0 p) F0 (fuel+6) SΓ.length none
+        (.expr (sourceReferenceReadAssign (ds self) ssrc sj si) : Source.RStmt E0 [] false .body SΓ SΓ)
+        sy.1).run (.nil,sy.2)=(.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) SΓ.length none
+        (.expr (sourceNestedDelete (ds self) sj si) : Source.RStmt E0 [] false .body SΓ SΓ)
+        ym.1).run (.nil,ym.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) SΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (ds self) ssrc sj si))
+          (.stmt (.expr (sourceNestedDelete (ds self) sj si)) .nil) : Source.RItems E0 [] false .body SΓ SΓ)
+        sy.1).run (.nil,sy.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run σ (.cons (referenceReadStmt (dt self) tsrc ti tj) (.cons (nestedDeleteStmt (dt self) ti tj) .nil))=
+        .ok ⟨σ.withHeap (deletedHeap self),List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj) machine=.ok (postWord self) 0 ∧
+      run (nestedDeleteCode (C := C) 1 (dt self) ti tj) (postWord self)=.ok (deletedWord self) 0 ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj ++ nestedDeleteCode (C := C) 1 (dt self) ti tj)
+        machine=.ok (deletedWord self) 0 ∧
+      sourceViews sy=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+        some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+      sourceViews ym=expectedSource self ∧ sourceViews z=deletedSource self ∧
+      SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn ∧
+      SourceBoolMemoryAt z 1 (deletedHeap self) right .dyn ∧ Source.MemOK E0 SH z ∧
+      RefArrayStateRepr 1 1 8 frag (σ.withHeap (deletedHeap self)) base (deletedWord self) ∧
+      ym.1=sy.1 ∧ z.1=sy.1 ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) ∧
+      StructAllocatorRepr (deletedHeap self) base 8 ⟨48,by decide⟩ (deletedWord self) ∧
+      (deletedWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+    have result := (dat self).computed_reference_delete_sequence (G0 p) F0 fuel sy σ (dref self) fresh
+      (daddr self) 3 addresses fresh_at (ds self) ssrc sj si si (dt self) tsrc ti tj tj
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨1,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.getElem_cons_succ,List.getElem_cons_zero];decide)
+      (by intro t ht hn;exact hn)
+      SH source_memOK initial_repr
+    simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at result
+    obtain ⟨mid,out,ym,z,mm,target,hw₁,selected,hw₂,stmt₁,stmt₂,items,native,word₁,word₂,word,hr₁,hr₂,mok₁,mok₂,repr₁,repr₂,locals₁,locals₂,parent,child,other,write,addrs,next,effects,stack,alloc,mmEq,targetEq,midAddrs⟩ := result
+    have known₁ : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : (postHeap self).writeAddr (.index right .dyn (indexValue ⟨1,by decide⟩)) false=some (deletedHeap self) := by
+      cases self <;> simp only [Heap.writeAddr,Heap.setIndex,postHeap,dref,Bool.false_eq_true,if_false,if_true,indexValue,Int.toNat_natCast,
+        Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,deletedHeap] <;> rfl
+    have outEq : out=deletedHeap self := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    subst mm
+    subst target
+    have midTables := source_tables self ym hr₁ midAddrs
+    have leftTable : z.2.heap.get 0=sy.2.heap.get 0 := addrs 0 (by cases self <;> decide) (by decide)
+    have rightMember : right∈MObj.elems .dyn ((deletedHeap self).get (dref self)) := by
+      rw [parent]
+      exact List.mem_set (dhi self) right
+    have rightAt := hr₂.children right rightMember
+    have leftAt : SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn := by
+      change z.2.heap.get 0=some ⟨SB,sourceBoolMemory _⟩
+      rw [leftTable]
+      cases self <;> simp only [deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,left,MObj.elems_dyn,MObj.setElem_dyn] <;> simpa only [SourceBoolMemoryAt,MObj.elems_dyn] using left_at
+    have finalTables : sourceViews z=deletedSource self := by
+      have hparent := hr₂.parent
+      have hr := rightAt
+      unfold SourceBoolMemoryAt at hr
+      cases self
+      all_goals
+        simp only [deletedHeap,postHeap,dref,daddr,addresses,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,List.set_cons_zero,List.set_cons_succ] at hparent hr
+        unfold sourceViews deletedSource
+        simp only [Bool.false_eq_true,if_false,if_true]
+        rw [leftTable,hparent,hr,addrs 4 (by decide) (by decide)]
+      · rw [addrs 3 (by decide) (by decide)];rfl
+      · rw [addrs 2 (by decide) (by decide)];rfl
+    refine ⟨ym,z,stmt₁,stmt₂,items,native,word₁,word₂,word,rfl,midTables,finalTables,hr₂,leftAt,rightAt,mok₂,repr₂,locals₁,locals₂,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide) (by decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) allocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn,base] <;> decide
+
+/-- Complete INITIAL, pointer-replaced, and child-cleared word/native tables;
+free pointer, all root/scalar locals, guard, headers, payloads and empty parent
+are retained. Deleting without rebinding or omitting deletion is discriminated. -/
+theorem complete_reference_delete_vectors (self : Bool) :
+    words machine=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (postWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (deletedWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    views (deletedHeap self)=([true,false,false],[false,false,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    (deletedWord self).mem 0=w[48] ∧ (deletedWord self).stack=[w[42]] ∧
+    words (deletedWord self)≠words (postWord self) ∧
+    words (deletedWord self)≠words (writeMachine machine 18 (w[0])) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,?_,?_,?_,rfl,rfl,by decide,by decide⟩
+      · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+      · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+      · simp only [views,deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_delete_vectors' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_delete_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls
