@@ -116,3 +116,6 @@
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean` | Inhabited either-pipeline images, crossed-word expansion and aligned word-fit endpoint refusal. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExecutionInterface.lean` | Additive fetched charged-load/P6 payload and post-image linkage, retaining all existing access failures and budgets. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadExecution.lean` | Derives the actual charged load, saved tail, exact raw-byte value and P6 touch post-image iff from initial images and the real gate. |
+| `Backend/AbiEntry/ValueGateInterface.lean` | Intrinsic payable/non-payable gate contracts indexed by actual public compiler selection. |
+| `Backend/AbiEntry/ValueGate.lean` | Typed require/value-check family, checked compiler selection and exact whole-machine intrinsic execution. |
+| `Backend/AbiEntry/ValueGateControls.lean` | Inhabited context, saved-tail/protected-memory and all-word payable/nonzero rejection controls. |

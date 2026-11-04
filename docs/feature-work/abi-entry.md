@@ -225,3 +225,20 @@ selection through the public checked compiler, exact emitted instruction shape,
 and execution for every machine. It covers payable bypass and non-payable zero
 value, preserving the complete successful machine. It does not certify runtime
 selector dispatch, failure bytes, gas, or Source/physical entry provenance.
+`ValueGate.lean` implements the typed require family and proves the public
+`Evm.Compiler.compile` selects it for every base, context and fragment. Any
+selected result has the exact five-instruction non-payable gate (or empty
+payable bypass), and actual intrinsic execution accepts exactly payable or zero
+value. Success preserves the complete machine, including stack, word
+memory, storage and environment, with no residual skip. Nonzero rejection is
+the existing intrinsic revert outcome; it does not independently certify empty
+ABI revert bytes, rollback, native gas/stack limits, Source dispatch or an
+emitted physical entry. No desired compiled value or run is an input premise.
+`ValueGateControls` uses an inhabited nonempty context and two distinct saved
+stack words with protected nonzero memory. Public selection, zero acceptance,
+all-word payable bypass, arbitrary nonzero rejection, maximum-word rejection
+and a payable/nonzero refusal of a false revert claim are checked.
+
+Independent read-only finder and skeptic reviews passed with no findings. They
+confirmed actual public selection, arbitrary selected-result execution, complete
+successful machine preservation, and the explicit intrinsic-only boundary.

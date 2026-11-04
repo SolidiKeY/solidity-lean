@@ -28,6 +28,8 @@ import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
 import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
+import Solidity.Backend.AbiEntry.ValueGate
+import Solidity.Backend.AbiEntry.ValueGateControls
 import Solidity.Backend.AbiEntry.ValueGateInterface
 import Solidity.Backend.AbiEntry.WordValidation
 import Solidity.Backend.AbiEntry.WordValidationInterface
