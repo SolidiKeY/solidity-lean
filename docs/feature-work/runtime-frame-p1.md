@@ -1444,3 +1444,27 @@ These are source/kernel results. No target recursive image, physical stack,
 public compiler selection, approved-profile provenance, world relation or
 `PendingRecursiveReturns` inhabitant is claimed. Existing target observations
 and frozen interfaces remain unchanged.
+
+
+### Pending approved-profile interface
+
+`RuntimeFrameV3ApprovedProfile` is a generated version-one dependency contract.
+It reuses `InterfaceV3.AdmissionAgreement` and `FamilyAdmissionAgreement`, and
+the published P8 `ProducerAssembly.AdmissionHalf` and `SourceOrigins` types.
+The source specification, origins, artifact and `SourceInputs` relation are
+external parameters; the record does not choose them from an emitter's
+entry predicate, execution or selected whitelist.
+
+`sourceImage` retains checked frontend acceptance, well-formed and in-profile
+source origins, allowed environments and admissible resources for the same
+supplied artifact. `Pending` and `PendingFamily` expose the remaining source
+image and runtime-admission equivalences at one index or every index.
+The relation also receives the exact artifact explicitly. There is no
+existential artifact replacement, extra failure-free restriction or depth cap.
+
+No instance is supplied. Inhabiting these records alone does not establish
+actual-source adequacy of `SourceInputs`, artifact provenance, nonvacuity,
+P8 operational realization or full approved-profile coverage. An empty or
+emitter-derived relation cannot be cited as original-profile evidence. Those
+obligations remain open, as do the concrete runtime and recursive producers.
+The existing frozen V3 call/fixed-thunk/recursive contracts are reused unchanged.
