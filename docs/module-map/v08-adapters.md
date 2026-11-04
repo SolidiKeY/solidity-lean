@@ -486,3 +486,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/StructuredFlow/ConditionalReturnCompiler.lean` | Actual compiler composition for V07-related conditional assignments followed by captured bare return. |
 | `Backend/StructuredFlow/ConditionalReturnCompilerControls.lean` | Both-pipeline native full-cell/stack observations and compiled donor/flag mutation refusals. |
+
+| `Lowering/G19/ConditionalReturnContinuation.lean` | V07-related conditional return suppresses arbitrary unreachable Source and intrinsic target continuations. |
+| `Lowering/G19/ConditionalReturnContinuationControls.lean` | Both-pipeline/checked-mode return continuation controls and eager caller-write rejection for both guards. |
