@@ -421,6 +421,9 @@ import Solidity.Backend.Passes.CaptureMutation
 import Solidity.Backend.Passes.CaptureTransport
 import Solidity.Backend.Passes.CapturedReadback
 import Solidity.Backend.Passes.CapturedValueStability
+import Solidity.Backend.Passes.CheckedAdditionCapture
+import Solidity.Backend.Passes.CheckedAdditionCaptureControls
+import Solidity.Backend.Passes.CheckedAdditionCapturePins
 import Solidity.Backend.Passes.ClosedHashPins
 import Solidity.Backend.Passes.ClosedValueControls
 import Solidity.Backend.Passes.ClosedValues

@@ -554,6 +554,20 @@ that incomplete check remains separate from the passing touched closure and
 the coordinator's published-tree validation. A duplicate owned map row was
 removed after independent review, retaining the published row.
 
+## Checked addition capture
+
+`CheckedAdditionCapture` consumes the published CheckedAdd compiler certificate to
+compile a fresh intrinsic uint256 local. It derives Source expression success or
+arithmetic panic independently of intrinsic declaration execution, retains the
+original memory Input and exact fresh-slot capacity, and chooses one captured
+word and original output map before all saved tails. Successful runs expose the
+full MappedOutput and physical readback; failure has no invented final state.
+This is not Source declaration lowering or public ABI/session adequacy.
+
+Independent read-only finder and skeptic source reviews found no soundness
+defect and confirmed those boundaries. Focused failures and resource records
+are retained separately from successful theorem checks.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic

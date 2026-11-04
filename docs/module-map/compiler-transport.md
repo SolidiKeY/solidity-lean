@@ -64,3 +64,6 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/MemoryCallScopePins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
 | `Backend/Passes/MemoryScopeAllocation.lean` | Inhabited positive allocation across scope exit with exact allocator ownership. |
 | `Backend/Passes/MemoryScopePins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
+| `Backend/Passes/CheckedAdditionCapture.lean` | Public checked-add compilation with fresh capture, full mapped output and shared tails. |
+| `Backend/Passes/CheckedAdditionCaptureControls.lean` | Populated heap/caller capture and overflow controls with complete ordered observations. |
+| `Backend/Passes/CheckedAdditionCapturePins.lean` | Standard-only axiom guards for checked-add capture headlines. |
