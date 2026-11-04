@@ -245,3 +245,9 @@ This adoption imports only ScalarSequenceFrameControls from the reviewed
 4fe21828 snapshot; the remaining local work is preserved. No broader completion
 is inferred from the master's integration receipt. Cache delivery for this
 published base is separately pending; full lane validation remains open.
+
+P20 consumer signature checkpoint01d82a785bd58ff750e61622f7c7e52eea81e733
+passes all eight checkpoint gates (library3441 jobs) and its per-file check.
+MCP errors/warnings are zero; independent finder/skeptic reviews pass. The
+signature is now available for a separate implementation checkpoint. No
+PendingG24 inhabitant or completed Source/representation endpoint is inferred.
