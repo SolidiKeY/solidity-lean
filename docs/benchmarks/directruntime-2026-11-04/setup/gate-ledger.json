@@ -1,0 +1,362 @@
+[
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/browser-checks-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/browser-baseline-checks.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 59.97600168000008,
+    "minimumOuterHeadroomBytes": 5601366016
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/browser-control-completion-gate.json",
+    "command": [
+      "node",
+      "tests/directruntime-20261104/native-browser/browser-control-completion.cjs"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "wallSeconds": 20.56921083799898,
+    "minimumOuterHeadroomBytes": 5423955968
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/browser-edit-controls-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/browser-edit-controls.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 10.342713689000448,
+    "minimumOuterHeadroomBytes": 5533200384
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/browser-smoke-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/browser-smoke-checks.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 26.349584781000885,
+    "minimumOuterHeadroomBytes": 5372440576
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/browser-wire-gate.json",
+    "command": [
+      "node",
+      "tests/directruntime-20261104/native-browser/browser-wire-audit.cjs"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "wallSeconds": 12.94976206300089,
+    "minimumOuterHeadroomBytes": 5584236544
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/fresh-specs-gate.json",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "tests/directruntime-20261104/native-browser/fresh-spec-controls.mjs"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 1.409281023999938,
+    "minimumOuterHeadroomBytes": 6483869696
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/native-audit-gate.json",
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/audit-native.py"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "wallSeconds": 24.05404231600005,
+    "minimumOuterHeadroomBytes": 11811860480
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/native-checks-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/native-baseline-checks.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 6.719507259999773,
+    "minimumOuterHeadroomBytes": 12935405568
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/native-lsp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/native-lsp-baseline.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 17.361784005001027,
+    "minimumOuterHeadroomBytes": 4448559104
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/native-resource-gate.json",
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/measure-native-resource.py"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 0.8050400699999045,
+    "minimumOuterHeadroomBytes": 6666420224
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-1-gmp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/gmp-serial.sh"
+    ],
+    "status": "fail",
+    "exitCode": 125,
+    "resourceStop": true,
+    "wallSeconds": null,
+    "minimumOuterHeadroomBytes": 1767612416
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-2-gmp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/gmp-serial.sh"
+    ],
+    "status": "fail",
+    "exitCode": 125,
+    "resourceStop": true,
+    "wallSeconds": null,
+    "minimumOuterHeadroomBytes": 4139679744
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-3-gmp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/gmp-serial.sh"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "wallSeconds": 1.1120357469999362,
+    "minimumOuterHeadroomBytes": 6300622848
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-4-compact-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/compact-runtime-cache.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 100.63703502000044,
+    "minimumOuterHeadroomBytes": 5936549888
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-4-direct-gate.json",
+    "command": [
+      "bash",
+      "web/tools/lean-wasm/build-direct.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "wallSeconds": 1.5112661590001153,
+    "minimumOuterHeadroomBytes": 4054900736
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-4-gmp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/gmp-serial.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 272.2798568959997,
+    "minimumOuterHeadroomBytes": 5817020416
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-5-compact-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/compact-runtime-cache.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 18.429038703000515,
+    "minimumOuterHeadroomBytes": 7403196416
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-5-direct-gate.json",
+    "command": [
+      "bash",
+      "web/tools/lean-wasm/build-direct.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 306.2448658129997,
+    "minimumOuterHeadroomBytes": 4537155584
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-5-gmp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/gmp-serial.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 59.91944847200011,
+    "minimumOuterHeadroomBytes": 7160541184
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/link-symbol-diagnostic.sh"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "wallSeconds": 0.2010795660007716,
+    "minimumOuterHeadroomBytes": 6577356800
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link-retry-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/link-symbol-diagnostic.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 84.9206462889997,
+    "minimumOuterHeadroomBytes": 4576141312
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/web-build-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/build-browser-baseline.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 2.2062978500007375,
+    "minimumOuterHeadroomBytes": 6330277888
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/web-deps-gate.json",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/npm",
+      "ci",
+      "--prefix",
+      "web",
+      "--cache",
+      "/workspace/solidity-lean/.lake/native-browser-npm-cache",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "status": "fail",
+    "exitCode": 127,
+    "resourceStop": false,
+    "wallSeconds": 0.11028464299943153,
+    "minimumOuterHeadroomBytes": 6838575104
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/before/web-deps-retry-gate.json",
+    "command": [
+      "npm",
+      "ci",
+      "--prefix",
+      "web",
+      "--cache",
+      "/workspace/solidity-lean/.lake/native-browser-npm-cache",
+      "--no-audit",
+      "--no-fund"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 2.615679526999884,
+    "minimumOuterHeadroomBytes": 6523822080
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/mcp-baseline-checks.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "wallSeconds": 6.979232044001037,
+    "minimumOuterHeadroomBytes": 4288688128
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline-retry-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/mcp-baseline-checks.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "wallSeconds": 6.76171791500019,
+    "minimumOuterHeadroomBytes": 4130287616
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/setup/sort-conformance-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/sort-conformance.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 8.703323069001272,
+    "minimumOuterHeadroomBytes": 6168055808
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/closure-hardening-gate.json",
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/check-root-hardening.py"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "wallSeconds": 6.042506581999987,
+    "minimumOuterHeadroomBytes": 4292222976
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/closure-hardening-retry-gate.json",
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/check-root-hardening.py"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "wallSeconds": 23.139642430000094,
+    "minimumOuterHeadroomBytes": 4500295680
+  }
+]

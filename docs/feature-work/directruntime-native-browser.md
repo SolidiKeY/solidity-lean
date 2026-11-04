@@ -1,4 +1,4 @@
-# Direct runtime native/browser lane — partial native baseline
+# Direct runtime native/browser lane — blocked fresh native/browser baseline
 
 Batch: `solidity-directruntime-20261104`; branch:
 `codex/solidity-directruntime-20261104/native-browser`.
@@ -13,9 +13,9 @@ This is a reviewable checkpoint, **not completion** and not `RUNTIME_GATE_PASS`.
 
 | Work item | State |
 |---|---|
-| 1. Before integration, current 83-function baseline | Native portion recorded; browser baseline pending. No A integration performed. |
+| 1. Before integration, current 83-function baseline | Fresh native AST, native LSP and real browser 83 × 3 matrices passed. Cold native metrics incomplete; no A integration. |
 | 2. Closure/bridge audit and committed A integration | Static audits and current native evidence recorded; confirmed production fixes and A handoff pending. |
-| 3. Fresh native/browser B Identity, controls, C controls and existing regressions | Existing native suite/control evidence recorded. B/C sources, exact Identity diamond twin and browser modality pending. |
+| 3. Fresh native/browser B Identity, controls, C controls and existing regressions | Existing native suite/control evidence recorded. Existing browser controls have one stack-overflow failure. B/C sources and exact Identity diamond twin pending. |
 | 4. Matched after baseline, ≥3 rounds, performance and final handoff | Pending. No after measurement or slowdown verdict. |
 
 ## Current native evidence
@@ -75,7 +75,11 @@ and the unchanged 4 GiB outer-cgroup reserve.
 | Guarded `fresh-spec-controls.mjs` | PASS 8/8, `before/fresh-specs-gate.json`, `before/fresh-spec-controls/results.json`. |
 | First `build-wasm-baseline.sh` | Pinned image provisioned, then first GMP preflight REFUSED insufficient initial reserve. `before/wasm-build.log.gz`. No WASM runtime built. |
 | Python compile, Bash `-n`, Node `--check` for wrappers | PASS; no Lean server or proof claim. |
-| Browser, actual frozen sort checker, MCP, final build and matched after gates | PENDING. |
+| Real browser 83 × 3, smoke/offline and edit/staleness controls | PASS; browser-checks, browser-smoke and browser-edit-controls receipts. |
+| Browser complete negative controls | FAIL: 13/14 expected rows; one LFml.fitsM stack overflow. |
+| Frozen sort checker | PASS: 377 taclets, 131 read-bearing, table covers 131; annotations match. |
+| Per-file MCP | KeySort zero errors; DirectRuntime resource-stopped twice. Whole gate FAIL. |
+| Final build and matched after gates | PENDING. |
 
 Outer scope: 16 GiB, swap limit `max`, host swap zero. This is not the Lean gate
 scope. Verified inner scope: memory.max=12884901888, memory.swap.max=0.
@@ -110,14 +114,16 @@ callee checks are **not** a general purity proof and there is no namespace exemp
 Both read-only reviews used no Lean server. They confirmed source/request/object
 identities, found the headroom-guard, overwrite and fresh-control provenance gaps,
 and re-reviewed their fixes. Review records are in `setup/reviews.json`.
-They support this partial native checkpoint only.
+They support the recorded partial checkpoint only; final browser review is recorded separately in setup/reviews.json.
 
 ## Confirmed production work still to do
 
 1. Native object keys/manifests omit complete header/compiler/runtime provenance.
    The external baseline inventory supplements this; production builders still need fixes.
-2. Closure extraction silently discards missing generated runtime callback roots.
-   Add a rejecting regression and fix after the full before baseline is preserved.
+2. Missing generated `l_`/`_init_l_` native roots now fail closed. Ten synthetic tests
+   pass, including iterator roots; a bounded comparison preserved all 200 baseline
+   extracted C module hashes. Arbitrary other ABI roots still require link validation.
+   No rebuilt binary or after-performance result is claimed for this fix.
 3. Both builders need initial/snapshot/final bridge and closure-script identities.
 4. `DIRECT_RUNTIME_FULL=1` can produce an ordinary-loadable full runtime.
    Keep certification separate; owned builder enforcement and coordinated handoff
@@ -131,25 +137,68 @@ unchanged. No axioms, sorry, premises, exclusions, proof budgets or statements c
 No new Lean module exists; module-registration proposal: none. Central documentation
 may later link this lane document through the normal owner-integrated handoff.
 
-## Dependency question
+## Fresh browser and source-to-result evidence
 
-**Q-PRODUCERS** — sources: work queue 2–3 and committed-output-only boundary.
-Where should this VM retrieve A's committed translator interface and B/C's committed
-controls? The local checkout and remote advertised no such batch branches at audit.
-Options: (1) supply committed SHAs with retrievable artifacts; (2) keep producer
-integration pending until coordinator handoff. No recommendation or exclusion request.
-No answer or new authorization is inferred.
+`before/matched-before-summary.json` records complete denominators and boundaries.
+Native LSP: 249/249, median of function medians 62.251926 ms, nearest-rank p95
+75.866278 ms, initialization 127.573555 ms. Real Chromium: 249/249,
+median 185.922378 ms, p95 224.386924 ms, startup 3428.200938 ms.
+These source-to-result figures include editor submission and differ from native AST latency.
+There is no after result or slowdown conclusion.
 
-## Resume order
+The freshly built WASM is 16,378,154 bytes, SHA-256
+`4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef`.
+The single HTML is 41,479,535 bytes. Source, compiler, bridge, runtime archive,
+asset and binary identities are recorded in before/wasm-build.json,
+wasm-runtime-source.json, html-build.json and web-asset-manifest.json.
+The SDK is pinned Emscripten 4.0.15. The final WASM builder passed in 306.244866 s,
+with sampled process RSS 2,643,546,112 bytes and minimum outer headroom
+4,537,155,584 bytes. Earlier failures/refusals remain in the gate ledger.
+GMP and the Lean runtime archive were freshly built separately.
+Lake optional artifact export was disabled with LAKE_CACHE_DIR="" to avoid cache
+copy pressure; no proof options changed. The same policy must hold for matched builds.
 
-1. Retry the serial WASM build with a fresh attempt ID after verifying reserve.
-   Keep prior logs/refusals. Complete real browser baseline and existing browser controls.
-2. Preserve a successful cold-C-build measurement, build/check RSS and all compiler/runtime
-   identities; the failed cold build plus cached-link retry is not that measurement.
-3. Run the actual frozen sort check and per-file MCP/final policy gates when appropriate.
-4. Obtain committed A/B/C artifacts; integrate only authorized producer output.
-   Complete exact positive Identity diamond twin and false/default/alias/zero/OOB controls
-   through both fresh backends, plus C controls and all existing negative/staleness cases.
-5. Fix owned production audit findings, coordinate unowned loader fixes, run matched
-   ≥3-round before/after evidence, investigate >10% slowdown, and repeat independent
-   reviews/final gates. No publication, push, PR or merge is authorized here.
+The unchanged website harness passed current-source specification, offline fresh-worker,
+wrong-specification and stale-green controls. The edit harness passed supported edits
+and unsupported calldata; cached retrieval checks are behavior checks, not fresh timings.
+
+## Required browser failure and owner handoff
+
+The completion diagnostic attempted seven groups covering fourteen expected rows.
+Thirteen rows returned the expected results; the false invariantCountsToBound control
+threw `RangeError: Maximum call stack size exceeded`. This is a **failed required gate**,
+not pending, unsupported, or admission success. The same fresh source returns pending
+on native. The initial wire audit stops at the error; its original incomplete report is
+preserved. browser-control-attempts.jsonl and browser-control-completion.json record
+all attempted groups, including the failed request before awaiting its result.
+
+A diagnostic symbol-map relink produced a byte-identical WASM, with unchanged source,
+fuel, compiler stack and default Chromium settings. The exact stack contains
+LFml.fitsM (Solidity/Calculus/ReadBounds.lean:75) and its generated closures.
+This identifies overflowing traversal frames, not the sole initiating cause or a proven
+repair. before/browser-stack-handoff.json pins frames, source and both backend results.
+D cannot edit ReadBounds/DirectRuntime/translator paths. No stack-size increase,
+control exclusion, catch-to-pass, kernel fallback or proof-budget change was used.
+
+Every bounded gate command, exit, wall and minimum headroom is indexed by
+setup/gate-ledger.json; raw logs retain decisive output. The actual frozen sort checker
+passed: `parsed 377 taclets, 131 read-bearing, table covers 131` and `OK — annotations match`.
+MCP KeySort reported zero errors, but DirectRuntime checks twice crossed the reserve
+and were killed; no successful DirectRuntime MCP or final policy gate is claimed.
+**RUNTIME_GATE_PASS remains pending.**
+
+## Scope questions and resume obligations
+
+Self-contained questions and mutually exclusive options are in setup/producer-handoff.json:
+Q-PRODUCERS requests retrievable A committed interface and B/C controls, or continued
+pending handoff. Q-BROWSER-STACK requests an owner-supplied committed repair, an owned
+bridge/compiler repair only if evidence establishes that cause, or continued blocked status.
+No authorization, exclusion or recommendation is inferred from silence.
+
+The narrow missing-generated-native-root hardening is implemented; the other production
+hardening above remains unfinished. Independent authorized work is not exhausted. Resume with independent
+owned fixes where possible, obtain the committed producer/stack resolutions, then run the
+exact positive Identity diamond twin and false/default/alias/zero/OOB controls on both fresh
+backends, C controls, existing regressions, complete cold-native metrics, matched ≥3-round
+after performance, final policy checks and independent reviews. Investigate >10% slowdown.
+The assignment is blocked and incomplete; no push, PR or merge was performed.

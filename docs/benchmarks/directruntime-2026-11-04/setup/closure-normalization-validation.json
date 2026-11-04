@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3 scripts/test-direct-runtime-closure.py",
+    "python3 tests/directruntime-20261104/native-browser/closure-regressions.py"
+  ],
+  "exitCode": 0,
+  "tests": 10,
+  "closureScriptSha256": "38620c3d895d0f68da31ce3b2b16abbdbfdd7d8242f33bc361c275612d829fa4",
+  "boundary": "Small Python tests only, no Lean/build started. Prior full extraction compared exact current production set input; normalization adds iterable support."
+}

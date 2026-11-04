@@ -36,5 +36,16 @@
       "v1/v2 runner hashes and no-overwrite publication"
     ],
     "finalNarrowReview": "No new blocking issue for partial native checkpoint; preserve all six ordinary control artifacts. Full assignment remains pending."
+  },
+  "browserFinal": {
+    "finder": "Verified byte-identical WASM/symbol map and each mapped frame; LFml.fitsM attribution limited, no sole cause claim. Matrix counts and medians match. No new evidence finding.",
+    "skeptic": "13/14 expected controls with one backend error; no completion overclaim. Independent owned hardening remains possible and must continue.",
+    "method": "Independent read-only; neither reviewer used Lean server."
+  },
+  "closureHardening": {
+    "finder": "Detected iterator exhaustion from double traversal; corrected by materializing set and iterator regression.",
+    "skeptic": "Current set callers sound; narrow missing generated prefix scope only; no binary/after acceptance implied.",
+    "tests": "Original2 + owned8 synthetic tests pass. Exact current200-module extraction comparison passes; resource-stopped first attempt preserved.",
+    "status": "Both independent final reviews confirm normalization fix; no remaining narrow finding. Full comparison receipt remains attributed to pre-normalization script hash."
   }
 }

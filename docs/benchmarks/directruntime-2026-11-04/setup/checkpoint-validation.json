@@ -1,0 +1,29 @@
+{
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "leanSourcesChanged": false,
+  "signatureBoundary": "All Lean source bytes unchanged from base; no implementation/proof closure or new theorem is claimed. No axiom signature expansion.",
+  "selectedExactSources": [
+    {
+      "path": "Solidity/Tools/DirectRuntime.lean",
+      "baseSha256": "8dc38e58b9179a7894d490fba3e05b05883d41517ff66207eda6c1275370e92d",
+      "workingSha256": "8dc38e58b9179a7894d490fba3e05b05883d41517ff66207eda6c1275370e92d",
+      "byteIdentical": true
+    },
+    {
+      "path": "Solidity/Calculus/ReadBounds.lean",
+      "baseSha256": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5",
+      "workingSha256": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5",
+      "byteIdentical": true
+    },
+    {
+      "path": "Solidity/KeySort.lean",
+      "baseSha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+      "workingSha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+      "byteIdentical": true
+    }
+  ],
+  "wrapperSyntax": "Python AST, Bash -n and Node --check passed",
+  "rawCapturesVerified": 33,
+  "goalGetTool": "Not exposed in available tool catalog; existing goal not created or reset.",
+  "runtimeGatePass": false
+}

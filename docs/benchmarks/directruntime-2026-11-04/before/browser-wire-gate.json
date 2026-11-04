@@ -1,0 +1,21 @@
+{
+  "command": [
+    "node",
+    "tests/directruntime-20261104/native-browser/browser-wire-audit.cjs"
+  ],
+  "exitCode": 1,
+  "wallSeconds": 12.94976206300089,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 5584236544,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 1420128256,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 393432,
+  "cgroupPeakBytes": 1028702208,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+}

@@ -58,6 +58,7 @@ def collect(root,stage,module):
     return seen,order
 
 def extract(root,stage,module='Solidity.Tools.DirectRuntime',native_roots=()):
+    native_roots=set(native_roots)
     modules,order=collect(root,stage,module)
     definitions={};global_defs={}
     for name,m in modules.items():
@@ -70,6 +71,14 @@ def extract(root,stage,module='Solidity.Tools.DirectRuntime',native_roots=()):
             global_defs[g]=name
     functions=set();globals=set();pending=['solidity_direct_check','lean_io_eprintln','lean_list_to_array','lean_array_to_list_impl','lean_io_error_to_string','lean_mk_io_user_error','lean_stream_of_handle']
     initializer_names={m['init'] for m in modules.values()}
+    # Archive undefined references include platform/libc symbols, which the
+    # linker resolves. Generated Lean callbacks must instead exist in the
+    # collected graph: silently filtering one would hide an incomplete closure.
+    missing_native=sorted(s for s in native_roots
+                          if s.startswith(('l_','_init_l_'))
+                          and s not in definitions and s not in global_defs)
+    if missing_native:
+        raise ValueError('Unresolved generated native roots: '+', '.join(missing_native))
     retained_native=sorted(s for s in native_roots if s in definitions or s in global_defs)
     pending.extend(retained_native)
     while pending:

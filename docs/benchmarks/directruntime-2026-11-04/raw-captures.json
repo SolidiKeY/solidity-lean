@@ -76,5 +76,125 @@
     "rawSha256": "b4a75126be462ba2b1928b6780e1d6d7b5de21ad7c564cfe22b7124ba0aa72a4",
     "archive": "docs/benchmarks/directruntime-2026-11-04/setup/keys/gates.tsv.gz",
     "archiveSha256": "1f14263ed818a8948bd0dc84052ac473bdb219e44ba00976f844384c7526a099"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/browser-checks.log",
+    "rawSha256": "c2446f828b0eaaf395bdde600eaed796a6d4548363ace8aafc8b29054db98948",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/browser-checks.log.gz",
+    "archiveSha256": "a7d8a774dbadca17c379317096bda094b20724ac0ddd3a5dd7891339473142fb"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/browser-control-completion.log",
+    "rawSha256": "f9395eb8fc099ee2cb0bdadc7afa47cad28859d97f0221a4ce8075f6f214ff73",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/browser-control-completion.log.gz",
+    "archiveSha256": "b57a2e58143f6a380e7d31aa1edcc1485b5715e2da11e75db9597e43a7609d3a"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/browser-edit-controls.log",
+    "rawSha256": "dc17da33d30895e7a7717392889f33a3590316cea787078dcbd2ebb9c1bde915",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/browser-edit-controls.log.gz",
+    "archiveSha256": "bfab689dfaff6ddffa450860db01412dc5614d37f1ad8ed834e7923812a69ccc"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/browser-smoke.log",
+    "rawSha256": "d810f9fc87dc6021cbd3fb8e86aada8ba1176e07e4dc6bbbeeb8b569aba4bb65",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/browser-smoke.log.gz",
+    "archiveSha256": "81e4648fce5ae3602ae77a6d7278f1e2f4814bd2e373b9bf0224de4da39c9737"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/browser-wire.log",
+    "rawSha256": "4fda4f9bdd12011d36b9b9e987af072f34ec523fb900416c6b39f5af7472af72",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/browser-wire.log.gz",
+    "archiveSha256": "08faa065b4b7c5587c3c23be223602007579c36f07387989c83b29fd8b74ca39"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/native-lsp.log",
+    "rawSha256": "9ef08918e47e0862201e1e33ea7a451c166ab06a367295b42af8055a1013976e",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/native-lsp.log.gz",
+    "archiveSha256": "4b209155744b6352a2c8ea4e3c8237625855cd35327f27ca37908ade9d10f20d"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-1.log",
+    "rawSha256": "cab259b6e92bced01a5a1900a60017938de7de33cde208e2b41993f56c724836",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-1.log.gz",
+    "archiveSha256": "a25e7cd49094d44ded61baa84ef32b5bea53ff8cd7f777890c1108406ad7a5de"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-2.log",
+    "rawSha256": "0948a282339228a1e9cdc4c81b7f01c1affa0dfea4d287c58f27522f89dd7960",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-2.log.gz",
+    "archiveSha256": "c0dcaa6535416611f684a179ba33a2ae7acfa08a20a92b3d5c75679c3e827cbd"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-3.log",
+    "rawSha256": "7480435838c203062e7c6f3ea585334328e1aa09b579d2d601825310492d1c08",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-3.log.gz",
+    "archiveSha256": "84ca070186af148c98382d2bd9aa5cdd8b24caab74bd600602f889feea03694c"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-4.log",
+    "rawSha256": "9f6fb2fe351c7699164f7acf2e675a08ed5fa45cf3fc9d9d7c76f3b1df1ec5b8",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-4.log.gz",
+    "archiveSha256": "3796c3827296a88e1dbfd15a68830cdf03d97efcbf1184de251fb7ce4d903d3d"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-5.log",
+    "rawSha256": "7f5b34d0bdbb1b2709f68052f5616c1a54d3c877c3c36ae0ae9d1c3a7b6349a5",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-build-retry-5.log.gz",
+    "archiveSha256": "3552c65986cd3b3c9a45238efdfbaaed7d3e1caa964f0119ce776ef960bb9eaf"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-3-gmp-config.log",
+    "rawSha256": "b94e30b14a28159ccd9140c48e495427e190b0ae8c769622e9ed238f0ac7528e",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-retry-3-gmp-config.log.gz",
+    "archiveSha256": "27f2fb940317c534ba824fae8d2a04d20c33e93758c6ee12cd5c47ed990158c5"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link-retry.log",
+    "rawSha256": "deb1df615556fa223d30c5067331cd1b530e9313a39b4c1044eb49a3b083ba3e",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link-retry.log.gz",
+    "archiveSha256": "4e181094c86a1e8d0eff0c8704213a90b70b5152d328c021e75419d882bb1f10"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link.log",
+    "rawSha256": "656ab034e85cfb975caaa162a770a3882cf9b8e0fc75320b761f2c60f8fc1e1e",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/wasm-symbol-link.log.gz",
+    "archiveSha256": "e20d0d4317690594466aa1ff992f88900dba47c3705b36add89ee231fa71f7e1"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/web-build.log",
+    "rawSha256": "3e75afc713c5c83bd7aba19ec16d52634058c4aa813d5a4ae0ca70f291928efd",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/web-build.log.gz",
+    "archiveSha256": "6c7252bf1e75b34caec4e53ea5957a0d09d37356ab96e7c8cf51200108450e35"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/web-deps-retry.log",
+    "rawSha256": "1c4d01f38174d34aac1d51eaf50369ac0f2b9825cce8863def8dea205928d1a2",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/web-deps-retry.log.gz",
+    "archiveSha256": "5e5ef94231f5e0949b9a95e7ccd67192dcbbaedc1a6b154c78dc0bd005831330"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/before/web-deps.log",
+    "rawSha256": "756d539eddd5113450fbe0196fda6c515a2aa064642869e1957d6fc1273f3b12",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/before/web-deps.log.gz",
+    "archiveSha256": "a1d3815b06fc6612abfa3bb59e25745c118f14d8ec3aa6009ab3da18169645bc"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline-retry.log",
+    "rawSha256": "5cca2cd4968a95c13d9d1e71dba5aad30552ed8d495980541c263e7c1fd3b2b5",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline-retry.log.gz",
+    "archiveSha256": "17c63c4e1c917772f0878579ed2da8e884101efa1ebf124ccc2987b687350976"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline.log",
+    "rawSha256": "815045133d0e9f528d8948799542f486c62f9164169281c82b58a0837f26138a",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/setup/mcp-baseline.log.gz",
+    "archiveSha256": "895ff3cd003cb5c8e050150b47942d767c9c8cc9ee459d33e59c3480d9a2a92c"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/setup/sort-conformance.log",
+    "rawSha256": "482e5f36bfd2de2b446d08d30ab31a0159b72b33507a32d21c262860ba6efe40",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/setup/sort-conformance.log.gz",
+    "archiveSha256": "c632aa8bdf29a4d784f88da6fd550a84259b5c78b3e32373935ca88f79288fd5"
   }
 ]

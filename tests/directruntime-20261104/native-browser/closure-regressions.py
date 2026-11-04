@@ -47,6 +47,26 @@ LEAN_EXPORT lean_object* solidity_direct_check(lean_object* x) { return x; }
         self.assertIn("l_callback(lean_object* x)", outputs[0][1])
         self.assertEqual(stats["nativeRoots"], ["l_callback"])
 
+    def test_iterator_native_callback_roots_retained(self):
+        outputs, stats = self.extract("""
+LEAN_EXPORT lean_object* l_callback(lean_object* x) { return x; }
+LEAN_EXPORT lean_object* solidity_direct_check(lean_object* x) { return x; }
+""", native_roots=iter(["l_callback"]))
+        self.assertEqual(stats["nativeRoots"], ["l_callback"])
+        self.assertIn("l_callback(lean_object* x)", outputs[0][1])
+
+    def test_missing_generated_native_roots_fail_closed(self):
+        for symbol in ("l_missing_callback", "_init_l_missing_value"):
+            with self.subTest(symbol=symbol):
+                with self.assertRaisesRegex(ValueError, "Unresolved generated native roots: " + symbol):
+                    self.extract("LEAN_EXPORT lean_object* solidity_direct_check(lean_object* x) { return x; }\n",
+                                 native_roots={symbol})
+
+    def test_platform_native_roots_remain_linker_resolved(self):
+        _, stats = self.extract("LEAN_EXPORT lean_object* solidity_direct_check(lean_object* x) { return x; }\n",
+                                native_roots={"malloc", "memcpy"})
+        self.assertEqual(stats["nativeRoots"], [])
+
     def test_unresolved_generated_reference_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "Unresolved generated Lean symbol: l_missing"):
             self.extract("LEAN_EXPORT lean_object* solidity_direct_check(lean_object* x) { return l_missing(x); }\n")

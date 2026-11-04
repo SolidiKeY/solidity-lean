@@ -1,0 +1,63 @@
+{
+  "status": "blocked",
+  "scope": "No unowned producer patch applied",
+  "issues": [
+    {
+      "paths": [
+        "Solidity/Calculus/ReadBounds.lean",
+        "Solidity/Tools/DirectRuntime.lean"
+      ],
+      "evidence": "before/browser-stack-handoff.json",
+      "request": "Owner supplies a committed, proof-preserving stack-safe resolution without changing budgets, excluding the control, or loading Lean on ordinary requests."
+    },
+    {
+      "paths": [
+        "web/browser/direct-worker.js",
+        "web/tools/build-static.mjs",
+        "vscode/src/direct-runtime.cjs"
+      ],
+      "evidence": "setup/reviews.json",
+      "request": "Coordinated producer handoff must reject full/certification runtimes for ordinary requests and enforce complete source/bridge/closure provenance. D will not edit these unowned paths."
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q-PRODUCERS",
+      "sources": [
+        "queue 2-3",
+        "committed-output-only boundary"
+      ],
+      "question": "Where should this VM retrieve A committed translator interface and B/C controls?",
+      "options": [
+        "Supply committed SHAs with retrievable artifacts",
+        "Keep integration pending until coordinator handoff"
+      ]
+    },
+    {
+      "id": "Q-BROWSER-STACK",
+      "sources": [
+        "queue 3",
+        "before/browser-stack-handoff.json",
+        "immutable ownership"
+      ],
+      "question": "Which owner resolves the exact default-browser LFml.fitsM stack-overflow control without changing proof budgets or excluding the control?",
+      "options": [
+        "Runtime/translator owner supplies a committed fix; D integrates and retests",
+        "D fixes only owned compiler/bridge paths if evidence establishes that cause",
+        "Keep this gate blocked pending owner handoff while independent work continues"
+      ]
+    }
+  ],
+  "pendingOwnedWork": [
+    "Native complete compiler/header/runtime cache identity",
+    "Builder input snapshots and pre/post identity checks",
+    "Separate full runtime build mode from ordinary verification",
+    "Matched successful cold-native build metrics",
+    "After integration native/browser regressions and >=3-round performance",
+    "B/C controls and exact positive Identity diamond twin in both modalities",
+    "Final build, review and handoff gates"
+  ],
+  "completedOwnedWork": [
+    "Reject missing l_/_init_l_ native callback roots; normalize iterator roots;10 synthetic tests;200-module extracted C unchanged before set-only normalization. Fresh rebuild/after measurements remain pending."
+  ]
+}

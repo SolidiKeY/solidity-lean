@@ -1,0 +1,50 @@
+{
+  "nativeAst": {
+    "passed": true,
+    "functions": 83,
+    "rounds": 3,
+    "expectedRequests": 249,
+    "actualRequests": 249,
+    "medianFunctionMs": 0.8389050000000111,
+    "p95FunctionMs": 4.069481999999994,
+    "startupMs": 7.561709000000008,
+    "initializationMs": null,
+    "boundary": "Precompiled AST"
+  },
+  "nativeLsp": {
+    "passed": true,
+    "functions": 83,
+    "rounds": 3,
+    "expectedRequests": 249,
+    "actualRequests": 249,
+    "medianFunctionMs": 62.25192600000082,
+    "p95FunctionMs": 75.86627799999951,
+    "startupMs": null,
+    "initializationMs": 127.573555,
+    "boundary": "Current source to result; fresh URI/editor submission"
+  },
+  "browser": {
+    "passed": true,
+    "functions": 83,
+    "rounds": 3,
+    "expectedRequests": 249,
+    "actualRequests": 249,
+    "medianFunctionMs": 185.92237800000294,
+    "p95FunctionMs": 224.38692400000218,
+    "startupMs": 3428.200938,
+    "initializationMs": null,
+    "boundary": "Current source to result; fresh URI/editor submission"
+  },
+  "controls": {
+    "nativeFreshDistinct": 14,
+    "nativePassed": 14,
+    "browserExpectedRows": 14,
+    "browserReturnedExpectedRows": 13,
+    "browserBackendErrors": 1,
+    "browserAttemptedGroups": 7,
+    "browserGatePassed": false
+  },
+  "completeGoal": false,
+  "after": null,
+  "slowdownVerdict": null
+}

@@ -1,0 +1,99 @@
+{
+  "binarySha256": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+  "symbolMapSha256": "2839f7ddb33526e7e186489a94030b142f4d9f54ef178aab11402b04cadc9f01",
+  "linkReceipt": "before/wasm-symbol-link.json",
+  "nativeControl": {
+    "name": "invariantCountsToBound",
+    "round": 0,
+    "sourceHash": "12fe08c7ebcb4bced15227fa6d6829b63cce545b88229ff173f03b4ad4efc0fd",
+    "wallMs": 4580.257445,
+    "result": {
+      "results": [
+        {
+          "function": "invariantCountsToBound",
+          "reading": "solc",
+          "reason": "checker did not decide",
+          "sourceId": 72,
+          "status": "pending",
+          "tag": "box",
+          "verification": "direct"
+        }
+      ]
+    }
+  },
+  "browserAttempt": {
+    "index": 4,
+    "name": "invariantCountsToBound",
+    "sourceHash": "12fe08c7ebcb4bced15227fa6d6829b63cce545b88229ff173f03b4ad4efc0fd",
+    "wireSha256": "9b521b1d102614fce15a2b1ab65b462d13be31d9f7349f9b996930f23fe3b9ec",
+    "fixtureSha256": "8a2ec311782f5cd49dd89e0e208ffebf9a8e62616a93faef80e35e5a958989dd",
+    "expected": [
+      [
+        "invariantCountsToBound",
+        [
+          "pending",
+          "refuted"
+        ]
+      ]
+    ],
+    "workerEpoch": 5
+  },
+  "workerError": {
+    "message": "Maximum call stack size exceeded",
+    "stack": "RangeError: Maximum call stack size exceeded\n    at wasm://wasm/03e7a4aa:wasm-function[3159]:0xf54b73\n    at wasm://wasm/03e7a4aa:wasm-function[2197]:0xbf5de2\n    at wasm://wasm/03e7a4aa:wasm-function[2199]:0xbf6488\n    at wasm://wasm/03e7a4aa:wasm-function[3078]:0xf375cc\n    at wasm://wasm/03e7a4aa:wasm-function[2197]:0xbf642b\n    at wasm://wasm/03e7a4aa:wasm-function[2198]:0xbf643e\n    at wasm://wasm/03e7a4aa:wasm-function[694]:0x1c0a79\n    at wasm://wasm/03e7a4aa:wasm-function[3078]:0xf3759c\n    at wasm://wasm/03e7a4aa:wasm-function[2197]:0xbf61c2\n    at wasm://wasm/03e7a4aa:wasm-function[2199]:0xbf65be"
+  },
+  "mappedFrames": [
+    {
+      "index": 3159,
+      "symbol": "emscripten_builtin_malloc"
+    },
+    {
+      "index": 2197,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg"
+    },
+    {
+      "index": 2199,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg___lam__0___boxed"
+    },
+    {
+      "index": 3078,
+      "symbol": "lean_apply_1"
+    },
+    {
+      "index": 2197,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg"
+    },
+    {
+      "index": 2198,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg___boxed"
+    },
+    {
+      "index": 694,
+      "symbol": "l_Solidity_RawStmt_mapExprsM___redArg___lam__21"
+    },
+    {
+      "index": 3078,
+      "symbol": "lean_apply_1"
+    },
+    {
+      "index": 2197,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg"
+    },
+    {
+      "index": 2199,
+      "symbol": "l_Solidity_Decide_LFml_fitsM___redArg___lam__0___boxed"
+    }
+  ],
+  "identifiedDefinition": "Solidity/Calculus/ReadBounds.lean:75 LFml.fitsM",
+  "existingLinkTheorem": "Solidity/Calculus/ReadBounds.lean:97 LFml.fits_eq_fitsM",
+  "conclusion": "Formula-size traversal is implicated by exact machine frames. This is not proof of the initiating phase or sole root cause. Core/translator paths are outside D ownership.",
+  "gateStatus": "fail",
+  "mitigationsNotUsed": [
+    "No fuel reduction",
+    "No excluded control",
+    "No custom Chromium stack flags",
+    "No catch-to-pending/PASS",
+    "No kernel fallback",
+    "No Core/DirectRuntime edit"
+  ]
+}
