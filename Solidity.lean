@@ -2439,6 +2439,7 @@ import Solidity.Yul.Checks.LocalItemFailure
 import Solidity.Yul.Checks.LocalItemWorld
 import Solidity.Yul.Checks.LocalLoopFailure
 import Solidity.Yul.Checks.LocalOperations
+import Solidity.Yul.Checks.LocalPostHorizon
 import Solidity.Yul.Checks.LocalProjection
 import Solidity.Yul.Checks.LocalState
 import Solidity.Yul.Checks.LocalU8Compare
@@ -2652,6 +2653,7 @@ import Solidity.Yul.LocalItemFailure
 import Solidity.Yul.LocalItemWorld
 import Solidity.Yul.LocalLoopFailure
 import Solidity.Yul.LocalOperations
+import Solidity.Yul.LocalPostHorizon
 import Solidity.Yul.LocalProjection
 import Solidity.Yul.LocalScope
 import Solidity.Yul.LocalState

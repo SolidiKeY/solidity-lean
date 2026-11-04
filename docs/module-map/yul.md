@@ -77,3 +77,5 @@
 | `Yul/LocalItemFailure.lean`, `Yul/Checks/LocalItemFailure.lean` | Statement, initialization and context-growing Boolean/default item failure classification with retained-context controls. |
 
 | `Yul/LocalLoopFailure.lean`, `Yul/Checks/LocalLoopFailure.lean` | Scope/while failure classification and concrete all-horizon omitted-guard timeout laws, including exact Source output and a break counterexample. |
+
+| `Yul/LocalPostHorizon.lean`, `Yul/Checks/LocalPostHorizon.lean` | Post-iteration/do-while failure classification and concrete omitted-guard post-loop horizon results. |

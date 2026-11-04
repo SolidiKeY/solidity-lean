@@ -277,3 +277,5 @@ VY1: local Boolean expression/control failures are proved to be timeouts for all
 VY1: actual statement/initialization and context-growing item failures are proved to be timeouts without erasing reached locals; see [lane handoff](inline-assembly-vy1.md#context-growing-item-failures). General P16 remains open.
 
 VY1: concrete scoped-loop timeout classification and all-horizon omitted-guard Source output proved, with retained raw results and a break counterexample; see [lane handoff](inline-assembly-vy1.md#concrete-finite-horizon-loop-timeouts). General P16 remains open.
+
+VY1: concrete post/do-while classifications and omitted-guard post-loop Source horizons proved; see [lane handoff](inline-assembly-vy1.md#post-and-body-first-horizons). General P16 remains open.

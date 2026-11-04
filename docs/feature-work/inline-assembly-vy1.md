@@ -966,3 +966,18 @@ runners are unchanged; broader P16 and final lane gates remain open.
 
 Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
 All eleven reported axiom sets contain only standard Lean axioms.
+
+### Post and body-first horizons
+
+LocalPostHorizon classifies actual post-iteration and do/while halts at all
+fuel on raw inputs. An omitted guard with a certified Boolean post has an
+actual retained timeout result at every finite horizon; exact Source.forIter
+timeout/world output follows from clean Source locals. Guard, post and body
+certificates remain explicit. Controls retain post writes, ignore false post
+values, skip post evaluation under a false guard, and distinguish do/while's
+body-first execution. Equality refusal concerns only this control certificate.
+Source, state and evaluators are unchanged. No general divergence, embedding
+or compiler adequacy is claimed; broader P16 and final lane gates remain open.
+
+Scoped diagnostics/builds and six independent finder/skeptic reviews pass.
+All eleven reported axiom sets contain only standard Lean axioms.
