@@ -2418,6 +2418,7 @@ import Solidity.Yul.Checks.LocalBoolFailure
 import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.Checks.LocalBoolForNoGuard
 import Solidity.Yul.Checks.LocalBoolForPost
+import Solidity.Yul.Checks.LocalBoolForRepresentation
 import Solidity.Yul.Checks.LocalBoolIf
 import Solidity.Yul.Checks.LocalBoolIfElse
 import Solidity.Yul.Checks.LocalBoolInitialization
@@ -2637,6 +2638,7 @@ import Solidity.Yul.LocalBoolFailure
 import Solidity.Yul.LocalBoolFor
 import Solidity.Yul.LocalBoolForNoGuard
 import Solidity.Yul.LocalBoolForPost
+import Solidity.Yul.LocalBoolForRepresentation
 import Solidity.Yul.LocalBoolIf
 import Solidity.Yul.LocalBoolIfElse
 import Solidity.Yul.LocalBoolInitialization

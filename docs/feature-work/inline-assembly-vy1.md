@@ -1117,3 +1117,21 @@ admission changes; general P16 and full-lane gates remain open.
 Independent read-only finder/skeptic reviews found no issues. Both modules
 have zero diagnostic errors and passing per-file checks; ten scoped axiom
 reports contain only Lean standard axioms. Final lane gates remain open.
+
+
+### Boolean-initialized for congruence
+
+`LocalBoolForRepresentation.close` and `forLoop` preserve the existing
+exact-word/local/world relation through the concrete no-post Boolean for
+runner. The all-fuel theorem retains the original initializer/guard/body
+certificates and their actual typed contexts. Normal completion removes only
+the initializer local; halted results retain their exact reached context and
+reason. Eight controls exercise normal closure, initializer/guard writes,
+timeouts before/after initialization and inside/after repeated bodies, and
+dirty projection refusal, with an inhabited intrinsic for/declaration witness.
+No runtime, Source or readback policy changes occur. Post expressions, broader
+body certificates, admission and general P16 remain outside this theorem.
+
+Independent read-only finder/skeptic reviews found no issues. Both modules
+have zero diagnostic errors; ten scoped axiom reports use only Lean standard
+axioms. Final lane gates and external compiler/EVM validation remain open.

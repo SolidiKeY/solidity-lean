@@ -93,3 +93,5 @@
 | `Yul/LocalBoolScopeRepresentation.lean`, `Yul/Checks/LocalBoolScopeRepresentation.lean` | Exact-word suffix restoration, scope closure and conditional congruence with retained halt contexts/guard writes. |
 
 | `Yul/LocalBoolWhileRepresentation.lean`, `Yul/Checks/LocalBoolWhileRepresentation.lean` | All-fuel while/do-while exact-word congruence with scoped declarations and precise halted contexts. |
+
+| `Yul/LocalBoolForRepresentation.lean`, `Yul/Checks/LocalBoolForRepresentation.lean` | All-fuel Boolean-initialized no-post for congruence, preserving initializer/body halt contexts and outer writes. |
