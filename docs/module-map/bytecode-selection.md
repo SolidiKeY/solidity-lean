@@ -111,3 +111,6 @@
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean` | Inhabited all-word/pipeline images, saved-tail conditional use, literal refusal and resource-domain controls. |
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldNumericInterface.lean` | Additive numeric paired-load signature retaining all H26 producer and initial-image premises. |
 | `Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean` | Existing word serializer/reader identity and exact numeric paired-load consequence, reusing the original transport. |
+| `Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentInterface.lean` | Additive exact MLOAD active-word and P6 touch post-image iff signatures. |
+| `Bridge/SolidityBridge/AccessBridge/MemoryLoadExtent.lean` | All-offset native extent arithmetic and exact post-image boundary reusing published P6 touch. |
+| `Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean` | Inhabited either-pipeline images, crossed-word expansion and aligned word-fit endpoint refusal. |

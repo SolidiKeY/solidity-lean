@@ -171,3 +171,26 @@ correspondence and the actual 32-byte span are explicit; the iff exposes the
 existing post-active word-fit boundary without narrowing calldata admission.
 The earlier absence of a local FrameMem read method is not a blocker: the
 published P6 adapter already supplies `touch` and its byte/carrier laws.
+
+`MemoryLoadExtent.lean` proves native active-word accounting at every offset,
+without modular loss in the word count, and the exact post-image iff using
+`P6ByteMemory.touch_image`. Complete physical bytes, logical state and invocation
+key are preserved by the existing operations. A full post-image holds exactly
+when its existing strict active-byte word-fit field holds; no new admission
+restriction or unconditional post-image is asserted. Controls construct initial
+images for either pipeline, expand a crossed-word read, and exhibit a fitting
+aligned last word ending at the word-size boundary whose raw post-image fails
+word-fit. They allocate no enormous native buffer and claim no charged success
+or Source reachability. Charged access/failure certificates remain unchanged.
+
+Dependency audit: the exact H26 consumer field is supplied conditionally, not
+realized by a concrete byte program. `Backend/Passes/EntryReception.lean` is an
+admitted Boolean handoff, not emitted raw decoding or selector dispatch. V11's
+structural V1/V2 view producers are available; deriving coherent raw views,
+emitted decoding and dispatch remain owned G40 work. Native G35.03 copy/slice
+and general V09 G24.03 composition are separate producer obligations. These
+facts do not justify classifying every remaining G40 proof as externally blocked.
+Independent read-only finder and skeptic reviews of this extent checkpoint
+passed with no findings. They confirmed that all-offset word-count accounting
+and the exact post-image iff do not narrow admission, and that the endpoint
+control is raw-model evidence rather than a charged-execution claim.
