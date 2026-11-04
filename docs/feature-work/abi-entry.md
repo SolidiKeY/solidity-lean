@@ -299,3 +299,10 @@ identified a nested duplicate axiom guard for `fetched_word`; the guard block
 was corrected to one matching annotation per print. Final diagnostics report
 zero errors and both focused review follow-ups confirm the fix with no
 outstanding findings. Neither review used a Lean server or build.
+
+`HeadCheckInterface.lean` states the ordinary indexed decoder's initial
+selector-inclusive short-head predicate over an actual size word. Its explicit
+word-to-byte-length equality is an initial representation fact; native size
+loading and coverage of Source inputs are not supplied. A true flag means this
+initial guard rejects; a false flag does not imply entry success. Receive and
+fallback selection use their separate paths and are not replaced by this check.
