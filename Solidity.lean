@@ -272,6 +272,8 @@ import Solidity.Backend.MemoryCopies.AliasBindingControls
 import Solidity.Backend.MemoryCopies.AliasBindingInterface
 import Solidity.Backend.MemoryCopies.AllocationPanic
 import Solidity.Backend.MemoryCopies.AllocationPanicInterface
+import Solidity.Backend.MemoryCopies.CanonicalSingleton
+import Solidity.Backend.MemoryCopies.CanonicalSingletonControls
 import Solidity.Backend.MemoryCopies.CanonicalSingletonInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.CopyPathControls
