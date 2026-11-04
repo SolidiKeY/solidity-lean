@@ -155,3 +155,6 @@
 | `Yul/Compilation/WhileWordExecution{,Controls}.lean` | Concrete unchanged word-selected lowerWhile turns, finite running prefixes/exits, whole model execution and all-prefix model fault; actual emitter consumer without abstract realization, raw-word counter/NOT/zero/boundary controls. No source-divergence/native/resource/G24 adequacy. |
 
 | `Bridge/SolidityBridge/Yul/WordForExecution{,Controls}.lean` | Existing original normal FOR source theorem composed with concrete WordControl-selected prelude/loop execution, without abstract realization callback; general raw-local/newer/symbolic-tail, ordered post, horizon and access controls. Native/resource/Source-G24 closure remains separate. |
+
+| `Yul/Compilation/WordBlockExecution.lean` | Forward actual finite StructuredExec transport under unchanged WordControl selection, one-sided branches and real loop witnesses; symbolic caller/nonstack preservation. No termination/failure iff/native/G24 claim. |
+| `Bridge/SolidityBridge/Yul/WordStructuredCompilation{,Controls}.lean` | Actual nested scope/switch and scoped FOR source/compiler consumers of concrete structured word execution, without realization callbacks; original horizon13/10, selector mutation, lexical scratch, symbolic framing and skipped bad/endless-arm controls. |

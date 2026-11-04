@@ -421,6 +421,8 @@ import SolidityBridge.Yul.UnarySelection
 import SolidityBridge.Yul.UnarySelectionControls
 import SolidityBridge.Yul.WordForExecution
 import SolidityBridge.Yul.WordForExecutionControls
+import SolidityBridge.Yul.WordStructuredCompilation
+import SolidityBridge.Yul.WordStructuredCompilationControls
 import SolidityBridge.Yul.WriteSelection
 import SolidityBridge.Yul.WriteSelectionControls
 import SolidityBridge.YulWorld.Returndata
