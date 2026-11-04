@@ -496,3 +496,17 @@ regrown payload at length 64. These synthetic heap/frame witnesses establish
 neither allocation reachability nor a historical successful index-40 access.
 General producer capture, arbitrary source/frame adequacy and the remaining
 original work/backfill obligations remain open.
+
+`P6ByteReferenceWrite` connects actual Source memory-byte writes to bounded
+MSTORE8 updates of the existing frame. It derives the nonwrapping payload address
+from the real placement and logical index; physical capacity remains a separate
+premise. `mixed_entry` derives input header/payload facts from the actual covered,
+duplicate-free mixed inventory. The write theorem proves exact typed writeback,
+selected-object reencoding of the whole updated map, every-original-H MemOK,
+and preservation of other heap cells and every exterior byte. It does not yet
+construct a refreshed complete mixed inventory. The unchanged-byte law preserves
+the whole Source state and byte map; frame access accounting remains distinct.
+The three-object string control changes the final byte of a partially occupied
+word, preserves nonzero padding, and distinguishes the numeric MSTORE8 operand
+from a left-aligned Source bytes1 word. No general compiler, static-call,
+allocator-provenance or dirty-local adequacy is claimed.
