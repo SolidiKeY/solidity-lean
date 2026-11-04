@@ -203,3 +203,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceFieldsInterface.lean` | Actual Source primitive/reference value and heterogeneous field default construction obligations, indexed by existing types and layout. |
 | `Backend/MemoryCopies/SourceFields.lean` | Actual primitive/reference Source defaults, heterogeneous field composition and layout-indexed struct construction with exact counts and framing. |
 | `Backend/MemoryCopies/SourceFieldsControls.lean` | Declared mixed bytes-array/string struct and dynamically self-referential struct defaults, child contents, partial timeout and wrong-root controls. |
+| `Backend/MemoryCopies/SourceBytesInterface.lean` | Actual typed persistent Source length/payload cell inputs for byte traversal, without aggregate-load or physical-layout assumptions. |
