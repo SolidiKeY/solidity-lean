@@ -564,3 +564,11 @@ not an authorized exclusion. Consequently this checkpoint completes concrete
 flat numeric/native composition, while G45.06 and the whole assignment remain
 partial. Neither Source adequacy, arbitrary IR outcomes, gas, termination nor
 G49 is claimed. Both reviews used no edits, builds or Lean server.
+
+
+The concrete-composition implementation567b238d passes all eight checkpoint
+gates and both per-file checks. Exact scoped axiom sets are standard only,
+and KeySort passes under the recorded Lean4.24.0/Lake5.0.0-src+797c613 toolchain.
+This following documentation-only handoff preserves its checked Lean sources.
+The required local structured-IR lowering producer remains open; the full
+assignment gate and whole-lane completion are therefore still pending.
