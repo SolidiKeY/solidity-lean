@@ -92,10 +92,22 @@ theorem lowerAssign_shape {n : Nat} (i : Fin n) {value : Vector Scalar.Word n �
     (depth : Nat) (p : Program) (emitted : (lowerAssign i rhs).code depth = some p) :
     CodeShape p (n+depth) (n+depth) := assign_shape i rhs rhsShape depth p emitted
 
+/-- Existing sequencing operand proof, exported for other actual visitors.
+Both emitted child-shape laws remain explicit at this generic layer. -/
+theorem lowerSeq_shape {n : Nat} {first second : Vector Scalar.Word n → Vector Scalar.Word n}
+    (a : LoweredStmt n first) (b : LoweredStmt n second)
+    (leftLaws : ∀ depth p, a.code depth = some p → CodeShape p (n+depth) (n+depth))
+    (rightLaws : ∀ depth p, b.code depth = some p → CodeShape p (n+depth) (n+depth))
+    (depth : Nat) (p : Program) (emitted : (lowerSeq a b).code depth = some p) :
+    CodeShape p (n+depth) (n+depth) := seq_shape a b leftLaws rightLaws depth p emitted
+
 /-- info: 'Solidity.Yul.Compilation.StatementVisitorShapes.visit_shape' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms visit_shape
 /-- info: 'Solidity.Yul.Compilation.StatementVisitorShapes.lowerAssign_shape' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms lowerAssign_shape
+
+/-- info: 'Solidity.Yul.Compilation.StatementVisitorShapes.lowerSeq_shape' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms lowerSeq_shape
 
 end Solidity.Yul.Compilation.StatementVisitorShapes

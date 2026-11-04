@@ -32968,5 +32968,115 @@
   "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerAssign_shape": [
     "Quot.sound",
     "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.packet": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.pop_shape": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.push_shape": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.scope_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.source_target": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.visit_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.actual_visit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.dirty_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.large_capacity_last": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.large_capacity_next": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.large_oversized": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.large_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.large_shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.largePacket": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.packet_instructions": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.result_zero": [
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.shape": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.source": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.source_without_emission": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.target_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.target_zero": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/ScopedVisitorShapesControls.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.Controls.update": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerSeq_shape": [
+    "Quot.sound",
+    "propext"
   ]
 }

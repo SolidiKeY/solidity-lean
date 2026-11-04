@@ -2628,6 +2628,8 @@ import Solidity.Yul.Compilation.ScopedRawStatementControls
 import Solidity.Yul.Compilation.ScopedRawStatements
 import Solidity.Yul.Compilation.ScopedStatementControls
 import Solidity.Yul.Compilation.ScopedStatements
+import Solidity.Yul.Compilation.ScopedVisitorShapes
+import Solidity.Yul.Compilation.ScopedVisitorShapesControls
 import Solidity.Yul.Compilation.ShapeCapacity
 import Solidity.Yul.Compilation.ShapeCapacityControls
 import Solidity.Yul.Compilation.ShiftSubMachine

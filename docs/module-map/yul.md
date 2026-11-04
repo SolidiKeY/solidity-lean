@@ -139,3 +139,5 @@
 | `Yul/Compilation/PureVisitorShapes{,Controls}.lean` | Actual full pure visitor success/emission derives recursive operand metadata, including ternary and software BYTE/CLZ; original closed-Yul source/target conjunction, separately capacity-checked packet, dirty-index and unbounded modular controls. No logical Source/G24/native closure. |
 
 | `Yul/Compilation/PureAssignmentShapes{,Controls}.lean` | Actual full-pure assignment and two-assignment sequence operand producers, original closed-source/update/run transport and separately capacity-checked packets; dirty read-after-write and physical SWAP16 controls. Reuses the existing statement assignment proof; no general statement/native/G24 closure. |
+
+| `Yul/Compilation/ScopedVisitorShapes{,Controls}.lean` | Actual scoped visitor success derives operand metadata for skip/sequence/full-pure assignment/singleton let/arbitrary zero prefixes; original closed-source/update/run, independently capacity-checked packets and nested/17-local access controls. Scope emission keeps its depthzero restriction; no native/G24/general-control closure. |
