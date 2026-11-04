@@ -551,3 +551,7 @@ They checked actual public compiler selection, emitted jump/skip behavior and
 first-match induction, exact result-cell-only mutation and malformed/empty-table
 controls. Both confirmed route/fallback labels are not represented as Source
 or ABI dispatch success, and the remaining correspondence boundary is explicit.
+
+`SourceRoutesInterface.lean` specifies ordinary Source lookup to checked route
+execution using raw selector bytes, retaining complete-prefix and initial-cell
+representation facts. Compile-time labels do not certify declaration bodies.
