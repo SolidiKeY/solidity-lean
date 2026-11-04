@@ -103,3 +103,5 @@
 | `Yul/LocalDefaultRepresentation.lean`, `Yul/Checks/LocalDefaultRepresentation.lean` | All-fuel heterogeneous default/scope/unchecked congruence with related clean/raw frames and unequal projection controls. |
 
 | `Yul/LocalDefaultControlRepresentation.lean`, `Yul/Checks/LocalDefaultControlRepresentation.lean` | All-fuel independently indexed default branch/loop congruence with typed failure-prefix controls. |
+
+| `Yul/LocalDefaultPostRepresentation.lean`, `Yul/Checks/LocalDefaultPostRepresentation.lean` | All-fuel default-scope post and omitted-guard congruence with post-effect/continuation controls. |

@@ -1219,3 +1219,26 @@ certificates remain required; broader certificates and general P16 remain open.
 Independent read-only finder/skeptic reviews found no issues. Both modules
 have zero diagnostic errors; fourteen scoped axiom reports use only Lean
 standard axioms. Final lane and external compiler/EVM validation remain open.
+
+
+### Default post and omitted-guard congruence
+
+`LocalDefaultPostRepresentation.postIter`, `noGuard` and
+`noGuardNoPost` prove all-fuel exact-word congruence for the existing
+default-scope post runner and concrete literal-true wrappers. Original
+guard/post/default-body certificates remain required. Guard/body/post order,
+predecessor horizons, full local/world relations and exact body/post failure
+frames remain unchanged; successful post values are discarded.
+Ten controls distinguish a post write stopping the next present guard from
+continued omitted-guard execution, ignored false/true post values, skipped
+posts, body versus post failures, zero fuel and dirty projection refusal.
+Existing typed default-body and side-effecting post witnesses are reused.
+The pre-existing `LocalLoopReductions.literalPost` supplies the universal
+false/true literal-post equivalence separately.
+No Source/runtime/readback/admission changes or broader certificate support
+are claimed. General P16 and full-lane validation remain open.
+
+Independent read-only finder/skeptic reviews have no remaining findings; the
+existing literal-post citation was confirmed against its committed signature.
+Both modules have zero diagnostic errors; thirteen scoped axiom reports use
+only Lean standard axioms. Final lane validation remains open.
