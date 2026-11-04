@@ -219,3 +219,9 @@ confirmed the gate result is not an assumed run or poststate, inheritance keeps
 all original failure/resource equations, and both charged controls use inhabited
 initial images. The remaining full G40 and G46 correspondence obligations are
 unchanged; this checkpoint does not supply a complete lane gate or producer.
+
+`ValueGateInterface.lean` states a bounded intrinsic G40 value-check contract:
+selection through the public checked compiler, exact emitted instruction shape,
+and execution for every machine. It covers payable bypass and non-payable zero
+value, preserving the complete successful machine. It does not certify runtime
+selector dispatch, failure bytes, gas, or Source/physical entry provenance.
