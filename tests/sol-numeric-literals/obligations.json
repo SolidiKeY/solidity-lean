@@ -60,6 +60,6 @@
   {
     "id": "immutable-handoff",
     "status": "pending",
-    "evidence": "This blocked checkpoint is sealed separately; final assignment seal must follow passing integration/runtime gates."
+    "evidence": "Final assignment seal follows passing integration/runtime gates and H35 verified cache delivery. VM gates pass; shipping preflight blocked on routing. See h35/HANDOFF.md and evidence/h35-cache-receipt.json."
   }
 ]

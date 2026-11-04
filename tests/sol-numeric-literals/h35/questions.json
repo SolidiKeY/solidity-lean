@@ -1,0 +1,15 @@
+[
+  {
+    "id": "Q-H35-SHIP1",
+    "sources": [
+      "H35",
+      "scripts/coord-tools/ship-cache.sh",
+      "evidence/h35-cache-preflight.log"
+    ],
+    "question": "Which supported transport and configuration should this VM use to obtain the required H35 cache-delivery receipt? The installed relay requires missing coordinator routing files.",
+    "options": [
+      "Provide a supported VM-side invocation and destination configuration: rerun the required tool and verify delivery.",
+      "Provide coordinator-side retrieval and required ship-cache invocation for the prepared archive: return a verified delivery receipt."
+    ]
+  }
+]

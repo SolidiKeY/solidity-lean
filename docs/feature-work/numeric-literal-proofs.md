@@ -306,3 +306,9 @@ breach. The wrapper now preserves the observed process exit separately and
 forces effective exit 125 when a resource stop coincides with process exit 0.
 The isolated MOCK tests cover both observed exits 137 and 0, with auto-removal;
 no real pressure or stop is induced. This does not change any Lean source.
+
+
+H35 follow-up: VM-owned build,627 exact #print axioms results and controls
+pass. Cache shipping preflight fails on absent coordinator routing; the prepared
+owned cache asset is not delivered. No new checkpoint is done. See
+tests/sol-numeric-literals/h35/HANDOFF.md and evidence/h35-cache-receipt.json.
