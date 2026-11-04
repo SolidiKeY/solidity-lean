@@ -1221,3 +1221,14 @@ validity. Controls retain a dirty bool's interior byte, its sibling and nonzero
 padding, and distinguish a valid empty window at the end from an invalid one
 past the end. This covers raw local images; typed-heap adequacy, CALL execution,
 resource accounting and source-level failure interpretation remain separate.
+
+`RawPhysicalCallOutput` computes the physical write span from the actual
+`callOutput` prefix. Its `copy` writes that prefix and touches the original
+requested output span. Thus empty returndata retains all old bytes while a
+nonempty requested span can still grow the physical high-water mark. `outside`
+preserves the unwritten requested tail, and `transport` reconstructs the full
+reached raw-local frame. `world_store` derives complete-map agreement with the
+concrete World port. `call_copied` composes the actual World call adapter under
+its explicit preflight, input-load, output-acceptance and invocation equations;
+it does not provide a concrete call producer or invocation adequacy. Controls
+separate short-return padding, retained dirty cells and requested-access extent.
