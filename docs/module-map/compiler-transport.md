@@ -53,7 +53,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/CompilerWholeScope.lean`, `CompilerWholeScopeControls.lean`, `CompilerWholeScopePins.lean` | Actual public whole-fixture recognition, physical Input/output and exact allocator growth, with independently typed scope contrast. |
 | `Backend/Passes/CompilerScopedFailure{,Pins}.lean` | Actual public whole scoped-call failure certificates, reached costs and arbitrary saved tails. |
 | `Backend/Passes/EffectfulConditional{Assignment,Controls,Pins}.lean` | Effectful conditional-expression Source/context transport, compiled captures and actual wrong-order controls. |
-| `Backend/Passes/RelatedMemoryCapture{,Controls,Pins}.lean` | Initial Source context alignment through actual reference capture and selected-map pointer readback. |
+| `Backend/Passes/RelatedMemoryCapturePins.lean` | Exact standard-axiom guards for initial Source context alignment, reference capture and selected-map pointer readback. |
 | `Backend/Passes/RelatedStorageCapture{,Controls,Pins}.lean` | Plain core storage-alias context transport and symbolic-slot capture/readback. |
 | `Backend/Passes/AssignmentAdditionPins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
 | `Backend/Passes/AssignmentMultiplicationPins.lean` | Exact observed standard-only axiom guards for the corresponding compiler-pass proofs. |
