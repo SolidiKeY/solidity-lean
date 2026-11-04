@@ -439,6 +439,19 @@ refreshed view and the real Source subcontext hash and KECCAK step consume the
 changed payload. Nonzero padding remains unchanged. The concrete old/new digest
 comparison is finite evidence, with no injectivity or compiler/gas claim.
 
+`P6ByteObjectCopy.payload_copy` generalizes byte-payload transport beyond the
+fixture. From an actual complete initial encoded heap, byte-root lookup and
+valid equal-length spans, it requires the destination to be empty or contained
+in that root's live payload. Header preservation and retained capacity are
+derived from actual Placement/history; new bytes come from the real reached
+frame. The actual Source action and existing inventory realization construct a
+complete refreshed view, coverage/IDs, unchanged other cells, every initial
+owner typing, heap type/next and address/free metadata. Source spans may read
+any represented region, including overlap. Empty maximum-offset copies remain
+no-access and preserve whole Source state. This is same-length payload support,
+not growth, arbitrary owned writes, static-call or assembly admission, resource
+feasibility or allocator/compiler adequacy.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary

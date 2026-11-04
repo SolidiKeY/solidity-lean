@@ -86,3 +86,4 @@
 | `Yul/Adapters/P6HistoryHashRef{,Controls}` | Actual Source subcontext byte hashing after completed copies, exact caller restoration and a nonempty changed-history Source/KECCAK witness. |
 | `Yul/Adapters/P6ByteCopyPreparation` | Actual overlapping copy-byte readback and canonical byte-object update existence from header/payload and retained-capacity facts. |
 | `Yul/Adapters/P6ChangedPayloadHashControls` | Kernel exact changed-byte Source state, nonempty history and changed-payload Source/KECCAK witness with sibling/alias preservation. |
+| `Yul/Adapters/P6ByteObjectCopy{,Controls}` | General payload-only byte copying with derived retained capacity, actual Source action, complete refreshed view and unrelated-cell/layout preservation. |
