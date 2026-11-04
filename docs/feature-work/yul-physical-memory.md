@@ -829,3 +829,14 @@ exact geometric room. Controls include static-frame `new bytes` and `new bool[]`
 exact size panic, timeout, padding and unknown bytes. This is the local-length
 producer adapter, not arbitrary operand instrumentation or target allocator
 selection/refinement. No new execution limit or admission exclusion is added.
+
+`NewMemoryOperand.decompose` removes the local-only restriction for the actual
+new-memory length operand: the owner evaluator's complete result and state feed
+amount conversion, the existing allocation guard and allocation. Success, panic
+and halt transport preserve that exact prefix. Physical realization requires
+real memory agreement and owner validity at the reached state, rather than
+assuming original-state facts survive arbitrary effects. Controls distinguish
+postincrement's old allocation length from its new local, preserve increment on
+size panic, and retain a condition write before later timeout. This is contextual
+execution transport, not arbitrary intermediate-reference capture or target
+allocator refinement; all existing horizons and outcomes remain unchanged.
