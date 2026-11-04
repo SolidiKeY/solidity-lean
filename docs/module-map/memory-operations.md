@@ -204,3 +204,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/Executable/CreationReturnInterfaceV1Audit.lean` | Complete interface types and standard-axiom guards. |
 | `Backend/Executable/ConstructorFrameSelection.lean` | Concrete checked constructor-argument declaration client: derived frame room, complete caller restoration and order/old-heap controls; native memory-machine scope. |
 | `Backend/Executable/ConstructorFrameSelectionAudit.lean` | Exact endpoint signature and scoped standard-axiom guards. |
+| `Backend/Executable/CreationReturnProducer.lean` | Concrete H26 kernel-return producer and exact returned-byte equivalence over all referenced library addresses. |
+| `Backend/Executable/CreationReturnProducerControls.lean` | Nonempty one-site unused-library equivalence and referenced two-site swap rejection. |
+| `Backend/Executable/CreationReturnProducerAudit.lean` | Exact producer/equivalence types and scoped standard-axiom guards. |

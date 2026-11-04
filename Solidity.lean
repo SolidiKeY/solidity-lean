@@ -152,6 +152,9 @@ import Solidity.Backend.Executable.CreationReturnProducer
 import Solidity.Backend.Executable.CreationReturnProducerControls
 import Solidity.Backend.Executable.CreationReturnInterfaceV1Audit
 import Solidity.Backend.Executable.CreationReturnInterfaceV1Controls
+import Solidity.Backend.Executable.CreationReturnProducer
+import Solidity.Backend.Executable.CreationReturnProducerAudit
+import Solidity.Backend.Executable.CreationReturnProducerControls
 import Solidity.Backend.Failure.Checkpoint
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks

@@ -351,3 +351,29 @@ orphans failed on three task scratch probes; these were moved intact to evidence
 and the focused orphan check rerun. Axiom-pins remains FAIL with zero errors and
 44 unrecorded standard-only changes (three from this audit); global inventory is
 reserved. Raw exit1 is preserved and is not a full checkpoint pass.
+
+
+### Concrete H26 return producer and exact observation domain (2026-11-04)
+
+`CreationReturnProducer.producer` now inhabits the unchanged frozen V1 type using
+both concrete `CreationLinkIdentity` laws and the actual nonempty constructor
+witness. This discharges the two kernel-return fields; it does not discharge any
+Source/profile/account/fetched-CREATE producer. The generic `link_congr` induction
+proves actual fold equality from agreement at every referenced site; no bounds
+are necessary for this standalone congruence. `runtime_equal_iff` retains actual
+Artifact/LinkTable/ImmutableTable bounds, disjointness and compatibility.
+`returned_equal_iff` derives both runtime identities from real `Exec` and
+constructor determinism, proving equality exactly when all referenced20-byte
+addresses agree. No equality of unused entries is concluded or required.
+
+The inhabited one-site105-byte client retains two immutable patches and nonempty
+arguments, actually returns twice under differing unused-library inputs, and
+uses the frozen producer field to observe the referenced address. The two-site
+swapped-reference negative consumes the new equivalence. Independent read-only
+finder and skeptic accepted the actual proofs and controls without findings.
+Scoped guards show the producer/equivalence/control proofs use only the standard
+three axioms, while `link_congr` is axiom-free. The failed initial automation
+probe is retained separately. G44 full source/account/world correspondence,
+G43/H19/H25, G36.03/V12 G37 and helper G18/VY5 remain open; G45 ownership remains
+reassigned/master-owned. General constructor Source lowering is not inferred
+from this bounded artifact-return result.
