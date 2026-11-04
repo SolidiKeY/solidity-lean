@@ -509,3 +509,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/FramedEmission.lean` | Actual checked payload emission preserves disjoint physical word frames; Source reason selection/readback consumer. |
 | `Backend/FailurePaths/FramedEmissionControls.lean` | Inhabited reason/Boolean return frames, adjacent byte boundaries and overlapping-emission refusal. |
+
+| `Backend/FailurePaths/RuntimeGuard.lean` | Actual Source Boolean-local bare require and public checked memory statement selection/run. |
+| `Backend/FailurePaths/RuntimeGuardControls.lean` | Inhabited true/false guards in both pipelines, saved stack, panic boundary and literal-selector refusal. |

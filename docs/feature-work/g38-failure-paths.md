@@ -267,3 +267,40 @@ remained incomplete: timeout at 300.064 seconds, 1,830,236,160 bytes peak,
 with `Yul.DirectUpdates` last logged complete. This is not a full-gate pass or
 an attribution of the timeout to that module. All failed elaboration and build
 receipts are retained in the handoff.
+
+
+## Runtime bare Boolean-local guards
+
+`FailurePaths.RuntimeGuard` connects an actual Source `require(local)` expression
+statement to `Evm.Memory.compileStmt` selecting the intrinsic bare-require
+statement. General Boolean operands are related by explicit initial local reads
+and the existing full `Memory.StateRepr`, including its heap/base-map conditions.
+No compiled certificate, desired execution or final representation is assumed.
+The selected instructions are exactly the local MLOAD followed by `assertTop`.
+The actual run returns the entire initial machine on true and bare revert on
+false. The actual Source run retains all state and caller locals, returning
+normally on true or reverting with empty bytes on false, at horizon `n+7`.
+Zero horizon still times out.
+
+`RuntimeGuardControls` inhabits the physical layout for both Boolean values and
+either Source pipeline, with saved stack word 77 and nonempty source log and
+function-local state. It distinguishes false from success, evaluates assert to
+its panic bytes, and retains refusal of a runtime local by the older literal
+statement selector. This is a relation between the supplied indexed Source and
+intrinsic nodes; automatic frontend lowering, arbitrary guard expressions,
+message-bearing require, assert compilation, bytecode/EVM execution, reverted
+target poststate and internal-frame payload transport remain outside this leaf.
+The instruction machine supplies no failure post-machine or payload bytes.
+
+Focused check:
+
+```
+LEAN_NUM_THREADS=1 lake -f lakefile.g38.toml build Solidity.Backend.FailurePaths.RuntimeGuardControls
+```
+
+With serial Lean `-j1`, `Elab.async=false` and the existing inherited guard, this
+passed in 2.763 seconds, peak aggregate RSS 818,483,200 bytes. Printed axioms are
+only `propext`, `Classical.choice` and `Quot.sound`. Independent read-only finder
+and skeptic reviews found no confirmed soundness or vacuity defect. The earlier
+300.064-second full checkpoint timeout remains failed; this focused check does
+not discharge it. No unchanged full retry was made for this leaf.
