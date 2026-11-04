@@ -2590,6 +2590,8 @@ import Solidity.Yul.Compilation.NormalControl
 import Solidity.Yul.Compilation.NormalControlControls
 import Solidity.Yul.Compilation.NormalStackControls
 import Solidity.Yul.Compilation.NormalStackTransport
+import Solidity.Yul.Compilation.NumericExecution
+import Solidity.Yul.Compilation.NumericExecutionControls
 import Solidity.Yul.Compilation.NumericMachine
 import Solidity.Yul.Compilation.OpcodeLowering
 import Solidity.Yul.Compilation.OpcodeLoweringControls

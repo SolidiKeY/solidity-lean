@@ -33078,5 +33078,103 @@
   "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerSeq_shape": [
     "Quot.sound",
     "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.expression": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.loweredExpr_machine": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.loweredStmt_machine": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.statement": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecution.lean:Solidity.Yul.Compilation.NumericExecution.step": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.actual_model": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.actual_selection": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.actual_visit": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.concrete_result": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.concrete_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.model_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.oversized_model": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.result_zero": [
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.scope_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.shifted_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.source": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.symbolic_zero": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.value_eq": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity/Yul/Compilation/NumericExecutionControls.lean:Solidity.Yul.Compilation.NumericExecution.Controls.zero_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
   ]
 }
