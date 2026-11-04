@@ -59,3 +59,6 @@ Solidity.Frontend.StatementGrammarH28.MixedSplit	Intrinsic mixed block and contr
 Solidity.Frontend.StatementGrammarH28.NestedCoverage	Recursive intrinsic block and control parser fuel coverage
 Solidity.Frontend.StatementGrammarH28.NestedUnique	Actual yield uniqueness for recursive intrinsic block/control fragment
 Solidity.Frontend.StatementGrammarH28.BoolCompound	Boolean compound statement parser fuel and actual yield coverage
+Solidity.Frontend.StatementGrammarH28.BalancePr	H31 local proof-only arbitrary syntax delimiter balance
+Solidity.Frontend.StatementGrammarH28.BalanceAtoms	H31 local proof-only arbitrary syntax delimiter balance
+Solidity.Frontend.StatementGrammarH28.SyntaxBalance	H31 local proof-only arbitrary syntax delimiter balance

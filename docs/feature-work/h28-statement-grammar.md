@@ -50,11 +50,13 @@ validity and existing layout and precedence contracts are not weakened.
    nearest-position results proved; final whole-scope acceptance pending.
 2. Splitting/root/association: recursive block/control balance, mixed boundary
    splitting, intrinsic nearest position and non-simple token roots proved.
-   General atom balance, simple roots and token-level association await Q-ATOM.
+   Arbitrary statement/atom brace balance and arbitrary block-prefix splitting
+   are proved under H31. Simple roots and token-level association remain in
+   progress; the former Q-ATOM hold is resolved.
 3. Parse/yield: recursive block/control completeness and actual yield uniqueness
    proved; fixed-Boolean/empty-for compound coverage proved. Broad uniqueness/
    profile completeness are refuted by SG-CEX-01 and retained OPEN/REFUTED.
-   General remaining statement composition awaits Q-ATOM; no successful parse
+   General remaining statement composition is in progress under H31; no successful parse
    is assumed to discharge completeness.
 4. All 45 kernel and pinned solc fixture controls pass with 40 constructor
    obligations. Per-checkpoint finder/skeptic reviews and sealed handoffs are
@@ -1034,3 +1036,116 @@ An earlier static timing setup failed because this host lacks /usr/bin/time;
 no gate ran in that attempt. Its failure record is sealed, and the actual
 checks use OS wait4 timing/RSS instead. Lean checks still use the established
 bounded Docker runtime and its /usr/bin/time, without changing proof budgets.
+
+
+## H31 resolution of Q-ATOM
+
+Human decision H31, received from the coordinator on 2026-11-04:
+"permit local proof-only inspection of the read-only expression/type/argument
+atoms in the boundary/fuel lemmas, with expression uniqueness excluded.
+Do not change producer APIs or theorem statements."
+
+This selects local proof-only boundary/fuel work. Q-ATOM is resolved; its
+prior hold and audits remain historical evidence, not an active dependency.
+Work resumes in the same VM/branch under the original goal. All prior
+premises, exclusions, statement obligations and proof budgets are preserved.
+No producer file/API or expression-uniqueness implementation is authorized.
+
+
+## Checkpoint N: H31 arbitrary syntax brace balance and block splitting
+
+BalancePr.lean, BalanceAtoms.lean and SyntaxBalance.lean prove curly-brace
+balance of every successful existing Syn statement yield and its complete
+expression/type/argument/Yul dependency closure. This uses H31's permission
+for local proof-only atom inspection. No producer, original theorem
+statement, premise, exclusion or expression-uniqueness claim is changed.
+BalanceCat selects only the required intrinsic categories and their list/opt
+closures; the public expression_yield_balanced and statement_yield_balanced
+statements require no atom-balance or expression-uniqueness premise.
+
+The exhaustive induction covers all 79 constructors in this closure, including
+all 13 statement roots, all three simple forms, both catch forms, all block/
+item/list/option alternatives, every expression/type/parameter/argument
+constructor and every Yul constructor. The exact category-to-constructor
+inventory, file identities and public names are in inventory-n.json. Excluded
+unit/top/part declaration categories are not needed to state these theorems;
+they are not replacement syntax or a new statement exclusion.
+
+The proof threads actual Pr input/output layouts through successful binds.
+Scalar helpers account for every operator/type token, identifier path,
+fragmented string literal and function-type visibility/mutability ordering.
+Literal payload bytes remain inside atomic string tokens, so brace bytes are
+not punctuation delimiters. Attribute balance is explicitly proved for the
+empty modifier list used by function types; no arbitrary modifier claim is
+assumed. Every conditional/optional yield clause is balanced for all outcomes.
+The new theorem proves brace-token balance, not uniqueness or balance of
+other delimiter kinds.
+
+arbitrary_block_boundary and successful_block_boundary derive balanced
+contents for any successful intrinsic block yield. arbitrary_block_prefix_split
+then recovers common token contents and the exact suffix from equal arbitrary
+braced prefixes, across different contexts/layouts. It requires no expression
+premise and does not conclude tree equality. This removes the earlier arbitrary
+atom/balance gap in braced-block splitting. General mixed statement splitting,
+simple-root discrimination, token-level else association and fuel remain
+separate original obligations.
+
+Controls contain an inhabited actual yield with a function type, explicit
+attribute order, call options, string bytes123/125 and an unchecked return
+block. They preserve arbitrary residual layout. Invalid duplicate attrs and
+wrong fragment lengths still fail. A string closing-brace payload successfully
+yields a neutral string token. A universal negative control proves no arbitrary
+statement can successfully yield an unmatched closing-brace punctuation token.
+The distinct-tree SG-CEX-01 flag collision remains explicitly balanced and
+has its same actual yield, preventing a balance-to-uniqueness overclaim.
+These are kernel printer controls, not new solc acceptance claims; the prior
+45 external solc fixtures remain separate.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/BalancePr.lean | pass, final helpers | /workspace/h28-statement-grammar-evidence/run-1793817522488562384 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/BalanceAtoms.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793817089471835499 |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/SyntaxBalance.lean | pass, final corollaries | /workspace/h28-statement-grammar-evidence/run-1793817709489959711 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.SyntaxBalance | pass; 4.57s timed wall, RSS 479544 KiB | /workspace/h28-statement-grammar-evidence/run-1793817739393455280 |
+| runtime.py diag tests/h28-sol/statement-grammar/SyntaxBalanceControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793817917798299560 |
+| runtime.py diag tests/h28-sol/statement-grammar/BalancePublicAxioms.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793817986826067885 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/BalancePr.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793818029194269624 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/BalanceAtoms.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793818035513912723 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/SyntaxBalance.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793818042215660926 |
+| runtime.py gate tests/h28-sol/statement-grammar/SyntaxBalanceControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793818060838635610 |
+| runtime.py gate tests/h28-sol/statement-grammar/BalancePublicAxioms.lean | pass, all45 public theorem signatures/axioms | /workspace/h28-statement-grammar-evidence/run-1793818075432211356 |
+
+All 45 public theorem signatures and kernel axiom sets are enumerated by the
+explicit BalancePublicAxioms audit. 34 have no axioms, ten use propext and
+Quot.sound, and one uses propext. axioms-n.json maps every name to its actual
+printed output. No custom axiom, sorry/admit, unsafe/native_decide or raised
+heartbeat limit is introduced. The three new source modules are locally
+registered; frozen shared roots and producer input hashes remain unchanged.
+
+Retained failed runs: run-1793816911121507914 used a reserved Lean binder;
+run-1793817361395340424 exposed a second reserved binder and ambiguous
+inferred postconditions. These were made explicit. run-1793817462334681963
+exposed dependent optional match elaboration and a mapping equation issue;
+the optional token computation was separated from its proof witness.
+run-1793817560041981557 exhausted the unchanged 200000-heartbeat limit during
+broad mapping equation expansion. The final proof splits the two existing
+MapKey constructors and uses their precise equations; no budget was raised.
+run-1793817836958203840 found a malformed NumLit.dec control and stopped when
+MCP auto-setup tried rebuilding an import without explicit -j1. The hard guard
+was retained, the control uses the actual numeric constructor, and the existing
+FlagCounterexample import was prebuilt serially before the passing recheck.
+No failed gate is relabeled PASS or removed. This is new proof work, not a
+speed-motivated producer refactor, and no speedup percentage is claimed.
+
+Separate read-only finder and skeptic pass the full closure and inhabited
+controls without Lean/server/builds. Their confirmed stale active Q-ATOM
+wording finding is fixed; the historical hold remains preserved. An incorrect
+missing-bitOr review finding was withdrawn after reread; the branch was
+already present and required no edit. reviews-n.json records both verdicts.
+
+H31 resolves Q-ATOM, so no scope question remains. The full original assignment
+is still incomplete: general mixed statement token splitting, simple-root
+discrimination, token-level conditional uniqueness/association, general
+compound expression/header/body fuel, full repository gates and whole-scope
+reviews/acceptance remain. SG-CEX-01 stays OPEN/REFUTED. No goal is created,
+reset or marked complete by this checkpoint.
