@@ -3222,6 +3222,16 @@
   "propext"
  ],
  "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean:Solidity.Backend.MemoryOps.Physical.writeBytes_eq_putBytes": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteWorldInterface.lean:Solidity.Backend.MemoryOps.Physical.ByteWorld.current_mload_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteWorldInterface.lean:Solidity.Backend.MemoryOps.Physical.ByteWorld.Producer.load_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frame_snapshot_read": [
   "Quot.sound",
   "propext"
