@@ -641,6 +641,7 @@ import Solidity.Backend.Selection.ControlPackets
 import Solidity.Backend.Selection.ExecutionTrace
 import Solidity.Backend.Selection.ExecutionTraceControls
 import Solidity.Backend.Selection.FrameCapacityV2
+import Solidity.Backend.Selection.FramedLoweringInterface
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls

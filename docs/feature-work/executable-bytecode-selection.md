@@ -572,3 +572,25 @@ and KeySort passes under the recorded Lean4.24.0/Lake5.0.0-src+797c613 toolchain
 This following documentation-only handoff preserves its checked Lean sources.
 The required local structured-IR lowering producer remains open; the full
 assignment gate and whole-lane completion are therefore still pending.
+
+
+## Recursive lowering reflection interface
+
+FramedLoweringInterface adds only a signature extending LoweringCertificate.
+The original success equivalence is retained. The new reflection field must
+recover the numeric stack, unchanged complete caller frame and zero pending
+skip from any actual successful IR result. This supplies the information
+needed to inspect intermediate branch/loop machines without assuming their
+frame or silently normalizing escaping skips. It does not classify faults,
+reverts or divergence, alter observations/budgets, or create another evaluator.
+The field is a required local proof, not a new foreign premise. No instance
+or recursive lowering proof is claimed by this signature-only checkpoint.
+
+
+Independent finder and skeptic signature reviews confirm this strictly
+strengthens the existing contract, with no evaluator or foreign premise.
+A registration presentation finding was fixed by joining the new and earlier
+owned module rows into the existing contiguous Markdown table. Programs with
+escaping skips or nonstack effects cannot satisfy this normal-return/frame
+contract merely by discarding those observations; eventual producers must
+prove their domain. Signature-only status remains explicit.

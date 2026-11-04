@@ -37,23 +37,19 @@
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoad.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/AccessBridge/MemoryLoadInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained premises are in the module. |
-
 | `Backend/Selection/ExecutionTrace.lean` | Actual bounded byte-PC traces, scalar placement and frozen code/sequence control certificates; branch and loop realization remain open. |
 | `Backend/Selection/ExecutionTraceControls.lean` | Inhabited placed sequence after PUSH32, all-prefix capacity and wrong-PC/result/tail/underflow controls. |
-
 | `Backend/Selection/ControlPackets.lean` | Bounded actual assembled JUMP/JUMPI/ISZERO tests, placed fetch and exact tag/byte-offset/JUMPDEST clients of existing LabelExec packets. |
 | `Backend/Selection/ControlPacketControls.lean` | Inhabited assembled packet arms plus independent literal-byte controls for exact1024/hidden1025 peaks, target corruption, PC/result/tail and untaken-target behavior. |
-
 | `Backend/Selection/BranchLayout.lean` | Static prefix views equal to existing conditional expansion and fixed-whole-items adapters for proved scalar/control packets and byte coordinates. |
 | `Backend/Selection/BranchPackets.lean` | Bounded selected-body, condition, test, join and tag traces at exact whole-branch placements. |
 | `Backend/Selection/BranchExecution.lean` | Frozen ControlCertificate constructor for whole conditional execution, actual selected body reachability and every prefix bound. |
 | `Backend/Selection/BranchControls.lean` | Inhabited assembled true/false arms, wrong-arm/tail negatives, overwritten-condition operand execution and join-capacity refusal. |
-
 | `Backend/Selection/LoopLayout.lean` | Static prefix views equal to existing loop expansion, head/exit tag coordinates and reused fixed-items adapters. |
 | `Backend/Selection/LoopPackets.lean` | Bounded actual loop head, condition/test, arbitrary certified-body entry, backedge and exit-tag traces. |
 | `Backend/Selection/LoopExecution.lean` | General body iteration/backedge and zero exit; finite StructuredExec induction and frozen whole-loop certificate. |
 | `Backend/Selection/StructuredExecution.lean` | Whole-byte ControlCertificate constructor for every existing BlockShape with its explicit ExpansionRoom. |
 | `Backend/Selection/LoopControls.lean` | Inhabited assembled nested-branch loop, repeated backedges/zero exit, changed condition stack and wrong-head/result/tail/header-capacity controls. |
-
 | `Backend/Selection/Composition.lean` | Same-artifact assembly/encoding/byte execution and named decoder-premise transport; concrete compositions from proved mixed scalar selection. |
 | `Backend/Selection/CompositionControls.lean` | Inhabited70-byte selector-to-runtime composition, full caller frame, independent six-step bytes, wrong artifact/tail and nonvacuous decoder-premise controls. |
+| `Backend/Selection/FramedLoweringInterface.lean` | Signature-only strengthening of existing lowering: reflect arbitrary successful IR outcomes into numeric stacks, complete caller frames and zero pending skips; local proof obligation. |
