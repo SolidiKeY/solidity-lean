@@ -153,3 +153,4 @@
 | `Yul/Adapters/RawPhysicalUpdate{,Controls}` | Derives complete raw-local inventory reencoding/readback after actual RawFrame.write and P6/MSTORE word updates, retaining other cells and residual bytes under explicit span/coordinate guards. |
 | `Yul/Adapters/RawPhysicalInterior{,Controls}` | Complete raw-local inventory transport after an interior-byte P6/MSTORE8 update, using exact full-word codecs and retaining other bytes/cells under explicit coordinate/fit guards. |
 | `Yul/Adapters/RawPhysicalAnyImage{,Controls}` | Universal arbitrary raw-byte image decode/reencode and finite-frame identity, applied to actual bounded overlapping/cross-cell P6 snapshot copies with derived reached room. |
+| `Yul/Adapters/RawPhysicalCalldata{,Controls}` | Actual Fr.cd copy into arbitrary raw-local images, with derived complete frame writeback and exact raw-word versus typed Source decoder success/error boundaries. |

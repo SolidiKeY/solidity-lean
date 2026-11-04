@@ -1168,3 +1168,17 @@ the published zero-length behavior. Controls copy 33 bytes from offset 33 to 34 
 bool/u8 boundary, retain exact resulting raw words and padding, and distinguish
 snapshot reads from overwritten-source chronology. Native MCOPY/compiler,
 allocation and general dirty Source readback adequacy remain separate.
+
+
+`RawPhysicalCalldata` binds actual `Source.Fr.cd` copying to the complete raw
+word inventory. Reached frame room follows the existing byte-write accounting,
+so arbitrary copied bytes and their right-zero-padding admit exact whole-frame
+writeback without an initial encoded-image premise. A selected raw cell reads
+the same 32 bytes as `Source.cdWordAt`; the actual typed `Source.readLoc` retains
+its complete decoder result/error and unchanged Source state. Raw representation
+is therefore distinct from typed acceptance, not a cleaning policy. Controls
+keep raw word 2 while bool calldata reading reverts and uint8 accepts 2, preserve
+static-frame Source carriers, right padding, maximum-offset zeros and exterior
+bytes. Source offsets remain mathematical Nat after the initial Word; no wrap
+or invented source-end bound is introduced. General dirty-local readback and
+compiler CALLDATACOPY correspondence remain open.
