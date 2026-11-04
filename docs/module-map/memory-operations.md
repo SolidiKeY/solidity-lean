@@ -145,3 +145,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceWrite.lean` | Independent Source location writes and existing intrinsic singleton copies. |
 | `Backend/MemoryOps/CalldataViewPacking.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained premises are in the module. |
 | `Backend/MemoryOps/CalldataViewPackingControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained premises are in the module. |
+| `Backend/MemoryOps/CalldataViewExtension.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/CalldataViewExtensionControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |

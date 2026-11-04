@@ -2610,6 +2610,64 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtension.lean:Solidity.Backend.MemoryOps.calldataViewExtendedKey_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtension.lean:Solidity.Backend.MemoryOps.calldataViewExtendedKey_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtension.lean:Solidity.Backend.MemoryOps.calldataViewFreshBase_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtension.lean:Solidity.Backend.MemoryOps.keyedCalldataViews_lookup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtension.lean:Solidity.Backend.MemoryOps.overlappingCalldataViewsV2": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.empty_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.empty_prior": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.full_coherent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.repack_not_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.runtime_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.sparse_keys": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewExtensionControls.lean:Solidity.Backend.MemoryOps.ViewExtensionControls.sparse_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewIdentity_eq": [
   "propext"
  ],

@@ -259,6 +259,8 @@ import Solidity.Backend.MemoryOps.CalldataSequenceLaws
 import Solidity.Backend.MemoryOps.CalldataTransfer
 import Solidity.Backend.MemoryOps.CalldataTransport
 import Solidity.Backend.MemoryOps.CalldataUintTransfer
+import Solidity.Backend.MemoryOps.CalldataViewExtension
+import Solidity.Backend.MemoryOps.CalldataViewExtensionControls
 import Solidity.Backend.MemoryOps.CalldataViewPacking
 import Solidity.Backend.MemoryOps.CalldataViewPackingControls
 import Solidity.Backend.MemoryOps.CheckedSnapshot
