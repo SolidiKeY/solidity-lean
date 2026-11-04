@@ -411,3 +411,7 @@ The lane adopts published master6f3eedf0788ee1f8a3bcf230558c712ecdca04d5. Its ac
 The original G33/G35 queue remains partial. Published P1 native-unwind/activation and P10 linked-backedge leaves do not supply full PROFILE/CALL closure. H24 checked-input obligations remain explicit; no P8 admission inhabitant or general physical copy preservation is supplied. H16/S03-PANIC41 remains VY5-owned and unmerged; existing V11 G34/G35.02/.03 and V10 G27.05 boundaries remain unchanged. New compositions must use the published dependency without treating these bounded leaves as whole-lane closure.
 
 Independent read-only finder/skeptic confirmed unchanged owned Lean proofs and master compatibility. They found duplicate traversal map rows and stale Interface/SourceInterface descriptions after rebase. These were fixed by retaining published rows for integrated modules and preserved corrected rows for unintegrated modules, with one row per module. No Lean/server/builds or writes were performed by reviewers.
+
+## Compiler-selected reference children
+
+`SelectedArrayDefaultInterface.lean` extends the existing DefaultBuilder proof family to runtime parents over any production-supported reference root and fixed wrappers. It carries the actual compileDefault result and a fitting represented input for the entire parent, without a separate unused-child capacity premise. No new selector, builder, emitter or Source admission classifier is introduced.

@@ -220,3 +220,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalFootprintInterface.lean` | Exact intrinsic copy allocation-count, parent-last identity and sequential subtree separation obligations. |
 | `Backend/MemoryCopies/TraversalFootprint.lean` | Live intrinsic object measures and exact copy growth, parent-last, positive footprint and pair root-boundary proofs. |
 | `Backend/MemoryCopies/TraversalFootprintControls.lean` | Nested duplicate subtree identities/contents, old-object retention, shadows, empty and64-branch footprint controls. |
+| `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Production-selected runtime reference-array defaults over arbitrary supported roots and fixed wrappers, with whole-parent feasibility. |

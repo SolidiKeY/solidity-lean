@@ -297,6 +297,7 @@ import Solidity.Backend.MemoryCopies.RuntimeArrays
 import Solidity.Backend.MemoryCopies.RuntimeRebind
 import Solidity.Backend.MemoryCopies.RuntimeRebindControls
 import Solidity.Backend.MemoryCopies.RuntimeRebindInterface
+import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
 import Solidity.Backend.MemoryCopies.SourceBytes
 import Solidity.Backend.MemoryCopies.SourceBytesControls
 import Solidity.Backend.MemoryCopies.SourceBytesInterface
