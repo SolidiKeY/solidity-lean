@@ -186,3 +186,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceReferenceReadControls.lean` | Inhabited distinct/same-parent/no-op clients, complete five-object/twenty-four-word observations, nested reads and exact bounds/timeout distinctions. |
 
 | `Backend/MemoryOps/SourceReferenceReadSequence.lean` | Computed reference RHS followed by reached nested delete or ordered parent/child bounds rejection; actual Source Items, intrinsic Prog, whole word append and prefix observer/allocator frames. |
+
+| `Backend/MemoryOps/SourceReferenceAliasSequence.lean` | Actual computed reference replacement followed by reached local alias selection; Source Items, intrinsic Prog, full word append and derived observer/local/allocator frames. |
