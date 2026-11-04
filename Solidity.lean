@@ -289,6 +289,8 @@ import Solidity.Backend.MemoryCopies.DeepCopyContents
 import Solidity.Backend.MemoryCopies.DefaultSelection
 import Solidity.Backend.MemoryCopies.DefaultSelectionControls
 import Solidity.Backend.MemoryCopies.DefaultSelectionInterface
+import Solidity.Backend.MemoryCopies.FixedMemoryCopy
+import Solidity.Backend.MemoryCopies.FixedMemoryCopyControls
 import Solidity.Backend.MemoryCopies.FixedMemoryCopyInterface
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
