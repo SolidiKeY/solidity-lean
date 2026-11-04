@@ -649,13 +649,50 @@ consumes the correctness theorem in both pipelines. Exact Source and target
 observations reuse the checked three-condition result. Empty selection,
 zero-horizon timeout, skip/unchecked/context-growth structural refusals and
 assignment/literal-guard compiler refusals are explicit. These are scope
-refusals, not claims that Source rejects those programs. Root `.block`
-statement selection, general effectful bodies, context-map construction,
-internal-frame payload transport and physical bytecode/EVM adequacy are not
-supplied here.
+refusals, not claims that Source rejects those programs. Root `.block` statement selection is handled separately below. General
+effectful bodies, context-map construction, internal-frame payload transport
+and physical bytecode/EVM adequacy are not supplied here.
 
 The focused serial check passed in 2.944 seconds with 837,017,600 bytes peak
 aggregate RSS and no new source warnings. All sixteen printed theorem reports
 use only `propext`, `Classical.choice` and `Quot.sound` (or subsets). No proof
 budget was raised. Earlier failed full-checkpoint validation remains failed;
 focused selector checks do not establish the outstanding full build.
+
+## Root guard-block statements
+
+`FailurePaths.GuardBlockSelection` recognizes an actual root Source `.block`,
+computes its existing structural body view and lowers the admitted guards to
+an intrinsic `.block` program. It invokes public `Memory.compileStmt` on that
+statement. `block_public` proves the actual public block-arm choice;
+`selected_public` derives both program and statement compiler provenance and
+exact returned code. `compile_of_view` proves equality with the established
+sequence compiler for every recognized block, including downstream refusals.
+The selected statement fragment is the public compiler’s restricted inner
+fragment; the code is exactly the inner program code.
+
+`restore_self` and `close_normal` prove the actual Source local-restoration
+operations. `body_correct` composes the checked sequence execution with
+`Out.close`; `selected_correct` derives original Source statement execution at
+`n + admitted.admitted.statements.length + 8` and selected instruction execution.
+The extra horizon step is the root block. Initial typed maps/read correspondence
+and full `StateRepr` remain explicit; normal completion restores the same locals
+and Source state and preserves the complete target machine. Empty Source revert
+and bare target revert propagate unchanged. No target post-failure machine,
+execution oracle or supplied desired certificate is assumed.
+
+`GuardBlockSelectionControls` consumes the root selector in the inhabited mixed
+context in both Source pipelines. Concrete joint Source/target controls cover
+success and first/middle/last failure; exact general observations are also
+proved. Zero and one horizon retain timeout. Empty blocks compile; bare guards
+at this block-only entry point, skip/unchecked/declaration bodies and assignment
+bodies are refused. The other guard entry points retain their own behavior.
+This closes root-block selection for the existing unchanged-context pure guard
+sequence, not general nested/effectful bodies, frontend admission, internal-call
+failure transport or physical bytecode/EVM correspondence.
+
+The serial focused control check passed in 4.558 seconds with 823,193,600 bytes
+peak aggregate RSS and no new source warnings. All twenty-six printed theorem
+axiom reports use only `propext`, `Classical.choice` and `Quot.sound` or subsets.
+Earlier full-build timeout and the published calculus-plan doc-path failure
+remain open; this result does not turn either failed gate into a pass.

@@ -121,6 +121,8 @@ import Solidity.Backend.FailurePaths.CheckedGuardsControls
 import Solidity.Backend.FailurePaths.Controls
 import Solidity.Backend.FailurePaths.FramedEmission
 import Solidity.Backend.FailurePaths.FramedEmissionControls
+import Solidity.Backend.FailurePaths.GuardBlockSelection
+import Solidity.Backend.FailurePaths.GuardBlockSelectionControls
 import Solidity.Backend.FailurePaths.GuardBodySelection
 import Solidity.Backend.FailurePaths.GuardBodySelectionControls
 import Solidity.Backend.FailurePaths.GuardLowering
