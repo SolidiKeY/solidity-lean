@@ -104,3 +104,5 @@
 | `Lowering/V07/BooleanComparisonControls.lean` | Inhabited mixed-reference, alias/context, effect-order and wrong-binding controls. |
 | `Lowering/V07/AddressConversions.lean` | Existing-carrier address/uint160 value and actual expression/local/assignment conversion certificates. |
 | `Lowering/V07/AddressConversionControls.lean` | Inhabited mixed-reference conversion, admission-refusal, alias and capture-lifetime controls. |
+| `Lowering/V07/AddressComparisons.lean` | Six address comparison clauses over independent Source execution and existing native captures; initial canonical context alignment. |
+| `Lowering/V07/AddressComparisonControls.lean` | Inhabited address comparison, context-extension and ordered negative controls with exact axiom guards. |

@@ -2120,6 +2120,8 @@ import Solidity.Lowering.StorageOps.SourceWriteRollback
 import Solidity.Lowering.StorageOps.SourceWriteRollbackControls
 import Solidity.Lowering.StorageOps.TwoClearRepresentationControls
 import Solidity.Lowering.V07.AcceptedGraphProducer
+import Solidity.Lowering.V07.AddressComparisonControls
+import Solidity.Lowering.V07.AddressComparisons
 import Solidity.Lowering.V07.AddressConversionControls
 import Solidity.Lowering.V07.AddressConversions
 import Solidity.Lowering.V07.AliasRhsSubtraction
