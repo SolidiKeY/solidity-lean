@@ -1482,3 +1482,30 @@ violations. Independent read-only finder/skeptic merge reviews report no finding
 P20 pending producer fields remain explicit obligations; importing them proves
 no concrete Source/compiler adequacy. General P16/full VY1 and final lane gates
 remain open.
+
+### Recursive while completed horizons
+
+`LocalWhileHorizon.successor` and `extension` preserve the exact final caller
+raw frame after actual normal completion of the existing default-scoped while.
+Fuel induction uses concrete `LocalBoolHorizon.successor` and
+`LocalDefaultHorizon.blockSuccessor` to fix each actual predecessor guard/body
+result and restored intermediate state before the recursive induction step.
+No child simulation or termination law is assumed.
+Ten controls include a new inhabited scoped body: declare a uint8, write the
+surviving Boolean guard false, evaluate another Boolean expression, restore
+the caller frame and exit. They cover completed extra-fuel equality, timeouts
+before/after the write in the extended context, changed timeout outcomes,
+skipped body and zero fuel, persistent dirty projection refusal on the stopped
+path, and the existing literal-true noncompletion theorem instantiated with
+the mutating body. The latter does not assert general divergence.
+Normal completion remains required. Timeout-prefix stability, arbitrary
+control/readback, admission and general Source/compiler adequacy remain open.
+No Source/ExtCall/evaluator/layout, observation or proof-budget changes.
+General P16/full VY1 and final gates remain open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Twelve scoped axiom reports use only Lean standard
+axioms. Raw failed automation, redundant-rewrite and reserved fixture-name
+attempts are retained separately; statements, observations and budgets were
+not weakened or increased.

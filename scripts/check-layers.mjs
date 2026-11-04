@@ -25,6 +25,7 @@ const CORE = [
   /^Solidity\.Yul\.(LocalDefaultHorizon|Checks\.LocalDefaultHorizon)$/, // Heterogeneous default item/block completed fuel stability.
   /^Solidity\.Yul\.(LocalUncheckedHorizon|Checks\.LocalUncheckedHorizon)$/, // Existing unchecked scope/continuation completed fuel stability.
   /^Solidity\.Yul\.(LocalIfHorizon|Checks\.LocalIfHorizon)$/, // Independently typed conditional scope completed fuel stability.
+  /^Solidity\.Yul\.(LocalWhileHorizon|Checks\.LocalWhileHorizon)$/, // Recursive default-scoped while completed fuel stability.
   /^Solidity\.Yul\.(LocalDefaultPostRepresentation|Checks\.LocalDefaultPostRepresentation)$/, // Default-scope post and omitted-guard congruence.
   /^Solidity\.Yul\.(LocalDefaultControlRepresentation|Checks\.LocalDefaultControlRepresentation)$/, // Independently indexed default branches and loops.
   /^Solidity\.Yul\.(LocalDefaultRepresentation|Checks\.LocalDefaultRepresentation)$/, // Heterogeneous default and unchecked exact-word congruence.

@@ -2529,6 +2529,7 @@ import Solidity.Yul.Checks.LocalU8Horizon
 import Solidity.Yul.Checks.LocalU8Representation
 import Solidity.Yul.Checks.LocalUncheckedHorizon
 import Solidity.Yul.Checks.LocalValues
+import Solidity.Yul.Checks.LocalWhileHorizon
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Yul.Checks.Occurrences
 import Solidity.Yul.Checks.OpenControls
@@ -2770,6 +2771,7 @@ import Solidity.Yul.LocalU8Representation
 import Solidity.Yul.LocalU8Source
 import Solidity.Yul.LocalUncheckedHorizon
 import Solidity.Yul.LocalValues
+import Solidity.Yul.LocalWhileHorizon
 import Solidity.Yul.LocalWordView
 import Solidity.Yul.LocalWordWrite
 import Solidity.Yul.LocalWriteback

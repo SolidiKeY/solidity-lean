@@ -313,3 +313,5 @@ VY1: completed unchecked-scope/ordinary-continuation horizon stability; see [lan
 VY1: independently typed conditional-scope completed horizon stability; see [lane handoff](inline-assembly-vy1.md#independently-typed-conditional-scope-horizons). Full lane remains open.
 
 VY1: adopted the published P16 dependency without changing its interface; retained local checkpoints and explicit P20 producer obligations. See [lane handoff](inline-assembly-vy1.md#published-p16-dependency-adoption).
+
+VY1: recursive default-scoped while completed horizon stability and mutating-iteration controls; see [lane handoff](inline-assembly-vy1.md#recursive-while-completed-horizons). Full lane remains open.

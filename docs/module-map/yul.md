@@ -132,3 +132,5 @@
 | `Backend/PrimitivePackets/CheckedAdd/Target.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Yul/LocalWhileHorizon.lean`, `Yul/Checks/LocalWhileHorizon.lean` | Exact completed recursive while horizon stability using concrete guard/body laws; mutating scoped iteration and partial-write controls. |
