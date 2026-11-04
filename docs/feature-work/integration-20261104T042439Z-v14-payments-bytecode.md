@@ -12,3 +12,7 @@ Separate read-only finder and skeptic reviews must pass before publication.
 Reviews use exact diff/dependency packets; nested shell access is unavailable.
 
 Independent finder and skeptic passed with no confirmed findings.
+
+Review note: the nonzero-prefix control distinguishes different byte lengths.
+The separate exact-byte controls establish the stronger patch-layout observations;
+the prefix control is not counted as an independent same-length byte-order test.
