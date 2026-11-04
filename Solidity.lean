@@ -1884,6 +1884,7 @@ import Solidity.Lowering.V08.Callable
 import Solidity.Lowering.V08.CallableMetadata
 import Solidity.Lowering.V08.CallableReflection
 import Solidity.Lowering.V08.CallbackControls
+import Solidity.Lowering.V08.ConditionalCallable
 import Solidity.Lowering.V08.ConstructorContinuations
 import Solidity.Lowering.V08.ConstructorScalarTransport
 import Solidity.Lowering.V08.Controls

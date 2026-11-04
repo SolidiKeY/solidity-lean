@@ -25310,6 +25310,87 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.argument_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.chosen_bound": [],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.context_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.initial_alignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.reached_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.retained_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.skipped_branch_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.static_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.wrong_branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.wrong_context_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.target_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/ConditionalCallable.lean:Solidity.Lowering.V08.ConditionalCallable.transport_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V08/ConstructorContinuations.lean:Solidity.Lowering.V08.ConstructorContinuations.argument_failure": [
   "Classical.choice",
   "Quot.sound",
