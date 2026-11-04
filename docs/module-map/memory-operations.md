@@ -323,3 +323,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedPathCopyInterface.lean` | Selected memory-path checked fresh-copy/binding contracts without a room premise. |
 | `Backend/MemoryCopies/CheckedPathCopy.lean` | Total selected-path checked copying, state adoption and fresh local binding. |
 | `Backend/MemoryCopies/CheckedPathCopyControls.lean` | Populated/empty/long/indexed binding, aliases, path refusal and inhabited capacity refusal. |
+| `Backend/MemoryCopies/CheckedStorageArrayInterface.lean` | Actual storage-header capacity guard and total primitive storage-to-memory copy contract. |
