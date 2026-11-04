@@ -1,0 +1,18 @@
+[
+  {
+    "role": "finder",
+    "verdict": "Accepted partial conditional-counter/child-span checkpoint; no confirmed source defects.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "results": "Delimiter/count state only; exhaustive29 expression closure with bare namedArg colons shielded by real enclosures. Originalprec/yields derive condition/question and true/colon/false cuts internally. Optional index/slice payloads cover absent endpoints. Arbitrary nestedtruebranch and rawscanner/bracket controls accepted.",
+    "limitations": "General highroot and recursive tree identity/public uniqueness/corollary remain open.",
+    "final_metadata": "Independent checkpoint/corruption controls PASS43/725; current signature/pin/source evidence, ledger and global43/725/3715 counts consistent. Final verdict accepted partial checkpoint, no remaining findings."
+  },
+  {
+    "role": "skeptic",
+    "verdict": "Accepted partial conditional-counter/child-span checkpoint; no confirmed source defects.",
+    "method": "Independent read-only source review; no Lean server or edits.",
+    "results": "Delimiter/count state only; exhaustive29 expression closure with bare namedArg colons shielded by real enclosures. Originalprec/yields derive condition/question and true/colon/false cuts internally. Optional index/slice payloads cover absent endpoints. Arbitrary nestedtruebranch and rawscanner/bracket controls accepted.",
+    "limitations": "General highroot and recursive tree identity/public uniqueness/corollary remain open.",
+    "final_metadata": "Independent checkpoint/corruption controls PASS43/725; current signature/pin/source evidence, ledger and global43/725/3715 counts consistent. Final verdict accepted partial checkpoint, no remaining findings."
+  }
+]

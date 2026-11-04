@@ -40,9 +40,9 @@ determinism alone does not establish this. The corollary is still open.
 constructors in intrinsic declaration order, boundaries, root levels, root
 conditions, layouts and open reconstruction obligations. `constructor-controls.json`
 assigns a kernel-checked accepted-root fixture to every constructor.
-`declarations.json` enumerates all 641 source declarations with source signatures;
+`declarations.json` enumerates all 725 source declarations with source signatures;
 `signatures.lean` and its kernel output report their actual types and axiom sets.
-The thirty-eight modules are proposed for coordinator registration, with module-map rows,
+The forty-three modules are proposed for coordinator registration, with module-map rows,
 in `registration-manifest.json`. Shared roots and maps remain frozen. The Bracket
 kind also has its three constructors, recursors and deriving instances generated
 by Lean; it describes token delimiters, not expression syntax.
@@ -98,7 +98,7 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `ExpressionCommaFree` | Exhaustive expression closure yields have no top-level commas; original expression certificates supply every scanner condition in certified component-span reconstruction. This concludes word-vector equality, not child-tree equality. |
 | `LowFreeAlgebra` | Joint question/assignment selector includes all 13 assignment operators; loose-root-free token, type-spelling and attribute algebra. |
 | `ExpressionLowFree` | Existing recursive precedence plus level ≥ 2 derives loose-marker freedom for all expression roots; type and call-argument outer words are unconditionally free, including arbitrary enclosed descendants. |
-| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Assignment child spans are now proved in BinarySpans; the conditional colon cut remains open. |
+| `LowRoot` | Existing certificates determine assignment versus conditional versus higher root class and the assignment operator. Assignment and conditional child spans are now proved in BinarySpans and ConditionalSpans; recursive tree identity remains open. |
 | `LowControls` | Every assignment operator and arbitrary prefix depth inhabit a conditional middle branch with exact yield and whole precedence; the first marker is the outer question, never that middle assignment. |
 | `BinaryFreeAlgebra` | Parameterized exact binary-rank markers and token/attribute algebra; prefix helper records its necessary rank-10 limitation. |
 | `ExpressionBinaryFree` | Original certificates imply marker freedom above each rank 2–9, 11 and 12, across all constructors and reachable type/call syntax. Its raw-rank-10 limitation is handled by the later operand-sensitive `AddRoot` proof. |
@@ -116,7 +116,12 @@ Numeric spellings, elementary aliases, comments and whitespace are below tokens.
 | `YieldSplit` | Actual successful StateT/Option executions invert into child successes, with arbitrary independent layout states. |
 | `BinarySpans` | All eleven ordinary binary families plus assignment derive equal child token spans and actual state executions from parent certificates/yields; enum operators reconstruct. |
 | `SpanControls` | Arbitrary mixed additive/prefix depths have partial-state operator/depth uniqueness and certified family-tree uniqueness. |
-| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 641 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
+| `ConditionalBalance` | Delimiter/count-only machine and arbitrary successful-prefix/failing-colon cut reconstruction. |
+| `ConditionalAlgebra` | Neutral tokens, literal fragments, actual attribute layouts and balanced enclosures preserve paired conditional punctuation. |
+| `ExpressionConditional` | Every original expression/type/param/callargs yield pairs top-level question/colon punctuation; bare namedArg colons remain shielded in actual enclosures. |
+| `ConditionalSpans` | Original certificates derive all three conditional child spans and layout states; optional index/slice payloads separate and slice colon cuts reconstruct. |
+| `ConditionalControls` | Arbitrary nested true branches have inhabited certificates and correct outer-colon cuts; raw selectors choose an inner colon, and all bracket kinds shield arbitrary internal colons. |
+| `AxiomPins` | Exact `#guard_msgs` axiom pins for all 725 source declarations; actual sets use only `propext`, `Classical.choice` and `Quot.sound`, or no axioms. |
 
 `firstTop_cut_unique` has token-machine `skip` hypotheses. They are NOT assumed in
 the original expression target. Delimiter/grouping corollaries now derive their
@@ -157,13 +162,13 @@ uses at most three files. No heartbeat, timeout or trust budget was raised.
 
 Actual versions: Lean 4.24.0, commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake 5.0.0-src+797c613.
-`checkpoint-proof-spans.log` records the passing permitted KeySort result BEFORE
+`checkpoint-proof-conditional.log` records the passing permitted KeySort result BEFORE
 `RUNTIME_GATE_PASS`: 377 taclets parsed, 131 read-bearing, 131 matched. Runtime
 success is not full assignment acceptance. The same command passed MCP diagnostics
 and the per-file kernel axiom-pin gate at the exact module hashes recorded in
-`checkpoint-proof-spans.inside.json`. It took 25.049671 seconds, child peak RSS
-250512 KiB, exact container peak 827023360 bytes, minimum parent headroom
-15617515520 bytes, with zero OOM events. These figures describe that command,
+`checkpoint-proof-conditional.inside.json`. It took 26.686933 seconds, child peak RSS
+251716 KiB, exact container peak 830967808 bytes, minimum parent headroom
+15597060096 bytes, with zero OOM events. These figures describe that command,
 not all earlier builds. Every other run has separate command/exit/time/RSS records;
 failed attempts and unavailable-tool probes remain retained. Sampled cgroup usage
 is labeled separately from exact memory.peak and per-child RSS.
@@ -175,10 +180,10 @@ signature/axiom evidence, runtime bounds, KeySort and compiler observations.
 Default full acceptance remains exit 1 while the original target is open. Changing
 ledger statuses alone cannot turn the partial checkpoint into full acceptance.
 The actual `./run-lean.sh` attempt exited 1 before building, at the frozen-root
-check: exactly these thirty-eight modules lack central root imports. The orphan gate
-reported the same thirty-eight. Source trust passed (3710 sources, zero findings), and
+check: exactly these forty-three modules lack central root imports. The orphan gate
+reported the same forty-three. Source trust passed (3715 sources, zero findings), and
 layers passed (559 core modules, none reaching elaboration or checked adapters).
-The global axiom-source gate reported zero errors but exited 1 for 641 unrecorded
+The global axiom-source gate reported zero errors but exited 1 for 725 unrecorded
 new standard pins. Proposed module/map rows and the exact axiom registration
 reference are in the manifest for coordinator integration; the worker did not
 edit frozen roots or trust inventory. These failed global gates are not counted
@@ -201,8 +206,8 @@ require their own reviews.
 
 The expression-closure delimiter invariant and grouped/enclosed span reconstruction
 are now proved. The comma separator and joint loose/non-minus binary marker invariants are now
-derived from certificates. The rank-ten operand-state invariant is now proved. Next complete conditional-colon/high-root span
-decomposition for arbitrary precedence roots and reconstruct conditional colons. A raw
+derived from certificates. The rank-ten operand-state invariant is now proved. Conditional colon spans are now proved. Next complete high-root span
+decomposition and recursive child identities. A raw
 punctuation split is insufficient: `-` is both a prefix and binary token, and
 conditional middle expressions mask nested assignments/colons. Prove those facts;
 do not add a desired split, parse completeness or uniqueness as a premise.
@@ -392,3 +397,43 @@ gates. Exact actual standard-only axiom sets cover all 641 declarations. Separat
 finder and skeptic source reviews accepted the partial checkpoint without
 defects or Lean-server use; records are in `evidence/reviews-spans.json`. Failed
 first bind inversion and missing direct import diagnostics remain retained.
+
+
+## Conditional colon and actual child-span checkpoint
+
+Five modules add 84 declarations, giving 43 modules and 725 declarations. A
+delimiter stack plus natural counter pairs question marks and colons outside
+brackets; balanced enclosures shield arbitrary internal colons. The generic
+first-failure machine also detects malformed raw delimiters, explicitly distinct
+from the certificate-derived outer-colon result. Successful original expression,
+type, parameter and call-argument yields preserve the counter for every initial
+depth, by exhaustive intrinsic induction over all 29 expression constructors.
+Bare named arguments necessarily carry an unpaired colon and are omitted only
+from that intermediate invariant; their actual surrounding braces are handled
+using raw balance. No original expression/certificate/target is excluded.
+
+The actual conditional printer inversion derives all child executions. Existing
+condition precedence supplies low-marker freedom and reconstructs the question
+cut; true-branch conditional balance reconstructs the outer colon. All three
+child words follow, for independently chosen partial layout states. Optional
+expression payloads also distinguish index from slice, including absent
+endpoints, and uniquely split the slice colon. Complete postfix bases/enclosures
+and child-tree identities remain open. Arbitrarily nested true branches have
+exact inhabited certificates. The paired scanner selects the outer colon after
+4*n+1 tokens; a raw colon scanner selects an earlier colon at 2*n+1 for n>0.
+All three bracket kinds shield arbitrary runs of internal colons.
+
+Diagnostics and serial kernel signature/axiom gates pass with exact standard
+sets for all 725 declarations. Independent read-only finder/skeptic source
+reviews accepted the partial checkpoint without defects or Lean-server use;
+records are in `evidence/reviews-conditional.json`. Earlier failed nil-map
+normalizations, reserved-name syntax and redundant-tactic attempts are retained.
+High-root reconstruction, recursive type/list/argument/tree uniqueness, the
+public theorem and parseCat corollary remain open.
+
+The coordinator-published master was fetched and verified at
+`b419c3cf4f642ae519b66bebc26cdf2f7cf93574`, descending from the assigned base.
+All six assignment read-only master inputs are unchanged there; the integrated
+`Fragments.lean` matches this branch. No merge/rebase/reset was performed and
+the assigned branch still descends from its exact pinned base. Remaining work
+is not claimed integrated. Fetch evidence is `evidence/published-master-fetch.log`.

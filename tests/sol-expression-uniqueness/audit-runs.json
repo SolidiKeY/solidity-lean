@@ -1,6 +1,6 @@
 {
-  "proof_stem": "checkpoint-proof-spans",
-  "proof_gate_dir": "checkpoint-gates-spans",
-  "signature_stem": "signature-audit-spans",
-  "signature_gate_dir": "signature-gates-spans"
+  "proof_stem": "checkpoint-proof-conditional",
+  "proof_gate_dir": "checkpoint-gates-conditional",
+  "signature_stem": "signature-audit-conditional",
+  "signature_gate_dir": "signature-gates-conditional"
 }

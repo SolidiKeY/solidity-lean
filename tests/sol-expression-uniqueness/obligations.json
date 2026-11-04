@@ -15,13 +15,13 @@
     "id": "EU-03",
     "obligation": "balanced delimiter and token splitting lemmas",
     "status": "partial",
-    "evidence": "Balanced delimiter, comma and completion-state invariants are derived from actual yields. Operand-sensitive additive skip/last-cut lemmas cover arbitrary lengths. Complete conditional-colon and high-root decomposition remain open."
+    "evidence": "Raw delimiter, comma, operand-state and conditional-counter algebra proved at arbitrary lengths; all expression yields pair top-level question/colon punctuation while actual enclosures shield internal colons. High-root decomposition remains open."
   },
   {
     "id": "EU-04",
     "obligation": "root reconstruction for all precedence levels",
     "status": "open",
-    "evidence": "All ordinary binary roots and assignment now reconstruct both child token words and actual layout-state executions from original certificates. Conditional colon/high-root spans and recursive child identities remain open."
+    "evidence": "All ordinary binary roots, assignment and conditional recover actual child token words/layout executions internally from original certificates; conditional colon and index/slice payloads are reconstructed. High-root/tree identity remains open."
   },
   {
     "id": "EU-05",
@@ -57,25 +57,25 @@
     "id": "EU-10",
     "obligation": "arbitrary-family inhabited and negative controls",
     "status": "partial",
-    "evidence": "Arbitrary right-prefix depth now has same-yield family-tree uniqueness through recovered spans, including independent partial layouts. Inhabited and negative state-entry controls retained; full boundary acceptance remains open."
+    "evidence": "Arbitrary nested conditional true branches have inhabited exact-yield certificates, correct outer-colon positions and raw-selector countercontrols. All prior arbitrary families retained; full boundary acceptance remains open."
   },
   {
     "id": "EU-11",
     "obligation": "all module/declaration inventory and standard-only axiom pins",
     "status": "pass",
-    "evidence": "38 modules/641 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
+    "evidence": "43 modules/725 source declarations inventoried with exact actual kernel signatures and standard-only raw-message axiom pins."
   },
   {
     "id": "EU-12",
     "obligation": "runtime, KeySort, import closure, trust and fixture gates",
     "status": "partial",
-    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at38 frozen registrations; trust3710zero/layers559zero pass; central axiom inventory zero errors but641 unrecorded pins. Full global build remains open."
+    "evidence": "Current H26/KeySort/kernel/source-hash gates pass. Global roots/orphans stop at43 frozen registrations; trust3715zero/layers559zero pass; central axiom inventory zero errors but725 unrecorded pins. Full global build remains open."
   },
   {
     "id": "EU-13",
     "obligation": "independent finder and skeptic reviews",
     "status": "partial",
-    "evidence": "Separate finder/skeptic accepted partial printer inversion, all12 binary/assignment span proofs and arbitrary family controls without defects or Lean-server use. See evidence/reviews-spans.json."
+    "evidence": "Separate finder/skeptic accepted conditional counter/algebra/all29expression closure, actual3childspan and index/slice payload proofs, arbitrary nested controls. No defects or Lean-server use. See evidence/reviews-conditional.json."
   },
   {
     "id": "EU-14",

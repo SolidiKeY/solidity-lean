@@ -669,6 +669,265 @@
     "propext",
     "Quot.sound"
   ],
+  "Solidity.Frontend.ExpressionUniqueness.QBalancedItems": [],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_balanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_cons": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_dropHead": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_flatten": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_flatMap": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_of_atoms": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_parens": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_braces": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_square": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_tk": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_idt": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_path": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_elem": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_visibility": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_mutability": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_dataLoc": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_optToks": [],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_prefix": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_suffix": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_mul": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_add": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_shift": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_order": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_equality": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_assign": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.fragsP_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.litP_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.QBalancedAttrs": [],
+  "Solidity.Frontend.ExpressionUniqueness.qBalancedAttrs_append": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_single": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.arrange_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.attrsP_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.QState": [],
+  "Solidity.Frontend.ExpressionUniqueness.qToken": [],
+  "Solidity.Frontend.ExpressionUniqueness.qStep": [],
+  "Solidity.Frontend.ExpressionUniqueness.qRun": [],
+  "Solidity.Frontend.ExpressionUniqueness.QBalanced": [],
+  "Solidity.Frontend.ExpressionUniqueness.qStep_open": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qStep_close": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qStep_atom": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qStep_context": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qRun_append": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qRun_context": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_enclose": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_nil": [],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_append": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_atom": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_conditional": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qNeutral": [],
+  "Solidity.Frontend.ExpressionUniqueness.qToken_neutral": [],
+  "Solidity.Frontend.ExpressionUniqueness.qNeutral_atom": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qStep_projection": [
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qRun_projection": [
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_balanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qFailure": [],
+  "Solidity.Frontend.ExpressionUniqueness.qFailure_after_success": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qFailure_marker": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qFailure_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_colon_cut_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional": [],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditionalTokens": [],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_prec": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_yield": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_certified": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_paired": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditionalTokens_length": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_outer_colon": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.rawColon": [],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_raw_colon": [
+    "propext"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.middleConditional_raw_colon_wrong": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.bracketed_colons_hidden": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.ConditionalChildSpans": [],
+  "Solidity.Frontend.ExpressionUniqueness.conditional_child_spans": [
+    "propext",
+    "Classical.choice",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.qBalanced_not_unpaired_colon": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.slice_payload_colon_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.index_slice_payload_disjoint": [
+    "propext",
+    "Quot.sound"
+  ],
   "Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty": [
     "propext"
   ],
@@ -769,6 +1028,19 @@
     "Quot.sound"
   ],
   "Solidity.Frontend.ExpressionUniqueness.certified_expr_spans_commaSep_unique": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.ConditionalCategory": [],
+  "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expr_yield_qBalanced": [
+    "propext",
+    "Quot.sound"
+  ],
+  "Solidity.Frontend.ExpressionUniqueness.expr_derives_qBalanced": [
     "propext",
     "Quot.sound"
   ],

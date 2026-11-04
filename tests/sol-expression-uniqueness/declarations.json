@@ -1320,6 +1320,486 @@
     "source_signature": "theorem attrsP_commaFree (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : CommaFreeAttrs singles) (hm : CommaFreeItems mods) :\n    Produces (attrsP singles mods order) CommaFree"
   },
   {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.QBalancedItems",
+    "source_signature": "def QBalancedItems (items : List (List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_balanced",
+    "source_signature": "theorem qBalancedItems_balanced {items : List (List Tok)} (h : QBalancedItems items) :\n    BalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_nil",
+    "source_signature": "theorem qBalancedItems_nil : QBalancedItems []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_cons",
+    "source_signature": "theorem qBalancedItems_cons {ts : List Tok} {items : List (List Tok)}\n    (h : QBalanced ts) (hs : QBalancedItems items) : QBalancedItems (ts :: items)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_single",
+    "source_signature": "theorem qBalancedItems_single {ts : List Tok} (h : QBalanced ts) : QBalancedItems [ts]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_dropHead",
+    "source_signature": "theorem qBalancedItems_dropHead {ts : List Tok} {items : List (List Tok)}\n    (h : QBalancedItems (ts :: items)) : QBalancedItems items"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedItems_flatten",
+    "source_signature": "theorem qBalancedItems_flatten {items : List (List Tok)} (h : QBalancedItems items) :\n    QBalanced items.flatten"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_flatMap",
+    "source_signature": "theorem qBalanced_flatMap {\u03b1 : Type} (xs : List \u03b1) (f : \u03b1 \u2192 List Tok)\n    (h : \u2200 x, x \u2208 xs \u2192 QBalanced (f x)) : QBalanced (xs.flatMap f)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_of_atoms",
+    "source_signature": "theorem qBalanced_of_atoms (ts : List Tok) (h : \u2200 t, t \u2208 ts \u2192 bracket t = none \u2227 qNeutral t = true) :\n    QBalanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_parens",
+    "source_signature": "theorem qBalanced_parens {ts : List Tok} (h : Balanced ts) : QBalanced (parens ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_braces",
+    "source_signature": "theorem qBalanced_braces {ts : List Tok} (h : Balanced ts) : QBalanced (braces ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_square",
+    "source_signature": "theorem qBalanced_square {ts : List Tok} (h : Balanced ts) :\n    QBalanced (pu .lbrack ++ ts ++ pu .rbrack)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_tk",
+    "source_signature": "theorem qBalanced_tk (k : Kw) : QBalanced (tk k)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_idt",
+    "source_signature": "theorem qBalanced_idt (name : String) : QBalanced (idt name)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_path",
+    "source_signature": "theorem qBalanced_path (p : IdPath) : QBalanced p.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_elem",
+    "source_signature": "theorem qBalanced_elem (e : Elem) : QBalanced e.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_visibility",
+    "source_signature": "theorem qBalanced_visibility (v : Visibility) : QBalanced v.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_mutability",
+    "source_signature": "theorem qBalanced_mutability (m : Mutability) : QBalanced m.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_dataLoc",
+    "source_signature": "theorem qBalanced_dataLoc (l : DataLoc) : QBalanced l.toks"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_optToks",
+    "source_signature": "theorem qBalanced_optToks {\u03b1 : Type} (f : \u03b1 \u2192 List Tok) (h : \u2200 a, QBalanced (f a))\n    (value : Option \u03b1) : QBalanced (optToks f value)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_prefix",
+    "source_signature": "theorem qBalanced_prefix (op : PrefixOp) : QBalanced op.punct"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_suffix",
+    "source_signature": "theorem qBalanced_suffix (op : SuffixOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_mul",
+    "source_signature": "theorem qBalanced_mul (op : MulOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_add",
+    "source_signature": "theorem qBalanced_add (op : AddOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_shift",
+    "source_signature": "theorem qBalanced_shift (op : ShiftOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_order",
+    "source_signature": "theorem qBalanced_order (op : OrderOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_equality",
+    "source_signature": "theorem qBalanced_equality (op : EqOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_assign",
+    "source_signature": "theorem qBalanced_assign (op : AssignOp) : QBalanced (pu op.punct)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.fragsP_qBalanced",
+    "source_signature": "theorem fragsP_qBalanced (mk : Bytes \u2192 Tok) (hm : \u2200 bs, bracket (mk bs) = none \u2227 qNeutral (mk bs) = true)\n    (bs : Bytes) : Produces (fragsP mk bs) QBalanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.litP_qBalanced",
+    "source_signature": "theorem litP_qBalanced (l : Lit) : Produces (litP l) QBalanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.QBalancedAttrs",
+    "source_signature": "def QBalancedAttrs (entries : List (Slot \u00d7 List Tok)) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalancedAttrs_append",
+    "source_signature": "theorem qBalancedAttrs_append {xs ys : List (Slot \u00d7 List Tok)}\n    (hx : QBalancedAttrs xs) (hy : QBalancedAttrs ys) : QBalancedAttrs (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_single",
+    "source_signature": "theorem qBalanced_single (slot : Slot) (ts : List Tok) (h : QBalanced ts) :\n    QBalancedAttrs (single slot ts)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.arrange_qBalanced",
+    "source_signature": "theorem arrange_qBalanced (order : List Slot) (singles : List (Slot \u00d7 List Tok))\n    (mods : List (List Tok)) (ts : List Tok) (hs : QBalancedAttrs singles)\n    (hm : QBalancedItems mods) (h : arrange order singles mods = some ts) : QBalanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalAlgebra",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.attrsP_qBalanced",
+    "source_signature": "theorem attrsP_qBalanced (singles : List (Slot \u00d7 List Tok)) (mods : List (List Tok))\n    (order : List Slot) (hs : QBalancedAttrs singles) (hm : QBalancedItems mods) :\n    Produces (attrsP singles mods order) QBalanced"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.QState",
+    "source_signature": "def QState : Type"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qToken",
+    "source_signature": "def qToken (depth : Nat) : Tok \u2192 Option Nat\n  | .punct .question => some (depth + 1)\n  | .punct .colon => match depth with | 0 => none | n + 1 => some n\n  | _ => some depth"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep",
+    "source_signature": "def qStep (state : QState) (t : Tok) : Option QState"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qRun",
+    "source_signature": "def qRun (state : QState) : List Tok \u2192 Option QState\n  | [] => some state\n  | t :: ts => (qStep state t).bind fun next => qRun next ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.QBalanced",
+    "source_signature": "def QBalanced (ts : List Tok) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep_open",
+    "source_signature": "theorem qStep_open (k : Bracket) (stack : List Bracket) (depth : Nat) :\n    qStep (stack, depth) (openTok k) = some (k :: stack, depth)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep_close",
+    "source_signature": "theorem qStep_close (k : Bracket) (stack : List Bracket) (depth : Nat) :\n    qStep (k :: stack, depth) (closeTok k) = some (stack, depth)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep_atom",
+    "source_signature": "theorem qStep_atom (t : Tok) (hb : bracket t = none) (depth : Nat) :\n    qStep ([], depth) t = (qToken depth t).map fun n => ([], n)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep_context",
+    "source_signature": "theorem qStep_context (t : Tok) (s next tail : List Bracket) (depth : Nat)\n    (hne : tail \u2260 []) (hs : step s t = some next) :\n    qStep (s ++ tail, depth) t = some (next ++ tail, depth)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qRun_append",
+    "source_signature": "theorem qRun_append (xs ys : List Tok) (state : QState) :\n    qRun state (xs ++ ys) = (qRun state xs).bind (fun next => qRun next ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qRun_context",
+    "source_signature": "theorem qRun_context (ts : List Tok) (s next tail : List Bracket) (depth : Nat)\n    (hne : tail \u2260 []) (h : run s ts = some next) :\n    qRun (s ++ tail, depth) ts = some (next ++ tail, depth)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_enclose",
+    "source_signature": "theorem qBalanced_enclose (k : Bracket) (ts : List Tok) (h : Balanced ts) :\n    QBalanced (openTok k :: (ts ++ [closeTok k]))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_nil",
+    "source_signature": "theorem qBalanced_nil : QBalanced []"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_append",
+    "source_signature": "theorem qBalanced_append {xs ys : List Tok} (hx : QBalanced xs) (hy : QBalanced ys) :\n    QBalanced (xs ++ ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_atom",
+    "source_signature": "theorem qBalanced_atom (t : Tok) (hb : bracket t = none)\n    (ht : \u2200 depth, qToken depth t = some depth) : QBalanced [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_conditional",
+    "source_signature": "theorem qBalanced_conditional {c a b : List Tok}\n    (hc : QBalanced c) (ha : QBalanced a) (hb : QBalanced b) :\n    QBalanced (c ++ .punct .question :: (a ++ .punct .colon :: b))"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qNeutral",
+    "source_signature": "def qNeutral : Tok \u2192 Bool\n  | .punct .question | .punct .colon => false\n  | _ => true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qToken_neutral",
+    "source_signature": "theorem qToken_neutral (t : Tok) (h : qNeutral t = true) (depth : Nat) :\n    qToken depth t = some depth"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qNeutral_atom",
+    "source_signature": "theorem qNeutral_atom {t : Tok} (hb : bracket t = none) (ht : qNeutral t = true) :\n    QBalanced [t]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qStep_projection",
+    "source_signature": "theorem qStep_projection (stack next : List Bracket) (n m : Nat) (t : Tok)\n    (h : qStep (stack, n) t = some (next, m)) : step stack t = some next"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qRun_projection",
+    "source_signature": "theorem qRun_projection (ts : List Tok) (stack next : List Bracket) (n m : Nat)\n    (h : qRun (stack, n) ts = some (next, m)) : run stack ts = some next"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_balanced",
+    "source_signature": "theorem qBalanced_balanced {ts : List Tok} (h : QBalanced ts) : Balanced ts"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qFailure",
+    "source_signature": "def qFailure (state : QState) : List Tok \u2192 Option Nat\n  | [] => none\n  | t :: ts => match qStep state t with\n    | none => some 0\n    | some next => (qFailure next ts).map Nat.succ"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qFailure_after_success",
+    "source_signature": "theorem qFailure_after_success (xs ys : List Tok) (initial final : QState)\n    (hr : qRun initial xs = some final) :\n    qFailure initial (xs ++ ys) = (qFailure final ys).map (fun n => xs.length + n)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qFailure_marker",
+    "source_signature": "theorem qFailure_marker (xs ys : List Tok) (initial final : QState) (marker : Tok)\n    (hr : qRun initial xs = some final) (hm : qStep final marker = none) :\n    qFailure initial (xs ++ marker :: ys) = some xs.length"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qFailure_cut_unique",
+    "source_signature": "theorem qFailure_cut_unique (xs ys xs' ys' : List Tok) (initial final final' : QState)\n    (marker marker' : Tok) (hr : qRun initial xs = some final)\n    (hr' : qRun initial xs' = some final')\n    (hm : qStep final marker = none) (hm' : qStep final' marker' = none)\n    (he : xs ++ marker :: ys = xs' ++ marker' :: ys') :\n    xs = xs' \u2227 marker = marker' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalBalance",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_colon_cut_unique",
+    "source_signature": "theorem qBalanced_colon_cut_unique (xs ys xs' ys' : List Tok)\n    (hx : QBalanced xs) (hx' : QBalanced xs')\n    (he : xs ++ .punct .colon :: ys = xs' ++ .punct .colon :: ys') :\n    xs = xs' \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional",
+    "source_signature": "def middleConditional : Nat \u2192 Syn .expr\n  | 0 => .ident \"a\"\n  | n + 1 => .cond (.ident \"c\") (middleConditional n) (.ident \"b\")"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditionalTokens",
+    "source_signature": "def middleConditionalTokens : Nat \u2192 List Tok\n  | 0 => [.ident \"a\"]\n  | n + 1 => [.ident \"c\", .punct .question] ++ middleConditionalTokens n ++ [.punct .colon, .ident \"b\"]"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_prec",
+    "source_signature": "theorem middleConditional_prec (n : Nat) : (middleConditional n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_yield",
+    "source_signature": "theorem middleConditional_yield (n : Nat) (rest : List Choice) :\n    (middleConditional n).yield rest = some ([middleConditionalTokens n], rest)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_certified",
+    "source_signature": "theorem middleConditional_certified (n : Nat) :\n    (middleConditional n).Derives (middleConditionalTokens n) \u2227 (middleConditional n).prec = true"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_paired",
+    "source_signature": "theorem middleConditional_paired (n : Nat) : QBalanced (middleConditionalTokens n)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditionalTokens_length",
+    "source_signature": "theorem middleConditionalTokens_length (n : Nat) : (middleConditionalTokens n).length = 4 * n + 1"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_outer_colon",
+    "source_signature": "theorem middleConditional_outer_colon (n : Nat) (tail : List Tok) :\n    qFailure ([], 0) (middleConditionalTokens n ++ .punct .colon :: tail) = some (4 * n + 1)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.rawColon",
+    "source_signature": "def rawColon : Tok \u2192 Bool\n  | .punct .colon => true\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_raw_colon",
+    "source_signature": "theorem middleConditional_raw_colon (n : Nat) (tail : List Tok) :\n    firstTop rawColon [] (middleConditionalTokens n ++ .punct .colon :: tail) =\n      some (2 * n + 1, .punct .colon)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.middleConditional_raw_colon_wrong",
+    "source_signature": "theorem middleConditional_raw_colon_wrong (n : Nat) (tail : List Tok) :\n    firstTop rawColon [] (middleConditionalTokens (n + 1) ++ .punct .colon :: tail) \u2260\n      some (4 * (n + 1) + 1, .punct .colon)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalControls",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.bracketed_colons_hidden",
+    "source_signature": "theorem bracketed_colons_hidden (k : Bracket) (n : Nat) (tail : List Tok) :\n    qFailure ([], 0) ((openTok k :: (List.replicate n (.punct .colon) ++ [closeTok k])) ++\n      .punct .colon :: tail) = some (n + 2)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ConditionalChildSpans",
+    "source_signature": "def ConditionalChildSpans (c a b c' a' b' : Syn .expr)\n    (initial rest initial' rest' : List Choice) : Prop"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.conditional_child_spans",
+    "source_signature": "theorem conditional_child_spans (c a b c' a' b' : Syn .expr)\n    (initial rest initial' rest' : List Choice) (items items' : List (List Tok))\n    (hp : (Syn.cond c a b).prec = true) (hp' : (Syn.cond c' a' b').prec = true)\n    (hy : (Syn.cond c a b).yield initial = some (items, rest))\n    (hy' : (Syn.cond c' a' b').yield initial' = some (items', rest'))\n    (heq : items.flatten = items'.flatten) :\n    ConditionalChildSpans c a b c' a' b' initial rest initial' rest'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.qBalanced_not_unpaired_colon",
+    "source_signature": "theorem qBalanced_not_unpaired_colon (xs ys : List Tok) (hx : QBalanced xs) :\n    \u00ac QBalanced (xs ++ .punct .colon :: ys)"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.optional_expr_yield_qBalanced",
+    "source_signature": "theorem optional_expr_yield_qBalanced (e : Syn (.opt .expr)) : Produces e.yield QBalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.slice_payload_colon_unique",
+    "source_signature": "theorem slice_payload_colon_unique (i i' : Syn (.opt .expr))\n    (initial rest initial' rest' : List Choice) (xs xs' : List (List Tok)) (ys ys' : List Tok)\n    (hi : i.yield initial = some (xs, rest)) (hi' : i'.yield initial' = some (xs', rest'))\n    (he : xs.flatten ++ .punct .colon :: ys = xs'.flatten ++ .punct .colon :: ys') :\n    xs.flatten = xs'.flatten \u2227 ys = ys'"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ConditionalSpans",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.index_slice_payload_disjoint",
+    "source_signature": "theorem index_slice_payload_disjoint (index start : Syn (.opt .expr))\n    (initial rest initial' rest' : List Choice) (xs ys : List (List Tok)) (tail : List Tok)\n    (hi : index.yield initial = some (xs, rest))\n    (hs : start.yield initial' = some (ys, rest')) :\n    xs.flatten \u2260 ys.flatten ++ .punct .colon :: tail"
+  },
+  {
     "module": "Solidity.Frontend.ExpressionUniqueness.DelimiterReconstruction",
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.skip_of_run_forbidden_at_empty",
@@ -1504,6 +1984,30 @@
     "kind": "theorem",
     "name": "Solidity.Frontend.ExpressionUniqueness.certified_expr_spans_commaSep_unique",
     "source_signature": "theorem certified_expr_spans_commaSep_unique\n    (a b : Syn .expr) (aspan bspan : List Tok)\n    (args args' : List (Syn .expr \u00d7 List Tok))\n    (ha : a.Derives aspan) (hb : b.Derives bspan)\n    (has : \u2200 pair, pair \u2208 args \u2192 pair.1.Derives pair.2)\n    (hbs : \u2200 pair, pair \u2208 args' \u2192 pair.1.Derives pair.2)\n    (he : commaSep (aspan :: args.map Prod.snd) = commaSep (bspan :: args'.map Prod.snd)) :\n    aspan :: args.map Prod.snd = bspan :: args'.map Prod.snd"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionConditional",
+    "kind": "def",
+    "name": "Solidity.Frontend.ExpressionUniqueness.ConditionalCategory",
+    "source_signature": "def ConditionalCategory : Cat \u2192 Bool\n  | .expr | .typeName | .param | .callArgs => true\n  | .list c | .opt c => ConditionalCategory c\n  | _ => false"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionConditional",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expressionCategory_yield_qBalanced",
+    "source_signature": "theorem expressionCategory_yield_qBalanced {c : Cat} (e : Syn c) :\n    ConditionalCategory c = true \u2192 Produces e.yield QBalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionConditional",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_yield_qBalanced",
+    "source_signature": "theorem expr_yield_qBalanced (e : Syn .expr) : Produces e.yield QBalancedItems"
+  },
+  {
+    "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionConditional",
+    "kind": "theorem",
+    "name": "Solidity.Frontend.ExpressionUniqueness.expr_derives_qBalanced",
+    "source_signature": "theorem expr_derives_qBalanced (e : Syn .expr) (ts : List Tok) (h : e.Derives ts) :\n    QBalanced ts"
   },
   {
     "module": "Solidity.Frontend.ExpressionUniqueness.ExpressionLowFree",

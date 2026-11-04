@@ -5,7 +5,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: actual optional-expression payloads separate index from slice and reconstruct outer slice colon, including empty endpoints; postfix base/enclosure and tree identity remain open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_index (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -15,7 +15,7 @@
     "level": 15,
     "precNode": "base.level >= 15 and not base.isNew",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "open",
+    "root_reconstruction": "partial: actual optional-expression payloads separate index from slice and reconstruct outer slice colon, including empty endpoints; postfix base/enclosure and tree identity remain open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_slice (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
@@ -205,7 +205,7 @@
     "level": 1,
     "precNode": "c.level >= 2 and f.level >= 1; t unrestricted at root",
     "layout": "descendant choices in preorder; no choice at this node",
-    "root_reconstruction": "partial: first question marker and conditional class reconstructed; condition/branch spans and colon matching remain open",
+    "root_reconstruction": "partial: original certificate and actual partial printer executions reconstruct condition/question and true/outer-colon/false spans, deriving low-marker freedom and paired conditional punctuation internally; recursive child-tree identity remains open",
     "uniqueness": "open",
     "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_cond (finite kernel accepted-root fixture); arbitrary global reconstruction remains open"
   },
