@@ -238,3 +238,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SnapshotPathInterface.lean` | Exact typed snapshot-path contents and reference bounds across successful schedules and reached failure prefixes. |
 | `Backend/MemoryCopies/SnapshotPaths.lean` | Generic all-path snapshot contents/bounds after actual capture schedules and reached failures, absence and old-reference separation. |
 | `Backend/MemoryCopies/SnapshotPathControls.lean` | Nested alias/deep-copy overlap in both directions, retained failure-prefix effects, empty paths and a 65-step schedule. |
+| `Backend/MemoryCopies/RuntimeGrowthInterface.lean` | Existing allocator-growth relation for actual emitted runtime-default statements, with represented fitting inputs. |
