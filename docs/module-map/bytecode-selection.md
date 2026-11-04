@@ -54,3 +54,6 @@
 | `Backend/Selection/LoopExecution.lean` | General body iteration/backedge and zero exit; finite StructuredExec induction and frozen whole-loop certificate. |
 | `Backend/Selection/StructuredExecution.lean` | Whole-byte ControlCertificate constructor for every existing BlockShape with its explicit ExpansionRoom. |
 | `Backend/Selection/LoopControls.lean` | Inhabited assembled nested-branch loop, repeated backedges/zero exit, changed condition stack and wrong-head/result/tail/header-capacity controls. |
+
+| `Backend/Selection/Composition.lean` | Same-artifact assembly/encoding/byte execution and named decoder-premise transport; concrete compositions from proved mixed scalar selection. |
+| `Backend/Selection/CompositionControls.lean` | Inhabited70-byte selector-to-runtime composition, full caller frame, independent six-step bytes, wrong artifact/tail and nonvacuous decoder-premise controls. |

@@ -531,3 +531,36 @@ reports. KeySort passes under Lean4.24.0/Lake5.0.0-src+797c613. This following
 documentation-only handoff preserves the checked Lean sources. Whole control
 realization for the frozen shaped fragment is available; G45.06 IR-to-byte
 composition and the assignment's final full gate remain open.
+
+
+## Assembly composition: proved flat instance and remaining structured lowering
+
+Composition.compose binds a proved lowering certificate, existing shape/room,
+actual assembled program and decoder roundtrip for that same program.
+CompositionCertificate.execute derives finite byte execution and every stack
+bound from actual IR success and the proved control realization. It does not
+infer executable behavior from decoder roundtrip. execute_bridge transports
+each actual step and prefix through the unchanged G45.05-BR DecoderPremise,
+including its nonempty entry and reachability closure requirements.
+
+scalarComposition supplies its own scalarLowering from the existing mixed
+selector and constructs actual assembly using the master assembler theorem;
+its caller supplies no unproved lowering certificate. The resulting code is
+proved equal to the selected native program. Controls instantiate six mixed
+IR instructions,70 encoded bytes and a populated tail. Actual IR success
+preserves the complete caller frame; an independent six-step byte run reaches
+PC70 and result5. A validly encoded literal mutant reaches6 and decodes to a
+different artifact. Tail corruption, empty decoder reachability and a decoder
+step that always refuses are rejected. An identity adapter only tests the
+conditional transport and is not an implementation of Bridge agreement.
+
+Independent finder and skeptic reviews found no soundness defect, but both
+confirmed an original scope obligation remains: no producer here constructs
+LoweringCertificate for actual compiler IR relative jump/jumpi patterns or
+recursive loop instructions. Generic compose requires that proved component;
+whole Block/StructuredExec realization does not supply IR-to-block lowering.
+That is required local lane work, not a G24 or decoder-agreement premise and
+not an authorized exclusion. Consequently this checkpoint completes concrete
+flat numeric/native composition, while G45.06 and the whole assignment remain
+partial. Neither Source adequacy, arbitrary IR outcomes, gas, termination nor
+G49 is claimed. Both reviews used no edits, builds or Lean server.
