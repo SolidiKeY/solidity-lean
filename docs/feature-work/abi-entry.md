@@ -524,3 +524,8 @@ They verified byte order and equal-width injectivity, exact Source selector
 bytes/direction, local full-prefix condition and concrete padded collision,
 and non-vacuous suffix/capacity controls. Full runtime dispatch boundaries were
 confirmed explicit rather than inferred from this numeric predicate.
+
+`SelectorRoutesInterface.lean` states typed first-match selector-local routing
+through the existing public compiler, with exact result-cell mutation and
+complete machine preservation. Route labels are not ABI bodies or authenticated
+Source declarations; raw loading and entry/body composition remain open.
