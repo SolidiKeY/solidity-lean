@@ -86,3 +86,22 @@ and found no issues. Actual plan-parametric evaluator induction (legacy
 GrowAt/ApproxAt use default disabled plans), fixed-plan Session consistency,
 H25 authority wiring and P8 realization remain open. This does not discharge
 the original24 obligations/six combinations or create fresh native evidence.
+
+
+Published dependency b419c3cf adopted during this increment. Its first coherent
+checkpoint failed at two new H16 consumers: memory-internal-calls' comparison
+control still supplied five St fields, and V17/G19's conditional proof applied
+its EM result directly where the new optional plan occupied that position.
+The first gains only Cursor.empty. The latter spells its two local equations
+using .run and normalizes ExceptT.run for the existing sub-scope rewrite.
+Public theorem statements/results, prior five state fields and budgets are
+unchanged. Both fixes pass focused checks and read-only finder/skeptic review.
+The first full build61s and library22s failures remain failures.
+
+The published merge briefly committed documentation conflict markers after a
+permission error did not stop the shell. Commit837c0793 immediately removes
+only those markers, retaining both sides. Parent inventories and failed map
+are retained; the regenerated axiom inventory equals the semantic three-way
+merge, with fourteen new request-horizon pins. The known H19 transfers shrink
+to an axiom-free proof is preserved, not overwritten by master's old Word pin.
+No Source implementation was altered by that correction.
