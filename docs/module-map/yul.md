@@ -54,75 +54,6 @@
 | `Bridge/SolidityBridge/Yul/BranchModelControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAlias.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
-| `Yul/LocalBoolWhile.lean`, `Yul/Checks/LocalBoolWhile.lean` | fuelled Boolean scope iteration and all-fuel clean Source agreement. |
-| `Yul/LocalBoolDivergence.lean`, `Yul/Checks/LocalBoolDivergence.lean` | universal no-normal-completion laws for literal-true certified scoped loops. |
-| `Yul/LocalBoolDoWhile.lean`, `Yul/Checks/LocalBoolDoWhile.lean` | body-first scoped iteration and concrete all-fuel clean Source agreement. |
-| `Yul/LocalBoolDoDivergence.lean`, `Yul/Checks/LocalBoolDoDivergence.lean` | constant-true do/while noncompletion laws and guard controls. |
-| `Yul/LocalBoolFor.lean`, `Yul/Checks/LocalBoolFor.lean` | Boolean initializer and context-growing for-body scope composition, without post. |
-| `Yul/LocalBoolPostIter.lean`, `Yul/LocalBoolForPost.lean`, `Yul/Checks/LocalBoolForPost.lean` | scoped for posts and initializer composition. |
-| `Yul/LocalBoolForNoGuard.lean`, `Yul/Checks/LocalBoolForNoGuard.lean` | exact omitted-guard Source transport and concrete scoped adapters. |
-| `Yul/LocalBoolUnchecked.lean`, `Yul/Checks/LocalBoolUnchecked.lean` | unchecked/ordinary Boolean item scope composition and concrete Source laws. |
-| `Yul/LocalDefaultBinding.lean`, `Yul/Checks/LocalDefaultBinding.lean` | constant-default declarations followed by certified local item bodies. |
-| `Yul/LocalDefaultItems.lean`, `Yul/Checks/LocalDefaultItems.lean` | certified heterogeneous constant-default declaration sequences and concrete Source item composition. |
-| `Yul/LocalDefaultUnchecked.lean`, `Yul/Checks/LocalDefaultUnchecked.lean` | unchecked heterogeneous default scopes, ordinary continuations and concrete Source composition. |
-| `Yul/LocalItemWorld.lean`, `Yul/Checks/LocalItemWorld.lean` | universal raw-input world preservation for pure local item/default/unchecked execution. |
-| `Yul/LocalDefaultIfElse.lean`, `Yul/Checks/LocalDefaultIfElse.lean` | conditional default scopes, concrete Source agreement and raw world preservation. |
-| `Yul/LocalDefaultWhile.lean`, `Yul/Checks/LocalDefaultWhile.lean` | scoped default-loop Source agreement, raw purity and finite-normal exclusion. |
-| `Yul/LocalDefaultDoWhile.lean`, `Yul/Checks/LocalDefaultDoWhile.lean` | body-first default scopes, Source agreement, raw purity and finite-normal exclusion. |
-| `Yul/LocalDefaultPostIter.lean`, `Yul/Checks/LocalDefaultPostIter.lean` | scoped default for-iterations with Boolean post evaluation, Source agreement and raw purity. |
-| `Yul/LocalDefaultNoGuard.lean` | Concrete default-scoped omitted-guard iterations using existing Source transport. |
-
-| `Yul/LocalBoolFailure.lean`, `Yul/Checks/LocalBoolFailure.lean` | All-fuel raw Boolean expression/control error classification and dirty-state refusal/branch controls. |
-
-| `Yul/LocalItemFailure.lean`, `Yul/Checks/LocalItemFailure.lean` | Statement, initialization and context-growing Boolean/default item failure classification with retained-context controls. |
-
-| `Yul/LocalLoopFailure.lean`, `Yul/Checks/LocalLoopFailure.lean` | Scope/while failure classification and concrete all-horizon omitted-guard timeout laws, including exact Source output and a break counterexample. |
-
-| `Yul/LocalPostHorizon.lean`, `Yul/Checks/LocalPostHorizon.lean` | Post-iteration/do-while failure classification and concrete omitted-guard post-loop horizon results. |
-
-| `Yul/LocalLoopReductions.lean`, `Yul/Checks/LocalLoopReductions.lean` | Exact constant-loop reductions, retained do/while timeout witnesses and Source horizon output, with effectful-post/break counterexamples. |
-
-| `Yul/Interfaces/P16.lean` | Import-only intrinsic syntax and bounded raw-local Source adapter contract freeze; no general producer instance. |
-
-| `Yul/LocalBoolRepresentation.lean`, `Yul/Checks/LocalBoolRepresentation.lean` | Exact-word Boolean representation relation and all-fuel four-form expression congruence; dirty-word/projection/error controls. |
-
-| `Yul/LocalBoolControlRepresentation.lean`, `Yul/Checks/LocalBoolControlRepresentation.lean` | All-fuel exact-word six-form control congruence; skipped writes, dirty observations and retained timeout updates. |
-
-| `Yul/LocalBoolItemRepresentation.lean`, `Yul/Checks/LocalBoolItemRepresentation.lean` | All-fuel Boolean initializer/item exact-word congruence, retaining reached contexts and halt reasons. |
-
-| `Yul/LocalBoolScopeRepresentation.lean`, `Yul/Checks/LocalBoolScopeRepresentation.lean` | Exact-word suffix restoration, scope closure and conditional congruence with retained halt contexts/guard writes. |
-
-| `Yul/LocalBoolWhileRepresentation.lean`, `Yul/Checks/LocalBoolWhileRepresentation.lean` | All-fuel while/do-while exact-word congruence with scoped declarations and precise halted contexts. |
-
-| `Yul/LocalBoolForRepresentation.lean`, `Yul/Checks/LocalBoolForRepresentation.lean` | All-fuel Boolean-initialized no-post for congruence, preserving initializer/body halt contexts and outer writes. |
-
-| `Yul/LocalBoolPostRepresentation.lean`, `Yul/Checks/LocalBoolPostRepresentation.lean` | All-fuel guarded post-iteration congruence preserving body/post halt states and discarded post values. |
-
-| `Yul/LocalBoolForPostRepresentation.lean`, `Yul/Checks/LocalBoolForPostRepresentation.lean` | All-fuel Boolean initializer/guard/post for congruence with precise scope and outer-write controls. |
-
-| `Yul/LocalDefaultRepresentation.lean`, `Yul/Checks/LocalDefaultRepresentation.lean` | All-fuel heterogeneous default/scope/unchecked congruence with related clean/raw frames and unequal projection controls. |
-
-| `Yul/LocalDefaultControlRepresentation.lean`, `Yul/Checks/LocalDefaultControlRepresentation.lean` | All-fuel independently indexed default branch/loop congruence with typed failure-prefix controls. |
-
-| `Yul/LocalDefaultPostRepresentation.lean`, `Yul/Checks/LocalDefaultPostRepresentation.lean` | All-fuel default-scope post and omitted-guard congruence with post-effect/continuation controls. |
-
-| `Yul/LocalU8Representation.lean`, `Yul/Checks/LocalU8Representation.lean` | Exact checked-u8 result/error congruence and comparison/Boolean composition, retaining per-pipeline operand order. |
-
-| `Yul/LocalU8Horizon.lean`, `Yul/Checks/LocalU8Horizon.lean` | Exact full-run stability after non-timeout checked-u8 results, arbitrary added fuel and timeout counterexamples. |
-
-| `Yul/LocalU8CompareHorizon.lean`, `Yul/Checks/LocalU8CompareHorizon.lean` | Exact comparison result/state stability after non-timeout, preserving operand order and invalid-operation halts. |
-
-| `Yul/LocalBoolHorizon.lean`, `Yul/Checks/LocalBoolHorizon.lean` | Full raw-frame terminal fuel stability for base and short-circuit Boolean expressions, with selected-branch and timeout controls. |
-
-| `Yul/LocalCompareHorizon.lean`, `Yul/Checks/LocalCompareHorizon.lean` | Concrete checked-u8 comparison and Boolean branch terminal horizon composition, retaining raw states, panic and timeout controls. |
-
-| `Yul/LocalItemHorizon.lean`, `Yul/Checks/LocalItemHorizon.lean` | Exact final indexed raw-frame stability for completed Boolean declaration/expression lists, with multi-declaration and reached-context controls. |
-
-| `Yul/LocalDefaultHorizon.lean`, `Yul/Checks/LocalDefaultHorizon.lean` | Exact completed heterogeneous default-item and restored-block frame stability, with numeric-prefix/dirty-local controls. |
-
-| `Yul/LocalUncheckedHorizon.lean`, `Yul/Checks/LocalUncheckedHorizon.lean` | Completed-run stability for the existing unchecked default scope, ordinary continuation and enclosing block; distinct inner/continuation timeout frames. |
-
-| `Yul/LocalIfHorizon.lean`, `Yul/Checks/LocalIfHorizon.lean` | Completed heterogeneous conditional-scope fuel stability using concrete guard and selected restored-block producers. |
 | `Yul/Compilation/P20InterfaceV1.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/P20InterfaceV1Controls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/CheckedAdd/Agreement.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
@@ -130,39 +61,14 @@
 | `Backend/PrimitivePackets/CheckedAdd/Selected.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/CheckedAdd/Source.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/CheckedAdd/Target.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Interfaces/P16.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
-
-| `Yul/LocalWhileHorizon.lean`, `Yul/Checks/LocalWhileHorizon.lean` | Exact completed recursive while horizon stability using concrete guard/body laws; mutating scoped iteration and partial-write controls. |
-
-| `Yul/LocalDoWhileHorizon.lean`, `Yul/Checks/LocalDoWhileHorizon.lean` | Exact completed body-first do/while horizon stability with concrete restored-body/guard producers and two-iteration controls. |
-
-| `Yul/LocalForPostHorizon.lean`, `Yul/Checks/LocalForPostHorizon.lean` | Exact guarded for/post completed horizon stability with concrete guard/body/post producers and retained post-effect controls. |
-
-| `Yul/LocalForInitHorizon.lean`, `Yul/Checks/LocalForInitHorizon.lean` | Exact Boolean/default scope and iteration agreement, concrete initializer stability and full present-guard/post for-statement completed horizons. |
-
-| `Yul/LocalForNoPostHorizon.lean`, `Yul/Checks/LocalForNoPostHorizon.lean` | Exact Boolean/default while agreement and concrete initialized no-post for completed horizons, with nested-scope caller-write controls. |
-
-| `Yul/LocalForNoGuardFailure.lean`, `Yul/Checks/LocalForNoGuardFailure.lean` | Concrete initialized omitted-guard finite noncompletion, clean Source consequences and scoped mutation/refusal controls. |
-
-| `Yul/LocalForTimeout.lean`, `Yul/Checks/LocalForTimeout.lean` | Concrete full Boolean for halt classification, reached omitted-guard timeouts and clean Source consequences. |
-
-| `Yul/LocalForFirstDone.lean`, `Yul/Checks/LocalForFirstDone.lean` | Actual Source firstDone outcomes for initialized omitted guards; least-horizon, break, continue and completed-failure controls. |
-
-| `Yul/RawStatementHorizon.lean`, `Yul/Checks/RawStatementHorizon.lean` | Concrete raw/coherence-aware statement horizon stability with exact dirty-frame retention and projection/timeout controls. |
-
-| `Yul/RawSequenceHorizon.lean`, `Yul/Checks/RawSequenceHorizon.lean` | Concrete same-context raw sequence/block stability; partial-stage, dirty-cell witness and clean Source controls. |
-
-| `Yul/RawLoopBodyHorizon.lean`, `Yul/Checks/RawLoopBodyHorizon.lean` | Concrete raw condition/control-body stability; dirty truth, break/continue, selected/skipped body and clean Source controls. |
-
-| `Yul/RawControlSequenceHorizon.lean`, `Yul/Checks/RawControlSequenceHorizon.lean` | Concrete raw control-sequence/block stability; break/continue short-circuit, normal-tail partial effects and clean Source controls. |
-
-| `Yul/RawControlledWhileHorizon.lean`, `Yul/RawReadOnlyViews.lean`, `Yul/Checks/RawControlledWhileHorizon.lean` | Concrete while completed-frame stability, read-only word views and break/continue/mutation/clean Source controls. |
-
-| `Yul/RawSequenceWhileHorizon.lean`, `Yul/Checks/RawSequenceWhileHorizon.lean` | Concrete sequence-bodied while stability; deep-tail break/continue, mutation, timeout and clean Source controls. |
-
-| `Yul/RawAdapterLoopHorizon.lean`, `Yul/Checks/RawAdapterLoopHorizon.lean` | Exact concrete P16 adapter/driver agreement, completed whole-frame stability and inhabited Source/dirty controls. |
-
-| `Yul/RawAdapterSequenceLoopHorizon.lean`, `Yul/Checks/RawAdapterSequenceLoopHorizon.lean` | Concrete P16 sequence/block loop agreement, full-frame stability and inhabited dirty/Source controls. |
-
-| `Yul/RawDoWhileHorizon.lean`, `Yul/Checks/RawDoWhileHorizon.lean` | Concrete body-first driver/adapter completed-frame stability, dirty controls and clean Source boundary. |
+| `Yul/Checks/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerCoverage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerCoverageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/ShapeCapacity.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/ShapeCapacityControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindow.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindowControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
