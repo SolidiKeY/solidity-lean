@@ -98,3 +98,6 @@
 
 | `Lowering/StorageOps/SourceNestedByteCapture.lean` | Actual empty-reference allocation and arbitrary runtime nested-capture timeout allocation prefixes |
 | `Lowering/StorageOps/SourceNestedByteCaptureControls.lean` | Actual storRef nested captures separating storage/journal preservation from changed heap, old objects and static failure |
+
+| `Lowering/StorageOps/SourceNestedByteValues.lean` | Actual distinct nonempty byte capture and runtime index allocation-prefix law at arbitrary common inner length |
+| `Lowering/StorageOps/SourceNestedByteValuesControls.lean` | Full nonempty capture outcomes/headers/heaps/journals, retained tails and wrong-order negative control |

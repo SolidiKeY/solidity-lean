@@ -1802,6 +1802,8 @@ import Solidity.Lowering.StorageOps.SourceIntCopyReadbacks
 import Solidity.Lowering.StorageOps.SourceMappingDelete
 import Solidity.Lowering.StorageOps.SourceNestedByteCapture
 import Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls
+import Solidity.Lowering.StorageOps.SourceNestedByteValues
+import Solidity.Lowering.StorageOps.SourceNestedByteValuesControls
 import Solidity.Lowering.StorageOps.SourceReadFrames
 import Solidity.Lowering.StorageOps.SourceScalarDeleteLog
 import Solidity.Lowering.StorageOps.SourceSelfCopy

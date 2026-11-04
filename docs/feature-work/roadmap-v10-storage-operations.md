@@ -188,6 +188,25 @@ wrapper is a type-checked proposition only in TERRA-TODO; nineteen adapters
 remain pending. General nested shapes, physical allocation/failure and compiler
 composition remain open.
 
+## Nonempty nested capture payloads
+
+`SourceNestedByteValues.capture` derives actual byte reads and typed allocation
+for nonempty payloads. `timeout_prefix` tracks distinct per-child payloads in
+runtime allocation order: at original fuel `count+length+3`, capture of
+`count+1` references times out after exactly `count` allocations. Both parameters
+are arbitrary naturals. Headers and byte reads are transported through heap-only
+updates using the published read-frame laws; the footprint folds existing
+Source heap operations over the runtime index range.
+
+This component uses a common runtime inner length, not arbitrary differing
+child lengths and not a source-profile cap. Populated copies distinguish partial
+capture, later destination/static failure and self-copy; old objects, retained
+source tails, complete headers/context/journals and distinct nonempty heap
+payloads are pinned. A reversed allocation order is a checked negative control.
+The routine outer wrapper is type-checked prose only in TERRA-TODO; twenty
+adapters remain unproved. General variable-shape capture, physical emission and
+compiler/world composition remain open.
+
 ## Remaining obligations
 
 General Source AST/address/default/value correspondence, complete packing/ABI

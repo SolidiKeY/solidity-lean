@@ -196,3 +196,31 @@ theorem copy_timeout_prefix :
 ```
 
 One adapter added to the prior eighteen: nineteen remain pending.
+
+## C172: nonempty nested capture outer wrapper
+
+Module: `Solidity.Lowering.StorageOps.SourceNestedByteValues`.
+Lemma: `copy_timeout_prefix`.
+Why routine: unfold the two existing outer storRef/loadMem binds and apply
+checked `timeout_prefix` at start0. Keep the exact heap payloads and order;
+add no writable/destination premise. Common inner length is a parameter of
+this component theorem, not an admitted-source restriction. Proposition type
+only; no compiled theorem, assumption or stub.
+
+```lean
+theorem copy_timeout_prefix :
+∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
+ (frame : Solidity.Source.Fr) (src dst : Solidity.Source.SPath) (_different : src≠dst)
+ (count length : Nat) (payload : Nat → Nat → UInt8)
+ (locals : Solidity.Source.Locals E.layout Γ) (state : Solidity.Source.St E)
+ (_outerHeader : (Solidity.Source.readLen (E:=E) (Γ:=Γ) frame src).run (locals,state)=(.ok (count+1),(locals,state)))
+ (_headers : ∀ j<count+1,(Solidity.Source.readLen (E:=E) (Γ:=Γ) frame (src.go (.index j))).run (locals,state)=(.ok length,(locals,state)))
+ (_reads : ∀ j<count+1,∀ k<length,(Solidity.Source.readAt (E:=E) (Γ:=Γ) frame ((src.go (.index j)).go (.index k)) (.fixedBytes 1 (by decide))).run (locals,state)=
+  (.ok (Solidity.Source.Val.fixedBytes (n:=1) (h:=by decide) [payload j k] rfl),(locals,state))),
+ (Solidity.Source.storeVal (E:=E) (Γ:=Γ) frame (count+length+5) (.array .storage (.bytes .storage) none) dst
+  (Solidity.Source.Val.storRef (τ:=.array .storage (.bytes .storage) none) rfl src)).run (locals,state)=
+ (.error .timeout,(locals,(List.range' 0 count).foldl
+  (Solidity.Lowering.StorageOps.SourceNestedByteValues.allocateAt length payload) state))
+```
+
+One adapter added to prior nineteen: twenty remain pending.
