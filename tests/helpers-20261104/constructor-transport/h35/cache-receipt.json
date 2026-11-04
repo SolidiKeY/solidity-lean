@@ -1,0 +1,24 @@
+{
+  "status": "blocked",
+  "kind": "local failed-preflight receipt; not a successful shipment receipt",
+  "source_head": "f1b41e799e41adf459c093fed7202849c9121b0b",
+  "gates": "All fresh H35 VM-owned build, per-file kernel,28 axiom guards,28 explicit axiom inventory and compiler controls pass.",
+  "command": "SHIP_ALLOW_HEAD=1 LAKE_CACHE_DIR=/workspace/.setup/cache/lake SHIP_STATE=/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/h35/shipment bash scripts/coord-tools/ship-cache.sh --dry-run /workspace/solidity-lean",
+  "exit_code": 1,
+  "failure": "FileNotFoundError: /home/agent/.local/state/cloudvm-coord/poll-state.json",
+  "missing_setup": [
+    "/home/agent/.local/share/cloudvm-coord/vmexec.py",
+    "/home/agent/.local/state/cloudvm-coord/poll-state.json",
+    "/home/agent/.local/share/cloudvm/batches/solidity-helpers-20261104/catalog.json"
+  ],
+  "script_role": "Coordinator/master-to-lane relay, unchanged at fetched master. No worker-to-coordinator destination is configured.",
+  "script_preflight": "1698 cached artifacts,570 mappings,2.05GB identified; stopped before lane selection or any transfer. No receipts.tsv or shipped marker produced.",
+  "prepared_owned_cache": {
+    "path": "/workspace/solidity-lean/tests/helpers-20261104/constructor-transport/h35/cache-handoff/owned-cache.tar.gz",
+    "sha256": "083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a",
+    "artifact_count": 12,
+    "bytes": 294765
+  },
+  "ship_allow_head": "Documented override selected the actual helper head as H35 requests; no claim of origin/master or full-lane validation.",
+  "completion": "No H35 checkpoint completion claimed without an actual cache import/shipping receipt. QREG full-root validation also remains unresolved."
+}

@@ -1,0 +1,11 @@
+shipment 20261104T222239Z-f1b41e79: 1698 artifacts (2.05 GB), 570 mappings, delta vs nothing: 1698 (2.05 GB); 0 traces without cached outputs skipped
+Traceback (most recent call last):
+  File "<stdin>", line 144, in <module>
+  File "<stdin>", line 92, in lanes
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/agent/.local/state/cloudvm-coord/poll-state.json'
