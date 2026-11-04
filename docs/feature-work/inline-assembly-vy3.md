@@ -1028,3 +1028,37 @@ axiom inventory checks pass. The core-only touched tool reports no targets
 for this Bridge-only change; the explicit focused build supplies its import
 check. Earlier broad library/Bridge failures and full-lane obligations remain
 open. No new external solc/EVM evidence or Source/G24/native adequacy is claimed.
+
+
+### Lexical scopes around switch composition
+
+`SolidityBridge.Yul.ScopedSwitch` composes actual `SwitchControl` leaves with
+the original sequence, conditional, one-value declaration and zero-prefix
+constructors. Evidence remains indexed by the original statement, context
+and horizon; helpers use explicit generalized recursors. No new source AST,
+state or function convention is introduced. The initializer runs in the old
+context, the body receives the exact fresh prefix, and scope exit retires
+only that prefix. `Derivation.source` and `Derivation.structured` constructively
+prove original evaluation and whole-block target execution for every local
+vector and arbitrary caller tail. No desired run is a premise. Two guarded
+standard-axiom reports are recorded.
+
+Inhabited controls combine nested let/zero scopes and switches, multiword
+zero initialization, dirty fresh words, writes to outer locals, a copied
+old-context initializer, conditional scope entry and an empty prefix. Selected
+model observations retain all caller words and machine fields while removing
+both fresh prefixes. Additional update controls are backed by the general
+source/structured proofs; they are not separate native execution evidence.
+Original `SwitchControl` refusals remain unchanged. Case-body nested switches
+still refuse; shifted live slot15 emits and16 does not. Actual underflow,
+source fuel refusals, prefix-only capacity and oversized mathematical success
+remain distinct controls.
+
+Independent read-only finder and skeptic reviews found no confirmed findings.
+Focused and per-file kernel checks, both MCP diagnostics, checked signatures,
+trust/layer/root/docs/module-map and axiom inventory pass. The toolkit touched
+gate selects no targets for these Bridge-only modules; their explicit focused
+build supplies the local import check. Earlier broad build failures remain
+open without unchanged retries. General switch case bodies, functions/loops/
+early control, multi-result declarations, Source/G24/views/raw readback,
+frontend admission and native/final joint adequacy are still unfinished.

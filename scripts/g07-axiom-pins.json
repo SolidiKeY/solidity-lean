@@ -1985,6 +1985,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Bridge/SolidityBridge/Yul/ScopedSwitch.lean:SolidityBridge.Yul.ScopedSwitch.Derivation.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedSwitch.lean:SolidityBridge.Yul.ScopedSwitch.Derivation.structured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.ControlRealization.selectSliceUsing": [
   "Classical.choice",
   "Quot.sound",

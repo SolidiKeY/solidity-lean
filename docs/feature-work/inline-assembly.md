@@ -348,3 +348,11 @@ source and whole-block target proofs. Reviewed controls show a second switch
 reads the first switch's updated locals, preserving dirty words and callers.
 Lexical-scope/case-body switch compilation and full Source/G24/native/final
 gates remain open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 lexical switch scopes: `SolidityBridge.Yul.ScopedSwitch` adds an
+original-statement scope adapter over concrete switch/control lowering, with
+exact source horizons and constructive initialized-prefix entry/retirement
+proofs preserving outer mutations and arbitrary caller tails. Reviewed nested
+scope/dirty-word/model controls pass. Case-body nesting and full source/native
+adequacy remain open; see [the lane record](inline-assembly-vy3.md).
