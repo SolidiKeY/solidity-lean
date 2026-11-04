@@ -2242,6 +2242,8 @@ import Solidity.Lowering.V07.UdvtAssignment
 import Solidity.Lowering.V07.UdvtAssignmentControls
 import Solidity.Lowering.V07.UdvtBoolAssignment
 import Solidity.Lowering.V07.UdvtBoolAssignmentControls
+import Solidity.Lowering.V07.UdvtFixedBytesAssignment
+import Solidity.Lowering.V07.UdvtFixedBytesAssignmentControls
 import Solidity.Lowering.V07.UnsignedAddition
 import Solidity.Lowering.V07.UnsignedCastControls
 import Solidity.Lowering.V07.UnsignedCasts
