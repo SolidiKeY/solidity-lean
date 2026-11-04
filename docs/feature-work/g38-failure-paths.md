@@ -586,3 +586,38 @@ aggregate RSS. Printed axioms are only `propext`, `Classical.choice` and
 `Quot.sound`. Independent read-only finder and skeptic reviews found no
 confirmed defect. The historical full-checkpoint timeout remains failed;
 focused checks do not establish a full build on the expanded published base.
+
+## Finite guard sequences
+
+`FailurePaths.GuardSequences` lowers finite lists of the admitted indexed
+Source guards to the existing intrinsic `Prog`. Its `items` function builds
+existing Source `RItems`; this entry point does not recognize arbitrary source
+blocks or add an intermediate language. The compiler calls public
+`Memory.compileProg` on the computed program. `lowered_public` derives public
+compilation success and the unchanged fragment for every successful lowering.
+
+`lowered_correct` and `selected_correct` derive actual Source `execItems` and
+selected instruction execution with horizon `n + statements.length + 7`.
+Each normal guard preserves the locals, Source state and full target machine,
+so the next guard uses the original read and representation premises. The first
+failure short-circuits the suffix and propagates empty Source revert and bare
+target revert. Supplied maps, typed read correspondence and full `StateRepr`
+remain necessary; no execution, desired poststate or compiler witness is
+assumed by the executable-selector theorem.
+
+`GuardSequencesControls` compiles a mixed three-guard list through the public
+compiler, proves its exact concatenated instructions and instantiates the
+general theorem in both Source pipelines. `source_run` and `target_run` identify
+the result as the conjunction of the three conditions, including unchanged
+state/machine on success. Controls distinguish success, first/middle/last
+failure, equality rejection by `<`, empty compilation, zero-horizon timeout
+and static refusal of a literal guard in the suffix. General effectful bodies,
+Source block recognition, payload/internal-frame transport and physical
+bytecode/EVM correspondence are outside this result.
+
+The focused serial check passed in 4.872 seconds with 1,082,912,768 bytes peak
+aggregate RSS. All printed new theorem axioms are standard only. A failed
+recursive simplifier attempt reached the existing heartbeat limit; replacing
+it with one evaluator rewrite discharged the same claim without raising limits.
+Earlier failed full-checkpoint validation remains failed, and this focused
+sequence result does not establish a full build on the expanded published base.

@@ -536,3 +536,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/FailurePaths/GuardLowering.lean` | Computable intrinsic guard targets, guaranteed public compilation and exact dispatcher/code/refusal equivalence. |
 | `Backend/FailurePaths/GuardLoweringControls.lean` | Computed mixed-context targets and public compile/run clients for all three guard families, with refusal controls. |
+| `Backend/FailurePaths/GuardSequences.lean` | Finite indexed guard lists lowered to public-compiled intrinsic programs, unchanged fragments and actual Source/target short-circuit simulation. |
+| `Backend/FailurePaths/GuardSequencesControls.lean` | Mixed three-guard public selection, exact Source/target outcomes in both pipelines and positioned failure/refusal/horizon controls. |
