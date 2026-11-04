@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build the import-free verifier using generated Lean C and Emscripten.
 Usage: build-direct-runtime.py NATIVE_LEAN_PREFIX WASM_STAGE OUTPUT
-Set EMCC when emcc is not on PATH. Run under the repository memory guard.
+Set EMCC when emcc is not on PATH and EM_CONFIG to its explicit SDK config.
+Run under the repository memory guard.
 """
 import hashlib, importlib.util, json, os, pathlib, re, shutil, subprocess, sys, tempfile
 for override in ['LEAN_CC','LEAN_SYSROOT','CPATH','C_INCLUDE_PATH','CPLUS_INCLUDE_PATH','LIBRARY_PATH','COMPILER_PATH']:
@@ -35,6 +36,7 @@ if not compiler.is_file():
     compiler=pathlib.Path(shutil.which(emcc) or emcc).resolve()
 clang=pathlib.Path(os.environ.get('EMCC_CLANG',str(compiler.parent.parent/'bin/clang')))
 config_path=pathlib.Path(os.environ['EM_CONFIG']).resolve()
+os.environ['EM_CONFIG']=str(config_path)
 config_initial=hashlib.sha256(config_path.read_bytes()).hexdigest()
 configured=json.loads(subprocess.check_output([sys.executable,'-c',
     "import sys,json; sys.path.insert(0,sys.argv[1]); from tools import config,shared; "
@@ -49,7 +51,7 @@ node=configured['node']
 configured_tools.append(pathlib.Path(node[0] if isinstance(node,list) else node))
 compiler_identity={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [compiler,compiler.with_suffix('.py'),clang]}
 emcc=str(compiler)
-compiler_version=subprocess.check_output([emcc,'--version'],text=True).strip()
+compiler_version=subprocess.check_output([sys.executable,emcc,'--version'],text=True).strip()
 headers=hashlib.sha256()
 for header in sorted((prefix/'include/lean').rglob('*.h')):
     headers.update(str(header.relative_to(prefix/'include')).encode());headers.update(header.read_bytes())
@@ -57,7 +59,7 @@ build_identity=hashlib.sha256(json.dumps({'compiler':compiler_identity,'version'
 
 def provenance_paths():
     return [pathlib.Path(__file__).resolve(),closure_path,bridge_path,root/'lean-toolchain',root/'lakefile.toml',
-            *map(pathlib.Path,compiler_identity),*configured_tools,prefix/'bin/lean',prefix/'bin/lake',
+            pathlib.Path(sys.executable),*map(pathlib.Path,compiler_identity),*configured_tools,prefix/'bin/lean',prefix/'bin/lake',
             *sorted(compiler.parent.rglob('*.py')),
             config_path,
             *sorted((prefix/'include').rglob('*.h')),
@@ -109,7 +111,7 @@ for i,(name,text,source,expected) in enumerate(inputs):
     if not obj.exists():
         snapshot=output/(key+'.c');snapshot.write_bytes(raw)
         temporary=output/(key+'.tmp.o')
-        subprocess.run([emcc,*flags,'-c',str(snapshot),'-o',str(temporary)],check=True)
+        subprocess.run([sys.executable,emcc,*flags,'-c',str(snapshot),'-o',str(temporary)],check=True)
         temporary.replace(obj);snapshot.unlink()
     objects.append(str(obj))
     entry={'module':name,'cSha256':digest,'compiledCSha256':hashlib.sha256(raw).hexdigest()}
@@ -135,7 +137,7 @@ libraries.append(stage/'libuv/src/libuv/libuv.a')
 link_output=pathlib.Path(tempfile.mkdtemp(prefix='link-',dir=output))
 bridge_source=output/('bridge-'+hashlib.sha256(bridge_bytes).hexdigest()+'.c')
 bridge_source.write_bytes(bridge_bytes)
-subprocess.run([emcc,*flags,str(bridge_source),*objects,
+subprocess.run([sys.executable,emcc,*flags,str(bridge_source),*objects,
     '-Wl,--start-group',*map(str,libraries),str(gmp),'-Wl,--end-group',
     '--no-entry','-fwasm-exceptions','-sMODULARIZE=1','-sEXPORT_NAME=createDirectVerifier','-sENVIRONMENT=worker,node',
     '-sALLOW_MEMORY_GROWTH=1','-sINITIAL_MEMORY=67108864','-sMAXIMUM_MEMORY=4294967296',
