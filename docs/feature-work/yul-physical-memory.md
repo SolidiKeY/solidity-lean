@@ -773,3 +773,12 @@ precedes frame entry; no rollback across initialization is asserted. Controls
 reverse child writes (leaving 2 instead of caller 3) and perform two real heap
 allocations. These laws do not restore the allocated heap, establish call
 admission, or claim complete Source-state rollback.
+
+`CellHashRollback` executes actual `Source.mark` and `Source.rollbackTo` around
+the combined typed-write/hash computation. The exact successful run restores
+external writes and leaves the original locals/logs while retaining the hash's
+allocated heap object. This matches `rollbackTo`; `enterInstance` separately
+restores a saved heap, which this adapter does not implement. The restored map
+is reconstructed using computed residual cells. A late timeout bypasses the
+subsequent rollback operation and preserves its completed write prefix, so the
+adapter is not unconditional undo or automatic transaction failure handling.
