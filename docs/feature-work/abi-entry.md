@@ -396,3 +396,8 @@ Independent read-only finder and skeptic reviews passed with no findings.
 They confirmed the actual P10 pushed value is consumed, modulo conversion and
 local representability are explicit, protected-state controls are inhabited,
 and the two execution layers and remaining native/Source boundary are clear.
+
+`AccessBridge/MemorySizeExecutionInterface.lean` specifies fetched charged MSIZE
+from an initial P6 image, preserving exact bytes, extent and saved stack with
+state/continuation accounting. Gas and stack capacity remain explicit; this
+is a primitive bridge, not whole compiler/Source adequacy.
