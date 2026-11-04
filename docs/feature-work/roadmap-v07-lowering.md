@@ -760,3 +760,10 @@ failure projection or whole SourceSpec adequacy. G18.01/G18.06 retain the
 concrete producer/ordered-child/representation/copy/delete/lifetime boundaries;
 G18 children/G19 remain delegated. Backfill A/B remain partial; constructors0
 and no external compiler/EVM tests were added.
+
+
+### CP43: effectful unsigned quotient/remainder
+
+`UnsignedQuotRemEffects` derives actual assignment/read `evalPair` and typed capture programs for both pipelines. Legacy uses the old aliased denominator; viaIR uses the assigned denominator. Semantic numerator/denominator positions are preserved. Canonical initial ranges and local-family alignment derive success results and reached alias relations. Zero inputs produce complete division-by-zero panic bytes after the actual assignment; the target error has no returned state, so the failure theorem frames the actual prefix and makes no rollback claim. Ten kernel laws and 21 inhabited clients cover repeated/self aliases, distinct equal-content locals, context extension, live references and caller fields. The 2304 bounded executions include extrema, both checked settings, all widths and discriminating wrong-order/reversed-capture/drop controls. These are Lean controls, not external compiler/EVM tests or whole frontend selection.
+
+Independent read-only finder and skeptic source reviews pass with no findings. Registered exact axiom guards cover all 31 new laws/clients (two empty axiom sets, 29 standard three). G16/G17 and Backfill A/B remain partial; G18.01 general accepted-source admission and G18.06 ordered composition remain open on concrete P8 and delegated V16/V14 children. G19 remains V17-owned; constructor coverage remains zero. No producer inhabitant, general failure-state projection, recursive copy or lifetime closure is supplied. Checkpoint validation/export evidence is retained separately; global inventory and final whole-lane gates are not claimed passed here.
