@@ -2474,6 +2474,8 @@ import Solidity.Yul.Adapters.PhysicalSnapshotSliceControls
 import Solidity.Yul.Adapters.RawPhysical
 import Solidity.Yul.Adapters.RawPhysicalAnyImage
 import Solidity.Yul.Adapters.RawPhysicalAnyImageControls
+import Solidity.Yul.Adapters.RawPhysicalCallAccess
+import Solidity.Yul.Adapters.RawPhysicalCallAccessControls
 import Solidity.Yul.Adapters.RawPhysicalCallFrame
 import Solidity.Yul.Adapters.RawPhysicalCallFrameControls
 import Solidity.Yul.Adapters.RawPhysicalCallOutput

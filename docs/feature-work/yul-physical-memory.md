@@ -1244,3 +1244,12 @@ enclosing-frame commit. Controls execute the adapter with a labelled synthetic
 answer containing real typed Source journal operations: success changes storage,
 revert preserves the prior caller value/log and physical output tail, and a
 static value-bearing call is rejected. Concrete invocation adequacy is open.
+
+`RawPhysicalCallAccess` records the input span as well as output access on the
+reached P6 frame. Touching input changes extent only, preserving the complete
+output image and World result. `execute_eq` still loads and invokes from the
+pre-call snapshot; an overlapping output cannot supply a later input value.
+The synthetic input-dependent control distinguishes those two snapshots.
+An independent empty-output fixture keeps output-only extent at six words while
+input access reaches eight. This is bounded physical accounting, not a claim
+about gas ordering, concrete invocation adequacy or allocation refinement.
