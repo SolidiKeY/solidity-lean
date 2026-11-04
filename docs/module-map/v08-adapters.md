@@ -492,3 +492,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Backend/StructuredFlow/ConditionalContinuationCompiler.lean` | Actual compiler of V07-related captured-return continuation guard with whole-tail fragment check. |
 | `Backend/StructuredFlow/ConditionalContinuationCompilerControls.lean` | Full native cell/stack guard observations and separately compiled eager caller-write rejection. |
+
+| `Lowering/G19/AssignmentBlocks.lean` | Arbitrary finite ordered Boolean-copy blocks with actual Source/typed runs and full V07 context-map transport. |
+| `Lowering/G19/AssignmentBlocksControls.lean` | Heterogeneous unsigned/Boolean frame, reached-read ordering, reversal, repetition and same-slot controls. |

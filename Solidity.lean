@@ -1642,6 +1642,8 @@ import Solidity.Language.FixedPoint.Conformance
 import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
+import Solidity.Lowering.G19.AssignmentBlocks
+import Solidity.Lowering.G19.AssignmentBlocksControls
 import Solidity.Lowering.G19.AssignmentDoWhileBreak
 import Solidity.Lowering.G19.AssignmentDoWhileBreakControls
 import Solidity.Lowering.G19.AssignmentDoWhileContinue
