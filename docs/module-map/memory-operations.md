@@ -300,3 +300,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/FixedStoragePath.lean` | Actual fixed storage-path Source/target declaration, rebinding and refusal proofs. |
 | `Backend/MemoryCopies/FixedStoragePathControls.lean` | Nested fixed-child empty/pair/64 bindings, old aliases, Source execution and invalid-path controls. |
 | `Backend/MemoryCopies/ForwardOverlapInterface.lean` | Runtime forward-overlap word-copy and checked snapshot-model contracts. |
+| `Backend/MemoryCopies/ForwardOverlap.lean` | Shared forward-loop execution, unread-source invariant and V11 checked snapshot-model agreement. |
+| `Backend/MemoryCopies/ForwardOverlapControls.lean` | Actual left/self/empty/long overlap executions, boundary cells and rightward corruption counterexample. |

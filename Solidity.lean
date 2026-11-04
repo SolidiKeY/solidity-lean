@@ -301,6 +301,8 @@ import Solidity.Backend.MemoryCopies.FixedStorageCopyInterface
 import Solidity.Backend.MemoryCopies.FixedStoragePath
 import Solidity.Backend.MemoryCopies.FixedStoragePathControls
 import Solidity.Backend.MemoryCopies.FixedStoragePathInterface
+import Solidity.Backend.MemoryCopies.ForwardOverlap
+import Solidity.Backend.MemoryCopies.ForwardOverlapControls
 import Solidity.Backend.MemoryCopies.ForwardOverlapInterface
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
