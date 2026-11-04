@@ -212,7 +212,9 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion
 import Solidity.Backend.InternalFlow.RuntimeFrameV3HeapDomain
 import Solidity.Backend.InternalFlow.RuntimeFrameV3MemoryArgument
+import Solidity.Backend.InternalFlow.RuntimeFrameV3MutatingActivation
 import Solidity.Backend.InternalFlow.RuntimeFrameV3NativeParents
+import Solidity.Backend.InternalFlow.RuntimeFrameV3NativeUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3PairedUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ParentPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore
