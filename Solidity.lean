@@ -7,6 +7,7 @@ import Solidity.AST
 import Solidity.Automation.H28.Chain
 import Solidity.Automation.H28.Context
 import Solidity.Automation.H28.Prove
+import Solidity.Backend.AbiEntry.CalldataWord
 import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
 import Solidity.Backend.AbiEntry.Consumers

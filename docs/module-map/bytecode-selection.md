@@ -122,3 +122,8 @@
 | `Backend/AbiEntry/ValueGateBodyInterface.lean` | Actual checked compiler selection and exact body-result composition signatures for core-classified typed bodies. |
 | `Backend/AbiEntry/ValueGateBody.lean` | Public compiler selection of typed guarded bodies and preservation of their entire intrinsic outcome. |
 | `Backend/AbiEntry/ValueGateBodyControls.lean` | Context-growing mutation, protected memory/tail, blocked body and raw fault/skip controls. |
+| `Backend/AbiEntry/CalldataWordInterface.lean` | Exact all-offset zero-padded semantic/source word access contracts, separate from entry span checks. |
+| `Backend/AbiEntry/CalldataWord.lean` | Reuses published window padding and bounds to prove semantic/source word reader equality. |
+| `Bridge/SolidityBridge/AccessBridge/AbiWordInterface.lean` | Native semantic-word and all-kind numeric validation/rejection contracts, retaining charged-load failures and budgets. |
+| `Bridge/SolidityBridge/AccessBridge/AbiWord.lean` | Actual native load to indexed decoder and existing validator agreement without an assumed decoded word. |
+| `Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean` | Prefixed/unaligned fetched word, validation/refusal, padding/large-offset and distinct zero-fuel controls. |

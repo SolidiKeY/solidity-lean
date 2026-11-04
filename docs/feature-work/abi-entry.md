@@ -278,3 +278,24 @@ short input may zero-pad, while full entry still has its original guards.
 Validator execution remains in the existing numeric runner, not a newly proved
 fetched native validator sequence. Decoder fuel and free-memory parameters
 remain explicit rather than being hidden by a success premise.
+`CalldataWord.lean` reuses `Yul.Views.abi_readBytes_fit` and the published reader
+bound to identify every semantic byte window and source word read. Bridge
+`AbiWord.lean` then reuses the native calldata certificate and existing
+`WordValidation.validator` proofs. The native word, its lossless numeric-runner
+representation and every kind's flag agree with `Semantics.AbiEntry.load`.
+Positive-fuel semantic word rejection is exactly the false flag, for all length
+and free-memory parameters. No decoded payload or desired run is assumed.
+The extended certificate retains every original charged-load failure and low
+budget; native execution of the validator code itself remains open.
+Controls install exact bytes with a nonempty unaligned prefix and ordered
+suffix, check uint/address acceptance and bool/enum/bytesN rejection, preserve
+both saved tail words in an actual fetched load with exact reached state and
+charge, and retain large-offset/empty-input zero padding. Empty raw word access
+is not entry acceptance. Zero decoder fuel remains distinct from rejection.
+Aggregate decoding, emitted span/offset/length guards, full native validator
+composition, dispatch and Source/physical entry adequacy remain open.
+Independent read-only finder and skeptic reviews passed on semantics. They
+identified a nested duplicate axiom guard for `fetched_word`; the guard block
+was corrected to one matching annotation per print. Final diagnostics report
+zero errors and both focused review follow-ups confirm the fix with no
+outstanding findings. Neither review used a Lean server or build.
