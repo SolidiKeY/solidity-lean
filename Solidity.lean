@@ -1779,6 +1779,8 @@ import Solidity.Lowering.StorageOps.SourceSignedStorageCopyTarget
 import Solidity.Lowering.StorageOps.SourceSignedStorageCopyTargetControls
 import Solidity.Lowering.StorageOps.SourceStorageCopy
 import Solidity.Lowering.StorageOps.SourceStorageCopyControls
+import Solidity.Lowering.StorageOps.SourceStorageCopyPrefix
+import Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyTarget
 import Solidity.Lowering.StorageOps.SourceStorageCopyTargetControls
 import Solidity.Lowering.StorageOps.SourceTwoArrayDeleteControls
