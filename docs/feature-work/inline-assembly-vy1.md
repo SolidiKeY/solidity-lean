@@ -1015,3 +1015,24 @@ Source embedding. Those original obligations remain open.
 Independent read-only finder and skeptic reviews found no scope or contract
 findings. Per-file interface/signature checks and generated registration pass;
 this is an interface checkpoint, not full-lane validation.
+
+
+### Exact-word Boolean representation congruence
+
+`LocalBoolRepresentation.expression` relates the existing four-form
+`LocalBoolExpr.Supported` evaluator for every fuel and pair of related typed
+local states. Boolean locals may differ in constructor only when their complete
+words agree; all other values and the full Source world remain equal.
+Read/write laws preserve the relation, result observation preserves error tags
+and full words, and negation/branch truth respect exact word equality.
+The assignment-negation-read witness, raw-zero/one witnesses, dirty-two refusal,
+equal-truth counterexample, projection distinction and halt distinction guard
+the boundary. Constructor-sensitive `clean?` is deliberately not preserved:
+this relation is not Source admission or readback equivalence.
+No runtime or Source definitions change. Six-form control congruence, general
+P16 and the remaining full-lane obligations remain open.
+
+Independent read-only finder/skeptic reviews found no issues. Both per-file
+diagnostics report zero errors; all 15 scoped axiom reports use only Lean
+standard axioms. Full-lane gates and external compiler/EVM validation are not
+claimed for this proof-only increment.

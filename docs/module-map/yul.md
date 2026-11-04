@@ -83,3 +83,5 @@
 | `Yul/LocalLoopReductions.lean`, `Yul/Checks/LocalLoopReductions.lean` | Exact constant-loop reductions, retained do/while timeout witnesses and Source horizon output, with effectful-post/break counterexamples. |
 
 | `Yul/Interfaces/P16.lean` | Import-only intrinsic syntax and bounded raw-local Source adapter contract freeze; no general producer instance. |
+
+| `Yul/LocalBoolRepresentation.lean`, `Yul/Checks/LocalBoolRepresentation.lean` | Exact-word Boolean representation relation and all-fuel four-form expression congruence; dirty-word/projection/error controls. |
