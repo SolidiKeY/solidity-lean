@@ -406,6 +406,18 @@ Controls distinguish late failure from reversed order and show an overlapping
 failed-copy replay changes byte129 from255 to0. This is synchronization of actual
 component copies, not Source/Yul failure, rollback or arbitrary program adequacy.
 
+`P6HistoryHash` connects completed copy histories to actual Source memory-byte
+hashing and the KECCAK256 micro-step. It derives the shared payload from the
+refreshed complete view, coverage and inventory IDs, retaining actual poststate
+local/cell/span facts and same-input Fixed agreement explicitly. Initial view
+and completion remain distinct premises. A separate live-frame theorem hashes
+raw reached bytes even after unsupported preparation, with no Source-equivalence
+claim. Controls bind nonempty byte payloads through two actual Source aliases
+at an empty-history boundary and hash a failed nonempty history's retained
+`[0,255]` input, distinguishing prior canonical `[255,255]` and wrong padding
+ranges. Finite digest inequalities do not assert injectivity; the micro-step
+does not establish gas or whole-frame memory-expansion accounting.
+
 The slice adapter does not assume or establish initial Source/raw agreement,
 resource/capacity correctness, intermediate observation/capture or compiler
 correspondence. General physical execution beyond that published slice, arbitrary
