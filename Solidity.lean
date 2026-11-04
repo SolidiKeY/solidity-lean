@@ -30,6 +30,8 @@ import Solidity.Backend.AbiWorld.ErrorRoundtrip
 import Solidity.Backend.AbiWorld.LibraryResultPacket
 import Solidity.Backend.AbiWorld.MutatingEntryWords
 import Solidity.Backend.AbiWorld.MutatingEntryWordsControls
+import Solidity.Backend.AbiWorld.MutatingWritePhysical
+import Solidity.Backend.AbiWorld.MutatingWritePhysicalControls
 import Solidity.Backend.AbiWorld.NativeParentWord
 import Solidity.Backend.AbiWorld.NativeParentWordControls
 import Solidity.Backend.AbiWorld.PacketPrefix

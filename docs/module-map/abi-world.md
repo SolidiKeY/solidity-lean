@@ -30,3 +30,6 @@ See [ABI packet consumers](../feature-work/abi-world-packets.md) for proof bound
 
 | `Solidity.Backend.AbiWorld.MutatingEntryWords` | Ordered full-word codec observation of actual mutation and allocating child frame entry. |
 | `Solidity.Backend.AbiWorld.MutatingEntryWordsControls` | Inhabited entry application, stale/order/heap-preservation negatives and complete codec vectors. |
+
+| `Solidity.Backend.AbiWorld.MutatingWritePhysical` | Actual selected mutation prefix and P6 initial-frame physical byte-store consequence, with explicit scaled span. |
+| `Solidity.Backend.AbiWorld.MutatingWritePhysicalControls` | Populated initial physical frame, actual write/neighbor application and scale/bound negatives. |
