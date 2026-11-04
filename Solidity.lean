@@ -424,6 +424,8 @@ import Solidity.Backend.MemoryCopies.TraversalFootprintControls
 import Solidity.Backend.MemoryCopies.TraversalFootprintInterface
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
+import Solidity.Backend.MemoryCopies.TypedCapture
+import Solidity.Backend.MemoryCopies.TypedCaptureControls
 import Solidity.Backend.MemoryCopies.TypedCaptureInterface
 import Solidity.Backend.MemoryOps.CalldataAgreementChildren
 import Solidity.Backend.MemoryOps.CalldataArrayRead

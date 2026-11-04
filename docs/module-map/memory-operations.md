@@ -306,3 +306,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RangeOverlap.lean` | Descending invariant and runtime direction selection with actual snapshot and checked-list agreement. |
 | `Backend/MemoryCopies/RangeOverlapControls.lean` | Both overlap directions, repaired corruption, self/empty/64-word/disjoint copies and endpoint controls. |
 | `Backend/MemoryCopies/TypedCaptureInterface.lean` | Typed captureOverwrite runtime-copy contract with complete allocator and frame preservation. |
+| `Backend/MemoryCopies/TypedCapture.lean` | Actual captured-array execution with derived capacity and complete heap/allocator transport. |
+| `Backend/MemoryCopies/TypedCaptureControls.lean` | Primitive overlaps, dynamic cross-object writes, shallow reference identities, alias/frame and negative controls. |
