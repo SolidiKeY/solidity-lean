@@ -146,3 +146,9 @@ impossibility proof for all programs; the oversized-tail control concerns the
 contract domain, not native overflow execution. Independent read-only finder
 and skeptic reviews found no semantic gap. The finder's reuse request was
 fixed by consuming `Producer.load_at` instead of repeating its proof.
+
+`ByteWorldNumericInterface.lean` adds a numeric consequence while retaining the
+original paired contract and all its input premises. Its implementation must
+prove the bridge between the existing word serializer and byte reader rather
+than assume an encoder inverse. Code realization, Source origin and post-active
+representation remain open.
