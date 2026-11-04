@@ -1501,6 +1501,8 @@ import Solidity.Frontend.OverrideValidation.Identity
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
 import Solidity.Frontend.Problems
+import Solidity.Frontend.QualifiedUnits.Controls
+import Solidity.Frontend.QualifiedUnits.Lookup
 import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
