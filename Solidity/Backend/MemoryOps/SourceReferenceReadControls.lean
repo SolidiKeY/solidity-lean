@@ -6,6 +6,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceRhsAssignment
 import Solidity.Backend.MemoryOps.SourceRhsValue
 import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceReferenceGrowth
 import Solidity.Backend.MemoryOps.SourceMemoryShortCircuit
 import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder
 import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
@@ -2690,5 +2691,144 @@ theorem memory_failure_skip_vectors :
 #guard_msgs (whitespace := lax) in #print axioms memory_failure_skips_declaration
 /-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skip_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms memory_failure_skip_vectors
+
+
+private def graphOldMap (i : Nat) := if i=5 then 0 else addresses i
+private theorem graphOldAgreement (i : Nat) (hi : i<H.length) : graphOldMap i=addresses i := by
+  have ne : i≠5 := by change i<5 at hi;omega
+  unfold graphOldMap
+  rw [if_neg ne]
+private theorem graphInitial : SourceBoolRefsAt sy 3 hp fresh graphOldMap := by
+  have h := fresh_at.transport (Heap.Keeps.refl hp) (fun _ _ h => h) graphOldAgreement
+  exact h
+private theorem graphEmptyInitial : SourceBoolRefsAt sy 4 hp empty graphOldMap := by
+  have h := empty_at.transport (Heap.Keeps.refl hp) (fun _ _ h => h) graphOldAgreement
+  exact h
+private def graphObject (blank : Bool) : MObj H B := ⟨if blank then [] else [false,true],by cases blank <;> decide⟩
+private def graphPair (blank : Bool) := hp.alloc (graphObject blank)
+private def graphSource (blank : Bool) : Source.EMState E0 SΓ :=
+  (sy.1,{sy.2 with heap := (sy.2.heap.alloc ⟨SB,sourceBoolMemory (MObj.elems .dyn (graphObject blank))⟩).1})
+private def graphNewMap := allocatedSourceAddress graphOldMap 5 5
+
+/-- Actual paired allocations retain shared children and the literal empty
+parent, with a real update of the previously unused fresh map entry. -/
+theorem reference_growth_client (blank : Bool) :
+    (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject blank)))).run sy=
+      (.ok (.memRef rfl 5),graphSource blank) ∧
+    Heap.Keeps (List.prefix_append H [B]) hp (graphPair blank).1 ∧
+    SourceBoolRefsAt (graphSource blank) 3 (graphPair blank).1 (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+    SourceBoolRefsAt (graphSource blank) 4 (graphPair blank).1 (empty.wk (List.prefix_append H [B])) graphNewMap ∧
+    SourceBoolMemoryAt (graphSource blank) 5 (graphPair blank).1 (graphPair blank).2 .dyn ∧
+    Source.MemOK E0 SH (graphSource blank) ∧
+    (∀ i,i<H.length → graphNewMap i=graphOldMap i) ∧ graphOldMap 5=0 ∧ graphNewMap 5=5 ∧
+    (graphPair blank).2.id=5 ∧ (∀ Q (q : HRef H Q),(q.wk (List.prefix_append H [B])).id≠(graphPair blank).2.id) ∧
+    (graphSource blank).1=sy.1 ∧ (graphSource blank).2.heap.next=6 ∧
+    ((graphSource blank).2.ex=sy.2.ex ∧ (graphSource blank).2.events=sy.2.events ∧
+      (graphSource blank).2.logs=sy.2.logs ∧ (graphSource blank).2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := graphInitial.alloc_bool (graphObject blank) SH source_memOK F0
+    rcases h with ⟨run,keep,parent,new,mok,id,map,agree,distinct,_,_,cells,_,locals,next,ex,events,logs,fnLocals⟩
+    refine ⟨run,keep,parent,graphEmptyInitial.transport keep cells agree,new,mok,agree,rfl,rfl,id,distinct,locals,next,ex,events,logs,fnLocals⟩
+
+/-- Both real pipelines read the SAME old children after allocation. The second
+parent entry differs materially, while entries0/2 share one identity. -/
+theorem reference_growth_reads (p : Roadmap.Pipeline) (horizon : Nat) (blank : Bool) :
+    (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run (graphSource blank)=
+      (.ok (.val (.bool false)),graphSource blank) ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local si) rfl) (.local si) rfl)).run (graphSource blank)=
+      (.ok (.val (.bool true)),graphSource blank) ∧
+    ((graphPair blank).1.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)).map HRef.id=some 0 ∧
+    ((graphPair blank).1.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 2)).map HRef.id=some 0 ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 4 0)).run (graphSource blank)=
+      (.error (.revert (Source.panicData .index)),graphSource blank) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := graphInitial.alloc_bool (graphObject blank) SH source_memOK F0
+    have parent := h.2.2.1
+    have reads := h.2.2.2.2.2.2.2.2.2.2.2.2.1
+    have initial0 : hp.index fresh .dyn (uintOfNat 0)=some left := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have initial1 : hp.index fresh .dyn (uintOfNat 1)=some right := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have initial2 : hp.index fresh .dyn (uintOfNat 2)=some left := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have lv : hp.index left .dyn (uintOfNat 1)=some false := by simp only [Heap.index,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have rv : hp.index right .dyn (uintOfNat 1)=some true := by simp only [Heap.index,Heap.get,Objs.get,hp,right,MObj.elems_dyn];rfl
+    have a := reads (uintOfNat 0) (uintOfNat 1) left false initial0 lv
+    have b := reads (uintOfNat 1) (uintOfNat 1) right true initial1 rv
+    have c := reads (uintOfNat 2) (uintOfNat 1) left false initial2 lv
+    refine ⟨parent.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) _ false rfl rfl rfl a.1 a.2.2.1,
+      parent.eval_nested_read (G0 p) F0 horizon ssrc si si (uintOfNat 1) (uintOfNat 1) _ true rfl rfl rfl b.1 b.2.2.1,
+      congrArg (Option.map HRef.id) a.1,congrArg (Option.map HRef.id) c.1,?_⟩
+    exact ((reference_growth_client blank).2.2.2.1.parent_bounds F0 (uintOfNat 0)
+      (by change (hp.alloc (graphObject blank)).1.len (empty.wk (List.prefix_append H [B])) .dyn ≤ (uintOfNat 0).1.toNat
+          rw [Heap.Keeps.len h.2.1 empty .dyn];simp only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn];decide)).1
+
+/-- Full old and fresh Source object tables, old-map agreement and fresh
+identity/length/payload. No target code or post-allocation word image is claimed. -/
+theorem reference_growth_vectors (blank : Bool) :
+    [((graphSource blank).2.heap.get 0),((graphSource blank).2.heap.get 1),((graphSource blank).2.heap.get 2),
+      ((graphSource blank).2.heap.get 3),((graphSource blank).2.heap.get 4),((graphSource blank).2.heap.get 5)]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,
+       some ⟨SB,sourceBoolMemory (if blank then [] else [false,true])⟩] ∧
+    (graphSource blank).1=sy.1 ∧ sy.2.heap.get 5=none ∧ (graphSource blank).2.heap.next=6 ∧
+    ((graphPair blank).2.id,graphOldMap 5,graphNewMap 5)=(5,0,5) ∧
+    (∀ i,i<5 → graphNewMap i=graphOldMap i) ∧
+    MObj.elems .dyn ((graphPair blank).1.get (graphPair blank).2)=(if blank then [] else [false,true]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨?_,rfl,rfl,rfl,rfl,?_,?_⟩
+    · cases blank <;> simp only [graphSource, graphObject, MObj.elems_dyn] <;> rfl
+    · exact (reference_growth_client blank).2.2.2.2.2.2.1
+    · change MObj.elems .dyn ((hp.alloc (graphObject blank)).1.get (hp.alloc (graphObject blank)).2)=_
+      rw [Heap.get_alloc,MObj.elems_wk,List.map_id'' (f := MVal.wk (List.prefix_append H [B]) (.prim .bool)) (fun _ => rfl)]
+      simp only [graphObject, MObj.elems_dyn]
+
+/-- Keeping the unused old map entry would incorrectly identify the fresh
+object with LEFT; the actual read distinguishes them for both fresh lengths. -/
+theorem reference_growth_wrong_map (blank : Bool) :
+    ¬ SourceBoolMemoryAt (graphSource blank) (graphOldMap (graphPair blank).2.id)
+      (graphPair blank).1 (graphPair blank).2 .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | intro bad
+    change SourceBoolMemoryAt (graphSource blank) 0 (graphPair blank).1 (graphPair blank).2 .dyn at bad
+    have old : (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run (graphSource blank)=
+        (.ok (.bool true),graphSource blank) := by
+      apply source_bool_read (graphSource blank) 0 [true,false,false] _ 0 (by decide)
+      cases blank <;> simp only [graphSource,graphObject,MObj.elems_dyn] <;> rfl
+    have impossible := (bad.read_iff F0 (uintOfNat 0) true).mp old
+    change (MObj.elems .dyn ((graphPair blank).1.get (graphPair blank).2))[0]?=some true at impossible
+    rw [(reference_growth_vectors blank).2.2.2.2.2.2] at impossible
+    cases blank <;> cases impossible
+
+/-- Fresh contents and endpoint failures are actual Source observations, not
+reads of the retained old child. -/
+theorem reference_growth_fresh_reads :
+    (Source.memElem (E := E0) (Γ := SΓ) 5 1 .bool).run (graphSource false)=
+      (.ok (.bool true),graphSource false) ∧
+    (Source.memElem (E := E0) (Γ := SΓ) 5 2 .bool).run (graphSource false)=
+      (.error (.revert (Source.panicData .index)),graphSource false) ∧
+    (Source.memElem (E := E0) (Γ := SΓ) 5 0 .bool).run (graphSource true)=
+      (.error (.revert (Source.panicData .index)),graphSource true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have nonempty : (graphSource false).2.heap.get 5=some ⟨SB,sourceBoolMemory [false,true]⟩ := by
+      simp only [graphSource,graphObject,MObj.elems_dyn];rfl
+    have vacant : (graphSource true).2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ := by
+      simp only [graphSource,graphObject,MObj.elems_dyn];rfl
+    exact ⟨source_bool_read _ 5 _ nonempty 1 (by decide),
+      source_bool_bounds _ 5 _ nonempty 2 (by decide),source_bool_bounds _ 5 _ vacant 0 (by decide)⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_wrong_map' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_wrong_map
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_fresh_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_fresh_reads
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_reads
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_vectors
 
 end Solidity.Backend.MemoryOps.SourceReferenceReadControls

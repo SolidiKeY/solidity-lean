@@ -368,6 +368,7 @@ import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
 import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
 import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
 import Solidity.Backend.MemoryOps.SourceReferenceAssignment
+import Solidity.Backend.MemoryOps.SourceReferenceGrowth
 import Solidity.Backend.MemoryOps.SourceReferenceRead
 import Solidity.Backend.MemoryOps.SourceReferenceReadControls
 import Solidity.Backend.MemoryOps.SourceReferenceReadSequence

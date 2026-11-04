@@ -212,3 +212,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceLocalReferenceOrder.lean` | Actual indexed write then allocating local-reference deletion in Source Items/native Prog/full word append; changed retained aliases and world/allocator frames. |
 
 | `Backend/MemoryOps/SourceMemoryShortCircuit.lean` | Actual initial Bool indexed-write bounds error absorbs arbitrary context-changing Source/native and word continuations; no suffix/allocator premises. |
+
+| `Solidity/Backend/MemoryOps/SourceReferenceGrowth.lean` | Actual paired Source/intrinsic allocation preserves finite reference-parent/Boolean-child observations; no emitted allocator claim. |

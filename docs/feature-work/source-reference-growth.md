@@ -1,0 +1,11 @@
+# Reference-parent growth
+
+`SourceReferenceGrowth` transports the existing `SourceBoolRefsAt` finite parent/Boolean-child observer through actual `Source.allocRef` and intrinsic `Heap.alloc`. It derives fresh identity, old occupied Source-cell preservation, native Keeps, MemOK, old valid-ID map agreement and actual reached parent/child reads. Runtime parent and child lengths remain arbitrary under their existing intrinsic validity.
+
+`sourceBoolRefMemory_wk` requires a typing prefix and agreement only on valid old identities. `SourceBoolRefsAt.transport` additionally requires native Keeps and preservation of occupied Source cells. `SourceBoolRefsAt.alloc_bool` consumes an initial observer, an intrinsic Boolean array object and initial Source MemOK. Freshness and post-observers are conclusions; no global injectivity or desired final observation is a premise.
+
+The populated controls preserve the repeated LEFT identity in parent [LEFT, RIGHT, LEFT] and a literal empty parent while allocating either [] or [false,true]. They enumerate all six Source objects, observe actual nested reads under both pipelines, retain local/world fields, and distinguish the stale unused map entry (0) from the new Source address (5). The stale map fails fresh correspondence; fresh reads and exact endpoint panics execute existing Source operations. Native old objects are universally framed by Keeps. No post-allocation word image is claimed.
+
+Source/kernel and intrinsic allocation evidence is not a Source allocation expression, emitted allocator, constructor, physical byte memory, ABI, general graph, external compiler/EVM or whole-lane theorem. P6 concrete byte/world producer, reserved copies and final Source/V10/target composition remain open. The persistent goal remains unchanged and blocked.
+
+Focused core attempt03 and controls attempt03 pass. Attempts01/02 remain retained failures. Independent finder/skeptic source reviews found no semantic issue; their requested stale-map and fresh-read controls were added. Exact standard axiom guards are measured, not suppressed. Full private checkpoint gates and historical raw documentation/inventory failures remain separate obligations; no new cold timing coverage is claimed.
