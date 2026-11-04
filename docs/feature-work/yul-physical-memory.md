@@ -997,3 +997,13 @@ compose prior regrowth with repeated/cross-word writes, late Panic0x32 and a
 skipped suffix, preserving aliases and caller locals in an empty child context.
 This fixed-root adapter adds no evaluator, admission fragment, runtime cap,
 automatic rollback or target execution theorem.
+
+`MultiRootByteWrites` removes the fixed-root premise from finite byte plans.
+Every request still calls actual `writeLoc`; lookup derives bytes/string
+ownership or the owner's unchanged error, without per-request validity facts.
+Whole reached-prefix reconstruction, Source writeback and original allocation
+history cover arbitrary root/index sequences over the existing supported heap
+profile. Controls alternate roots, overwrite a byte again, then stop on a
+non-byte root; separate dangling/bounds cases preserve their prefixes. The
+fixture's bytes/string locals retain their shared root0 alias. The physical
+support profile remains an input representation condition, not Source admission.
