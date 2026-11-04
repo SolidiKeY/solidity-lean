@@ -511,3 +511,12 @@ published nested-cache collection fix, the new inventory check passes with
 or lane completion. H24's declaration-graph companion is present but supplies
 no concrete admission inhabitant or creation/initcode executor. Original
 world/G01/G51/compiler/resource and joint obligations remain open.
+
+## Terminal builtin G0 repair
+
+`terminalBuiltin` uses `Builtin.casesOn` with a motive generalizing both arities
+and the operand function, replacing the indexed executable match rejected at
+review. Its public signature, existing laws and complete control module are
+unchanged. RETURN/REVERT retain full loaded bytes, STOP ignores memory, and
+missing memory or unhandled builtins still return `none`. This mechanical
+repair adds no interpreter, Source/G01/G51 or compiler adequacy claim.
