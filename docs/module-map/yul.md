@@ -119,3 +119,5 @@
 | `Yul/LocalItemHorizon.lean`, `Yul/Checks/LocalItemHorizon.lean` | Exact final indexed raw-frame stability for completed Boolean declaration/expression lists, with multi-declaration and reached-context controls. |
 
 | `Yul/LocalDefaultHorizon.lean`, `Yul/Checks/LocalDefaultHorizon.lean` | Exact completed heterogeneous default-item and restored-block frame stability, with numeric-prefix/dirty-local controls. |
+
+| `Yul/LocalUncheckedHorizon.lean`, `Yul/Checks/LocalUncheckedHorizon.lean` | Completed-run stability for the existing unchecked default scope, ordinary continuation and enclosing block; distinct inner/continuation timeout frames. |

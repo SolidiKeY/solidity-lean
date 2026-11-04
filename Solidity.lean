@@ -2463,6 +2463,7 @@ import Solidity.Yul.Checks.LocalU8CompareHorizon
 import Solidity.Yul.Checks.LocalU8Expr
 import Solidity.Yul.Checks.LocalU8Horizon
 import Solidity.Yul.Checks.LocalU8Representation
+import Solidity.Yul.Checks.LocalUncheckedHorizon
 import Solidity.Yul.Checks.LocalValues
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Yul.Checks.Occurrences
@@ -2700,6 +2701,7 @@ import Solidity.Yul.LocalU8Expr
 import Solidity.Yul.LocalU8Horizon
 import Solidity.Yul.LocalU8Representation
 import Solidity.Yul.LocalU8Source
+import Solidity.Yul.LocalUncheckedHorizon
 import Solidity.Yul.LocalValues
 import Solidity.Yul.LocalWordView
 import Solidity.Yul.LocalWordWrite

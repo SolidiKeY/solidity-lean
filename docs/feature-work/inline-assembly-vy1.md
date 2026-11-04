@@ -1417,3 +1417,29 @@ Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
 and layer checks pass. Fourteen scoped axiom reports use only Lean standard
 axioms. Raw failed automation attempts remain distinct from passing checks;
 no checking/proof limits were increased.
+
+### Unchecked scope and ordinary continuation horizons
+
+`LocalUncheckedHorizon.successor` and `extension` preserve exact completed
+raw frames for the existing unchecked default-item scope followed by ordinary
+default items. Actual normal completion supplies a normal inner run; concrete
+`LocalDefaultHorizon.successor` fixes that frame before its existing certified
+restoration, then fixes the ordinary continuation at the same residual horizon.
+`blockSuccessor` and `blockExtension` apply the unchanged outer restoration
+to the fixed completed continuation. True/false control indices remain explicit.
+Eleven controls reuse inhabited uint8/uint256 prefixes and add an inhabited
+side-effecting Boolean continuation. They cover exact completed/restored frames,
+arbitrary added fuel, inner-prefix timeout contexts, a continuation timeout
+after restoration retaining its Boolean write, later completion of that
+continuation, timeout-to-completion change and persistent dirty projection refusal.
+These laws concern the existing wrapper's certified defaults and Boolean items;
+they add no unchecked numeric arithmetic, arbitrary control, readback or admission.
+Normal completion is required. No Source/ExtCall/evaluator/layout or observation
+changes; proof budgets are unchanged. General P16/full VY1 and final gates remain
+open.
+
+Independent read-only finder and skeptic reviews report no findings.
+Both modules have zero per-file diagnostic errors; scoped Lean, generated-root
+and layer checks pass. Fifteen scoped axiom reports use only Lean standard
+axioms. Failed standard automation attempts are retained separately from
+passing gates; no checking/proof limits were increased.
