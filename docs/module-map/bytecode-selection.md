@@ -48,3 +48,9 @@
 | `Backend/Selection/BranchPackets.lean` | Bounded selected-body, condition, test, join and tag traces at exact whole-branch placements. |
 | `Backend/Selection/BranchExecution.lean` | Frozen ControlCertificate constructor for whole conditional execution, actual selected body reachability and every prefix bound. |
 | `Backend/Selection/BranchControls.lean` | Inhabited assembled true/false arms, wrong-arm/tail negatives, overwritten-condition operand execution and join-capacity refusal. |
+
+| `Backend/Selection/LoopLayout.lean` | Static prefix views equal to existing loop expansion, head/exit tag coordinates and reused fixed-items adapters. |
+| `Backend/Selection/LoopPackets.lean` | Bounded actual loop head, condition/test, arbitrary certified-body entry, backedge and exit-tag traces. |
+| `Backend/Selection/LoopExecution.lean` | General body iteration/backedge and zero exit; finite StructuredExec induction and frozen whole-loop certificate. |
+| `Backend/Selection/StructuredExecution.lean` | Whole-byte ControlCertificate constructor for every existing BlockShape with its explicit ExpansionRoom. |
+| `Backend/Selection/LoopControls.lean` | Inhabited assembled nested-branch loop, repeated backedges/zero exit, changed condition stack and wrong-head/result/tail/header-capacity controls. |

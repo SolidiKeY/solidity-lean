@@ -489,3 +489,37 @@ documentation-only handoff preserves every Lean source from that checked
 implementation. Consumers may construct conditional control certificates from
 certified children and the stated test/join room. General-loop realization,
 G45.06 and the assignment's full final gate remain open.
+
+
+## General structured loops
+
+LoopExecution proves one actual iteration of an arbitrary certified structured
+body through the generated head tag, condition, test, body and backedge. It
+needs no remaining-loop execution premise. The backedge returns to the real
+placed head byte PC, rather than item count or byte zero. A zero condition
+executes the exit JUMPDEST. finite_loop inducts the existing finite
+StructuredExec derivation and joins these traces; no fixed body-step bound,
+favorable reached-body fact or byte-jump oracle is supplied. The condition's
+actual lower stack may change values. Shape evidence derives only its length.
+
+loopCertificate implements every frozen control-certificate field. The test's
+n+2 room also provides the backedge's n+1 room, while each body certificate
+retains its own prefix bounds. StructuredExecution.structuredCertificate now
+constructs control realization for every existing BlockShape together with
+ExpansionRoom, including nested branches/loops and arbitrary sequences.
+Sequence composition uses the explicit intermediate shape/room witnesses.
+Static loop prefix views are proved equal to Block.expand and reuse the same
+fixed-whole-items adapters; no additional evaluator or compiler is introduced.
+
+Controls construct actual assembly for a loop whose nonempty body is itself
+a conditional decrement. Two iterations take2 to1 to0 with a protected word23
+and repeated backedges to byte33 after PUSH32. A zero-entry execution exits,
+and an independent one-iteration witness needs no remaining-loop premise.
+Wrong head zero, final result and corrupted tail are rejected. Reusing the
+existing changed-condition control, whole loop exit returns99 from input42.
+Header overflow is static control-certificate rejection, not an independently
+executed overflow witness. Independent finder/skeptic reviews passed all five
+modules without findings and used no edits, builds or Lean server. Finite
+StructuredExec is a finite-execution premise, not a termination proof. These
+results cover the frozen structured fragment; source adequacy, gas and Bridge
+agreement remain separate. G45.06 composition remains open.

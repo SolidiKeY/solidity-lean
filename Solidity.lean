@@ -644,6 +644,10 @@ import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls
 import Solidity.Backend.Selection.LiteralSelection
 import Solidity.Backend.Selection.LiteralSelectionControls
+import Solidity.Backend.Selection.LoopControls
+import Solidity.Backend.Selection.LoopExecution
+import Solidity.Backend.Selection.LoopLayout
+import Solidity.Backend.Selection.LoopPackets
 import Solidity.Backend.Selection.MixedSelection
 import Solidity.Backend.Selection.NumericSequence
 import Solidity.Backend.Selection.Premises
@@ -655,6 +659,7 @@ import Solidity.Backend.Selection.ScalarSequenceFrames
 import Solidity.Backend.Selection.ScalarSequenceResources
 import Solidity.Backend.Selection.SignedSelection
 import Solidity.Backend.Selection.StackSelection
+import Solidity.Backend.Selection.StructuredExecution
 import Solidity.Backend.Selection.UnsignedSelection
 import Solidity.Backend.StorageOps.AbsentRootQueries
 import Solidity.Backend.StorageOps.AggregatePop
