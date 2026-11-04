@@ -3324,6 +3324,8 @@ import Solidity.Yul.Views.RetainedAllocationOrder
 import Solidity.Yul.Views.RetainedAllocationOrderControls
 import Solidity.Yul.Views.RetainedAllocationRegions
 import Solidity.Yul.Views.RetainedArrayAgreement
+import Solidity.Yul.Views.RetainedArrayHeader
+import Solidity.Yul.Views.RetainedArrayHeaderControls
 import Solidity.Yul.Views.RetainedArrayImage
 import Solidity.Yul.Views.RetainedArrayLayout
 import Solidity.Yul.Views.RetainedArrayLength

@@ -965,3 +965,13 @@ the dormant aliases through the existing checked retained-array writeback after
 regrowth. Original capacity96 differs from the current32-byte view. This
 regrowth is canonical preparation/writeback through actual heapPut, not a new
 Solidity expression rule or target execution theorem.
+
+`RetainedArrayHeader` extends checked regrowth to a complete refreshed heap.
+Canonical element words come from the same raw map, including dormant regions;
+old image reads plus placement separation establish every post-header image
+read. Actual canonical preparation and `heapPut`, original-H MemOK, complete map
+reconstruction, reserved preservation and unchanged whole Source writeback use
+the original allocation history. Controls compose shrink, allocating reference
+deletion and regrowth without assuming new reads or a final inverse. The
+original-capacity failure remains preparation `None`, not a language refusal;
+no source length-assignment syntax or target execution is added.
