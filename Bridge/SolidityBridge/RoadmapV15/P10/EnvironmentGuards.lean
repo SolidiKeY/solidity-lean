@@ -33,11 +33,11 @@ theorem environment_driver_result (k : EnvKey) (site : Site (environmentOp k)) (
   by_cases gas : site.state.gasAvailable.toNat < environmentCost k
   · simp only [Assembly.driverSteps,DecoderAgreement.decode_all,Option.option,bind,Except.bind]
     rw [environment_gate_result]
-    simp only [if_pos gas,Except.bind]
+    simp only [if_pos gas]
   · by_cases full : 1024 < site.state.stack.length+1
     · simp only [Assembly.driverSteps,DecoderAgreement.decode_all,Option.option,bind,Except.bind]
       rw [environment_gate_result]
-      simp only [if_neg gas,if_pos full,Except.bind]
+      simp only [if_neg gas,if_pos full]
     · simp only [if_neg gas,if_neg full]
       exact (environment_fetched k site fuel (Nat.le_of_not_gt gas) (Nat.le_of_not_gt full)).1
 theorem environment_short_fuel (k : EnvKey) (site : Site (environmentOp k)) :
