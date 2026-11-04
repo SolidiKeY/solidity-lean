@@ -621,3 +621,41 @@ recursive simplifier attempt reached the existing heartbeat limit; replacing
 it with one evaluator rewrite discharged the same claim without raising limits.
 Earlier failed full-checkpoint validation remains failed, and this focused
 sequence result does not establish a full build on the expanded published base.
+
+## Direct indexed Source-items selection
+
+`FailurePaths.GuardBodySelection` accepts existing indexed Source `RItems`
+directly. Its executable structural `view` recognizes expression-statement
+sequences and records their unchanged output context and exact reconstruction
+from existing statements. This structural view alone does not admit arbitrary
+expressions as guards: the downstream `GuardSequences` compiler still checks
+each statement against the same three guard families. Assignments, for example,
+are structurally expression statements but their compilation is refused.
+
+`compile` uses that computed view and the public memory program compiler.
+`selected_public` derives its exact intrinsic program, public compiler choice,
+unchanged fragment and code. `selected_correct` derives actual execution of the
+original Source items, using reconstruction rather than a supplied statement
+list or desired run. Its horizon is `n + admitted.statements.length + 7`; the
+admitted witness is computed by `view`, not a new execution premise. Typed maps,
+initial read correspondence and full `StateRepr` remain explicit. The view is
+general over existing Source indices to permit structural recursion; the
+compiler entry point still takes equal input/output contexts, no declared
+returns, no modifier and the body statement context.
+
+`GuardBodySelectionControls` passes a nonempty mixed Boolean/integer Source
+items body to the new entry point, proves its exact public-selected code and
+consumes the correctness theorem in both pipelines. Exact Source and target
+observations reuse the checked three-condition result. Empty selection,
+zero-horizon timeout, skip/unchecked/context-growth structural refusals and
+assignment/literal-guard compiler refusals are explicit. These are scope
+refusals, not claims that Source rejects those programs. Root `.block`
+statement selection, general effectful bodies, context-map construction,
+internal-frame payload transport and physical bytecode/EVM adequacy are not
+supplied here.
+
+The focused serial check passed in 2.944 seconds with 837,017,600 bytes peak
+aggregate RSS and no new source warnings. All sixteen printed theorem reports
+use only `propext`, `Classical.choice` and `Quot.sound` (or subsets). No proof
+budget was raised. Earlier failed full-checkpoint validation remains failed;
+focused selector checks do not establish the outstanding full build.
