@@ -241,3 +241,39 @@ These are not fresh native comparisons, nor the original24 full obligations.
 Deployment transaction-fate ordinal0 and ordinary ordinal1+, full fixed-plan
 request/session consistency, H25 post-fee settlement authority, P8 realization,
 H19 reachability and the original24/six full Y10 obligations remain open.
+
+## Existing admission API: arbitrary cursors and horizon laws
+
+This checkpoint extends FailureRequestAdmission.requestValueScope, already
+implemented at1483d6d4. Initial inspection missed that implementation and
+produced a duplicate uncommitted wrapper. Finder/skeptic identified the overlap;
+all four draft files were preserved verbatim with checksums outside the checkout
+at /workspace/vy5-composition/funded-request-draft-20261104 and the duplicate
+operation was removed from the working source tree. It is not new admission
+coverage. All original and failed draft diagnostics remain retained.
+
+The genuine extension proves full rejected-run equations for arbitrary typed
+callers, quiescent cursors and nonconstant plans, plus exact full-plan identity
+and request-scope execution equality when the current fate is affordable.
+Rejection advances the actual request ordinal once and preserves the exact
+dependent pair of frame count/frame list. Grow/Below/Approx transport consumes
+the real body relations and existing request-scope laws; no body execution or
+desired result is assumed. No existing Source runtime module or representation
+changed. Session/fee/balance installation remains separate.
+
+Inhabited controls explicitly seed a quiescent cursor at request37 with frame
+counter11; this is not a claim of session-prefix reachability. Other request
+fates are dropped, so reading index0 is discriminated. The actual bytesOfRV
+operation reads the retained caller alias and returns complete DEAD bytes with
+exact Nat2^256. Underfunding before a zero cut, funded zero cut, real timeout,
+wrong index and same-length AABB-vs-DEAD controls retain the full stated fields.
+Seventeen actual compiler-derived axiom sets are pinned, all standard only.
+These kernel Source controls are not native comparisons or P8/full-Y10 closure.
+
+Failures include a missing final definitional reduction, a reduced projection
+in a funded-plan rewrite, and a draft equality between differently indexed frame
+lists. The corrected counter theorem uses exact dependent-pair equality rather
+than discarding frame data or weakening to an untyped projection. All budgets
+and historical docs/G03/native failing exits remain unchanged. Original24 full
+obligations/six combinations, fate0/session execution, H19/H25, P8 realization
+and immutable/funds release remain open.

@@ -142,3 +142,7 @@
 | `Source/FailureDeploymentHorizon.lean` | Fixed-plan actual initializer/base-argument/modifier-body growth/approximation, deployment event-prefix monotonicity and exact full-result stability after non-timeout completion; no session fate or P8 claim. |
 | `Source/FailureDeploymentReceipt.lean` | Actual enabled-plan deployRun receipt growth, approximation and arbitrary-horizon prefix; terminal receipt remains outside body-event budget. |
 | `Source/FailureDeploymentControls.lean` | Inhabited registered initializer/nonempty-constructor-body/ancestor-stop transport, changed-plan counterexample and22 exact standard axiom pins. |
+
+| `Source/FailureRequestAdmissionLaws.lean` | Existing requestValueScope nonconstant-plan arbitrary-cursor admission equations, unchanged funded-plan identity and exact dependent frame/counter retention on rejection. |
+| `Source/FailureRequestAdmissionHorizon.lean` | Existing exact-Nat admission API Grow/Below/Approx transport with explicit actual body relations; no second runtime admission operation. |
+| `Source/FailureRequestAdmissionHorizonControls.lean` | Nonconstant fate at ordinal37/frame counter11, exact wide balance and typed caller alias readback, timeout/cut/wrong-index/full-byte controls and17 exact axiom pins. |
