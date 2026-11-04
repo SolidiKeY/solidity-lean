@@ -269,3 +269,12 @@ Independent read-only finder and skeptic reviews passed with no findings. They
 confirmed genuine public selection, no assumed body execution, complete outcome
 preservation and non-vacuous mutation controls. Both distinguished the supported
 core family from the remaining full G40/profile obligation.
+
+`CalldataWordInterface.lean` and Bridge `AbiWordInterface.lean` state exact
+all-offset zero-padded word agreement and the existing numeric validators'
+agreement with the indexed semantic word decoder. Native charged-load failures
+and budgets are inherited. Raw word access is not an entry span/length check;
+short input may zero-pad, while full entry still has its original guards.
+Validator execution remains in the existing numeric runner, not a newly proved
+fetched native validator sequence. Decoder fuel and free-memory parameters
+remain explicit rather than being hidden by a success premise.
