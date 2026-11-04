@@ -1384,3 +1384,124 @@ completeness targets, full repository gates and whole-scope reviews/acceptance.
 Root discrimination under the existing contract is now proved, including the
 previous contextual pair. The original assignment is not marked complete;
 SG-CEX-01 and SG-CEX-02 stay OPEN/REFUTED with no new exclusion or premise.
+
+## Checkpoint Q: atom semicolon absence and actual mixed-list segmentation
+
+Implementation and VM proof validation are complete for this bounded increment.
+H35 cache delivery remains pending; this checkpoint is not reported done before
+that requirement is resolved. The original full queue remains partial.
+
+H31 permits proof-only inspection of immutable expression/type/argument atoms.
+NoSemiPr and NoSemiAtoms establish semicolon-free token concatenation, literal
+fragments, type attributes and operator combinators. SemiFree is a token
+predicate, not an AST, and admits real empty and nonempty token sequences.
+SyntaxNoSemi proves it for all seven atomic categories and recursive list/opt
+wrappers: 42 substantive constructors plus nil/cons/none/some, exhaustively.
+Categories outside that closure have a false category guard; no absence claim
+is made for statements or blocks. All literal payload bytes remain inside
+tokens, including semicolon bytes and zero-length successful fragments.
+There is no expression uniqueness assumption, producer change or parser premise.
+
+SemicolonSplit derives actual yield shapes for simple, continue, break,
+return, emit and revert statements. Arbitrary successful yields of any two
+of those roots have unique complete token prefixes and residual suffixes.
+First-semicolon framing intentionally does not describe do-while: its body
+can contain an earlier semicolon. The checked inhabited negative control
+demonstrates this boundary; no original theorem statement or exclusion changes.
+
+FramedStatementList proves all successful statement yields are nonempty.
+It combines the six semicolon boundaries with arbitrary successful block
+boundaries, using the existing raw root collision classification. Its mixed
+list theorem requires the seven-root fragment only on the source list;
+the matching target list is arbitrary. Actual yield decomposition retains
+each intermediate layout. The conclusion equates actual token segments,
+not syntax trees, expressions, layout states or parsed results. In particular,
+arbitrary compound and unchecked contents may occur inside its block segments.
+General compound statement/item boundaries remain unfinished.
+
+NoSemiControls checks actual successful nonempty yields for all42 substantive
+constructors, all five literal variants, literal semicolon payloads and the
+four list/option constructors. It retains negative punctuation-semicolon,
+empty fragment-choice and wrong layout-choice controls. FramedListControls
+checks 12 actual variants spanning all six semicolon roots, plus an inhabited
+seven-segment mixed list with a conditional inside its block. Its seven-root
+inventory observes that real syntax list, rather than counting a literal list.
+A universal control applies the list theorem against any matching target list.
+SemicolonPublicAxioms checks and prints all49 new public theorem signatures
+and axiom sets, with no custom axiom or sorry/admit/unsafe/native_decide.
+inventory-q-v2.json and axioms-q.json retain exact source identities and scope.
+
+The five new source modules have a local registration manifest only.
+Read-only producers and frozen shared roots are unchanged. This increment
+adds proofs, not a producer refactor or speed claim, and raises no budget.
+All Lean work remains explicit -j1 in the same 12 GiB/no-swap runtime with
+4 GiB VM headroom. No external solc fixture changed; the earlier 51 pinned
+external expectations remain separate from these kernel proofs.
+
+H35 validation also rechecked checkpoint P on this VM: all five P owned
+module builds, all43 public theorem audits and both control suites passed.
+The actual container Lake cache was recovered at /home/ubuntu/.cache/lake
+and matched to the owned module traces. The H35 preparation contains all71
+then-owned modules, 213 real artifacts and 71 input mappings. It ran the
+unmodified scripts/coord-tools/ship-cache.sh with SHIP_ALLOW_HEAD=1 and an
+explicit prepared LAKE_CACHE_DIR. Collection succeeded with zero unresolved
+traces, but transport exited1 because this worker lacks coordinator
+/home/agent/.local/state/cloudvm-coord/poll-state.json. No fabricated lane,
+catalog, credentials or transport were configured and no delivery PASS is
+claimed. The initial archive is /workspace/h35-cache-1793830946459497122.tar.gz;
+its receipt, mapping/artifact inventory, logs and checksums are under
+/workspace/h28-statement-grammar-evidence/h35-cache-1793830946459497122.
+
+Q-H35-TRANSPORT [H35; scripts/coord-tools/ship-cache.sh]: How should the verified
+worker cache be delivered when coordinator-only lane/catalog/transport state
+is absent here? Option A: coordinator retrieves the prepared archive, using
+the saved actual cache and receipt without installing coordinator transport
+on the worker. Option B: coordinator supplies a worker-compatible shipping
+command/configuration, which is then run on this VM with a saved delivery
+receipt. Neither option is assumed authorized by silence. Proof work continues
+independently; checkpoint delivery is pending.
+
+Remaining original obligations: general compound/item token boundaries,
+token-level conditional association/uniqueness independently of SOL-EU,
+remaining true structural-fuel coverage versus SG-CEX-01/02 OPEN/REFUTED,
+full repository gates, scope-complete acceptance and whole-scope reviews.
+No persistent goal was created, reset or marked complete.
+
+Q review correction: independent finder and skeptic both found stale checkpoint O
+witness-symbol keys in the first inventory-q.json. Constructor values and counts
+were already correct. inventory-q-v2.json names the actual *SemiWitnesses Q
+controls and records the correction; the original inventory remains retained.
+
+| Q gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag NoSemiPr.lean | pass | run-1793831052027716872 |
+| runtime.py build NoSemiPr | pass | run-1793831069023255982 |
+| runtime.py diag NoSemiAtoms.lean | pass | run-1793831074825537175 |
+| runtime.py build NoSemiAtoms | pass | run-1793831087678602802 |
+| runtime.py diag SyntaxNoSemi.lean | pass | run-1793831093257515323 |
+| runtime.py build SyntaxNoSemi | pass | run-1793831160626686369 |
+| runtime.py diag SemicolonSplit.lean | pass | run-1793831184961638100 |
+| runtime.py build SemicolonSplit | pass | run-1793831262233128156 |
+| runtime.py diag FramedStatementList.lean | pass | run-1793831412200866640 |
+| runtime.py build FramedStatementList | pass | run-1793831479084220188 |
+| runtime.py diag NoSemiControls.lean | pass | run-1793831635330130933 |
+| runtime.py diag FramedListControls.lean | pass | run-1793831673827620942 |
+| runtime.py diag SemicolonPublicAxioms.lean | pass | run-1793831682179764548 |
+| runtime.py gate SemicolonPublicAxioms.lean | pass, all49 signatures/axioms | run-1793831699131661534 |
+| check-doc-paths.sh / check-trust.sh / check-layers.mjs | pass | static-q-precommit-1793831785447820938 |
+| register.sh --check | fail, frozen roots lack lane imports | static-q-precommit-1793831785447820938 |
+
+All paths above are under /workspace/h28-statement-grammar-evidence. Each
+runtime receipt includes exact command, exit, wall/RSS, input hashes, process
+samples and no-swap/headroom checks. The final exact-head gate and cache
+receipts are in the sealed handoff; H35 cache transport is not yet passing.
+
+Retained failed diagnostics: run-1793831324092392533 required the actual
+SyntaxBalance import and explicit predicate reduction; run-1793831353837696486
+required the actual core append_eq_nil_iff name and recursive guard equation;
+run-1793831380943820735 resolved the guard by its equation theorem. Controls
+run-1793831493775876917 corrected Tok.str spelling; subsequent preflight
+run-1793831523045102863 refused a stopped runtime. The same container was
+restarted. run-1793831561186026424 and run-1793831644405690338 required
+recursive fixture equations instead of an unavailable Decidable reduction.
+No theorem signature, premise, exclusion, budget or producer was changed.

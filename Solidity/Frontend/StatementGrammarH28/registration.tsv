@@ -70,3 +70,8 @@ Solidity.Frontend.StatementGrammarH28.SyntaxPair	H31 full contract-level stateme
 Solidity.Frontend.StatementGrammarH28.ContextPr	H31 full contract-level statement roots and checked contextual declaration counterexample
 Solidity.Frontend.StatementGrammarH28.RootContract	H31 full contract-level statement roots and checked contextual declaration counterexample
 Solidity.Frontend.StatementGrammarH28.ContextualDeclCounterexample	H31 full contract-level statement roots and checked contextual declaration counterexample
+Solidity.Frontend.StatementGrammarH28.NoSemiPr	Semicolon-free token combinators over immutable printer computations
+Solidity.Frontend.StatementGrammarH28.NoSemiAtoms	Semicolon-free literal/type/operator/attribute atom proofs
+Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi	Universal 46-constructor expression/type/argument/simple closure semicolon absence
+Solidity.Frontend.StatementGrammarH28.SemicolonSplit	Actual first-semicolon boundary splitting for six statement roots
+Solidity.Frontend.StatementGrammarH28.FramedStatementList	Universal statement nonemptiness and seven-root source list segmentation against arbitrary target
