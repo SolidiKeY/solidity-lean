@@ -490,3 +490,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Lowering/V08/LiteralFailureCopyEncoding.lean` | Actual standard ABI expression after typed local conversions; derived copy effects and packet allocation. |
 | `Lowering/V08/LiteralFailureCopyEncodingControls.lean` | Populated copy/packet/old-alias and partial-fuel controls with complete packets. |
+
+| `Lowering/V08/LiteralFailurePackedFields.lean` | Actual heterogeneous packed parts/encoding and converted-argument packet allocation. |
+| `Lowering/V08/LiteralFailurePackedFieldsControls.lean` | Populated packed fields, complete payloads, allocation and adjacent-boundary ambiguity controls. |
