@@ -4,6 +4,7 @@ import Solidity.Backend.MemoryOps.PhysicalStructSequence
 import Solidity.Backend.MemoryOps.PhysicalStructDelete
 import Solidity.Backend.MemoryOps.PhysicalStructAlias
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
+import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceNative
 import Solidity.Backend.MemoryOps.SourceCalldataTransfer
 import Solidity.Backend.MemoryOps.SourceCalldataBinding
 import Solidity.Backend.MemoryOps.SourceCalldataMutation
@@ -2274,4 +2275,182 @@ theorem source_copy_mutation_prefix_tables :
 #guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_empty_late
 /-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_copy_mutation_prefix_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms source_copy_mutation_prefix_tables
+
+private abbrev SliceCtx := Source.STy.array .calldata .bool none :: .int .u256 :: .int .u256 :: SourceCtx
+private def sliceStart (empty : Bool) : PrimTy.uint.Denote := indexValue (wmod (if empty then 3 else 1))
+private def sliceFinish : PrimTy.uint.Denote := indexValue (wmod 3)
+private def sliceInput (empty : Bool) : Source.EMState E SliceCtx :=
+  (.cons (.cdRef rfl 64 3) (.cons (sourceUint (sliceStart empty)) (.cons (sourceUint sliceFinish) inputSource.1)),inputSource.2)
+private def sliceFrame : Source.Fr := {copyFrame with cd := List.replicate 64 2 ++ copyFrame.cd}
+private def slicePayload (empty : Bool) : List Bool := if empty then [] else [false,true]
+private def sliceValues (empty : Bool) : List (Source.Val E.layout .bool) := if empty then [] else [.bool false,.bool true]
+private def sliceObject (empty : Bool) : MObj H B := ⟨slicePayload empty,by cases empty <;> decide⟩
+private def sliceHeap (empty : Bool) := hp.alloc (sliceObject empty)
+private def sliceOut (empty : Bool) : Source.EMState E SliceCtx :=
+  ((sliceInput empty).1,{(sliceInput empty).2 with heap := ((sliceInput empty).2.heap.alloc ⟨SB,sourceBoolMemory (slicePayload empty)⟩).1})
+private def sliceExpr := sourceBoolSliceCopy (E := E) (.here : Source.Idx SliceCtx (.array .calldata .bool none)) (.there .here) (.there (.there .here)) false
+private theorem sliceAt (empty : Bool) : SourceBoolStructAt (sliceInput empty) 2 hp parent addresses layout := source_at.same_heaps rfl rfl
+private theorem sliceOK (empty : Bool) : Source.MemOK E SH (sliceInput empty) :=
+  ⟨⟨memOK.1.1,⟨trivial,⟨trivial,⟨trivial,memOK.1.2⟩⟩⟩⟩,memOK.2⟩
+private theorem sliceDecoded (empty : Bool) :
+    sourceCalldataBoolValues E sliceFrame (64+32*(sliceStart empty).1.toNat)
+      (sliceFinish.1.toNat-(sliceStart empty).1.toNat)=.ok (sliceValues empty) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases empty <;> rfl
+private theorem slicePayloadExact (empty : Bool) : sourceBoolValuePayload (sliceValues empty)=slicePayload empty := by cases empty <;> rfl
+
+private theorem sliceElems (empty : Bool) : MObj.elems .dyn ((sliceHeap empty).1.get (sliceHeap empty).2)=slicePayload empty := by
+  first
+  | solve | rfl | simp only [] | omega
+  | change MObj.elems .dyn ((hp.alloc (sliceObject empty)).1.get (hp.alloc (sliceObject empty)).2)=_
+    rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn]
+    cases empty <;> rfl
+
+/-- BOTH pipelines, actual offset64 plus start1 => decoder offset96. Populated
+parent/tag/aliases survive; a fresh empty or unequal two-element child is
+computed and allocated by both existing machines, not supplied as a payload. -/
+theorem source_bool_slice_native_client (p : Roadmap.Pipeline) (fuel : Nat) (empty : Bool) :
+    (Source.evalE (G p) sliceFrame (fuel+3) sliceExpr).run (sliceInput empty)=
+      (.ok (.val (.memRef rfl 3)),sliceOut empty) ∧
+    Heap.Keeps copyExt hp (sliceHeap empty).1 ∧
+    SourceBoolStructAt (sliceOut empty) 2 (sliceHeap empty).1 (parent.wk copyExt) copyAddresses layout ∧
+    SourceBoolMemoryAt (sliceOut empty) 3 (sliceHeap empty).1 (sliceHeap empty).2 .dyn ∧
+    Source.MemOK E SH (sliceOut empty) ∧
+    [(sliceHeap empty).2.id,(parent.wk copyExt).id,(left.wk copyExt).id,(right.wk copyExt).id]=[3,2,0,1] ∧
+    MObj.elems .dyn ((sliceHeap empty).1.get (sliceHeap empty).2)=slicePayload empty ∧
+    MObj.elems .dyn ((sliceHeap empty).1.get (left.wk copyExt))=[true,false,false] ∧
+    MObj.elems .dyn ((sliceHeap empty).1.get (right.wk copyExt))=[false,true,false] ∧
+    (sliceHeap empty).1.field (parent.wk copyExt) layout.tag_type=u7 ∧
+    ((sliceHeap empty).1.field (parent.wk copyExt) layout.child_type).id=0 ∧
+    [(sliceOut empty).2.heap.get 0,(sliceOut empty).2.heap.get 1,(sliceOut empty).2.heap.get 2,(sliceOut empty).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+        some ⟨SS,data 0⟩,some ⟨SB,sourceBoolMemory (slicePayload empty)⟩] ∧
+    (sliceOut empty).1=(sliceInput empty).1 ∧
+    ((sliceOut empty).2.ex=(sliceInput empty).2.ex ∧ (sliceOut empty).2.events=(sliceInput empty).2.events ∧
+      (sliceOut empty).2.logs=(sliceInput empty).2.logs ∧ (sliceOut empty).2.fnLocals=(sliceInput empty).2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (sliceAt empty).slice_bool_copy_native (G p) sliceFrame fuel .here (.there .here) (.there (.there .here))
+      64 3 (sliceStart empty) sliceFinish false rfl rfl rfl
+      (by cases empty <;> decide) SH (sliceOK empty)
+    have ordered : ¬sliceFinish.1.toNat<(sliceStart empty).1.toNat := by cases empty <;> decide
+    have bounded : ¬3<sliceFinish.1.toNat := by decide
+    dsimp only at result
+    simp only [Bool.false_eq_true,if_false] at result
+    rw [if_neg ordered,if_neg bounded,sliceDecoded empty] at result
+    simp only [slicePayloadExact] at result
+    obtain ⟨valid,run,keep,old,new,mok,fresh,freshAddr,oldAddr,distinct,parentNe,childNe,aliases,loc,ex,ev,logs,fn⟩ := result
+    have keeps : Heap.Keeps copyExt hp (sliceHeap empty).1 := keep
+    refine ⟨run,keep,old,new,mok,rfl,?_,?_,?_,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl⟩
+    · exact sliceElems empty
+    · rw [keeps left,MObj.elems_wk,left_values];rfl
+    · rw [keeps right,MObj.elems_wk,right_values];rfl
+    · rw [keeps.field parent layout.tag_type];rfl
+    · rw [keeps.field parent layout.child_type];rfl
+
+/-- Bounds, raw noncanonical prefix and early horizon rejection are actual
+Source outcomes; no native allocation or suffix state is invented for them.
+Wrong original-offset decoding fails, while the actual shifted copy succeeds. -/
+theorem source_bool_slice_native_rejections (p : Roadmap.Pipeline) (fuel : Nat) :
+    sourceCalldataBoolValues E sliceFrame 0 2=.error (.revert []) ∧
+    sourceCalldataBoolValues E sliceFrame 96 2=.ok [.bool false,.bool true] ∧
+    (Source.evalE (G p) sliceFrame 2 sliceExpr).run (sliceInput false)=(.error .timeout,sliceInput false) ∧
+    (Source.evalE (G p) sliceFrame (fuel+3) sliceExpr).run
+      ((sliceInput false).1.set (.there .here) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)=
+        (.error (.revert []),((sliceInput false).1.set (.there .here) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)) ∧
+    (Source.evalE (G p) sliceFrame (fuel+3) sliceExpr).run
+      ((sliceInput false).1.set (.there (.there .here)) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)=
+        (.error (.revert []),((sliceInput false).1.set (.there (.there .here)) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,?_,?_⟩
+    · let y : Source.EMState E SliceCtx := ((sliceInput false).1.set (.there .here) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)
+      have hr : SourceBoolStructAt y 2 hp parent addresses layout := (sliceAt false).same_heaps rfl rfl
+      have hm : Source.MemOK E SH y := ⟨⟨(sliceOK false).1.1,Source.LocalsOK.set (sliceInput false).1 (.there .here) (sliceOK false).1.2 trivial⟩,(sliceOK false).2⟩
+      have rejected := hr.slice_bool_copy_native (G p) sliceFrame fuel .here (.there .here) (.there (.there .here))
+        64 3 (indexValue (wmod 4)) sliceFinish false rfl rfl rfl (by decide) SH hm
+      exact rejected
+    · let y : Source.EMState E SliceCtx := ((sliceInput false).1.set (.there (.there .here)) (sourceUint (indexValue (wmod 4))),(sliceInput false).2)
+      have hr : SourceBoolStructAt y 2 hp parent addresses layout := (sliceAt false).same_heaps rfl rfl
+      have hm : Source.MemOK E SH y := ⟨⟨(sliceOK false).1.1,Source.LocalsOK.set (sliceInput false).1 (.there (.there .here)) (sliceOK false).1.2 trivial⟩,(sliceOK false).2⟩
+      have rejected := hr.slice_bool_copy_native (G p) sliceFrame fuel .here (.there .here) (.there (.there .here))
+        64 3 (sliceStart false) (indexValue (wmod 4)) false rfl rfl rfl (by decide) SH hm
+      exact rejected
+
+/-- Literal-empty succeeds; the nonempty returned object differs from either
+old child and supports exact endpoint observations without any public cutoff. -/
+theorem source_bool_slice_native_boundaries :
+    (sliceHeap true).1.len (sliceHeap true).2 .dyn=0 ∧
+    (sliceHeap false).1.len (sliceHeap false).2 .dyn=2 ∧
+    (sliceHeap false).1.index (sliceHeap false).2 .dyn (indexValue (wmod 1))=some true ∧
+    (sliceHeap false).1.index (sliceHeap false).2 .dyn (indexValue (wmod 2))=none ∧
+    MObj.elems .dyn ((sliceHeap false).1.get (sliceHeap false).2)≠MObj.elems .dyn ((sliceHeap false).1.get (left.wk copyExt)) ∧
+    MObj.elems .dyn ((sliceHeap false).1.get (sliceHeap false).2)≠MObj.elems .dyn ((sliceHeap false).1.get (right.wk copyExt)) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have keep : Heap.Keeps copyExt hp (sliceHeap false).1 := (source_bool_slice_native_client .legacy 0 false).2.1
+    refine ⟨?_,?_,?_,?_,?_,?_⟩
+    · rw [Heap.len,sliceElems];rfl
+    · rw [Heap.len,sliceElems];rfl
+    · change (MObj.elems .dyn ((sliceHeap false).1.get (sliceHeap false).2))[(indexValue (wmod 1)).1.toNat]?=some true
+      rw [sliceElems];rfl
+    · change (MObj.elems .dyn ((sliceHeap false).1.get (sliceHeap false).2))[(indexValue (wmod 2)).1.toNat]?=none
+      rw [sliceElems];rfl
+    · rw [sliceElems,keep left,MObj.elems_wk,left_values];decide
+    · rw [sliceElems,keep right,MObj.elems_wk,right_values];decide
+
+
+/-- Actual reached fresh-reference reads disagree with a retained old alias;
+Source index panic remains distinct from slice-bound revert[]. -/
+theorem source_bool_slice_native_reads (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G p) sliceFrame (fuel+3) sliceExpr).run (sliceInput false)=
+      (.ok (.val (.memRef rfl 3)),sliceOut false) ∧
+    (Source.memElem (E := E) 3 1 .bool).run (sliceOut false)=(.ok (.bool true),sliceOut false) ∧
+    (Source.memElem (E := E) 3 2 .bool).run (sliceOut false)=(.error (.revert (Source.panicData .index)),sliceOut false) ∧
+    (Source.memElem (E := E) 0 1 .bool).run (sliceOut false)=(.ok (.bool false),sliceOut false) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨run,keep,old,new,mok,ids,elems,oldLeft,oldRight,tag,child,tables,locals,effects⟩ := source_bool_slice_native_client p fuel false
+    have fresh : (sliceOut false).2.heap.get 3=some ⟨SB,sourceBoolMemory [false,true]⟩ := by
+      unfold SourceBoolMemoryAt at new
+      rw [elems] at new
+      exact new
+    exact ⟨run,source_bool_read (sliceOut false) 3 [false,true] fresh 1 (by decide),
+      source_bool_bounds (sliceOut false) 3 [false,true] fresh 2 (by decide),
+      source_bool_read (sliceOut false) 0 [true,false,false] rfl 1 (by decide)⟩
+
+/-- Ordered INITIAL and reached Source object records, actual operand locals,
+heap counters and all typed identities. No emitted-word state is supplied or
+claimed: this component realizes existing Source and intrinsic heap allocation. -/
+theorem source_bool_slice_native_vectors (empty : Bool) :
+    [(sliceInput empty).2.heap.get 0,(sliceInput empty).2.heap.get 1,(sliceInput empty).2.heap.get 2,(sliceInput empty).2.heap.get 3]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SS,data 0⟩,none] ∧
+    (sliceInput empty).2.heap.next=3 ∧ (sliceOut empty).2.heap.next=4 ∧
+    (sliceInput empty).1.get (.here : Source.Idx SliceCtx (.array .calldata .bool none))=.cdRef rfl 64 3 ∧
+    (sliceOut empty).1.get (.there .here : Source.Idx SliceCtx (.int .u256))=sourceUint (sliceStart empty) ∧
+    (sliceOut empty).1.get (.there (.there .here) : Source.Idx SliceCtx (.int .u256))=sourceUint sliceFinish ∧
+    [(sliceHeap empty).2.id,(parent.wk copyExt).id,(left.wk copyExt).id,(right.wk copyExt).id]=[3,2,0,1] ∧
+    [(sliceHeap empty).1.len (left.wk copyExt) .dyn,(sliceHeap empty).1.len (right.wk copyExt) .dyn,(sliceHeap empty).1.len (sliceHeap empty).2 .dyn]=
+      [3,3,(if empty then 0 else 2)] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,?_⟩
+    have keep : Heap.Keeps copyExt hp (sliceHeap empty).1 := Heap.keeps_alloc hp (sliceObject empty)
+    rw [keep.len left .dyn,keep.len right .dyn]
+    simp only [Heap.len,left_values,right_values,sliceElems]
+    cases empty <;> rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bool_slice_native_reads
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bool_slice_native_vectors
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bool_slice_native_client
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_rejections' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bool_slice_native_rejections
+/-- info: 'Solidity.Backend.MemoryOps.Physical.StructChildControls.source_bool_slice_native_boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bool_slice_native_boundaries
+
 end Solidity.Backend.MemoryOps.Physical.StructChildControls

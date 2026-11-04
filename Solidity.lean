@@ -331,6 +331,7 @@ import Solidity.Backend.MemoryOps.SourceAssignment
 import Solidity.Backend.MemoryOps.SourceCalldataBinding
 import Solidity.Backend.MemoryOps.SourceCalldataBoolSlice
 import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceControls
+import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceNative
 import Solidity.Backend.MemoryOps.SourceCalldataBoolSliceSequence
 import Solidity.Backend.MemoryOps.SourceCalldataCopy
 import Solidity.Backend.MemoryOps.SourceCalldataMixedCopy
