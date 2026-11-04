@@ -1978,6 +1978,8 @@ import Solidity.Lowering.V08.LiteralFailureStatementReasonControls
 import Solidity.Lowering.V08.LiteralFailureStorageDecode
 import Solidity.Lowering.V08.LiteralFailureStorageDecodeControls
 import Solidity.Lowering.V08.LiteralFailureStorageSuccessControls
+import Solidity.Lowering.V08.LiteralFailureStringConversion
+import Solidity.Lowering.V08.LiteralFailureStringConversionControls
 import Solidity.Lowering.V08.LiteralFailureStringInterleaving
 import Solidity.Lowering.V08.LiteralFailureStringInterleavingControls
 import Solidity.Lowering.V08.LiteralFailureStringPrefix

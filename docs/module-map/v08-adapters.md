@@ -481,3 +481,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Solidity/Lowering/V08/LiteralFailureConvertedFields.lean` | Input-only converted-argument evidence; actual copied values, reached field evidence, exact allocation count and custom-error execution. |
 | `Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean` | Two interleaved calldata copies into an existing error signature, complete copied objects/packets, old aliases and zero/one/two-copy timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringConversion.lean` | Published allocation transport for typed fields/argument evidence; actual calldata-string copy before converted tails and custom errors. |
+| `Solidity/Lowering/V08/LiteralFailureStringConversionControls.lean` | StringMixed execution with real string/byte tags, old aliases, copied packets and zero/one/two-copy timeout controls. |
