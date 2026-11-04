@@ -272,6 +272,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean` | Both-pipeline bitwise clients, width/horizon negatives and complete ordered native observations. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrder.lean` | Published int256 Source-local less-than and greater-or-equal results against fetched SLT and SLT/ISZERO bodies. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrderControls.lean` | Both-pipeline signed comparison clients, equality/minimum/horizon boundaries and ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrder.lean` | Published uint256 Source-local LT/GT results to actual charged fetched bodies via existing Scalar certificates. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrderControls.lean` | Direct combined-law clients, uint256 boundaries, short horizons and complete ordered native observations. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 

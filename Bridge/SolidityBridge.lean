@@ -270,6 +270,8 @@ import SolidityBridge.RoadmapV15.P10.PublishedRemainder
 import SolidityBridge.RoadmapV15.P10.PublishedRemainderControls
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrder
 import SolidityBridge.RoadmapV15.P10.PublishedSignedOrderControls
+import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrder
+import SolidityBridge.RoadmapV15.P10.PublishedUnsignedOrderControls
 import SolidityBridge.RoadmapV15.P10.PushDecoderAgreement
 import SolidityBridge.RoadmapV15.P10.PushDecoderControls
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
