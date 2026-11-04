@@ -351,3 +351,7 @@ Controls use an actual declared bytes root and derive fixture-cell reads for eve
 ## Source string copies
 
 `SourceStringsInterface.lean` states the complete existing Source string-copy certificate family from actual persistent typed length/payload cells. It shares the byte-reader input boundary, without assuming aggregate success, string/bytes admission conversion or emitted execution.
+
+`sourceStringLoad_run` consumes the proved Source byte range/length reader in the existing string load branch, preserving exact byte order and input state. `sourceStringCopies` inhabits the complete SourceStorageCopyCertificate family through the existing fresh root allocator. This shares proof infrastructure, not a bytes-to-string Source admission rule or new interpreter.
+
+A separately declared string root stores distinct bytes[17,23]. Actual copied string payload order and empty copying are observed; old Boolean/nonheap state is retained, reverse[23,17] is rejected and insufficient horizon times out before allocation. Independent read-only finder and skeptic passed without Lean/server/build/writes. All three files have zero MCP errors/warnings; direct proofs passed. Standalone negative-control probe passed decide. Persistent Source inputs and uint256 length range remain explicit; physical storage layout, emitted compilation, allocation-size/gas failures, broader nested copying and full G33/G35 remain open. Checkpoint gates and scoped axiom reports are required before acceptance.

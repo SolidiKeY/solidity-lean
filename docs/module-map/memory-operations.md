@@ -207,3 +207,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceBytes.lean` | Actual arbitrary-payload Source byte traversal, length/load derivation from typed stored cells and fresh-root copy certificate. |
 | `Backend/MemoryCopies/SourceBytesControls.lean` | Declared populated persistent bytes storage, generic fixture-cell read proof, 0/2/64 copies, old/nonheap frame, wrong payload and horizon refusal. |
 | `Backend/MemoryCopies/SourceStringsInterface.lean` | Complete Source string-copy family over actual persistent typed length and byte cells, reusing the byte-reader boundary. |
+| `Backend/MemoryCopies/SourceStrings.lean` | Actual Source string payload load and complete fresh-root copy family through the proved byte reader and existing allocator. |
+| `Backend/MemoryCopies/SourceStringsControls.lean` | Separately declared populated/empty string copies, distinct byte order, old/nonheap frame, reversal rejection and horizon refusal. |
