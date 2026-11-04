@@ -401,3 +401,23 @@ and the two execution layers and remaining native/Source boundary are clear.
 from an initial P6 image, preserving exact bytes, extent and saved stack with
 state/continuation accounting. Gas and stack capacity remain explicit; this
 is a primitive bridge, not whole compiler/Source adequacy.
+
+`AccessBridge/MemorySizeExecution.lean` composes published P10 `msize_agreement`
+with the existing P6 image payload theorem. From initial representation, gas
+and stack room it derives the actual fetched reached state, X continuation,
+exact observed `32*highWaterWords`, complete saved stack and preserved frame
+image. It also retains memory bytes, exact two-gas charge, PC increment and
+execution count. The image is proved fieldwise since accounting fields change;
+no desired reached state or successful execution is assumed. Inherited charged
+contracts keep failures and fuel budgets visible. Controls inhabit either
+pipeline, retain two unequal saved words, observe 64 bytes despite reserved
+capacity 96, permit arbitrarily enlarged reserves and reject wrong active
+extent and short fuel. This completes this primitive linkage only: other
+memory/copy/store payloads, general compiler selection and Source/world adequacy
+remain open. The physical-write counterexample and all producer boundaries are
+unchanged. Bridge diagnostics remained unavailable; focused serial importing
+builds checked the implementation after stopping its server.
+Independent read-only finder and skeptic reviews passed with no findings.
+They confirmed initial-image-derived execution, exact post-image/accounting,
+standard word-fit handling, inhabited either-pipeline/unbounded-reserve controls
+and preservation of inherited failures and remaining compiler/Source boundaries.

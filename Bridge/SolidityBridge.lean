@@ -25,6 +25,9 @@ import SolidityBridge.AccessBridge.MemoryLoadExtent
 import SolidityBridge.AccessBridge.MemoryLoadExtentControls
 import SolidityBridge.AccessBridge.MemoryLoadExtentInterface
 import SolidityBridge.AccessBridge.MemoryLoadInterface
+import SolidityBridge.AccessBridge.MemorySizeExecution
+import SolidityBridge.AccessBridge.MemorySizeExecutionControls
+import SolidityBridge.AccessBridge.MemorySizeExecutionInterface
 import SolidityBridge.Adversary
 import SolidityBridge.AdversaryPolicy
 import SolidityBridge.Arith

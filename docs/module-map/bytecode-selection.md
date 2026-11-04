@@ -139,3 +139,6 @@
 | `Bridge/SolidityBridge/AccessBridge/HeadSizeInterface.lean` | Fetched charged native calldata extent to numeric short-head consumer signature. |
 | `Bridge/SolidityBridge/AccessBridge/HeadSize.lean` | Published P10 fetched extent and whole-State/X transport consumed by the existing numeric head-check compiler. |
 | `Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean` | Inhabited charged native execution, protected state, short input and word-size wraparound limitation controls. |
+| `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionInterface.lean` | Fetched charged MSIZE/P6 image-preserving execution and continuation contract. |
+| `Bridge/SolidityBridge/AccessBridge/MemorySizeExecution.lean` | Initial-image-derived MSIZE value, complete saved stack and preserved post-image, reusing P10 execution. |
+| `Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionControls.lean` | Either-pipeline inhabited execution, arbitrary reserved capacity, wrong-active and short-fuel controls. |
