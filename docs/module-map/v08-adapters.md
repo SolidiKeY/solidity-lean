@@ -435,6 +435,9 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/UnsignedMul/Execution.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/UnsignedMul/Selection.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/UnsignedMul/WideControls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/SignedMod/Controls.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/SignedMod/Selection.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/SignedMod/Source.lean` | Bounded precompile-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

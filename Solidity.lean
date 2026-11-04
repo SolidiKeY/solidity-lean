@@ -628,6 +628,9 @@ import Solidity.Backend.PrimitivePackets.SignedDiv.Controls
 import Solidity.Backend.PrimitivePackets.SignedDiv.Execution
 import Solidity.Backend.PrimitivePackets.SignedDiv.Origin
 import Solidity.Backend.PrimitivePackets.SignedDiv.Selected
+import Solidity.Backend.PrimitivePackets.SignedMod.Controls
+import Solidity.Backend.PrimitivePackets.SignedMod.Selection
+import Solidity.Backend.PrimitivePackets.SignedMod.Source
 import Solidity.Backend.PrimitivePackets.SignedSub.Controls
 import Solidity.Backend.PrimitivePackets.SignedSub.Execution
 import Solidity.Backend.PrimitivePackets.UnsignedMul.Execution
