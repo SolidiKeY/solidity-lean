@@ -216,3 +216,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceStoredFields.lean` | Actual primitive/bytes/string load families, heterogeneous storage field traversal and layout-indexed fresh Source struct copying with exact counts. |
 | `Backend/MemoryCopies/SourceStoredFieldsControls.lean` | Declared mixed struct storage copy with scalar42, distinct bytes/string contents, fresh child/parent identities, old/nonheap state and refusal controls. |
 | `Backend/MemoryCopies/SourceStoredReferencesInterface.lean` | Reference closure obligations for existing Source stored-value certificates: nested structs, empty dynamic arrays and byte arrays with exact counts/horizons. |
+| `Backend/MemoryCopies/SourceStoredReferences.lean` | Proved closure of existing Source stored-value certificates for nested structs, empty dynamic arrays and byte arrays. |
+| `Backend/MemoryCopies/SourceStoredReferencesControls.lean` | Declared nested struct identities/payloads, empty recursive child arrays, old-state framing and negative Source controls. |
