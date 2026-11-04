@@ -273,3 +273,14 @@ skeptic reviews pass, including the distinction between closed-fragment
 controls and the still-open PendingG24 link from VY3's P20 producer. No
 PendingRepresentedSuccess field is discharged. Full lane validation still
 requires matching verified cache readiness under the unchanged resource rules.
+
+## H30 bounded prerequisite attempt
+
+H30 authorized one additional serial prerequisite build with a180-second hard
+bound. The unchanged DecisionHashesChecks build was stopped by its preattached
+RAM safety guard before that deadline and above the4GiB reserve floor. No
+proof error or timeout is reported, but no target artifact or matching cache
+mapping was produced. Full validation did not start. The allowance is used,
+prior red receipts are retained and no unchanged retry follows. A distinct
+resource repair requires the separate decision specified by H30; no theorem,
+gate or proof budget is weakened.
