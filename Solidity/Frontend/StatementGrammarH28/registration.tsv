@@ -53,3 +53,4 @@ Solidity.Frontend.StatementGrammarH28.FixtureControls.Case41	Finite constructor 
 Solidity.Frontend.StatementGrammarH28.FixtureControls.Case42	Finite constructor fixture kernel certificate and inventory
 Solidity.Frontend.StatementGrammarH28.FixtureControls.Case43	Finite constructor fixture kernel certificate and inventory
 Solidity.Frontend.StatementGrammarH28.FixtureControls.Case44	Finite constructor fixture kernel certificate and inventory
+Solidity.Frontend.StatementGrammarH28.ElsePosition	Unique intrinsic nearest-else attachment positions

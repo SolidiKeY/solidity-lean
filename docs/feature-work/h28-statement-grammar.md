@@ -584,3 +584,65 @@ remaining universal compound fuel coverage, full repository gates and
 whole-scope acceptance/reviews remain unfinished. SG-CEX-01 remains
 OPEN/REFUTED. The persistent original goal continues without a new premise,
 producer change, exclusion, VM or replacement goal.
+
+
+## Checkpoint H: unique intrinsic nearest-else positions
+
+ElsePosition.lean refines the existing openIf contract with NearestSlot,
+a relation indexed by an existing Syn statement and a list of observed
+statement edges. No replacement syntax or expression traversal is introduced.
+The five relation alternatives are a missing-else root whose then branch is
+closed, descent through an open then branch, descent through an existing
+else branch, a for body and a while body. Unlike OpenSpine.missing, the root
+alternative cannot stop before a nearer exposed missing else inside then.
+
+nearestSlot_unique proves arbitrary two related paths equal. slotOfOpen
+constructively handles every statement constructor; nearestSlot_exists_iff
+and nearestSlot_unique_exists give existence exactly when openIf=true and
+unique existence respectively. prec_else_no_then_slot proves the existing
+prec=true contract forbids every then-branch slot at an else-bearing if.
+These are universal results for intrinsic statement positions, independent
+of expression uniqueness. They do not prove token-level association or parser
+uniqueness, and do not imply that every arbitrary raw Syn tree satisfies prec.
+
+Controls inhabit all five relation constructors, including a for/while/then
+path. A two-missing-if tree has nearest path [thenBranch], and the outer []
+path is proved impossible. Closing the inner if exposes the outer root slot;
+an existing else redirects the path into its else branch. Arbitrary block
+and do-while bodies hide internal slots, and the wrong outer attachment is
+kernel-checked to fail the existing precedence contract. All relation clauses
+and all 13 statement roots are covered by the universal source definitions
+and proofs; these are not only finite fixture assertions.
+
+| Gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag Solidity/Frontend/StatementGrammarH28/ElsePosition.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793806453197594452 |
+| runtime.py build Solidity.Frontend.StatementGrammarH28.ElsePosition | pass; 2.04s timed wall, RSS 429144 KiB | /workspace/h28-statement-grammar-evidence/run-1793806489384777736 |
+| runtime.py diag tests/h28-sol/statement-grammar/ElsePositionControls.lean | pass | /workspace/h28-statement-grammar-evidence/run-1793806540601075377 |
+| runtime.py gate Solidity/Frontend/StatementGrammarH28/ElsePosition.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793806563294152781 |
+| runtime.py gate tests/h28-sol/statement-grammar/ElsePositionControls.lean | pass, no warnings | /workspace/h28-statement-grammar-evidence/run-1793806577242791476 |
+
+nearestSlot_unique has no axioms. The existence equivalence, unique existence
+and precedence exclusion use only propext and Quot.sound. Exact signatures
+and all printed control axiom sets are saved in the gate logs. No custom
+axiom, unsafe/native_decide, expression premise or budget raise was added.
+The first attempt (run-1793806432901494391) did not generalize the competing
+path in the uniqueness induction; the final proof generalizes it explicitly.
+The failed receipt is retained. Separate read-only finder and skeptic pass
+source and all controls, without using Lean/server/builds. Registration is
+local only.
+
+Checkpoint G also has exact-head passing constructor and KeySort gates at
+adcaa8105854cfc09e5536890912a1530d020a7b, with actual Lean 4.24.0 and
+Lake 5.0.0-src+797c613. Its runtime-g.json records permitted KeySort PASS
+before RUNTIME_GATE_PASS. The invalid KeySort path setup refusal at
+run-1793806282988676952 is retained; the verified Solidity/KeySort.lean
+passed at run-1793806303988860870. That is a per-file runtime receipt, not
+a full repository gate claim.
+
+Remaining work: arbitrary syntax/atom balance, mixed-list splitting,
+token-root discrimination and token-level conditional uniqueness/association,
+remaining universal compound fuel coverage, full repository gates,
+whole-scope reviews/acceptance and final handoff. The intrinsic attachment
+position obligation is now proved; its token-level counterpart is not.
+SG-CEX-01 remains OPEN/REFUTED, and the original persistent goal stays active.
