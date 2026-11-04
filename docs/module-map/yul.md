@@ -87,3 +87,5 @@
 | `Yul/LocalBoolRepresentation.lean`, `Yul/Checks/LocalBoolRepresentation.lean` | Exact-word Boolean representation relation and all-fuel four-form expression congruence; dirty-word/projection/error controls. |
 
 | `Yul/LocalBoolControlRepresentation.lean`, `Yul/Checks/LocalBoolControlRepresentation.lean` | All-fuel exact-word six-form control congruence; skipped writes, dirty observations and retained timeout updates. |
+
+| `Yul/LocalBoolItemRepresentation.lean`, `Yul/Checks/LocalBoolItemRepresentation.lean` | All-fuel Boolean initializer/item exact-word congruence, retaining reached contexts and halt reasons. |

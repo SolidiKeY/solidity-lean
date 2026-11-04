@@ -1056,3 +1056,23 @@ No Source or runtime definitions change.
 Independent read-only finder/skeptic reviews found no issues. Both per-file
 diagnostics report zero errors; eight scoped axiom reports contain only Lean
 standard axioms. Final lane gates and external compiler/EVM tests remain open.
+
+
+### Context-growing Boolean item congruence
+
+`LocalBoolItemRepresentation.finish`, `initialization` and `items` prove
+exact-word congruence for the existing Boolean initialization and item-list
+executions. The result relations keep normal output contexts and each halted
+execution's exact reached context, halt reason, related full locals and equal
+world. The item theorem quantifies over every existing supported body, input
+and output context, fuel and related input pair.
+An inhabited declaration-then-negating-assignment witness has seven controls:
+completion, timeouts before/after declaration, zero fuel, refused dirty normal
+projection, existing error projection, and refusal to relate halts at different
+reached contexts. Proofs use bounded unfolding, not higher recursion budgets.
+These proof-only relations do not change evaluators or imply clean? projection
+equivalence, admission/readback or general P16 embedding.
+
+Independent read-only finder/skeptic reviews found no issues. Both new files
+have zero diagnostic errors and passing per-file checks. Ten scoped axiom
+reports contain only Lean standard axioms; final lane gates remain open.
