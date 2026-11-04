@@ -1943,6 +1943,8 @@ import Solidity.Lowering.V08.LiteralFailureEffectDecodeControls
 import Solidity.Lowering.V08.LiteralFailureEncodedRethrow
 import Solidity.Lowering.V08.LiteralFailureEncodedRethrowControls
 import Solidity.Lowering.V08.LiteralFailureLowering
+import Solidity.Lowering.V08.LiteralFailureMemoryReason
+import Solidity.Lowering.V08.LiteralFailureMemoryReasonControls
 import Solidity.Lowering.V08.LiteralFailurePackedBytes
 import Solidity.Lowering.V08.LiteralFailurePackedBytesControls
 import Solidity.Lowering.V08.LiteralFailureReturnSlots
