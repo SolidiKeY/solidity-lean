@@ -840,3 +840,13 @@ postincrement's old allocation length from its new local, preserve increment on
 size panic, and retain a condition write before later timeout. This is contextual
 execution transport, not arbitrary intermediate-reference capture or target
 allocator refinement; all existing horizons and outcomes remain unchanged.
+
+`AllocationPointer` identifies the physical word of a new allocation with its
+actual logical Source reference using existing checked pointer decoding.
+Coverage derives from old/new inventory preparation. The existing pointer-field
+writeback equals the actual new-expression/getV/writeLoc sequence, preserving
+writer errors and owner safety at every original heap typing. Controls use a
+real fourth object (logical ID 3, physical word 288), pointer-array aliases, a
+bounds panic retaining the allocation, and interior/wrong-type preparation None.
+This does not prove a target sink-word store or full changed-memory reconstruction,
+which remain separate physical-writeback obligations.

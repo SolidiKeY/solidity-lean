@@ -2838,6 +2838,8 @@ import Solidity.Yul.Views.AllocationInventory
 import Solidity.Yul.Views.AllocationInventoryControls
 import Solidity.Yul.Views.AllocationPhysicalControls
 import Solidity.Yul.Views.AllocationPhysicalView
+import Solidity.Yul.Views.AllocationPointer
+import Solidity.Yul.Views.AllocationPointerControls
 import Solidity.Yul.Views.AllocationRefresh
 import Solidity.Yul.Views.AllocationRefreshControls
 import Solidity.Yul.Views.AllocationSequence
