@@ -1,3 +1,7 @@
+# Preserved task lists after published adoption
+
+## Existing owned list
+
 # Routine proof queue — current G21 follow-up
 
 Earlier superseded V2/P10 notes remain preserved in refs/checkpoints/v13-before-c467-rebase and the previous sealed exports. They are not silently re-adopted here.
@@ -36,3 +40,29 @@ preservation through an abstract run_from_observation lemma, and word_decoder
 isolates actual Source bool decoding before the final evaluator rewrite.
 No Terra work remains for this item. Original failed attempts/seal remain
 immutable; generic and all-profile/runtime obligations are unchanged.
+
+
+## Published list
+
+# Routine handoff status
+
+## NJ1 — completed for the fixed fixture
+
+The exact original decoder equality, packet and compilation/source/model
+endpoints are now kernel-proved in the actual module
+`SolidityBridge.Yul.StructuredSwitchJsonKernelAttachment`, namespace
+`SolidityBridge.Yul.StructuredSwitchJson.KernelControls`:
+
+- `raw_nested_parsed`: `blockAux 20 ast = .ok tree`, with no parser premise.
+- `raw_nested_packet`: the original `Packet [] 20 16 (Controls.fixture "1")`.
+- `raw_nested_compiles`: exact `checkCompile` equality returning that packet.
+- `raw_nested_source`: actual closed-word execution at horizon16.
+- `raw_nested_low_fuel`: exact compiler horizon2 refusal for the same fixture.
+- `raw_nested_model`: arbitrary mathematical machine/caller, with the real
+  represented-stack premise retained.
+
+Bounds20/16, dirty literal, fixture and expected prefix21/999/42/17 are unchanged.
+Earlier failed attempts are preserved as evidence. No NJ1 proof remains pending;
+this closes only the fixed-fixture obligation, not generic JSON correctness,
+Solidity admission, Source/G24/native adequacy or the full original lane.
+No earlier excluded Terra tasks or completed work are restored here.
