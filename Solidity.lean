@@ -93,6 +93,9 @@ import Solidity.Backend.AbiEntry.UIntBindingInterface
 import Solidity.Backend.AbiEntry.UnsignedGate
 import Solidity.Backend.AbiEntry.UnsignedGateControls
 import Solidity.Backend.AbiEntry.UnsignedGateInterface
+import Solidity.Backend.AbiEntry.ValueCheckedBodies
+import Solidity.Backend.AbiEntry.ValueCheckedBodiesControls
+import Solidity.Backend.AbiEntry.ValueCheckedBodiesInterface
 import Solidity.Backend.AbiEntry.ValueGate
 import Solidity.Backend.AbiEntry.ValueGateBody
 import Solidity.Backend.AbiEntry.ValueGateBodyControls

@@ -199,3 +199,6 @@
 | `Backend/AbiEntry/BoolBindingBodyInterface.lean` | One-artifact Boolean validation, binding and typed-body compiler contract. |
 | `Backend/AbiEntry/BoolBindingBody.lean` | Actual whole/body selection and ordered raw Boolean entry/body execution. |
 | `Backend/AbiEntry/BoolBindingBodyControls.lean` | Both-bit allocating bodies, decoder/body failure distinction and saved-state controls. |
+| `Backend/AbiEntry/ValueCheckedBodiesInterface.lean` | Ordered value-check/uint-or-Boolean entry/body compiler certificates. |
+| `Backend/AbiEntry/ValueCheckedBodies.lean` | Public combined compilation, early value refusal and raw typed-body agreement. |
+| `Backend/AbiEntry/ValueCheckedBodiesControls.lean` | Payable/zero/nonzero ordering, malformed locals, strict decoding and body failure controls. |

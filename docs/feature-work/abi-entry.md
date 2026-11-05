@@ -1098,3 +1098,30 @@ retained rather than relabeled.
 `ValueCheckedBodiesInterface.lean` specifies value checking before uint/Boolean
 decoding, binding and typed body execution, including early rejection without
 any calldata-local representation premise.
+
+`ValueCheckedBodies.lean` composes the existing `ValueGateBody` with the proved
+uint and Boolean entry/body programs through the same public compiler. Both
+families export actual selection, ordered execution and raw typed-value/body
+agreement. Execution checks payability/value before the head, primitive word,
+parameter declaration and body. Early rejection quantifies arbitrary machine
+memory with no word/size representation facts, so it prevents all calldata-local
+reads. Allowed calls retain the existing raw decoding acceptance and the entire
+body outcome. Raw word/local agreement keeps explicit representation and
+`fuel + 2`; no decoded payload, target run or body result is assumed.
+
+Controls execute the combined artifacts for payable entries at every represented
+value, zero-value non-payable entries and nonzero non-payable entries with all
+locals malformed. Passing the value check still rejects dirty uint high bits
+and dirty Boolean two. Real typed bodies copy the uint argument or branch on
+the Boolean argument, while an actual reverting body remains rejected after
+successful decoding. Exact input/argument/other-cell, storage, balance, callvalue
+and saved-stack observations are retained. Focused builds, per-file diagnostics
+and individual standard-only axiom guards pass. Independent read-only finder
+and skeptic reviews found no semantic issues.
+
+Payability remains an explicit flag; existing `SourcePayable` supplies Source
+metadata flags, but this increment does not establish Source declaration,
+signature or body association. Native loading/frame realization, signed and
+aggregate bindings, multiparameter decoding, full profile/dispatch-entry
+composition and physical failure bytes remain open. G46.02, the writer
+counterexample, fixture replay and full assignment gates remain pending.
