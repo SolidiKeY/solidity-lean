@@ -449,3 +449,12 @@ workload; durable-guard-next.py corrects that path and the label for future
 attachments. The current attachment passed with ample reserve. Original
 executed code/logs are preserved; no full-pass or continuous-coverage claim
 is inferred. Full validation remains active and final review is pending.
+
+
+The Docker-hosted monitor survived the next turn boundary. Corrected v2
+now executes durable-guard-next.py with accurate reattachment labeling and
+fail-closed high-memory handling. It reached READY before the superseded
+monitor container was stopped; the workload was uninterrupted. Independent
+read-only skeptic review confirms these narrow recovery fixes. This closes
+the monitor implementation repair, not the historical gaps or full gate.
+The unchanged full validation continues; no completed runtime gate is claimed.
