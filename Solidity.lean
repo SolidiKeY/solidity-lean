@@ -1709,6 +1709,8 @@ import Solidity.Frontend.QualifiedUnits.References
 import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.QualifiedUnits.SignatureGap
 import Solidity.Frontend.QualifiedUnits.SignatureHiding
+import Solidity.Frontend.QualifiedUnits.SignatureMemberControls
+import Solidity.Frontend.QualifiedUnits.SignatureMembers
 import Solidity.Frontend.QualifiedUnits.SignatureNormalization
 import Solidity.Frontend.QualifiedUnits.Specification
 import Solidity.Frontend.QualifiedUnits.TypePaths

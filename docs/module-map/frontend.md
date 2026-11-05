@@ -162,3 +162,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/LiteralGrammarH28/HexPins.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
 | `SolcValidation/DataLayout.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 | `SolcValidation/DataResolution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureMembers.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
