@@ -27,6 +27,7 @@ can never be read as one under another.
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
 | O12 | reachable starting states: deployment plus a finite sequence of entry calls (`ValidStart (.reachable M)`); Lean-only | done |
+| O11 | caller models `none < staticOnly < nonReentrant R < any` (`ValidM`), Lean-only | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -784,3 +785,65 @@ formula. Deployment runs deterministically under every caller model. The
 interface `M` is a model obligation (`Contract` keeps no visibility). The
 stub's adaptation to O11's lattice is listed in
 [calculus-modes.md](feature-work/calculus-modes.md#handoffs).
+## O11. Caller models (Lean-only)
+
+**Decision.** What a callee that calls back may do is an argument of the
+validity statement, `ValidM M ts φ` (`⊨ᶠₘ[M; ts] φ`,
+`Calculus/CallerModel.lean`), beside the transfer semantics `ts`, which
+still says whether a `transfer` and a `send` call back at all. solkey has
+no such option: its two readings are the lattice's ends, and every
+existing statement (`ValidT`, `ValidC`, `⊨ᶠ`) keeps its meaning, so the
+SolKey test suite reads nothing new.
+
+| Model | A callee that calls back may | Reading |
+|---|---|---|
+| `none` | not call back at all; it answers by the transaction's oracle | `Fml.Valid` (`validM_none`); `ValidT (.noCallback I)` with no `try` or value call (`validM_none_iff_noCallback`) |
+| `staticOnly` | call back by `STATICCALL` only (`CallMode.static`, `Mode.readOnly`): answer anything, change nothing | resumption leaves storage, ledger, balance as they were (no value arrives, forced or not) |
+| `nonReentrant R` | call back into `R`'s entries, in sequence (`Reentry.Reach`), but into one its reentrancy lock guards only while the lock is not held (`Reentry.Step`); each call a callback run of its body, whose own callees may leave any state keeping the invariant | resumption reachable by those calls |
+| `any` | leave any state keeping the invariant | `ValidT ts` (`validM_any`) |
+
+The runs `ExecSM M J` are `ExecS J` with `CallerModel.Allows` a premise
+more at each resumption (`transferResume`, `sendResume`, `tryOk`); the
+invariant's checks on exit and on resumption are unchanged.
+`Calculus/CallerModelRun.lean` proves a run under `M` a run under every
+model allowing more (`ExecPM.mono`), `any`'s runs exactly the callback runs
+(`ExecPM.toExecP`, `ExecP.ofExecPM`), and the deterministic run a run under
+every model (`Prog.execM_run`).
+
+**The lock judgment.** A `Reentry` lists the entries a callee may call back
+(`body : Entry → Prog C [] []`), the ones the lock guards (`guarded`), and
+when the lock is held (`held`, of the storage). `Reentry.Guards` states
+that a guarded entry never completes while the lock is held;
+`Reentry.reachAny_iff` proves that then, the lock held and no unguarded
+entry releasing it (`KeepsHeld`), a callee calling back into *any* entry
+reaches exactly what `nonReentrant` allows. `ValidM` does not ask for
+`Guards`: `R` states which entries carry the modifier, and `Guards` is
+what makes that claim true of their bodies (`setX_guards`).
+
+**Weakening** (`ValidM.weaken`, `Calculus/CallerModelValid.lean`): `M ≤ M'`
+and `φ` with its modalities in positive positions (`Fml.posModal true`,
+which every `pre → [ P ] post` with a first-order `pre` has) give
+`ValidM M' ts φ → ValidM M ts φ`; `ValidM.of_validT` reads a `ValidT`
+proof (`sol_prove`'s, O3) under every model. A modality in a negative
+position turns the inclusion of runs around, so such formulas are excluded.
+
+**Strictness** (`Examples/Tactics/CallerModel.lean`): one formula per
+adjacent pair, valid under the weaker model and refuted by a typed run
+under the stronger, the two `nonReentrant` pairs with one `R` (a guarded
+`setX()`): refuted with the lock free, valid with it taken. `none <
+staticOnly` separates by the invariant every calling-back model owes on
+exit, not by the callee's power; the sharper witness (two equal calls
+answered alike only under `none`, by the oracle) is true but `sol_close`
+does not prove it, as the calculus forgets the oracle's correlation.
+
+**Not done.** No calculus reads `ValidM` at `staticOnly` or `nonReentrant`:
+a proof there goes through `ValidT` (`ValidM.of_validT`), through `Fml.Valid`
+when no callback is left, or by the runs (`Theory/CallerModel/Static.lean`,
+a model that changes nothing). A re-entrant call carries no value, and its
+own callees call back as under `any`, so an entry whose body pays or calls
+out lets `nonReentrant` reach any state keeping the invariant.
+`ExecSM .none` is not `none`'s reading (its `try` answers any data); read
+`none` by `Prog.run`. `staticOnly` is a model of the callee,
+not a reading of `ExtCall.mode` (H22): a `static` call still gets the
+reading the model gives every call.
+

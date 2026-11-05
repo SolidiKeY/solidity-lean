@@ -116,6 +116,7 @@ import Solidity.Examples.Tactics.CallbackRuns
 import Solidity.Examples.Tactics.CallbackStrategy
 import Solidity.Examples.Tactics.CallbackUnwk
 import Solidity.Examples.Tactics.CallbackWk
+import Solidity.Examples.Tactics.CallerModel
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.Chains
 import Solidity.Examples.Tactics.Checked
