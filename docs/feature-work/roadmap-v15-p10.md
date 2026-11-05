@@ -1915,3 +1915,7 @@ empty-stack refusals. Complete native records retain ordered code, stack, buffer
 calldata, accounts and initial accounts; each model preserves its own frame.
 Eight new axiom reports have exact guarded expectations. No full opcode,
 Source-origin, physical, world or Osaka adequacy obligation is closed.
+
+### Selected unsigned order
+
+The instruction-selection agreement now connects the published LT/GT certificates to the charged fetched step and its continuation. The input stack representation, numeric capacity, gas and fuel bounds remain explicit; account state, memory and both return-byte fields are preserved separately from the IR frame. Controls distinguish equal-low-byte words, equality and unsigned high-bit ordering, preserve the complete populated stack and state, and check gas-before-arity and fuel priority. This is primitive agreement, not Source, account-call or full Osaka adequacy.

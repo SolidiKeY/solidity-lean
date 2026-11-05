@@ -654,4 +654,110 @@ theorem flags_resource_order (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms flags_resource_order
+
+theorem lt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .lt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (a.toNat < b.toNat)))) 0 ∧
+    Scalar.run Selection.ltCertificate.code (a::b::spill)=some (Scalar.flag (decide (a.toNat < b.toNat))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (a::b::spill))=
+      .ok (nativeExpected .LT 3 a b (Scalar.flag (decide (a.toNat < b.toNat))) perm) ∧
+    EVM.X 2 #[] (F.input .LT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .LT 3 a b (Scalar.flag (decide (a.toNat < b.toNat))) perm) := by
+  have h := InstructionSelectionAgreement.lt #[] (F.site .LT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .LT a b (Scalar.flag (decide (a.toNat < b.toNat))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem gt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .gt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (a.toNat > b.toNat)))) 0 ∧
+    Scalar.run Selection.gtCertificate.code (a::b::spill)=some (Scalar.flag (decide (a.toNat > b.toNat))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (a::b::spill))=
+      .ok (nativeExpected .GT 3 a b (Scalar.flag (decide (a.toNat > b.toNat))) perm) ∧
+    EVM.X 2 #[] (F.input .GT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .GT 3 a b (Scalar.flag (decide (a.toNat > b.toNat))) perm) := by
+  have h := InstructionSelectionAgreement.gt #[] (F.site .GT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .GT a b (Scalar.flag (decide (a.toNat > b.toNat))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem order_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (1::257::spill))=
+      .ok (nativeExpected .LT 3 1 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (1::257::spill))=
+      .ok (nativeExpected .GT 3 1 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (17::17::spill))=
+      .ok (nativeExpected .LT 3 17 17 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (17::17::spill))=
+      .ok (nativeExpected .GT 3 17 17 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (BitVec.ofNat 256 (2^255)::1::spill))=
+      .ok (nativeExpected .GT 3 (BitVec.ofNat 256 (2^255)) 1 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (BitVec.ofNat 256 (2^255)::1::spill))=
+      .ok (nativeExpected .LT 3 (BitVec.ofNat 256 (2^255)) 1 0 perm) := by
+  exact ⟨(lt_client 1 257 perm).2.2.1,(gt_client 1 257 perm).2.2.1,
+    (lt_client 17 17 perm).2.2.1,(gt_client 17 17 perm).2.2.1,
+    (gt_client (BitVec.ofNat 256 (2^255)) 1 perm).2.2.1,
+    (lt_client (BitVec.ofNat 256 (2^255)) 1 perm).2.2.1⟩
+
+theorem order_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (257::1::spill))=
+      .ok (nativeExpected .GT 3 257 1 1 perm) ∧
+    (nativeExpected .LT 3 1 257 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .GT 3 257 1 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .LT 3 1 257 1 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .GT 3 257 1 1 perm).stack≠[u 1,u 513,u 258] ∧
+    (nativeExpected .LT 3 1 257 1 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x10,0] ∧
+    (nativeExpected .GT 3 257 1 1 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x11,0] ∧
+    (nativeExpected .LT 3 1 257 1 perm).pc=u 4 ∧
+    (nativeExpected .LT 3 1 257 1 perm).gasAvailable=u 9 ∧
+    (nativeExpected .LT 3 1 257 1 perm).execLength=42 ∧
+    (nativeExpected .LT 3 1 257 1 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .LT 3 1 257 1 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .LT 3 1 257 1 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .LT 3 1 257 1 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .LT 3 1 257 1 perm).accountMap=accounts ∧
+    (nativeExpected .LT 3 1 257 1 perm).σ₀=accounts := by
+  refine ⟨(gt_client 257 1 perm).2.2.1,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 1,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 1,u 258,u 513]≠[u 1,u 513,u 258];decide
+
+theorem order_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .LT 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 2 perm (257::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .LT 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.lt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms lt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.gt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms gt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_resource_priority
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
