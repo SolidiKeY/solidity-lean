@@ -554,6 +554,9 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 
 See [P8 admission](../feature-work/p8-admission.md).
 
+| `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSub.lean` | Published unchecked signed Source-local subtraction, canonical word and charged fetched SUB transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSubControls.lean` | Signed wrap boundaries, populated full observations and gas/stack/fuel negative controls. |
@@ -578,3 +581,4 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/PrimitivePackets/SignedCast/Target.lean` | Selected intrinsic execution with complete caller frame and separate SIGNEXTEND/Source-wrap equality. |
 | `Backend/PrimitivePackets/SignedCast/Agreement.lean` | Source origin through selected code under explicit initial local-family and full representation premises. |
 | `Backend/PrimitivePackets/SignedCast/CastControls.lean` | Populated narrowing/widening, boundary, both-pipeline and wrong-width/index/tail controls. |
+

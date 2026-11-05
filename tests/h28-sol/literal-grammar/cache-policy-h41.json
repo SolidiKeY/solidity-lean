@@ -1,0 +1,24 @@
+{
+  "policy": "H41",
+  "source": "Coordinator2026-11-05 user authorization accompanying9584f9e7",
+  "instruction": "Never run ship-cache.sh on a VM; leave verified packs with path+sha for coordinator pull.",
+  "supersedes": "Earlier H35 VMshipment instruction and Q-CACHE-01 route question",
+  "worker_action": "Verified24module pack path+sha supplied for coordinatorpull",
+  "delivery": "Coordinator-side; no import/delivery/freshness inferred",
+  "historical_question_record": [
+    {
+      "id": "Q-CACHE-01",
+      "sources": [
+        "Coordinator H35: ship caches using scripts/coord-tools/ship-cache.sh",
+        "Actual ship-cache preflight exit1: absent coordinator poll-state",
+        "Host/container transport configuration probes"
+      ],
+      "question": "How should the verified 24-module cache archive be delivered when this VM lacks ship-cache coordinator transport and lane configuration?",
+      "options": [
+        "Coordinator retrieval: fetch the verified archive from this VM and supply an import/delivery receipt; shipment remains pending until that receipt.",
+        "Configured VM shipment: provide receiver plus VMEXEC/catalog/lane configuration, then run the existing shipping tool and retain its receipt."
+      ],
+      "historical_prior_state": "asked asynchronously; no delivery route or receipt received"
+    }
+  ]
+}
