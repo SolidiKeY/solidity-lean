@@ -108,3 +108,4 @@ theorem HexBody.length_bounds {raw out : Bytes} (h : HexBody raw out) :
   | sep _ _ _ _ ih => simp only [List.length_cons]; omega
 
 end Solidity.Frontend.LiteralGrammarH28
+

@@ -446,3 +446,94 @@ close no proof obligation and grant no broader scope. Decisions c, c-prime,
 d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
 classes remain unknown; exact validity and hash premises remain unchanged.
 
+## Automation lane approvals (2026-10-31)
+
+For batch `solidity-automation-20261031`, VA1 records the exact human
+answers supplied in the originating chat and repeated in the worker launch:
+
+- AQ1 (start M7-next and the M8 leftovers): "Yes, start both lanes".
+- AQ2 (keep literal-loop unrolling and warn): "Yes, keep unrolling and warn".
+
+This authorizes VA1 AU01/AU02 and VA2 AU03/AU04 in isolated checkouts.
+VA1 owns Decision theorem/coverage/residue, AU02 pipelines, Decision example
+splits and M7-next documentation. It does not authorize AU05/AU06, compiler
+work, publication, pushing or merging. Decisions c, c′, d, e3′ and e3″ and
+the existing validity/hash premises remain unchanged. This approval record
+is setup evidence, not an implementation or validation claim.
+
+
+## VA1-Q1: human-authorized boundary revision (2026-11-01)
+
+Original AU02 requirement, retained for provenance: unconditional
+`Fml.Covered ⊆ Fml.inTarget` on program-free leaves. The retained kernel
+counterexample is committed at `8bbd5606e55f6ceadcbe611c2475370466d88ae9`.
+
+Exact question asked in coordinator `01a19286`:
+
+> VA1 kernel-checked a counterexample to the requested unconditional Covered implies inTarget inclusion. May it replace that false requirement with a precise certified boundary and retained counterexample, leaving both predicates unchanged? Independent work is already progressing.
+
+Exact direct human answer:
+
+> Authorize the certified boundary revision
+
+QuestionItemId:
+`["request_user_input_async","call_4a12e56cd98f422e8a2aec9a4282ef73",0]`.
+Durable original-batch receipt on the coordinator host:
+`decisions/20261101-approved-va1-decision/human-decision.json`.
+This worker records the direct human receipt supplied in the original thread;
+it does not claim that coordinator-host path is a local VM artifact.
+
+This supersedes only the false unconditional inclusion obligation. The revised
+obligation is a precisely stated, kernel-proved supported boundary, with explicit
+quantifiers/signatures, inhabited positive and negative controls, public
+proof/axiom reports, the exact supported class and what remains outside it.
+Both `Covered` and `inTarget` definitions remain byte-for-byte unchanged.
+The old inclusion is not presented as proved under a vacuous/circular or
+stronger precondition. No semantic/default/test/refusal/profile/pin/observation
+or budget change, new axiom or unfinished proof is authorized. Every other
+AU01/AU02/backfill/full-validation obligation remains. Earlier decisions,
+checkpoints, failures and seals are preserved; publication is not authorized.
+
+
+### VA1-Q2 / H6 performance-only authorization
+
+Coordinator message received on 2026-11-02 reports the human decision verbatim:
+H6 (VA1-Q2): "VA1 splits it".
+
+This resolves only VA1-Q2's ownership hold for a narrow performance-only split
+of TypeExamples and necessary registrations. Statements, observations and all
+proof/resource/test budgets must be preserved. It does not authorize a semantic
+repair, changed expectations, new premise/exclusion, compiler-lane expansion,
+push/merge/publication, or changes to the original full-goal requirements.
+AQ1/AQ2 and the approved VA1-Q1 boundary revision remain as recorded above.
+The message identifies Claude Code as coordinator and retires the previous
+Codex listener/auditor; no VM/branch/goal identity is changed by this receipt.
+
+
+### VA1 registry scheduling update — 2026-11-02
+
+The coordinator's user message assigns VA1 sole writing of Calculus files for its
+current AU01 item, then AU02. AU05 is additionally assigned after AU02, conditional
+on verified integration of VA2 ae1a1d56 and rebasing onto master. The announced master
+is a3205e6a1a1be1471fa0dc91688eca032d8acd85; fetch/ancestry/code verification is required.
+AU05 must use actual master Hash code and copy-recovery's SS-CP5-HASHED typed premise.
+AU03/AU04, G46.05 and SS-CP5-HASHED production are not reassigned. Before each new item,
+fetch origin master and reuse actual ready deliveries. This records queue ownership,
+not an exclusion, premise, profile or semantic change. AQ1/AQ2, Q1's certified-boundary
+revision and H6's exact “VA1 splits it” authorization remain as recorded above.
+No AU05 work or further walk change has started; the announced987/1024 memory-loop
+visits and unchanged300s timing guard must be preserved and revalidated when relevant.
+
+### VA1 H1 resource recovery (relayed 2026-11-03)
+
+The coordinator relayed the human resource decision H1 verbatim:
+
+> Free disk + 4 GiB reserve
+
+This authorizes the task-owned host-available admission/monitor reserve of
+4 GiB and cleanup of owned regenerable data. The aggregate child cap remains
+12 GiB, swap remains zero, and Lean remains serial with explicit `-j1` and
+`LEAN_NUM_THREADS=1`. No semantic, premise, observation, proof, test or timeout
+budget changes follow from this resource authorization. Existing AQ1/AQ2, Q1
+and H6 records remain unchanged. Cache reclamation was attempted through both
+provided kernel interfaces and denied permission; the failures are retained.

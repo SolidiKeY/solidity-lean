@@ -1,0 +1,12 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "sha256": {
+    "Solidity/Frontend/Checked/Lexer.lean": "7c8545210edd7f6255a8e0990035dc506ae8345ce95af4a7f7345397ec3fdfca",
+    "Solidity/Frontend/Checked/Token.lean": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a",
+    "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+    "Solidity/Source/Const.lean": "46ea4e0b34c80b91ccf30dec162398c290a5ad3a8403e58317a1d67d46888fa3",
+    "tests/upstream/grammar-0.8.38/SolidityLexer.g4": "b6eb8ffcb358b8a854b22ed0e3df6ced8c42760a3da4f77899ba9c65a6dd7132",
+    "Solidity/Frontend/Checked/Tables.lean": "4989b4811753c9515a07be8236f53a0fa537bf1f2ecf7cdd7c33978c65d5b2ff",
+    "Solidity/Keccak.lean": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+  }
+}

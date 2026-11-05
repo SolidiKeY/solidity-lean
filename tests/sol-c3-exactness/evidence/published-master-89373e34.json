@@ -1,0 +1,74 @@
+{
+  "published_master": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "previous_published_master": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "owned_checkpoint": "a7f4755cc1bd375052622aec6a966b6a1c21e427",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "repository": "/workspace/solidity-lean",
+  "comparisons": {
+    "Solidity/Frontend/C3Exactness/Admission.lean": {
+      "owned_sha256": "3b4a8d7414967ebacc18c5f8afc0acede2bcb54c8298bbb85455b83b9faebde6",
+      "published_sha256": "3b4a8d7414967ebacc18c5f8afc0acede2bcb54c8298bbb85455b83b9faebde6"
+    },
+    "Solidity/Frontend/C3Exactness/Controls.lean": {
+      "owned_sha256": "c987131a33b420024bed9f03f61c96e80eb781793bdcb31a95402f21fcae833d",
+      "published_sha256": "aaa9a6b8f188d2cbcdf620a5aa32a57ef36520cebfed15b8e0e8d00ac8930bd3"
+    },
+    "Solidity/Frontend/C3Exactness/Linearization.lean": {
+      "owned_sha256": "4314aad20e0460a79fabf61c68369c9afacc2121568f81c52b7faadbb54db75e",
+      "published_sha256": "4314aad20e0460a79fabf61c68369c9afacc2121568f81c52b7faadbb54db75e"
+    },
+    "Solidity/Frontend/C3Exactness/Trace.lean": {
+      "owned_sha256": "887787f0337787593a6a995715c7e08dad7b09b612f73e0b9f2dccb7f58e5bec",
+      "published_sha256": "887787f0337787593a6a995715c7e08dad7b09b612f73e0b9f2dccb7f58e5bec"
+    },
+    "Solidity/Source/Resolve.lean": {
+      "owned_sha256": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
+      "published_sha256": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1"
+    },
+    "Solidity/Source/Inheritance.lean": {
+      "owned_sha256": "fac8c3b392d5dd3e917ce4ca8920f37790cf6d81801b2b3780d3e8cdc743190b",
+      "published_sha256": "fac8c3b392d5dd3e917ce4ca8920f37790cf6d81801b2b3780d3e8cdc743190b"
+    },
+    "Solidity/Frontend/Static/C3.lean": {
+      "owned_sha256": "669236a80233d0bf8e706830a7fb177167de781d47bad9c1791d25a17dbb3e57",
+      "published_sha256": "669236a80233d0bf8e706830a7fb177167de781d47bad9c1791d25a17dbb3e57"
+    },
+    "Solidity/Frontend/Static/Inheritance.lean": {
+      "owned_sha256": "b584df857e47d3cc2644591369ee51c858fe98de1ed020accdd3c61fa8ca50bf",
+      "published_sha256": "b584df857e47d3cc2644591369ee51c858fe98de1ed020accdd3c61fa8ca50bf"
+    },
+    "Solidity/Source/Decls.lean": {
+      "owned_sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+      "published_sha256": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9"
+    },
+    "Solidity/Source/WellFormed.lean": {
+      "owned_sha256": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a",
+      "published_sha256": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a"
+    }
+  },
+  "published_c3_modules": [
+    "Solidity/Frontend/C3Exactness/Admission.lean",
+    "Solidity/Frontend/C3Exactness/Controls.lean",
+    "Solidity/Frontend/C3Exactness/Linearization.lean",
+    "Solidity/Frontend/C3Exactness/Trace.lean"
+  ],
+  "remaining_new_modules": [
+    "Solidity/Frontend/C3Exactness/Audit.lean",
+    "Solidity/Frontend/C3Exactness/GraphControls.lean",
+    "Solidity/Frontend/C3Exactness/Identity.lean",
+    "Solidity/Frontend/C3Exactness/OrderObstruction.lean",
+    "Solidity/Frontend/C3Exactness/Renaming.lean"
+  ],
+  "changed_published_modules": [
+    "Solidity/Frontend/C3Exactness/Controls.lean"
+  ],
+  "identical_published_modules": [
+    "Solidity/Frontend/C3Exactness/Admission.lean",
+    "Solidity/Frontend/C3Exactness/Linearization.lean",
+    "Solidity/Frontend/C3Exactness/Trace.lean"
+  ],
+  "proof_checkpoint_scope_patch": "/workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/integration-89373e34-to-a7f4755c.patch",
+  "proof_checkpoint_scope_patch_sha256": "16e300b4c637913fdebe2252cbd30dbdaec1c289cd062081eb319c53886c2a4a",
+  "coordinator_reported_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261104T182351Z",
+  "boundary": "Remote source/ancestry independently verified; coordinator gate receipt is reported external evidence, not read locally or substituted for remaining lane gates. Remaining patch ends at a7f4755c; final packet regenerates delta through its exact committed head."
+}

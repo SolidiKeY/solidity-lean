@@ -1,0 +1,3 @@
+PASS lean:tests/directruntime-20261104/shared-translator/ApiSignatures.lean 2s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/api-signatures/1.log
+{"childMaxRssKiB": 525184, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/evidence/api-signatures", "bash", "scripts/coord-tools/gate.sh", "per-file", "tests/directruntime-20261104/shared-translator/ApiSignatures.lean"], "exit": 0, "scopeMemoryPeakBytes": "129101824", "wallSeconds": 2.2673504050001156}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 16303878144, "outerWallSeconds": 7.836802624000029}

@@ -1,0 +1,626 @@
+[
+  {
+    "id": "empty",
+    "mode": ".none",
+    "raw": [],
+    "expected": []
+  },
+  {
+    "id": "raw-arbitrary",
+    "mode": ".all",
+    "raw": [
+      0,
+      10,
+      13,
+      255
+    ],
+    "expected": [
+      0,
+      10,
+      13,
+      255
+    ]
+  },
+  {
+    "id": "raw-plain",
+    "mode": ".plain 34",
+    "raw": [
+      32,
+      65,
+      126
+    ],
+    "expected": [
+      32,
+      65,
+      126
+    ]
+  },
+  {
+    "id": "raw-plain-control",
+    "mode": ".plain 34",
+    "raw": [
+      31
+    ],
+    "expected": null
+  },
+  {
+    "id": "raw-plain-high",
+    "mode": ".plain 34",
+    "raw": [
+      255
+    ],
+    "expected": null
+  },
+  {
+    "id": "raw-unicode-invalid-utf8",
+    "mode": ".unicode 34",
+    "raw": [
+      255
+    ],
+    "expected": [
+      255
+    ]
+  },
+  {
+    "id": "raw-unicode-LF",
+    "mode": ".unicode 34",
+    "raw": [
+      10
+    ],
+    "expected": null
+  },
+  {
+    "id": "raw-unicode-CR",
+    "mode": ".unicode 34",
+    "raw": [
+      13
+    ],
+    "expected": null
+  },
+  {
+    "id": "raw-same-quote",
+    "mode": ".plain 34",
+    "raw": [
+      34
+    ],
+    "expected": null
+  },
+  {
+    "id": "raw-other-quote",
+    "mode": ".plain 39",
+    "raw": [
+      34
+    ],
+    "expected": [
+      34
+    ]
+  },
+  {
+    "id": "raw-other-quote-double",
+    "mode": ".plain 34",
+    "raw": [
+      39
+    ],
+    "expected": [
+      39
+    ]
+  },
+  {
+    "id": "raw-single-quote-refusal",
+    "mode": ".plain 39",
+    "raw": [
+      39
+    ],
+    "expected": null
+  },
+  {
+    "id": "unicode-double-quote-refusal",
+    "mode": ".unicode 34",
+    "raw": [
+      34
+    ],
+    "expected": null
+  },
+  {
+    "id": "unicode-double-other-quote",
+    "mode": ".unicode 34",
+    "raw": [
+      39
+    ],
+    "expected": [
+      39
+    ]
+  },
+  {
+    "id": "unicode-single-quote-refusal",
+    "mode": ".unicode 39",
+    "raw": [
+      39
+    ],
+    "expected": null
+  },
+  {
+    "id": "unicode-single-other-quote",
+    "mode": ".unicode 39",
+    "raw": [
+      34
+    ],
+    "expected": [
+      34
+    ]
+  },
+  {
+    "id": "escape-single",
+    "mode": ".none",
+    "raw": [
+      92,
+      39
+    ],
+    "expected": [
+      39
+    ]
+  },
+  {
+    "id": "escape-double",
+    "mode": ".none",
+    "raw": [
+      92,
+      34
+    ],
+    "expected": [
+      34
+    ]
+  },
+  {
+    "id": "escape-slash",
+    "mode": ".none",
+    "raw": [
+      92,
+      92
+    ],
+    "expected": [
+      92
+    ]
+  },
+  {
+    "id": "escape-n",
+    "mode": ".none",
+    "raw": [
+      92,
+      110
+    ],
+    "expected": [
+      10
+    ]
+  },
+  {
+    "id": "escape-r",
+    "mode": ".none",
+    "raw": [
+      92,
+      114
+    ],
+    "expected": [
+      13
+    ]
+  },
+  {
+    "id": "escape-t",
+    "mode": ".none",
+    "raw": [
+      92,
+      116
+    ],
+    "expected": [
+      9
+    ]
+  },
+  {
+    "id": "escape-LF",
+    "mode": ".none",
+    "raw": [
+      92,
+      10
+    ],
+    "expected": []
+  },
+  {
+    "id": "escape-CR",
+    "mode": ".none",
+    "raw": [
+      92,
+      13
+    ],
+    "expected": []
+  },
+  {
+    "id": "escape-CRLF",
+    "mode": ".none",
+    "raw": [
+      92,
+      13,
+      10
+    ],
+    "expected": []
+  },
+  {
+    "id": "CRLF-followed-raw-LF",
+    "mode": ".all",
+    "raw": [
+      92,
+      13,
+      10,
+      10
+    ],
+    "expected": [
+      10
+    ]
+  },
+  {
+    "id": "CR-then-escaped-LF",
+    "mode": ".none",
+    "raw": [
+      92,
+      13,
+      92,
+      10
+    ],
+    "expected": []
+  },
+  {
+    "id": "invalid-simple",
+    "mode": ".none",
+    "raw": [
+      92,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "lone-backslash",
+    "mode": ".all",
+    "raw": [
+      92
+    ],
+    "expected": null
+  },
+  {
+    "id": "x-zero",
+    "mode": ".none",
+    "raw": [
+      92,
+      120,
+      48,
+      48
+    ],
+    "expected": [
+      0
+    ]
+  },
+  {
+    "id": "x-mixed-case",
+    "mode": ".none",
+    "raw": [
+      92,
+      120,
+      102,
+      70
+    ],
+    "expected": [
+      255
+    ]
+  },
+  {
+    "id": "x-invalid-first",
+    "mode": ".all",
+    "raw": [
+      92,
+      120,
+      103,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "x-invalid-second",
+    "mode": ".all",
+    "raw": [
+      92,
+      120,
+      48,
+      103
+    ],
+    "expected": null
+  },
+  {
+    "id": "x-truncated-0",
+    "mode": ".all",
+    "raw": [
+      92,
+      120
+    ],
+    "expected": null
+  },
+  {
+    "id": "x-truncated-1",
+    "mode": ".all",
+    "raw": [
+      92,
+      120,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "x-exact-two-digits",
+    "mode": ".all",
+    "raw": [
+      92,
+      120,
+      52,
+      49,
+      50
+    ],
+    "expected": [
+      65,
+      50
+    ]
+  },
+  {
+    "id": "u-007f",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      55,
+      102
+    ],
+    "expected": [
+      127
+    ]
+  },
+  {
+    "id": "u-0080",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      56,
+      48
+    ],
+    "expected": [
+      194,
+      128
+    ]
+  },
+  {
+    "id": "u-07ff",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      48,
+      55,
+      102,
+      102
+    ],
+    "expected": [
+      223,
+      191
+    ]
+  },
+  {
+    "id": "u-0800",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      48,
+      56,
+      48,
+      48
+    ],
+    "expected": [
+      224,
+      160,
+      128
+    ]
+  },
+  {
+    "id": "u-D800",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      68,
+      56,
+      48,
+      48
+    ],
+    "expected": [
+      237,
+      160,
+      128
+    ]
+  },
+  {
+    "id": "u-DFFF",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      68,
+      70,
+      70,
+      70
+    ],
+    "expected": [
+      237,
+      191,
+      191
+    ]
+  },
+  {
+    "id": "u-FFFF",
+    "mode": ".none",
+    "raw": [
+      92,
+      117,
+      70,
+      70,
+      70,
+      70
+    ],
+    "expected": [
+      239,
+      191,
+      191
+    ]
+  },
+  {
+    "id": "u-truncated-0",
+    "mode": ".all",
+    "raw": [
+      92,
+      117
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-truncated-1",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-truncated-2",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-truncated-3",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-invalid-digit-0",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      103,
+      48,
+      48,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-invalid-digit-1",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      103,
+      48,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-invalid-digit-2",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      103,
+      48
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-invalid-digit-3",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      48,
+      103
+    ],
+    "expected": null
+  },
+  {
+    "id": "u-exact-four-digits",
+    "mode": ".all",
+    "raw": [
+      92,
+      117,
+      48,
+      48,
+      52,
+      49,
+      50
+    ],
+    "expected": [
+      65,
+      50
+    ]
+  },
+  {
+    "id": "mixed-recursive",
+    "mode": ".all",
+    "raw": [
+      65,
+      92,
+      110,
+      92,
+      120,
+      52,
+      49,
+      92,
+      117,
+      48,
+      48,
+      69,
+      57,
+      92,
+      13,
+      10,
+      66
+    ],
+    "expected": [
+      65,
+      10,
+      65,
+      195,
+      169,
+      66
+    ]
+  }
+]

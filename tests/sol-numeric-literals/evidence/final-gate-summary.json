@@ -1,0 +1,83 @@
+{
+  "validated_head": "ebb4d3257694880f45b3591435cb270200d5ed2c",
+  "gates": [
+    {
+      "name": "build-touched",
+      "command": "build_touched",
+      "status": "pass",
+      "seconds": 20,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/1.log"
+    },
+    {
+      "name": "run-lean",
+      "command": "bash run-lean.sh",
+      "status": "fail",
+      "seconds": 0,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/2.log"
+    },
+    {
+      "name": "trust",
+      "command": "bash scripts/check-trust.sh",
+      "status": "pass",
+      "seconds": 11,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/3.log"
+    },
+    {
+      "name": "orphans",
+      "command": "node scripts/check-orphans.mjs",
+      "status": "fail",
+      "seconds": 1,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/4.log"
+    },
+    {
+      "name": "layers",
+      "command": "node scripts/check-layers.mjs",
+      "status": "pass",
+      "seconds": 0,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/5.log"
+    },
+    {
+      "name": "roots",
+      "command": "bash scripts/coord-tools/register.sh --check",
+      "status": "fail",
+      "seconds": 0,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/6.log"
+    },
+    {
+      "name": "doc-paths",
+      "command": "bash scripts/check-doc-paths.sh",
+      "status": "pass",
+      "seconds": 10,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/7.log"
+    },
+    {
+      "name": "axiom-pins",
+      "command": "node scripts/check-axiom-pins.mjs",
+      "status": "pass",
+      "seconds": 13,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/8.log"
+    },
+    {
+      "name": "testsuite",
+      "command": "bash scripts/check-testsuite.sh",
+      "status": "pass",
+      "seconds": 0,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/9.log"
+    },
+    {
+      "name": "corpus",
+      "command": "bash scripts/check-corpus.sh",
+      "status": "pass",
+      "seconds": 2894,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/10.log"
+    },
+    {
+      "name": "automatic-strict",
+      "command": "node scripts/check-automatic.mjs --strict",
+      "status": "pass",
+      "seconds": 0,
+      "evidence": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/recovered-full-gates/11.log"
+    }
+  ],
+  "source_hash_boundary": "All 42 Lean files match audit-validation.json and acceptance.json; later reporting/checker controls do not change these proof sources."
+}

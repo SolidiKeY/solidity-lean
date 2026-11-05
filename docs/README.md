@@ -13,6 +13,8 @@ history is in git.
 | [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
 | [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
 | [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
+| [feature-work/hash-xi-context.md](feature-work/hash-xi-context.md) | Actual Xi/Theta hash-query transport for arbitrary world and context, with explicit fixed-code/gas and native/source limits. |
+| [feature-work/h7-bounded-interfaces.md](feature-work/h7-bounded-interfaces.md) | H7 logical padding/scanner APIs, bounds and native/source limits. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
@@ -172,3 +174,4 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [P8a SourceSpec and failure resources](feature-work/p8-source-spec.md): actual Source execution anchor, unchanged failure-resource transfer, and the proved bare-horizon obstruction; full producer remains open.
 
 H16: [typed failure interface, current-master measurements and deferred runtime migration](feature-work/source-failure-execution.md).
+G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).

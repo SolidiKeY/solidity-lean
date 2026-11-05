@@ -6,7 +6,7 @@ P4 dispatch and G42.04 body/result lowering are EXPLICIT producer duties.
 This relation uses existing Source states and typed World accounts; no new
 state or execution semantics is introduced. Code linkage alone proves neither
 storage/heap layout nor body adequacy or SourceSpec admission.
-The `admission : P8a.Producer …` field makes these inputs uninhabited until
+The `admission : DeclarationGraphAdmission.Producer …` field makes these inputs uninhabited until
 P8-SPEC-LAW1 is resolved (`Lowering/P8/ResourceContractLaw1.lean`), so the
 results here are vacuous for now. -/
 namespace Solidity.Lowering.V08.LibraryPremises
@@ -46,7 +46,7 @@ structure Inputs (S : P8a.Spec) (reference : P8a.OperationalReference)
     (kindOf : String → Option K)
     (stateRelation : {Γ : Ctx} → Source.St E → State (cs caller) Γ → Prop)
     (valueRelation : Source.RVal E.layout (Source.STy.ret rs) → α → Prop) where
-  admission : P8a.Producer S reference origins roots
+  admission : DeclarationGraphAdmission.Producer S reference origins roots
   program : Source.SrcProg E
   programAgreement : g.prog = program.prog
   pipelineAgreement : g.pipeline = program.pipeline

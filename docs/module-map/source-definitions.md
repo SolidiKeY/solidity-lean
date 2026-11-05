@@ -148,3 +148,7 @@
 | `Source/FailureRequestAdmissionLaws.lean` | Existing requestValueScope nonconstant-plan arbitrary-cursor admission equations, unchanged funded-plan identity and exact dependent frame/counter retention on rejection. |
 | `Source/FailureRequestAdmissionHorizon.lean` | Existing exact-Nat admission API Grow/Below/Approx transport with explicit actual body relations; no second runtime admission operation. |
 | `Source/FailureRequestAdmissionHorizonControls.lean` | Nonconstant fate at ordinal37/frame counter11, exact wide balance and typed caller alias readback, timeout/cut/wrong-index/full-byte controls and17 exact axiom pins. |
+| `Source/Agreement/PrimitiveTypes.lean` | SS-AGREE typed bool/uint/int value relation; no execution claim. |
+| `Source/Agreement/Primitive.lean` | Total model-to-source primitive producer, range proofs and discriminating value controls. |
+| `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
+| `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |

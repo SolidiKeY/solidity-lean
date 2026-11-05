@@ -1,0 +1,18 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "python3",
+    "tests/h28-sol/non-vacuity/kernel.py",
+    "--module",
+    "Solidity.Assurance.NonVacuityH28.Pins",
+    "--fresh"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 114.1603359360015,
+  "children_user_seconds": 113.165532,
+  "children_system_seconds": 0.962306,
+  "children_max_rss_kib": 1379580,
+  "children_major_faults": 0,
+  "children_minor_faults": 445719
+}

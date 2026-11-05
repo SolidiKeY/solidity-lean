@@ -1,0 +1,6 @@
+/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/Solidity_Backend_PrimitivePackets_UnsignedCast_Controls-build-1793894381536015694.log exit 0
+/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Matrix_lean-check-1793894384570603799.log exit 0
+/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Audit_lean-check-1793894387603971353.log exit 0
+/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/versions-tools-1793894395640954106.log exit 0
+/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/evidence/keysort-keysort-1793894396670806772.log exit 0
+PACKET_ACCEPTANCE_PASS: 372 rows, 23 theorem pins, 72 declarations

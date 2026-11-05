@@ -1,0 +1,20 @@
+{
+  "policy": "H41",
+  "status": "ready-for-coordinator-pull",
+  "head": "7985d1eb62ab1757df04802d963894ebf7fc8718",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "archive": "/workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz",
+  "sha256": "648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862",
+  "bytes": 6045725,
+  "modules": 24,
+  "artifact_files": 72,
+  "mappings": 24,
+  "archive_members": 75,
+  "archive_verified": true,
+  "all_current_source_and_trace_hashes_match": true,
+  "vm_ship_cache_invoked": false,
+  "delivery_or_import_asserted": false,
+  "cache_freshness_from_notice_asserted": false,
+  "resolved_question": "Q-CACHE-01 route answered by H41; coordinatorpull, not VMshipment",
+  "coordinator_action": "Pull the verifiedpack and retain own delivery/importreceipt; no receipt invented here"
+}

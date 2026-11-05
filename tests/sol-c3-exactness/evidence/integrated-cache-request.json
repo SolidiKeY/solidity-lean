@@ -1,0 +1,12 @@
+{
+  "status": "coordinator-pending",
+  "route": "H41 coordinator-side guarded cache delivery; never ship-cache.sh on VM",
+  "published": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "module": "Solidity.Examples.Tactics.OpenLoops",
+  "source_sha256": "42a3b065d9664b9ee52e9ffa19f44667932e86361338466fe62577e7b485fb73",
+  "setup_sha256": "7a900f65e3e1f3e74024b3990e667d592719644e53bc6d239d4279720759c0d8",
+  "lean": "4.24.0",
+  "reason": "Full driver H1-stopped3042.86s; isolated unchanged published module H1-stopped510.64s after owned-file-cache preparation, no theorem error reported",
+  "limits": "12GiB aggregate/no swap/oneCPU/-j1/4GiB reserve unchanged",
+  "boundary": "No permission/budget/theorem change requested. Need matching content-addressed artifact+input mapping or continue same-budget recovery when available; no freshness/import inferred."
+}

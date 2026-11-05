@@ -1,0 +1,58 @@
+{
+  "head": "95dfcbc1bb573f508a929fc1698afd23ffd9a532",
+  "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "phases": [
+    {
+      "name": "full-toolkit",
+      "command": [
+        "bash",
+        "scripts/coord-tools/gate.sh",
+        "full"
+      ],
+      "exit": 1,
+      "seconds": 162.25761367600353,
+      "evidence": "/workspace/scratch/h28-runtime/b86-broad-95dfcbc1/full-toolkit.log",
+      "head": "95dfcbc1bb573f508a929fc1698afd23ffd9a532"
+    },
+    {
+      "name": "default-native-build",
+      "command": [
+        "lake",
+        "build",
+        "Solidity",
+        "SolidityExamples",
+        "solkeycheck",
+        "solidity-lean",
+        "SolkeyTestSuite"
+      ],
+      "exit": 0,
+      "seconds": 836.6011402959994,
+      "evidence": "/workspace/scratch/h28-runtime/b86-broad-95dfcbc1/default-native-build.log",
+      "head": "95dfcbc1bb573f508a929fc1698afd23ffd9a532"
+    },
+    {
+      "name": "solkey",
+      "command": [
+        "bash",
+        "scripts/check-solkey.sh"
+      ],
+      "exit": 0,
+      "seconds": 2.3031889510020847,
+      "evidence": "/workspace/scratch/h28-runtime/b86-broad-95dfcbc1/solkey.log",
+      "head": "95dfcbc1bb573f508a929fc1698afd23ffd9a532"
+    },
+    {
+      "name": "scope-audit",
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/literal-grammar/audit.py",
+        "tests/h28-sol/literal-grammar/evidence/full-pins-build-02.log"
+      ],
+      "exit": 0,
+      "seconds": 0.10357620500144549,
+      "evidence": "/workspace/scratch/h28-runtime/b86-broad-95dfcbc1/scope-audit.log",
+      "head": "95dfcbc1bb573f508a929fc1698afd23ffd9a532"
+    }
+  ]
+}

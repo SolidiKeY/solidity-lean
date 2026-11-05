@@ -1,4 +1,4 @@
-import Solidity.Calculus.Spec
+import Solidity.Frontend.ExecutableAst.Shared.Scope
 
 /-! # Existing intrinsic obligation construction
 
@@ -26,8 +26,10 @@ def assertionObligation (lowerBodyLoops : BodyLoopLowerer) (callPre : PlainEntry
   unless d.params.all (fun nt => nt.2 matches .prim _) do
     throw "plain reference obligation"
   let ctx ← d.paramCtx
-  let (raw, st) ← (lowerBodyLoops [] 0 d.body).runFrom { funs := C.funs }
-    (ctx, RawStmt.maxIdxs d.body + 1)
+  let (raw, st) ← (do
+    let body ← renameStmts [] d.body
+    lowerBodyLoops [] 0 body).runFrom { funs := C.funs } (ctx, Scope.bodySeed C d)
+  Scope.validateScopes (d.params.map (·.1)) d.body
   let raw ← lowerReturns [] raw
   let ⟨_, program⟩ ← (elabProgAtS.go C 0 raw st (source := true)).mapError (·.2)
   let Γ := ECtx.toNCtx st.1

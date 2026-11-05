@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+python3 tests/h28-sol/non-vacuity/checker-tests.py
+python3 tests/h28-sol/non-vacuity/check.py
+set +e
+python3 tests/h28-sol/non-vacuity/check.py --accept
+status=$?
+set -e
+if [ "$status" -ne 1 ]; then
+  printf 'Expected incomplete acceptance to fail with exit 1, got %s\n' "$status"
+  exit 1
+fi
+printf 'ACCOUNTING_CHECKPOINT_PASS: structural checks and negative acceptance control only\n'
