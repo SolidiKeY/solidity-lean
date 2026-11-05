@@ -448,4 +448,116 @@ theorem finiteTimeoutAndDiamond : RawFrame.run code policy 0 rawInitial = none �
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.finiteTimeoutAndDiamond
 
+
+/- Legal transfers suppress the following actual recursive call. -/
+def transferLeaveCode : Stmt [] X ⟨true,false⟩ 0 :=
+  .functions [ClosedRun.divergeSig]
+    (.cons (.discard (.call .here Fin.elim0)) .nil)
+    (.seq .leave (.discard (.call .here Fin.elim0)))
+def transferLeavePolicy : Policy.StmtP .A transferLeaveCode :=
+  (Policy.stmt_iff .A transferLeaveCode).mp rfl
+def transferBreakCode : Stmt [] X ⟨false,true⟩ 0 :=
+  .functions [ClosedRun.divergeSig]
+    (.cons (.discard (.call .here Fin.elim0)) .nil)
+    (.seq .break_ (.discard (.call .here Fin.elim0)))
+def transferBreakPolicy : Policy.StmtP .A transferBreakCode :=
+  (Policy.stmt_iff .A transferBreakCode).mp rfl
+def transferContinueCode : Stmt [] X ⟨false,true⟩ 0 :=
+  .functions [ClosedRun.divergeSig]
+    (.cons (.discard (.call .here Fin.elim0)) .nil)
+    (.seq .continue_ (.discard (.call .here Fin.elim0)))
+def transferContinuePolicy : Policy.StmtP .A transferContinueCode :=
+  (Policy.stmt_iff .A transferContinueCode).mp rfl
+
+
+theorem transferLeaveCompletes :
+    (RawFrame.run transferLeaveCode transferLeavePolicy 3 logicResult.state).isSome = true := by rfl
+def transferLeaveResult :=
+  (RawFrame.run transferLeaveCode transferLeavePolicy 3 logicResult.state).get transferLeaveCompletes
+theorem transferBreakCompletes :
+    (RawFrame.run transferBreakCode transferBreakPolicy 3 logicResult.state).isSome = true := by rfl
+def transferBreakResult :=
+  (RawFrame.run transferBreakCode transferBreakPolicy 3 logicResult.state).get transferBreakCompletes
+theorem transferContinueCompletes :
+    (RawFrame.run transferContinueCode transferContinuePolicy 3 logicResult.state).isSome = true := by rfl
+def transferContinueResult :=
+  (RawFrame.run transferContinueCode transferContinuePolicy 3 logicResult.state).get transferContinueCompletes
+
+def transferTag {control} : Closed.Flow control → Nat
+  | .normal => 0
+  | .leave_ _ => 1
+  | .break_ _ => 2
+  | .continue_ _ => 3
+def transferPost {control} (tag : Nat) (result : RawFrame.Outcome ctx control) : Prop :=
+  RawFrame.view result.state flag = word 2 ∧
+  RawFrame.view result.state small = word 257 ∧ transferTag result.flow = tag
+
+
+theorem transferFinished : Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.transferLeaveCode Solidity.Yul.Checks.LocalBlock.transferLeavePolicy 3 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.transferLeaveResult ∧
+Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.transferBreakCode Solidity.Yul.Checks.LocalBlock.transferBreakPolicy 3 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.transferBreakResult ∧
+Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.transferContinueCode Solidity.Yul.Checks.LocalBlock.transferContinuePolicy 3 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.transferContinueResult := ⟨rfl,rfl,rfl⟩
+
+theorem transferModal : ∀ mode : Solidity.Modality,
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferLeaveCode Solidity.Yul.Checks.LocalBlock.transferLeavePolicy (Solidity.Yul.Checks.LocalBlock.transferPost 1) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferBreakCode Solidity.Yul.Checks.LocalBlock.transferBreakPolicy (Solidity.Yul.Checks.LocalBlock.transferPost 2) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferContinueCode Solidity.Yul.Checks.LocalBlock.transferContinuePolicy (Solidity.Yul.Checks.LocalBlock.transferPost 3) Solidity.Yul.Checks.LocalBlock.logicResult.state := by
+  intro mode
+  refine ⟨?_,?_,?_⟩
+  · exact (RawFrame.Logic.holds_completed ctx ⟨true,false⟩ mode transferLeaveCode
+      transferLeavePolicy (transferPost 1) logicResult.state 3 transferLeaveResult
+      transferFinished.1).mpr ⟨rfl,rfl,rfl⟩
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,true⟩ mode transferBreakCode
+      transferBreakPolicy (transferPost 2) logicResult.state 3 transferBreakResult
+      transferFinished.2.1).mpr ⟨rfl,rfl,rfl⟩
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,true⟩ mode transferContinueCode
+      transferContinuePolicy (transferPost 3) logicResult.state 3 transferContinueResult
+      transferFinished.2.2).mpr ⟨rfl,rfl,rfl⟩
+
+theorem transferRejectNormal : ∀ mode : Solidity.Modality,
+¬ (Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferLeaveCode Solidity.Yul.Checks.LocalBlock.transferLeavePolicy (Solidity.Yul.Checks.LocalBlock.transferPost 0) Solidity.Yul.Checks.LocalBlock.logicResult.state) ∧
+¬ (Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferBreakCode Solidity.Yul.Checks.LocalBlock.transferBreakPolicy (Solidity.Yul.Checks.LocalBlock.transferPost 0) Solidity.Yul.Checks.LocalBlock.logicResult.state) ∧
+¬ (Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.transferContinueCode Solidity.Yul.Checks.LocalBlock.transferContinuePolicy (Solidity.Yul.Checks.LocalBlock.transferPost 0) Solidity.Yul.Checks.LocalBlock.logicResult.state) := by
+  intro mode
+  refine ⟨?_,?_,?_⟩
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨true,false⟩ mode transferLeaveCode
+      transferLeavePolicy (transferPost 0) logicResult.state 3 transferLeaveResult
+      transferFinished.1).mp invalid
+    have impossible : 1 = 0 := wrong.2.2
+    cases impossible
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨false,true⟩ mode transferBreakCode
+      transferBreakPolicy (transferPost 0) logicResult.state 3 transferBreakResult
+      transferFinished.2.1).mp invalid
+    have impossible : 2 = 0 := wrong.2.2
+    cases impossible
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨false,true⟩ mode transferContinueCode
+      transferContinuePolicy (transferPost 0) logicResult.state 3 transferContinueResult
+      transferFinished.2.2).mp invalid
+    have impossible : 3 = 0 := wrong.2.2
+    cases impossible
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_completed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_completed
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferLeaveCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferLeaveCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferBreakCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferBreakCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferContinueCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferContinueCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferFinished' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferFinished
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferModal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferModal
+/-- info: 'Solidity.Yul.Checks.LocalBlock.transferRejectNormal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.transferRejectNormal
+
 end Solidity.Yul.Checks.LocalBlock
