@@ -260,6 +260,25 @@ the absolute archive path and SHA256; the archive remains on this VM for
 coordinator retrieval, outside Git. The script collected 1638 artifacts and
 550 mappings; its counter reported `0 traces without cached outputs skipped`.
 That counter excludes traces with absent mapping/outputs. Separate owned-cache
-coverage checks confirm Reader and both proof modules are included. Cache delivery is blocked, so under
-H35 no checkpoint is merge-ready solely on these passing VM gates. The
-central registration and ordinary native/browser obligations above remain open.
+coverage checks confirm Reader and both proof modules are included. At that
+checkpoint cache delivery was blocked; the H41 receipt below supersedes that
+delivery blocker. Central registration and ordinary native/browser obligations above remain open.
+
+
+## H41 coordinator pull receipt
+
+H41 amends H35: leave verified packs on the VM with absolute path and SHA256;
+the coordinator pulls them. Never run ship-cache.sh on the VM. Future packs
+remain coordinator-pending until receipt. The coordinator now reports receiving
+this existing pack and verifying its SHA256 against our report. Its receipt is
+`/home/guilherme/.local/state/cloudvm-coord/receipts/memory-references-cache-received-20261105T025513Z.json`.
+That host file is not directly accessible here; the evidence records the
+coordinator message as provenance. The local archive was freshly rehashed and
+matches `067205b0b4c324f18b8c643ad5745f63311278e842aff1ebb05d2f3c1c16fa78`.
+The absolute archive path and receipt details are in `evidence/h41/cache-received.json`.
+
+Cache delivery is therefore coordinator-received, and its transport blocker is
+resolved. Historical H35 failure logs remain intact. This changes no source,
+theorem, or validation result. Central registration and A/D integration, fresh
+native/browser Identity including the positive diamond twin, and all ordinary
+modality controls remain required before assignment completion.
