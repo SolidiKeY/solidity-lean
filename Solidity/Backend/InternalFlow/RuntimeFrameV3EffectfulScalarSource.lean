@@ -74,3 +74,11 @@ theorem all_horizons {C : Contract} {Γ : Ctx} (function : Name)
  · simp only [if_neg enough,error_bind]
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.write_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.write_source
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.all_horizons' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulScalarSource.all_horizons
