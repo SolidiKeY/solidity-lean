@@ -1,5 +1,15 @@
 {
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_lookup": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.account_transfer": [
+  "Classical.choice",
+  "Quot.sound",
   "propext"
  ],
  "Solidity/Lowering/V08/WorldImageAccess.lean:Solidity.Lowering.V08.WorldImageAccess.image_atTime": [
