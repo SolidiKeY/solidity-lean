@@ -43,6 +43,16 @@ print('PASS 10 adversarial evidence controls')
 from unittest.mock import patch
 import hashlib
 manifest = json.loads((gate.TESTS / 'evidence/replay-manifest.json').read_text())
+try:
+    gate.validate_replays(rows, manifest)
+except ValueError as error:
+    if 'inputs changed' not in str(error):
+        raise
+    print('PASS rejects stale replay fingerprints after reviewed gate change')
+# Isolate the semantic mutations below from the intentionally stale historical
+# input fingerprint. This mock exists only in this regression process; neither
+# recorded evidence nor production validation is rewritten.
+gate.replay_inputs = lambda: manifest['inputs']
 gate.validate_replays(rows, manifest)
 
 def reject_manifest(name, change):

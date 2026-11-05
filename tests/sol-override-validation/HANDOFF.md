@@ -35,3 +35,27 @@ expansion. Existing goal is unchanged; get_goal is unavailable.
 
 H44 checks and read-only finder/skeptic reviews are summarized in the feature doc;
 full raw split outputs remain in runtime/H44, outside Git.
+
+## Review corrections (2026-11-06)
+
+Old final-gate aggregate successes do not certify acceptance: the old runner
+ignored failures and the old helper could synthesize pin expectations. Both
+are replaced with failure-propagating, read-only checks of committed fixed
+expectations. The actual corrected control checker passed all four files
+without modifying Lean. Nine regression tests, 25 semantic mutation controls,
+H44 archive verification and frozen 943-row compiler evidence validation pass.
+The changed gate invalidates historical replay fingerprints: --replays now
+correctly fails until fresh evidence is produced and reviewed. Final full gates
+remain pending. No old replay hash was changed to match the edited script.
+
+Retrieve the archive named in BULK-MANIFEST.sha256, then run:
+python3 scripts/check-sol-override-validation.py --bulk-archive PATH --restore-bulk
+The digest anchors restored data; the checker refuses tracked source overwrite.
+Use --verify-bulk-only for digest-only verification. For Lean gates use an
+explicit bounded --runner command or --local, with caller-owned writer.lock,
+prepared PATH/SOLKEY_RULES, zero swap and 4GiB VM reserve. No runtime paths are
+assumed. See the feature doc for exact review fixes and trust boundaries.
+
+Replay entry verifies frozen archive inputs before execution, fingerprints the
+shared runner, and places timeout inside the selected execution environment.
+SOL_OV_BULK_ARCHIVE can locate the retrieved archive outside its recorded path.

@@ -1,10 +1,21 @@
 # Independent override graph validation (SOL-OV / V06 G14)
 
+## Review correction (2026-11-06)
+
+The former final-gate orchestration did not propagate failed exit codes, and
+its old control helper could rewrite pin expectations from observed output.
+Those paths do not establish acceptance. Historical aggregate PASS statements
+below are provenance only, not current certification. The reviewed fixed
+`#guard_msgs` expectations remain committed and unchanged; the replacement
+control checker compares them without editing Lean sources. Whole-lane gates
+remain pending. See the review-fix checkpoint at the end for new checks.
+
 ## Status and provenance
 
 The additive candidate implements all five callable families, independent
 visible/private-aware graphs, override lists, cut pruning, original implementation
-selection and whole-checker equivalence. Owned implementation, proofs and differential controls are checked. Overall
+selection and whole-checker equivalence. Historical proof and differential records
+are retained; current acceptance requires the corrected gates. Overall
 acceptance is **blocked** on central registrations and required repository gates.
 No `RUNTIME_GATE_PASS` or whole-assignment completion is claimed.
 
@@ -454,3 +465,45 @@ implementation tree are identical. Candidate documentation paths PASS; saved
 943-row evidence validation PASS; existing 25 adversarial gate controls PASS.
 These packaging checks are not a fresh kernel/compiler/full-runtime gate.
 Raw outputs remain in tests/sol-override-validation/runtime/H44 outside Git.
+
+
+## Coordinator review fixes (2026-11-06)
+
+Blocker 1: final_gates.py aggregates every command exit and returns nonzero if
+any gate failed, including when later gates succeed. Launch errors fail too.
+Both controls scripts include DefensiveControls. Blocker 2: check_controls.py
+only executes the four committed guarded proof files; there is no raw-output
+pin generation or tracked source rewrite. All existing Lean bytes remain
+unchanged. Blocker 3: the compiler checker verifies the H44 committed SHA256
+manifest, verifies consumed recorded files against that archive, and always
+binds matrix/required-controls/fixture inputs, including fresh compiler mode.
+`--bulk-archive PATH --restore-bulk` restores missing untracked inputs after
+digest verification, refusing changed existing data, links, traversal and any
+tracked-source overwrite. The archive stays outside Git under H44.
+
+Runtime selection is explicit via `--runner 'docker exec CONTAINER'` or `--local`
+(and SOL_OV_RUNNER); no container name, PATH, toolchain install or SolKey path
+is assumed. Caller prepares its environment, owns writer.lock and retains the
+4GiB VM reserve. Resource preflight rejects unlimited/over-12GiB memory, swap,
+and missing effective package/library -j1. Live Lean/Lake checks precede MCP
+and shell proofs. The replay launcher uses the same configurable runner.
+
+Checks actually run after the fixes: nine targeted Python regressions PASS;
+25 existing adversarial evidence controls PASS (test-only historical-input
+mock isolates semantic tests from stale fingerprints); archive SHA256 PASS;
+943 archived compiler rows PASS with frozen inputs bound. Actual corrected
+check_controls.py in the existing 10GiB/no-swap container PASS for Trust,
+AdvancedControls, GraphControls and DefensiveControls; all four Lean sources
+remain byte-identical. The gate implementation change deliberately invalidates
+the prior replay input hash: --replays exits 1, "inputs changed or are incomplete".
+No production replay fingerprint or archived output was regenerated to pass.
+Fresh replays and final full/runtime gates remain pending; old saved-replay
+PASS claims are superseded by this explicit stale result. No RUNTIME_GATE_PASS.
+
+Separate read-only finder/skeptic reviews found fresh-compiler input binding and
+pre-MCP surviving-process gaps; both were fixed and reviewers confirmed them
+resolved. Replay follow-up also binds archive inputs before execution, fingerprints the
+shared runner and puts execution timeouts inside the selected environment.
+Raw outputs are local in runtime/H44; no bulk
+logs or fixtures were added to Git. Lean/Source/ExtCall, theorem statements,
+premises, exclusions, proof budgets and CENTRAL/H41 holds are unchanged.

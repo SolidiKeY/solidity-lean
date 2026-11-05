@@ -9,6 +9,9 @@ from pathlib import Path
 import subprocess
 import sys
 import tomllib
+import tarfile
+import shutil
+import os
 
 ROOT = Path(__file__).resolve().parents[1]
 TESTS = ROOT / 'tests/sol-override-validation'
@@ -92,7 +95,7 @@ def replay_inputs():
                 if local.is_file():
                     pending.append(local)
     paths.update(TESTS / p for p in ['matrix.json', 'required-controls.json',
-        'CandidateReplay.lean', 'CurrentChecker.lean', 'compiler.mjs', 'replay.py',
+        'CandidateReplay.lean', 'CurrentChecker.lean', 'compiler.mjs', 'replay.py', 'gate_runtime.py',
         'evidence/compiler-matrix.json', 'evidence/serial-lakefile.toml'])
     paths.add(ROOT / 'scripts/check-sol-override-validation.py')
     paths.add(ROOT / 'lakefile.toml')
@@ -164,13 +167,87 @@ def validate_replays(rows, manifest):
     return summary
 
 
+def verify_bulk_archive(archive=None, restore=False):
+    """H44's committed archive digest is the evidence trust anchor.
+
+    Retrieval is external: the archive is intentionally not in Git. A caller
+    may supply its new location. Restoration writes only untracked test data,
+    refuses links/path traversal and never overwrites existing different bytes.
+    """
+    manifest = TESTS / 'BULK-MANIFEST.sha256'
+    records = [line.split('  ', 1) for line in manifest.read_text().splitlines()
+               if line and not line.startswith('#')]
+    if len(records) != 1 or len(records[0]) != 2 or not re.fullmatch(r'[0-9a-f]{64}', records[0][0]):
+        fail('invalid committed bulk manifest')
+    digest, recorded_path = records[0]
+    archive = Path(archive or os.environ.get('SOL_OV_BULK_ARCHIVE', recorded_path))
+    if not archive.is_file():
+        fail('retrieve the H44 archive and supply --bulk-archive PATH; see BULK-MANIFEST.sha256')
+    with archive.open('rb') as source:
+        if hashlib.file_digest(source, 'sha256').hexdigest() != digest:
+            fail('bulk archive SHA256 differs from committed manifest')
+    if restore:
+        tracked = set(subprocess.check_output(['git', 'ls-files'], cwd=ROOT, text=True).splitlines())
+        with tarfile.open(archive, 'r:gz') as bundle:
+            for member in bundle:
+                rel = Path(member.name)
+                if rel.is_absolute() or '..' in rel.parts or not member.name.startswith('tests/sol-override-validation/'):
+                    fail('unsafe bulk archive path')
+                if not member.isfile():
+                    fail('bulk archive contains a non-regular member')
+                if member.name in tracked:
+                    fail('bulk restoration would modify a tracked source')
+                target = ROOT / rel
+                if not target.resolve().is_relative_to(TESTS.resolve()):
+                    fail('bulk restoration escapes test directory')
+                with bundle.extractfile(member) as source:
+                    if target.exists():
+                        with target.open('rb') as present:
+                            if hashlib.file_digest(present, 'sha256').digest() != hashlib.file_digest(source, 'sha256').digest():
+                                fail('existing bulk data differs: ' + member.name)
+                    else:
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        with target.open('xb') as output:
+                            shutil.copyfileobj(source, output)
+    return archive
+
+
+def verify_recorded_bulk(archive, evidence_path, replays):
+    paths = [TESTS / 'matrix.json', TESTS / 'required-controls.json']
+    if evidence_path is not None:
+        paths.append(evidence_path)
+    paths.extend((TESTS / 'fixtures').glob('*.sol'))
+    if replays:
+        paths.extend(TESTS / 'evidence' / name for name in [
+            'replay-manifest.json', 'serial-lakefile.toml', 'replay-build.log',
+            'candidate-matrix.tsv', 'current-checker.tsv'])
+    wanted = {str(path.resolve().relative_to(ROOT.resolve())): path for path in paths}
+    with tarfile.open(archive, 'r:gz') as bundle:
+        for member in bundle:
+            if member.name in wanted:
+                path = wanted.pop(member.name)
+                with bundle.extractfile(member) as snapshot, path.open('rb') as current:
+                    if hashlib.file_digest(snapshot, 'sha256').digest() != hashlib.file_digest(current, 'sha256').digest():
+                        fail('recorded data differs from committed archive: ' + member.name)
+    if wanted:
+        fail('recorded data absent from committed archive: ' + str(sorted(wanted)))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compiler', type=Path, help='rerun exact compiler instead of checking recorded results')
     parser.add_argument('--evidence', type=Path, default=TESTS / 'evidence/compiler-matrix.json')
     parser.add_argument('--write-evidence', action='store_true', help='save successful fresh compiler results')
     parser.add_argument('--replays', action='store_true', help='also validate hash-bound current and candidate replay evidence')
+    parser.add_argument('--bulk-archive', type=Path, help='retrieved H44 archive; digest must match committed manifest')
+    parser.add_argument('--restore-bulk', action='store_true', help='restore missing untracked inputs from the verified archive')
+    parser.add_argument('--verify-bulk-only', action='store_true', help='verify the committed archive digest without running checks')
     args = parser.parse_args()
+    archive = verify_bulk_archive(args.bulk_archive, args.restore_bulk)
+    print('PASS H44 archive SHA256: ' + str(archive))
+    if args.verify_bulk_only:
+        return
+    verify_recorded_bulk(archive, None if args.compiler else args.evidence, args.replays)
     rows = json.loads((TESTS / 'matrix.json').read_text())
     if args.write_evidence and not args.compiler:
         fail('--write-evidence requires --compiler')

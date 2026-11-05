@@ -1,35 +1,48 @@
-"""Run the repository-required gates, preserving failure statuses and outputs.
-Requires the writer lock, the existing bounded container and frozen SolKey.
+"""Run required serial gates; any failed gate makes the process fail.
+
+Caller holds writer.lock, prepares PATH/SOLKEY_RULES and retains 4GiB VM reserve.
+Logs are local outputs, never updated proof expectations or committed evidence.
 """
-import json
-from pathlib import Path
-import subprocess
-import time
-ROOT=Path(__file__).resolve().parents[2]
-E=ROOT/'tests/sol-override-validation/evidence'
-PATH='/workspace/solidity-lean/tests/sol-override-validation/runtime/bin:/workspace/.setup/tools/lean-4.24.0-linux/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/local/bin:/usr/bin:/bin'
-prefix=['docker','exec','-e','LEAN_NUM_THREADS=1','-e','PATH='+PATH,'-e','SOLKEY_RULES=/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key','sol-ov-session']
-results=[]
-def run(name,args,seconds=180):
-    command=prefix+['timeout','--kill-after=10',str(seconds)]+args
-    started=time.time()
-    with (E/(name+'.log')).open('w') as output:
-        result=subprocess.run(command,stdout=output,stderr=subprocess.STDOUT)
-    results.append(dict(name=name,command=command,exitCode=result.returncode,status='pass' if result.returncode==0 else 'fail',seconds=round(time.time()-started,2),evidence=str(E/(name+'.log'))))
-    (E/'final-gates.json').write_text(json.dumps(results,indent=2)+'\n')
-    print(name+': exit '+str(result.returncode),flush=True)
-    return result.returncode
-run('versions',['sh','-c','lean --version; lake --version; cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max; cat /sys/fs/cgroup/memory.events'])
-for source in sorted((ROOT/'Solidity/Frontend/OverrideValidation').glob('*.lean')):
-    run('final-diag-'+source.stem,['scripts/coord-tools/lean-mcp','diag',str(source)])
-for name in ['Trust','GraphControls','AdvancedControls']:
-    run('final-diag-'+name,['scripts/coord-tools/lean-mcp','diag','tests/sol-override-validation/'+name+'.lean'])
-run('mcp-stop',['scripts/coord-tools/lean-mcp','stop'])
-for name in ['Trust','GraphControls','AdvancedControls']:
-    run('final-proof-'+name,['lake','env','lean','-j1','--tstack=131072','tests/sol-override-validation/'+name+'.lean'])
-run('final-keysort',['bash','scripts/check-solkey.sh'],600)
-run('final-run-lean',['bash','./run-lean.sh'],1800)
-run('final-axiom-inventory',['node','scripts/check-axiom-pins.mjs'])
-run('final-doc-paths',['bash','scripts/check-doc-paths.sh'])
-run('final-core-checkpoint',['lake','build','Solidity'],1800)
-run('final-resources',['sh','-c','cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max /sys/fs/cgroup/memory.peak /sys/fs/cgroup/memory.events'])
+from gate_runtime import ROOT, Runner, arguments
+
+CONTROLS = ['Trust', 'GraphControls', 'AdvancedControls', 'DefensiveControls']
+
+
+def main():
+    runner = Runner(arguments(__doc__), 'final-gates')
+    if runner.preflight():
+        return 1
+    if runner.run('no-live-lean-before-mcp', ['sh', '-c',
+            "! ps -eo stat=,comm= | awk '$1 !~ /^Z/ && ($2 == \"lean\" || $2 == \"lake\") {found=1} END {exit !found}'"]):
+        return 1
+    runner.run('lean-version', ['lean', '--version'])
+    runner.run('lake-version', ['lake', '--version'])
+    for source in sorted((ROOT / 'Solidity/Frontend/OverrideValidation').glob('*.lean')):
+        runner.run('final-diag-' + source.stem,
+                   ['scripts/coord-tools/lean-mcp', 'diag', str(source.relative_to(ROOT))])
+    for name in CONTROLS:
+        runner.run('final-diag-' + name,
+                   ['scripts/coord-tools/lean-mcp', 'diag', f'tests/sol-override-validation/{name}.lean'])
+    # Stop before shell Lean; a failed diagnostic is retained by status().
+    if runner.run('mcp-stop', ['scripts/coord-tools/lean-mcp', 'stop']):
+        return 1
+    if runner.run('no-live-lean', ['sh', '-c',
+            "! ps -eo stat=,comm= | awk '$1 !~ /^Z/ && ($2 == \"lean\" || $2 == \"lake\") {found=1} END {exit !found}'"]):
+        return 1
+    for name in CONTROLS:
+        runner.run('final-proof-' + name,
+                   ['lake', 'env', 'lean', '-j1', '--tstack=131072', f'tests/sol-override-validation/{name}.lean'])
+    for name, command, seconds in [
+        ('final-keysort', ['bash', 'scripts/check-solkey.sh'], 600),
+        ('final-run-lean', ['bash', './run-lean.sh'], 1800),
+        ('final-axiom-inventory', ['node', 'scripts/check-axiom-pins.mjs'], 180),
+        ('final-doc-paths', ['bash', 'scripts/check-doc-paths.sh'], 180),
+        ('final-core-checkpoint', ['lake', 'build', 'Solidity'], 1800),
+        ('final-resources', ['sh', '-c', 'cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max /sys/fs/cgroup/memory.peak /sys/fs/cgroup/memory.events'], 180),
+    ]:
+        runner.run(name, command, seconds)
+    return runner.status()
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
