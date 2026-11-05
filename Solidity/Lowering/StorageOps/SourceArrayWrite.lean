@@ -41,10 +41,10 @@ theorem source_run :
 #guard_msgs in #print axioms source_run
 open Solidity.Backend.StorageOps Solidity.TypeGraph Solidity.Storage Solidity.Storage.Representation Solidity.Storage.Representation.Graph Solidity.Backend.StorageOps.TargetArrayWrite
 
-/-- Actual fresh Source write, written-cell word observation, guarded target
-execution, PUBLIC represented update/frame and per-run numeric transport. The
-header/leaf encoding and address agreements remain explicit premises; this is
-not an address compiler, whole Source statement or world rollback theorem. -/
+/-- Paired Source and guarded-target facts sharing length, index and payload
+ word. Representation/frame/numeric transport concern the graph and target;
+ Source path and target base remain independent. No Source-path/layout relation
+ is a premise or conclusion, so this is not compiler/address preservation. -/
 theorem complete_numeric :
 ∀ {n N L R : Nat} {G : Schema n} {p : PrimTy}
     {hash : Solidity.Storage.Pre → Nat} {P : List Solidity.Storage.Pre} {locations : List Solidity.Storage.Loc}
