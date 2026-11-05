@@ -13,3 +13,5 @@
 | `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean` | Populated source/target scalar result and distinct native exhaustion versus target success controls. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean` | Complete native allocating-recursive output coherence across all sufficient quotation indices; target heap identity remains separate. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean` | Exact populated two-allocation output at two sufficient indices and genuine insufficient-index exhaustion. |
+| `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContents.lean` | Exact fresh private array source contents and physical words after arbitrary allocating descent tails. |
+| `Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean` | Populated one/two-turn fresh object observations and header/payload ordering negatives. |
