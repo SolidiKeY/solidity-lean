@@ -685,3 +685,29 @@ cache964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e5
 Local/coordinator-pending,not shipment/installation. H41 no ship-cache.sh invocation.
 Current source/compiled fingerprints and cache/gate receipt are under adoption-708.
 No get_goal capability is exposed;the existing goal is not reset or completed.
+
+
+## Published1ae rebase and durable ownership audit
+
+Coordinator integrated19f8973d through source-equivalent cherry-picks1dcfab2e/
+79dca631,not original commit ancestry. All owned files matched the published tree.
+Required rebase onto1aeaf276 completed cleanly,skipping already-applied8f03f212/
+19f8973d;old identities remain in recovery ref
+refs/codex-recovery/shared-translator/pre-1aeaf276. No runtime source changed.
+
+The optional static ownership audit now uses the unique merge base of HEAD and
+fetched refs/remotes/origin/master,requiring pinnedb419 ancestry. This prevents a
+new hard-coded SHA edit for each publication and continues checking unpublished
+tracked/untracked tree deviations. Ambiguous ancestry fails closed. Caller MUST
+still establish authorized fetch/rebase;the audit grants no authorization and is
+not an audit of every historical edit. Original decoder/proof-search/builder/
+wrapper comparisons remain pinned to their original bases and are unchanged.
+No runtime API,semantic exclusion,premise,proof budget or trust boundary changed.
+
+Fresh344-job owned build,axiom inventory,modal/direct controls,native18+2 and new
+ownership audit passed38.161s,RSS1250152KiB,min5537415168bytes. Native binary source/
+C bindings remain exact;no Source AST importer migration was delivered. Independent
+read-only finder/skeptic(no Lean/server/writes) found no scope-guard defect and
+confirmed source-equivalence versus ancestry distinction. Remaining CR/DR-A-META,
+complete form/source parity,exhaustive binary closure,WASM,before-after and final
+full gates remain open. No RUNTIME_GATE_PASS or whole-goal completion is claimed.
