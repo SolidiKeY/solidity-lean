@@ -277,3 +277,40 @@ browser traversal, supply Identity/B/C controls, or turn the resource-stopped
 full/corpus checks into passes. H40 still assigns the repair to lane A with
 unchanged budgets. Fresh master remains1e367905 with no changes in the compared
 runtime/read-bounds/shared paths; this lane continues to await that repair.
+
+## Adopted published 8495 checkpoint
+
+Adopted `8495f1deb0a95dd6b9301822d8649ab76b217681` with an ordinary merge
+into this owned branch, preserving original base/history/work. Its packet is
+`docs/feature-work/integration-20261105-checkpoints.md`. Imported producer edits
+are separate from worker edits: D adds no Lean declaration or axiom. Withheld
+packets/protected Source repairs were not taken; no scanner or trust rule changed.
+
+The packet delivers Memory.Reader and ControlTuple.Adapter/AdmissionControls
+plus C's source/AST fixture. Their explicit-j1 VM build passed21jobs and13fixture
+admission checks. Those checks explicitly imply no intrinsic proof/runtime verdict.
+DirectRuntime, ReadBounds and runtime wiring remain unchanged; H40's lane A repair
+is still awaited. H21 cache freshness is not inferred from publication.
+
+Fixture backfill freshly compiled C's exact13public-function source with the
+pinned compiler and submitted actual serialized requests to both real backends.
+All13 controls remain unsupported. A separately freshly compiled existing
+additionSimple guard proves on both, demonstrating the client is not always
+unknown; it is not the required allocation Identity twin. Semantic/Identity
+acceptance remains false. The exact B Identity allocation fixture is not in
+this packet; the scalar web Identity example is not substituted.
+
+These inventory requests deliberately reuse the previously compiled native/WASM
+artifacts after checking all336current source hashes, bridge/closure and binary
+identities. They are not claimed as fresh post-integration binary builds or a
+completed post-A regression/performance gate. No environment/kernel assets or
+serialized environments were observed on the recorded ordinary requests.
+
+An evidence mistake in the first supplement reused two raw native paths,
+overwriting the initial trace/reply stream. The first JSON/log survives; missing
+raw evidence is not reconstructed. Versioned source and exact browser journal
+lineage are retained in published-8495/evidence-lineage.json. A corrected harness
+with output guards ran in a new verified-controls directory; its14-request
+native trace/browser evidence is intact. Both reviewers accepted the scoped
+inventory and disclosure. All original full/corpus, Identity/B-C, A-repair and
+matched post-integration gates remain required.

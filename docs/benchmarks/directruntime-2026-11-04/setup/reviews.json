@@ -67,5 +67,10 @@
     "finder": "No new finding. Coordinator-attested receipt is scoped to the exact preserved pack; no independent remote-file access claimed. Future cache delivery remains pending until receipt; no VM shipping.",
     "skeptic": "No new finding. Current receipt closes transport only, not runtime/control/full/corpus acceptance. Historical failed invocation preserved. Reviewer did not rehash/archive-read or access remote host.",
     "method": "Independent read-only, no Lean server/build."
+  },
+  "published8495": {
+    "finder": "No new blocking finding. Verified cleanv3 trace/replies/browser journal/harness hashes. API admission and13unsupported controls are not semantic acceptance; reused binaries and missing Identity/A integration explicit. Initial trace loss disclosed, not reconstructed.",
+    "skeptic": "Independently recomputed four final hashes and empty worker Lean delta vs8495. No new finding. Verified source archive lineage is separate from actual execution path; initial raw native loss disclosed and final separate evidence intact.",
+    "method": "Independent read-only; no Lean server/build by reviewers."
   }
 }

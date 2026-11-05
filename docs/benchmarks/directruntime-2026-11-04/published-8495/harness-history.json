@@ -1,0 +1,9 @@
+{
+  "firstInventoryHarness": "tests/directruntime-20261104/native-browser/history/published-8495-controls-v1.mjs",
+  "sha256": "f7957c0767ae98a8c555da0d3adc6370172496613d2b1cd21b8d3d8956bef8a8",
+  "firstReceipt": "controls-gate.json",
+  "supplement": "controls-with-guard-gate.json",
+  "boundary": "Original13-request result preserved. Supplemental14-request run adds an existing proved workload as a client guard, not Identity non-vacuity acceptance.",
+  "actualExecutedPathAtTime": "tests/directruntime-20261104/native-browser/published-8495-controls.mjs",
+  "archivedSourceNotStandaloneReplay": true
+}

@@ -532,5 +532,41 @@
     "rawSha256": "f4f072f3650c777280e444951ebadfe1f667a8b788e15c7600cb9d3661596a4a",
     "archive": "docs/benchmarks/directruntime-2026-11-04/h40/testsuite-retry.log.gz",
     "archiveSha256": "c46cbecc12b4fa9efdb9d69b25954615f6c6a19bff8a1978a00b0a7d3709e7d6"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/api.log",
+    "rawSha256": "6d7254126548412291a72a708387319d5c032add28575d5c347484e7119dcd4a",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/api.log.gz",
+    "archiveSha256": "a345d445f7f53f3da23cfb753231dab8903694aef0702b7f79df602efd70ccdd"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/control-native-with-guard.strace",
+    "rawSha256": "b29e123431788aae7eae17c0b20a0aa4127ada7f18cfd839a75d46f19981ba06",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/control-native-with-guard.strace.gz",
+    "archiveSha256": "194418d53ea78dd5276a7de9f9e96396745baa16a607a7d2bf61210e6c71f8dc"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/controls-with-guard.log",
+    "rawSha256": "72f19aad0a475b974a7130c9d9cb4e8bfd56879b9a17faef99a4bf58014ece08",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/controls-with-guard.log.gz",
+    "archiveSha256": "0f67a847ba5b3c8edd1da3aa9909324ade74716faed1defdbe29e76e1af9f5d8"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/controls.log",
+    "rawSha256": "7e84f51dcdee217fd75206c40b97051526e74ac5df1d1807d2670ed8801c4cec",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/controls.log.gz",
+    "archiveSha256": "f2e0bf5e68a9cb091ccc777378b16aa6b482270698abee51f91d82220f32704a"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/verified-controls/control-native-with-guard.strace",
+    "rawSha256": "32b7a42219789036b94cf005b1529cd954460418d3d0145bb1e191f6a08e0563",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/verified-controls/control-native-with-guard.strace.gz",
+    "archiveSha256": "3accaa2f6309ce51f1eeece16c370d6669779d5e781120548cb4dd08a33a8965"
+  },
+  {
+    "raw": "docs/benchmarks/directruntime-2026-11-04/published-8495/verified-controls.log",
+    "rawSha256": "f2718630d2ea183900445df253239dbf0eb6e433732ce91dd99acf684ffc40d5",
+    "archive": "docs/benchmarks/directruntime-2026-11-04/published-8495/verified-controls.log.gz",
+    "archiveSha256": "fffe562643bec8e8834c8a6e1c0b0d2013e47e614d2a5ca39ccc5a1b41df6b2c"
   }
 ]

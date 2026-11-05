@@ -42,7 +42,7 @@
   "questions": [],
   "pendingOwnedWork": [
     "After A migration source-to-result native/browser matched performance and final gate suite",
-    "Exact B Identity positive diamond twin and controls, C controls, both modalities",
+    "Exact B Identity diamond twin/controls plus post-integration semantic acceptance of delivered C controls on both modalities",
     "Final full-policy gates; DirectRuntime MCP now passed independently",
     "Further boundary audits required after producer changes"
   ],
@@ -54,7 +54,8 @@
     "WASM extraction isolated serially; successful fresh200-module build, exact baseline WASM",
     "Fresh native249+14, browser249+13/14, audit and repeated sort evidence",
     "Complete empty-native-output200-object compile/link288.991666s, then249fresh requests+14controls; Lean dependencies warm, exact binary matches audited candidate.",
-    "H40 independent per-file MCP: KeySort and DirectRuntime zero errors, unchanged12GiB/no-swap/4GiB reserve"
+    "H40 independent per-file MCP: KeySort and DirectRuntime zero errors, unchanged12GiB/no-swap/4GiB reserve",
+    "Adopted8495;VM-j1 dependency/admission build;fresh Cfixture baseline on native/browser with positive client guard, all13Ccontrols unsupported. Not semantic acceptance."
   ],
   "resolvedQuestions": [
     {
@@ -127,5 +128,11 @@
     "futurePreparedPackStatus": "coordinator-pending until coordinator receipt",
     "vmShipCacheExecution": "prohibited; no new invocation",
     "priorFailedWorkerTransportReceipt": "h35/cache-shipment-receipt.json"
+  },
+  "latestPublishedDelivery": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "availableProducerDependencies": {
+    "memoryReader": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
+    "controlTupleAdapter": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+    "controlFixture": "tests/directruntime-20261104/control-tuples/Controls.sol"
   }
 }
