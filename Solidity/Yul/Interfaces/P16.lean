@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawControlGrowingBlock
 import Solidity.Yul.RawControlGrowingSequence
 import Solidity.Yul.RawControlForPost
 import Solidity.Yul.RawControlDeclaration
@@ -159,3 +160,11 @@ retaining old-context initializer errors versus grown tail frames and
 checked/coherent Source premises. Mutation, control restoration and both
 error prefixes are witnessed in Solidity.Yul.Checks.RawControlGrowingSequence.
 Final block closure, other declarations and frontend admission remain separate. -/
+
+/-! RawControlGrowingBlock.adapter closes the actual supported Boolean
+initializer/checked Items sequence through existing scope restoration, producing
+a same-context checked block adapter. The full Source.execS law retains actual
+initializer/tail errors, older effects and checked/coherent premises.
+Closed/nested Source computations and control/error-frame witnesses are in
+Solidity.Yul.Checks.RawControlGrowingBlock. Other declarations, dirty Source
+readback and general frontend admission remain separate. -/
