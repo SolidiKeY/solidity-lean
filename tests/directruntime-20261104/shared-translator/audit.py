@@ -23,11 +23,13 @@ oldBody=oldAssertion.split(':= do',1)[1].strip()
 newBody=intrinsic.split(':= do',1)[1].split('/-- One executable',1)[0].strip()
 expected=oldBody.replace('  let ctx ← d.paramCtx', '  unless d.params.all (fun nt => nt.2 matches .prim _) do\n    throw "plain reference obligation"\n  let ctx ← d.paramCtx')
 expected=expected.replace('(Problem.callPre C Γ false [] false [] true)', '(callPre C Γ)')
-assert newBody==expected, 'assertion body differs beyond explicit callbacks/reference gate'
+expected=expected.replace('  let (raw, st) ← (lowerBodyLoops [] 0 d.body).runFrom { funs := C.funs }\n    (ctx, RawStmt.maxIdxs d.body + 1)', '  let (raw, st) ← (do\n    let body ← renameStmts [] d.body\n    lowerBodyLoops [] 0 body).runFrom { funs := C.funs } (ctx, Scope.bodySeed C d)\n  Scope.validateScopes (d.params.map (·.1)) d.body')
+assert newBody==expected, 'assertion body differs beyond explicit callbacks/reference gate and reviewed lexical preparation'
 assert 'obligation lowerBodyLoops\n    (fun C Γ => Problem.callPre C Γ false [] false [] true)' in current, 'producer callbacks not pinned'
 export=lambda s:s[s.index('@[export solidity_direct_check]'):]
 assert export(original)==export(current), 'exported JSON wrapper changed'
 assert 'private partial def expression' not in current
+assert 'contract executableReader source' in current and 'function executableReader n avoid' in current, 'runtime does not use canonical composition'
 inventory=json.loads((root/'tests/directruntime-20261104/shared-translator/coverage-inventory.json').read_text())
 assert inventory['counts']['compilerSolidityKinds']==58
 assert len(inventory['rawConstructors']['RawStmt'])==42
@@ -36,7 +38,13 @@ assert len(inventory['rawConstructors']['RawStmt'])==42
 assert all(not re.search(r'\b(?:sorry|axiom|admit)\b', q.read_text())
            for q in (root/'Solidity/Frontend/ExecutableAst/Shared').glob('*.lean'))
 
-files=subprocess.check_output(['git','diff','--name-only',base],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
+# The coordinator explicitly authorized adoption of this exact published tree.
+# Ownership is checked against it once it is an ancestor; unowned deviations
+# from that tree still fail, including any direct producer edits.
+adopted='8495f1deb0a95dd6b9301822d8649ab76b217681'
+usesAdoption=subprocess.run(['git','merge-base','--is-ancestor',adopted,'HEAD'],cwd=root,capture_output=True).returncode==0
+ownershipBase=adopted if usesAdoption else base
+files=subprocess.check_output(['git','diff','--name-only',ownershipBase],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
 allowed=lambda p:p=='Solidity/Tools/DirectRuntime.lean' or p.startswith(('Solidity/Frontend/ExecutableAst/Shared/','tests/directruntime-20261104/shared-translator/')) or p=='docs/feature-work/directruntime-shared-translator.md'
 assert all(allowed(p) for p in files), 'unowned path modified'
-print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'exact callback extraction plus reference gate','exportedWrapper':'byte-identical','ownedPathsOnly':True,'newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))
+print(json.dumps({'publishedReaderStringLiteralCount':len(literals(removed)),'currentReaderChange':'whole-root metadata admission after unchanged legacy decoding','proofSearchBlock':'byte-identical','assertionBuilder':'callback extraction, reference gate and existing lexical renamer with scope/freshness checks','exportedWrapper':'byte-identical','ownedPathsOnly':True,'ownershipComparisonBase':ownershipBase,'newAxiomsOrAdmittedProofs':False,'boundary':'static source audit; not runtime or semantic proof'},sort_keys=True))

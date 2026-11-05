@@ -1,10 +1,11 @@
+import Solidity.Frontend.ExecutableAst.Shared.Compose
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Tools.DirectRuntime
 
-/-! H35 axiom inventory of executable boundary definitions. No new or changed
-named theorem exists in the owned implementation; this does not prove source
-preservation or transitive runtime closure. Standard existing axioms are compared
+/-! Axiom inventory of executable boundary definitions and three new numerical
+freshness theorems in Scope. These bounds do not prove source preservation
+or transitive runtime closure. Standard existing axioms are compared
 with the pinned base runtime entrypoint separately. -/
 #print axioms Solidity.Frontend.ExecutableAst.Shared.Reader
 #print axioms Solidity.Frontend.ExecutableAst.Shared.BodyLoopLowerer
@@ -42,3 +43,15 @@ with the pinned base runtime entrypoint separately. -/
 #print axioms Solidity.Tools.DirectRuntime.check
 #check Solidity.Tools.DirectRuntime.checkString
 #print axioms Solidity.Tools.DirectRuntime.checkString
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.executableExpression
+#print axioms Solidity.Frontend.ExecutableAst.Shared.executableStatements
+#print axioms Solidity.Frontend.ExecutableAst.Shared.executableReader
+
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.nextIndex
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.le_foldMax
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.member_lt_nextIndex
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.reservedNames
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.bodySeed
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.reserved_lt_bodySeed
+#print axioms Solidity.Frontend.ExecutableAst.Shared.Scope.validateScopes

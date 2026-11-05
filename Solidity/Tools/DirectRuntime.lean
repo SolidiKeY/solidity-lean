@@ -1,6 +1,6 @@
 import Solidity.Frontend.Testing
 import Solidity.Calculus.AnonLocalCapture
-import Solidity.Frontend.ExecutableAst.Shared.Translate
+import Solidity.Frontend.ExecutableAst.Shared.Compose
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 
 /-! Import-free executable entry point. Compiler JSON is decoded to the existing
@@ -108,7 +108,7 @@ private partial def unrollLoops (ss : List RawStmt) : List RawStmt :=
 The same intrinsic obligation builder and executable verifier are called. -/
 def check (request : Json) : Except String Json := do
   let source ← field request "contract"
-  let base ← contract reader source
+  let base ← contract executableReader source
   if (request.getObjVal? "function").isOk && !(request.getObjValAs? String "function").isOk then
     throw "invalid function selector"
   if (request.getObjVal? "sourceId").isOk && !(request.getObjValAs? Int "sourceId").isOk then
@@ -139,7 +139,7 @@ def check (request : Json) : Except String Json := do
     let result : Json := if clauses.any (·.kind == "skip") then
         Json.mkObj [("status", toJson "skipped"), ("reason", toJson "tagged `@custom:key skip`")]
       else match (do
-        let (_, d) ← function reader n avoid
+        let (_, d) ← function executableReader n avoid
         let C := { base with funs := [(name, d)] }
         let φ ← buildObligation C name specified (clauses.any (·.kind == "box"))
         if listing then return Json.mkObj [("status", toJson "ready"), ("reason", toJson "")]

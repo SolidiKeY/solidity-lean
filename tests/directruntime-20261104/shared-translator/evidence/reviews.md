@@ -139,3 +139,12 @@ to the user message and leaves host receipt unread locally and installation
 unverified. H35-CACHE is resolved. No VM ship-cache invocation followed H41.
 Four owned source/trace mappings remain those of the received pack. Full lane
 adoption, source proofs and runtime closure remain open.
+
+## Composed readers and scoped obligation preparation
+
+Independent read-only finder and skeptic used no Lean/server. No confirmed code
+defect remained. Finder identified a stale AxiomInventory comment claiming no new
+theorems; corrected to explicitly name the three numerical freshness proofs.
+Both confirmed gate evidence:344jobs,14per-file gates,two MCP diagnostics,exit0.
+Callback receives renamed syntax; bounds and finite samples are not source
+preservation. Producer migration/native-WASM closure/full parity remain open.

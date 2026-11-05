@@ -68,3 +68,28 @@ private def signedComplementC : Contract := exampleContract
     [.assert (.binop .eqB (.unop .bnot (.name "x")) (.num 0))] }
 #guard match assertionObligation lowerBodyLoops markerPre signedComplementC "f" false with
   | .error "operator ~ does not take int" => true | _ => false
+
+-- Lexical preparation must retain invalid same-scope duplicates as refusals.
+private def duplicateC : Contract := exampleContract
+  { emptyDecl with body := [.decl (.named "uint") "x" (some (.num 1)),
+      .decl (.named "uint") "x" (some (.num 2))] }
+#guard match assertionObligation lowerBodyLoops markerPre duplicateC "f" false with
+  | .error "x is already declared, or names a state variable" => true | _ => false
+private def paramCollisionC : Contract := exampleContract
+  { emptyDecl with params := [("x", .prim .uint)], body := [.decl (.named "uint") "x" none] }
+#guard match assertionObligation lowerBodyLoops markerPre paramCollisionC "f" false with
+  | .error "x is already declared, or names a state variable" => true | _ => false
+private def unusedCaptureParamC : Contract := exampleContract
+  { emptyDecl with params := [("se1", .prim .uint)], body := [.decl (.named "uint") "x" none] }
+#guard match assertionObligation lowerBodyLoops markerPre unusedCaptureParamC "f" false with
+  | .ok _ => true | _ => false
+private def reservedStateC : Contract :=
+  { vars := [("se1", .prim .uint)], funs := [("f", { emptyDecl with body := [.decl (.named "uint") "x" none] })] }
+#guard match assertionObligation lowerBodyLoops markerPre reservedStateC "f" false with
+  | .ok _ => true | _ => false
+-- A UInt quantifier must not capture the freshly renamed Boolean local.
+private def quantifiedCaptureC : Contract := exampleContract
+  { emptyDecl with body := [.decl (.named "bool") "x" (some (.bool true)),
+      .whileLoop { qinv := [.all .uint "se1" (.expr (.name "x"))] } (.bool false) []] }
+#guard match assertionObligation lowerBodyLoops markerPre quantifiedCaptureC "f" true with
+  | .ok _ => true | _ => false

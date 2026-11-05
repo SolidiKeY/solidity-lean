@@ -1,3 +1,4 @@
+import Solidity.Frontend.ExecutableAst.Shared.Compose
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 open Solidity.Frontend.ExecutableAst.Shared
@@ -22,3 +23,15 @@ open Solidity.Frontend.ExecutableAst.Shared
 #check validateMetadata
 #check checkedExpression
 #check checkedStatements
+
+#check Solidity.Frontend.ExecutableAst.Shared.executableExpression
+#check Solidity.Frontend.ExecutableAst.Shared.executableStatements
+#check Solidity.Frontend.ExecutableAst.Shared.executableReader
+
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.nextIndex
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.le_foldMax
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.member_lt_nextIndex
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.reservedNames
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.bodySeed
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.reserved_lt_bodySeed
+#check Solidity.Frontend.ExecutableAst.Shared.Scope.validateScopes

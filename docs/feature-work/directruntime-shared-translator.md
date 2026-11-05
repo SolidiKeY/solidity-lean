@@ -375,3 +375,36 @@ printing do not establish identity resolution, intrinsic closure, source
 equivalence, or backend support. Full producer adoption/proofs/native-WASM gates
 remain open. The next step is user-authorized adoption of published8495f1de and
 its exact reviewed Memory/ControlTuple packets, preserving this committed work.
+
+
+## Reviewed packet composition and lexical preparation
+
+Adopted published8495f1de in merge d6894545, preserving owned metadata controls.
+Compose wires the published Memory.Reader and ControlTuple.Adapter through one
+recursive executableReader; DirectRuntime uses it for contract/function reads.
+There is no failure-catching fallback. Reference parameters/returns and unsupported
+siblings retain their existing guards. New Scope/Compose registration is proposed
+locally, without modifying shared roots.
+
+Plain obligation preparation now reuses the existing renameStmts before the loop
+callback. The callback therefore receives freshly renamed syntax. Scope guards
+check original same-scope duplicates; nested shadowing remains valid. Fresh names
+reserve root, parameter, local and invariant binders. Three checked theorems prove
+index bounds only, not semantic preservation of renaming. This supersedes earlier
+claims that the assertion builder changed only by callback extraction.
+
+The exact344-job build, two MCP checks and14per-file gates passed in57.357s,
+maximum child RSS1245272KiB, scope peak1091465216bytes and minimum outer available
+5293535232bytes. Logs: artifacts/composed-gates.log and composed-gates/*.log.
+The new/changed axiom inventory contains only existing propext/Classical.choice/
+Quot.sound dependencies, without admissions. Finite intrinsic execution controls
+exercise four normal, two panic and two revert results; these samples and ready
+listings do not establish source correctness or universal proof closure.
+
+The composed fixture retains existing builtin-ID normalization/loop annotations
+and restores required typeIdentifier/tryCall from matching raw compiler nodes.
+This is a test-only adapter, not authorization to alter producer interfaces.
+DR-A-META remains open: producer owners must select metadata retention or an
+explicit checked compatibility adapter. CR's existing Lean import migration,
+native/WASM closure, full parity/proof inventory and final gates remain pending.
+The prior received cache predates Scope/Compose and must not be claimed fresh.
