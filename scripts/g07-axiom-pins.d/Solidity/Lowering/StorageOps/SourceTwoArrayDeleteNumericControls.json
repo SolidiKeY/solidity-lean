@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.Controls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.Controls.numeric_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.Controls.source_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteNumericControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteNumeric.Controls.wrong_retained_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

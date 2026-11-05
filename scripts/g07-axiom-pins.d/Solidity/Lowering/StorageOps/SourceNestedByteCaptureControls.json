@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.timeout_heap_changed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceNestedByteCaptureControls.lean:Solidity.Lowering.StorageOps.SourceNestedByteCaptureControls.timeout_storage_unchanged": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

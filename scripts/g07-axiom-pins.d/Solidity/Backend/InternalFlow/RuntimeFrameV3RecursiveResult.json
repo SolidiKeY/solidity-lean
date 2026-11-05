@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveResult.lean:Solidity.Backend.InternalFlow.RuntimeFrame.RecursiveResult.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

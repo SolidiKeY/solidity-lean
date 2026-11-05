@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.bool_repr": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.bool_values": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceFixtures.lean:Solidity.Backend.MemoryOps.SequenceFixtures.uint_repr": [
+  "Quot.sound",
+  "propext"
+ ]
+}

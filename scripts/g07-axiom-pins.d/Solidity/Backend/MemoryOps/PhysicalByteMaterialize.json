@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.byteCode_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.materialize_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.pushed_toBytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.materialize_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.materialize_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.absent_and_older": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.bad_old_evidence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.bad_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.bad_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.ordered_graph": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.ordered_stores": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.represented_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RuntimeCopyCompositionControls.lean:Solidity.Backend.StorageOps.RuntimeCopyCompositionControls.self_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

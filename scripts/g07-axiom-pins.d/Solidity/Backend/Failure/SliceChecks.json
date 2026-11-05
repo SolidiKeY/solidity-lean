@@ -1,0 +1,40 @@
+{
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.checkedRun_emit_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.chunkWrites_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.run_chunkWrites": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.run_emit_suffix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.run_writes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.Slice.getBytes_putBytes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.Slice.getBytes_suffix_write": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.Slice.putBytes_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Failure/SliceChecks.lean:Solidity.Backend.Failure.stackSafe_emit_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

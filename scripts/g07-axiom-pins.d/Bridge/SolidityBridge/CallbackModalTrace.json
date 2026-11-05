@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/CallbackModalTrace.lean:Solidity.Bridge.CallbackTrace.bisim_holdsC": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/CallbackModalTrace.lean:Solidity.Bridge.CallbackTrace.holdsC_iff_traceSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

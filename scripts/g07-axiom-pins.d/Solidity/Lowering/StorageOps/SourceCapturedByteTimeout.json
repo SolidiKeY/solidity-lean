@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCapturedByteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteTimeout.cleanup_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

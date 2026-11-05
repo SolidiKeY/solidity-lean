@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Termination.lean:Solidity.Examples.Termination.flags_terminate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Termination.lean:Solidity.Examples.Termination.sourceProgram_terminates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

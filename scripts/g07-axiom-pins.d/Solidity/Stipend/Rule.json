@@ -1,0 +1,12 @@
+{
+ "Solidity/Stipend/Rule.lean:Solidity.Stipend.fits_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Stipend/Rule.lean:Solidity.Stipend.requires_eleven_not_fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

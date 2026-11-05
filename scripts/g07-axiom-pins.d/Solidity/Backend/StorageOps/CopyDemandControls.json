@@ -1,0 +1,100 @@
+{
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.actual_root_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.arbitrary_depth_copy": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.copied": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.demands": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.graph": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.hash": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.Inner": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.locations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.mapping_permit_essential": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.nested_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.numericView": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.old": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.Outer": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.outside_owner_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.permit": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.progress_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.queries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.root": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.separated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.src": [],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemandControls.lean:Solidity.Backend.StorageOps.CopyDemandControls.wrong_whole_extent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

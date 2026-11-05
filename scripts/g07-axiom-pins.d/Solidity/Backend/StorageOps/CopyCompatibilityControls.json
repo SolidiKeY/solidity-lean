@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.complete_header_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.destination_bounds_essential": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.fresh_header_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.nested_post_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.selected_word_only": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyCompatibilityControls.lean:Solidity.Backend.StorageOps.CopyCompatibilityControls.source_bounds_essential": [
+  "Quot.sound",
+  "propext"
+ ]
+}

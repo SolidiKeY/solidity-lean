@@ -1,0 +1,79 @@
+{
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.capture_stage_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.CapturedValueStability.joined_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.ConditionalReferenceCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.bad_capture_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.capture_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.capture_success_not_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.immediate_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.joined_observations": [],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reached_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.reference_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.skipped_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.QueueCompletionControls.wrong_readback": [],
+ "Solidity/Backend/Passes/QueueCompletionPins.lean:Solidity.Backend.Passes.ShortCircuitBoundary.revert_witness_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

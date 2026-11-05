@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.aliases_and_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.bad_union": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.failures_and_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.header_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.old_source_is_not_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.reverse_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.storage_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotDependentControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotDependent.Controls.whole_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

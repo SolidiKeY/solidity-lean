@@ -1,0 +1,186 @@
+{
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.expression_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.numeric_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.program_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.reached_composition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedMixedCapture.reached_environment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.actual_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.actual_prefix_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.byte_roundtrip": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.bytes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.capacity_negative": [],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.coarse_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.guard_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.guard_is_not_division": [],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.ignored_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.instructions": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.intrinsic_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.intrinsic_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.numeric_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.physical_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.physical_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.reached_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.reached_guard_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.self_balance_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.wrong_environment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValueControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.checked_application": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.decode_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.encode_wrap_sub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.mixed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.represented_word": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.sub_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PublishedValuePins.lean:Solidity.Backend.Passes.PublishedValues.symbolic_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

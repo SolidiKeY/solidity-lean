@@ -1,0 +1,18 @@
+{
+ "Solidity/Semantics/CtxEquiv/AdversaryControls.lean:Solidity.CtxEquiv.AdversaryControls.noCallback_strictly_weaker": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/AdversaryControls.lean:Solidity.CtxEquiv.AdversaryControls.pay_not_ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/AdversaryControls.lean:Solidity.CtxEquiv.AdversaryControls.seq_history_observed": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/AdversaryControls.lean:Solidity.CtxEquiv.AdversaryControls.store_not_ctxEquiv": [
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/AdversaryControls.lean:Solidity.CtxEquiv.AdversaryControls.twoTx_not_ctxEquiv": [
+  "propext"
+ ]
+}

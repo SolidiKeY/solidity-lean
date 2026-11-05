@@ -1,0 +1,36 @@
+{
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.left_overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.overlap_refutes": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.right_overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.self_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.separated_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.separated_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.source_captures": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotRepeatControls.lean:Solidity.Backend.StorageOps.TargetSnapshotRepeatControls.whole_context": [
+  "propext"
+ ]
+}
