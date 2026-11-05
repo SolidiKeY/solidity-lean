@@ -102,8 +102,6 @@ end Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native
 
-/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native_discarded' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.PrimitiveCallerFrame.Controls.native_discarded
