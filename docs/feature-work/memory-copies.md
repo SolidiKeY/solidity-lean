@@ -1166,3 +1166,26 @@ Independent design finder/skeptic reviews required correct physical-versus-
 intrinsic allocation order, header/pointer transport and cleanup of the source
 operand. Outer storage-header loading, Source/physical adequacy and the original
 producer obligations remain open. Interface precedes proofs and controls.
+
+Parent implementation/handoff (interface `6cb1a5fc43430c4af23ff665aaf0de1e03c0ea10`):
+`nestedStorageParent` now proves checked count-operand execution against the
+actual nested copy, including complete adopted allocator and intrinsic
+snapshot contents. Existing `adoptDefaultParent` connects parent-first physical
+reservation with children-first intrinsic identities. Refusal distinguishes
+parent reservation failure from child failure after reservation.
+
+Controls observe parent root 40/header 3, child pointers 44/47/48 and retained
+nonzero payloads, parent identity after its three children, empty/64-child/
+repeated parents, old aliases, last-fitting empty parent and saturated refusal.
+A boundary witness includes actual successful reservation and full allocator
+before the child loop refuses; negative controls reject the wrong parent
+identity, header and returned child address. Both independent semantic reviews
+passed with no findings. Strict warnings were repaired by retaining an unused
+bound premise under `_bounded` and removing one unused simp argument.
+Final three diagnostics have zero errors/empty warnings; standalone dependent
+allocator transport passed without budget or premise changes. Eight main and
+seventeen control targets bring the checkpoint to 1,261 scoped reports across
+214 modules, preserving the previous 211. Exact-head gates, axiom audit, patch
+reconstruction and reviewed seal remain required before acceptance. Outer
+storage-header loading/child-base selection, approved Source compilation and
+all original Source/physical/producer obligations remain open.
