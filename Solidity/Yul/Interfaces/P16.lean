@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterSequence
 import Solidity.Yul.Syntax
 import Solidity.Yul.BlockTyping
 import Solidity.Yul.Words
@@ -34,4 +35,9 @@ conditional factories provide concrete mixed checked-word/control producers;
 fromAdapter reuses the older contract without changing it. These factories do
 not provide an instance for arbitrary statements. Inhabited uses and selected
 flow/Source controls live in Solidity.Yul.Checks.RawCheckedAdapter.
+RawCheckedAdapterSequence.Items retains the same checked/coherent contract for
+actual Source item syntax. Its concrete cons and block factories compose
+checked producers, preserving short-circuit flow and exact frames. Nested
+inhabitants are checked in Solidity.Yul.Checks.RawCheckedAdapterSequence.
+No arbitrary-statement producer or general assembly admission follows.
 -/
