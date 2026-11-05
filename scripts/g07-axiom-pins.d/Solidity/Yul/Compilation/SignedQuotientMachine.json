@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/SignedQuotientMachine.lean:Solidity.Yul.Compilation.SignedQuotientMachine.sdiv_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedQuotientMachine.lean:Solidity.Yul.Compilation.SignedQuotientMachine.smod_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

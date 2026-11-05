@@ -1,0 +1,67 @@
+{
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.add_assoc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.div_trunc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.explicit_explicit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.explicit_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.implicit_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.mul_trunc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.neg_unsigned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.rescale_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.rescale_rescale_down": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.Fx.result_unchecked_of_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.FxTy.implicitOK_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.FxTy.subsumes_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Laws.lean:Solidity.Language.FixedPoint.tdiv_tdiv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

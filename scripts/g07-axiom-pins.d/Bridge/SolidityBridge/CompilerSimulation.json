@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/CompilerSimulation.lean:Solidity.Evm.Compiler.bisimulation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/CompilerSimulation.lean:Solidity.Evm.Compiler.trace_equivalence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

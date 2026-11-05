@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/NestedRetainedCopy.lean:Solidity.Backend.StorageOps.NestedRetainedCopy.child_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedRetainedCopy.lean:Solidity.Backend.StorageOps.NestedRetainedCopy.copied_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

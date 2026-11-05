@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStorageClear.lean:Solidity.Lowering.StorageOps.SourceByteStorageClear.range_eq_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

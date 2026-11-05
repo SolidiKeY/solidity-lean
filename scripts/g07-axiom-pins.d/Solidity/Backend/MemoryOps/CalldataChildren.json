@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.boolChild_parent_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.alias_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.read_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.decodedBoolChildren_overwrite": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataChildren.lean:Solidity.Backend.MemoryOps.referenceSlice_empty": [
+  "Quot.sound",
+  "propext"
+ ]
+}

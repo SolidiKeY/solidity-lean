@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.boolTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.mixedTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.primitiveTransfer_ref_root_ne": [],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.RefChildRepr.mixedSequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceChildren.lean:Solidity.Backend.MemoryOps.uintTransfer_frame_or_empty": [
+  "Quot.sound",
+  "propext"
+ ]
+}

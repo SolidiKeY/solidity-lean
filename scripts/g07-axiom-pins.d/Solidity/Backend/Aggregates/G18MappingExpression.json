@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/Aggregates/G18MappingExpression.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.assignment_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpression.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.location_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpression.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.read_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpression.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.reference_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpression.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.static_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
