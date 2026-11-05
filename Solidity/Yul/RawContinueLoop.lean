@@ -1,0 +1,138 @@
+import Solidity.Yul.RawU8ForAbsent
+
+/-! The actual literal-true/continue runner, not a replacement loop semantics.
+All-horizon timeout and raw observations concern this specific body; general
+program divergence and compiler adequacy remain separate. -/
+namespace Solidity.Yul.RawContinueLoop
+def test (ctx : Solidity.Source.Ctx) :
+    LocalBoolControl.Supported ctx.env ctx.tys (.bool true) := .base (.literal true)
+def body (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool) :
+    RawCheckedAdapter.Adapter ctx returns modifier u .cont :=
+  RawCheckedAdapter.fromAdapter (RawSourceAdapter.body
+    (ctx := ctx) (returns := returns) (modifier := modifier) (u := u) .continue_)
+def refresh {ctx : Solidity.Source.Ctx} (state : RawFrame.State ctx) : RawFrame.State ctx :=
+  RawCoherent.capture state (RawCoherent.prepare state)
+def run (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+    (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : RawFrame.State ctx) :
+    Solidity.Source.R Unit × RawFrame.State ctx :=
+  RawCheckedAdapterLoop.run (test ctx) (body ctx returns modifier u) pipeline fuel state
+
+theorem refresh_view : ∀ (ctx : Solidity.Source.Ctx) (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawFrame.view (Solidity.Yul.RawContinueLoop.refresh state) = Solidity.Yul.RawFrame.view state := by
+  intro ctx state
+  change localWordCells ctx (RawCoherent.prepare state).1 = RawFrame.view state
+  exact RawCoherent.prepare_view state
+
+theorem refresh_world : ∀ (ctx : Solidity.Source.Ctx) (state : Solidity.Yul.RawFrame.State ctx), (Solidity.Yul.RawContinueLoop.refresh state).world = state.world := by
+  intro ctx state
+  change (RawCoherent.prepare state).2 = state.world
+  unfold RawCoherent.prepare
+  split <;> rfl
+
+theorem all_fuel : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ (Solidity.Yul.RawContinueLoop.run ctx returns modifier u pipeline fuel state).1 = .error .timeout ∧
+ Solidity.Yul.RawFrame.view (Solidity.Yul.RawContinueLoop.run ctx returns modifier u pipeline fuel state).2 = Solidity.Yul.RawFrame.view state ∧
+ (Solidity.Yul.RawContinueLoop.run ctx returns modifier u pipeline fuel state).2.world = state.world := by
+  intro ctx returns modifier u pipeline fuel state
+  induction fuel generalizing state with
+  | zero => exact ⟨rfl,rfl,rfl⟩
+  | succ fuel ih =>
+    cases fuel with
+    | zero =>
+      change (.error .timeout : Solidity.Source.R Unit) = .error .timeout ∧
+        RawFrame.view (refresh state) = RawFrame.view state ∧ (refresh state).world = state.world
+      exact ⟨rfl,refresh_view ctx state,refresh_world ctx state⟩
+    | succ fuel =>
+      have guard : RawCondition.eval (test ctx) (fuel+1) state = (.ok true,refresh state) := by rfl
+      have branch : (body ctx returns modifier u).run pipeline (fuel+1) (refresh state) =
+          (.ok (.continue_ rfl),refresh state) := by rfl
+      have next := ih (refresh state)
+      unfold run
+      rw [RawCheckedAdapterLoop.run,guard,branch]
+      dsimp only
+      exact ⟨next.1,next.2.1.trans (refresh_view ctx state),next.2.2.trans (refresh_world ctx state)⟩
+
+theorem source_while : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (glob : Solidity.Source.Glob ctx.env) (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph ctx.env))
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawCoherent.coherent state = true →
+ (Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.whileLoop (R := returns) (M := modifier) (l := true) (u := u)
+     (.bool true) .cont) state.clean).run (Solidity.Source.L0 ctx.env,state.world) =
+ (.error .timeout,(Solidity.Source.L0 ctx.env,state.world)) := by
+  intro ctx returns modifier u glob frame checked fuel nps ph state same
+  have compared := RawCheckedAdapterLoop.correct ctx returns modifier true u (.bool true)
+    (test ctx) .cont (body ctx returns modifier u) glob frame checked fuel nps ph state same
+  have actual : (Solidity.Source.execS glob frame fuel nps ph
+      (Solidity.Source.RStmt.whileLoop (R := returns) (M := modifier) (l := true) (u := u)
+        (.bool true) .cont) state.clean).run (Solidity.Source.L0 ctx.env,state.world) =
+      RawSequence.represented (run ctx returns modifier u glob.pipeline fuel state) := compared.2
+  have observed := all_fuel ctx returns modifier u glob.pipeline fuel state
+  rw [actual]
+  simp only [RawSequence.represented,observed.1,Except.map,observed.2.2]
+
+theorem initialized_timeout : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ (Solidity.Yul.RawU8ForAbsent.run (.local index) (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u) pipeline fuel state).1 = .error .timeout := by
+  intro ctx name returns modifier u index pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      cases fuel with
+      | zero => rfl
+      | succ fuel =>
+        change (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) _).1 = .error .timeout
+        exact (all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) _).1
+
+theorem initialized_world : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ (Solidity.Yul.RawU8ForAbsent.run (.local index) (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u) pipeline fuel state).2.world = state.world := by
+  intro ctx name returns modifier u index pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      cases fuel with
+      | zero => exact refresh_world ctx state
+      | succ fuel =>
+        let reached : RawFrame.State (ctx.push name LocalU8Expr.Ty) :=
+          RawCoherent.capture
+            (RawFrame.ofClean (.cons (.int 0 (by decide)) state.clean) state.world)
+            (((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1),
+              (RawCoherent.prepare state).2)
+        change (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2.world = state.world
+        rw [(all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2.2]
+        exact refresh_world ctx state
+
+theorem source_for : ∀ (ctx : Solidity.Source.Ctx) (_name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (glob : Solidity.Source.Glob ctx.env) (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph ctx.env))
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawCoherent.coherent state = true →
+ (Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.forLoop (R := returns) (M := modifier) (l := true) (u := u)
+     (Solidity.Source.RStmt.declInit (τ := Solidity.Yul.LocalU8Expr.Ty) (.local index) (by rfl))
+     .none .none .cont) state.clean).run (Solidity.Source.L0 ctx.env,state.world) =
+ (.error .timeout,(Solidity.Source.L0 ctx.env,state.world)) := by
+  intro ctx name returns modifier u index glob frame checked fuel nps ph state same
+  have compared := RawU8ForAbsent.correct ctx name returns modifier u (.local index) (.local index)
+    .cont (body (ctx.push name LocalU8Expr.Ty) returns modifier u)
+    glob frame checked fuel nps ph state same
+  have actual : (Solidity.Source.execS glob frame fuel nps ph
+      (Solidity.Source.RStmt.forLoop (R := returns) (M := modifier) (l := true) (u := u)
+        (.declInit (τ := LocalU8Expr.Ty) (.local index) (by rfl)) .none .none .cont)
+      state.clean).run (Solidity.Source.L0 ctx.env,state.world) =
+      RawSequence.represented (RawU8ForAbsent.run (.local index)
+        (body (ctx.push name LocalU8Expr.Ty) returns modifier u) glob.pipeline fuel state) := compared.2
+  have timeout := initialized_timeout ctx name returns modifier u index glob.pipeline fuel state
+  have world := initialized_world ctx name returns modifier u index glob.pipeline fuel state
+  rw [actual]
+  simp only [RawSequence.represented,timeout,Except.map,world]
+end Solidity.Yul.RawContinueLoop

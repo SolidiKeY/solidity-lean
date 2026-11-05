@@ -1,3 +1,4 @@
+import Solidity.Yul.RawContinueLoop
 import Solidity.Yul.RawU8ForAbsent
 import Solidity.Yul.RawU8For
 import Solidity.Yul.RawCheckedGrowingAbsent
@@ -260,3 +261,11 @@ retains actual initializer/body certificates and checked/coherent premises.
 Checks witness mutation/break, a finite continue-only horizon, dirty retention
 and per-pipeline initializer errors. General admission and unbounded divergence
 claims do not follow from these bounded witnesses. -/
+
+/-! RawContinueLoop.all_fuel proves every horizon of the actual literal-true/
+continue runner times out, preserving raw word views and world. Concrete Source
+while and read-local uint8 initialized-for laws quantify every fuel under genuine
+checked/coherent premises. Initialized raw laws establish timeout/world; they do
+not claim raw-frame metadata identity or general initializer divergence.
+Checks include all-fuel dirty words and a terminating-break countercontrol.
+General program divergence, admission and compiler adequacy remain separate. -/
