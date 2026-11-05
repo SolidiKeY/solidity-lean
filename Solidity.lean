@@ -672,6 +672,8 @@ import Solidity.Backend.Passes.TripleFailures
 import Solidity.Backend.Passes.TriplePins
 import Solidity.Backend.Passes.TripleSequence
 import Solidity.Backend.Passes.TripleSuffix
+import Solidity.Backend.Passes.TupleReturnConsumer
+import Solidity.Backend.Passes.TupleReturnConsumerControls
 import Solidity.Backend.Passes.ValueCertificate
 import Solidity.Backend.Passes.ValueContext
 import Solidity.Backend.Passes.ValueContextAllocation

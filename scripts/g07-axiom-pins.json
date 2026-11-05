@@ -14359,6 +14359,66 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.automatic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.expanded_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.reached_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.failure_before_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.insufficient_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.missing_compaction_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumerControls.lean:Solidity.Backend.Passes.TupleReturnConsumer.Controls.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.core_val_fresh_code": [
   "Quot.sound",
   "propext"
