@@ -1,0 +1,19 @@
+{
+  "status": "PASS for adoption boundary only; fresh exact-head gates pending",
+  "roles": [
+    "finder",
+    "skeptic"
+  ],
+  "read_only": true,
+  "lean_server_used": false,
+  "reviewed_snapshot": "adoption-reviewed-inputs.json",
+  "snapshot_sha256": "2af1cd784c534f38c5abb66c056f541131d3b06009d855d148f4b22b53163e2a",
+  "findings": [],
+  "verification": [
+    "Exact merge parents ffd09ef2 and8495",
+    "All63 frozen source hashes identical across original/adopted/actual trees",
+    "Both worker history diffs remain within exclusive scope",
+    "No shared-registry or cache-route authorization inferred"
+  ],
+  "limitation": "Followup source review includes Node buffer fix; new final evidence review remains required"
+}

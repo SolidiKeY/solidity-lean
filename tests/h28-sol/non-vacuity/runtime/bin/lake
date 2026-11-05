@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+if [ "${1:-}" = serve ]; then exec "$real" "$@" -j1 --tstack=131072; fi
+# The unchanged corpus generator uses Promise.all. Serialize only its
+# lake lean probes; waiting flock processes are not Lean workers.
+if [ "${1:-}" = --quiet ] && [ "${2:-}" = --no-build ] && [ "${3:-}" = lean ]; then
+  lock=/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/corpus-probe.lock
+  mkdir -p "$(dirname "$lock")"
+  exec flock "$lock" "$real" "$@" -j1
+fi
+exec "$real" "$@"
