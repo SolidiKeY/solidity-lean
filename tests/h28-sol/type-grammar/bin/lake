@@ -1,0 +1,7 @@
+#!/bin/sh
+# The LSP's serve and setup-file subprocesses use the same bounded build config.
+config=/workspace/solidity-lean/tests/h28-sol/type-grammar/runtime.toml
+if [ "$1" = serve ]; then
+  exec /opt/lean/bin/lake -f "$config" "$@" -j1 --tstack=131072
+fi
+exec /opt/lean/bin/lake -f "$config" "$@"

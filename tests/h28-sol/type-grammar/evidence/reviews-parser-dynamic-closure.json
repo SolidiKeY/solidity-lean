@@ -1,0 +1,24 @@
+{
+  "scope": "ParserDynamicClosure all20theorems; arbitrarydynamicarraysaroundmappings and inhabitedallinterleavingcontrols",
+  "finder": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "checkpoint accepted",
+    "findings": []
+  },
+  "skeptic": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "dynamic-closure checkpoint accepted only",
+    "findings": []
+  },
+  "trust": {
+    "reviewed_audit": "h28-type-66db517edf62.json",
+    "final_tooling_audit": "h28-type-9c8bb13234b0.json",
+    "proof_hashes_identical_between_audits": true,
+    "current_statement_count": 272,
+    "new_empty": 2,
+    "new_propext": 18,
+    "allowlist_unchanged": true
+  },
+  "clarification": "DynamicMappingGrammar is an inhabited proof-control family over unchanged Syn, not replacement assignment language. Generic mapping closure consumes strict-child evidence only.",
+  "remaining": "Function/static-length certification and final whole-language gates/acceptance"
+}

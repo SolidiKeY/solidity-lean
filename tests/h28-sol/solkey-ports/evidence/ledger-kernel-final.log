@@ -1,0 +1,70 @@
+Solidity.SolkeyAgreementH28.fresh_iff_absent : ∀ (H : Solidity.HTy) (id : Nat),
+  Solidity.SolkeyAgreementH28.Fresh H id ↔ ∀ (R : Solidity.RefTy) (r : Solidity.HRef H R), r.id ≠ id
+'Solidity.SolkeyAgreementH28.fresh_iff_absent' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.write_typing : ∀ {H : Solidity.HTy} {T : Solidity.Ty}
+  {m n : Solidity.Grown H fun x => Unit} {a : Solidity.MAddrT T} {v : Solidity.MvT T},
+  m.writeT a v = some n → n.H' = m.H'
+'Solidity.SolkeyAgreementH28.write_typing' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.newFromWrite : ∀ {H : Solidity.HTy} {T : Solidity.Ty}
+  {m n : Solidity.Grown H fun x => Unit} {a : Solidity.MAddrT T} {v : Solidity.MvT T},
+  m.writeT a v = some n →
+    ∀ (id : Nat), Solidity.SolkeyAgreementH28.Fresh n.H' id ↔ Solidity.SolkeyAgreementH28.Fresh m.H' id
+'Solidity.SolkeyAgreementH28.newFromWrite' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.Writes.typing : ∀ {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},
+  Solidity.SolkeyAgreementH28.Writes m n → n.H' = m.H'
+'Solidity.SolkeyAgreementH28.Writes.typing' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.Writes.fresh_iff : ∀ {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},
+  Solidity.SolkeyAgreementH28.Writes m n →
+    ∀ (id : Nat), Solidity.SolkeyAgreementH28.Fresh n.H' id ↔ Solidity.SolkeyAgreementH28.Fresh m.H' id
+'Solidity.SolkeyAgreementH28.Writes.fresh_iff' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.Writes.separate : ∀ {H : Solidity.HTy} {m n : Solidity.Grown H fun x => Unit},
+  Solidity.SolkeyAgreementH28.Writes m n →
+    ∀ {R : Solidity.RefTy} (r : Solidity.HRef m.H' R) (id : Nat),
+      Solidity.SolkeyAgreementH28.Fresh m.H' id → Solidity.SolkeyAgreementH28.Fresh n.H' id ∧ r.id ≠ id
+'Solidity.SolkeyAgreementH28.Writes.separate' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.newFromCopySt : ∀ {H : Solidity.HTy} (hp : Solidity.Heap H) {T : Solidity.Ty}
+  (v : Solidity.SVal T) (hm : T.mapFree = true) (id : Nat),
+  Solidity.SolkeyAgreementH28.Fresh (Solidity.SVal.copyStToM hp v hm).H' id → Solidity.SolkeyAgreementH28.Fresh H id
+'Solidity.SolkeyAgreementH28.newFromCopySt' depends on axioms: [propext]
+@Solidity.SolkeyAgreementH28.copy_witness : ∀ {H : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}
+  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true) (old : Solidity.HRef H S),
+  have g := Solidity.SVal.copyStToM hp v hm;
+  Solidity.SolkeyAgreementH28.Fresh H g.val.id ∧
+    ¬Solidity.SolkeyAgreementH28.Fresh g.H' g.val.id ∧ (Solidity.HRef.wk ⋯ old).id ≠ g.val.id
+'Solidity.SolkeyAgreementH28.copy_witness' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.copy_not_converse : ∀ {H : Solidity.HTy} (hp : Solidity.Heap H) {R : Solidity.RefTy}
+  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true),
+  ¬∀ (id : Nat),
+      Solidity.SolkeyAgreementH28.Fresh H id → Solidity.SolkeyAgreementH28.Fresh (Solidity.SVal.copyStToM hp v hm).H' id
+'Solidity.SolkeyAgreementH28.copy_not_converse' depends on axioms: [propext]
+@Solidity.SolkeyAgreementH28.Operations.prefix : ∀ {H K : Solidity.HTy} {hp : Solidity.Heap H} {hq : Solidity.Heap K},
+  Solidity.SolkeyAgreementH28.Operations hp hq → H <+: K
+'Solidity.SolkeyAgreementH28.Operations.prefix' depends on axioms: [propext]
+@Solidity.SolkeyAgreementH28.Operations.fresh_back : ∀ {H K : Solidity.HTy} {hp : Solidity.Heap H}
+  {hq : Solidity.Heap K},
+  Solidity.SolkeyAgreementH28.Operations hp hq →
+    ∀ (id : Nat), Solidity.SolkeyAgreementH28.Fresh K id → Solidity.SolkeyAgreementH28.Fresh H id
+'Solidity.SolkeyAgreementH28.Operations.fresh_back' depends on axioms: [propext]
+@Solidity.SolkeyAgreementH28.Operations.separate : ∀ {H K : Solidity.HTy} {hp : Solidity.Heap H} {hq : Solidity.Heap K}
+  (h : Solidity.SolkeyAgreementH28.Operations hp hq) {R : Solidity.RefTy} (r : Solidity.HRef H R) (id : Nat),
+  Solidity.SolkeyAgreementH28.Fresh K id → (Solidity.HRef.wk ⋯ r).id = r.id ∧ (Solidity.HRef.wk ⋯ r).id ≠ id
+'Solidity.SolkeyAgreementH28.Operations.separate' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.copy_then_witness : ∀ {H K : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}
+  (v : Solidity.SVal (Solidity.Ty.ref R)) (hm : (Solidity.Ty.ref R).mapFree = true) (old : Solidity.HRef H S)
+  {hq : Solidity.Heap K} (suffix : Solidity.SolkeyAgreementH28.Operations (Solidity.SVal.copyStToM hp v hm).heap hq),
+  let g := Solidity.SVal.copyStToM hp v hm;
+  have root := Solidity.HRef.wk ⋯ g.val;
+  root.id = g.val.id ∧
+    Solidity.SolkeyAgreementH28.Fresh H root.id ∧
+      ¬Solidity.SolkeyAgreementH28.Fresh K root.id ∧ (Solidity.HRef.wk ⋯ old).id ≠ root.id
+'Solidity.SolkeyAgreementH28.copy_then_witness' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.copies_ordered : ∀ {H K : Solidity.HTy} (hp : Solidity.Heap H) {R S : Solidity.RefTy}
+  (v : Solidity.SVal (Solidity.Ty.ref R)) (hv : (Solidity.Ty.ref R).mapFree = true) {hq : Solidity.Heap K}
+  (middle : Solidity.SolkeyAgreementH28.Operations (Solidity.SVal.copyStToM hp v hv).heap hq)
+  (w : Solidity.SVal (Solidity.Ty.ref S)) (hw : (Solidity.Ty.ref S).mapFree = true),
+  (Solidity.HRef.wk ⋯ (Solidity.SVal.copyStToM hp v hv).val).id < (Solidity.SVal.copyStToM hq w hw).val.id
+'Solidity.SolkeyAgreementH28.copies_ordered' depends on axioms: [propext, Quot.sound]
+@Solidity.SolkeyAgreementH28.copy_mirror : ∀ {H : Solidity.HTy} (hp : Solidity.Heap H) {T : Solidity.Ty}
+  (v : Solidity.SVal T) (hm : T.mapFree = true),
+  Solidity.SVal.Mirrors (Solidity.SVal.copyStToM hp v hm).heap (List.length H) v (Solidity.SVal.copyStToM hp v hm).val
+'Solidity.SolkeyAgreementH28.copy_mirror' depends on axioms: [propext, Quot.sound]

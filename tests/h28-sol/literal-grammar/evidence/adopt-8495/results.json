@@ -1,0 +1,233 @@
+{
+  "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+  "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "phases": [
+    {
+      "name": "lake-version",
+      "command": [
+        "/workspace/scratch/h28-runtime/lean-4.24.0-linux/bin/lake",
+        "--version"
+      ],
+      "exit": 0,
+      "seconds": 0.033711994998157024,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/lake-version.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "lean-version",
+      "command": [
+        "/workspace/scratch/h28-runtime/lean-4.24.0-linux/bin/lean",
+        "--version"
+      ],
+      "exit": 0,
+      "seconds": 0.03595460199721856,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/lean-version.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "KeySort",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.KeySort"
+      ],
+      "exit": 0,
+      "seconds": 0.2140485509953578,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/KeySort.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "owned-build",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.LiteralGrammarH28.Body",
+        "Solidity.Frontend.LiteralGrammarH28.BodyControls",
+        "Solidity.Frontend.LiteralGrammarH28.BodyPins",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryControls",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryPins",
+        "Solidity.Frontend.LiteralGrammarH28.Classification",
+        "Solidity.Frontend.LiteralGrammarH28.EncodingValue",
+        "Solidity.Frontend.LiteralGrammarH28.FragmentCompleteness",
+        "Solidity.Frontend.LiteralGrammarH28.Fragments",
+        "Solidity.Frontend.LiteralGrammarH28.FullControls",
+        "Solidity.Frontend.LiteralGrammarH28.FullPins",
+        "Solidity.Frontend.LiteralGrammarH28.Global",
+        "Solidity.Frontend.LiteralGrammarH28.Hex",
+        "Solidity.Frontend.LiteralGrammarH28.HexControls",
+        "Solidity.Frontend.LiteralGrammarH28.HexEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.HexPins",
+        "Solidity.Frontend.LiteralGrammarH28.ModeGrammar",
+        "Solidity.Frontend.LiteralGrammarH28.ProofSafety",
+        "Solidity.Frontend.LiteralGrammarH28.Quoted",
+        "Solidity.Frontend.LiteralGrammarH28.Roundtrips",
+        "Solidity.Frontend.LiteralGrammarH28.Scanner",
+        "Solidity.Frontend.LiteralGrammarH28.Split",
+        "Solidity.Frontend.LiteralGrammarH28.TaggedEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.WordTable"
+      ],
+      "exit": 0,
+      "seconds": 4.775326057999337,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/owned-build.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "axioms",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullPins.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.096393826002895,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/axioms.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "HexControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/HexControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.3596597470022971,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/HexControls.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "BodyControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BodyControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.6261130670027342,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/BodyControls.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "BoundaryControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BoundaryControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.575468027003808,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/BoundaryControls.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "FullControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.809651479998138,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/FullControls.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "inventory-audit",
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/literal-grammar/audit.py",
+        "tests/h28-sol/literal-grammar/evidence/full-pins-build-02.log"
+      ],
+      "exit": 0,
+      "seconds": 0.08655448199715465,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/inventory-audit.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "roots",
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 1,
+      "seconds": 0.1051117829993018,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/roots.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exit": 1,
+      "seconds": 0.37860531600017566,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/orphans.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "run-lean",
+      "command": [
+        "bash",
+        "run-lean.sh"
+      ],
+      "exit": 1,
+      "seconds": 0.5071113029989647,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/run-lean.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    },
+    {
+      "name": "ship-cache-preflight",
+      "command": [
+        "bash",
+        "scripts/coord-tools/ship-cache.sh",
+        "--dry-run",
+        "/workspace/solidity-lean"
+      ],
+      "exit": 1,
+      "seconds": 11.920744917995762,
+      "evidence": "/workspace/scratch/h28-runtime/adopt-8495-attempt2/ship-cache-preflight.log",
+      "preserved_head": "0858098f1f278d99ca2d1b8f19100cef441f7cb0",
+      "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "tree": "in-progress authorized merge; all24 Lean bytes preserved"
+    }
+  ]
+}

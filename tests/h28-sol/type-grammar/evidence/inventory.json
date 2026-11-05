@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3",
+    "tests/h28-sol/type-grammar/check_inventory.py"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.025115411000001586,
+  "stdout": "PASS: 8 source pins; all 5 Syn typeName constructors; 8 elementary constructor families; 5 attribute layout shapes\nExternal inventory check only: no uniqueness/completeness theorem is implied\n",
+  "stderr": ""
+}
