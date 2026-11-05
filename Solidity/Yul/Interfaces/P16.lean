@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterDoWhile
 import Solidity.Yul.RawCheckedAdapterLoop
 import Solidity.Yul.RawCheckedAdapterIfElse
 import Solidity.Yul.RawCheckedAdapterSequence
@@ -50,4 +51,8 @@ RawCheckedAdapterLoop.loop composes an actual checked body producer as a
 fuelled while statement. Its real fuel induction preserves checked/coherent
 Source agreement and consumes body break/continue exactly as Source does.
 Nested execution and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterLoop.
+RawCheckedAdapterDoWhile.adapter composes an actual checked body producer as
+a body-first loop. Its real fuel induction preserves Source guard ordering,
+control consumption, exact frames and checked/coherent premises. Nested,
+body-order and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterDoWhile.
 -/
