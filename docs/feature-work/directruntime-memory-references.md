@@ -424,3 +424,13 @@ exits,wall/RSS and proof reports are in `evidence/published-b86`. The new
 Admission/Compose artifacts require an updated H41 pickup pack; delivery is
 coordinator-pending. Full merged gates and native/browser positive diamond
 Identity and all modality controls remain open; no RUNTIME_GATE_PASS.
+
+The refreshed H41 pickup pack for code head `3c155ded9ac4a3f47639337b687bd4933d99dd88` passed
+complete member-by-member SHA256 readback: 1650 artifacts,
+554 mappings,571626029 bytes. Packing exit0,73.692 s,64716 KiB
+peak aggregate RSS. All six relevant module mappings/outputs are included
+(`cache-owned-coverage.json`). Delivery is coordinator-pending.
+Archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/published-b86/cache-3c155ded/cache.tar.zst`.
+SHA256: `0349a31155afbc11f7875a432d099070d204cae479f7b59b0e3229f39ffdb97c`.
+This packet supersedes the prior pickup packet for the expanded Admission
+control; prior verified archives remain preserved.
