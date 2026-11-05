@@ -62,5 +62,10 @@
     "finder": "Reviewed private serial wrappers and actual bounded receipts. No new finding. Decisions assign owners, not completed repairs/transport; required controls/final gates remain outstanding.",
     "skeptic": "Reviewed live container/PID evidence: no elan/Nix bypass, actual flock and explicit -j1. Confirmed MCP/policy/TestSuite passes separate from full/corpus resource stops; no budgets/source changes or completion claim.",
     "method": "Independent read-only, no Lean server or builds."
+  },
+  "h41": {
+    "finder": "No new finding. Coordinator-attested receipt is scoped to the exact preserved pack; no independent remote-file access claimed. Future cache delivery remains pending until receipt; no VM shipping.",
+    "skeptic": "No new finding. Current receipt closes transport only, not runtime/control/full/corpus acceptance. Historical failed invocation preserved. Reviewer did not rehash/archive-read or access remote host.",
+    "method": "Independent read-only, no Lean server/build."
   }
 }

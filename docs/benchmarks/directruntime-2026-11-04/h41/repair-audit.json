@@ -1,0 +1,12 @@
+{
+  "remote": "1e367905c938186aac1680f25d1059721ddce333",
+  "comparedDelivery": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "paths": [
+    "Solidity/Calculus/ReadBounds.lean",
+    "Solidity/Tools/DirectRuntime.lean",
+    "Solidity/Frontend/ExecutableAst"
+  ],
+  "changed": [],
+  "repairAvailableInComparedPaths": false,
+  "action": "Await committed lane A repair per H40; no unrelated updates merged"
+}

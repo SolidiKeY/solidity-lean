@@ -32,11 +32,11 @@
       "paths": [
         "scripts/coord-tools/ship-cache.sh"
       ],
-      "evidence": "h35/cache-shipment-receipt.json",
-      "request": "Complete actual H35 cache transport with configured coordinator routing or coordinator retrieval and receipt. No shipped checkpoint completion claimed.",
+      "evidence": "h41/cache-receipt.json",
+      "request": "For future verified packs: leave on VM, record path/SHA and coordinator-pending; never invoke ship-cache.sh on VM.",
       "owner": "coordinator",
-      "status": "coordinator-pending",
-      "decision": "H40"
+      "status": "coordinator-confirmed-received",
+      "decision": "H41"
     }
   ],
   "questions": [],
@@ -109,5 +109,23 @@
       },
       "reason": "Standing producer-delivery dependency; H40 instructs waiting for A repair. No new user decision requested this turn."
     }
-  ]
+  ],
+  "cacheDelivery": {
+    "decision": "H41",
+    "source": "Coordinator message supplied in this thread",
+    "status": "coordinator-confirmed-received",
+    "coordinatorReceiptPath": "/home/guilherme/.local/state/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json",
+    "coordinatorReceiptLocalCopy": null,
+    "receiptBasis": "Coordinator states pulled and verified against the reported SHA; remote receipt contents not independently read on this VM",
+    "archive": "/workspace/solidity-lean/.lake/native-browser-h35-cache-ship/20261104T222539Z-65e23115/pack-afaaecf77f0a6f11.tar.zst",
+    "sha256": "3f2fb9f6a585b6a64f386b6e127b972a84fd7149ca914a29a191afac97d95dbb",
+    "bytes": 539036429,
+    "localRehashMatches": true,
+    "coordinatorVerifiedReportedSha": true,
+    "archiveLeftIntact": true,
+    "amendedPolicyVerbatim": "Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue.",
+    "futurePreparedPackStatus": "coordinator-pending until coordinator receipt",
+    "vmShipCacheExecution": "prohibited; no new invocation",
+    "priorFailedWorkerTransportReceipt": "h35/cache-shipment-receipt.json"
+  }
 }

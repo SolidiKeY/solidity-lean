@@ -255,3 +255,25 @@ H40 resolves the two ownership/routing questions. The remaining producer-deliver
 question is retained as deferred history while waiting; there is no new scope
 question this turn. The required browser control, exact Identity twin and B/C
 controls remain unaccepted, and all post-repair gates must be rerun as applicable.
+
+## H41 cache receipt and amended transport policy
+
+The coordinator confirms receipt of the preserved H35 pack and verification
+against SHA-256 `3f2fb9f6a585b6a64f386b6e127b972a84fd7149ca914a29a191afac97d95dbb`.
+The supplied receiver receipt is
+`/home/guilherme/.local/state/cloudvm-coord/receipts/native-browser-cache-received-20261105T025529Z.json`.
+This is coordinator-attested receipt evidence; the remote file was not read
+on this VM. A fresh local hash matches and the 539,036,429-byte archive remains
+intact at its recorded path. Evidence: h41/cache-receipt.json.
+
+H41 amends H35: leave verified packs on the VM and record path/SHA; the
+coordinator pulls them. **Never run ship-cache.sh on a VM.** Future prepared
+packs are coordinator-pending until receipt. This specific pack is now
+coordinator-confirmed received; the historical failed worker attempt remains
+an immutable pre-H41 event and is not retried.
+
+Receipt closes this pack's transport obligation only. It does not repair the
+browser traversal, supply Identity/B/C controls, or turn the resource-stopped
+full/corpus checks into passes. H40 still assigns the repair to lane A with
+unchanged budgets. Fresh master remains1e367905 with no changes in the compared
+runtime/read-bounds/shared paths; this lane continues to await that repair.
