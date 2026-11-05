@@ -541,3 +541,14 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` | Concrete ADD/MUL certificate sequence, two charged fetched steps, native continuation and populated order/wrap/resource controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` | Exact STOP decoding, actual arithmetic-sequence termination and populated buffer/PC/fuel controls against the pinned reference. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/ReturnSizeObservation.lean` | Charged frozen-API return-data-size observation, exact gate ordering and populated distinct-buffer/capacity controls. |
+
+
+## Signed cast primitive packet
+
+| Module | Purpose |
+|---|---|
+| `Backend/PrimitivePackets/SignedCast/CastSource.lean` | Existing Source local signed casts at all approved byte widths, retaining the exact input state. |
+| `Backend/PrimitivePackets/SignedCast/Selected.lean` | Total public compiler selection at all approved signed byte widths, with no supplied certificate. |
+| `Backend/PrimitivePackets/SignedCast/Target.lean` | Selected intrinsic execution with complete caller frame and separate SIGNEXTEND/Source-wrap equality. |
+| `Backend/PrimitivePackets/SignedCast/Agreement.lean` | Source origin through selected code under explicit initial local-family and full representation premises. |
+| `Backend/PrimitivePackets/SignedCast/CastControls.lean` | Populated narrowing/widening, boundary, both-pipeline and wrong-width/index/tail controls. |
