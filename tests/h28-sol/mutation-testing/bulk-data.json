@@ -78,5 +78,19 @@
       "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
     },
     "coordinator_pull_observed": false
+  },
+  "archive_verifier_review": {
+    "archive": "/workspace/h28-verifier-review-a6fa0138/evidence.tar.gz",
+    "sha256": "8edc925d89ce75253e79f9c627b678528b17a66cf50dbcc8aad6df4e47a576fb",
+    "bytes": 36581,
+    "files": 29,
+    "gate_head": "a310f670da30fbc0964477073fbf05829457e014",
+    "delivery_base": "a6fa01380efd373d85f7a8e6c13811e2d552ae7c",
+    "archive_verifier_executions": 16,
+    "unit_tests_per_mode": 74,
+    "bulk_verifications": 2,
+    "finder": "PASS",
+    "skeptic": "PASS",
+    "no_lean_or_gate_budget_change": true
   }
 }
