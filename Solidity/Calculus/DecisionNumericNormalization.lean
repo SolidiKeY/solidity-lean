@@ -562,4 +562,42 @@ theorem qfUIntPrefix_logic_certified {C : Contract} (name : Var)
   | refuted σ => exact Or.inr ⟨σ, rfl, decideGoal_refutes he⟩
   | unknown => exact False.elim (hd he)
 
+
+/-- A numeric source body under any finite intrinsic primitive-quantifier prefix.
+This syntax class neither inspects normalization success nor a decision verdict. -/
+inductive _root_.Solidity.Fml.NumericPrimitivePrefix {C : Contract} :
+    {Γ : Ctx} → Fml C Γ → Prop where
+  | body {Γ : Ctx} {φ : Fml C Γ} (grammar : φ.QFUIntLinear) :
+      Fml.NumericPrimitivePrefix φ
+  | all {Γ : Ctx} (name : Var) (p : PrimTy) {φ : Fml C (.val p :: Γ)}
+      (grammar : Fml.NumericPrimitivePrefix φ) :
+      Fml.NumericPrimitivePrefix (.all name p φ)
+
+/-- Every actual primitive prefix contributes its own visit to the exact
+normalizer boundary. The budget and source work are unchanged. -/
+theorem numericPrimitivePrefix_normalization_iff_work {C : Contract} {Γ : Ctx}
+    {φ : Fml C Γ} (h : φ.NumericPrimitivePrefix) (budget : Nat) :
+    (ProgramNormalization.ofFormula? budget φ).isSome = true ↔
+      φ.normalizationWork ≤ budget := by
+  induction h generalizing budget with
+  | body grammar => exact qfUIntLinear_normalization_iff_work grammar budget
+  | @all Γ name p φ grammar ih =>
+    cases budget with
+    | zero =>
+      change false = true ↔ φ.normalizationWork + 1 ≤ 0
+      constructor
+      · intro impossible; cases impossible
+      · intro impossible; omega
+    | succ budget =>
+      have step :
+          (ProgramNormalization.ofFormula? (budget + 1) (.all name p φ)).isSome =
+            (ProgramNormalization.ofFormula? budget φ).isSome := by
+        change ((actualNormalization (budget + 1) (.all name p φ) (budget + 1)).map
+          Prod.fst).isSome = ((actualNormalization budget φ budget).map Prod.fst).isSome
+        rw [actual_all budget budget name p φ]
+        cases actualNormalization budget φ budget <;> rfl
+      rw [step, ih budget]
+      change φ.normalizationWork ≤ budget ↔ φ.normalizationWork + 1 ≤ budget + 1
+      omega
+
 end Solidity.Decide
