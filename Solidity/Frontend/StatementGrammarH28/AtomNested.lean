@@ -1,0 +1,422 @@
+import Solidity.Frontend.StatementGrammarH28.AtomConditional
+
+/-! Arbitrarily nested statements and item lists over expression atoms.
+
+`AtomStmt` and `AtomItems` are mutual relations over the existing indexed
+syntax (no alternate AST): blocks of arbitrary width and depth, empty return,
+break and continue in their intrinsic contexts, `return e;`, `unchecked`
+items in their permitted context, and `if`/`while`/`do`/empty-header `for`
+with atom conditions. Expression atoms enter only through the exposed
+premises `ExprAtomRparen` and `ExprAtomSemi`; expression parser completeness
+and expression uniqueness (SOL-EU) are not claimed. The else-bearing
+constructor keeps exactly the existing closed-then contract. All parser
+success is derived by mutual structural recursion on the witness, with a
+budget computed from the syntax; no successful parse is assumed. -/
+namespace Solidity.Frontend.StatementGrammarH28
+open Solidity.Source Solidity.Frontend.Checked
+
+/-- Exposed expression-atom premise before `;`, with fuel budget `a`. -/
+def ExprAtomSemi (e : Syn .expr) (es : List Tok) (a : Nat) : Prop :=
+  ∀ (n : Nat) (s : St),
+    expr (n + a) (locatedInput (es ++ [.punct .semi]) s) = .ok (e, punctBefore .semi s)
+
+/-- The atom is nonempty and does not start with the terminator
+(`return;` is the empty return). -/
+def NoSemiHead (es : List Tok) : Prop := es ≠ [] ∧ es.head? ≠ some (.punct .semi)
+
+theorem bool_atom_semi (b : Bool) : ExprAtomSemi (.lit (.bool b)) [.bool b] 5 :=
+  fun n s => bool_expr_semi n b s
+
+theorem ident_atom_semi (x : String) : ExprAtomSemi (.ident x) [.ident x] 5 :=
+  fun _ _ => rfl
+
+mutual
+inductive AtomStmt : {k : SCtx} → Syn (.stmt k) → List Tok → Nat → Prop where
+  | block {k : SCtx} {xs : Syn (.list (.item k))} {parts : List (List Tok)} {b : Nat} :
+      AtomItems xs parts b → AtomStmt (.blockStmt (.block xs)) (braces parts.flatten) b
+  | returnNone {k : SCtx} :
+      AtomStmt (k := k) (.returnStmt .none) [.kw .return_, .punct .semi] 0
+  | returnSome {k : SCtx} {e : Syn .expr} {es : List Tok} {a : Nat} :
+      ExprAtomSemi e es a → NoSemiHead es →
+      AtomStmt (k := k) (.returnStmt (.some e)) ([.kw .return_] ++ es ++ [.punct .semi]) (a + 1)
+  | breakStmt {u : Bool} : AtomStmt (k := ⟨true, u⟩) .breakStmt [.kw .break_, .punct .semi] 0
+  | continueStmt {u : Bool} :
+      AtomStmt (k := ⟨true, u⟩) .continueStmt [.kw .continue_, .punct .semi] 0
+  | ifNone {k : SCtx} {c : Syn .expr} {cs : List Tok} {a : Nat}
+      {x : Syn (.stmt k)} {ts : List Tok} {d : Nat} :
+      ExprAtomRparen c cs a → AtomStmt x ts d →
+      AtomStmt (.ifStmt c x .none)
+        ([.kw .if_, .punct .lparen] ++ cs ++ [.punct .rparen] ++ ts) (d + a + 1)
+  | ifSome {k : SCtx} {c : Syn .expr} {cs : List Tok} {a : Nat}
+      {t e : Syn (.stmt k)} {ts es : List Tok} {d f : Nat} :
+      ExprAtomRparen c cs a → AtomStmt t ts d → AtomStmt e es f → t.openIf = false →
+      AtomStmt (.ifStmt c t (.some e))
+        ([.kw .if_, .punct .lparen] ++ cs ++ [.punct .rparen] ++ ts ++ [.kw .else_] ++ es)
+        (d + f + a + 1)
+  | whileLoop {l u : Bool} {c : Syn .expr} {cs : List Tok} {a : Nat}
+      {x : Syn (.stmt ⟨true, u⟩)} {ts : List Tok} {d : Nat} :
+      ExprAtomRparen c cs a → AtomStmt x ts d →
+      AtomStmt (Syn.whileStmt (l := l) c x)
+        ([.kw .while_, .punct .lparen] ++ cs ++ [.punct .rparen] ++ ts) (d + a + 1)
+  | forLoop {l u : Bool} {x : Syn (.stmt ⟨true, u⟩)} {ts : List Tok} {d : Nat} :
+      AtomStmt x ts d → AtomStmt (Syn.forStmt (l := l) .none .none .none x)
+        ([.kw .for_, .punct .lparen, .punct .semi, .punct .semi, .punct .rparen] ++ ts) (d + 1)
+  | doLoop {l u : Bool} {c : Syn .expr} {cs : List Tok} {a : Nat}
+      {x : Syn (.stmt ⟨true, u⟩)} {ts : List Tok} {d : Nat} :
+      ExprAtomRparen c cs a → AtomStmt x ts d →
+      AtomStmt (Syn.doWhile (l := l) x c)
+        ([.kw .do_] ++ ts ++ [.kw .while_, .punct .lparen] ++ cs ++ [.punct .rparen, .punct .semi])
+        (d + a + 1)
+
+inductive AtomItems : {k : SCtx} → Syn (.list (.item k)) → List (List Tok) → Nat → Prop where
+  | nil {k : SCtx} : AtomItems (Syn.nil (c := .item k)) [] 0
+  | stmtCons {k : SCtx} {x : Syn (.stmt k)} {xs : Syn (.list (.item k))}
+      {ts : List Tok} {parts : List (List Tok)} {d b : Nat} :
+      AtomStmt x ts d → AtomItems xs parts b →
+      AtomItems (.cons (.stmtItem x) xs) (ts :: parts) (max (d + 7) b)
+  | uncheckedCons {l : Bool} {ys : Syn (.list (.item ⟨l, true⟩))}
+      {xs : Syn (.list (.item ⟨l, false⟩))} {qs parts : List (List Tok)} {c b : Nat} :
+      AtomItems ys qs c → AtomItems xs parts b →
+      AtomItems (.cons (.uncheckedItem (.block ys)) xs)
+        ((.kw .unchecked :: braces qs.flatten) :: parts) (max (c + 2) b)
+end
+
+/-- No atom statement starts with `else`. -/
+theorem atom_stmt_no_else_input {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (h : AtomStmt x ts d) (s : St) : NoFollowingElse (locatedInput ts s) := by
+  cases h <;> intro bad <;> cases bad
+
+theorem atom_stmt_tokens_nonempty {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (h : AtomStmt x ts d) : ts ≠ [] := by
+  intro he
+  subst ts
+  exact atom_stmt_no_else_input h (locatedInput [.kw .else_] ⟨[], [], 0⟩) rfl
+
+theorem atom_items_no_else {k : SCtx} {xs : Syn (.list (.item k))} {parts : List (List Tok)}
+    {b : Nat} (h : AtomItems xs parts b) (s : St) (hs : NoFollowingElse s) :
+    NoFollowingElse (locatedInput parts.flatten s) := by
+  cases h with
+  | nil => exact hs
+  | stmtCons hx _ =>
+    rw [List.flatten_cons, locatedInput_append]
+    exact atom_stmt_no_else_input hx _
+  | uncheckedCons => intro bad; cases bad
+
+theorem atom_items_count_le : {k : SCtx} → {xs : Syn (.list (.item k))} →
+    {parts : List (List Tok)} → {b : Nat} → AtomItems xs parts b →
+    itemCount xs ≤ parts.flatten.length
+  | _, _, _, _, .nil => Nat.le_refl 0
+  | _, _, _, _, .stmtCons (ts := ts) hx ht => by
+    have hn : ts.length ≠ 0 := by
+      intro zero
+      exact atom_stmt_tokens_nonempty hx (List.eq_nil_of_length_eq_zero zero)
+    have ih := atom_items_count_le ht
+    simp only [itemCount_cons, List.flatten_cons, List.length_append]
+    omega
+  | _, _, _, _, .uncheckedCons _ ht => by
+    have ih := atom_items_count_le ht
+    simp only [itemCount_cons, List.flatten_cons, List.length_append, List.length_cons]
+    omega
+
+/-- One loop step of the block parser over a represented statement item. -/
+theorem atom_item_step {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (h : AtomStmt x ts d) (m : Nat) (s : St)
+    (parse : stmt m k (locatedInput ts s) = .ok (x, s)) :
+    blockLeafStep (m + 1) k (locatedInput ts s) = .ok (some (.stmtItem x), s) := by
+  have lifted : ((stmt m k (locatedInput ts s)).bind
+      (fun p => .ok (Syn.stmtItem p.1, p.2))).bind
+      (fun p => .ok (some p.1, p.2)) = .ok (some (.stmtItem x), s) := by
+    rw [parse]
+    rfl
+  cases h <;>
+    simp only [blockLeafStep, item, braces, pu, List.cons_append, List.nil_append,
+      List.append_assoc] at lifted ⊢ <;>
+    exact lifted
+
+theorem atom_empty_return (n : Nat) (k : SCtx) (s : St) :
+    stmt (n + 0 + 6) k (locatedInput [.kw .return_, .punct .semi] s) = .ok (.returnStmt .none, s) :=
+  empty_return_coverage (n + 4) k 0 0 0 0 s
+
+theorem atom_return_some {k : SCtx} {e : Syn .expr} {es : List Tok} {a : Nat}
+    (he : ExprAtomSemi e es a) (hs : NoSemiHead es) (n : Nat) (s : St) :
+    stmt (n + (a + 1) + 6) k (locatedInput ([.kw .return_] ++ es ++ [.punct .semi]) s) =
+      .ok (.returnStmt (.some e), s) := by
+  have fuel : n + (a + 1) + 6 = ((n + 5 + a) + 1) + 1 := by omega
+  have hi : locatedInput ([.kw .return_] ++ es ++ [.punct .semi]) s =
+      locatedInput [.kw .return_] (locatedInput (es ++ [.punct .semi]) s) := by
+    simp only [← locatedInput_append, List.cons_append, List.nil_append]
+  rw [fuel, hi, stmt]
+  change (optExprBefore (n + 5 + a + 1) .semi (locatedInput (es ++ [.punct .semi]) s)).bind
+    (fun p => ((do expectP .semi; return Syn.returnStmt p.1) : P (Syn (.stmt k))) p.2) = _
+  have hopt : optExprBefore (n + 5 + a + 1) .semi (locatedInput (es ++ [.punct .semi]) s) =
+      .ok (.some e, punctBefore .semi s) := by
+    have hp : isP .semi (locatedInput (es ++ [.punct .semi]) s) =
+        .ok (false, locatedInput (es ++ [.punct .semi]) s) := by
+      have hb : ((locatedInput (es ++ [.punct .semi]) s).ts.head?.map
+          (fun t : Located => t.tok) == some (Tok.punct .semi)) = false := by
+        cases es with
+        | nil => exact absurd rfl hs.1
+        | cons t rest =>
+          apply beq_eq_false_iff_ne.mpr
+          intro bad
+          apply hs.2
+          simp only [locatedInput, List.cons_append, List.map_cons, List.head?_cons,
+            Option.map_some, atToken] at bad
+          simp only [List.head?_cons, bad]
+      unfold isP isTok peek peekN
+      change (pure ((locatedInput (es ++ [.punct .semi]) s).ts.head?.map
+        (fun t : Located => t.tok) == some (Tok.punct .semi)) : P Bool) _ = _
+      rw [hb]
+      rfl
+    simp only [optExprBefore]
+    change (isP .semi (locatedInput (es ++ [.punct .semi]) s)).bind (fun p =>
+      ((if p.1 then pure Syn.none else do return Syn.some (← expr (n + 5 + a))) :
+        P (Syn (.opt .expr))) p.2) = _
+    rw [hp]
+    change (expr (n + 5 + a) (locatedInput (es ++ [.punct .semi]) s)).bind
+      (fun p => .ok (Syn.some p.1, p.2)) = _
+    rw [he (n + 5) s]
+    rfl
+  rw [hopt]
+  rfl
+
+mutual
+/-- Coverage at every excess fuel and every framed suffix. -/
+theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List Tok} → {d : Nat} →
+    AtomStmt x ts d → ∀ (n : Nat) (s : St), StatementFrame x s →
+      stmt (n + d + 6) k (locatedInput ts s) = .ok (x, s)
+  | k, _, _, b, .block (xs := xs) (parts := parts) h, n, s, _ => by
+    have items := atom_items_at h (n + b + 4) (by omega)
+    have hb := block_of_itemsAt xs parts.flatten (n + b + 4) (atom_items_count_le h) items s
+    rw [blockInput_eq] at hb
+    change stmt ((n + b + 5) + 1) k (blockInput parts.flatten s) = _
+    rw [blockInput_eq, stmt_block_prefix, hb]
+    rfl
+  | k, _, _, _, .returnNone, n, s, _ => atom_empty_return n k s
+  | _, _, _, _, .returnSome he hs, n, s, _ => atom_return_some he hs n s
+  | _, _, _, _, .breakStmt, n, s, _ => break_coverage (n + 5) _ 0 0 0 0 s
+  | _, _, _, _, .continueStmt, n, s, _ => continue_coverage (n + 5) _ 0 0 0 0 s
+  | k, _, _, _, .ifNone (c := c) (x := x) (ts := ts) (d := d) (a := a) hc h, n, s, hf => by
+    have he : NoFollowingElse s := by
+      rcases hf with hc' | he
+      · cases hc'
+      · exact he
+    have hb := atom_stmt_coverage h (n + a) s (Or.inr he)
+    rw [locatedInput_append]
+    have fuel : n + (d + a + 1) + 6 = (n + d + 6) + a + 1 := by omega
+    rw [fuel, if_atom_prefix hc]
+    have fb : n + d + 6 + a = n + a + d + 6 := by omega
+    change (stmt (n + d + 6 + a) k (locatedInput ts s)).bind (fun p =>
+      ((do if ← eat (.kw .else_) then
+             return Syn.ifStmt c p.1 (.some (← stmt (n + d + 6 + a) k))
+           else return Syn.ifStmt c p.1 .none) : P (Syn (.stmt k))) p.2) = _
+    rw [fb, hb]
+    change (eat (.kw .else_) s).bind (fun p =>
+      ((if p.1 then do
+          return Syn.ifStmt c x (.some (← stmt (n + a + d + 6) k))
+        else pure (Syn.ifStmt c x .none)) : P (Syn (.stmt k))) p.2) = _
+    rw [eat_else_false s he]
+    rfl
+  | k, _, _, _, .ifSome (c := c) (t := t) (e := e) (ts := ts) (es := es) (d := d) (f := f)
+      (a := a) hc ht he hcl, n, s, hf => by
+    let tail := locatedInput [.kw .else_] (locatedInput es s)
+    have pt := atom_stmt_coverage ht (n + f + a) tail (Or.inl hcl)
+    have pe := atom_stmt_coverage he (n + d + a) s hf
+    have ft : n + f + a + d + 6 = n + (d + f) + 6 + a := by omega
+    have fe : n + d + a + f + 6 = n + (d + f) + 6 + a := by omega
+    rw [ft] at pt
+    rw [fe] at pe
+    rw [locatedInput_append, locatedInput_append, locatedInput_append]
+    have fuel : n + (d + f + a + 1) + 6 = (n + (d + f) + 6) + a + 1 := by omega
+    rw [fuel, if_atom_prefix hc]
+    change (stmt (n + (d + f) + 6 + a) k (locatedInput ts tail)).bind (fun p =>
+      ((do if ← eat (.kw .else_) then
+             return Syn.ifStmt c p.1 (.some (← stmt (n + (d + f) + 6 + a) k))
+           else return Syn.ifStmt c p.1 .none) : P (Syn (.stmt k))) p.2) = _
+    rw [pt]
+    change (stmt (n + (d + f) + 6 + a) k (locatedInput es s)).bind
+      (fun p => .ok (Syn.ifStmt c t (.some p.1), p.2)) = _
+    rw [pe]
+    rfl
+  | _, _, _, _, .whileLoop (l := l) (u := u) (d := d) (a := a) hc h, n, s, hf => by
+    rw [locatedInput_append]
+    have fuel : n + (d + a + 1) + 6 = (n + d + 6) + a + 1 := by omega
+    rw [fuel, while_atom_prefix hc]
+    have fb : n + d + 6 + a = n + a + d + 6 := by omega
+    rw [fb, atom_stmt_coverage h (n + a) s hf]
+    rfl
+  | _, _, _, _, .forLoop (l := l) (u := u) (ts := ts) (d := d) h, n, s, hf => by
+    rw [locatedInput_append, stmt]
+    change (stmt (n + (d + 1) + 5) ⟨true, u⟩ (locatedInput ts s)).bind
+      (fun p => .ok (Syn.forStmt (l := l) .none .none .none p.1, p.2)) = _
+    have fuel : n + (d + 1) + 5 = n + d + 6 := by omega
+    rw [fuel, atom_stmt_coverage h n s hf]
+    rfl
+  | _, _, _, _, .doLoop (l := l) (u := u) (c := c) (cs := cs) (x := x) (ts := ts) (d := d)
+      (a := a) hc h, n, s, _ => by
+    let tail := locatedInput ([.kw .while_, .punct .lparen] ++ cs ++
+      [.punct .rparen, .punct .semi]) s
+    have frame : StatementFrame x tail := Or.inr (by intro bad; cases bad)
+    have hb := atom_stmt_coverage h (n + a) tail frame
+    have fb : n + a + d + 6 = n + (d + a + 1) + 5 := by omega
+    rw [fb] at hb
+    have ht : locatedInput ([.kw .do_] ++ ts ++ [.kw .while_, .punct .lparen] ++ cs ++
+        [.punct .rparen, .punct .semi]) s = locatedInput [.kw .do_] (locatedInput ts tail) := by
+      simp only [tail, ← locatedInput_append, List.append_assoc]
+    rw [ht, stmt]
+    change (stmt (n + (d + a + 1) + 5) ⟨true, u⟩ (locatedInput ts tail)).bind (fun p =>
+        ((do expect (.kw .while_) "'while'"
+             expectP .lparen
+             let c' ← expr (n + (d + a + 1) + 5)
+             expectP .rparen
+             expectP .semi
+             pure (Syn.doWhile (l := l) p.1 c')) : P (Syn (.stmt ⟨l, u⟩))) p.2) = _
+    rw [hb]
+    have fa : n + (d + a + 1) + 5 = (n + d + 6) + a := by omega
+    rw [fa]
+    exact do_atom_tail hc (n + d + 6) l u x s
+
+/-- The block parser's item loop at every fuel above the list budget. -/
+theorem atom_items_at : {k : SCtx} → {xs : Syn (.list (.item k))} →
+    {parts : List (List Tok)} → {b : Nat} → AtomItems xs parts b →
+    ∀ fuel, b ≤ fuel → ItemsAt xs parts.flatten fuel
+  | k, _, _, _, .nil, fuel, _ => by
+    intro extra s
+    simp only [itemCount_nil, itemsAsList_nil, List.flatten_nil]
+    change manyAux _ (extra + 1) (endState s) = _
+    exact many_aux_none (leaf_step_stop fuel k s)
+  | k, _, _, _, .stmtCons (x := x) (xs := xs) (ts := ts) (parts := parts) (d := d) (b := b)
+      hh ht, fuel, hf => by
+    intro extra s
+    simp only [itemCount_cons, itemsAsList_cons, List.flatten_cons]
+    change manyAux _ ((extra + itemCount xs + 1) + 1)
+      (locatedInput (ts ++ parts.flatten) (endState s)) = _
+    rw [locatedInput_append]
+    have enough : d + 7 ≤ fuel := by omega
+    obtain ⟨n, hn⟩ := Nat.exists_eq_add_of_le' enough
+    have eqfuel : fuel = (n + d + 6) + 1 := by omega
+    have frame : StatementFrame x (leafInput parts.flatten s) :=
+      Or.inr (atom_items_no_else ht (endState s) (by intro bad; cases bad))
+    have head : blockLeafStep fuel k (locatedInput ts (leafInput parts.flatten s)) =
+        .ok (some (.stmtItem x), leafInput parts.flatten s) := by
+      rw [eqfuel]
+      exact atom_item_step hh (n + d + 6) _ (atom_stmt_coverage hh n _ frame)
+    exact many_aux_cons head (atom_items_at ht fuel (by omega) extra s)
+  | _, _, _, _, .uncheckedCons (l := l) (ys := ys) (xs := xs) (qs := qs) (parts := parts)
+      (c := c) (b := b) hy ht, fuel, hf => by
+    intro extra s
+    simp only [itemCount_cons, itemsAsList_cons, List.flatten_cons]
+    change manyAux _ ((extra + itemCount xs + 1) + 1)
+      (locatedInput ((.kw .unchecked :: braces qs.flatten) ++ parts.flatten) (endState s)) = _
+    rw [locatedInput_append]
+    have enough : c + 2 ≤ fuel := by omega
+    obtain ⟨n, hn⟩ := Nat.exists_eq_add_of_le' enough
+    have eqfuel : fuel = ((n + c) + 1) + 1 := by omega
+    have inner := block_of_itemsAt ys qs.flatten (n + c) (atom_items_count_le hy)
+      (atom_items_at hy (n + c) (by omega)) (leafInput parts.flatten s)
+    have head : blockLeafStep fuel ⟨l, false⟩
+        (uncheckedInput qs.flatten (leafInput parts.flatten s)) =
+        .ok (some (.uncheckedItem (.block ys)), leafInput parts.flatten s) := by
+      rw [eqfuel]
+      exact step_unchecked_of_coverage ((n + c) + 1) l (.block ys) qs.flatten _ inner
+    exact many_aux_cons head (atom_items_at ht fuel (by omega) extra s)
+end
+
+/-- Block-statement, block and unchecked-item coverage for item lists. -/
+theorem atom_items_block_coverage {k : SCtx} {xs : Syn (.list (.item k))}
+    {parts : List (List Tok)} {b : Nat} (h : AtomItems xs parts b) (n : Nat) (s : St) :
+    block (n + b + 1) k (blockInput parts.flatten s) = .ok (.block xs, s) :=
+  block_of_itemsAt xs parts.flatten (n + b) (atom_items_count_le h)
+    (atom_items_at h (n + b) (by omega)) s
+
+theorem atom_items_unchecked_coverage {l : Bool} {xs : Syn (.list (.item ⟨l, true⟩))}
+    {parts : List (List Tok)} {b : Nat} (h : AtomItems xs parts b) (n : Nat) (s : St) :
+    item (n + b + 2) ⟨l, false⟩ (uncheckedInput parts.flatten s) =
+      .ok (.uncheckedItem (.block xs), s) := by
+  rw [uncheckedInput_eq, item_unchecked_prefix, atom_items_block_coverage h]
+  rfl
+
+/-- The root keeps the immutable precedence node contract. -/
+theorem atom_stmt_node {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (h : AtomStmt x ts d) : x.precNode = true := by
+  cases h with
+  | ifSome _ _ _ hc => exact (if_some_contract_iff _ _ _).mpr hc
+  | _ => rfl
+
+theorem atom_stmt_nearest_else {k : SCtx} {c : Syn .expr} {t e : Syn (.stmt k)}
+    {ts : List Tok} {d : Nat} (h : AtomStmt (.ifStmt c t (.some e)) ts d) : ¬ OpenSpine t :=
+  nearestElse_node _ _ _ (atom_stmt_node h)
+
+/-- Two witnesses over the same tokens are the same tree (the parser is a
+function); atoms enter only through their exposed parse premises. -/
+theorem atom_stmt_token_unique {k : SCtx} {x y : Syn (.stmt k)}
+    {ts us : List Tok} {d e : Nat} (hx : AtomStmt x ts d)
+    (hy : AtomStmt y us e) (he : ts = us) : x = y := by
+  subst us
+  let s : St := ⟨[], [], 0⟩
+  have frame (z : Syn (.stmt k)) : StatementFrame z s := Or.inr (by intro bad; cases bad)
+  have px := atom_stmt_coverage hx e s (frame x)
+  have py := atom_stmt_coverage hy d s (frame y)
+  have hf : e + d + 6 = d + e + 6 := by omega
+  rw [hf] at px
+  exact congrArg Prod.fst (Except.ok.inj (px.symm.trans py))
+
+/-- A statement prefix and its suffix are determined by the token string. -/
+theorem atom_stmt_prefix_unique {k : SCtx} {x y : Syn (.stmt k)}
+    {ts us rest tail : List Tok} {d e : Nat} (hx : AtomStmt x ts d)
+    (hy : AtomStmt y us e) (s : St)
+    (fx : StatementFrame x (locatedInput rest s))
+    (fy : StatementFrame y (locatedInput tail s))
+    (he : ts ++ rest = us ++ tail) : x = y ∧ rest = tail := by
+  have input : locatedInput ts (locatedInput rest s) = locatedInput us (locatedInput tail s) := by
+    rw [← locatedInput_append, ← locatedInput_append, he]
+  have px := atom_stmt_coverage hx e (locatedInput rest s) fx
+  have py := atom_stmt_coverage hy d (locatedInput tail s) fy
+  have fuel : e + d + 6 = d + e + 6 := by omega
+  rw [fuel, input] at px
+  have pair := Except.ok.inj (px.symm.trans py)
+  have suffix := congrArg (fun p => p.2.ts.map (fun t : Located => t.tok)) pair
+  simp only [locatedInput, List.map_append, List.map_map, Function.comp_def, atToken,
+    List.map_id'] at suffix
+  exact ⟨congrArg Prod.fst pair, List.append_cancel_right suffix⟩
+
+/-- Every control-leaf item list is a nested item list, budget seven when nonempty. -/
+theorem atom_items_of_leaf_items {k : SCtx} {xs : Syn (.list (.item k))} {ts : List Tok}
+    (h : LeafItems xs ts) : ∃ parts, parts.flatten = ts ∧ AtomItems xs parts (if ts = [] then 0 else 7) := by
+  induction h with
+  | nil => exact ⟨[], rfl, .nil⟩
+  | @returnCons k xs ts h ih =>
+    obtain ⟨parts, hp, hi⟩ := ih
+    refine ⟨[.kw .return_, .punct .semi] :: parts, by simp only [List.flatten_cons, hp]; rfl, ?_⟩
+    have := AtomItems.stmtCons (AtomStmt.returnNone (k := k)) hi
+    split at hi <;> simp_all
+  | @breakCons u xs ts h ih =>
+    obtain ⟨parts, hp, hi⟩ := ih
+    refine ⟨[.kw .break_, .punct .semi] :: parts, by simp only [List.flatten_cons, hp]; rfl, ?_⟩
+    have := AtomItems.stmtCons (AtomStmt.breakStmt (u := u)) hi
+    split at hi <;> simp_all
+  | @continueCons u xs ts h ih =>
+    obtain ⟨parts, hp, hi⟩ := ih
+    refine ⟨[.kw .continue_, .punct .semi] :: parts, by simp only [List.flatten_cons, hp]; rfl, ?_⟩
+    have := AtomItems.stmtCons (AtomStmt.continueStmt (u := u)) hi
+    split at hi <;> simp_all
+
+#print axioms bool_atom_semi
+#print axioms ident_atom_semi
+#print axioms atom_stmt_no_else_input
+#print axioms atom_stmt_tokens_nonempty
+#print axioms atom_items_no_else
+#print axioms atom_items_count_le
+#print axioms atom_item_step
+#print axioms atom_empty_return
+#print axioms atom_return_some
+#print axioms atom_stmt_coverage
+#print axioms atom_items_at
+#print axioms atom_items_block_coverage
+#print axioms atom_items_unchecked_coverage
+#print axioms atom_stmt_node
+#print axioms atom_stmt_nearest_else
+#print axioms atom_stmt_token_unique
+#print axioms atom_stmt_prefix_unique
+#print axioms atom_items_of_leaf_items
+end Solidity.Frontend.StatementGrammarH28
