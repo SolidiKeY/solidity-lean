@@ -93,3 +93,31 @@ theorem step {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Frame R)}
    exact (unchanged x hv).trans (outside x hp hr hc)
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.rhs' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.rhs
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.value' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.value
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advanceCode' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advanceCode
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.selected' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.selected
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.advance
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.code' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.code
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarUnwind.step
