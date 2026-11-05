@@ -47,8 +47,9 @@ theorem raw_body (a b : PrimTy.uint.Denote) (tail : Scalar.Stack) :
  change some ((BitVec.ofInt 256 a.val + BitVec.ofInt 256 b.val) :: tail)=_
  rw [← BitVec.ofInt_add]
 
-/-- Actual source operands and actual scalar guard share the same failure bytes.
-No local-read lowering, joint memory/frame relation or payload emission is assumed. -/
+/-- Conjunction of Source overflow and scalar-guard overflow with equal panic bytes.
+These are separate executions, not a Source-to-target simulation. No local-read
+lowering, joint memory/frame relation or payload-emission theorem is supplied. -/
 theorem agreement {E : Env} {Γ : RCtx} (G : Glob E) (F : Fr) (n : Nat)
  (a b : PrimTy.uint.Denote) (older : Locals E.layout Γ) (state : St E)
  (tail : Scalar.Stack) (overflow : ((2^256 : Nat) : Int)≤a.val+b.val) :

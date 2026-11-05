@@ -78,7 +78,13 @@ theorem callvalue_fetched (site : Site .CALLVALUE) (fuel : Nat)
   apply invocation_checked site (Or.inr (Or.inr rfl)) fuel gas room
   rfl
 
+/-- info: 'SolidityBridge.RoadmapV15.P10.address_fetched' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms address_fetched
+/-- info: 'SolidityBridge.RoadmapV15.P10.caller_fetched' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms caller_fetched
+/-- info: 'SolidityBridge.RoadmapV15.P10.callvalue_fetched' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms callvalue_fetched
 end SolidityBridge.RoadmapV15.P10
