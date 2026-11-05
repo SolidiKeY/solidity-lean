@@ -1,0 +1,1 @@
+PASS lean:tests/directruntime-20261104/memory-references/Admission.lean 4s /workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/per-file/1.log

@@ -1,0 +1,428 @@
+{
+  "binary": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+  "binarySha256": "5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01",
+  "refusals": 22,
+  "exit": 0,
+  "observations": [
+    {
+      "input": "malformed/allocationArity.output.json",
+      "inputSha256": "286918ea278677566feefb723dabe2fa1c35d5f16e78971f2a58f46f42ee2d80",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: allocation needs one length",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/allocationResultLocation.output.json",
+      "inputSha256": "fafbc4168ced43ac9bab8c53cbd15204ea5582e60a4f97944c309b064fab16c9",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: inconsistent type identifier/location",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/calldataIdentifier.output.json",
+      "inputSha256": "2cf2c2a61c921e4caeb59232092ab13ca46be10d283d483c63f01932df6665cb",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: inconsistent type identifier/location",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/calldataLocation.output.json",
+      "inputSha256": "0bc40c4f0e5a74391fa942729de479d7f2940a8070c56d924c4ffc1598aabab5",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: unsupported reference location",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/coherentStorageFromNew.output.json",
+      "inputSha256": "4b030f5218b773dca5e96bb43cfeb594901c709bbad71266b7a3addf2faaf44f",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: storage local from new",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/constantLocal.output.json",
+      "inputSha256": "c67a3c199eb45778e6f87da881f6420eda10d109f8895e4a0e34c56620d0358c",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: constant local",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/constructorIdentifier.output.json",
+      "inputSha256": "8c974eca35a9e4e5bc97422df5a5e9792bbcd5d4d24ee1138eb60db7496bb157",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: inconsistent allocation constructor identifier",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/fixedLength0.output.json",
+      "inputSha256": "79edbe88f0dbd41162fc415998c430c1fb38fed706eb6cb2780a67dd7fea2a8e",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: invalid fixed array length",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/fixedLength115792089237316195423570985008687907853269984665640564039457584007913129639936.output.json",
+      "inputSha256": "86c614ad8b408162bc6504632b376778a01285f32b253128e844cf0e6baf18dc",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: invalid fixed array length",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/incompatibleType.output.json",
+      "inputSha256": "878814743fe0a5e974a4354b294c4541dcc0d1a4d83ecce4c9fa5a6e8a96b474",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: inconsistent type metadata",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/missingConstructorIdentifier.output.json",
+      "inputSha256": "79e3fbd2c68dc0de23c9850952139e2be7108a7c3e9715aa51e671632f5a137b",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "String expected",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/missingDeclarationNode.output.json",
+      "inputSha256": "1b8331c3d27fb38e27d1ca5cd2103d6c6c5effda49b22d956e6a847a74655c65",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "String expected",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/missingIdentifier.output.json",
+      "inputSha256": "3b33650245f41878d5ce81ce3837770da22d0f72c0d772cadfe11b4c6d24f5e3",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "String expected",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/missingLocation.output.json",
+      "inputSha256": "c1d172452794791378437ab858741e08bbe9bc6918fa3879cc554bb3790f2b9c",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "String expected",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/missingTypeName.output.json",
+      "inputSha256": "f6a6a854279d511ec2e1640599e7f30f6bea3ab664f53493ce5ddabfc3b5f2cf",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "property not found: typeName",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/stateLocal.output.json",
+      "inputSha256": "659b21f73f586ed1a7c5e8b6d9d87f1b96c59472867c383fae0d53fa2c60cae3",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: state local",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/storageLocation.output.json",
+      "inputSha256": "35eb8fa49232bb2b4de12e009da425abb2ef27e06350de871dd7e518d427ea5c",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: inconsistent type identifier/location",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/tryAllocation.output.json",
+      "inputSha256": "42ecf098dd1648927cb4e3fbbc5440c49ad59c2d027ce1ef994ece6031cd74eb",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: try allocation",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/unknownLocation.output.json",
+      "inputSha256": "812b524bfbb39b88e2d5d80ff452a34e2f595af197347bef4a3179599078d7d5",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: unsupported reference location",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "malformed/wrongDeclarationNode.output.json",
+      "inputSha256": "138343123b573ddecdbec6a384a72af1e3bf7d20426b9afd016638796eefde1d",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "memory reader: declaration node kind",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "type-errors/elementMismatch.output.json",
+      "inputSha256": "4a541b0822a4a88fa361729e03c470675a5b0aff3fc467569c3e5f28745e1132",
+      "function": "identity",
+      "sourceId": 31,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "mv1: `new` of another type",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "input": "type-errors/storageFromMemory.output.json",
+      "inputSha256": "c8c5bcc30177190c8b725bc75effde4ad76a6c1803f453840b21e1f498134538",
+      "function": "identity",
+      "sourceId": 40,
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "a value where a storage reference is expected",
+            "sourceId": 40,
+            "status": "unsupported",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    }
+  ],
+  "traceSha256": "38ec7388930c9a0636850fabdba68eb86adf7d0ae045788990a0d8334901e9b8",
+  "boundary": "20 controlled malformed ASTs and two coherent type-error ASTs; separate from the 84 freshly compiled valid-source requests. Trace checks are observations, not exhaustive binary closure."
+}

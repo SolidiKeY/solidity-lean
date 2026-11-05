@@ -1,0 +1,3441 @@
+{
+  "binary": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+  "buildRepository": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/native-snapshot-708",
+  "binarySha256": "5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01",
+  "sourceFresh": true,
+  "backend": "native-generated-c",
+  "cases": 84,
+  "missingPositive": [],
+  "unsoundPositive": [],
+  "unresolved": 4,
+  "protocolErrors": 0,
+  "identityDiamondProved": true,
+  "allDecisive": false,
+  "records": [
+    {
+      "id": "identity",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/identity.box.sol",
+      "sourceSha256": "bd356d88f08c0e511dbb8e503ad92770651a559e2184cdb0fe2031c76cfdcdf0",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "4675ec016682508909360abc76627f7a9ab5f0680f5231cab7ef05d10303c1ad",
+      "requestSha256": "6e084918df0feec7165468e874822bf483ed178f9e1efeff9d73049794d1d86e",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 31,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "09be70accca9a0f03a90f6b751a6cf677d40353c634fc790acea9d44d62bcb8f",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "identity",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/identity.box.sol",
+      "sourceSha256": "bd356d88f08c0e511dbb8e503ad92770651a559e2184cdb0fe2031c76cfdcdf0",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "4675ec016682508909360abc76627f7a9ab5f0680f5231cab7ef05d10303c1ad",
+      "requestSha256": "6e084918df0feec7165468e874822bf483ed178f9e1efeff9d73049794d1d86e",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 31,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "1b2d2e065d4897d1666defd581133add227508b52d9a969407a7fbec80faf2be",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "identity",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/identity.diamond.sol",
+      "sourceSha256": "c894b47b278614ac9a4adaa184534bcb19d95c0420d0ef7de7f8da0ac55cf2bb",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "8080c0a182ff5bfe846bc93ae7973eb33722a773b4a9fea090839b39dd21cd83",
+      "requestSha256": "2835b8cd821cfa7095005b091c71ebaefa3b7265ad91bf496205be9acfefde68",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "1a8bf9a530038502b5b4ed8ec9e9f30bc790fca3de5fb090e78d7fe69f6f5a44",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "identity",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/identity.diamond.sol",
+      "sourceSha256": "c894b47b278614ac9a4adaa184534bcb19d95c0420d0ef7de7f8da0ac55cf2bb",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "8080c0a182ff5bfe846bc93ae7973eb33722a773b4a9fea090839b39dd21cd83",
+      "requestSha256": "2835b8cd821cfa7095005b091c71ebaefa3b7265ad91bf496205be9acfefde68",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "04041cdb26dce6e48b38572a18b59c3221222db92d7edfa6109cee49cf1762f8",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "false",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/false.box.sol",
+      "sourceSha256": "c438eaa8e53c8ac7c3420be86ce9fde1f9f0fe825617237d93e336c5ff835f2e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "510c204382d80d686ffc7f5d7872964b7151b45dd2e01903a442314b6a05cb91",
+      "requestSha256": "2faa4eecc219c85af69aa6d5f7aed887b337535b40caf0a688cf219bd3206850",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 31,
+            "status": "refuted",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "879279127c4ace11218c8db9f7aa2d2526ed4eb4c3a4de1cfd5d51b7c9c4e322",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "false",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/false.box.sol",
+      "sourceSha256": "c438eaa8e53c8ac7c3420be86ce9fde1f9f0fe825617237d93e336c5ff835f2e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "510c204382d80d686ffc7f5d7872964b7151b45dd2e01903a442314b6a05cb91",
+      "requestSha256": "2faa4eecc219c85af69aa6d5f7aed887b337535b40caf0a688cf219bd3206850",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 31,
+            "status": "refuted",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "021427b9572cd37a0a97184b2a87a23d1612abb724583bfe6119248d4aae4056",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "false",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/false.diamond.sol",
+      "sourceSha256": "4e24b26271dabd2348d6e672312232808715f86b563a0cb35a1af9b5dd42cea2",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "cddb1bc6de63c10e1b5d08c3f161f342fd68cef4156d54c6ff64b699f26b4cd6",
+      "requestSha256": "409b3dcffa7d5380acef74e06459ecb2bef26da386ea2bba95b981a984c21e52",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 30,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c3a9acd5484f3ad85412c17c88c3c02dca473dc2664f10c14ecf7bc79ab041f7",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "false",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/false.diamond.sol",
+      "sourceSha256": "4e24b26271dabd2348d6e672312232808715f86b563a0cb35a1af9b5dd42cea2",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "cddb1bc6de63c10e1b5d08c3f161f342fd68cef4156d54c6ff64b699f26b4cd6",
+      "requestSha256": "409b3dcffa7d5380acef74e06459ecb2bef26da386ea2bba95b981a984c21e52",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 30,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "a5c8055d5ee28b7db7c0421a3f784773e484b647e1f5de6007442884744ea496",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "default",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/default.box.sol",
+      "sourceSha256": "7bdd91e783cdd1327ccdf0248de524c7b5d8c6748b397610a354de5ee96c886f",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "677e8709b24d687aa35182a5e013249bc57a205b13da30f07a69b2d1b6a005fc",
+      "requestSha256": "014c129bf6d085f3315e37ee691d03a9f28fbb2171a6c8ed13c5c1a6fa6009da",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c333409e6d0a1cb16911012ab77dd075b198af05099f3bf3f193114afaa87e89",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "default",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/default.box.sol",
+      "sourceSha256": "7bdd91e783cdd1327ccdf0248de524c7b5d8c6748b397610a354de5ee96c886f",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "677e8709b24d687aa35182a5e013249bc57a205b13da30f07a69b2d1b6a005fc",
+      "requestSha256": "014c129bf6d085f3315e37ee691d03a9f28fbb2171a6c8ed13c5c1a6fa6009da",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "3be9205c92027150733b4fbec37eae84b607e1d732f9840adda59436c42f9bd5",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "default",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/default.diamond.sol",
+      "sourceSha256": "dc8c29db77670d8ccd1bc43c1ae0adb94090f68c76f80935b8df0bb02cdd62ef",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "ea141d36261099e3b6547173c45b274c2b2a03e1057f080b3c64d696f4734770",
+      "requestSha256": "af43676e85d7c2657bc44368185d2431579d3d8ba6e76bc90aa37c0ac65785ea",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "68d4625959534e1cfb5d7240ef03a1519bd290c3f14330e02466c29e978de8ec",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "default",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/default.diamond.sol",
+      "sourceSha256": "dc8c29db77670d8ccd1bc43c1ae0adb94090f68c76f80935b8df0bb02cdd62ef",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "ea141d36261099e3b6547173c45b274c2b2a03e1057f080b3c64d696f4734770",
+      "requestSha256": "af43676e85d7c2657bc44368185d2431579d3d8ba6e76bc90aa37c0ac65785ea",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "da33e1578e9a0e6a9d0ba0bd642bf6a1d0694291e1b392127ff66c276687462c",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "alias",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/alias.box.sol",
+      "sourceSha256": "58160c22d9a14081ee10c38286927dbc15a83d8208b7c66083988f1d147fb0e7",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "91e2b2d43bb3b566a80f4282265384b3f70ce047d59d1263f3261b3d33dd0182",
+      "requestSha256": "c8379fadba62ba0dd8c8ce4453b170fff4c6bc818562ddc7020451cb10c5a7c6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 40,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "6d42bcc90a5c2b72e0ee938a8c21e71711e4e0bc56ea3e398fc8bfcbebca860f",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "alias",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/alias.box.sol",
+      "sourceSha256": "58160c22d9a14081ee10c38286927dbc15a83d8208b7c66083988f1d147fb0e7",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "91e2b2d43bb3b566a80f4282265384b3f70ce047d59d1263f3261b3d33dd0182",
+      "requestSha256": "c8379fadba62ba0dd8c8ce4453b170fff4c6bc818562ddc7020451cb10c5a7c6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 40,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "5f6db91d577adb78c31a62f7dc92a45440b0a0860447fc049e794cbaabccfcb6",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "alias",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/alias.diamond.sol",
+      "sourceSha256": "7f2414458ea69a6a792ec4b61b68bd32f7433099d664ce42366fa1ef321accc8",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2f562ea68b83493429929b32549c2aef5681f825ca38b6648ed39437a74a4618",
+      "requestSha256": "216d4ef06b261a4c24ff7db8d4848333303bf9f8e3c5a2331477f1f648964b07",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 39,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "dd5b1b064f31acfa6be0f73ff7331c4256f429f5b0aba88b2328f117dfa5c96a",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "alias",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/alias.diamond.sol",
+      "sourceSha256": "7f2414458ea69a6a792ec4b61b68bd32f7433099d664ce42366fa1ef321accc8",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2f562ea68b83493429929b32549c2aef5681f825ca38b6648ed39437a74a4618",
+      "requestSha256": "216d4ef06b261a4c24ff7db8d4848333303bf9f8e3c5a2331477f1f648964b07",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 39,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "d935857cf810f09212039fbe28e477cccd27bb7562c2dd26aed24ec329fe5b02",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "aliasIsNotCopy",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/aliasIsNotCopy.box.sol",
+      "sourceSha256": "9f8d7e601cb834eab2ad77a8872bbe5c829e97d80503e5d01f874e86fd7966c7",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e0d9f7fd15d63d8e20cc63ca7c62e3d99535f023cb189b312289b68b287d79eb",
+      "requestSha256": "5497e82a85c62c9c1458d2a4c5115121541b74ff293b7c01d180d10373e0d50e",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 38,
+            "status": "refuted",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "0e45220cf6ad5fc559339e23b3a77d02adcfe2675606325f0832a6fce650547f",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "aliasIsNotCopy",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/aliasIsNotCopy.box.sol",
+      "sourceSha256": "9f8d7e601cb834eab2ad77a8872bbe5c829e97d80503e5d01f874e86fd7966c7",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e0d9f7fd15d63d8e20cc63ca7c62e3d99535f023cb189b312289b68b287d79eb",
+      "requestSha256": "5497e82a85c62c9c1458d2a4c5115121541b74ff293b7c01d180d10373e0d50e",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 38,
+            "status": "refuted",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "0fd6414940540bd704de1e3a278aa36f6dd172150222e0a3fb89fc724092fef3",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "aliasIsNotCopy",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/aliasIsNotCopy.diamond.sol",
+      "sourceSha256": "c1eacb9d1232b425b80031ac82888807abba31592aa9a784d4b3dd2079aa3852",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e28b52f778654f739c1d26fa6311c44dbfe750f540a0dd24494c008ad1de43ba",
+      "requestSha256": "f5eba0e5a595a7aecde9a5703a290ad3d49ad2ae9c1b5583806eeddee41ed9f0",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 37,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "245ae1592fbdebf949f4467a834d2972be4eef17c7c82a81c2fd6d22ff0fc81c",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "aliasIsNotCopy",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/aliasIsNotCopy.diamond.sol",
+      "sourceSha256": "c1eacb9d1232b425b80031ac82888807abba31592aa9a784d4b3dd2079aa3852",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e28b52f778654f739c1d26fa6311c44dbfe750f540a0dd24494c008ad1de43ba",
+      "requestSha256": "f5eba0e5a595a7aecde9a5703a290ad3d49ad2ae9c1b5583806eeddee41ed9f0",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: panic (an `assert` failed)"
+              ],
+              "outcome": {
+                "halt": "panic (an `assert` failed)",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 37,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "cc6eda0a1bf017aa1909ff03f9ed537ef36e54a6b0baa80695785fd7a493f4d9",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "distinctAllocations",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/distinctAllocations.box.sol",
+      "sourceSha256": "7121bce61fcdab77ccc1ed8c0fcf7bb64b58ae1710035dc6768f4013bd94664c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "4f4d953d5962e44bc58580abba8cf3769de0b61c8c3bce5a0fae776a31f89c1c",
+      "requestSha256": "cbad6a1302f12b3b997d7371c47ccfdd717a83912e5e182af97aeeda43e5a7a6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 42,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "a65e991dc51cbddd53f88849fba6ca2ba2fea17a3bed728bac5263959d25ccb7",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "distinctAllocations",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/distinctAllocations.box.sol",
+      "sourceSha256": "7121bce61fcdab77ccc1ed8c0fcf7bb64b58ae1710035dc6768f4013bd94664c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "4f4d953d5962e44bc58580abba8cf3769de0b61c8c3bce5a0fae776a31f89c1c",
+      "requestSha256": "cbad6a1302f12b3b997d7371c47ccfdd717a83912e5e182af97aeeda43e5a7a6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 42,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "cabe4bba8c5b25932427de14b4706ea1766060526bc847fc4b7f761c1a589abd",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "distinctAllocations",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/distinctAllocations.diamond.sol",
+      "sourceSha256": "375a1f347919c989544364c34ba2cb97fc66704d8fb0520610a0c31f24b6eff9",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a107db5c727cbc246b4b335f861f5f66a45507171cf793915b5e9e0b394062d2",
+      "requestSha256": "b34cb4f6a538df30f840c8deca4854745f8e274aa5644eb01ae595e13d29b25f",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 41,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "3ea7ba6b28e03587393bd86659acf41b204d8d6046c6a1400e908e2d618a3aec",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "distinctAllocations",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/distinctAllocations.diamond.sol",
+      "sourceSha256": "375a1f347919c989544364c34ba2cb97fc66704d8fb0520610a0c31f24b6eff9",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a107db5c727cbc246b4b335f861f5f66a45507171cf793915b5e9e0b394062d2",
+      "requestSha256": "b34cb4f6a538df30f840c8deca4854745f8e274aa5644eb01ae595e13d29b25f",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 41,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "dfcbf190df36565507e6c55330f638359de36be2f2c050a0674c2cbfaeae25bb",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroRead",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/zeroRead.box.sol",
+      "sourceSha256": "948e9b1e55a978eecced9853e4269e8516cda91acc36bd49a61f1073ce26c789",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "b6b0175c0147d40cca1070759c837bbb38da6299785211739a339481fc6b51ac",
+      "requestSha256": "b95a3855e79eaae16dc2dc95bd61ee0df761de74b38af7f37fe67f853b06b27a",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c9ec8b2495a5b20dc571660370075a0a316538ab803a96c9a8fdbff1df8e4e24",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroRead",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/zeroRead.box.sol",
+      "sourceSha256": "948e9b1e55a978eecced9853e4269e8516cda91acc36bd49a61f1073ce26c789",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "b6b0175c0147d40cca1070759c837bbb38da6299785211739a339481fc6b51ac",
+      "requestSha256": "b95a3855e79eaae16dc2dc95bd61ee0df761de74b38af7f37fe67f853b06b27a",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "8cad7e5bf3dfd298fd83862359ac7567e2e27f46177df3b5a715c0b6ff67c8d1",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroRead",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/zeroRead.diamond.sol",
+      "sourceSha256": "3db77d1a5900612bcb8864218e1e1d51a5f450f6d31f6de33bfb15258926ef95",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "35d59c7b7b86579a9770fc351a628cb8ca15bcad347dca3d1437c460f3eeb1bd",
+      "requestSha256": "c994bcdb8e879f7069b3644e0b183a77c3d912856febaa33b9519108efb63e2e",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 24,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "12bcf4197f74176d28deda6b06020c6b147c920b30144ce36fac09d3826899ca",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroRead",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/zeroRead.diamond.sol",
+      "sourceSha256": "3db77d1a5900612bcb8864218e1e1d51a5f450f6d31f6de33bfb15258926ef95",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "35d59c7b7b86579a9770fc351a628cb8ca15bcad347dca3d1437c460f3eeb1bd",
+      "requestSha256": "c994bcdb8e879f7069b3644e0b183a77c3d912856febaa33b9519108efb63e2e",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 24,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c7258b9b975a40727e96bc4e2d240d320c133a09990518e86005e1fc515c1c1e",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroWrite",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/zeroWrite.box.sol",
+      "sourceSha256": "4cb837f89b8821cf3673d5f40b38ee751a036d3bdb37873f04830cb0520806f2",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6267388a407d6e90f5ffc0b2f16c1cdfe7e1e424bfc1563d94bfa976cfb878dc",
+      "requestSha256": "6c3504c280d01f8714eaddb59e75a95af08957399d723b3840511f8712632ec8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 27,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "060c9d95b1a05d59286f3aed716b55d0768a6ad11d92d0515956c671c6b06843",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroWrite",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/zeroWrite.box.sol",
+      "sourceSha256": "4cb837f89b8821cf3673d5f40b38ee751a036d3bdb37873f04830cb0520806f2",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6267388a407d6e90f5ffc0b2f16c1cdfe7e1e424bfc1563d94bfa976cfb878dc",
+      "requestSha256": "6c3504c280d01f8714eaddb59e75a95af08957399d723b3840511f8712632ec8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 27,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "9bc58a5f2053237f0c78ee2ae3dee5275c4de98571684d2a3fa5555fc9ed94cc",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroWrite",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/zeroWrite.diamond.sol",
+      "sourceSha256": "79529553bd54edf3dbbe9c5c9d8cabe1be392db67aa9fcb3392362235c79da7c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e85141ceb5d158b37919aae10c779e01cf0671175c79abe61885fa1f9dd58a8d",
+      "requestSha256": "3ec9f2e0129bfe351d13517deaf0c9387dc169c9bcbf4dda2659211d153b7734",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 26,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "4491e2db192f4a7e7087100dc3bc8770dec96e1f00f75ad9f27061c2039e6152",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "zeroWrite",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/zeroWrite.diamond.sol",
+      "sourceSha256": "79529553bd54edf3dbbe9c5c9d8cabe1be392db67aa9fcb3392362235c79da7c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "e85141ceb5d158b37919aae10c779e01cf0671175c79abe61885fa1f9dd58a8d",
+      "requestSha256": "3ec9f2e0129bfe351d13517deaf0c9387dc169c9bcbf4dda2659211d153b7734",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 26,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "b7591e1dcef6139c750772d577ffb3f043b3ae15831e047238026465792dfdca",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobRead",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/oobRead.box.sol",
+      "sourceSha256": "f61c16d4bc64d525e73a8145c22745b5b1dffa53f62e792d3911d6af4c554b33",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a9abf9c40606beefb985f60005217fbae5ee9b8277f8c55d9da00dd40ec6211a",
+      "requestSha256": "0719359b1360ca03ea43a69a66789fc8d64530e16ecdb9d2538e8bc3f31d5db2",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "3fbf5ea679db8bf62df3b29552e544e6be3d955421087980ade086a643fd8d55",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobRead",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/oobRead.box.sol",
+      "sourceSha256": "f61c16d4bc64d525e73a8145c22745b5b1dffa53f62e792d3911d6af4c554b33",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a9abf9c40606beefb985f60005217fbae5ee9b8277f8c55d9da00dd40ec6211a",
+      "requestSha256": "0719359b1360ca03ea43a69a66789fc8d64530e16ecdb9d2538e8bc3f31d5db2",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 25,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "765feec7a877dc5c303beffa0b66716667d31d825c74fe4343b7088aed41a753",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobRead",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/oobRead.diamond.sol",
+      "sourceSha256": "cb8301d057d6ed25c94cb0e606f0e678b07b72d48d402ea45e3738a3c89dc936",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "b819dfe61cbee319f504167c470593da1a6de877d1967c18015d9fc02488c031",
+      "requestSha256": "03831b6f4c1b4cfc8f93069256b85799a5c0de24af0034faf158f8e5d019729f",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 24,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "657b24258bd82f7370b5eb34aedf3f08d3150b69e7ac60c8ac426d08e1875105",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobRead",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/oobRead.diamond.sol",
+      "sourceSha256": "cb8301d057d6ed25c94cb0e606f0e678b07b72d48d402ea45e3738a3c89dc936",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "b819dfe61cbee319f504167c470593da1a6de877d1967c18015d9fc02488c031",
+      "requestSha256": "03831b6f4c1b4cfc8f93069256b85799a5c0de24af0034faf158f8e5d019729f",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 24,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "eecdedb9ccb48d15b8361802b32449d5003b4649ca30ba8f63ac43e0a8c61e74",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobWrite",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/oobWrite.box.sol",
+      "sourceSha256": "4fb81be6804c6c41017df4b45064258fc8dfd95b0365ee0854be04fd9cc28759",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "c806618c52e8b62f7c3049745cdfe50af490ed1003b9d75996216c6a534dedec",
+      "requestSha256": "532e6a8d1fae815388d5b91daca2a24b925eb245c465d29b72f836dbb6f3d617",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 27,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c90913eb6ccae3c4507514c21cd99a7e45ee45e6526125b054d94e3ec8676ec9",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobWrite",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/oobWrite.box.sol",
+      "sourceSha256": "4fb81be6804c6c41017df4b45064258fc8dfd95b0365ee0854be04fd9cc28759",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "c806618c52e8b62f7c3049745cdfe50af490ed1003b9d75996216c6a534dedec",
+      "requestSha256": "532e6a8d1fae815388d5b91daca2a24b925eb245c465d29b72f836dbb6f3d617",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 27,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "a0c198dbbb6fbeb8328ab9d73dd2b7d6a3ba2e084491dfa3c95064c6a574062a",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobWrite",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/oobWrite.diamond.sol",
+      "sourceSha256": "400ddd6c90c5c0438c1d0069c530846bfff74fdb460d30fb65be5192a4e6be36",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "bbf9cd440c7790a2c6ab2886429ddf0ad039a7e9cbefa0ea6e399259bb1a3df8",
+      "requestSha256": "97c2da1ac6c8406e1f7d21d0c42cbf9aab07f5a6777f6fdbf842e8976ef6e856",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 26,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "d9301f9bc9da2a63c34c5bdd22f31a6b807c02bf3e7b7965f8face4699a938ea",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "oobWrite",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/oobWrite.diamond.sol",
+      "sourceSha256": "400ddd6c90c5c0438c1d0069c530846bfff74fdb460d30fb65be5192a4e6be36",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "bbf9cd440c7790a2c6ab2886429ddf0ad039a7e9cbefa0ea6e399259bb1a3df8",
+      "requestSha256": "97c2da1ac6c8406e1f7d21d0c42cbf9aab07f5a6777f6fdbf842e8976ef6e856",
+      "requiredProven": false,
+      "status": "refuted",
+      "result": {
+        "results": [
+          {
+            "counterexample": {
+              "arguments": [],
+              "certified": false,
+              "goalKind": "fmlValid",
+              "initialBalance": "0",
+              "initialLedger": [],
+              "initialStorage": "",
+              "kind": "model-state",
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: revert"
+              ],
+              "outcome": {
+                "halt": "revert",
+                "kind": "halt"
+              },
+              "transaction": {
+                "ext": [],
+                "msgSender": "1",
+                "msgValue": "0",
+                "selfAddress": "0",
+                "timestamp": "0"
+              }
+            },
+            "function": "identity",
+            "reading": "solc",
+            "reason": "counterexample found",
+            "sourceId": 26,
+            "status": "refuted",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "62fc299a03be480f524296dc3b0e98570347b785bba3878a6efb55d26b91fa46",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "emptySuccess",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/emptySuccess.box.sol",
+      "sourceSha256": "01102fe8f0e0242681ec8665bc284358d36e42da04c1459e3f5c10737f64535a",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "9e83c89547d5fe8cdba391d0f604318ab99cd1f194c79baf9bc86e6b2d4e077e",
+      "requestSha256": "a812f6ff390c9cf3e6aad8036226860f4d487e8e45b2c2fbfb22bf8c29660d8f",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "772e14c360ec300281e51767014cb27d68875d88fbdd689de2703da9c5af339c",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "emptySuccess",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/emptySuccess.box.sol",
+      "sourceSha256": "01102fe8f0e0242681ec8665bc284358d36e42da04c1459e3f5c10737f64535a",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "9e83c89547d5fe8cdba391d0f604318ab99cd1f194c79baf9bc86e6b2d4e077e",
+      "requestSha256": "a812f6ff390c9cf3e6aad8036226860f4d487e8e45b2c2fbfb22bf8c29660d8f",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "1c99d23c7ebd52e8529fed845c6ccc2c09ed5664431b2ea636e61235a7b6772c",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "emptySuccess",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/emptySuccess.diamond.sol",
+      "sourceSha256": "a89fa83dff19795c0bd0c753e3a5c193fab68dfc8ca5c92cde4dfa96412eb8c9",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6962b89d0fbf7e4d5d15cb32c905c113e8b04fb7bdb5bdacee7eb9e5e7364f1a",
+      "requestSha256": "31786ee1c1a3f2405888437582e021f38ef7eafffcbdf354a1df61dfbab49317",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "3de8c92b233bcd0677445ff5307dc3d9f5e08751c33f10f9ca45728dba1454ed",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "emptySuccess",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/emptySuccess.diamond.sol",
+      "sourceSha256": "a89fa83dff19795c0bd0c753e3a5c193fab68dfc8ca5c92cde4dfa96412eb8c9",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6962b89d0fbf7e4d5d15cb32c905c113e8b04fb7bdb5bdacee7eb9e5e7364f1a",
+      "requestSha256": "31786ee1c1a3f2405888437582e021f38ef7eafffcbdf354a1df61dfbab49317",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "7903e80aed5ba62c35c75d4fd552664efaa18a6811c7f60b6926188a006f16ea",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "uintIdentity",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/uintIdentity.box.sol",
+      "sourceSha256": "97af816161596dc61483090777846c9ab45fd12df9301f6d78fff01d9a0e86fd",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "40944b8e11b8559d89a41d9257f5720c079c7931f07d1a2d93551211a101d451",
+      "requestSha256": "894676379fa630d5629cbbbb7e9bd18349fd985ff4a0852486d1485c4933b2b0",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 31,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "a2517ff64d63b6459bd694c78dea9fcbb411059ef54523758e5df68f82de91ed",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "uintIdentity",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/uintIdentity.box.sol",
+      "sourceSha256": "97af816161596dc61483090777846c9ab45fd12df9301f6d78fff01d9a0e86fd",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "40944b8e11b8559d89a41d9257f5720c079c7931f07d1a2d93551211a101d451",
+      "requestSha256": "894676379fa630d5629cbbbb7e9bd18349fd985ff4a0852486d1485c4933b2b0",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 31,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "6c524c37c7a92ebb0bc3f471db3328d00f743006cdfaf05e0fa74469205ff021",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "uintIdentity",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/uintIdentity.diamond.sol",
+      "sourceSha256": "88d068c72e68135efed1db14da63b27e62ca79a263aa0396920a4650426a1eb5",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "8a035b96541530438b49cb2dd60aefd9d1b9bd8dddf16439e0d84a37ea287fb2",
+      "requestSha256": "2e2bbae0e60c13459cefda586a199950beabf96f7eb12d0453f0a730b680e3c6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "ca61662c14dedb06bf4dbb108c302b34cbadbe651c7d4fba2ab3e853908f1e23",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "uintIdentity",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/uintIdentity.diamond.sol",
+      "sourceSha256": "88d068c72e68135efed1db14da63b27e62ca79a263aa0396920a4650426a1eb5",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "8a035b96541530438b49cb2dd60aefd9d1b9bd8dddf16439e0d84a37ea287fb2",
+      "requestSha256": "2e2bbae0e60c13459cefda586a199950beabf96f7eb12d0453f0a730b680e3c6",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "6c1ffcf8ab71dc86ecf6030f43112e6f0c0c186005865a04fe9af472a94df7db",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolDefault",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/boolDefault.box.sol",
+      "sourceSha256": "75689e7037d06e8a53bb359baee8f44189463c362016f3a2c224d0b1c67f3c1e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "bfbd8ad8006b58172b81a18990588f30471a7078fbafae902c484b01c2f30842",
+      "requestSha256": "645c47a4d647f70c34b69d5acf0ad4d03c1afbca2aaee6b15bd3b08fa2c6d73a",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "65438bc345001b4fb817c25d37778f300baef2ba9a2c634cbcf72668ad5b2e57",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolDefault",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/boolDefault.box.sol",
+      "sourceSha256": "75689e7037d06e8a53bb359baee8f44189463c362016f3a2c224d0b1c67f3c1e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "bfbd8ad8006b58172b81a18990588f30471a7078fbafae902c484b01c2f30842",
+      "requestSha256": "645c47a4d647f70c34b69d5acf0ad4d03c1afbca2aaee6b15bd3b08fa2c6d73a",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 24,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "ce91758254d5d4a7d931265b170affe4ee5f3f8e1773210d3a1b26c75c2d4e18",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolDefault",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/boolDefault.diamond.sol",
+      "sourceSha256": "bc4e2937be32b906aaf110e3f4fb789fddcbbb98c78dc7ca34c5dd2b2fdc4634",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "be9af2fb1a8b50b5f743c702c656bafff765ca8884a8ef93613ad2b7a9d06dbe",
+      "requestSha256": "c078671e02f43ec213c894525efa5a3dc5bd857ec0cbf32249047511010f35fb",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "f2e70cd52eeac3d06e88f0af4dbb0b0439345babc786620cf7f6c9848197a1cc",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolDefault",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/boolDefault.diamond.sol",
+      "sourceSha256": "bc4e2937be32b906aaf110e3f4fb789fddcbbb98c78dc7ca34c5dd2b2fdc4634",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "be9af2fb1a8b50b5f743c702c656bafff765ca8884a8ef93613ad2b7a9d06dbe",
+      "requestSha256": "c078671e02f43ec213c894525efa5a3dc5bd857ec0cbf32249047511010f35fb",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 23,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "9ef2e75c8d55abdfcfb383cee6a3b6436314084d798dd12798831d82dc78e587",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolAlias",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/boolAlias.box.sol",
+      "sourceSha256": "405b2e0dbb32d26bae818f881f9c739abf9018c9ec22c4675a8be14a05a5ed65",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6bf4d0dc88bd3e5164095ebbf9a516d0e151f65b03fbc5d105012e76baf4b3a7",
+      "requestSha256": "c77745a0ccf0528f3ad5015a17d6d6a9ad2fb959551c6324bd549ce5035b6ad2",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 36,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "0b190b0bf2a7a3ec16ecc60aa32aa9b189fc122c782b6fe0943af2f92da29119",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolAlias",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/boolAlias.box.sol",
+      "sourceSha256": "405b2e0dbb32d26bae818f881f9c739abf9018c9ec22c4675a8be14a05a5ed65",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "6bf4d0dc88bd3e5164095ebbf9a516d0e151f65b03fbc5d105012e76baf4b3a7",
+      "requestSha256": "c77745a0ccf0528f3ad5015a17d6d6a9ad2fb959551c6324bd549ce5035b6ad2",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 36,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "ad96ebfb10e7910db56251de064cedb165a031de5ba78a3fb98dea8933be0fea",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/boolAlias.diamond.sol",
+      "sourceSha256": "dfcf87bd578dbe26063b9bb6eeab015055d324fb7a8de76672171f27e52e9020",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "cb31545600d86338aec91b00255eb5c1968ad71f5e915f6e672bedc3541459e6",
+      "requestSha256": "79e4f6811711bbe6a265a6cc9d424e5ca986f8750446d3138e2b9ff194526e02",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "ddc73379ff263ca3fa5e786d020612b8df22de02709d26bd66a8c40b6dcf7ce2",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "boolAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/boolAlias.diamond.sol",
+      "sourceSha256": "dfcf87bd578dbe26063b9bb6eeab015055d324fb7a8de76672171f27e52e9020",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "cb31545600d86338aec91b00255eb5c1968ad71f5e915f6e672bedc3541459e6",
+      "requestSha256": "79e4f6811711bbe6a265a6cc9d424e5ca986f8750446d3138e2b9ff194526e02",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "bbf6755c8a16b3e46dde0992ba5d15d46b59727f300f7ad59001cfc6999f8c38",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedDefault",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/fixedDefault.box.sol",
+      "sourceSha256": "4860a3892ebf3d1a899d185c32a84051f63ab8e52a2e6745485450e01079e170",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "af51fada2122ad9f1c7f156a714a683c37c54bb424d997a8267af7b3d168f243",
+      "requestSha256": "efe518e184b592af00b242d7cee1bdb058f2ae9178f53d3dc191cba3cf7b4b43",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 21,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "b4a22779fa8ba7a8cdeeda6804979e4b22c80cd356ae421396428607e7860ff4",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedDefault",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/fixedDefault.box.sol",
+      "sourceSha256": "4860a3892ebf3d1a899d185c32a84051f63ab8e52a2e6745485450e01079e170",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "af51fada2122ad9f1c7f156a714a683c37c54bb424d997a8267af7b3d168f243",
+      "requestSha256": "efe518e184b592af00b242d7cee1bdb058f2ae9178f53d3dc191cba3cf7b4b43",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 21,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "47706218c1ea3e7f17f98e57ce513e9cfa75434f02faf7f7abe8a6665b1a80f3",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedDefault",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/fixedDefault.diamond.sol",
+      "sourceSha256": "337ac4e50290320dec7fa7694add2e3f88ce9fbc4c10baa125fe5f9d6dbfef18",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "aedf6253d9e182acece734a3199d5d38dedfbf69ddd6f22af2f33ab4757c1c70",
+      "requestSha256": "d3fd05adafbf06aeaae0c73f931e12930f6b4a97a8e21d1bd9bdf59da4ba0a64",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 20,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "5a06e274dfdc327cffd0d9edb433e4ffaeb611087a7f564bb64087b729ed562e",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedDefault",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/fixedDefault.diamond.sol",
+      "sourceSha256": "337ac4e50290320dec7fa7694add2e3f88ce9fbc4c10baa125fe5f9d6dbfef18",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "aedf6253d9e182acece734a3199d5d38dedfbf69ddd6f22af2f33ab4757c1c70",
+      "requestSha256": "d3fd05adafbf06aeaae0c73f931e12930f6b4a97a8e21d1bd9bdf59da4ba0a64",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 20,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "d6b197f6a2c3fcc5448f800296a2600ef591635e1ef06fcef96c53b0a2314f47",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedAlias",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/fixedAlias.box.sol",
+      "sourceSha256": "fdb1e0864ceac63b43ce36e1ae00f68ed4b58c4b3705f57dfecefd3c5684b17e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "d6deb77a383e4f6b9ddf83e91d932a8fca575cadb40ce567cda3fd9c19560f05",
+      "requestSha256": "33564142f97409e5dac559621190fd19c7587116fdbc54610f3ac145f1c29081",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "cde14cddaf3a2fae8383fb0b18caf691651566dfbec3a795c0b4d03e8ba655ea",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedAlias",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/fixedAlias.box.sol",
+      "sourceSha256": "fdb1e0864ceac63b43ce36e1ae00f68ed4b58c4b3705f57dfecefd3c5684b17e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "d6deb77a383e4f6b9ddf83e91d932a8fca575cadb40ce567cda3fd9c19560f05",
+      "requestSha256": "33564142f97409e5dac559621190fd19c7587116fdbc54610f3ac145f1c29081",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "ab4a49c05bfe567f63e6f8cc68eba9f57d12215cc65ba5b58b5075c2de91f965",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/fixedAlias.diamond.sol",
+      "sourceSha256": "8ba6d7d36dcea5060e88a3e3ab92e21f7b036ec0dab4d2c41da008ffacda92e8",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "85269eb519d42186fd15e47f5a8cea06396de41fd79ded760523f0f602fddf7d",
+      "requestSha256": "e9d378f27d26bea3145a01d9dbc54bd77a5143beccd2053cd9adce694d0b534d",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 34,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "35ce69d03f57fc4d8bbb9a56684a3991460ae4e0cdae6b219f01c0320a99de6a",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "fixedAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/fixedAlias.diamond.sol",
+      "sourceSha256": "8ba6d7d36dcea5060e88a3e3ab92e21f7b036ec0dab4d2c41da008ffacda92e8",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "85269eb519d42186fd15e47f5a8cea06396de41fd79ded760523f0f602fddf7d",
+      "requestSha256": "e9d378f27d26bea3145a01d9dbc54bd77a5143beccd2053cd9adce694d0b534d",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 34,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "c3942d11d0a24969a22c7959a5743133146acd05fcf8cb526b4e38355a79ca76",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "referenceAlias",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/referenceAlias.box.sol",
+      "sourceSha256": "90f3b33e6b120606dde006a86973f52ca929479edcd541551df94b655ededafe",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "78783c8a3c6b9fdc086a85c3ff91e38d6222bc66ea89b1417df2a1d2ca605155",
+      "requestSha256": "a970889ea70658a7d5c938efb2d1eefcb72957d0fa40f08309c6658e1d419353",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "0252425ac58f5219a2de7e713c3597b9b72fbc09b30e7e9112990461a91e2cd5",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "referenceAlias",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/referenceAlias.box.sol",
+      "sourceSha256": "90f3b33e6b120606dde006a86973f52ca929479edcd541551df94b655ededafe",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "78783c8a3c6b9fdc086a85c3ff91e38d6222bc66ea89b1417df2a1d2ca605155",
+      "requestSha256": "a970889ea70658a7d5c938efb2d1eefcb72957d0fa40f08309c6658e1d419353",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 54,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "44f74b517c149361194520c13a9244042ea10fec31e92b07a4a2ecab70fc5402",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "referenceAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/referenceAlias.diamond.sol",
+      "sourceSha256": "b531526d439a710eb58e2c992a33ffe4014afec147ed0e3cb8fc88e9b191e03a",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "40c0233cfa0761778244cb23c64039cbacad42fcb61452c9dcfb3469dbe25ba5",
+      "requestSha256": "068c07ad7e8ad691a0790bc0627a41632e71ed26a94303314a46242298a4a697",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "9bcab87e0c9afce613f0bc8f1fbe487a8e0122ff83364cc7d2494f98a7ba37ab",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "referenceAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/referenceAlias.diamond.sol",
+      "sourceSha256": "b531526d439a710eb58e2c992a33ffe4014afec147ed0e3cb8fc88e9b191e03a",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "40c0233cfa0761778244cb23c64039cbacad42fcb61452c9dcfb3469dbe25ba5",
+      "requestSha256": "068c07ad7e8ad691a0790bc0627a41632e71ed26a94303314a46242298a4a697",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 53,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "53283969bd3bff6b943cb3bf62d95d347ad7079dfd7cab9617028827a61e70c2",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "mappingRoot",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/mappingRoot.box.sol",
+      "sourceSha256": "66de898e01ea331635e71b42d093825c59bfdfe7a91ec8810d6fc65cba0f0d52",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "1ead4a89170a204bfa04699947e0f8f5a619da0055e1986f952591b0c9d5bb42",
+      "requestSha256": "1c30cb81616113f17053303e31306d46206fd570485b3fa377b20b1008a69bd8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "7145f555e91ec67d5e169fcaba143b94b8098846c937525422988db00155b623",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "mappingRoot",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/mappingRoot.box.sol",
+      "sourceSha256": "66de898e01ea331635e71b42d093825c59bfdfe7a91ec8810d6fc65cba0f0d52",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "1ead4a89170a204bfa04699947e0f8f5a619da0055e1986f952591b0c9d5bb42",
+      "requestSha256": "1c30cb81616113f17053303e31306d46206fd570485b3fa377b20b1008a69bd8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 35,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "9c13b33ad29739c92cdb9578e717f0211c0cb56922efd9a7c3277a285f19a5b3",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "mappingRoot",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/mappingRoot.diamond.sol",
+      "sourceSha256": "de3f2c3458166e03a215d0288d1f42d78b6b444b81299ad3b682667eece917fc",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "669614cb539925359ce5812328599157c744b85e0c2cad6c686662b35283cd06",
+      "requestSha256": "e414849cc4a8db431b2a8da49285ade3d5d79bc072bb7a799df10353d4a84099",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 34,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "66162d8ce975dafdfd699450a887e0b699c82030e7dcdde8a23542675a6dfb69",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "mappingRoot",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/mappingRoot.diamond.sol",
+      "sourceSha256": "de3f2c3458166e03a215d0288d1f42d78b6b444b81299ad3b682667eece917fc",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "669614cb539925359ce5812328599157c744b85e0c2cad6c686662b35283cd06",
+      "requestSha256": "e414849cc4a8db431b2a8da49285ade3d5d79bc072bb7a799df10353d4a84099",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 34,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "939e3fef71763b918e6a6b1e68ed1a20f5c19cca396f98495688f7331f49e36e",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageAlias",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/storageAlias.box.sol",
+      "sourceSha256": "732169fbdef204eec6c586f6058b263c90bf16653eac7b15ff5c0ed4c1cd1998",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "004b82e52e2601bf2ac6cdeabb8120b24574002e13ca2637aacc5e685d74ba9a",
+      "requestSha256": "bf30d6c786edd71a0dbe7148a7d802fb46b64027ee53de91af9688225f44a4a5",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "b10db59189ff189e174f6b9579bda4ae3a1a80773c39fdb5f23a2378a7cd5221",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageAlias",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/storageAlias.box.sol",
+      "sourceSha256": "732169fbdef204eec6c586f6058b263c90bf16653eac7b15ff5c0ed4c1cd1998",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "004b82e52e2601bf2ac6cdeabb8120b24574002e13ca2637aacc5e685d74ba9a",
+      "requestSha256": "bf30d6c786edd71a0dbe7148a7d802fb46b64027ee53de91af9688225f44a4a5",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 30,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "f9d406d27855c484fb3ed4ccce706341706dafc36464515f5eb507d526382237",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/storageAlias.diamond.sol",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2f86adcac8e54eadc6750510365abe7edb2f07ce097769d3ae223d7d4a567251",
+      "requestSha256": "440f3a40583c77b47ad103a036b7aa96e338391395f590f233dfad36c6e2d2fe",
+      "requiredProven": false,
+      "status": "pending",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 29,
+            "status": "pending",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "5998359c212548295757ef53253c665089d904ac311a084991f1e9fb169c1ebd",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/storageAlias.diamond.sol",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2f86adcac8e54eadc6750510365abe7edb2f07ce097769d3ae223d7d4a567251",
+      "requestSha256": "440f3a40583c77b47ad103a036b7aa96e338391395f590f233dfad36c6e2d2fe",
+      "requiredProven": false,
+      "status": "pending",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 29,
+            "status": "pending",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "5565ef2c84fa584d000c2f0982356fc07c7642c607025f90564fcc72f1bf36ec",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "copyAfterPush",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/copyAfterPush.box.sol",
+      "sourceSha256": "aa31e68c3018105ebeaedb4f91e31cd2f5887d1967e284a03af693780233e7c5",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a7554265714c28e5538b8773422bdcfc785ed7b270cb03e6d6015e7d496cf2e9",
+      "requestSha256": "2daf4d2b89a32eeb47dcecbd90c9a0a602cbb3d61e05191d71e838ca0440d708",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 43,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "1e2b17f096c66d631544f463fe675c595584c452519184b23faf907618caa738",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "copyAfterPush",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/copyAfterPush.box.sol",
+      "sourceSha256": "aa31e68c3018105ebeaedb4f91e31cd2f5887d1967e284a03af693780233e7c5",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "a7554265714c28e5538b8773422bdcfc785ed7b270cb03e6d6015e7d496cf2e9",
+      "requestSha256": "2daf4d2b89a32eeb47dcecbd90c9a0a602cbb3d61e05191d71e838ca0440d708",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 43,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "5eea1f89b964b128e1263fbe3346d097631f07fba56ee1d212dc684dfcd44f40",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "copyAfterPush",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/copyAfterPush.diamond.sol",
+      "sourceSha256": "788efb34e12f00e795270c23622dc20aaec7fa8d7e01d32f0c98be37ba0f1d4f",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "81a8caf1ddad7547f20a808c7e30117ec89d70aca862edd142f1667d6b03da29",
+      "requestSha256": "a1d44b0723f6d1dab666e375ee31142477dd30738e9da271b778fda54eef24f8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 42,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "bfe1c70d715288972ec0ea5b91b9c42c2b22e7fbc9ee5d779f9190d9eed910fb",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "copyAfterPush",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/copyAfterPush.diamond.sol",
+      "sourceSha256": "788efb34e12f00e795270c23622dc20aaec7fa8d7e01d32f0c98be37ba0f1d4f",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "81a8caf1ddad7547f20a808c7e30117ec89d70aca862edd142f1667d6b03da29",
+      "requestSha256": "a1d44b0723f6d1dab666e375ee31142477dd30738e9da271b778fda54eef24f8",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 42,
+            "status": "proved",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "2eb6df500f1de5a7fc9f65dab6af34052f1d605e16c9d1acfcf4364edd3fe67a",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageCopy",
+      "modality": "box",
+      "viaIR": false,
+      "source": "sources/storageCopy.box.sol",
+      "sourceSha256": "9fc72e39d2edb7e28348fc815df063aaca6e6a4376da165fa0ecc6030909b04e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "9b685eb259ea767de54fc66135bafafa59f0c8655509a853e583375dfdf279d0",
+      "requestSha256": "14a9e690fdd438b2447d8faf76da4727267defbc14c0999144057baecc9d1e90",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 45,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "584f0f8895b58642161b891db172eb19681c5cd715d40b143e0f9a327c848eeb",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageCopy",
+      "modality": "box",
+      "viaIR": true,
+      "source": "sources/storageCopy.box.sol",
+      "sourceSha256": "9fc72e39d2edb7e28348fc815df063aaca6e6a4376da165fa0ecc6030909b04e",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "9b685eb259ea767de54fc66135bafafa59f0c8655509a853e583375dfdf279d0",
+      "requestSha256": "14a9e690fdd438b2447d8faf76da4727267defbc14c0999144057baecc9d1e90",
+      "requiredProven": true,
+      "status": "proved",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 45,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "6f969a7b528cbf0240a1efdebc27af12518ea486e00565b47de1b5df644927f5",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": false,
+      "source": "sources/storageCopy.diamond.sol",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2a14ca407b4d4c21d12b14b3f255a2e6d2338acd4d668492747d398ff1505348",
+      "requestSha256": "dea56bca3839170c401234805142c0700907af64b7534b0f054a06d5754a3f7a",
+      "requiredProven": false,
+      "status": "pending",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 44,
+            "status": "pending",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "80ca3fa38ff5a5931ba6560a3ee7b99fc7235bc3a8c4ca07aae909cd6e20ca61",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": true,
+      "source": "sources/storageCopy.diamond.sol",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c",
+      "compiler": {
+        "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+        "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+      },
+      "rawAstSha256": "2a14ca407b4d4c21d12b14b3f255a2e6d2338acd4d668492747d398ff1505348",
+      "requestSha256": "dea56bca3839170c401234805142c0700907af64b7534b0f054a06d5754a3f7a",
+      "requiredProven": false,
+      "status": "pending",
+      "result": {
+        "results": [
+          {
+            "function": "identity",
+            "reading": "solc",
+            "reason": "checker did not decide",
+            "sourceId": 44,
+            "status": "pending",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      },
+      "protocolError": null,
+      "exit": 0,
+      "signal": null,
+      "traceSha256": "cb90b279e31b136e27503143f8226e7ed85f1c61ae1d550d6a3223b6dbb7aa56",
+      "observedSerializedEnvironmentAccess": false,
+      "observedExternalExecs": [
+        "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check"
+      ]
+    }
+  ],
+  "boundary": "External fresh source-to-native controls; no browser result, compiler equivalence or exhaustive linked-function closure proof. Trace observations apply only to these runs."
+}

@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "scripts/build-direct-native.py",
+    "tests/directruntime-20261104/memory-references/runtime/native-prefix",
+    "tests/directruntime-20261104/memory-references/runtime/lean4-797c613",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native"
+  ],
+  "exit": 1,
+  "wallSeconds": 317.5845176779985,
+  "peakAggregateRssKiB": 1373640,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

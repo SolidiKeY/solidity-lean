@@ -1,0 +1,15 @@
+{
+  "command": [
+    "node",
+    "tests/directruntime-20261104/memory-references/native-source-controls.mjs",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-source"
+  ],
+  "exit": 1,
+  "wallSeconds": 8.731727544000023,
+  "peakAggregateRssKiB": 243040,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

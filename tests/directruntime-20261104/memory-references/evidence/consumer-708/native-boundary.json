@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "tests/directruntime-20261104/memory-references/native-boundary-audit.py",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-boundary"
+  ],
+  "exit": 0,
+  "wallSeconds": 0.8093088739988161,
+  "peakAggregateRssKiB": 26228,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

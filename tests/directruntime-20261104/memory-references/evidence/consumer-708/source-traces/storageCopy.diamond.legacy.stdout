@@ -1,0 +1,2 @@
+{"ready":true}
+{"results":[{"function":"identity","reading":"solc","reason":"checker did not decide","sourceId":44,"status":"pending","tag":"diamond","verification":"direct"}]}

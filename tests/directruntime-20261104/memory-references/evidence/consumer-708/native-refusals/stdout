@@ -1,0 +1,23 @@
+{"ready":true}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: allocation needs one length","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: inconsistent type identifier/location","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: inconsistent type identifier/location","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: unsupported reference location","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: storage local from new","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: constant local","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: inconsistent allocation constructor identifier","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: invalid fixed array length","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: invalid fixed array length","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: inconsistent type metadata","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"String expected","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"String expected","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"String expected","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"String expected","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"property not found: typeName","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: state local","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: inconsistent type identifier/location","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: try allocation","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: unsupported reference location","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"memory reader: declaration node kind","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"mv1: `new` of another type","sourceId":31,"status":"unsupported","tag":"box","verification":"direct"}]}
+{"results":[{"function":"identity","reading":"solc","reason":"a value where a storage reference is expected","sourceId":40,"status":"unsupported","tag":"box","verification":"direct"}]}

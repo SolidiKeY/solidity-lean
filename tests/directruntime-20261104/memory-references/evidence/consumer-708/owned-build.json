@@ -1,0 +1,17 @@
+{
+  "command": [
+    "lake",
+    "build",
+    "Solidity.Frontend.ExecutableAst.Memory.Reader",
+    "Admission",
+    "KernelControls",
+    "KernelMatrix"
+  ],
+  "exit": 0,
+  "wallSeconds": 5.743722024009912,
+  "peakAggregateRssKiB": 1026284,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

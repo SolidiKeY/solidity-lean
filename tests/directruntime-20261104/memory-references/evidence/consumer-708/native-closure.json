@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3",
+    "tests/directruntime-20261104/memory-references/native-closure-evidence.py",
+    "tests/directruntime-20261104/memory-references/runtime/native-snapshot-708",
+    "tests/directruntime-20261104/memory-references/runtime/isolated-native-prefix",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated",
+    "tests/directruntime-20261104/memory-references/runtime/consumer-708/native-closure"
+  ],
+  "exit": 0,
+  "wallSeconds": 44.748755353997694,
+  "peakAggregateRssKiB": 1228428,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

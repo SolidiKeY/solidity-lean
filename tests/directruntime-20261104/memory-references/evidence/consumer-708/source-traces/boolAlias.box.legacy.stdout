@@ -1,0 +1,2 @@
+{"ready":true}
+{"results":[{"function":"identity","reading":"solc","reason":"","sourceId":36,"status":"proved","tag":"box","verification":"direct"}]}

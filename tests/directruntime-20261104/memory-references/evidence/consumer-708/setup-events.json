@@ -1,0 +1,9 @@
+{
+  "firstNativeBuild": "344-module Lean target passed; producer native builder exit1 on missing materialized PaymentWitness.c before C compilation",
+  "sharedMaterializationRejected": true,
+  "rejectedActionExecuted": false,
+  "automaticReviewReason": "The action overwrites generated C files under the shared .lake/build/ir root, outside the lane exclusive write paths; a clean isolated build is safer.",
+  "saferAlternative": "Exact708 detached build worktree under owned runtime. Only new isolated C/setup files created with source/trace equality and exclusive creation; no shared output overwrite.",
+  "isolatedSetupAttempt": "Initial isolated materialization read failed on absent setup.json before writes; successful identical-source setup copied into isolated new file.",
+  "sourceEdits": "No producer source edited; original builder and extractor unchanged."
+}

@@ -1,8 +1,9 @@
 # Executable array memory/reference reader
 
 Implementation and development controls are committed in this lane's packet.
-The whole assignment remains blocked on ordinary A/D integration and fresh native/browser
-acceptance. Central registration is resolved by the adopted published master. Kernel validation does not
+Consumer integration is published in `70845978ab616a63b13d0dee8b31b28893ccf591`;
+Fresh native Identity and mandatory local-memory controls pass; four storage-array
+diamond cases remain pending, and browser validation awaits D. Central registration is resolved. Kernel validation does not
 satisfy those gates. No runtime acceptance marker is issued.
 
 Repository: `/workspace/solidity-lean`.
@@ -21,7 +22,7 @@ No push, default-branch merge, PR or publication was performed.
 | Queue | Result | Remaining acceptance |
 |---|---|---|
 | Immutable model/interface inventory and waiting backfill | Existing constructors, elaboration, run, calculus and producer boundaries inspected; original compiler fixtures committed before A's interface arrived | Source/Core/physical adequacy gaps remain independent |
-| Location-aware locals and allocation | Owned reader implemented; existing index/assignment recursion reused; all 84 valid fixtures intrinsically typed | A must wire the reader into the ordinary verifier |
+| Location-aware locals and allocation | Owned reader implemented; existing index/assignment recursion reused; all 84 valid fixtures intrinsically typed | Consumer wiring is resolved in 70845978; fresh native/browser controls remain |
 | Controls and intrinsic proofs | 42 exact source-body box/diamond kernel controls, 12 focused controls, 84 initial-model executions, 20 malformed refusals and two intrinsic type refusals pass | These are development checks; ordinary runtime control results remain pending |
 | Source-to-result and handoff | Existing source transport checked; exact API/import and normalization instructions below | Both fresh native and browser binaries and the final full gate |
 
@@ -61,10 +62,10 @@ substitute the state-root parser into local/allocation handlers, or retry anothe
 reader after an error. This preserves child failures and existing sequencing.
 Primitive/reference parameters and specifications retain Shared's behavior.
 
-The ordinary `Solidity/Tools/DirectRuntime.lean` entry point still uses its
-private legacy readers at this head. This lane did not edit it or Shared.
-A must replace that reader use through its owned integration while retaining
-the existing intrinsic obligation builder and trusted-verifier result path.
+The published `70845978` entry point imports Shared.Compose and Shared.Intrinsic,
+uses the canonical executableReader, and calls the shared obligation builder.
+The earlier private-reader blocker is resolved by A's producer migration; this
+lane did not edit DirectRuntime or Shared. The trusted result path is retained.
 D must rebuild both ordinary runtimes from that integrated head and execute the
 actual source controls; a listing/ready result is not verification.
 
@@ -502,3 +503,102 @@ The publication changes no DirectRuntime/executable-AST interface. Ordinary
 consumer integration,fresh native/browser positive diamond Identity and all
 modality controls,and the full merged VM gate remain open. No ordinary proof
 closure,full-tree cache freshness or RUNTIME_GATE_PASS is claimed.
+
+
+## Integrated consumer and isolated native validation: 70845978
+
+Rebased the assigned branch onto `70845978ab616a63b13d0dee8b31b28893ccf591`.
+The prior head764d75c2 is an ancestor,and owned files were preserved; recovery
+ref `refs/backup/memory-references-pre-708` retains it. This publication also
+contains A's DirectRuntime migration to executableReader/shared obligations.
+Earlier consumer-blocker notes above are historical and superseded here.
+
+Fresh native validation uses the existing producer build script unchanged,
+Lean4.24.0/source797c613 and default-O2,with the exact12GiB/no-swap bound,
+serial-j1 and H1 headroom guard. The first build completed its344-module Lean
+target but failed before C compilation because cached dependency C was not
+materialized. Automatic approval review rejected an attempt to restore shared
+.lake C files outside exclusive paths. No rejected action executed. The safer
+alternative is a clean detached build worktree under the owned runtime path.
+All343 source bytes and cache/trace OLean identities were checked;only new C
+files and an identical-source successful setup descriptor were created there.
+No shared output overwrite or producer source edit was used.
+
+The new native-source-controls runner freshly compiles84 AST fixtures from42
+source variants through compileFixture.rawAst,then calls the real native
+compiled verifier with metadata-selected box/diamond readings and records
+source/compiler/request/binary/C/bridge identities. A protocol/modality/sourceId
+error always forces failure;Identity diamond explicitly requires two cases.
+Unknown and unsupported results remain gaps. Separate22 malformed/type-error
+API controls are not counted as fresh valid-source cases. Runtime traces and
+limited named-symbol/dynamic-link observations do not prove exhaustive binary
+closure or compiler/Source adequacy. Final results follow after execution.
+
+This VM currently lacks Emscripten and the pinned WASM leanrt/libuv/GMP stage;
+only the Ubuntu build container is installed. D's dependency handoff requires
+rebuilding the existing browser producer at the same source bytes and running
+the fresh request packet through an actual browser worker. Boot/listing or
+Node-only WASM does not satisfy browser acceptance. No browser success or
+RUNTIME_GATE_PASS is claimed.
+
+
+### Actual native source-to-result observations
+
+Fresh isolated native build passed in1230.231 s,sampled aggregate peak RSS
+1737064 KiB,without guard stop. Binary20962960 bytes,
+SHA256 `5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01`.
+Producer C/object reconstruction verified all206 object keys and exact14
+frontend-origin candidate bodies. All source/bridge/C bytes matched the
+manifest and successful cache outputs. Lean4.24.0,Lake5.0.0-src+797c613,
+clang19.1.2 and hostCC14.2.0 identities are recorded.
+
+All84 compiler-AST cases were freshly compiled from42 source variants through
+the pinned0.8.34 compiler,then checked by that real native binary,with no cached
+verdicts or certificates. Results:64proved,16refuted,4pending,zero protocol
+errors. Both exact Identity box and unannotated positive diamond twins prove
+in both compiler settings. False assertion and alias-is-not-copy controls
+refute in both modes. Default initialization,alias writes,distinct allocations,
+uint/bool/fixed/nested-reference cases prove. Zero/OOB read/write cases prove
+under box and refute under diamond,preventing an always-revert pass.
+
+The full native matrix command deliberately exits1:storageAlias.diamond and
+storageCopy.diamond are pending in both settings. None was falsely proved.
+These are proof-closure gaps,not admission failures:existing development
+controls refute their universal diamond properties. SourceCounterexample's
+existing primitive-storage guard at lines75/109 returns unknown for these
+array-root contracts. That guard and all statements/premises remain unchanged.
+No exclusion is proposed. A separate real-native gate rejects20malformed ASTs
+and two coherent type-error ASTs;these22 are not fresh valid-source cases.
+
+Traces covering all106 requests observe no serialized/source Lean environment access,
+extra execve/execveat,or network syscall. Dynamic-link and named-symbol audits
+pass. Fourteen frontend-origin candidates have exact compiled-body/object
+provenance and disassembly for independent generic-helper classification.
+These observations do not prove exhaustive forbidden-functionality absence
+over all9953 retained functions,compiler equivalence,or Source adequacy.
+
+Fresh owned-module build,both-reader development controls,54standard-only
+axiom reports and KeySort377/131 pass on the integrated source. Final full
+merged gates were not rerun here. The full assignment remains incomplete.
+
+`evidence/consumer-708/D-HANDOFF.json` is the explicit dependency packet to D:
+it gives the fresh84-request file,hash,case order,source/build manifest,required
+actual browser-worker checks,missing pinned WASM/emsdk dependencies,and the
+four preserved native unknowns. D must return fresh browser binary/worker
+evidence;boot/listing and Node-only WASM do not count. No browser verdict or
+RUNTIME_GATE_PASS is claimed. Original source/physical/world adequacy gaps
+and producer premises remain independent and unchanged.
+
+Independent read-only finder/skeptic reviewed the actual native binary,all206
+object hashes,all84 results,22refusals,85traces covering106requests,and the D
+request digest. All pre-execution runner findings were fixed before the real
+run. Both classified all14 exact C bodies/disassemblies as six IO-success
+initializers and eight generic equality/membership/UTF8/JSON/array helpers;
+none of those14 implements forbidden frontend/kernel functionality. This
+remains a candidate-specific classification,not exhaustive9953absence.
+
+The explicit signed-int mandatory subset is44/44 decisive as expected
+(`native-mandatory-controls.json`):11scenarios×2modalities×2pipelines. This
+subset does not replace or weaken the full84-case gate,which stays failed
+with four pending conditional-storage diamonds. All required positive cases
+in that full matrix are proved;no expected-negative case was proved.

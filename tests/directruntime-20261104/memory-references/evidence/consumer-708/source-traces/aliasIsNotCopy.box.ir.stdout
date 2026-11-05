@@ -1,0 +1,2 @@
+{"ready":true}
+{"results":[{"counterexample":{"arguments":[],"certified":false,"goalKind":"fmlValid","initialBalance":"0","initialLedger":[],"initialStorage":"","kind":"model-state","lines":["msg.sender = 1, msg.value = 0","before: ","after: panic (an `assert` failed)"],"outcome":{"halt":"panic (an `assert` failed)","kind":"halt"},"transaction":{"ext":[],"msgSender":"1","msgValue":"0","selfAddress":"0","timestamp":"0"}},"function":"identity","reading":"solc","reason":"counterexample found","sourceId":38,"status":"refuted","tag":"box","verification":"direct"}]}

@@ -3,3 +3,7 @@ evidence/**/*.log -whitespace
 evidence/**/*.tsv -whitespace
 evidence/*.log -whitespace
 evidence/*.tsv -whitespace
+
+# Exact captured objdump and generated-C excerpts; executable sources stay strict.
+evidence/consumer-708/native-boundary/*.asm -whitespace
+evidence/consumer-708/native-closure/*.c.txt -whitespace

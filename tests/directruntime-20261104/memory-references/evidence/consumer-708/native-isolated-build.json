@@ -1,0 +1,16 @@
+{
+  "command": [
+    "python3",
+    "scripts/build-direct-native.py",
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/isolated-native-prefix",
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/lean4-797c613",
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated"
+  ],
+  "exit": 0,
+  "wallSeconds": 1230.2310464440088,
+  "peakAggregateRssKiB": 1737064,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

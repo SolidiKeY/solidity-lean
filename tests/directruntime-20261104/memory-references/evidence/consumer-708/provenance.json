@@ -1,0 +1,32 @@
+{
+  "head": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "branch": "codex/solidity-directruntime-20261104/memory-references",
+  "preRebase": "764d75c2ae0fdff556b99a1222bfb27855bfd3b5",
+  "recoveryRef": "refs/backup/memory-references-pre-708",
+  "ownedTreePreservedAcrossRebase": true,
+  "isolatedRepository": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/native-snapshot-708",
+  "isolatedSourceClean": true,
+  "leanSourceCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+  "leanSourceClean": true,
+  "versions": {
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+    "clang": "clang version 19.1.2 (https://github.com/llvm/llvm-project 7ba7d8e2f7b6445b60679da826210cdde29eaf8b)",
+    "hostCC": "x86_64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0"
+  },
+  "binary": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+  "binarySha256": "5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01",
+  "binaryBytes": 20962960,
+  "inputsSha256": {
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/native-snapshot-708/scripts/build-direct-native.py": "7b72740325b11c6e427e1d351a3d3f3d715b5cded5c0800ce007183d5ca81888",
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/native-snapshot-708/scripts/direct-runtime-closure.py": "bfb277b2be3496fae001d62b29bf3ea59c6bb3ffe297b8d38526a966ed9cbad2",
+    "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/native-snapshot-708/web/browser/direct-bridge.c": "6f38dac8eb57d2c78309ddd40fe086ad1a19f4de36faae9e1d197914b2d1a46b",
+    "/workspace/.setup/tools/lean-4.24.0-linux/bin/clang": "f6cf302db3066d715a9cf83891973bfe43384d118d29bff10fd25d9f89f306ce",
+    "/workspace/.setup/tools/lean-4.24.0-linux/bin/leanc": "d57d74cff9aeac83e55590960af80e29622019b6a743f8a4f7f3c0414e6ab674",
+    "/workspace/.setup/tools/lean-4.24.0-linux/include/lean/config.h": "9db920de13a0936da07bf8c32cb5103774323a6570b63adcfd4d0aa4d99436c9",
+    "/workspace/.setup/tools/lean-4.24.0-linux/lib/lean/libleanrt.a": "214095e9a6dd1657bab4a4dcd66a29f3524d6b471b79dbbbc806a3f44c47f7cf"
+  },
+  "freshNativeBuild": true,
+  "ordinaryCertificatesUsed": false,
+  "boundary": "C/source/object/binary provenance and observed runtime traces; no compiler equivalence,exhaustive linked-function absence or browser claim."
+}

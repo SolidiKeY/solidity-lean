@@ -1,0 +1,2 @@
+{"ready":true}
+{"results":[{"function":"identity","reading":"solc","reason":"","sourceId":20,"status":"proved","tag":"diamond","verification":"direct"}]}

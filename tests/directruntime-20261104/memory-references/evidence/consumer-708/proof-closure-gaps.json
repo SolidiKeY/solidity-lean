@@ -1,0 +1,41 @@
+{
+  "fullNativeMatrixGateExit": 1,
+  "proved": 64,
+  "refuted": 16,
+  "pending": [
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": false,
+      "status": "pending",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db"
+    },
+    {
+      "id": "storageAlias",
+      "modality": "diamond",
+      "viaIR": true,
+      "status": "pending",
+      "sourceSha256": "e2e7fead4a20d89703f7eaa12bfcdf2fc026c792053fa57f14e9ec124c4b43db"
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": false,
+      "status": "pending",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c"
+    },
+    {
+      "id": "storageCopy",
+      "modality": "diamond",
+      "viaIR": true,
+      "status": "pending",
+      "sourceSha256": "4556136ab59c607cd8aec1c135bf098fe38c8ed4cea0886312f506a545b9804c"
+    }
+  ],
+  "requiredPositiveMissing": [],
+  "unsoundPositive": [],
+  "protocolErrors": 0,
+  "sourceEvidence": "Solidity/Tools/SourceCounterexample.lean:75 and109 conservatively refuse counterexample search when contract storage vars are not all primitive. These storage-array diamond properties are refuted by existing development controls, but native witness search returns unknown.",
+  "guardPolicy": "No guard/premise/exclusion weakened; unknown remains pending.",
+  "browser": "No execution; pinned Emscripten/WASM stage missing; explicit D handoff required."
+}

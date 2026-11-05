@@ -1,0 +1,14 @@
+{
+  "command": [
+    "lake",
+    "build",
+    "Solidity.Tools.DirectRuntime"
+  ],
+  "exit": 0,
+  "wallSeconds": 1.6823706360009965,
+  "peakAggregateRssKiB": 57684,
+  "headroomGuardStopped": false,
+  "memoryMax": 12884901888,
+  "memorySwapMax": 0,
+  "leanThreads": 1
+}

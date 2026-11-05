@@ -1,0 +1,16 @@
+24483 execve("/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check", ["/workspace/solidity-lean/tests/d"...], 0x7ffcc077db38 /* 22 vars */) = 0
+24483 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory)
+24483 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3
+24483 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3
+24483 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3
+24483 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3
+24483 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/librt.so.1", O_RDONLY|O_CLOEXEC) = 3
+24483 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3
+24483 open("/proc/sys/vm/overcommit_memory", O_RDONLY) = 3
+24483 access("/sys/devices/system/node/node1", R_OK) = -1 ENOENT (No such file or directory)
+24483 openat(AT_FDCWD, "/proc/version_signature", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory)
+24483 clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0x7f340a3e0990, parent_tid=0x7f340a3e0990, exit_signal=0, stack=0x7f3409be0000, stack_size=0x7ffec0, tls=0x7f340a3e06c0}, 88) = -1 ENOSYS (Function not implemented)
+24483 clone(child_stack=0x7f340a3dfeb0, flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, parent_tid=[24484], tls=0x7f340a3e06c0, child_tidptr=0x7f340a3e0990) = 24484
+24483 exit_group(0)                     = ?
+24484 +++ exited with 0 +++
+24483 +++ exited with 0 +++
