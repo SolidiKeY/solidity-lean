@@ -1863,3 +1863,20 @@ the 255/256 exponent-byte cost boundary (60/110), wrong operand/tail order and
 insufficient gas/fuel. The new axiom reports are exact guarded expectations.
 This establishes no Solidity exponent guard, source-loading or whole-program
 resource relation, and closes no full opcode or Osaka adequacy obligation.
+
+
+## Selected unsigned quotient and remainder
+
+The consumer connects the actual unsigned instruction selector's DIV/MOD
+certificates to scalar execution and charged fetched steps with native
+continuations. Numeric initial-stack correspondence, legal capacity and at least
+five gas units remain explicit. IR and native complete frames stay separate.
+Zero divisors produce the raw target's zero word; this is not a Solidity checked
+arithmetic or panic-guard correspondence claim.
+
+Populated controls cover quotient/remainder `17 / 5 = 3`, `17 % 5 = 2`, zero
+divisors, the unsigned high-bit case `2^255 / 2 = 2^254`, distinct operand/tail
+orders and complete ordered native observations. Gas-before-stack and
+fuel-before-execution failures remain explicit, including insufficient gas with
+a zero divisor. Nine new axiom reports have exact guarded expectations. These
+laws close no full opcode, Source-origin, world or Osaka adequacy obligation.
