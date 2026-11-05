@@ -1,3 +1,4 @@
+import Solidity.Yul.RawCheckedAdapter
 import Solidity.Yul.Syntax
 import Solidity.Yul.BlockTyping
 import Solidity.Yul.Words
@@ -27,4 +28,10 @@ slice separately; it does not generalize Adapter's loop-control result.
 Concrete inhabited use and refusal/horizon controls already live in
 Solidity.Yul.Checks.RawLiteralScope (adapterTrue, mixed, mixedSource, timeouts).
 The core import boundary deliberately does not import that checks module.
+RawCheckedAdapter.Adapter adds an explicit pipeline parameter and retains
+frame.checked=true in its actual Source agreement field. Its block and
+conditional factories provide concrete mixed checked-word/control producers;
+fromAdapter reuses the older contract without changing it. These factories do
+not provide an instance for arbitrary statements. Inhabited uses and selected
+flow/Source controls live in Solidity.Yul.Checks.RawCheckedAdapter.
 -/
