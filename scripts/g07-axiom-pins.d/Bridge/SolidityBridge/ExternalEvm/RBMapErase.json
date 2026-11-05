@@ -1,0 +1,10 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/RBMapErase.lean:Solidity.Evm.StorageSlots.find_erase": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/RBMapErase.lean:Solidity.Evm.StorageSlots.mem_erase": [
+  "Quot.sound",
+  "propext"
+ ]
+}

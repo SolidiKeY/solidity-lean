@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/precompiles.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Precompiles
 
 | Module | What it defines |

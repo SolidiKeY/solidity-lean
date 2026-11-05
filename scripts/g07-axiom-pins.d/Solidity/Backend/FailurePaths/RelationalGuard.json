@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.exact_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.selected_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.arbitrary_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.collision_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.finite_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.fullword": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.Controls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

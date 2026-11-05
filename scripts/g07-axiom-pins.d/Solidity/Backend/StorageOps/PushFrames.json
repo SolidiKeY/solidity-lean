@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/StorageOps/PushFrames.lean:Solidity.Backend.StorageOps.PushFrames.compatible_other": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrames.lean:Solidity.Backend.StorageOps.PushFrames.complete_fresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrames.lean:Solidity.Backend.StorageOps.PushFrames.get_other": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrames.lean:Solidity.Backend.StorageOps.PushFrames.read_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushFrames.lean:Solidity.Backend.StorageOps.PushFrames.represented_contexts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.loop_ir": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.loop_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.multi_ir": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/ModifierFrameProofs.lean:Solidity.Tests.ModifierFrameProofs.multi_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

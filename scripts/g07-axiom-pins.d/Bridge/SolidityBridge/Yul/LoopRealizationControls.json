@@ -1,0 +1,36 @@
+{
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.always_no_finite_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.always_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.counter_two": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.finite_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.realization": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoopRealizationControls.lean:SolidityBridge.Yul.LoopRealization.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

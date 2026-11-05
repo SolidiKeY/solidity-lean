@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/calculus.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The calculus
 
 | Module | What it defines |

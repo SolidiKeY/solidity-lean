@@ -1,0 +1,7 @@
+{
+ "Solidity/Source/HorizonDeploy.lean:Solidity.Source.deploy_events_mono": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

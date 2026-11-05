@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3ParentStop.lean:Solidity.Backend.InternalFlow.RuntimeFrame.ParentStop.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

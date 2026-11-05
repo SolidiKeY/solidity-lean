@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopTransport.lean:Solidity.Backend.StorageOps.NestedPopTransport.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransport.lean:Solidity.Backend.StorageOps.NestedPopTransport.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransport.lean:Solidity.Backend.StorageOps.NestedPopTransport.header_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopTransport.lean:Solidity.Backend.StorageOps.NestedPopTransport.popped_child": [
+  "Quot.sound",
+  "propext"
+ ]
+}

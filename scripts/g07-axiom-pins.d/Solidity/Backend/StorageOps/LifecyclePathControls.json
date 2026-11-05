@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.deleteAt_eq_delAt": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.live_read_append": [],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.modifyAt_failure": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.popAt_invalidates_live": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.popAt_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.prefix_live_find": [],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.prefix_live_save": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.pushAt_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.pushAt_reused_alias": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecyclePathControls.lean:Solidity.Backend.StorageOps.pushAt_revives_live": [
+  "Quot.sound",
+  "propext"
+ ]
+}

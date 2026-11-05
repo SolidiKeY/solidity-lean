@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrierControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls.uniform_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

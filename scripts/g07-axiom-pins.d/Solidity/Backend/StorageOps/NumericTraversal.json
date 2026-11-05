@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.copy_element": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.copy_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.copy_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.graph_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.prefix_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.prefix_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.prefix_restart": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.represented_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericTraversal.lean:Solidity.Backend.StorageOps.NumericTraversal.writePrefix": []
+}

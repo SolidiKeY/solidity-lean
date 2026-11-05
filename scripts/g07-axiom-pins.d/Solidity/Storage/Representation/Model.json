@@ -1,0 +1,12 @@
+{
+ "Solidity/Storage/Representation/Model.lean:Solidity.Storage.Representation.scalar_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/Model.lean:Solidity.Storage.Representation.scalar_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,57 @@
+{
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.condition_operand_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.condition_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.outside_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.prefix_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_failure_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_operand_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedWidthGuard.lean:Solidity.Backend.Passes.SignedWidthGuard.require_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

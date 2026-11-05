@@ -1,0 +1,70 @@
+{
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.arguments_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.body_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.caller_restored": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.expression_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.internal_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.observed_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.populated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.result_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.signature": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.wrong_result_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.wrong_source_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.wrong_target_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/TupleCallable.lean:Solidity.Lowering.V08.TupleCallable.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
