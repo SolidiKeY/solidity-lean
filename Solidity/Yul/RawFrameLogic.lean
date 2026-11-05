@@ -115,4 +115,31 @@ theorem diamond_iff_termination_and_box : ∀ (ctx : Solidity.Source.Ctx) (contr
   · rintro ⟨⟨fuel,result,done,_⟩,valid⟩
     exact ⟨fuel,result,done,valid fuel result done⟩
 
+
+/-- A genuine completed raw run determines either modality's whole-outcome postcondition. -/
+theorem holds_completed : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx)
+ (fuel : Nat) (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy fuel state = some result →
+ (Solidity.Yul.RawFrame.Logic.holds mode code policy post state ↔ post result) := by
+  intro ctx control mode code policy post state fuel result done
+  cases mode with
+  | box =>
+    constructor
+    · intro valid
+      exact valid fuel result done
+    · intro valid otherFuel other otherDone
+      have same := RawFrame.run_completed_unique ctx control code policy state
+        otherFuel fuel other result otherDone done
+      rw [same]
+      exact valid
+  | diamond =>
+    constructor
+    · intro actual
+      exact diamond_implies_box ctx control code policy post state actual fuel result done
+    · intro valid
+      exact ⟨fuel,result,done,valid⟩
+
 end Solidity.Yul.RawFrame.Logic
