@@ -1162,3 +1162,31 @@ separate from new checkpoint outcomes.
 `SignedEntryBodyInterface.lean` specifies actual value-checked signed decoding,
 typed binding and core-admitted body execution with exact ordered outcomes.
 Early value rejection needs no calldata-local representation facts.
+
+`SignedEntryBody.lean` selects a single typed program containing value checking,
+signed head/word validation, the existing bit-preserving `.int` declaration and
+an existing core-admitted body. Binding/body and complete artifacts are selected
+through the public compiler. Exact execution preserves value-before-head-before-
+validation ordering and then runs the actual body on the proved bound state,
+retaining its whole outcome. Early non-payable rejection needs no calldata-local
+representation facts. Raw semantic success constructs the typed word from bytes,
+identifies the actual local and signed reading, and keeps `fuel + 2` explicit.
+No decoded payload, desired execution or body result is supplied as a premise.
+
+Controls execute the complete program at every represented payable value for
+negative and positive signed bytes, allocating a Boolean sign result from the
+new `.int` local. Zero-value non-payable success, nonzero-value rejection before
+all malformed locals, strict dirty-word rejection, short-input rejection before
+word/body access, raw typed-value agreement and low semantic fuel are explicit.
+An actual reverting body after successful decoding distinguishes body failure
+from decoder rejection. Saved input/argument/storage/balance/stack observations
+are retained. The short control exercises the complete value-checked artifact.
+Focused builds, final per-file diagnostics and standard-only scoped axiom guards
+pass. Independent read-only finder and skeptic reviews found no semantic issues.
+
+This supplies supported singleton signed value/entry/body composition. Payability
+remains an explicit flag; Source signature/declaration/body association, aggregate
+and multiparameter decoding/binding, native loading/frame realization, general
+profile/dispatch-entry composition and physical failure bytes remain open.
+G46.02, its writer counterexample, fixture replay and full assignment gates
+remain pending.

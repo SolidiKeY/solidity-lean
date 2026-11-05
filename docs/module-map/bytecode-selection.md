@@ -205,3 +205,6 @@
 | `Backend/AbiEntry/SignedBindingInterface.lean` | Actual compiler contract for validated typed signed parameter binding. |
 | `Backend/AbiEntry/SignedBinding.lean` | Bit-preserving typed signed declaration, exact execution and raw signed-reading agreement. |
 | `Backend/AbiEntry/SignedBindingControls.lean` | Signed boundaries, raw negative input, wide metadata and typed signed branch controls. |
+| `Backend/AbiEntry/SignedEntryBodyInterface.lean` | Ordered value/signed-entry/binding/body compiler certificate. |
+| `Backend/AbiEntry/SignedEntryBody.lean` | Actual signed body and value-check compilation with raw signed-local agreement. |
+| `Backend/AbiEntry/SignedEntryBodyControls.lean` | Both-sign allocating bodies, early value/short rejection and decoder/body failure controls. |
