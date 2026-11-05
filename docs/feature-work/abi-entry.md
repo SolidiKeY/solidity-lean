@@ -833,3 +833,7 @@ oversized rejection, exact saved state and the one-way semantic failure
 transport. Both confirmed the dirty-bool control prevents a full-decoding
 interpretation; neither used a build or Lean server. Focused compilation has
 no warnings in the changed modules.
+
+`UnsignedGateInterface.lean` specifies actual public-compiler word validation
+against an unbounded unsigned bound; wide bounds are not truncated. Raw loading
+and full argument decoding remain explicit separate obligations.
