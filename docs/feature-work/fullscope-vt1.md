@@ -180,3 +180,79 @@ No new exclusion, weakened observation, assumed producer proof, or closure claim
 Raw fixture whitespace: git diff --cached --check reports trailing blank lines
 in two compiler-emitted unoptimized IR files. Preserve exact compiler Strings;
 source/script whitespace checks exclude only raw *.yul fixtures and pass.
+
+## C03: adopted integration and checked object-data reference adapter
+
+Original base remains e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3. Published
+master 8495f1deb0a95dd6b9301822d8649ab76b217681 was fetched, its ancestry in
+origin/master verified, and merged without conflict. Merge head before C03 was
+904ba9fbf1a1f9d52f07d2e0fd53ac66d7da18b5. Both earlier owned commits remain
+ancestors; no reset, replacement VM, push or protected producer edit occurred.
+Read integration-20261105-checkpoints.md. Newly integrated Yul physical/world
+components do not freeze VX1 H38, establish final VX4 adequacy or close T01/T02.
+No local cache shipment receipt for sched-20261105T0200Z was found; the notice
+is not cache freshness evidence. The owned checks below use observed warm artifacts.
+
+DataLayout.lean adds static `DataRef artifact` (word offset, word size and an
+actual in-bounds interval), `DataTable artifact` (intrinsically unique names),
+and membership-carrying `DataSelection`. DATASIZE returns the actual selected
+bytes' length without truncation; DATAOFFSET retains the assembled position.
+Each selected byte is proved equal to the actual artifact byte. Present labels
+are never discarded. Static references do not restrict dynamic DATACOPY/CODECOPY
+bounds; no dynamic copy semantics, object-label association or layout authenticity
+is claimed. No owner proof/producer is assumed. Canonical nested names, parsing,
+object assembly and memory/gas/resource composition remain required work.
+
+Exact theorem signatures/premises, namespace Solidity.SolcValidation:
+- `DataRef.bytes_length {artifact : List DataByte} (ref : DataRef artifact) : ref.bytes.length = ref.size.val`
+- `DataRef.datasize_exact {artifact : List DataByte} (ref : DataRef artifact) : ref.datasize.val = ref.bytes.length`
+- `DataRef.dataoffset_exact {artifact : List DataByte} (ref : DataRef artifact) : ref.dataoffset = ref.offset`
+- `DataRef.byte_exact {artifact : List DataByte} (ref : DataRef artifact) (i : Nat) (inside : i < ref.bytes.length) : ref.bytes[i] = artifact[ref.offset.val + i]` (the RHS bound proof is derived from ref.within and inside)
+- `DataSelection.sound {artifact : List DataByte} {entries : List (String × DataRef artifact)} {label : String} (selected : DataSelection entries label) : (label, selected.ref) ∈ entries`
+- `selectData_complete {artifact : List DataByte} {label : String} {entries : List (String × DataRef artifact)} (selected : DataSelection entries label) : (selectData label entries).isSome = true`
+Axiom sets are inventoried in registration-proposal.md and measured-4.log:
+only the standard propext/Quot.sound where listed; no new axiom/sorry/native_decide.
+DataRef.within and table uniqueness are intrinsic static validity, not new
+premises in a final compiler-correctness theorem or language exclusions.
+
+Pinned ObjectData.yul assembles to 14 bytes, SHA-256
+625580c50946ed8ad35484c59775596a7844fa335282e78adc84834bc10b5883.
+The final three bytes 11 22 33 at offset11 inhabit a checked DataRef/table.
+Kernel controls cover actual bytes, size, offset, present/missing labels,
+zero-length endpoint, impossible out-of-range reference and duplicate table.
+The compiler rejects unknown/duplicate labels with exact pinned diagnostics.
+`generate-object-data.mjs --check` recompiles and compares saved JSON and Lean
+witness without writes; three mutation tests reject altered source, artifact
+bytes and generated witness. This establishes fixture coherence, not compiler
+correctness, source-label association or target EVM execution.
+
+Finder and skeptic reviews were separate/read-only, with no Lean/server. They
+confirmed interval/static-vs-dynamic boundaries and found a fixture-coherence
+gap. Fixed via read-only recompilation/comparison and mutation tests. Added
+unknown/duplicate-label compiler and intrinsic negative controls. Finder's final
+minor constant-generation concern was fixed by deriving interval constants from
+assembled length and the witness mutation from the actual offset. Both reviews
+found no other concrete defect within this component's scope.
+
+Revalidation on adopted integration: check-dialect.sh passed Lean/Lake/KeySort
+and syntax witnesses. `VT1_EVIDENCE_STAMP=integrated-8495 bash tests/fullscope-20261104/vt1/check-data.sh`
+and the corresponding check-import.sh both exit0. New logs are separate under
+evidence/data-integrated-8495 and evidence/import-integrated-8495; historical
+C02 logs remain unchanged. New data group max sampled aggregate RSS304947200
+bytes; cgroup peak171831296 bytes. Import group max RSS305623040 bytes;
+cgroup peak186585088 bytes. Every check serial, one CPU, LEAN_NUM_THREADS=1,
+-j1, <=180s/command and 300s/group, MemoryMax12GiB/swap0, 4GiB reserve guarded.
+Per-file bounded MCP on DataLayout and ObjectDataChecks: zero errors; server
+stopped before other checks. Full builds and final H35 readiness remain open.
+
+Registration proposal now includes the third module. Central roots/maps/trust
+pins were not edited. Existing C02 stub relay and cache transfer receipts remain
+pending. T02 relations still wait for frozen X01/G01; no unfrozen stub is proved
+against. All remaining T01 object/parser/operation semantics, physical memory,
+immutable/linker layout and T02 helper/function/contract simulations remain open.
+
+C03 static gates on adopted master: layers pass (628 enumerated core modules),
+trust passes (3926 sources, 287 sites, zero findings), existing axiom pins pass
+(7546 pins, no unrecorded changes), documentation paths pass. Root/orphan/map
+gates fail only on the three owned modules awaiting central registration.
+These failures remain open; no full-build or H35 checkpoint readiness claim.

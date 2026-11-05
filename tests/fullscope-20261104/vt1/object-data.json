@@ -1,0 +1,125 @@
+{
+  "compiler": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "file": "soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "input": {
+    "language": "Yul",
+    "sources": {
+      "ObjectData.yul": {
+        "content": "object \"Root\" {\n  code {\n    datacopy(0, dataoffset(\"payload\"), datasize(\"payload\"))\n    return(0, datasize(\"payload\"))\n  }\n  data \"payload\" hex\"112233\"\n}\n"
+      }
+    },
+    "settings": {
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "evm.bytecode.object"
+          ]
+        }
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "ObjectData.yul": {
+        "Root": {
+          "evm": {
+            "bytecode": {
+              "object": "6003600b5f3960035ff3fe112233"
+            }
+          }
+        }
+      }
+    },
+    "errors": []
+  },
+  "controls": [
+    {
+      "id": "unknown-label",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { pop(dataoffset(\"missing\")) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "TypeError: Unknown data object \"missing\".\n --> control.yul:1:36:\n  |\n1 | object \"A\" { code { pop(dataoffset(\"missing\")) } }\n  |                                    ^^^^^^^^^\n\n",
+          "message": "Unknown data object \"missing\".",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 44,
+            "file": "control.yul",
+            "start": 35
+          },
+          "type": "TypeError"
+        }
+      ]
+    },
+    {
+      "id": "duplicate-label",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { stop() } data \"x\" hex\"11\" data \"x\" hex\"22\" }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "ParserError: Object name \"x\" already exists inside the containing object.\n --> control.yul:1:52:\n  |\n1 | object \"A\" { code { stop() } data \"x\" hex\"11\" data \"x\" hex\"22\" }\n  |                                                    ^^^\n\n",
+          "message": "Object name \"x\" already exists inside the containing object.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 54,
+            "file": "control.yul",
+            "start": 51
+          },
+          "type": "ParserError"
+        }
+      ]
+    }
+  ],
+  "sha256": "625580c50946ed8ad35484c59775596a7844fa335282e78adc84834bc10b5883",
+  "payload": {
+    "offset": 11,
+    "size": 3,
+    "bytes": [
+      17,
+      34,
+      51
+    ]
+  },
+  "boundary": "External assembled-byte fixture; label association and EVM execution are not kernel proved."
+}

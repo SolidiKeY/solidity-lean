@@ -25,3 +25,20 @@ New theorem inventory for central integration:
 
 Root/orphan gates fail until central serialized registration is integrated.
 These rows and axiom sets are a proposal, not an edited trust pin or final gate.
+
+## C03 addition after adopting published master 8495f1de
+
+Add `import Solidity.SolcValidation.DataLayout` to the generated root.
+Proposed docs/module-map/yul.md row:
+| `SolcValidation/DataLayout.lean` | Intrinsically bounded artifact byte references, unique data-label tables, exact size/offset/byte correspondence and present-label lookup completeness. |
+Add exact `Solidity.SolcValidation.DataLayout` to CORE alongside Dialect.
+Its import closure is Dialect and Yul.Builtins, with no Lean frontend import.
+
+New standard-axiom inventory (all source-level axioms remain unchanged):
+- DataRef.bytes_length: [propext, Quot.sound]
+- DataRef.datasize_exact: [propext, Quot.sound]
+- DataRef.dataoffset_exact: []
+- DataRef.byte_exact: [propext, Quot.sound]
+- DataSelection.sound: []
+- selectData_complete: [propext]
+All names are in Solidity.SolcValidation. Central re-pin/registration remains COORD.

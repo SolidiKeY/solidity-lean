@@ -1,0 +1,6 @@
+'Solidity.SolcValidation.DataRef.bytes_length' depends on axioms: [propext, Quot.sound]
+'Solidity.SolcValidation.DataRef.datasize_exact' depends on axioms: [propext, Quot.sound]
+'Solidity.SolcValidation.DataRef.dataoffset_exact' does not depend on any axioms
+'Solidity.SolcValidation.DataRef.byte_exact' depends on axioms: [propext, Quot.sound]
+'Solidity.SolcValidation.DataSelection.sound' does not depend on any axioms
+'Solidity.SolcValidation.selectData_complete' depends on axioms: [propext]
