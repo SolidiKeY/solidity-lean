@@ -8,7 +8,7 @@ open Evm Evm.Memory
 theorem empty_memory_snapshot {H : HTy} (heap : Heap H) (element : Ty)
     (input : HRef H (.array element)) (empty : heap.len input .dyn = 0) :
     MVal.copyMToSt heap (T := .ref (.array element)) input = SVal.dflt (.ref (.array element)) := by
-  have elements : (heap.get input).val = [] := List.length_eq_zero.mp (by
+  have elements : (heap.get input).val = [] := List.length_eq_zero_iff.mp (by
     simpa only [Heap.len, MObj.elems_dyn] using empty)
   have object : heap.get input = Objects.emptyArray element := Subtype.ext elements
   let visit : MVal H element → SVal element :=

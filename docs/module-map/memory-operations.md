@@ -153,6 +153,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/PhysicalByteWorldInterface.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/ControlsV2.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/InterfaceV2Roots.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SourceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStore.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStoreControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceRawBoolCopy.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
@@ -161,7 +162,12 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryCopies/SourceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/NestedDefaults.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteMaterialize.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteStack.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteStackExact.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
 | `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
 | `Backend/MemoryCopies/SourceFramesInterface.lean` | Exact Source allocation-frame obligations for all default and storage-load traversal families, including halted runs. |
@@ -177,11 +183,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/DeepCopyContents.lean` | Inhabited fresh snapshot-copy heap certificate and initial live contents after actual old-object overlap schedules, with alias/empty/refusal controls. |
 | `Backend/MemoryCopies/AllocationPanicInterface.lean` | Explicit Source allocation-panic state and byte-exact emitted terminal-slice obligation; no size-selector premise hidden. |
 | `Backend/MemoryCopies/AllocationPanic.lean` | Derived oversized Source failure joined to reused byte-exact Panic(0x41) emission, packet framing and wrong-result/timeout/zero-length controls. |
-| `Backend/MemoryCopies/NestedDefaults.lean` | Total production selection for fixed dimensions around empty dynamic defaults, exact cost and existing allocator-growth execution. |
 | `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |
 | `Backend/MemoryCopies/RuntimeArrays.lean` | Production-selected runtime reference-array loop and scoped declaration correctness, complete parent demand and size-independent code. |
 | `Backend/MemoryCopies/RuntimeArrayControls.lean` | Actual populated runtime lengths0/2/64, empty-any-child and same-code controls, scoped declaration execution and wrong-cursor rejection. |
-
 | `Backend/MemoryCopies/AliasBindingInterface.lean` | Actual pointer-compiler selection and emitted alias rebinding success/refusal with allocator framing. |
 | `Backend/MemoryCopies/AliasBinding.lean` | Actual selected pointer compiler followed by alias-local store, deriving exact source/target success or bounds refusal. |
 | `Backend/MemoryCopies/AliasBindingControls.lean` | Populated indexed-alias source/target observations, bounds refusal and fresh-pointer/empty-code negative controls. |
@@ -271,7 +275,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimePathArrayInterface.lean` | Existing storage-path compilation feeding runtime array copying, actual declaration/rebinding with full ownership and failed-path certificates. |
 | `Backend/MemoryCopies/RuntimePathArray.lean` | Actual checked path simulation feeding runtime array copying, full declaration/rebinding ownership and source/target failed-path propagation. |
 | `Backend/MemoryCopies/RuntimePathArrayControls.lean` | Runtime nested-path declarations/rebindings with two old aliases, distinct empty/pair/64-element data, source alias preservation and invalid-empty controls. |
-
 | `Backend/MemoryCopies/PrimitiveArrayLiveInterface.lean` | Live primitive-array normalization certificate, including arbitrary storage shadows. |
 | `Backend/MemoryCopies/PrimitiveArrayLive.lean` | Intrinsic live-array bound, copy/representation normalization and actual runtime-copy transport. |
 | `Backend/MemoryCopies/PrimitiveArrayLiveControls.lean` | Arbitrary shadows, empty/long certificates and retained-source-slot runtime controls. |
@@ -311,7 +314,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedMemoryArrayInterface.lean` | Runtime capacity guard and total fresh primitive-array copy contract. |
 | `Backend/MemoryCopies/CheckedMemoryArray.lean` | Actual loaded-capacity guard and total fresh primitive-array copy execution. |
 | `Backend/MemoryCopies/CheckedMemoryArrayControls.lean` | Populated/empty/long copies, inhabited saturation refusals and last-fitting capacity controls. |
-| `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Production-selected default capacity guard and total allocation/refusal contract. |
 | `Backend/MemoryCopies/CheckedDefault.lean` | Actual production default selection with total guarded allocation/refusal and complete result transport. |
 | `Backend/MemoryCopies/CheckedDefaultControls.lean` | Inhabited nested defaults, impossible-capacity refusal and unused huge child controls. |
 | `Backend/MemoryCopies/CheckedReferenceInterface.lean` | Complete-demand runtime reference-array default guard and allocation/refusal contract. |

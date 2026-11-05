@@ -111,6 +111,7 @@ import SolidityBridge.ExternalEvm.StorageSlots
 import SolidityBridge.ExternalEvm.TryMemory
 import SolidityBridge.ExternalEvm.TryMemoryCode
 import SolidityBridge.ExternalEvm.TryMemoryDriver
+import SolidityBridge.ExternalEvm.TryPanicOperational
 import SolidityBridge.ExternalEvm.TryPanicRelative
 import SolidityBridge.ExternalEvm.TryPanicSourcePadding
 import SolidityBridge.ExternalEvm.TryPanicSourceScanner
@@ -160,6 +161,11 @@ import SolidityBridge.Loop
 import SolidityBridge.LoopFixpoint
 import SolidityBridge.ModelTheory
 import SolidityBridge.ModelTheory.LowenheimSkolem
+import SolidityBridge.PrecompileAgreement.Bytes
+import SolidityBridge.PrecompileAgreement.Controls
+import SolidityBridge.PrecompileAgreement.Gas
+import SolidityBridge.PrecompileAgreement.Header
+import SolidityBridge.PrecompileAgreement.Identity
 import SolidityBridge.ProofTheory
 import SolidityBridge.PropertyChecks
 import SolidityBridge.Rewriting
@@ -198,6 +204,8 @@ import SolidityBridge.RoadmapV15.P10.ExternalCodeExtent
 import SolidityBridge.RoadmapV15.P10.ExternalCodeExtentControls
 import SolidityBridge.RoadmapV15.P10.FrozenInterface
 import SolidityBridge.RoadmapV15.P10.FrozenWitness
+import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
+import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.RoadmapV15.P10.JumpMemberConsumer
 import SolidityBridge.RoadmapV15.P10.JumpMemberControls
