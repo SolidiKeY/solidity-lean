@@ -1967,3 +1967,7 @@ SHL/SHR short-stack consumers connect actual certificate refusal with the charge
 ### Binary bitwise refusals
 
 AND/OR/XOR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twelve priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Comparison refusals
+
+LT/GT/EQ/SLT/SGT short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twenty priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
