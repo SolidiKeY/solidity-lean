@@ -1816,3 +1816,77 @@ acceptance and repository final gates/reviews remain open. SG-CEX-01 and
 SG-CEX-02 remain OPEN/REFUTED. This checkpoint neither weakens those targets
 nor completes or resets the persistent objective. Local registration alone
 is added; shared generated roots and module maps remain coordinator-owned.
+
+
+## Checkpoint V: recursive conditionals and exact token frames
+
+Adopted remote-verified published `b86ae4568cef6d6226f4d170360bbb089debe3fb`
+at merge `fef2b237ad409cc0958c9d9efffe593cce953d7f`, preserving all owned
+files and seven pinned inputs. Receipt:
+`/workspace/h28-statement-grammar-evidence/adopt-b86-locations.json`.
+Balance and YieldSplit are now integrated; no integrated proof was duplicated.
+
+ConditionalPrefix, ConditionalCoverage and ConditionalYield add an intrinsic
+six-constructor BooleanStatements relation: existing BooleanLoops; if without
+else; if with else; while; empty-header for; do-while. Recursive bodies use
+existing Syn contexts. Conditions remain Boolean literals. The if-with-else
+constructor retains exactly `then.openIf = false`, proved equivalent to the
+immutable `precNode = true` contract, with no new expression assumption.
+StatementFrame requires either a closed statement or a suffix whose next token
+is not else. This necessary token boundary is explicit; it is not a successful
+parser premise. No existing theorem, premise, exclusion or budget was changed.
+
+The universal coverage theorem derives `n + d + 6` fuel from the syntax
+witness, with one budget unit per unary wrapper and summed branch budgets plus
+one for an else-bearing if. Both branches receive proved sufficient fuel.
+Arbitrary excess fuel and suffix/layout/EOF states are retained. Open bodies
+of do-while are followed by the immutable while token and therefore receive a
+valid internal frame; the outer do-while is closed and preserves an arbitrary
+suffix, even an else. Actual printer yields preserve all layouts. Public token
+and Derives uniqueness use common sufficient fuel, independently of SOL-EU.
+Framed prefix uniqueness additionally recovers the existing intrinsic tree and
+both token suffixes from equality of concatenated token streams. This is proved
+for this inhabited fragment, not for arbitrary statement syntax.
+
+ConditionalCoverageControls covers every relation constructor. Controls include
+an arbitrary Nat-depth if tower, while/for bodies containing matched ifs, an open
+else branch, and do-while around an open if with an arbitrary else suffix. The
+dangling-else positive and wrong-association trees have the same actual tokens;
+the wrong tree fails the existing precedence node contract and cannot inhabit
+the relation. Another actual parser equation shows an open if capturing a
+following else when its required frame is absent. No general-expression
+uniqueness or whole-language completeness is claimed. Internal token locations
+are zero as in earlier coverage; arbitrary suffix locations are preserved.
+These kernel token-parser proofs do not prove string lexing or source validity.
+
+The public axiom/signature audit lists all eleven source theorems, six relation
+constructors and StatementFrame. Controls print all eighteen theorem axioms.
+No new computational indexed-family match was introduced: tower construction
+recurses on Nat, option/list observations are existing producer computations,
+and the new indexed inductions/cases construct proofs only. No producer API,
+Source/Core file, generated root, shared map or trust registry was authored.
+
+Per-file diagnostics pass at the unchanged heartbeat limit. Initial failures
+remain immutable: run-1793882612075873590 (explicit Prec import needed),
+run-1793882645762970222 (Boolean negation parentheses),
+run-1793882794044773933 (explicit optional-statement yield equation), and
+run-1793883078630214996 (the lambda form of List.map_id). The owned runtime
+stopped on failures and was restarted unchanged; none counts as a passing gate.
+Final source diagnostics: run-1793883122484848524; original controls diagnostics:
+run-1793882956468356276. Final committed-head gates, current source hashes,
+exact commands/exits/timing/RSS, reviews and cache receipt are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-v-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-v-locations.json`.
+
+Separate read-only source finder and skeptic reviews passed; neither used Lean,
+a server, builds or solc. Final acceptance additionally requires review of the
+committed-head controls and exact evidence, recorded in the external handoff.
+The skeptic caught a premature final-review claim, corrected before commit.
+H41 delivery remains coordinator-pending after
+local byte/hash verification; never run ship-cache.sh on this VM.
+
+Original queue remains partial: general compound/item token framing, nearest
+else and uniqueness beyond this fixed-atom fragment, remaining true parser
+coverage, full repository final gates and whole-scope acceptance/reviews remain
+open. SG-CEX-01/02 stay OPEN/REFUTED; SOL-EU remains excluded. Existing frozen
+persistent objective is neither reset nor completed by this checkpoint.

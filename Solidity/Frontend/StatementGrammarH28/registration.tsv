@@ -84,3 +84,6 @@ Solidity.Frontend.StatementGrammarH28.ParenAtoms	Immutable atom/operator/attribu
 Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance	All79statementdependencyconstructor parenthesis balance and actual headers
 Solidity.Frontend.StatementGrammarH28.G0List	GateG0 category-generalised typed list observers with exact constructor equations
 Solidity.Frontend.StatementGrammarH28.LoopCoverage	Syntax-derived arbitrary-depth Boolean loop parser coverage and actual yield uniqueness
+Solidity.Frontend.StatementGrammarH28.ConditionalPrefix	Exact Boolean if parser prefix and immutable closed-then contract equivalence
+Solidity.Frontend.StatementGrammarH28.ConditionalCoverage	Recursive Boolean conditional and loop structural fuel with exact open-if suffix framing
+Solidity.Frontend.StatementGrammarH28.ConditionalYield	Actual Boolean fragment yields, nearest else and framed prefix tree/suffix uniqueness
