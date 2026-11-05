@@ -870,3 +870,29 @@ changed-module warnings.
 `SignedGateInterface.lean` specifies actual public-compiler signed word cleanup
 validation for every semantic width, preserving accepted sign-extended words.
 Raw loading, native execution and full decoding remain separate.
+
+`SignedGate.lean` implements signed cleanup validation through the existing
+intrinsic/public compiler. A small unsigned range accepts nonnegative values;
+the other branch accepts correctly sign-extended negative words. If the low
+bound reaches the word modulus, the program accepts every represented word
+without truncating a bound. Exact actual execution agrees with `Kind.int.valid`
+for every natural width, preserves the input word and all saved state except
+the result cell, and finishes with zero pending skip. A comparison adapter
+reuses the existing unsigned condition; prior implementations are unchanged.
+Raw-word representation connects compiled rejection iff the positive-fuel
+existing signed scalar ABI decoder rejects, without a supplied decoded value
+or run. Native loading, span/head checks and failure-byte realization remain
+separate; existing numeric signed validators and their certificates remain.
+Controls cover both int8 edges and adjacent dirty values, zero/one widths as
+specified by the existing semantics, every represented word at widths 256 and
+257, a wide-bound truncation counterexample, prefixed unaligned dirty/valid
+negative raw words, malformed input and protected saved state. Raw successful
+negative value derivation is explicit. Full argument construction, aggregate
+decoding, fixed-byte compiler guards, body integration and full entry composition
+remain open; these are word validators, not full ABI execution.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked signed endpoints, zero/wide-width semantics, actual emitted
+comparison/branch joins and public selection, raw decoder iff and unchanged
+valid negative words/saved state. Neither used a build or Lean server. Focused
+compilation has no warnings in the changed modules.

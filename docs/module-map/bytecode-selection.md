@@ -176,3 +176,6 @@
 | `Backend/AbiEntry/UnsignedGateInterface.lean` | Actual public compiler unsigned range guard certificate. |
 | `Backend/AbiEntry/UnsignedGate.lean` | Unsigned uint/bool/enum guard execution and raw decoder rejection equivalence. |
 | `Backend/AbiEntry/UnsignedGateControls.lean` | Dirty bits, enum/word boundaries, wide no-wrap and raw decoding controls. |
+| `Backend/AbiEntry/SignedGateInterface.lean` | Actual signed cleanup compiler execution certificate. |
+| `Backend/AbiEntry/SignedGate.lean` | Signed two-range guards with exact execution and raw decoder correspondence. |
+| `Backend/AbiEntry/SignedGateControls.lean` | Sign-extension edges, full/wide widths and raw negative-word controls. |

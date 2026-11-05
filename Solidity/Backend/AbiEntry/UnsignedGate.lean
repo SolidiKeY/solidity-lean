@@ -26,6 +26,16 @@ theorem selected (C : Contract) (base bound : Nat) (label : Fin W) :
     Compiler.compile base (Frag.init RouteCtx) (program C bound label)=some (compiled C base bound label) :=
   ValueGateBody.body_selected base _ _ _ (admitted C bound label)
 
+/-- Comparison adapter for typed validator composition. -/
+theorem condition_code (C : Contract) (base : Nat) (bound : Fin W) :
+    compileVal base (condition C bound)=[.mload base,.push (.val bound),.gt] := by
+  simp only [condition,compileVal,compileSimple]
+  have literal : wmod (toWord (bound.val : Int))=bound := by
+    simp only [toWord,Int.natCast_nonneg,if_true,Int.toNat_natCast]
+    exact Fin.ext (Nat.mod_eq_of_lt bound.isLt)
+  rw [literal]
+  rfl
+
 private theorem bounded_code (C : Contract) (base : Nat) (bound label : Fin W) :
     compileProg base (.cons (.require (condition C bound)) (SelectorRoutes.writeLabel C label))=
       [.mload base,.push (.val bound),.gt,.jumpi 1,.revert,.push (.val label),.mstore (base+1)] := by
@@ -195,4 +205,6 @@ def certificate : Interface.UnsignedGateCertificate program where
 #guard_msgs (whitespace := lax) in #print axioms uint_correspondence
 /-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.bool_correspondence' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms bool_correspondence
+/-- info: 'Solidity.Backend.AbiEntry.UnsignedGate.condition_code' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms condition_code
 end Solidity.Backend.AbiEntry.UnsignedGate

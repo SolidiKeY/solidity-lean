@@ -58,6 +58,9 @@ import Solidity.Backend.AbiEntry.SelectorRoutesInterface
 import Solidity.Backend.AbiEntry.ShortRoutes
 import Solidity.Backend.AbiEntry.ShortRoutesControls
 import Solidity.Backend.AbiEntry.ShortRoutesInterface
+import Solidity.Backend.AbiEntry.SignedGate
+import Solidity.Backend.AbiEntry.SignedGateControls
+import Solidity.Backend.AbiEntry.SignedGateInterface
 import Solidity.Backend.AbiEntry.SourcePayable
 import Solidity.Backend.AbiEntry.SourcePayableControls
 import Solidity.Backend.AbiEntry.SourcePayableInterface
