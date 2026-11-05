@@ -328,6 +328,8 @@ import SolidityBridge.RoadmapV15.P10.SourceWordBytes
 import SolidityBridge.RoadmapV15.P10.SourceWordBytesControls
 import SolidityBridge.RoadmapV15.P10.StackFamilyConsumer
 import SolidityBridge.RoadmapV15.P10.StackFamilyControls
+import SolidityBridge.RoadmapV15.P10.StackSelectionAgreement
+import SolidityBridge.RoadmapV15.P10.StackSelectionControls
 import SolidityBridge.RoadmapV15.P10.StorageChaseControls
 import SolidityBridge.RoadmapV15.P10.StorageChaseCost
 import SolidityBridge.RoadmapV15.P10.StorageChaseExecution

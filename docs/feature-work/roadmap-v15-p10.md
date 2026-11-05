@@ -1801,3 +1801,21 @@ A controlled native lifecycle regression exits a process leader while its worker
 This reproduces the lifecycle class and preserves the fail-closed guard. The surviving thread and exact cause in the earlier Lean failure remain unobserved, and no supported safe runtime repair has been established. The failed four-target gate remains failed; its wait budget, toolchain and allocator configuration remain unchanged.
 
 The remaining world bridge requires concrete producer evidence. `Solidity/Backend/WorldCalls/Premises.lean` leaves `Returndata` unconstrained and allows an empty `Step`; the legacy CALL in `Solidity/Evm/Machine.lean` models payment acceptance without recipient execution. These declarations supply neither actual account execution nor transaction correspondence. Native/source representation, approved coverage and inhabited call/returndata transport remain explicit dependencies.
+
+
+## Published stack selection to fetched families
+
+`StackSelectionAgreement` consumes the published `Selection.dupCertificate` and
+`swapCertificate` and the existing fetched stack-family laws. For all sixteen
+legal indices it derives actual one-based IR selection, the exact Scalar code
+run, the charged fetched step and native continuation. Gas, legal capacity,
+operand depth and initial numeric stack correspondence remain explicit. Each
+model retains its own complete frame; physical compiler-input origin and whole
+Source/Osaka/world/resource adequacy are not supplied.
+
+`StackSelectionControls` instantiates both families at every depth with distinct
+nonzero operands, nonuniform leading words, caller spill and populated native
+accounts/buffers. Independent whole-State expected records, complete ordered
+SWAP16 observations, wrong index partners and IR-versus-charged-gas/fuel
+separation are checked. Existing primitive adapters and failure controls are
+reused unchanged. No full opcode obligation is closed.
