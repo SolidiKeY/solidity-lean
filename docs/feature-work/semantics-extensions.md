@@ -149,6 +149,14 @@ negative control in `Examples/Tactics/Mutability.lean` (`put5_changes`,
 `setA_changes_a`); axiom pins: only `propext`, `Classical.choice`,
 `Quot.sound`.
 
+**Gates.** Lean MCP diagnostics clean on every touched file;
+`./run-lean.sh` (2026-11-05): `Build completed successfully (3841 jobs)`
+(default targets, examples, `SolkeyTestSuite`), then `check-solkey.sh` fails
+with `57 mismatch(es)` against `../solkey` at `69e251f`, not the pinned
+`473da8944c` (`docs/solkey-migration.md`): environmental, and this lane
+touches no rule, taclet or sort annotation. Layers, roots and axiom pins
+passed in the earlier `gate.sh` run.
+
 **Reviews** (read-only finder and skeptic, no Lean server). Fixed:
 static frames were uncovered (now `static_preserves_all`,
 `ordinary_static`, `enter_static`); the payable docstring overclaimed
