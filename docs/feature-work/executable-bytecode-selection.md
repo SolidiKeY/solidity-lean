@@ -493,3 +493,12 @@ Both per-file Lean MCP diagnostics pass; independent read-only finder and
 skeptic accept the pin-only diff. Audit evidence distinguishes guarded prints
 from ordinary emitted reports rather than silently dropping these16checks.
 Original RAM-stop and coordinator-owned RawBytesN registration remain open.
+
+Final explicit per-file checks pass in2s/1s; touched passes. The checkpoint
+library passes3818jobs/172s, with trust, layers and doc-paths passing. The
+checkpoint remains failed: orphan/root checks require the three coordinator-
+owned RawBytesN imports, and axiom-pins reports zero errors but16unrecorded
+new entries. Their exact additive baseline delta is exported in the sealed
+handoff for coordinator integration; no shared pin baseline is changed here.
+The guard completes normally. This completes the requested source guards,
+not shared registration/baseline integration or the original full gate.
