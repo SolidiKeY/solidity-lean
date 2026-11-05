@@ -85,4 +85,8 @@
 | `Source/Agreement/PrimitiveTypes.lean` | SS-AGREE typed bool/uint/int value relation; no execution claim. |
 | `Source/Agreement/Primitive.lean` | Total model-to-source primitive producer, range proofs and discriminating value controls. |
 | `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
-| `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |
+| `Source/Agreement/NormalStatement.lean` | One-way normal-locals target; conditional sequence proofs are separate, and general Source/model agreement remains open. |
+| `Source/Agreement/NormalStep.lean` | Explicit per-statement normal-result producer premise over existing Source and model evaluators. |
+| `Source/Agreement/NormalCuts.lean` | Actual Source sequence/journal decomposition; normal-tail inversion without chosen intermediate state. |
+| `Source/Agreement/NormalComposition.lean` | Conditional nil/cons/two-statement proof of the existing normal-locals agreement obligation. |
+| `Source/Agreement/NormalControls.lean` | Concrete no-op producer/importer and timeout, early-return and incompatible-association controls. |
