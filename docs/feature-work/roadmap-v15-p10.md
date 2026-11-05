@@ -1959,3 +1959,7 @@ DIV/MOD short-stack consumers connect actual certificate refusal with the charge
 ### Unary numeric refusals
 
 NOT/ISZERO empty-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Populated surrounding states witness the empty-operand case. Controls retain gas-before-underflow and distinguish native and driver fuel policy; exceptions supply no final-state, rollback or account-world conclusion.
+
+### Logical-shift refusals
+
+SHL/SHR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
