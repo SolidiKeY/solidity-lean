@@ -497,127 +497,120 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/CalldataPackets/RawBool/Execution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+| `Source/Preservation/AllocatingControls.lean` | Inhabited memory-expression and exact-argument witnesses in both source pipelines. |
+| `Source/Preservation/AllocatingFragment.lean` | An additive memory-expression admission over intrinsic resolved syntax. |
+| `Source/Preservation/MemoryBodies.lean` | An additive memory-body certificate and joint statement/sequence Hoare proof. |
+| `Source/Preservation/MemoryBodyCalls.lean` | Actual modifier-free internal calls with syntactically admitted memory bodies. |
+| `Source/Preservation/MemoryBodyControls.lean` | An inhabited intrinsic memory-call body: mutate through alias a, rebind a to a fresh allocation, and return alias b. |
+| `Source/Preservation/MemoryBranchControls.lean` | Conditional memory statements over inhabited runtime inputs. |
+| `Source/Preservation/MemoryExpressions.lean` | Memory body expressions over the existing intrinsic source syntax. |
+| `Source/Preservation/NewArrayFragment.lean` | Dynamic-new consumer of published allocation preservation. |
+| `Source/Preservation/NewArrayFragmentControls.lean` | Computed local length with a live caller reference: two plus two allocates four elements; oversized lengths and low horizons keep their halts. |
+| `Source/Preservation/ReferenceArguments.lean` | Exact-type arguments may be reference locals or allocating expressions. |
+| `Source/Preservation/ReferenceReturnControls.lean` | An actual intrinsic return-only call with a memory parameter and two reference results. |
+| `Source/Preservation/ReferenceReturns.lean` | Reference-return consumers of actual sub/body/call frames. |
+| `Source/Progress/EffectBodies.lean` | Callee-body sequences containing the proved builtin and emit statements. |
+| `Source/Progress/EffectCatalogue.lean` | A finite declaration-order certificate for nonrecursive effect bodies. |
+| `Source/Progress/EffectCatalogueControls.lean` | Actual elaborated source functions with an emit in the leaf, a require that calls the leaf, and an assert-failing callee. |
+| `Source/Preservation/AllocationBodyControls.lean` | Actual typed allocation nodes composed in admitted memory-body statements. |
+| `Source/Preservation/EncodingArguments.lean` | Syntactic ABI arguments with allocating expression children and raw string literals. |
+| `Source/Preservation/MemoryProgram.lean` | Source memory-call admission tied to actual elaborated bodies. |
+| `Source/Preservation/MemoryProgramControls.lean` | A source-elaborated memory parameter and ordinary single-reference return. |
+| `Source/Progress/NewArray.lean` | Non-stuck dynamic allocation for explicit ready memory types. |
+| `Source/Progress/NewArrayControls.lean` | Inhabited allocation progress and exact observations. |
+| `Source/Progress/ReadyArguments.lean` | Exact-type ready arguments combine non-stuck extraction with the existing reference-preserving argument evaluator. |
+| `Source/Progress/ReadyExpressionControls.lean` | Ready reference conditionals and exact argument lists over inhabited memory. |
+| `Source/Progress/ReadyExpressions.lean` | Readiness-decorated allocating expressions, over the existing intrinsic syntax and preservation admission. |
+| `Source/Progress/ReadyDefaults.lean` | Default return-slot progress for explicit ready types. |
+| `Source/Progress/ReadyReturnControls.lean` | Actual source-elaborated alias and allocating reference returns. |
+| `Source/Progress/ReadyReturns.lean` | Actual single-return memory bodies and calls. |
+| `Source/Progress/ReadyProgram.lean` | Complete hybrid value and ready memory function catalogues derive call progress and preservation. |
+| `Source/Progress/ReadyProgramControls.lean` | Elaborated mixed and identity units with inhabited call and expression witnesses. |
+| `Source/Progress/ReadyBodies.lean` | Ready memory statement and sequence progress with explicit frame and readiness certificates. |
+| `Source/Progress/ReadyBodyCalls.lean` | Actual modifier-free calls and call expressions over ready memory sequences. |
+| `Source/Progress/ReadyBodyControls.lean` | Elaborated nested allocation scopes, returned references and exact halt controls. |
+| `Source/Progress/ReadyScopeControls.lean` | Intrinsic conditional, unchecked restoration and reference-tuple controls. |
+| `Source/Progress/ReadyCatalogue.lean` | Ready-body call progress and preservation with frame metadata derived from elaboration. |
+| `Source/Progress/ReadyCatalogueControls.lean` | Inhabited elaborated ready-unit, reference-input and hybrid coverage clients. |
+| `Source/Progress/ReadyDispatchControls.lean` | Nonidentity inherited dispatch consumes elaboration-derived ready-frame metadata. |
+| `Source/Progress/CallComposition.lean` | Finite nested certified calls and exact arguments preserve source memory and progress. |
+| `Source/Progress/CallCompositionControls.lean` | Inhabited nested alias returns, argument growth and exact halt/refusal controls. |
+| `Source/Progress/ForwardingReturns.lean` | Actual single-return forwarding bodies and calls derive progress and memory preservation from composed expressions. |
+| `Source/Progress/ForwardingControls.lean` | Elaborated primitive-argument memory-return relay with escaped references and callee-panic restoration. |
+| `Source/Progress/ForwardingChain.lean` | Finite source forwarding certificates derive per-entry and whole-unit call guarantees. |
+| `Source/Progress/ForwardingChainControls.lean` | Inhabited base/relay, caller restoration and freshness/coverage controls. |
 
 | `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
 | `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
 | `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
-## Exact return-slot consumers
+| `Source/Progress/InitializedLocals` | Composed initialized-local progress and reference preservation. |
+| `Source/Progress/InitializedPrefixes` | Finite initialized-local prefixes ending in one return. |
+| `Source/Progress/InitializedCalls` | Actual internal-call frames for initialized-return bodies. |
+| `Source/Progress/InitializedControls` | Elaborated initialized-local relay and success/panic/refusal consumers. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureReturnSlots.lean` | Exact heterogeneous Source return-slot overwrite, older-parameter preservation, declaration-order extraction and tuple-statement composition. |
-| `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Actual mixed bytes/uint tuple return, extraction, encoding and local terminal transport; wrong-type order and stale-slot controls. |
+| `Source/Progress/InitializedChain` | Finite initialized-return extensions and whole-unit call/composition proofs. |
+| `Source/Progress/InitializedChainControls` | Whole-unit initialized relay, caller/panic consumers and coverage refusals. |
 
-## Tuple-return argument failure
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureTupleAbort.lean` | Actual tuple argument failure, exact Halt and state transport through the Source statement boundary. |
-| `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Effectful argument ordering, skipped writes, positive tuple return and timeout/Panic controls. |
+| `Backend/FailurePaths/FramedEmission.lean` | Actual checked payload emission preserves disjoint physical word frames; Source reason selection/readback consumer. |
+| `Backend/FailurePaths/FramedEmissionControls.lean` | Inhabited reason/Boolean return frames, adjacent byte boundaries and overlapping-emission refusal. |
 
-## Heterogeneous word and byte encoding
+| `Backend/FailurePaths/RuntimeGuard.lean` | Actual Source Boolean-local bare require and public checked memory statement selection/run. |
+| `Backend/FailurePaths/RuntimeGuardControls.lean` | Inhabited true/false guards in both pipelines, saved stack, panic boundary and literal-selector refusal. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureMixedEncoding.lean` | Indexed field-evidence relation and actual arbitrary word/bytes Source encoder agreement with the existing typed ABI codec. |
-| `Lowering/V08/LiteralFailureMixedEncodingControls.lean` | Four-field tuple return/extraction, heap encoding, aliases, offsets and bounded local RETURN controls. |
+| `Backend/FailurePaths/RelationalGuard.lean` | Actual Source relational bare require and public checked memory statement selection/run. |
+| `Backend/FailurePaths/RelationalGuardControls.lean` | Inhabited signed/unsigned guards, equality/extrema, both pipelines and refusal/horizon controls. |
 
-## Mixed ABI expression allocation
+| `Backend/FailurePaths/LogicalGuard.lean` | Actual short-circuit Source Boolean-local require and public checked memory selection/run. |
+| `Backend/FailurePaths/LogicalGuardControls.lean` | Inhabited logical guards in both pipelines, saved stack, target-only skipped-invalid-RHS and fault/revert distinctions. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureMixedExpression.lean` | Actual local argument evaluation, mixed ABI expression allocation, input-field preservation and raw rethrow with phase-specific timeouts. |
-| `Lowering/V08/LiteralFailureMixedExpressionControls.lean` | Populated mixed input, fresh result, aliases, cursor, timeout and both Source pipeline observations. |
+| `Source/Progress/ReadyRebinding.lean` | Finite ready local-rebinding prefixes and actual Source body/call progress paired with reference preservation. |
+| `Source/Progress/ReadyRebindingControls.lean` | Inhabited parameter rebinding, distinct old/fresh aliases, caller restoration, heap persistence and panic/refusal controls. |
 
-## Mixed selector-prefixed ABI packets
+| `Backend/FailurePaths/LocalGuardSelection.lean` | Executable indexed Source Boolean-local require selection through the public memory compiler, with every-success correctness. |
+| `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Inhabited actual selector consumers in both pipelines and selector/refuted-relation/horizon controls. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureMixedSelector.lean` | Actual heterogeneous encodeWithSelector allocation, raw rethrow and post-allocation timeout. |
-| `Lowering/V08/LiteralFailureMixedSelectorControls.lean` | Mixed/empty-tail clients, body-relative offsets, supplied-selector decoder observations and full reached outputs. |
+| `Backend/FailurePaths/LogicalGuardSelection.lean` | Executable indexed Source logical-local require selection and every-success actual run correctness. |
+| `Backend/FailurePaths/LogicalGuardSelectionControls.lean` | Inhabited logical-selector clients, exact Boolean observations, complementary refusals and relation/horizon controls. |
 
-## Mixed signature-prefixed ABI packets
+| `Backend/FailurePaths/RelationalGuardSelection.lean` | Actual full-width integer-local Source guard selection, preserving width/sign/operator evidence and proving every-success runs. |
+| `Backend/FailurePaths/RelationalGuardSelectionControls.lean` | Inhabited signed/unsigned selector clients, integer-index map, exact boundaries and successful-but-refused uint8 Source control. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureMixedSignature.lean` | Actual mixed-tail encodeWithSignature allocation, raw rethrow and post-allocation timeout from existing field/read/hash semantics. |
-| `Lowering/V08/LiteralFailureMixedSignatureControls.lean` | Signature/payload aliasing, existing Keccak pin, four-byte prefix, empty tail, timeouts and complete reached outputs. |
+| `Backend/FailurePaths/CheckedGuards.lean` | Unified indexed Source guard dispatch, every-success actual runs and exact public checked compiler/code provenance. |
+| `Backend/FailurePaths/CheckedGuardsControls.lean` | One inhabited mixed Boolean/integer frame for all dispatch branches, provenance clients and outcome/refusal/relation controls. |
 
-## Declared mixed custom errors
+| `Backend/FailurePaths/GuardLowering.lean` | Computable intrinsic guard targets, guaranteed public compilation and exact dispatcher/code/refusal equivalence. |
+| `Backend/FailurePaths/GuardLoweringControls.lean` | Computed mixed-context targets and public compile/run clients for all three guard families, with refusal controls. |
+| `Backend/FailurePaths/GuardSequences.lean` | Finite indexed guard lists lowered to public-compiled intrinsic programs, unchanged fragments and actual Source/target short-circuit simulation. |
+| `Backend/FailurePaths/GuardSequencesControls.lean` | Mixed three-guard public selection, exact Source/target outcomes in both pipelines and positioned failure/refusal/horizon controls. |
+| `Backend/FailurePaths/GuardBodySelection.lean` | Computed structural Source-items admission, exact reconstruction and public guard-program compilation/execution provenance. |
+| `Backend/FailurePaths/GuardBodySelectionControls.lean` | Direct mixed-context Source-items selector clients in both pipelines, exact observations and structural/guard refusal controls. |
+| `Backend/FailurePaths/GuardBlockSelection.lean` | Root Source guard-block lowering through public checked statement compilation, exact code provenance and actual Source scope restoration/run simulation. |
+| `Backend/FailurePaths/GuardBlockSelectionControls.lean` | Inhabited root-block clients and exact joint outcomes in both pipelines, low-horizon timeouts and root/body refusal controls. |
 
-| Module | Content |
-|---|---|
-| `Lowering/V08/LiteralFailureMixedCustomError.lean` | Actual identity-converted local arguments and custom-error execution from generic mixed codec field facts. |
-| `Lowering/V08/LiteralFailureMixedCustomErrorControls.lean` | Member/type witnesses for mixed and empty errors, populated state, selector transport and exact stuck/timeout controls. |
+| `Source/Progress/InlineArrayParents.lean` | Ready inline-array allocation expression/statement progress, derived memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/InlineArrayParentControls.lean` | Inhabited inline allocation over live caller memory, exact statement/fuel/panic runs and retained readiness/element exclusions in both pipelines. |
 
-| `Solidity/Lowering/V08/LiteralFailureStringPrefix.lean` | Actual typed string-prefix encoding and declared error execution over a represented mixed tail; G38 encoding premise consumer. |
-| `Solidity/Lowering/V08/LiteralFailureStringPrefixControls.lean` | Populated typed string/custom-error controls, shared string/bytes reference, exact bytes and distinct stuck/timeout outcomes. |
+| `Source/Progress/StructParents.lean` | Constructor-derived member layout, actual packing/allocation progress and joint expression/statement preservation with checked-elaboration adaptation. |
+| `Source/Progress/StructParentControls.lean` | Inhabited reference-field constructors, old/fresh heap observations, early/later allocation panic, exact fuel and retained packing/readiness boundaries in both pipelines. |
 
-| `Solidity/Lowering/V08/LiteralFailureStringInterleaving.lean` | Indexed memory-string/byte witness relation; actual encoder computation equality and Source error/expression consumers. |
-| `Solidity/Lowering/V08/LiteralFailureStringInterleavingControls.lean` | Populated multi-string typed controls, aliases, old-object preservation, allocation and late failure observations. |
+| `Source/Progress/AllocationBodyCalls.lean` | Syntactic allocation-parent body prefixes, actual modifier-free internal-call progress, joint memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/AllocationBodyCallControls.lean` | Source-inferred callee body, inhabited old-reference returns, persistent default/child/struct allocations, propagated panic and caller restoration in both evaluator pipelines. |
 
-| `Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean` | Actual bool-kind standard ABI encoding before a supported mixed memory tail; G38/error/expression consumers. |
-| `Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean` | Boolean local, shared/distinct strings, allocation/failure controls and exact packed-width distinction. |
+| `Source/Progress/AggregateDefaults.lean` | Finite memory-array/struct default certificates, actual all-horizon default progress and joint memory preservation. |
+| `Source/Progress/AllocationReturns.lean` | Allocating-parent return statements, modifier-free body/internal-call progress, memory preservation and checked-elaboration adapters. |
+| `Source/Progress/AggregateReturnControls.lean` | Actual elaborated fixed-array return, distinct default/fresh references, inhabited caller restoration and unchanged default/readiness refusals in both pipelines. |
+| `Source/Progress/AggregateDefaultControls.lean` | Inhabited reference-field struct defaults, retained earlier allocation on timeout and old default-certificate refusal. |
 
-| `Solidity/Lowering/V08/LiteralFailureTypedFields.lean` | Synchronized Source/ABI field evidence, constructive normalization, generic standard encoding and allocation preservation. |
-| `Solidity/Lowering/V08/LiteralFailureTypedFieldsControls.lean` | Seven-field, three-bool actual execution controls, typed kind corruption, aliases, allocation and late failures. |
+| `Source/Progress/ParentArguments.lean` | Exact allocating-parent argument certificates, actual left-to-right evaluation, reference growth transport and checked-elaboration direct-call composition. |
+| `Source/Progress/ParentArgumentControls.lean` | Elaborated reference identity callee, intrinsic allocating argument, returned alias distinct from retained default, inhabited caller restoration and old-argument refusal. |
+| `Source/Progress/ParentArgumentFlowControls.lean` | Two allocating arguments, early panic before callee allocation and later panic preserving earlier argument memory in both pipelines. |
 
-| `Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean` | Actual calldata-to-memory argument conversion before typed custom-error encoding, with reached heap state. |
-| `Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean` | Copied-object and full-packet observations, extraction boundaries, before/after-copy failures and retained-state controls. |
+| `Source/Progress/BoundParents.lean` | Typed allocation-parent local prefixes, actual declaration/frame/scope progress, joint memory preservation and elaborated-call adaptation. |
+| `Source/Progress/BoundParentControls.lean` | Elaborated parent-initialized local and returned reference, retained default/fresh heap objects, inhabited caller restoration and old-body refusal. |
+| `Source/Progress/BoundParentPanicControls.lean` | Elaborated division panic after allocating a local, retained memory growth and restored caller state in both evaluator pipelines. |
 
-| `Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean` | Frame-indexed calldata bytes/string prefix over represented tail; actual no-copy encoding, layout and expression/G38 consumers. |
-| `Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean` | Populated no-copy calldata encoding, shared/short/past-end references, exact result allocation and order/frame corruption controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean` | Actual checked calldata slice argument composed with standard ABI encoding; invalid-head short-circuiting before arbitrary tails. |
-| `Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean` | Populated slice/encode byte outputs, logical versus physical bounds, effectful-tail ordering and timeout controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureNestedSlice.lean` | Actual nested calldata slicing, relative offset/full-word bounds, ordered failures and standard encoding consumer. |
-| `Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean` | Populated nested-slice packet outputs, old-alias preservation, nonzero/incorrect bases, two-stage bounds and timeout controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureSliceChain.lean` | Arbitrary finite actual typed slice-chain evaluation, explicit fuel, standard encoding and invalid-extension consumers. |
-| `Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean` | Populated mixed explicit/omitted-end chain, complete packets, failure extensions, skipped allocating tails and timeout controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureLocatedFields.lean` | Arbitrary supported memory/scalar/calldata interleavings; actual encoder-part derivation, ABI layout and allocation-preserved evidence. |
-| `Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean` | Eight-field mixed-location execution, aliases, complete packets, typed-kind/wire distinction and failure/fuel controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureConvertedFields.lean` | Input-only converted-argument evidence; actual copied values, reached field evidence, exact allocation count and custom-error execution. |
-| `Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean` | Two interleaved calldata copies into an existing error signature, complete copied objects/packets, old aliases and zero/one/two-copy timeout controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureStringConversion.lean` | Published allocation transport for typed fields/argument evidence; actual calldata-string copy before converted tails and custom errors. |
-| `Solidity/Lowering/V08/LiteralFailureStringConversionControls.lean` | StringMixed execution with real string/byte tags, old aliases, copied packets and zero/one/two-copy timeout controls. |
-
-| `Solidity/Lowering/V08/LiteralFailureCopySequence.lean` | Arbitrary supported local conversion sequences; actual identity/byte/string steps, reached values/fields, preservation and exact object counts. |
-| `Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean` | FieldMix7 with three interleaved copies, full error/copy outputs, old aliases and zero/one/two/three-copy timeout states. |
-
-| `Lowering/V08/LiteralFailureCopyEncoding.lean` | Actual standard ABI expression after typed local conversions; derived copy effects and packet allocation. |
-| `Lowering/V08/LiteralFailureCopyEncodingControls.lean` | Populated copy/packet/old-alias and partial-fuel controls with complete packets. |
-
-| `Lowering/V08/LiteralFailurePackedFields.lean` | Actual heterogeneous packed parts/encoding and converted-argument packet allocation. |
-| `Lowering/V08/LiteralFailurePackedFieldsControls.lean` | Populated packed fields, complete payloads, allocation and adjacent-boundary ambiguity controls. |
-
-| `Lowering/V08/LiteralFailureCopySelector.lean` | Actual selector-prefixed encoding after converted local arguments, with typed value injection and reached allocation. |
-| `Lowering/V08/LiteralFailureCopySelectorControls.lean` | Populated arbitrary-selector/copy/old-string/full-word controls and complete packets. |
-
-| `Lowering/V08/LiteralFailureCopySignature.lean` | Signature alias transport through actual copies and signature-prefixed encoder execution. |
-| `Lowering/V08/LiteralFailureCopySignatureControls.lean` | Actual aliased signature/read/copy packets, dangling-read and timeout-priority controls. |
-
-| `Lowering/V08/LiteralFailureCopyReturn.lean` | Derived converted tuple-return execution, slot extraction and actual return-data encoding. |
-| `Lowering/V08/LiteralFailureCopyReturnControls.lean` | Populated hidden return slots/caller parameters, exact extracted packets and copy-only allocation controls. |
-
-| `Lowering/V08/LiteralFailureCopiedReason.lean` | Actual eager calldata-string require conversion, exact success/failure state and Error readback. |
-| `Lowering/V08/LiteralFailureCopiedReasonControls.lean` | Populated copied-reason, static/local, full-word old-field and tight-fuel controls with complete packets. |
-
-| `Lowering/V08/LiteralFailureArithmeticReason.lean` | Actual division/modulo failure with effectful denominator and exact panic bytes. |
-| `Lowering/V08/LiteralFailureArithmeticReasonControls.lean` | Populated division/modulo panic, operand effects, distinct panic classes and insufficient-fuel controls. |
-| `Lowering/V08/LiteralFailureMemoryRevert.lean` | Actual direct Source revert with an assigned heap-backed string reason. |
-| `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Heap-backed reason aliasing, complete revert execution and insufficient-fuel controls. |
-| `Lowering/V08/LiteralFailureOverflowReason.lean` | Typed checked/unchecked addition at signed and unsigned range boundaries. |
-| `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Signed/unsigned overflow and wrapping, boundary success and distinct panic-class controls. |
-| `Lowering/V08/LiteralFailureReasonSequence.lean` | Actual Source sequencing and propagation of effectful memory-backed reason statements. |
-| `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | First failure, skipped continuation, changed/stale references and timeout sequencing controls. |
-| `Lowering/V08/LiteralFailureReferenceReturn.lean` | Actual single memory-byte return, hidden return-slot extraction and existing encoded-return transport. |
-| `Lowering/V08/LiteralFailureReferenceReturnControls.lean` | Populated byte-reference return, extraction, actual encoding and conditional target-slice controls. |
-| `Lowering/V08/LiteralFailureScalarOverflow.lean` | Source uint256 addition overflow consumed by the actual checked scalar test. |
-| `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Maximum-word overflow, retained scalar operands, raw wrapping and positive boundary controls. |
-| `Lowering/V08/LiteralFailureStatementReason.lean` | Actual Source statement endpoints for effectful heap-backed require/revert reasons. |
-| `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Populated require/revert success and failure states, static-frame variants and stale-pointer negatives. |
+| `Source/Progress/BoundCatalogue.lean` | Bound-parent body catalogues with elaboration-derived frame metadata, checked complete function coverage and ready/parent argument adapters. |
+| `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
+| `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
+| `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |

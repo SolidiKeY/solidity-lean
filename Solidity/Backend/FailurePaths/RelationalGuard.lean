@@ -99,9 +99,16 @@ theorem agreement {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
     public_selection base fragment o signed a b,
     selected_run state o signed a b x y hx hy targetLeft targetRight represented⟩
 
-#print axioms public_selection
-#print axioms exact_code
-#print axioms selected_run
-#print axioms source_run
-#print axioms agreement
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.public_selection' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms public_selection
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.exact_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms exact_code
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.selected_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selected_run
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.source_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms source_run
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.agreement' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms agreement
 end Solidity.Backend.FailurePaths.RelationalGuard

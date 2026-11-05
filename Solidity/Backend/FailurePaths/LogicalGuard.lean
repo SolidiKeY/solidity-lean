@@ -136,11 +136,20 @@ theorem agreement {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
     public_selection base fragment disjunction a b,
     selected_run state disjunction a b x y targetLeft targetRight represented⟩
 
-#print axioms public_selection
-#print axioms exact_code
-#print axioms intrinsic_run
-#print axioms selected_run
-#print axioms source_expression
-#print axioms source_run
-#print axioms agreement
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.public_selection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms public_selection
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.exact_code' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms exact_code
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.intrinsic_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms intrinsic_run
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.selected_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms selected_run
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.source_expression' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms source_expression
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.source_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms source_run
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.agreement' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms agreement
 end Solidity.Backend.FailurePaths.LogicalGuard
