@@ -1947,3 +1947,7 @@ The SDIV certificate now composes with the charged fetched reference theorem, re
 ### Selected signed remainder
 
 The SMOD certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Sign-combination, zero-divisor and minimum-word boundary controls preserve the dividend's remainder sign, populated separate frames and gas-before-arity/fuel priority; wrong Euclidean results and permuted tails are rejected. These are raw primitive facts, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Signed division and remainder refusals
+
+General SDIV/SMOD short-stack consumers derive certificate refusal and actual fetched/native stack-underflow from explicit numeric representation, short-stack and adequate-gas premises. Populated singleton controls check gas-before-underflow and distinguish the driver's fuel policy from native gate refusal at one fuel. The exceptional result carries no final state, so no rollback, account-world or source-failure correspondence follows.
