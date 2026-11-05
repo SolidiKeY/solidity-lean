@@ -1,0 +1,15 @@
+Coordinator/V09 registration proposals only; do not modify shared roots/pins/maps in this packet.
+Solidity.Backend.PrimitivePackets.CheckedSub.Source
+Solidity.Backend.PrimitivePackets.CheckedSub.Selected
+Solidity.Backend.PrimitivePackets.CheckedSub.Target
+Solidity.Backend.PrimitivePackets.CheckedSub.Agreement
+Solidity.Backend.PrimitivePackets.CheckedSub.Controls
+
+Source: Checked uint256 runtime-local subtraction with success/exact arithmetic panic and unchanged Source state.
+Selected: Actual public Memory.compileVal selection and unchanged checked subtraction guard.
+Target: Certified emitted success/underflow execution with physical StateRepr and saved tails.
+Agreement: Total Source/selected-code classification and target revert iff x<y; no assumed output.
+Controls: Inhabited populated caller fixture, both pipelines, boundaries, underflow and correspondence/order/tail refusals.
+
+Owning doc: docs/feature-work/primitive-packets-1105-CheckedSub.md
+Observation/axiom fixture: tests/primitive-packets-1105/CheckedSub/Observations.lean
