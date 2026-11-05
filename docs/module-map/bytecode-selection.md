@@ -79,3 +79,7 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean` | Every-depth DUP/SWAP and arbitrary-tail POP clients, populated whole-State expectations, ordered observations and index/resource negatives. |
 
 
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Operational adapter for the H8 proof-only normalization. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean` | H8 relative closure over explicit missing P1/P3 producers. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean` | H8 consumers of the published H7 logical padding supplier. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | H8 original-runtime consumers of the published H7 bounded scanner. |
