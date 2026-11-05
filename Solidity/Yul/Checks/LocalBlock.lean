@@ -226,4 +226,17 @@ def selectedSnapshot (bound : Nat) : Option (List Nat) :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.run_some_iff_firstDone
 
+
+/- Nonvacuous least-horizon controls inspect every strict preceding raw run. -/
+#guard (selectedRaw 32).any (fun selected =>
+  (rawRun selected.1).isSome &&
+    (List.range selected.1).all (fun fuel => (rawRun fuel).isNone))
+#guard (selectedRaw 64).any (fun selected =>
+  (rawRun selected.1).isSome &&
+    (List.range selected.1).all (fun fuel => (rawRun fuel).isNone))
+#guard (selectedRaw 32).any (fun selected => selected.1 > 0)
+/-- info: 'Solidity.Yul.RawFrame.firstDone_minimal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_minimal
+
 end Solidity.Yul.Checks.LocalBlock

@@ -99,4 +99,27 @@ theorem run_some_iff_firstDone : ∀ (ctx : Solidity.Source.Ctx) (control : Soli
       cases agrees
       rfl
 
+/-- The actual selected horizon is least: every strict earlier raw execution exhausts fuel. -/
+theorem firstDone_minimal : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx)
+ (bound chosen : Nat)
+ (observed : Except Solidity.Source.Halt (Solidity.Yul.RawFrame.Outcome ctx control) × Unit),
+ Solidity.Source.firstDone (fun fuel => Solidity.Yul.Closed.sourceResult (Solidity.Yul.RawFrame.run code policy fuel state)) bound = some (chosen,observed) →
+ ∀ fuel, fuel < chosen → Solidity.Yul.RawFrame.run code policy fuel state = none := by
+  intro ctx control code policy state bound chosen observed selected fuel before
+  have within : chosen ≤ bound := (Solidity.Source.firstDone_spec selected).1
+  cases actual : run code policy fuel state with
+  | none => rfl
+  | some out =>
+    obtain ⟨earlier,earlySelection⟩ :=
+      (run_some_iff_firstDone ctx control code policy state fuel out).mp actual
+    have earlierWithin : earlier ≤ fuel := (Solidity.Source.firstDone_spec earlySelection).1
+    have extended := Solidity.Source.firstDone_mono
+      (fun horizon => Closed.sourceResult (run code policy horizon state))
+      (Nat.le_trans (Nat.le_of_lt before) within) earlySelection
+    have pairSame := Option.some.inj (extended.symm.trans selected)
+    have indexSame : earlier = chosen := congrArg Prod.fst pairSame
+    omega
+
 end Solidity.Yul.RawFrame
