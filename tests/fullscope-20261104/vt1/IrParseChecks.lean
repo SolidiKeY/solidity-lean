@@ -41,6 +41,29 @@ example : ok "data \"d\" hex\"00\"" = false := rfl                  -- data root
 example : ok (wrap "" ++ "}") = false := rfl                       -- trailing brace
 example : ok (wrap "let x := 0x") = false := rfl                    -- malformed number
 
+-- Scoping and static rules certified by `objectWf` (finder/skeptic C06 findings).
+example : ok (wrap "function f() {} function f() {}") = false := rfl           -- duplicate function
+example : ok (wrap "function add(a, b) -> c {}") = false := rfl                -- function named like a builtin
+example : ok (wrap "function datasize() {}") = false := rfl                    -- object operation name
+example : ok (wrap "function g() {} { function g() {} }") = false := rfl       -- inner function shadows outer
+example : ok (wrap "function f() {} let f := 1") = false := rfl                -- variable named like a function
+example : ok (wrap "function f(f) {}") = false := rfl                          -- parameter named like a function
+example : ok (wrap "switch 1 let z := 1") = false := rfl                       -- switch without cases
+example : ok (wrap "switch 1 case 1 {} case 1 {}") = false := rfl              -- duplicate case
+example : ok (wrap ("switch 1 case \"a\" {} case 0x61" ++ String.mk (List.replicate 62 '0') ++ " {}")) = false := rfl
+example : ok (wrap "for { { function g() {} } } 1 {} {}") = false := rfl       -- function in a for initializer
+example : ok (wrap "for { } 1 { } { function g() {} }") = true := rfl          -- allowed in the body
+example : ok (wrap "let x, y := g() x, x := g() function g() -> a, b {}") = false := rfl -- duplicate targets
+example : ok (wrap "pop(pc())") = false := rfl                                 -- pc outside strict assembly
+example : ok (wrap "let x := 0123") = false := rfl                             -- leading zero
+example : ok (wrap "let x := \"\\b\\f\\v\\u00e9\"") = true := rfl            -- escapes solc accepts
+example : ok "object \"A\" { code { } data \"d\" hex\"00\" data \"d\" hex\"01\" }" = false := rfl -- duplicate member
+
+-- Shape: the census of a small tree, and an inner variable bound at its position.
+example : (parse (wrap "pop(add(1, 2)) function f() -> r { r := mload(0) }")).toOption.map
+    (fun p => (objectCensus [] p.parts.root).map fun (path, fns, ops) => (path, fns.map FnSig.name, ops)) =
+    some [(["A"], ["f"], ["mload", "pop", "add"])] := by decide
+
 -- The certificate: a successful parse reproduces the exact lexed tokens.
 #check @Parsed.sound
 #print axioms Parsed.sound

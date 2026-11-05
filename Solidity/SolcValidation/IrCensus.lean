@@ -71,12 +71,17 @@ def Bodies.census {F ss} : Bodies F ss → List FnSig × List String
   | .cons body rest => let (f, o) := body.census; let (g, p) := rest.census; (f ++ g, o ++ p)
 end
 
+mutual
 /-- Per object (by its path of names), the functions and operations of its code. -/
 def objectCensus (path : List String) : Object Code → List (List String × List FnSig × List String)
   | .object name code children =>
-      let here := path ++ [name]
       let (fns, ops) := Block.census code
-      (here, fns, ops) :: (children.attach.flatMap fun ⟨child, _⟩ => objectCensus here child)
+      (path ++ [name], fns, ops) :: objectsCensus (path ++ [name]) children
   | .data _ _ => []
+
+def objectsCensus (path : List String) : List (Object Code) → List (List String × List FnSig × List String)
+  | [] => []
+  | o :: os => objectCensus path o ++ objectsCensus path os
+end
 
 end Solidity.SolcValidation.IrSyntax

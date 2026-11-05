@@ -12,8 +12,10 @@ builtins plus the compiler-only object operations). `leave`, `break` and
 `continue` are unrepresentable outside a function or loop. Function bodies see
 only their parameters and returns, plus every visible function.
 
-Names are kept as metadata so that the printer `Object.toks` can reproduce the
-source token stream exactly; this is what makes the parser certifying. No
+Names are kept as metadata so that the printer `objectToks` can reproduce the
+source token stream exactly; this is what makes the parser certifying. The
+types admit duplicate names; the checked `objectWf` (`SolcValidation/IrParse.lean`)
+rules them out and fixes each reference to its unique binder. No
 semantics is asserted here (see `SolcValidation/IrEval.lean`).
 -/
 namespace Solidity.SolcValidation.IrSyntax
@@ -65,11 +67,18 @@ def toByte? (n : Nat) : Option (Fin 256) :=
 def escapeByte (c : Char) : Option (Fin 256) :=
   if c = '\\' then some 92 else if c = '"' then some 34 else if c = '\'' then some 39
   else if c = 'n' then some 10 else if c = 'r' then some 13 else if c = 't' then some 9
+  else if c = 'b' then some 8 else if c = 'f' then some 12 else if c = 'v' then some 11
   else none
 
+/-- UTF-8 bytes of a `\uNNNN` code point (at most three bytes). -/
+def utf8Bytes (n : Nat) : List Nat :=
+  if n < 0x80 then [n]
+  else if n < 0x800 then [0xC0 + n / 64, 0x80 + n % 64]
+  else [0xE0 + n / 4096, 0x80 + n / 64 % 64, 0x80 + n % 64]
+
 /-- Bytes of a string literal body. Unescaped characters must be printable
-ASCII; non-ASCII text and `\u` escapes are refused (open work, not accepted
-with a guessed encoding). -/
+ASCII; non-ASCII text is refused (open work, not accepted with a guessed
+encoding). `\uNNNN` is encoded as UTF-8, as solc does. -/
 def decodeString : List Char → Option (List (Fin 256))
   | [] => some []
   | '\\' :: 'x' :: h :: l :: rest => do
@@ -78,6 +87,14 @@ def decodeString : List Char → Option (List (Fin 256))
       let b ← toByte? (hi * 16 + lo)
       let tail ← decodeString rest
       pure (b :: tail)
+  | '\\' :: 'u' :: a :: b :: c :: d :: rest => do
+      let a ← hexDigit? a
+      let b ← hexDigit? b
+      let c ← hexDigit? c
+      let d ← hexDigit? d
+      let bytes ← (utf8Bytes (((a * 16 + b) * 16 + c) * 16 + d)).mapM toByte?
+      let tail ← decodeString rest
+      pure (bytes ++ tail)
   | '\\' :: c :: rest => do
       let b ← escapeByte c
       let tail ← decodeString rest

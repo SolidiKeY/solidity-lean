@@ -7,15 +7,22 @@ import Solidity.SolcValidation.IrSyntax
 `/** @src */` annotations, are dropped). `parse` builds the intrinsic tree of
 `SolcValidation/IrSyntax.lean`: names are resolved to memberships, function
 groups are hoisted over their block, arities are checked, misplaced
-`leave`/`break`/`continue` and shadowing are refused. The parser itself is not
-trusted: a result is returned only together with the proof that printing the
-tree reproduces exactly the lexed token stream (`Parsed.sound`).
+`leave`/`break`/`continue` are unrepresentable. The parser itself is not
+trusted: a result is returned only together with the proofs that printing the
+tree reproduces exactly the lexed token stream and that the tree passes the
+scoping and static checks `objectWf` (`Parsed.sound`).
 
-The boundary is therefore the lexer and the printer, both short structural
-functions. Numeric spellings are compared by value (`0x80` and `128` lex
+The trusted boundary is the lexer, the printer and `objectWf`, all short
+structural functions. Numeric spellings are compared by value (`0x80` and `128` lex
 alike); comments and whitespace are not part of the provenance. Object data
 must be a `hex"…"` literal (what solc 0.8.38 emits); a plain-string data
-section is refused. Non-ASCII string literals and `\u` escapes are refused.
+section is refused. Refused although solc accepts them: single-quoted strings,
+unescaped non-ASCII characters, hex literals as expressions, `_` in numbers.
+Object names and operation labels are compared by their raw text (escapes are
+not decoded); whether a label exists is checked when it is evaluated.
+This tree is evaluated by compiled code, not by the kernel on a hot path:
+Gate G0's conditions (recursor forms, names out of the index) are not applied;
+the kernel controls run on inputs of a few dozen tokens.
 -/
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation
@@ -69,7 +76,7 @@ def lexNumber (c : Char) (cs : List Char) : Option (Nat × List Char) :=
       else (fun v => (v, after)) <$> hexValue digits
   | _, _ =>
       let (digits, after) := (c :: cs).span Char.isDigit
-      if (after.head?.map isIdChar).getD false then none
+      if (after.head?.map isIdChar).getD false || (c == '0' && digits.length > 1) then none
       else some (decValue digits, after)
 
 /-- Each step consumes at least one character, so `length + 1` fuel suffices. -/
@@ -447,12 +454,122 @@ def parseChildren (fuel : Nat) : Nat → List Tok → Except String (List (Objec
   | _ + 1, _ => .error "expected object, hex data or }"
 end
 
+/-! ## Well-formedness, checked and certified
+
+The printer prints names only, so the token certificate alone does not fix
+which binder a name refers to. `objectWf` checks, on the returned tree, the
+scoping rules that make resolution unique: every variable and call points at
+the first (innermost) binder of its name, and no declaration reuses a visible
+variable, function or reserved name, so that binder is the only one. It also
+checks what solc's analyzer requires beyond the grammar: each function body
+printed exactly once in order, nonempty and distinct `let`/assignment names,
+switches with a case or default and distinct case values, no function in a
+for-loop initializer, no `pc`, distinct object member names. -/
+
+def nodupNames (xs : List String) : Bool := xs.eraseDups.length == xs.length
+
+/-- A declaration of `xs` with functions `F` and locals `L` visible. -/
+def declOk (F : List FnSig) (L : List String) (xs : List String) : Bool :=
+  nodupNames xs && xs.all fun x => !L.contains x && !(F.any (·.name == x)) && !reserved x
+
+def nodupWords : List Word → Bool
+  | [] => true
+  | w :: ws => !ws.contains w && nodupWords ws
+
+mutual
+def Expr.wf {F L r} : Expr F L r → Bool
+  | .lit _ => true
+  | .var x m => m.index == L.idxOf x
+  | .op o args => o.name != "pc" && args.wf
+  | @Expr.call _ _ s m args => m.index == (F.map FnSig.name).idxOf s.name && args.wf
+
+def Args.wf {F L k} : Args F L k → Bool
+  | .nil => true
+  | .cons e rest => e.wf && rest.wf
+end
+
+def initWf {F L} {xs : List String} : Option (Expr F L xs.length) → Bool
+  | none => true
+  | some e => e.wf
+
+mutual
+/-- `init`: inside a for-loop initializer, where functions are refused. -/
+def Stmt.wf {F c L} (init : Bool) : Stmt F c L → Bool
+  | .block b => b.wf init
+  | .discard e => e.wf
+  | .assign ts e => !ts.isEmpty && nodupNames (ts.map Sigma.fst) && e.wf
+  | .if_ e b => e.wf && b.wf init
+  | .switch e cs => e.wf && cs.nonempty && nodupWords cs.values && cs.wf init
+  | .switchDefault e cs b => e.wf && nodupWords cs.values && cs.wf init && b.wf init
+  | .for_ lp => lp.wf
+  | .leave | .break_ | .continue_ => true
+
+def Cases.wf {F c L} (init : Bool) : Cases F c L → Bool
+  | .nil => true
+  | .cons _ b rest => b.wf init && rest.wf init
+
+def Cases.values {F c L} : Cases F c L → List Word
+  | .nil => []
+  | .cons l _ rest => l.value :: rest.values
+
+def Cases.nonempty {F c L} : Cases F c L → Bool
+  | .nil => false
+  | .cons _ _ _ => true
+
+def Loop.wf {F c L} : Loop F c L → Bool
+  | .stmt st rest => st.wf true && rest.wf
+  | .let_ xs e rest => !xs.isEmpty && declOk F L xs && initWf e && rest.wf
+  | .run e post body => e.wf && post.wf false && body.wf false
+
+/-- `next`: the index the next function marker must carry. -/
+def Items.wf {F c L g} (init : Bool) (next : Nat) : Items F c L g → Bool
+  | .nil => next == g
+  | .stmt st rest => st.wf init && rest.wf init next
+  | .let_ xs e rest => !xs.isEmpty && declOk F L xs && initWf e && rest.wf init next
+  | .fn k rest => k.val == next && rest.wf init (next + 1)
+
+def Block.wf {F c L} (init : Bool) : Block F c L → Bool
+  | .mk ss bodies items =>
+      (!init || ss.isEmpty) && declOk F L (ss.map FnSig.name) && bodies.wf && items.wf init 0
+
+def Bodies.wf {G ss} : Bodies G ss → Bool
+  | .nil => true
+  | @Bodies.cons _ s _ body rest => declOk G [] (s.params ++ s.rets) && body.wf false && rest.wf
+end
+
+def memberName : Object Code → String
+  | .object name _ _ => name
+  | .data name _ => name
+
+mutual
+def objectWf : Object Code → Bool
+  | .object _ code children => Block.wf false code && objectsWf children &&
+      nodupNames (children.map memberName)
+  | .data _ _ => true
+
+def objectsWf : List (Object Code) → Bool
+  | [] => true
+  | o :: os => objectWf o && objectsWf os
+end
+
+/-- Two memberships at the same position are the same membership: a checked
+`m.index = L.idxOf x` determines the binder from the printed name. -/
+theorem Mem.eq_of_index {α : Type} {L : List α} {x : α} :
+    (m₁ m₂ : Mem L x) → m₁.index = m₂.index → m₁ = m₂
+  | .here, .here, _ => rfl
+  | .there m₁, .there m₂, h => by
+      simp only [Mem.index, Nat.add_right_cancel_iff] at h
+      rw [Mem.eq_of_index m₁ m₂ h]
+  | .here, .there _, h => by simp only [Mem.index] at h; omega
+  | .there _, .here, h => by simp only [Mem.index] at h; omega
+
 /-- A parsed IR text: its lexed tokens and a tree printing back to exactly them. -/
 structure Parsed (text : String) where
   parts : ObjectParts
   tokens : List Tok
   lexed : lex text = some tokens
   printed : objectToks parts.root = tokens
+  wellFormed : objectWf parts.root = true
 
 def parse (text : String) : Except String (Parsed text) :=
   match h : lex text with
@@ -461,14 +578,17 @@ def parse (text : String) : Except String (Parsed text) :=
       let fuel := 4 * toks.length + 8
       let (parts, rest) ← parseObject fuel fuel toks
       unless rest.isEmpty do .error "trailing tokens after the root object"
-      if hp : objectToks parts.root = toks then .ok ⟨parts, toks, h, hp⟩
+      if hp : objectToks parts.root = toks then
+        if hw : objectWf parts.root = true then .ok ⟨parts, toks, h, hp, hw⟩
+        else .error "tree violates scoping or static rules"
       else .error "printed tree differs from the lexed text"
 
 /-- Provenance: the returned tree prints to exactly the token stream of the
-input text. Nothing about the untrusted parser is assumed. -/
+input text, and passes the checked scoping and static rules (`objectWf`).
+Both are checked on the result; the untrusted parser is not assumed correct. -/
 theorem Parsed.sound {text : String} (p : Parsed text) :
-    lex text = some (objectToks p.parts.root) := by
-  rw [p.lexed, p.printed]
+    lex text = some (objectToks p.parts.root) ∧ objectWf p.parts.root = true :=
+  ⟨by rw [p.lexed, p.printed], p.wellFormed⟩
 
 /-- The root of a parsed text is the code-bearing object it names. -/
 def Parsed.artifact {text : String} (p : Parsed text) (mode : IrMode)
