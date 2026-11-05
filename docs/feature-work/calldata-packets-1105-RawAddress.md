@@ -130,3 +130,14 @@ preservation and no new H38/X01/X02 producer interface. Runtime/KeySort/all37
 inventories passed3.844s. Saved-head checkpoint/cache results are retained in
 evidence/publication-3ad22f66; upstream full-gate reports are separate coordinator
 evidence. Original partial cache packet and previous seals remain preserved.
+
+## Rebase onto e6849d3b
+
+Authorized conflict-free rebase preserves original head2b8d7e70 at
+refs/vx1-preserved/pre-rebase-e6849d3b; exact upstream-plus-local tree verified.
+RawAddress source/controls and audit retain identical bytes and remain published.
+Rewritten packet commit isef8472164475a874d1051188578d513519f0a3df;
+original5d40125c remains in preserved history/seals. Both read-only reviews pass;
+all484 available checksum entries verified. Runtime/KeySort and37+39 inventories
+passed4.418s; original H38/X01/X02 holds remain. No new publication or cache
+receipt is inferred; saved-head gate results are in evidence/rebase-e6849d3b.

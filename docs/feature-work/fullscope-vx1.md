@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: published `3ad22f66d8fc6431378c22e71823436c79dede7f`, adopted by preservation merge `2600ba7046d53a41c24046991ec04c59673a3074`; includes 8bf83218 and earlier publications. Original assigned base remains unchanged. H38 producer review/full freeze remains pending; no full readiness/cache freshness inferred.
+Current integrated prerequisite: rebased onto published `e6849d3bdf516099d20c33d3581d523449764018`. Original assigned base remains `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`; original head `2b8d7e70c03f436e06c151dfcf32352560905468` is preserved at `refs/vx1-preserved/pre-rebase-e6849d3b`. Rewritten H38 proposal `76efe1a37a459b77b2e330d98eaafbd5b999ae7c` is byte-identical and still awaits producer review.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -756,3 +756,38 @@ or readiness is inferred from publication. H41 prior partial packs and all seals
 remain preserved with their original checksums; no ship-cache on VM or new delivery
 claim. No goal/VM creation/reset, push or PR. Exact saved-head gate results are in
 tests/calldata-packets-1105/RawAddress/evidence/publication-3ad22f66 and its handoff.
+
+## Checkpoint 09: authorized e6849d3b rebase
+
+The coordinator explicitly requested rebase before the next commit. A clean
+11-commit rebase onto e6849d3bdf516099d20c33d3581d523449764018 completed without
+conflicts at2c6dd714ae5762186b62febb249d3867e526155d. Original branch/head/base
+and all historical seals are preserved; the pre-rebase head2b8d7e70c03f436e06c151dfcf32352560905468
+remains reachable at refs/vx1-preserved/pre-rebase-e6849d3b. Rebased tree equals
+exactly the precomputed old-lane/upstream union, with the same eight local overlay
+paths. All15 owned files and four direct dependencies retain their original bytes.
+
+Original H38 proposal06f5ae081ca5e01a976b3ae3cb9b43a3d369d033 is preserved in
+that history. Its rewritten equivalent is76efe1a37a459b77b2e330d98eaafbd5b999ae7c;
+Contracts SHA2563e3833def0982b523de8be6a61a8c9b36b56abd9058b96b79a810582f3ced406
+matches exactly. Relay this rewritten path/commit to all consumers and the
+Source/EVM owners; it is a producer-review proposal, not frozen or dependency-ready.
+No theorem, premise, exclusion, observation or proof budget changed.
+
+The published four new Source/Agreement modules are adopted byte-identically,
+not manually edited H16 implementations. They relate primitive values/locals
+and state an unproved one-direction normal-result obligation; no full-state/
+resource simulation, Source interpretation or RunIndexed adapter is supplied.
+No H38 approval, environment-field adapter or catalog-generator change arrived.
+All original X01/X02 obligations remain open; G35 RawAddress remains published.
+The short COORD-MERGE notice supplies no new full-gate/cache receipt; no such
+outcome is inferred. Pruned foreign evidence is not reconstructed.
+
+Separate read-only finder/skeptic reviews pass preservation and scope. Finder
+also verified all484 available checksum-manifest entries. Neither used Lean/server.
+Actual bounded rebase-head runtime/KeySort and both owned inventories (37 RawAddress,
+39 VX1 controls) passed4.418s, Lean4.24.0/Lake5.0.0-src+797c613. No owned Lean
+source changed, no new implementation or cold prerequisite rebuild was performed.
+Saved-head checkpoint and G07 outcomes are separately retained under
+ tests/calldata-packets-1105/RawAddress/evidence/rebase-e6849d3b.
+H41 packs/seals remain unchanged; no VM/goal replacement/reset, push or PR.
