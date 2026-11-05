@@ -1,0 +1,5 @@
+ERROR 115:5 'change' tactic failed, pattern
+  (isDigit b && decide (underscoreOk (b :: post) = false)) = true
+is not definitionally equal to target
+  underscoreOk ([] ++ 95 :: b :: post) = false
+diag: 1 errors

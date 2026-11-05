@@ -1,0 +1,37 @@
+{
+  "finder": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "findings": [
+      "F-CONST-ACCEPT-01 fixed: untracked scope candidates, two exact preserved hashes, complete modules/authored declarations, six refusal mutation controls."
+    ]
+  },
+  "skeptic": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "findings": [
+      "Explicit IntValueRel/native eval added; both acceptance gaps fixed. No further proof defect."
+    ]
+  },
+  "proof_sources": {
+    "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+    "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
+    "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+    "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+    "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
+  },
+  "checker_sha256": "7410d4c50c816ba3c512b50086c9427d6b93d9513158675e665b5734924cd7f0",
+  "manifest_sha256": "e2612e4c2952b7297168e6c0b5691032962a658e0fc69d3287312f4957792f94",
+  "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted.",
+  "publication_review": {
+    "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
+    "finder": "PASS: actual published tree exactly4modules, Controls absent; hashes/rootimports/ancestry/13APIpins; forged complete delivery rejected. Read-only/noLeanserver.",
+    "skeptic": "PASS: exact published four-module set and byte pins; remaining Controls absent; provenance clear, scope safeguards retained. Read-only/noLeanserver."
+  },
+  "rebase_review": {
+    "finder": "PASS: conflict-free rebase,47proof/10untracked hashes preserved, backupref, ancestry/protectedbaseline guards; original/fresh46axiomprintmaps independently checked. Read-only/noLeanserver.",
+    "skeptic": "PASS: target/baseline/HEAD graph, zeroConstantsdelta beforebaseline, protected proof/APIpins, freshAudit27.09s complete and independentprintmap checks. Read-only/noLeanserver."
+  }
+}

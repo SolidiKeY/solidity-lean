@@ -1,0 +1,65 @@
+[
+  {
+    "id": "inventory",
+    "status": "done"
+  },
+  {
+    "id": "scanner-correspondence",
+    "status": "done"
+  },
+  {
+    "id": "erasure-and-values",
+    "status": "done"
+  },
+  {
+    "id": "token-classification",
+    "status": "done"
+  },
+  {
+    "id": "refusal-families",
+    "status": "done"
+  },
+  {
+    "id": "backfill",
+    "status": "done"
+  },
+  {
+    "id": "constructor-controls",
+    "status": "done"
+  },
+  {
+    "id": "compiler-fixtures",
+    "status": "done"
+  },
+  {
+    "id": "trust-inventory",
+    "status": "done"
+  },
+  {
+    "id": "independent-reviews",
+    "status": "done"
+  },
+  {
+    "id": "target-import-closure",
+    "status": "done",
+    "evidence": "evidence/recovered-full-gates/1.log: 49 jobs completed; source hashes match audit-validation.json"
+  },
+  {
+    "id": "static-gates",
+    "status": "blocked",
+    "evidence": "Post-adoption fullsuite passes build/trust/layers/docs/axiompins/TestSuite/corpus/automation;37rootimports and38maprows remain coordinator-owned. H41 handoff verifiedcoordinator-pending."
+  },
+  {
+    "id": "coordinator-registration",
+    "status": "blocked"
+  },
+  {
+    "id": "full-runtime-gate",
+    "status": "blocked"
+  },
+  {
+    "id": "immutable-handoff",
+    "status": "pending",
+    "evidence": "H41 verified-pack handoff recorded coordinator-pending; transport question resolved. Final assignment seal still awaits original integration/runtime gates."
+  }
+]

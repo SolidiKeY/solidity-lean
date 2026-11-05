@@ -1,0 +1,10 @@
+ERROR 125:3 Tactic `split` failed: Could not split an `if` or `match` expression in the goal
+
+Hint: Use `set_option trace.split.failure true` to display additional diagnostic information
+
+b : UInt8
+hd : (48 ≤ b.toNat ∧ b.toNat ≤ 57 ∨ 65 ≤ b.toNat ∧ b.toNat ≤ 70) ∨ 97 ≤ b.toNat ∧ b.toNat ≤ 102
+⊢ (have n := b.toNat;
+    if n ≤ 57 then n - 48 else if n ≤ 70 then n - 55 else n - 87) <
+    16
+diag: 1 errors

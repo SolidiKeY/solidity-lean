@@ -1,0 +1,18 @@
+{
+  "id": "454723131c0d84eb64ec5e3aeb89227d92cc6c11dba05d69d58ef98c671346e3",
+  "image_id": "sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377",
+  "cpu_nanos": 1000000000,
+  "auto_remove": true,
+  "memory_bytes": 12884901888,
+  "memory_swap_total_bytes": 12884901888,
+  "docker_version": "Docker version 28.4.0, build d8eb465",
+  "mcp_cleanup_command": [
+    "docker",
+    "exec",
+    "sol-nl-proof-worker",
+    "bash",
+    "-c",
+    "source /workspace/.setup/activate.sh\nexport LEAN_NUM_THREADS=1\nscripts/coord-tools/lean-mcp stop"
+  ],
+  "mcp_cleanup_exit": 0
+}
