@@ -6,6 +6,8 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
+Current integrated prerequisite: published `8495f1deb0a95dd6b9301822d8649ab76b217681`, adopted by preservation merge `38613ec0b319d866d7fbd597dc2285e115956b63`. Original assigned base remains recorded unchanged. H38 approval is still pending; publication does not imply producer completion or cache freshness.
+
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
 ## X01 interface checkpoint (in progress)
@@ -478,3 +480,92 @@ Validation for this documentation-only update: exact local hashes of both
 preserved packets, matching the supplied receipt for checkpoint-02; `git diff
 --check`. No Lean source changed, so no Lean rebuild or repeated proof checks
 were performed. No new scope question, goal creation/reset, push or publication.
+
+## Checkpoint 04: adopt independently published master
+
+Published prerequisite: `8495f1deb0a95dd6b9301822d8649ab76b217681`.
+Preserved VX1 parent: `d053582ca57b6a3da5706aef64529df2ecb0f3ac`.
+Preservation merge: `38613ec0b319d866d7fbd597dc2285e115956b63`.
+Original assignment base remains `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`.
+
+`git fetch origin master` obtained the exact reported SHA; `origin/master`
+matched it, and the original base is its ancestor. The clean owned branch was
+merged with that exact SHA, without reset, rebase, branch replacement or default-
+branch publication. Both original parents remain reachable. There were no
+conflicts or manual integration edits. Imported generated roots/maps/trust pins
+are the published producer/coordinator versions, not VX1 co-edits.
+
+Read-only finder and skeptic independently confirmed all ten existing files in
+VX1 reserved paths are byte-identical to the VX1 parent. VX1's five changed paths
+and master's 152 changed paths are disjoint; the merged tree is their union.
+The published delta contains no protected `Solidity/Source/**` or
+`Solidity/Syntax/Scoped.lean` edits. No protected producer repair was attempted.
+
+The packet scope is `docs/feature-work/integration-20261105-checkpoints.md`:
+27 bounded increments/58 Lean modules/two fixtures, plus previously published
+VC1. These are bounded producer checkpoints, not whole-lane completion. The
+reviewed VC1 opaque data fingerprints are exactly inventoried upstream; scanner
+policy was not changed or relaxed here.
+
+### Dependency assessment
+
+No H38 Source/EVM approval, RunIndexed producer adapter or generator-owner
+change arrived in the published tree. The Source, EVM contract interface,
+feature-generator and all VX1 catalog files are unchanged by this adoption.
+`Solidity/Optimizer/RoadmapComposition.lean` adapts the legacy `Roadmap.Cert`
+boundary and explicitly supplies no D6/artifact-linking certificate. It does
+not consume the new RunIndexed contract or authorize its freeze.
+
+The held statement-grammar Gate G0 failure and VY5 Monetary.wide failure remain
+producer work. The exact owners retain H16/H22 reservations; this lane must not
+repair them or manufacture stubs. V16's described branch-history situation is
+not treated as missing source or permission for duplicate recovery work.
+
+### VM revalidation and cache boundaries
+
+The owned contract/control import closure is unchanged: Contracts, its direct
+Hash.CollisionBound/Evm/Keccak dependencies and lean-toolchain have identical
+source to the prior VX1 parent. The owned closure was rechecked on the actual
+merge head using the existing bounded tooling: runtime versions and KeySort,
+Contracts kernel emission, controls and all 39 printed axiom inventories.
+Exit 0, 7.146s; no producer proof, observation, premise or budget changed.
+This does not check the full 152-file imported closure.
+
+Current-tree static checks exited 0 in 13.041s:
+3923 source files, 287 inventoried sites, zero trust findings; 628 core modules,
+zero elaborator/checked-parser paths; generated roots current; baseline catalog
+212 features and 783 upstream symbols current. All 30 exclusion rows still await
+rescope. These checks do not establish full X01 or production readiness.
+
+Every heavy check remained serial under explicit -j1/LEAN_NUM_THREADS=1,
+verified 12GiB/no-swap cgroup and continuous 4GiB parent-reserve monitoring.
+Logs/RSS/reserve records: `/workspace/vx1-evidence/checkpoint-04-integration/`.
+No unrelated prerequisite rebuild or cold build was launched.
+
+H21 shipping notice `sched-20261105T0200Z` is not a per-VM cache-freshness receipt.
+The local materialized artifacts for Optimizer.Pass and
+Backend.MemoryOps.SourceRawBoolCopy were absent when sampled; that fact does
+not prove shipment absence, and neither pack availability nor full cache
+freshness is claimed. H41 remains in force: preserve verified packs on this VM,
+report exact path/SHA and let the coordinator pull. Never run ship-cache.sh here.
+Earlier receipt covers only its exact archive, not this integrated tree.
+
+Both local read-only adoption reviews found no graph/ownership defect. Neither
+used Lean/server or wrote files; they do not substitute for producer approvals
+or integrated VM gates.
+
+### Continued queue and remaining requests
+
+The owned queue remains X01 then X02. Continue X01 freeze after VY5 Source and
+EVM/resource reviews of the committed H38 stub; preserve that relay request until
+receipt. The integration supplies none of the missing approvals. Full public
+D1–D6 contracts, all-30 manifest/diagnostic/ledger regeneration, X02 production
+integration and dependent witnesses/negative/combination proofs remain open.
+Existing generator and G07 owner requests remain; no source gate waiver or
+language exclusion is proposed. Completed independent census and schema controls
+remain available as scoped evidence, not production proofs.
+
+Final integrated build/complete inventory, exact-head combined imports and
+applicable cache receipts remain pending on actual prerequisites. Coordinator
+publication claims are recorded as upstream evidence, not relabeled as VM checks.
+No push, PR, goal creation/reset, VM replacement or host relay was performed.
