@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawControlGrowingSequence
 import Solidity.Yul.RawControlForPost
 import Solidity.Yul.RawControlDeclaration
 import Solidity.Yul.RawGrowingForPost
@@ -150,3 +151,11 @@ iteration and restoration under genuine checked/coherent premises.
 Mutation/continue/break/false-guard and initializer/post timeout witnesses are
 in Solidity.Yul.Checks.RawControlForPost. Other initializer types, declaration
 groups, dirty Source readback and general admission remain separate. -/
+
+/-! RawControlGrowingSequence.run/correct joins an actual supported Boolean
+initializer expression with a concrete checked Items tail at ctx.push.
+It reuses RawGrowingSequence.Result/Coherent/project and actual Out.up,
+retaining old-context initializer errors versus grown tail frames and
+checked/coherent Source premises. Mutation, control restoration and both
+error prefixes are witnessed in Solidity.Yul.Checks.RawControlGrowingSequence.
+Final block closure, other declarations and frontend admission remain separate. -/
