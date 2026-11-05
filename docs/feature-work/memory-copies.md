@@ -1245,3 +1245,22 @@ Independent design finder/skeptic reviews required weakened first references,
 retained physical contents and empty-header boundary controls. This two-location
 fragment does not close Source/physical adequacy or five-location composition.
 The signature-only interface precedes proofs and inhabited/negative controls.
+
+Pipeline implementation/handoff (interface `3a2942eba038935c081f4a410753fd5610709b65`):
+`storageMemoryPipeline` composes the actual checked copiers, deriving the second
+length/snapshot from the first allocator. Empty/pair/64 controls retain both
+headers and payloads; pair roots40/43 advance cursor46, long roots40/105 advance
+cursor170. Saturation and empty/pair second refusal preserve an actual
+represented successful prefix. Last-fitting pair and negatives reject erasure
+of either payload23 and any actual whole-run return of first root40.
+
+Both independent reviews passed after seven local facts received explicit
+types and the alias negative was strengthened. A discarded injection exceeded
+the unchanged budget; an Option-head contradiction repaired it. Explicit
+cursor projection and mirror equations repaired direct proof attempts. Final
+three diagnostics have zero errors/empty warnings. Standalone explicit cursor
+transport passed; six basic alternatives failed. Six main and thirteen control
+targets give 1,302 scoped reports over 220 modules, preserving 217 predecessors.
+Exact-head gates, axiom audit, patch reconstruction and seal remain required.
+This two-location fragment leaves full composition, Source/physical adequacy
+and original producer obligations open.
