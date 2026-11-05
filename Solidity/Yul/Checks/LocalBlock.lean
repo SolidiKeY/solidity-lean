@@ -1,3 +1,4 @@
+import Solidity.Yul.RawBoundary
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Source.Semantics
@@ -111,4 +112,27 @@ def stateWitness : Nonempty (LocalState env ctx.tys) := ⟨initial⟩
 #print axioms localWordCells_write
 #print axioms writebackLocalWords_view
 #print axioms runLocalBlock_projection
+
+/- Completed assembly retains dirty words; canonical return observers alone clean them.
+These controls execute the existing intrinsically typed code and policy. -/
+def rawInitial : RawFrame.State ctx := RawFrame.ofClean locals initial.2
+def rawRun (fuel : Nat) := RawFrame.run code policy fuel rawInitial
+
+#guard (rawRun 0).isNone
+#guard (rawRun 32).isSome
+#guard (rawRun 64).isSome
+#guard (rawRun 32).map (fun result => (RawFrame.view result.state flag).val) = some 2
+#guard (rawRun 32).map (fun result => (RawFrame.view result.state small).val) = some 257
+#guard (rawRun 32).map (fun result => (RawFrame.returnBool (ctx := ctx) .legacy result.state (.here)).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnU8 (ctx := ctx) .legacy result.state (.there (.there .here))).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnBool (ctx := ctx) .viaIR result.state (.here)).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnU8 (ctx := ctx) .viaIR result.state (.there (.there .here))).key) = some (some 1)
+
+/-- info: 'Solidity.Yul.RawFrame.run_returnBool_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_returnBool_agrees
+/-- info: 'Solidity.Yul.RawFrame.run_returnU8_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_returnU8_agrees
+
 end Solidity.Yul.Checks.LocalBlock

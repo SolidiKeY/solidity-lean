@@ -113,4 +113,47 @@ theorem returnU8_agrees : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.R
     congr 1
     exact congrArg (fun raw : Word => ((raw.val % 256 : Nat) : Int)) words
 
+
+/-- Canonical return observation after admitted Yul execution depends only on its input word view.
+The Option retains the execution's fuel exhaustion; this is not a Source return statement. -/
+theorem run_returnBool_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (pipeline : Solidity.Roadmap.Pipeline) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys .bool),
+ (Solidity.Yul.RawFrame.run code policy fuel first).map (fun result => Solidity.Yul.RawFrame.returnBool pipeline result.state index) =
+ (Solidity.Yul.RawFrame.run code policy fuel second).map (fun result => Solidity.Yul.RawFrame.returnBool pipeline result.state index) := by
+  intro ctx control code policy fuel pipeline first second same index
+  unfold run
+  rw [same]
+  cases executed : WordAdapter.run code policy fuel ⟨Fin.elim0, view second⟩ with
+  | none => rfl
+  | some result =>
+    change some (returnBool pipeline (capture first result.state.cells) index) =
+      some (returnBool pipeline (capture second result.state.cells) index)
+    exact congrArg some (returnBool_agrees ctx pipeline (capture first result.state.cells)
+      (capture second result.state.cells) rfl index)
+
+/-- Canonical return observation after admitted Yul execution depends only on its input word view.
+The Option retains the execution's fuel exhaustion; this is not a Source return statement. -/
+theorem run_returnU8_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (pipeline : Solidity.Roadmap.Pipeline) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ (Solidity.Yul.RawFrame.run code policy fuel first).map (fun result => Solidity.Yul.RawFrame.returnU8 pipeline result.state index) =
+ (Solidity.Yul.RawFrame.run code policy fuel second).map (fun result => Solidity.Yul.RawFrame.returnU8 pipeline result.state index) := by
+  intro ctx control code policy fuel pipeline first second same index
+  unfold run
+  rw [same]
+  cases executed : WordAdapter.run code policy fuel ⟨Fin.elim0, view second⟩ with
+  | none => rfl
+  | some result =>
+    change some (returnU8 pipeline (capture first result.state.cells) index) =
+      some (returnU8 pipeline (capture second result.state.cells) index)
+    exact congrArg some (returnU8_agrees ctx pipeline (capture first result.state.cells)
+      (capture second result.state.cells) rfl index)
+
 end Solidity.Yul.RawFrame
