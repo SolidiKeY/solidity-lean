@@ -15,3 +15,5 @@
 | `Roadmap/V16/CreationReturnConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |

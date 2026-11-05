@@ -198,6 +198,8 @@ import SolidityBridge.RoadmapV15.P10.ExternalCodeExtent
 import SolidityBridge.RoadmapV15.P10.ExternalCodeExtentControls
 import SolidityBridge.RoadmapV15.P10.FrozenInterface
 import SolidityBridge.RoadmapV15.P10.FrozenWitness
+import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
+import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.RoadmapV15.P10.JumpMemberConsumer
 import SolidityBridge.RoadmapV15.P10.JumpMemberControls
