@@ -186,3 +186,7 @@ Queue accounting: local inventory, adapters, supported flat tuple routing, fourt
 ## Remote dependency audit 8bf83218
 
 Fetched and verified published 8bf8321873befa3f35ca31e97e5339a1baee93e6 descending from b86ae456. Its diff in ExecutableAst and Tools.DirectRuntime is empty; runtime migration remains pending. The owned branch retains its previously validated graph; this remote was inspected without adoption. No new Lean/full gate, cache freshness or checkpoint completion is claimed. See evidence/remote-8bf832-audit.json.
+
+## Remote dependency audit 3ad22f66
+
+Fetched 3ad22f66d8fc6431378c22e71823436c79dede7f and verified ancestry from 8bf83218. ExecutableAst and Tools.DirectRuntime remain unchanged from b86ae456; DirectRuntime migration is still pending. Remote inspected without adoption; no new Lean gate, cache freshness or completion claim. See evidence/remote-3ad22f-audit.json.

@@ -1,0 +1,3 @@
+Temporary owned index at original base; actual checkout/index unchanged.
+COMMAND: git apply --cached --check /workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/original-proof.patch.log
+EXIT=0

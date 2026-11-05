@@ -1,10 +1,12 @@
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ParentRestore
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource
 
-/-! Restore the saved reference/counter while retaining a live scalar result.
-The payload and reached representation are actual inputs; the output run,
-representation, stack and allocator transport are derived. No general
-recursive compiler selection or approved-domain instance is asserted. -/
+/-! Restore the saved counter while retaining the scalar result and the SAME
+reference. The premise `after.mem start = after.mem b` requires the saved
+reference word to equal the active one; this theorem does not restore a
+different parent reference. Payload and reached representation are actual
+inputs. Output run, representation, stack and allocator transport are derived.
+No general recursive compiler or approved-domain instance is asserted. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.ScalarParentRestore
 open Evm Evm.Memory RecursiveSource ScalarRecursiveSource
 
@@ -80,3 +82,7 @@ theorem restore {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Frame R)
    simpa only [Nat.add_zero] using ownership
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarParentRestore
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarParentRestore.restore' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarParentRestore.restore

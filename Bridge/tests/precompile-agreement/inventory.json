@@ -1,0 +1,1394 @@
+{
+  "schema": 2,
+  "base": "b6ba0696102a7a038afe2ed333c09dff397cc5b2",
+  "vendor_commit": "047f63070309f436b66c61e276ab3b6d1169265a",
+  "mathlib_commit": "f897ebcf72cd16f89ab4577d0c826cd14afaafc7",
+  "status": "bounded-kernel-agreement",
+  "rows": [
+    {
+      "address": 1,
+      "name": "ecrecover",
+      "core_module": "Solidity/Precompiles/Basic.lean",
+      "core_gas": "3000",
+      "length": "128 bytes read, zero-padded; trailing bytes ignored",
+      "malformed": "Never returns none; invalid v/r/s or failed recovery returns empty output",
+      "vendor_definition": "\u039e_ECREC",
+      "vendor_gas": "3000",
+      "vendor_behavior": "Reads four padded big-endian words; invalid v/r/s returns empty; ECDSARECOVER subprocess and ffi.KEC opaque on valid recovery; subprocess error also returns successful empty output",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "empty",
+        "127/128/129 bytes",
+        "invalid v=29",
+        "gas 2999/3000/3001"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.ecrecover_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 72,
+          "sha256": "c12d7d0c105f0fcd35700eb89709e25c13a39baf5aa6ebe1e1c024d3ebe02b39"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 73,
+          "sha256": "7df16f45c6dfa19becf857408f4af9780549f52d7f196eb2b60765bf51f053a8"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 74,
+          "sha256": "f51d5a5ba6f99492ec0bb12e585ec5b4ec3736b9fc39b233b80d29fe694a98d5"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 75,
+          "sha256": "08d7047c8daaaf1bc4ecfd6662fee8d0805df7fb7b8df6436777a675584a51a0"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 76,
+          "sha256": "28130dd0f594a357f8de1c1b79cf2084041d3077cbb27b1f721c43a2d696c680"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 77,
+          "sha256": "21b652b402fd229fcb2581942720c9093fe915575fb8aac122beccbfb1682c8f"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 78,
+          "sha256": "79b295e34044a5dd4117ac96bad37b5e31a176ef0585dbc968f157668bafc121"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 79,
+          "sha256": "1981adb8c33840f4ea523de366045c46f8b10402d4ba9af16ad452554e042fbd"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 80,
+          "sha256": "5a350510683e0d461f700254533f244f6a424dcfa5c5b23c417b37a9fbba81da"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 81,
+          "sha256": "ec8f04696c43719a2fb56beb88ada73862970b2e27dea264739850589643b247"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "affordability-branch",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 2,
+      "name": "sha256",
+      "core_module": "Solidity/Precompiles/Basic.lean",
+      "core_gas": "60 + 12 * ((length + 31) / 32)",
+      "length": "Arbitrary",
+      "malformed": "Never returns none",
+      "vendor_definition": "\u039e_SHA256",
+      "vendor_gas": "60 + 12 * ((size + 31) / 32)",
+      "vendor_behavior": "ffi.SHA256 always returns Except.ok of opaque sha256; no cryptographic output equality established",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "lengths 0/1/31/32/33/63/64/65",
+        "cost-1/cost/cost+1"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.sha_price",
+        "SolidityBridge.PrecompileAgreement.sha_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.sha_lengths",
+        "SolidityBridge.PrecompileAgreement.Controls.sha_boundary"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 82,
+          "sha256": "9cae39888640147031f56654540a564b4bbf9249b6a2efbd55295041080e8b2f"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 83,
+          "sha256": "43fbf481a4591315652774de187a53833861a1799b03bc5f22e912a96310545a"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 84,
+          "sha256": "b9d3db41e87daafc91b3a5f4ce410bc2676bbf3406bcd255bca3fd779d2e3af8"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 85,
+          "sha256": "8f51adbe3362a49995595c16695d896fbf040d61538a23437fa294c487ab7f94"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 86,
+          "sha256": "099cf620a102b1ba21fe63bfd9f3d3c319f47ec1bdc8de002ac6bf0d8dc71e5c"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 87,
+          "sha256": "ea662a75b90fd1d66645743a708aee63681b8813295e4a1d43d6f2fe66c1880c"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "affordability-branch",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 3,
+      "name": "ripemd160",
+      "core_module": "Solidity/Precompiles/Basic.lean",
+      "core_gas": "600 + 120 * ((length + 31) / 32)",
+      "length": "Arbitrary",
+      "malformed": "Never returns none",
+      "vendor_definition": "\u039e_RIP160",
+      "vendor_gas": "600 + 120 * ((size + 31) / 32)",
+      "vendor_behavior": "RIP160 subprocess output is decoded as blob; errors yield successful empty output; padding/output equality unproved",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "lengths 0/1/31/32/33/63/64/65",
+        "cost-1/cost/cost+1"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.ripemd_price",
+        "SolidityBridge.PrecompileAgreement.ripemd_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths",
+        "SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 88,
+          "sha256": "953a78cf60c52078e1b487a79f8c0eee5e61a26f559e06b227b6727a1aaeb349"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 89,
+          "sha256": "084a5d59653f02fa3b4241b5d2df36b64219b40182bd44d2f1b101ce869bc9d2"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 90,
+          "sha256": "aed4b4bab7877f87fffe8db5f1a8f846a419aabfc16dd9c7be770540863d60b6"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 91,
+          "sha256": "0adeba81c6e68c0a430205de896a2522d328fc6f5079a94eda0d577da5af3a29"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 92,
+          "sha256": "74a981762401d07fc213fe9ef050ba0c83e714935aeb0d2c0c07ac6f82d571b5"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 93,
+          "sha256": "8ee9a1f21925fa2dfd68d459ac9c0e59455a3408759feff1cb4ef07ef5a3604c"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "affordability-branch",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 4,
+      "name": "identity",
+      "core_module": "Solidity/Precompiles/Basic.lean",
+      "core_gas": "15 + 3 * ((length + 31) / 32)",
+      "length": "Arbitrary",
+      "malformed": "Never returns none",
+      "vendor_definition": "\u039e_ID",
+      "vendor_gas": "15 + 3 * ((size + 31) / 32)",
+      "vendor_behavior": "Directly returns I.calldata; sufficient gas preserves account map and substate; insufficient gas returns false, empty map, zero gas, same substate, empty output",
+      "classification": "identity-candidate",
+      "controls": [
+        "arbitrary bytes/lengths",
+        "lengths 0/1/31/32/33/63/64/65",
+        "cost-1/cost/cost+1",
+        "nonempty bytes with zero values and high bytes"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.identity_gas",
+        "SolidityBridge.PrecompileAgreement.identity_output",
+        "SolidityBridge.PrecompileAgreement.identity_run",
+        "SolidityBridge.PrecompileAgreement.identity_success",
+        "SolidityBridge.PrecompileAgreement.identity_failure",
+        "SolidityBridge.PrecompileAgreement.identity_charged",
+        "SolidityBridge.PrecompileAgreement.identity_success_iff",
+        "SolidityBridge.PrecompileAgreement.identity_exact",
+        "SolidityBridge.PrecompileAgreement.identity_one_short",
+        "SolidityBridge.PrecompileAgreement.identity_unaffordable",
+        "SolidityBridge.PrecompileAgreement.words_multiple",
+        "SolidityBridge.PrecompileAgreement.words_next",
+        "SolidityBridge.PrecompileAgreement.words_last",
+        "SolidityBridge.PrecompileAgreement.words_boundary",
+        "SolidityBridge.PrecompileAgreement.words_rounding"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.identity_lengths",
+        "SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output",
+        "SolidityBridge.PrecompileAgreement.Controls.identity_boundary"
+      ],
+      "output_agreement": "kernel-arbitrary-bytes",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 94,
+          "sha256": "eec0374c0153fd1237bae8e136e3785019e44bd7a6670182a7d7e194dd0a386d"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 95,
+          "sha256": "a5d360095ddb7b5954fbf372df9f9243e463d0b1df1260e7aed02898de0b8f71"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 96,
+          "sha256": "875ee48f7a2b8327434b1ba8d8dc4674bbd202cdd0923c48488cd5871de04d07"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 97,
+          "sha256": "2dd0ce21279a401caa3de4a3a064c337486fa2115f1100402aad3d9361f3ae53"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 98,
+          "sha256": "7fe67f75db6086865cb0f9ee15f74b43aadc1986000e2bdbdbe7cb8210ea548f"
+        },
+        {
+          "path": "Solidity/Precompiles/Basic.lean",
+          "line": 99,
+          "sha256": "cdd7a5e9e426aba06ff142a63f356a4422fc9c4cb0fe7c5b4d1ccdc8d63fb5a1"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "affordability-branch",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 5,
+      "name": "modexp",
+      "core_module": "Solidity/Precompiles/Modexp.lean",
+      "core_gas": "Malformed: 0; otherwise max 500 (complexity * iterations); complexity=16 if max(Lb,Lm)<=32 else 2*ceil(max(Lb,Lm)/8)^2; iterations=max 1 (head.bitLength-1 or 16*(Le-32)+head.bitLength-1)",
+      "length": "Three 32-byte BE lengths then zero-padded operands",
+      "malformed": "Any Lb/Le/Lm >1024 returns none",
+      "vendor_definition": "\u039e_EXPMOD",
+      "vendor_gas": "max 200 (ceil(max(Lb,Lm)/8)^2 * max(adjusted_exp_length,1) / 3); exponent tail factor 8",
+      "vendor_behavior": "No 1024 length cap; base converted through UInt256 before exponentiation; empty input core gas 500 versus vendor 200 (kernel-validated gas counterexample; 33-byte-base input truncation is kernel-proved; native output probe failed on unavailable memset_zero)",
+      "classification": "fork-mismatch",
+      "controls": [
+        "empty: 500 versus 200",
+        "length header 1024/1025",
+        "exponent lengths 0/31/32/33",
+        "nonzero short operands",
+        "base exceeds 256 bits"
+      ],
+      "proofs": [],
+      "proof_status": "kernel-mismatch-only",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch",
+        "SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch",
+        "SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation"
+      ],
+      "output_agreement": "fork-mismatch",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 82,
+          "sha256": "60ca95617462b4144dfa70ee2ea842c0146cb5af851a21d432f22bc107f28127"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 83,
+          "sha256": "2d16fdd8c0a9e6ea3fa6a677ee654f4db8dbc8f41f88ceee5d05fc6a570c8ba2"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 84,
+          "sha256": "6bb20f4fdfdbd377018e98852dade9c1ef40ee95b2dd8b90ff91210edbdf6cd0"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 85,
+          "sha256": "4ca81c82d94ff2c42c770ef91b0c91d0f07ce980b02c087d41aeebc57024ebb2"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 86,
+          "sha256": "90d781263af2686f20ec322b734ae1d809f5da6b048ce40ea385ed79bf091b4b"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 87,
+          "sha256": "d2caa4dba26ffe30e0867ab552364f27690af648914077dc4e89a14bba6854bc"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 88,
+          "sha256": "3a3d52f16014cd74a99808fdc6ea978cf468b63700d338b472c5543a7f7f250f"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 89,
+          "sha256": "0c9c0565b9253081333ca0bc68e9ca0e8d27a41c278b7ac4c89519667cf6fe9a"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 90,
+          "sha256": "9b51497ad1f0069fa2e7bf5c9f733f713db819498add587c660c2929a513fcb5"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 91,
+          "sha256": "06864819dc5581cb06a12aceaa6529bb7d72854b50ca00f7f79e7cca564395a1"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 92,
+          "sha256": "e80bf1b1de08ba187fca2b1a1572461e4e79aa43fd7e13338dc2955a34a0270a"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 93,
+          "sha256": "59eac80194d3062225af88aefa21cfb1b98a2ff9d0473ba0082cde44df088569"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 94,
+          "sha256": "87724af761dfb599ed314041cce9d8ff292e8c6ddd9f0a95099ad8d993618754"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 95,
+          "sha256": "be6eef2fce23f38d7839dea49aecc044d4240289f28a514526366b3d1f5b88c6"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 96,
+          "sha256": "7e5f96abd2a4089ec68b351e68bf409d2dc0f56f3ae88a3c76ade39d9dae7d30"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 97,
+          "sha256": "9a816349964d3588a21bb1f0ee5beb557c4a45683da13d5e9792f3762d93cfc2"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 98,
+          "sha256": "6335081cf476f9ac59fac5dceb66e64ee7de955e96ecdfc838966918a5203cc2"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 99,
+          "sha256": "21a870ededd5941149197a656ff5577da7bbe839da274465103ac1ad4d414877"
+        },
+        {
+          "path": "Solidity/Precompiles/Modexp.lean",
+          "line": 100,
+          "sha256": "9416f96706639c0ee77b1ff85708696bf29a80db1860ea8c722c1f84156c71cf"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "fork-mismatch",
+      "agreement_domain": "no-universal-agreement"
+    },
+    {
+      "address": 6,
+      "name": "bnAdd",
+      "core_module": "Solidity/Precompiles/Bn254.lean",
+      "core_gas": "150",
+      "length": "128 bytes read, zero-padded; trailing ignored",
+      "malformed": "Invalid decoded G1 point returns none",
+      "vendor_definition": "\u039e_BN_ADD",
+      "vendor_gas": "150",
+      "vendor_behavior": "BN_ADD invokes subprocess; Except.error consumes all supplied gas, empty map/output; success deducts 150; no equality premise for subprocess",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "empty/infinity",
+        "127/128/129 bytes",
+        "invalid coordinate",
+        "gas 149/150/151"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.bnadd_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.bnadd_controls",
+        "SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 201,
+          "sha256": "c1ede3516c0e5b6e90dd6a976c24f85f4f996d7263de7de2a56f42a92d75148f"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 202,
+          "sha256": "3de7ff53ac60412faafcd0d93bed2fa764f4b75c6838a43614de565d61baf7e9"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 203,
+          "sha256": "d13d236afba26f0fe1c85db4bf4f795c4d07906a78b9ec0de9207f46a32677e8"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 204,
+          "sha256": "ce49e11f6a14787b0baa9ddceeb4c1bf86a5b9fd77a932da3924b9f1b10c556a"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 205,
+          "sha256": "7be3d12317904f247cfba6b25fb1f9785a5be4ddf223bb3a551133cd90da05c2"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 206,
+          "sha256": "3bbd9ae90954638524f4deeaeba3a5f39a34ecf79aa8f23db381c2f9c015a852"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "actual-success-flag",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 7,
+      "name": "bnMul",
+      "core_module": "Solidity/Precompiles/Bn254.lean",
+      "core_gas": "6000",
+      "length": "96 bytes read, zero-padded; trailing ignored",
+      "malformed": "Invalid decoded G1 point returns none",
+      "vendor_definition": "\u039e_BN_MUL",
+      "vendor_gas": "6000",
+      "vendor_behavior": "BN_MUL invokes subprocess; error consumes all supplied gas, empty map/output; success deducts 6000",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "empty/infinity",
+        "95/96/97 bytes",
+        "invalid coordinate",
+        "gas 5999/6000/6001"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.bnmul_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.bnmul_controls"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 207,
+          "sha256": "7f188a9d8db3e4acb11a4c099a86121dac5489b16b132af4812d23faaca510eb"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 208,
+          "sha256": "53895a30369f7564817a5fce24ed7f36452e0ff29cc7419c82809680f0647bb6"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 209,
+          "sha256": "69046175fc53f477fbcd7d98611e67d9d124031a9cddab846b84b30e12067b45"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 210,
+          "sha256": "8d8b2ada93fa7a96574104e5d2bc8519a4f9ff55833c71e7b3c01198c4c79686"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "actual-success-flag",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 8,
+      "name": "bnPairing",
+      "core_module": "Solidity/Precompiles/Bn254.lean",
+      "core_gas": "45000 + 34000 * (length / 192)",
+      "length": "Multiple of 192, including empty",
+      "malformed": "Bad length or invalid decoded pair returns none",
+      "vendor_definition": "\u039e_SNARKV",
+      "vendor_gas": "34000 * (size / 192) + 45000",
+      "vendor_behavior": "SNARKV subprocess determines validity; error consumes all supplied gas; floor pricing is evaluated even on malformed lengths",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "lengths 0/1/191/192/193/383/384/385",
+        "nonempty infinity pair",
+        "invalid point",
+        "cost-1/cost/cost+1"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.pairing_price",
+        "SolidityBridge.PrecompileAgreement.pairing_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.pairing_controls"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 211,
+          "sha256": "69f6de2d9835315418cc543a442d4f129a901b8db1716f1e2a33228e203ecd43"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 212,
+          "sha256": "06f0e65bf199e9d784a5f8c038e7ff6866216cf4d3826406dec154eb817c36f8"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 213,
+          "sha256": "bf82b68bbe8cbcb0381c793eda73e7a20a12ddc345979c6af689a44dc45f2503"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 214,
+          "sha256": "0303c3454c88f7e22da0e35f1e8e57d437a5a578f9e04766a4766eb5395738c1"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 215,
+          "sha256": "f060ede1ea85e4376cd35617cabd1a12198fe46520e5591dbb0eb74ff9996ccd"
+        },
+        {
+          "path": "Solidity/Precompiles/Bn254.lean",
+          "line": 216,
+          "sha256": "da4abf3e6047df4cf3ee300634ec05eaad5b891811c3eda00c263ddb9d74ac73"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "actual-success-flag",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 9,
+      "name": "blake2f",
+      "core_module": "Solidity/Precompiles/Blake2f.lean",
+      "core_gas": "readNat d 0 4 (right zero-padded BE rounds)",
+      "length": "Exactly 213",
+      "malformed": "Wrong length or flag>1 returns none",
+      "vendor_definition": "\u039e_BLAKE2_F",
+      "vendor_gas": "fromByteArrayBigEndian (d.extract 0 4), unpadded",
+      "vendor_behavior": "ffi.BLAKE2 checks size=213 and flag in {0,1} before opaque BLAKE2Compress; errors consume all gas; short headers differ: [1] core 16777216 versus vendor 1",
+      "classification": "header-domain-mismatch",
+      "controls": [
+        "lengths 0/1/2/3/4/212/213/214",
+        "header 00000001/01000000",
+        "flags 0/1/2",
+        "rounds-1/rounds/rounds+1"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.big_reader",
+        "SolidityBridge.PrecompileAgreement.first_four",
+        "SolidityBridge.PrecompileAgreement.zero_padding",
+        "SolidityBridge.PrecompileAgreement.blake_padding",
+        "SolidityBridge.PrecompileAgreement.blake_zero_header",
+        "SolidityBridge.PrecompileAgreement.blake_price",
+        "SolidityBridge.PrecompileAgreement.blake_gas",
+        "SolidityBridge.PrecompileAgreement.blake_zero_gas",
+        "SolidityBridge.PrecompileAgreement.blake_valid",
+        "SolidityBridge.PrecompileAgreement.blake_valid_one",
+        "SolidityBridge.PrecompileAgreement.blake_insufficient",
+        "SolidityBridge.PrecompileAgreement.blake_invalid_flag",
+        "SolidityBridge.PrecompileAgreement.blake_invalid_size"
+      ],
+      "proof_status": "kernel-common-header-domain",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.blake_controls",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_byte_order",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_high_header",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths",
+        "SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 127,
+          "sha256": "e80c4fe56a6b02432a7758365c7d6a1fe4cd5b4d3510492c39207de611b4b6b7"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 128,
+          "sha256": "b788e828e2a042e73c83ba50984ed4cebc385b7bc31e7c18f1a9f42ba4f584a0"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 129,
+          "sha256": "f008302f1ece95ff4e9d5755d9be7c3d033894c3718461e7170c538b0da6eb26"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 130,
+          "sha256": "aa589fc9b67af193be156bce4672b4467bf2b067e72b9a81d09e187eaca5c4b3"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 131,
+          "sha256": "ae1784a9e7f5505c5e59b29c661de6c3b2edc6ac99fc6e882009e363a8902962"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 132,
+          "sha256": "cd2a03c2377a0194edce373a56009142c82890e4d50ee4c2cb7c7a4d59394799"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 133,
+          "sha256": "a2c812ceaeccf25bfb1c8aa4d8121a97a3843adfc9e1cdbe05f7baffd7a2f067"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 134,
+          "sha256": "11d315d2c8540860242a12224809bd3c1da51a776ac7499f01672358aea89b43"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 135,
+          "sha256": "2113066849e646b75ed318338826619193e44e1d53eb9b6ecda010431a2e9e07"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 136,
+          "sha256": "f0477da301363dfd7128a71559c91a647e5bed393c92bfe8457559903cb52b39"
+        },
+        {
+          "path": "Solidity/Precompiles/Blake2f.lean",
+          "line": 137,
+          "sha256": "425925b1664c38ef619744a6374395247f088fe661b436db00aac2b98b935cfb"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "actual-success-flag-common-header-domain",
+      "agreement_domain": "size>=4-or-zero-header"
+    },
+    {
+      "address": 10,
+      "name": "pointEvaluation",
+      "core_module": "Solidity/Precompiles/PointEval.lean",
+      "core_gas": "50000",
+      "length": "Exactly 192",
+      "malformed": "Decode failure or verification false returns none",
+      "vendor_definition": "\u039e_PointEval",
+      "vendor_gas": "50000",
+      "vendor_behavior": "PointEval subprocess/ByteArray.ofBlob; error consumes all supplied gas; no cryptographic or process-output equality established",
+      "classification": "common-gas-external-output",
+      "controls": [
+        "lengths 0/191/192/193",
+        "valid and invalid proof",
+        "invalid versioned hash",
+        "gas 49999/50000/50001"
+      ],
+      "proofs": [
+        "SolidityBridge.PrecompileAgreement.point_gas"
+      ],
+      "proof_status": "kernel-matching-row",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.point_controls",
+        "SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch"
+      ],
+      "output_agreement": "open-crypto-or-ffi",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 171,
+          "sha256": "927f09d0266ca3800ade8daaa7f392de37a8e6c769f712068bb18df68091d1e2"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 172,
+          "sha256": "8ed139fb404c1001e1748dbc0e9b5b4a1b277034c0e7a672697de494536dc089"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 173,
+          "sha256": "61c444996105d4deafb21ed454bf357e4d187a5cf4dae9bef33bc159a9fc5053"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 174,
+          "sha256": "ad2c1920cbc3902d9156b5596a12f5819ccced32b290a01d104536cc868339fb"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 175,
+          "sha256": "fc1a5a52d554678862fce3b266d288ed10e993fcaf62b2f982ffecb8f88db23e"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 176,
+          "sha256": "0b9bb99ea99ecc400f157cdea8872637f8152f402d152a6c6200ef2b794ce0ac"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 177,
+          "sha256": "9eaddb05ab4bc7e7fd110434ce007e390fb07939c2aae272f67d085553b72376"
+        },
+        {
+          "path": "Solidity/Precompiles/PointEval.lean",
+          "line": 178,
+          "sha256": "9723872b2f9566db8307598b6e755f89b72319e4e1cdda2ebd5789af80daaa99"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "actual-success-flag",
+      "agreement_domain": "all-inputs"
+    },
+    {
+      "address": 11,
+      "name": "blsG1Add",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "375",
+      "length": "Exactly 256",
+      "malformed": "Wrong length or invalid G1 point",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "255/256/257 bytes",
+        "invalid field",
+        "infinity"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 460,
+          "sha256": "72ee326a221762d1250b6ac56a5e71afad9f41d8e0005bda827ba8ad592446b5"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 461,
+          "sha256": "d7606c4e53e3862e655bfad5185288769ad6a708110f640753b520e5c6becd0e"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 466,
+          "sha256": "d6fc858f2498c2eb3ea9bf08c55d868da10ba6c410cdabd4df1937c85d77e4d3"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 467,
+          "sha256": "fed668761b5105fae2fcb303c06c69a5bbeef5ec3261fd036758d5b979a5d5a7"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 468,
+          "sha256": "ca6cc515e472a76cced7fe0620d5fc73d210c12205230e53738beebb5f6b0646"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 469,
+          "sha256": "94daf91e7e94d7e18cd1370b8ac642deb95135d810eeec363d01ba88020b99a6"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 470,
+          "sha256": "df56ca12454f5328fbc1402befe85f927c2a9a12d1c4ccde83f5159b1e1cf62c"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 471,
+          "sha256": "8203978af25d207ca08bccc1819dd0e489b48763567577c842d216572da80967"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 472,
+          "sha256": "6af326a53d41cdc3add8f1502d89b40d16a2a1a5898c84a780b18d6ad4f27ed8"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 473,
+          "sha256": "7d2df064e455420af93be28a9e777711fa40b69ef8d6bbd0dee906e2306db686"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 12,
+      "name": "blsG1Msm",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "msmGas 12000 g1Discount 519 (length/160); k*c*discount/1000",
+      "length": "Nonempty multiple of 160",
+      "malformed": "Empty/bad length or invalid subgroup G1 point",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "0/159/160/161/320 bytes",
+        "discount indices 1/128/129",
+        "invalid subgroup"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core",
+        "SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 459,
+          "sha256": "28929252a74f8483f5d10ff6531193cd3bfdd0e04c2f46eaf0b72c44ad92efd9"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 478,
+          "sha256": "112e34c69c0c729e22a7b728a8aa58a4a6cc6c837e2cfd697284b2e1f0ae5d1e"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 479,
+          "sha256": "2acf0aa0472bb9b20ac1080d1f03cd5645bd692037d85a278a5e6eeee7e722ba"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 480,
+          "sha256": "da05754464bbaad5e6cb2fae520f6ea363f52a6244e782bf6e5e3804333b2d63"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 481,
+          "sha256": "742bddce16070eebde6cafa07fb9d22153cf6def51c54da3f9054c17f0958515"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 482,
+          "sha256": "541c90633b2de4d35b3ff9bc5b1f95d112df86466d6c3689fbe9a8cd39b5d36a"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 483,
+          "sha256": "cad34eb1e712220218e44dc2e0f76f71547675600c4c3dd9ab1687932e918c35"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 13,
+      "name": "blsG2Add",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "600",
+      "length": "Exactly 512",
+      "malformed": "Wrong length or invalid G2 point",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "511/512/513 bytes",
+        "invalid field",
+        "infinity"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 474,
+          "sha256": "20e96141e032f3da5b01a1298d2b9a25cdd627549456e975e6328d448a18ef87"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 475,
+          "sha256": "b7126cc446f0d5ae27a9d0c2c1a34bdeb1649a0edcbc42ea0be5dfec4e2d6791"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 476,
+          "sha256": "741403f126f81ea0e90006e61afed16ae2e112d031e4d39e058e94b60e2e3a0b"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 477,
+          "sha256": "1dc0f4c20ba4935318eb45bf94ae867d7c24e1b15f9e7d6df832aa007f07c8ed"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 14,
+      "name": "blsG2Msm",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "msmGas 22500 g2Discount 524 (length/288); k*c*discount/1000",
+      "length": "Nonempty multiple of 288",
+      "malformed": "Empty/bad length or invalid subgroup G2 point",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "0/287/288/289/576 bytes",
+        "discount indices 1/128/129",
+        "invalid subgroup"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core",
+        "SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 462,
+          "sha256": "f96bc8e19990a477a9721088fbdc10f964a9d8a24aa0066040e1c7c84e1add22"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 484,
+          "sha256": "529f38dcf4f33113ff8af2bcea8f53b35d6a0071761f0e0771680d8a4a620722"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 485,
+          "sha256": "1ca7baf4a692690c05e1a4837025324a8862108be7f55100589d4887e6723312"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 15,
+      "name": "blsPairing",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "32600 * (length/384) + 37700",
+      "length": "Nonempty multiple of 384",
+      "malformed": "Empty/bad length or invalid subgroup point",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "0/383/384/385/768 bytes",
+        "invalid subgroup",
+        "infinity pair"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 463,
+          "sha256": "18dbb53681b2d97d78e2bbc6035027d42b08ae065304aa7a70eac21ec61e2574"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 486,
+          "sha256": "3e57dd22be6662397b5643050694eb3532b10cd1a775b06e9f1bde74333f30bd"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 487,
+          "sha256": "ead1ccfcf3a44db7163747a0f30ec403e51fb6fa7b6aac6ecd1cdcfcaf3f5a78"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 488,
+          "sha256": "766c570d8e004c8ca2e63d31720cab72ab6acb792a3645e944ad97881a4410dc"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 489,
+          "sha256": "9039539fa76aeff26a1c5273f8923a6924063c03c14e042d412b51a1934ceaee"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 490,
+          "sha256": "e7b9ae3369ecc70d0cc529b829c54da32c7b68117034201fbab8bcb417e2a501"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 491,
+          "sha256": "cefc92d754164bf0169646262ed79ff0dfcdab91933801ac0f6ae7f06a393ac0"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 492,
+          "sha256": "eb4baceb9245cbe8f488952265f683ac5279dbc46577e0d3edac10bcc0b48d31"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 16,
+      "name": "blsMapFpToG1",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "5500",
+      "length": "Exactly 64",
+      "malformed": "Wrong length or field value >=p",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "63/64/65 bytes",
+        "field p-1/p",
+        "zero"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 493,
+          "sha256": "a4d4e80723756bd1bd28f874accf1bc5de132a69c33e073af8f769e7aa31db5d"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 494,
+          "sha256": "b8f3e8fd6e849dcf0aa08f8baea2bc8f9b8c001be689bad2f72a1219872cf5f4"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 495,
+          "sha256": "931d727a6d3461327168389e6d823dde118d7a359accf3e708fb65471851a770"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 496,
+          "sha256": "dfaa0b10b3289949ffcb4d5ab8fe4a1f460bf65dcc57d781f3d1ec772905e884"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 497,
+          "sha256": "045038bf436d6352ae998f104a75729fb170e34ac5ee53faf2b3a8d6b6f2ca72"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 498,
+          "sha256": "f65c7dfe169a7380e2c81b6b4c0cee19199879639938b31d72219cf49c085b0d"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 499,
+          "sha256": "8d6404ba1e37d2215d932dbaa7c527a7663aad83e7f4db2160a025e5b0c3c6e3"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 500,
+          "sha256": "b2017122215f145beda50c4994d6335a1c8c6da5ba620e170a0fcbfa7c89a8bd"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 17,
+      "name": "blsMapFp2ToG2",
+      "core_module": "Solidity/Precompiles/Bls12381.lean",
+      "core_gas": "23800",
+      "length": "Exactly 128",
+      "malformed": "Wrong length or invalid Fp2 component",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "127/128/129 bytes",
+        "component p-1/p",
+        "zero"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 501,
+          "sha256": "5ebbdd8e81678ecd6bbb8570a313677deebc2576c85e3b4d81a9b1d2b551b0cd"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 502,
+          "sha256": "ae1ad9fccd8d64f5cd1b8156d27a70dd231164617a29dadb1eeb62422b5f4413"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 503,
+          "sha256": "1b98b863282d563c0d404c918403d48289ce46a380c867a12aea691ff2fc4206"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 504,
+          "sha256": "998199d74a34143f1cc4e5db6570cdfb8456bea73a00517e0f8f571a0dabbf55"
+        },
+        {
+          "path": "Solidity/Precompiles/Bls12381.lean",
+          "line": 505,
+          "sha256": "0191d1ab47418295a1246d3f0b1ffbd0b91267216c4b235447e084d0dae49b44"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    },
+    {
+      "address": 256,
+      "name": "p256Verify",
+      "core_module": "Solidity/Precompiles/P256.lean",
+      "core_gas": "6900",
+      "length": "Exactly 160 for verification; other lengths return empty",
+      "malformed": "Never returns none; bad length/r/s/key/signature returns empty output",
+      "vendor_definition": null,
+      "vendor_gas": null,
+      "vendor_behavior": "No vendor implementation or dispatcher arm",
+      "classification": "unsupported-vendor",
+      "controls": [
+        "159/160/161 bytes",
+        "r/s 0/n",
+        "invalid key",
+        "valid signature"
+      ],
+      "proofs": [],
+      "proof_status": "open-unsupported-vendor",
+      "fixture_theorems": [
+        "SolidityBridge.PrecompileAgreement.Controls.unsupported_core"
+      ],
+      "output_agreement": "open-unsupported",
+      "core_vector_refs": [
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 82,
+          "sha256": "2a4b2cef601930c34df2909e95b638868a0acd65aa31889ff7f962764d89ef8c"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 83,
+          "sha256": "9b5220ce746f74c9a8d6c1994a319e54b645bf6e54db179b3aac0ad026e3acf0"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 84,
+          "sha256": "a8155d2e23ff61fe90c19c39db37f7ff249e290c6ea48f1b4ad71f42e99485d0"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 85,
+          "sha256": "8c6506c8caf9158c040db6ead4e881e34af5c2e17de9c45037db72ce7d01f383"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 86,
+          "sha256": "4997cc89796aca3fd57e9ac5e5725e111cf287f516fadc2ad1a2ff5e33ca7ec1"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 87,
+          "sha256": "3bed85d348c6baaf81705d1af1657ba0953fdceef30c3b7f84af7c0e1ef6bd49"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 88,
+          "sha256": "1cdab7002445dedc08c93268ad6948b3431b0fbd60fe68785980da10d8cc11b2"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 89,
+          "sha256": "64680dad6b714537da4b0a0e9ba4c934807697a4acdd63f8be4fd65550008917"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 90,
+          "sha256": "7528c525954baabae023f57c19dc630c708a863de9dc775126a0686cae55ed01"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 91,
+          "sha256": "ae8717045c70a7161af61182594018a865fb97c35522ecb9d7c5f135abc41dda"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 92,
+          "sha256": "2cdeef17149357b20038f16da0f125f94891321633d193bec6d9a8467cdac098"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 93,
+          "sha256": "e09b9bb5bc090cc4d06220417068f8fcf08a87e9ec590818ef7282b861ef75b2"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 94,
+          "sha256": "48f9a36b10fc7b8b62a6c5bb8d71734ea8009d3aae7373c978250361fbf02a67"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 95,
+          "sha256": "1e5653976a1ded84169aa79286225f24f2aa953bf245dce0da0e6e5415767587"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 96,
+          "sha256": "4e1de92f90423999a303954dc2011b7e4ba62b09f5103fe2ff61cb6d7939b142"
+        },
+        {
+          "path": "Solidity/Precompiles/P256.lean",
+          "line": 97,
+          "sha256": "eb6cbfdb3ef9ec1708a7532f52eae113cda60a2e14e0a346a37791884f434ce4"
+        }
+      ],
+      "boundary_suite": "Bridge/tests/precompile-agreement/BoundaryVectors.lean",
+      "control_status": "Kernel fixture theorems plus freshly compiled core and boundary #guard vectors; no external EVM subprocess test",
+      "charge_model": "unavailable-vendor",
+      "agreement_domain": "no-vendor"
+    }
+  ],
+  "pins": {
+    "Bridge/lake-manifest.json": "97bba755b0c4f8bea75d4e69e153ec674a546bdbb4df722359775bd59b7b788d",
+    "Bridge/lean-toolchain": "42779d67b81608af8a12aa4328d2ab47ca201925b3b2bd68369587b5340bb434",
+    "Bridge/vendor/Conform/Wheels.lean": "e71dd11fd1d3ae0bd9a3c33224598061ad28a4300cc6a078961443e9f7d72ad4",
+    "Bridge/vendor/EvmYul/BLAKE2_F.lean": "89c0cafb4d978733ccb1426692001a61ab3875e224f1789d39ce3dd35700167a",
+    "Bridge/vendor/EvmYul/BN_ADD.lean": "6cfab9324d7885fda4d9bffc2158a23e75a704fb5aa81e271270d2477afa1f85",
+    "Bridge/vendor/EvmYul/BN_MUL.lean": "72f6d6722648bdc993ea6aa0c93222a8bfcfdc7c88f05f603438bdf78c5724cf",
+    "Bridge/vendor/EvmYul/Data/Stack.lean": "e78feed573172a2ec290498abf7ddb659a08e5383655a3a629b49680af6946eb",
+    "Bridge/vendor/EvmYul/EVM/Exception.lean": "8e0c33029a54b8ed4663b51ce74691795824eb831633a7a37fc90c8d5b7c097d",
+    "Bridge/vendor/EvmYul/EVM/Gas.lean": "f716e0113537e3177fdbb95ec52707b3a704f98154378bc2698aa0d707897c38",
+    "Bridge/vendor/EvmYul/EVM/GasConstants.lean": "906cda79711e73ca637184256f6b53f5f444918ced2952ead4296797c2503fa8",
+    "Bridge/vendor/EvmYul/EVM/Instr.lean": "8293b3de9064e6fe73159819ea2ef6ba6365e28a50598d431b92195b739a19ba",
+    "Bridge/vendor/EvmYul/EVM/PrecompiledContracts.lean": "cb69358e1f534c46e7054e4ef60eb8f78f7c78502b9d6e7e3ecf375c60206012",
+    "Bridge/vendor/EvmYul/EVM/PrimOps.lean": "44b7d1d024c69acb0cc7d7955e37ba527268a133a9b5781e49a24737216b9ab8",
+    "Bridge/vendor/EvmYul/EVM/Semantics.lean": "fb3dfc2c235e6f56142417d343f05666d0ec81806859a099d427d421ce40d5be",
+    "Bridge/vendor/EvmYul/EVM/State.lean": "7e672e4d693016149f5cb657a0f0ce2ba1eeec403c19f12a78f5af77b24ff78e",
+    "Bridge/vendor/EvmYul/EVM/StateOps.lean": "591e741e15d4efea6152433c006cbb6d91abcf989c31dbc20ff38bbb56ff084f",
+    "Bridge/vendor/EvmYul/EllipticCurves.lean": "4b4de40dc3f3f22573b52011a96517a52d91fde57743663b11375162c56417c7",
+    "Bridge/vendor/EvmYul/FFI/ffi.lean": "5fc7ab512325ac6a7ab73f392f2f0eaff246b8cb1ad1e1a019bd47ccb0e3f05a",
+    "Bridge/vendor/EvmYul/MachineState.lean": "0acd50c32ca8ac6a547c727fb86d72ed96ab12e04b60bd7cf7c5b19817caffa1",
+    "Bridge/vendor/EvmYul/MachineStateOps.lean": "06ed7992a51dc56f260a4fd60a93924bb3abab207927d6eef80d796cb2606fef",
+    "Bridge/vendor/EvmYul/Maps/AccountMap.lean": "2f5307ea0804679f3d81211c9551ea7d4071e2c65cbfdbfbcaf97ca50d29be41",
+    "Bridge/vendor/EvmYul/Maps/ByteMap.lean": "8a50ea8384a18a2fb8818461f082112196460351c4fbac9ba3facf84e80da0f5",
+    "Bridge/vendor/EvmYul/Maps/StorageMap.lean": "ec14f9e015be68d577868e42e0de1fc81b122abe59cfcc1c5192a30ec74a1cf0",
+    "Bridge/vendor/EvmYul/Operations.lean": "50c24ccc2df8ff89d63002f3b8f34d79f804f2d8bda86e9bea074d176e235bba",
+    "Bridge/vendor/EvmYul/PerformIO.lean": "e0f703cb747ade774ad549a3bd8ad49054b188178b4d3b85d05dd87bf4b8faf1",
+    "Bridge/vendor/EvmYul/PointEval.lean": "13aa76c09291492e444834438e816c28e2cd24362f2a5fb5f8b05d3b6a31bce3",
+    "Bridge/vendor/EvmYul/Pretty.lean": "bda7af844834c6c2f93292f227a1354904b96e1818c0f58334733d5776abf846",
+    "Bridge/vendor/EvmYul/RIP160.lean": "3571ec9e522bdd5c407a8d68d6b29c0879c0544386a6017e555f409f97d43d81",
+    "Bridge/vendor/EvmYul/SHA256.lean": "c2a261f8f70c8a8a3327971aea6781023f54282d41ab705f0ea1ad59c9aa441b",
+    "Bridge/vendor/EvmYul/SHA256SUMS": "49c6e8a33c8a82b798549c7888ed6b7f27492b31e4edf1f462f9ec7cafaa7ad2",
+    "Bridge/vendor/EvmYul/SNARKV.lean": "66084eb23b1e926696376bbdf5625ae8874e7a6975c605240d487fd2732a9f85",
+    "Bridge/vendor/EvmYul/Semantics.lean": "e6bd5acd768d93f50a93f789a301d2f9218b210bdcd3739f95088fd4e5279d7b",
+    "Bridge/vendor/EvmYul/SharedState.lean": "1e435e76749627661374a969876f172bcfa9e7d09ef93380fd46c76780d39001",
+    "Bridge/vendor/EvmYul/SharedStateOps.lean": "99d0566564c01fece85c84972d8fe8853bf593a4c04b3b4da496db2774d3d7c6",
+    "Bridge/vendor/EvmYul/SpongeHash/Keccak256.lean": "2de57a7acf5bebf59289bb3d61d19676b211bdc576943a14f909cbc28b4b1d91",
+    "Bridge/vendor/EvmYul/State/Account.lean": "f16b3561025f2239156f974a5622229d477897f904c8491526b68994d9f2161d",
+    "Bridge/vendor/EvmYul/State/AccountOps.lean": "57034caaccf00e6229802e4660294ceda2b17ef6248ff8637296c0c9c7f338da",
+    "Bridge/vendor/EvmYul/State/Block.lean": "086d12396bc5bc4feedb7e7b5f57246b9dccf10c68cb3a345498d350fe2a5cce",
+    "Bridge/vendor/EvmYul/State/BlockHeader.lean": "a4408aefe9582cd603ea0c7dbb98dd349ce9cc731b69ac05e509ef100ed8ae56",
+    "Bridge/vendor/EvmYul/State/ExecutionEnv.lean": "07c13875da163c40b1fde5046c711a18502c54c3b574443c6c296fa4566dfbd7",
+    "Bridge/vendor/EvmYul/State/Substate.lean": "55ee146c801ed1dc7709842caaf6913eb209571724385c1d1adf1ad7fe5e99e3",
+    "Bridge/vendor/EvmYul/State/SubstateOps.lean": "ac84b31b185f12b9f0e57b8845aa88c4c227a87b50880ce5eb86777fecb53b31",
+    "Bridge/vendor/EvmYul/State/Transaction.lean": "1cc9cc2fc759cd5877cb9cdc23df0c0be2c08ffd87bfec3e9f3410432a465f3c",
+    "Bridge/vendor/EvmYul/State/TransactionOps.lean": "edfb3e96f719dd31081c5836fa310c1c2996afb10ff0baa0436faa348cbccbdc",
+    "Bridge/vendor/EvmYul/State/TrieRoot.lean": "c925e79b9bb003be6a59c8e4ee1d1ee94883a464571806520961fe5716d10dc0",
+    "Bridge/vendor/EvmYul/State/Withdrawal.lean": "4ee5ed96f3d4e017b2c3664a6fd017541b6a686704d4784f5e3f7e544422c7fc",
+    "Bridge/vendor/EvmYul/State.lean": "99ebc9013b33928e85aae377661747db44b5ce3f264b015fb76e157fd5b81446",
+    "Bridge/vendor/EvmYul/StateOps.lean": "c4bc96c474e876d679b13da457105737629251af402cb565e0d7cd8ff1054615",
+    "Bridge/vendor/EvmYul/UInt256.lean": "37a4fbd0a16f75928806daa288d0e0718f0a8bf594352a26351b43a64cfbb4cf",
+    "Bridge/vendor/EvmYul/UPSTREAM_SHA256SUMS": "bb469cc3611a19e6b6f2a64de2e9a6c6c4f65dfac1e9948e6d7d09c4028ba54b",
+    "Bridge/vendor/EvmYul/VENDOR.md": "f4f683667ac799bc826994f108700687b1094af4788852257c64a3c6ec3da582",
+    "Bridge/vendor/EvmYul/Wheels.lean": "2a0ec12172d345c4668b48cf7c0c3cf4dbac2c5f39a61f119bb7fcea4c7e44d8",
+    "Bridge/vendor/EvmYul/Yul/Ast.lean": "b6e2df760b6c26a4505de81c9439b0b260cfc71542e83e36fa210fe3088e4003",
+    "Bridge/vendor/EvmYul/Yul/Exception.lean": "a78b5e94afbdb853fad7d3586ab3642cb640ec3f00275d2914e185e53eaf9d56",
+    "Bridge/vendor/EvmYul/Yul/PrimOps.lean": "513312f8a699c51e76fef1804715d90ba0cad8475d6c48e1ff8bf40a85882eff",
+    "Bridge/vendor/EvmYul/Yul/State.lean": "9585264cef1d31fa5bc2d37aa61facba61a299274df1e98b03d6245f76e336b9",
+    "Bridge/vendor/EvmYul/Yul/StateOps.lean": "235710a73d056ea65c85b211e819be31f07524089ac332b3df0f0d17beeabca0",
+    "Bridge/vendor/EvmYul/Yul/Wheels.lean": "09f9ac5524fcb3f5f2b47cab1847705b7e8fd4f55a3d51ec875558ad94ad0a51",
+    "Bridge/vendor/EvmYul/h7-bounded-scanner-padding-pin.json": "665682db11940d10d325b418cdb2d2f9b7648ec7b74c97398cc58e279a6bca2c",
+    "Solidity/Precompiles/Basic.lean": "ad735d22f74786399c0bc6ce2813fc782e4eeaf1bf80577382633111cfcb4b30",
+    "Solidity/Precompiles/Blake2f.lean": "f33a4afceb229d9f13a47d15f01bbde264bbdd13d8d6c47ce43e6cbf776f949d",
+    "Solidity/Precompiles/Bls12381.lean": "23d23e78cc25ae0330fb45fd05a14abd589204e8873b6f518d78beb1a09d7476",
+    "Solidity/Precompiles/Bls12381Iso.lean": "8604c96abe3c64b69008f483906da938515669f532ad5e61ad39af720ded3bb3",
+    "Solidity/Precompiles/Bn254.lean": "322af5f8de4e8b4c345a3d9593e49a12329c96d57ac6dad11f9dfa056e42916e",
+    "Solidity/Precompiles/Field.lean": "350c0828fc5f639a3c0124664e1b22e0eba5eb933ff32ddb29ca4599b4fe85fd",
+    "Solidity/Precompiles/Modexp.lean": "5c818e49fd4545f77a63d22e9956ea8c72f43ab82128da2750e11aae5f92ac82",
+    "Solidity/Precompiles/Osaka.lean": "2bedba89b90b93fd65150e9ba8bcb9fd9b499df5eef06885839f2c8d11d3fa9f",
+    "Solidity/Precompiles/P256.lean": "1425a9e50856fd26d75986f50ca6e7505750fcc50d6eac3f854cc7cd0f4ed295",
+    "Solidity/Precompiles/Pairing.lean": "e3292ad348a04b8f1a0d16bcfcc0f1001e5953b080e611d4cd21b42cac049298",
+    "Solidity/Precompiles/PointEval.lean": "39af8a62ad5dfd1167a908df036dc617cc497698dd5b08eb6840e70a16007780",
+    "Solidity/Roadmap/Evm.lean": "b9ad80da5f25ad261c776c00e997f39c9d9306a5e0e2c74595b14f40b8fd0c50",
+    "Solidity/Keccak.lean": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b",
+    "Solidity/Hashes.lean": "1c2c71f30137bb0c0f5767b6f6596e6f54f14ef65f1921c5e7b2cff930bc0919",
+    "Solidity/RevertBytes.lean": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+    "Solidity/Secp256k1.lean": "44a750d75d6a27fbec52095f26e228b6d31927508854671d71119e78f76433e5"
+  }
+}

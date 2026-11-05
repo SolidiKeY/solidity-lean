@@ -4,6 +4,17 @@ import Solidity.Yul.RawGrowingBlock
 Restoration and closure use actual Source operations. This supplies no
 initializer execution, physical layout or general admission theorem. -/
 namespace Solidity.Yul.RawTypedScope
+
+/-- Read an occurrence from the authoritative raw view through actual preparation. -/
+def scalarRead {ctx : Solidity.Source.Ctx} (state : RawFrame.State ctx)
+    (cell : SourceScalarCell ctx) : Word :=
+  cell.wordRead (RawCoherent.prepare state).1
+
+/-- The same scalar occurrence under one intrinsically typed binder. -/
+def liftScalar {ctx : Solidity.Source.Ctx} (name : String) (ty : Solidity.Source.STy)
+    (cell : SourceScalarCell ctx) : SourceScalarCell (ctx.push name ty) :=
+  ⟨⟨.there cell.ref.index⟩,cell.encoding,cell.shape⟩
+
 def drop {ctx : Solidity.Source.Ctx} {name : String} {ty : Solidity.Source.STy}
     (state : RawFrame.State (ctx.push name ty)) : RawFrame.State ctx :=
   RawDeclarationFrame.ofSnapshot
@@ -96,5 +107,60 @@ theorem bool_close_eq : ∀ (ctx : Solidity.Source.Ctx) (name : String)
  Solidity.Yul.RawTypedScope.close result = Solidity.Yul.RawGrowingBlock.close (.inr result) := by
   intro ctx name result
   rfl
+
+theorem lift_scalar_read : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (cell : Solidity.Yul.SourceScalarCell ctx)
+ (locals : Solidity.Yul.LocalValues ctx.env (ctx.push name ty).tys),
+ (Solidity.Yul.RawTypedScope.liftScalar name ty cell).wordRead locals = cell.wordRead locals.2 := by
+  intro ctx name ty cell locals
+  rfl
+
+/-- Capture preserves every scalar word, including dirty high bits. -/
+theorem scalarRead_capture : ∀ (ctx : Solidity.Source.Ctx) (state : Solidity.Yul.RawFrame.State ctx)
+ (next : Solidity.Yul.LocalState ctx.env ctx.tys) (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead (Solidity.Yul.RawCoherent.capture state next) cell =
+ cell.wordRead next.1 := by
+  intro ctx state next cell
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  rw [← selected]
+  change localWordCells ctx (RawCoherent.prepare (RawCoherent.capture state next)).1 (.scalar ref) =
+    localWordCells ctx next.1 (.scalar ref)
+  rw [RawCoherent.prepare_view,RawCoherent.capture_view]
+
+theorem scalarRead_agrees : ∀ (ctx : Solidity.Source.Ctx) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead first cell = Solidity.Yul.RawTypedScope.scalarRead second cell := by
+  intro ctx first second same cell
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  rw [← selected]
+  change localWordCells ctx (RawCoherent.prepare first).1 (.scalar ref) =
+    localWordCells ctx (RawCoherent.prepare second).1 (.scalar ref)
+  rw [RawCoherent.prepare_view,RawCoherent.prepare_view,same]
+
+/-- Scalar projection through one binder close needs no coherence premise. -/
+theorem drop_scalar_read : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (state : Solidity.Yul.RawFrame.State (ctx.push name ty)) (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead (Solidity.Yul.RawTypedScope.drop state) cell =
+ Solidity.Yul.RawTypedScope.scalarRead state (Solidity.Yul.RawTypedScope.liftScalar name ty cell) := by
+  intro ctx name ty state cell
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  rw [← selected]
+  change localWordCells ctx (RawCoherent.prepare (drop state)).1 (.scalar ref) =
+    (liftScalar name ty (sourceScalarAt ctx ref)).wordRead (RawCoherent.prepare state).1
+  rw [RawCoherent.prepare_view]
+  change (sourceScalarAt ctx ref).wordRead (RawCoherent.prepare state).1.2 =
+    (liftScalar name ty (sourceScalarAt ctx ref)).wordRead (RawCoherent.prepare state).1
+  exact (lift_scalar_read ctx name ty (sourceScalarAt ctx ref) (RawCoherent.prepare state).1).symm
+
+theorem drop_scalar_agrees : ∀ (ctx : Solidity.Source.Ctx) (name : String) (ty : Solidity.Source.STy)
+ (first second : Solidity.Yul.RawFrame.State (ctx.push name ty)),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead (Solidity.Yul.RawTypedScope.drop first) cell =
+ Solidity.Yul.RawTypedScope.scalarRead (Solidity.Yul.RawTypedScope.drop second) cell := by
+  intro ctx name ty first second same cell
+  rw [drop_scalar_read,drop_scalar_read]
+  exact scalarRead_agrees _ _ _ same _
 
 end Solidity.Yul.RawTypedScope
