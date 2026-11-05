@@ -6,7 +6,6 @@ import argparse
 import json
 from pathlib import Path
 import re
-import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "tests/sol-expression-uniqueness"
@@ -49,7 +48,7 @@ def inventory(tag):
     manifest["module_map_rows"] = []
     for path in paths:
         header = re.search(r"^# (.+)$", path.read_text(), re.M)
-        manifest["module_map_rows"].append(dict(file="docs/module-map/source-definitions.md",
+        manifest["module_map_rows"].append(dict(file="docs/module-map/frontend.d/expression-uniqueness.md",
             module=path.relative_to(ROOT).as_posix()[9:], description=header[1] if header else path.stem))
     manifest["central_axiom_registration"]["count"] = len(rows)
     write("registration-manifest.json", manifest)
@@ -59,10 +58,11 @@ def inventory(tag):
     print(f"AUDIT_INVENTORY: {len(paths)} modules, {len(rows)} source declarations")
 
 
-def pins():
+def pins(report):
+    """`report`: actual Lean output of `#print axioms` for every declaration, e.g.
+    the messages of `signatures.lean` (the Codex-VM log was externalized under H44)."""
     rows = read("declarations.json")
-    runs = read("audit-runs.json")
-    report = DATA/"evidence"/runs["signature_gate_dir"]/"1.log"
+    assert report is not None and report.is_file(), "pins needs --report <actual kernel axiom output>"
     axioms = {}
     messages = {}
     pattern = r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])$"
@@ -87,8 +87,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("mode", choices=["inventory", "pins"])
     parser.add_argument("--tag", default="balance")
+    parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     if args.mode == "inventory":
         inventory(args.tag)
     else:
-        pins()
+        pins(args.report)

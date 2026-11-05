@@ -890,3 +890,37 @@ This is a complete original SOURCE PROOF checkpoint with an integration-blocked
 assignment status, not full RUNTIME/task acceptance. Required global registrations,
 central pins and library/TestSuite/corpus/strict integration validation remainOPEN.
 The goal is retained and not marked complete. No scope question is pending.
+
+## Claude-VM reviews
+
+**Post-split finder and skeptic (2026-11-05).** Both were read-only and neither
+used the Lean server.
+
+- **Skeptic: no refutation.**
+  - `CertifiedYieldUnique` is unchanged, and `Syn`, `Derives`, `prec` and `Tok`
+    are the existing definitions.
+  - There are no smuggled premises: no sorry, axiom, opaque, native_decide,
+    set_option, variable or class anywhere in the area.
+  - `AxiomPins.lean` imports all 99 other modules and holds 1241 pins. Their
+    axiom union is {propext, Classical.choice, Quot.sound}.
+  - e48d82a2 deleted no `.lean` file, and the layer check is clean.
+- **Finder: no `.lean` file deleted.** e48d82a2 deleted 671 json, 376 log,
+  43 tsv, 43 HEAD and 4 gz files. Every root import resolves, the EU-01 count is
+  29 = 29, and no file uses forbidden constructs.
+- **Confirmed findings, all fixed:**
+  1. This document still claimed the externalized evidence and the removed
+     tooling as present. Fixed by the current status section above.
+  2. `checker-controls.py` read deleted evidence and failed its positive
+     baseline. It is rewritten: synthetic gate logs exercise the build-log
+     checks (stale digest, failed exit, partial gate, error lines, missing log),
+     the axiom-report controls corrupt `AxiomPins.lean`, and the kernel
+     environment controls run only when the evidence is restored.
+  3. `refresh-audit.py pins` read a deleted log. It now takes `--report`.
+  4. `--checkpoint` accepted any log that said "Build completed successfully".
+     It now requires a `gate.sh` log whose `SOL_EU_SOURCES` digest equals the
+     current sources, `SOL_EU_FULL_GATE ./run-lean.sh`, `SOL_EU_EXIT 0` and no
+     error or failed job.
+  5. The `--proof` docstring overstated what it checks. It now says that mode is
+     static only.
+  6. `obligations.json` (EU-12, EU-13) and `registration-manifest.json` (rows
+     file, note, central pins, kernel inventory) were stale. They are updated.
