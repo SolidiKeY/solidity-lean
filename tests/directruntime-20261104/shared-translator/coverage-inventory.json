@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "44da26690ad5f2a410f4238588cfbc009ebd98d3",
+  "headAtGeneration": "34afa7f0ad9acc225db708ba1ec15a7f05ba7629",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -11898,7 +11898,7 @@
   "localComposedImportClosure": {
     "Solidity.Frontend.ExecutableAst.Shared.Compose": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
-      "sha256": "0b90b4b5ce3fc3e42b77c3f43223496f9e11b78ff775e8fb271fcb6f7fcf188f"
+      "sha256": "0c55d2dda8f700efd314b98ee9a284fd3ad73a17ae68ae4decf7d6eab15ccee5"
     },
     "Solidity.Frontend.ExecutableAst.Memory.Reader": {
       "path": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
@@ -16206,74 +16206,182 @@
         "name": "memoryAlias",
         "nodeId": 65,
         "src": "110:245:0",
-        "expected": "normal"
+        "expected": "normal",
+        "trustedExecutableVerifier": {
+          "status": "proved",
+          "reason": "",
+          "tag": "diamond",
+          "sourceId": 65,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "storageCopy",
         "nodeId": 111,
         "src": "360:204:0",
-        "expected": "normal"
+        "expected": "normal",
+        "trustedExecutableVerifier": {
+          "status": "proved",
+          "reason": "",
+          "tag": "diamond",
+          "sourceId": 111,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "tupleOrder",
         "nodeId": 174,
         "src": "569:267:0",
-        "expected": "normal"
+        "expected": "normal",
+        "trustedExecutableVerifier": {
+          "status": "proved",
+          "reason": "",
+          "tag": "diamond",
+          "sourceId": 174,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "executeFirst",
         "nodeId": 197,
         "src": "841:164:0",
-        "expected": "normal"
+        "expected": "normal",
+        "trustedExecutableVerifier": {
+          "status": "proved",
+          "reason": "",
+          "tag": "diamond",
+          "sourceId": 197,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "wrongTupleOrder",
         "nodeId": 218,
         "src": "1010:98:0",
-        "expected": "panic"
+        "expected": "panic",
+        "trustedExecutableVerifier": {
+          "status": "pending",
+          "reason": "checker did not decide",
+          "tag": "diamond",
+          "sourceId": 218,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "falseControl",
         "nodeId": 247,
         "src": "1113:127:0",
-        "expected": "panic"
+        "expected": "panic",
+        "trustedExecutableVerifier": {
+          "status": "pending",
+          "reason": "checker did not decide",
+          "tag": "diamond",
+          "sourceId": 247,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "discardedFailure",
         "nodeId": 267,
         "src": "1245:115:0",
-        "expected": "revert"
+        "expected": "revert",
+        "trustedExecutableVerifier": {
+          "status": "pending",
+          "reason": "checker did not decide",
+          "tag": "diamond",
+          "sourceId": 267,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "unsupportedCallTuple",
         "nodeId": 290,
         "src": "1445:80:0",
-        "expected": "reader refusal"
+        "expected": "reader refusal",
+        "trustedExecutableVerifier": {
+          "status": "unsupported",
+          "reason": "expected explicit tuple",
+          "tag": "diamond",
+          "sourceId": 290,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "unsupportedReference",
         "nodeId": 304,
         "src": "1530:96:0",
-        "expected": "reader refusal"
+        "expected": "reader refusal",
+        "trustedExecutableVerifier": {
+          "status": "unsupported",
+          "reason": "compact verifier: unsupported type uint256[]",
+          "tag": "diamond",
+          "sourceId": 304,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "unsupportedInlineArray",
         "nodeId": 321,
         "src": "1631:88:0",
-        "expected": "reader refusal"
+        "expected": "reader refusal",
+        "trustedExecutableVerifier": {
+          "status": "unsupported",
+          "reason": "inline array",
+          "tag": "diamond",
+          "sourceId": 321,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "unsupportedDiscardRead",
         "nodeId": 347,
         "src": "1724:142:0",
-        "expected": "reader refusal"
+        "expected": "reader refusal",
+        "trustedExecutableVerifier": {
+          "status": "unsupported",
+          "reason": "unknown: discarded potentially failing pure read",
+          "tag": "diamond",
+          "sourceId": 347,
+          "verification": "direct",
+          "reading": "solc"
+        }
       },
       {
         "name": "discardedReadFailure",
         "nodeId": 374,
         "src": "1871:136:0",
-        "expected": "revert"
+        "expected": "revert",
+        "trustedExecutableVerifier": {
+          "status": "pending",
+          "reason": "checker did not decide",
+          "tag": "diamond",
+          "sourceId": 374,
+          "verification": "direct",
+          "reading": "solc"
+        }
       }
     ]
+  },
+  "directCheckerObservations": {
+    "path": "tests/directruntime-20261104/shared-translator/direct-result-observations.json",
+    "sha256": "3b93f4274cb638433ef0c9cea9c6b97c8ffd23f23c02563e9151aefaa4528b88",
+    "controls": "tests/directruntime-20261104/shared-translator/DirectResultControls.lean",
+    "gate": "tests/directruntime-20261104/shared-translator/evidence/adoption-b86/direct-result-frozen.log",
+    "counts": {
+      "pending": 4,
+      "proved": 4,
+      "unsupported": 4
+    },
+    "boundary": "Actual public trusted executable checker outcomes under Lean control harness; no proof terms/declarations constructed. Pending is not refutation; proved is not Solidity preservation or native/WASM correctness."
   }
 }

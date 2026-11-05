@@ -177,3 +177,13 @@ confirmed Scope central registration,Compose proposal,fresh KeySort377/131/131,
 six-module cache local verification/coordinator-pending status and retained CR/
 metadata/native obligations. Their minor historical registration wording ambiguity
 was corrected in API-HANDOFF and lane docs. No Lean/server or writes by reviewers.
+
+
+## Publishedb86 and trusted checker observations
+
+Independent read-only finder/skeptic,no Lean/server/writes,confirmed exact published
+comment-only correction and cache byte-delivery attribution. Both found no defect
+in DirectResultControls or its claims:actual public checks without listing,diamond
+and identity/provenance guards,4proved/4pending/4unsupported. Frozen MCP/per-file
+PASS;pending is not refuted and no proof-term/source/native closure claim follows.
+No remaining material finding. CR/metadata/runtime obligations remain pending.

@@ -477,3 +477,36 @@ SHA256047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167,
 965584bytes,18artifacts/6mappings. Delivery remains coordinator-pending; dependency
 caches/toolchain must match. H41 was obeyed: no ship-cache.sh invocation. Fresh
 source/C/olean/trace fingerprints and cache/gate receipts are in adoption-9584.
+
+
+## Publishedb86 adoption and direct-result coverage
+
+Fetched remote-verified b86ae456 and merged in34afa7f0. One Compose add/add conflict
+was resolved to the published reviewed docstring correction; executable code is
+unchanged. All five Shared modules are now centrally registered on master. Later
+owned Translate/Intrinsic/DirectRuntime changes remain preserved. CR migration was
+not delivered; no producer paths were directly edited. Adoption.json records exact
+source hashes and receipt attribution.
+
+Local bounded344-job build,Compose MCP0,axiom inventory and four focused controls
+passed in43.917s,RSS1242408KiB,minimum outer available5394448384bytes. Compiler
+witness preflight still checks114identities,8fresh outputs and2binary pins.
+
+New DirectResultControls invokes the actual public checker without listing for
+12existing source-identified fixtures,checking function/sourceId,provenance and
+diamond tags. Four positive samples return proved;four failing diamond samples
+return pending;four unsupported shapes remain unsupported. Frozen MCP0 and per-file
+gate passed in48.385s,RSS1249260KiB,minimum available5325553664bytes. These are
+trusted executable-model outcomes,not exported Lean proof terms or source/native
+correctness proofs. Pending is not refutation. This complements,not replaces,the
+finite intrinsic execution and ready-listing controls. No checker implementation,
+proof budget,trust policy,premise or theorem was changed to obtain these results.
+
+Coordinator reports byte delivery of the prior965584-byte cache delta with SHA
+047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167 and host receipt
+/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json.
+Host receipt is unread locally; installation/entrypoint migration/parity/native
+closure do not follow. H41 remains in force for refreshed packs. CR migration,
+DR-A-META,exhaustive form parity,source preservation,native/WASM closure,before/after
+runtime and full final gates remain open. Original queue checkpoints stay partial;
+no RUNTIME_GATE_PASS or goal completion is asserted.

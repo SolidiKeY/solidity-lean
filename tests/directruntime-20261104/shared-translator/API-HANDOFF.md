@@ -99,3 +99,25 @@ passed. Source preservation and full producer parity remain open.
 Published9584 registers Scope centrally; Compose alone remains a local proposal.
 No generated root or map was edited by A. CR migration/DR-A-META/native closure
 remain pending; packet publication does not complete original queue item2.
+
+
+## Publishedb86 and actual direct-checker outcomes
+
+Publishedb86 registers Compose centrally; all five Shared modules are now on the
+adopted master. The published Compose correction is documentation-only. A retains
+later Translate/Intrinsic/DirectRuntime work. No CR import migration is delivered.
+
+DirectResultControls calls actual DirectRuntime.check without listing for12same
+source-identified fixture functions and checks result identity/provenance/diamond
+tags. Frozen results:four positive functions proved;four failing diamond samples
+pending;four unsupported shapes unsupported. Pending is not refutation;proved is
+a trusted executable-model result,not a Lean proof term or Solidity/native/WASM
+correctness claim. The independent finite execution samples remain separate.
+Inventory/migration packet link exact results and source IDs. Frozen MCP/per-file
+checks passed with unchanged existing checker budgets/trust boundary.
+
+Coordinator reports verified byte delivery of the previous965584-byte delta,
+SHA047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167;
+host receipt was not read locally. This does not establish migration or closure.
+The published comment correction changes source inputs; the refreshed local cache
+will be separately verified and left for H41 pickup. No ship-cache.sh invocation.

@@ -1,0 +1,4 @@
+diag: 0 errors
+PASS lean:tests/directruntime-20261104/shared-translator/DirectResultControls.lean 26s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/direct-result-frozen/1.log
+{"childMaxRssKiB": 1249260, "command": ["env", "SHARED_DIRECT_RESULT_CAPTURE=0", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/direct-result-frozen", "bash", "-c", "set -e; trap \"python3 scripts/coord-tools/lean-mcp stop\" EXIT; python3 scripts/coord-tools/lean-mcp diag tests/directruntime-20261104/shared-translator/DirectResultControls.lean; python3 scripts/coord-tools/lean-mcp stop; bash scripts/coord-tools/gate.sh per-file tests/directruntime-20261104/shared-translator/DirectResultControls.lean"], "exit": 0, "scopeMemoryPeakBytes": "935432192", "wallSeconds": 48.38531461599632}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 5325553664, "outerWallSeconds": 53.928385320992675}

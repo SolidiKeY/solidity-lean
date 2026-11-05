@@ -1,7 +1,7 @@
 {
   "status": "concrete API and observation packet; producer migration pending",
-  "sourceHead": "44da26690ad5f2a410f4238588cfbc009ebd98d3",
-  "adoptedMaster": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "sourceHead": "34afa7f0ad9acc225db708ba1ec15a7f05ba7629",
+  "adoptedMaster": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
   "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
   "publicRoots": [
     "Shared.function executableReader",
@@ -26,7 +26,7 @@
     },
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
-      "sha256": "0b90b4b5ce3fc3e42b77c3f43223496f9e11b78ff775e8fb271fcb6f7fcf188f"
+      "sha256": "0c55d2dda8f700efd314b98ee9a284fd3ad73a17ae68ae4decf7d6eab15ccee5"
     },
     {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
@@ -60,5 +60,14 @@
     "Resolve required typeIdentifier/tryCall retention alongside existing builtin normalization/loop annotations, or owner-reviewed checked compatibility adapter.",
     "Deliver exact reviewed CR commit for A consumption; D supplies fresh compiled native/WASM closure and source/binary provenance."
   ],
-  "boundary": "Every modern AST kind has selected source-anchored observations or explicit no-standalone-entry status in each reader/suite; this is not exhaustive per-form parity, intrinsic/source proof closure or backend support. Legacy Throw and Yul remain separately inventoried/refused."
+  "boundary": "Every modern AST kind has selected source-anchored observations or explicit no-standalone-entry status in each reader/suite; this is not exhaustive per-form parity, intrinsic/source proof closure or backend support. Legacy Throw and Yul remain separately inventoried/refused.",
+  "directCheckerObservations": {
+    "path": "tests/directruntime-20261104/shared-translator/direct-result-observations.json",
+    "counts": {
+      "proved": 4,
+      "pending": 4,
+      "unsupported": 4
+    },
+    "boundary": "Trusted executable model-checker observations; not Lean proof terms,source preservation,native/WASM closure or refutation of pending cases."
+  }
 }
