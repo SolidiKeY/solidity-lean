@@ -132,3 +132,4 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/OverrideValidation/Validator.lean` | Bounded override-validation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/NumericLiteralProofs/WordTable/Part05.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/NumericLiteralProofs/WordTable/Part06.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Fixtures.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |

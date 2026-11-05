@@ -1630,6 +1630,7 @@ import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExpressionUniqueness.Families
+import Solidity.Frontend.ExpressionUniqueness.Fixtures
 import Solidity.Frontend.ExpressionUniqueness.Fragments
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.ExpressionUniqueness.Statement
