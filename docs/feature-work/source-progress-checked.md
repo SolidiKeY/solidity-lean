@@ -910,3 +910,7 @@ call-program results, not universal source coverage, automatic admission,
 function-value reference-argument elaboration, compiler/EVM correspondence,
 physical adequacy or termination. Existing full-build and cache-delivery
 obligations remain separate from this bounded proof increment.
+
+The latest published contextual-equivalence increment adds 44 unrecorded axiom
+pins with zero axiom errors, identically on clean master. That inventory gate
+remains failed; these standard-only Source theorem reports do not pass it.
