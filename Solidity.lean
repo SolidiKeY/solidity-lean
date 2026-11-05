@@ -78,6 +78,7 @@ import Solidity.Backend.CalldataPackets.RawInt.Controls
 import Solidity.Backend.CalldataPackets.RawInt.Execution
 import Solidity.Backend.CalldataPackets.RawUint.Controls
 import Solidity.Backend.CalldataPackets.RawUint.Execution
+import Solidity.Backend.CalldataPackets.RawUintN.Controls
 import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
 import Solidity.Backend.Control
