@@ -1306,6 +1306,7 @@ import Solidity.Calculus.StepFragment
 import Solidity.Calculus.StmtSound
 import Solidity.Calculus.Surface
 import Solidity.Calculus.SurfaceNotation
+import Solidity.Calculus.SurfaceRevert
 import Solidity.Calculus.SurfaceSpec
 import Solidity.Calculus.SymbolicPaths
 import Solidity.Calculus.Symex
@@ -2250,6 +2251,14 @@ import Solidity.Semantics.CallbackWk
 import Solidity.Semantics.ContractWorld
 import Solidity.Semantics.ContractWorldCertificates
 import Solidity.Semantics.CreationTryFrame
+import Solidity.Semantics.CtxEquiv.AdversaryControls
+import Solidity.Semantics.CtxEquiv.Basic
+import Solidity.Semantics.CtxEquiv.Behav
+import Solidity.Semantics.CtxEquiv.Controls
+import Solidity.Semantics.CtxEquiv.RevertFml
+import Solidity.Semantics.CtxEquiv.Source
+import Solidity.Semantics.CtxEquiv.StorageObs
+import Solidity.Semantics.CtxEquiv.Unify
 import Solidity.Semantics.DeferredCallback
 import Solidity.Semantics.DeferredCorrespondence
 import Solidity.Semantics.DeferredSource
