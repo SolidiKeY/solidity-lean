@@ -83,3 +83,39 @@ proof/trust/budget additions. Neither review used Lean/server. Full 37-theorem
 kernel inventory passed in 1.810s; standard axioms only. Final gate HEAD/outcomes,
 checksums and integration blockers are recorded in the sealed handoff. No full
 checkpoint or lane readiness is inferred from these focused passes.
+
+## Adoption of scheduled 1422Z publication
+
+Published `8bf8321873befa3f35ca31e97e5339a1baee93e6` was fetched and adopted by
+merge `de78ff2369e29c5a75c4d3d64f8bbb1c0cf3e5e3`, preserving owned parent
+`5d40125c420f7e453706d163e12a02729e3e573d`. All15 existing owned files are
+byte-identical across adoption; the only two overlapping new paths are the
+identical RawAddress modules. Source/Scoped, direct dependencies, toolchain,
+Roadmap contracts and catalog generator are unchanged. Exact union/no conflict.
+
+Both RawAddress modules are now published and centrally registered in the root
+and module map; the former registration request is fulfilled. There are no
+RawAddress guarded G07 pin entries: the plain #print outputs and standalone
+37-theorem audit remain separate evidence. Do not report installed guarded pins.
+
+Coordinator notice reports passing combined full/core/Bridge/CLI/axiom gates and
+separate area/combined reviews under receipt sched-20261105T1422Z. That host
+receipt was not read on this VM; the integration leaf document retains prospective
+review wording. This is reported upstream evidence, not reconstructed local logs
+or a current-branch full-build/cache receipt.
+
+Actual adoption-head bounded runtime/KeySort and all37 theorem inventories PASS,
+5.128s. Lean4.24.0/Lake5.0.0-src+797c613 and verified12GiB/no-swap/4GiB parent
+reserve are recorded in evidence/publication-8bf83218. Source proofs are unchanged;
+no integrated implementation was duplicated or cold foundation build repeated.
+Separate read-only finder and skeptic confirm identity/union and registration;
+neither used Lean/server or found a preservation defect.
+
+No H38 approval or producer adapter arrived. InvocationEnvironment's bounded
+charged ADDRESS/CALLER/CALLVALUE steps supply no Source-frame relation or Osaka
+approval. Original X01 freeze/all30 catalog rescope and X02 production obligations
+remain blocked. Existing original failures/seals remain unchanged.
+Full-library cache/admission is checked separately at the saved handoff HEAD;
+publication alone establishes neither this VM's cache freshness nor full readiness.
+H41 partial owned packet remains preserved at the earlier handoff with its verified
+SHA; no new delivery receipt and no on-VM ship-cache. No goal/VM reset, push or PR.
