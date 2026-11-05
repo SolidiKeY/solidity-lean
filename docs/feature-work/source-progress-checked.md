@@ -919,3 +919,15 @@ RSS. The Source proofs are unchanged. Independent read-only finder and skeptic
 reviews found no integration defect. Earlier failed inventory logs remain
 historical evidence; neither this focused compatibility check nor publication
 establishes a VM full-build pass or outgoing cache delivery.
+
+ 
+The next published integration imports the reviewed FramedEmission pair while
+leaving this later Source catalogue increment pending. Runtime and the pair
+build pass against the adopted tree. An actual 19 cache fetches justified one
+new bounded full-gate attempt: it timed out at 300.101 seconds (exit 75), with
+1,121,955,840 bytes peak aggregate RSS. The last reported completion was
+Yul.OpenExpressionAgreement; the pending target is unknown. No claim attributes
+the timeout to that completed module, and no full-gate success follows from
+the coordinator's separate host checks. Both read-only compatibility reviews
+found no defect. Under H41 the verified owned cache pack remains on the VM for
+coordinator pull; outgoing shipment is not a worker-side prerequisite.
