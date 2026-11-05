@@ -1,0 +1,83 @@
+{
+  "threshold": [
+    "allocated_not_fresh",
+    "threshold_boundary"
+  ],
+  "write-field-primitive": [
+    "field_primitive"
+  ],
+  "write-field-reference": [
+    "field_reference",
+    "failed_reference"
+  ],
+  "write-index-dynamic-primitive": [
+    "index_primitive",
+    "index_read_changed",
+    "failed_identity",
+    "failed_index"
+  ],
+  "write-index-dynamic-reference": [
+    "index_reference"
+  ],
+  "write-index-fixed-primitive": [
+    "fixed_index"
+  ],
+  "write-index-fixed-reference": [
+    "fixed_reference"
+  ],
+  "primitive-sorts": [
+    "index_primitive",
+    "int_write",
+    "bool_write"
+  ],
+  "write-equality-directions": [
+    "write_forward",
+    "write_reverse"
+  ],
+  "write-sequences": [
+    "nil_writes",
+    "nonempty_writes",
+    "multiple_writes",
+    "overwrite_back",
+    "sequence_separation",
+    "writes_cannot_allocate"
+  ],
+  "copy-primitive": [
+    "primitive_no_alloc",
+    "primitive_threshold"
+  ],
+  "copy-struct": [
+    "token_alloc",
+    "person_alloc",
+    "empty_fields_no_alloc",
+    "unknown_struct_refusal"
+  ],
+  "copy-dynamic-array": [
+    "empty_array_alloc",
+    "live_array_alloc",
+    "shadow_not_allocated"
+  ],
+  "copy-fixed-array": [
+    "empty_fixed_alloc",
+    "live_fixed_alloc",
+    "nested_fixed_root"
+  ],
+  "copy-nesting": [
+    "nested_allocations",
+    "nested_root",
+    "nested_mirror",
+    "nested_child_id",
+    "nested_child_survives"
+  ],
+  "copy-multiple-mixed": [
+    "suffix_write_success",
+    "mixed_suffix",
+    "copied_witness_survives",
+    "copy_order",
+    "operations_cannot_shrink"
+  ],
+  "copy-asymmetry-and-refusals": [
+    "converse_rejected",
+    "map_refusal"
+  ]
+}
