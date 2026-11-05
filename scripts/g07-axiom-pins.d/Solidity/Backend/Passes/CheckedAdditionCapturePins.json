@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean:Solidity.Backend.Passes.CheckedAdditionCapture.Controls.capture_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean:Solidity.Backend.Passes.CheckedAdditionCapture.Controls.joint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean:Solidity.Backend.Passes.CheckedAdditionCapture.Controls.jointOverflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean:Solidity.Backend.Passes.CheckedAdditionCapture.overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CheckedAdditionCapturePins.lean:Solidity.Backend.Passes.CheckedAdditionCapture.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

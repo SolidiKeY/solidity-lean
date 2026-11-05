@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.compatible_stays": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.extent_stays": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.get_stays": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.header_compatible": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.read_stays": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPush.lean:Solidity.Backend.StorageOps.RetainedPush.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

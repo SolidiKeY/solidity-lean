@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.child_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.execute_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.old_last_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.popped_last_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.slot_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePop.lean:Solidity.Backend.StorageOps.AggregatePop.slot_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

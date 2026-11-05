@@ -1,0 +1,32 @@
+{
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.rootCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.shiftedCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/Sound/LoopLexDiamond.lean:Solidity.LoopLex.diamondPremise_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Sound/LoopLexDiamond.lean:Solidity.LoopLex.diamondStep_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

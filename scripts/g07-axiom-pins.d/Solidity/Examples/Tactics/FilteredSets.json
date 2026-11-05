@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Tactics/FilteredSets.lean:Solidity.Examples.Tactics.FilteredSets.one_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/FilteredSets.lean:Solidity.Examples.Tactics.FilteredSets.undefined_key_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

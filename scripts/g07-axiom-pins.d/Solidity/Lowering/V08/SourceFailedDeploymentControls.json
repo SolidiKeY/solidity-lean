@@ -1,0 +1,77 @@
+{
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.constructor_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.deployment_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.exact_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.rollback_candidate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.rollback_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.rolled_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.rolled_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.target_atomic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.target_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.timeout_after_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.timeout_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.wrong_heap_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.wrong_revert_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceFailedDeploymentControls.lean:Solidity.Lowering.V08.SourceFailedDeploymentControls.wrong_timeout_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

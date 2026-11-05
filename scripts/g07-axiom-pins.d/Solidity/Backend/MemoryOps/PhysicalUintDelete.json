@@ -1,0 +1,23 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalUintDelete.lean:Solidity.Backend.MemoryOps.Physical.uint_delete_bytes": [],
+ "Solidity/Backend/MemoryOps/PhysicalUintDelete.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintDelete.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.delete_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintDelete.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.delete_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalUintDelete.lean:Solidity.Backend.MemoryOps.Physical.UintArrayAt.delete_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

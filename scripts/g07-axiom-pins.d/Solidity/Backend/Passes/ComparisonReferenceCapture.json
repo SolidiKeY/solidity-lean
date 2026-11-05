@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/ComparisonReferenceCapture.lean:Solidity.Backend.Passes.ComparisonReferenceCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCapture.lean:Solidity.Backend.Passes.ComparisonReferenceCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCapture.lean:Solidity.Backend.Passes.ComparisonReferenceCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ComparisonReferenceCapture.lean:Solidity.Backend.Passes.ComparisonReferenceCapture.whole_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

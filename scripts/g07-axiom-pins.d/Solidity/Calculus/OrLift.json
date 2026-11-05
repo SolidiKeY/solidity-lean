@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/OrLift.lean:Solidity.Decide.LFml.gx_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/OrLift.lean:Solidity.Decide.LFml.orLift_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

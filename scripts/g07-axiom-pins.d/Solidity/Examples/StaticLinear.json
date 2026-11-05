@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/StaticLinear.lean:Solidity.Decide.StaticReduction.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

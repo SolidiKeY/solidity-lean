@@ -1,0 +1,183 @@
+{
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadata.after_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadata.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadata.physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadata.symbolic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.actual_bytes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.combined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.declaration_after_hash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.metadata": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.missing_refused": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.ordered_bytes": [],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.push_capacity_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.reached_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.resolved": [],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.wrong_alignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.ResolvedMetadataControls.wrong_selector": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPower.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPower.failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPower.operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPower.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPower.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.actual_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.after_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.capacity_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.component": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.ignored_sign": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.invocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.operand_words": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.ordered_after_power": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.ordered_memory": [],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.original_capacities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.overflow_component": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.overflow_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.overflow_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.overflowInvocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.reached_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.reached_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.skipped_capture_wrong": [],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.source_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/PowerMetadataPins.lean:Solidity.Backend.Passes.StatefulPowerControls.successful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

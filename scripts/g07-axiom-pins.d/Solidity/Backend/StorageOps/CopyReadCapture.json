@@ -1,0 +1,81 @@
+{
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.addresses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.capture_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.capture_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.captured_updates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.entries": [],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.entries_length": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.finite_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.finiteCopy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.finiteCopy_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.reader_congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.represented_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.represented_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.slot_reader_congr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.source_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.source_slot_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyReadCapture.lean:Solidity.Backend.StorageOps.CopyReadCapture.updates_eq_of_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

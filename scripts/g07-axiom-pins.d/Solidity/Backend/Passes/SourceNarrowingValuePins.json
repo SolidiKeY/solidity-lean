@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.actual_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.checked_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.complete_observations": [],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.saved_tail_wrong": [],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.unmasked_word_wrong": [],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.wrong_operand_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.Controls.wrong_width": [],
+ "Solidity/Backend/Passes/SourceNarrowingValuePins.lean:Solidity.Backend.Passes.SourceNarrowingValue.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Corpus/TestSuite.lean:Solidity.Corpus.TestSuite.storageRootReadWrite": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

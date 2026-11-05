@@ -1,0 +1,62 @@
+{
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.applied_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.baseline": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.child_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.conversion": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.full_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.panic_hoare": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.premise": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.wrong_count_premise": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.wrong_empty_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.wrong_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.wrong_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SourceSizeControls.lean:Solidity.Roadmap.V16.SourceSizeControls.zero_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

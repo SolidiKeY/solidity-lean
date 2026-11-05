@@ -1,0 +1,364 @@
+{
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.alias_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.alias_fresh_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.alias_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.aliasFinal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.aliasFresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.aliasOut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.before": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.leading": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.prefix_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.prefix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.public_calls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalar_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalar_fresh_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalar_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalarFinal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalarFresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.scalarOut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.tuple_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.tuple_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.tupleOut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.void": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.void_final": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.void_fresh_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.void_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.voidFinal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.voidFresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.voidOut": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.wrong": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuse.wrong_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.alias_joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.alias_resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.alias_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.beginning": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.budget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.following": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.scalar_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.scalar_joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.scalar_resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.scalar_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.void_joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.void_resources": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseApplication.void_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.distinct_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.nonallocating": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.unreachable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseFailure.wrong_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.alias_fresh_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.alias_source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.alias_target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.corrupt_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.leading_target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.old_addresses": [],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.prefix_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.private_cell_changed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.scalar_middle_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.scalar_middle_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.scalar_source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.scalar_target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.selected_fresh_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.skipped_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.tuple_source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.void_source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryCallReusePins.lean:Solidity.Backend.Passes.MemoryCallReuseObservations.void_target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

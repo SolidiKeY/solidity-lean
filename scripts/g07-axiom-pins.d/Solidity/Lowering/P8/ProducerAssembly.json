@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.assemble": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.checked_glue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/ProducerAssembly.lean:Solidity.Lowering.P8.ProducerAssembly.component_pipeline_closure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
