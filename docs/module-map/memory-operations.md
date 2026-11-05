@@ -527,3 +527,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedMemoryLoop.lean` | Finite checked nested-memory traversal, allocator and source preservation, and explicit capacity refusal. |
 | `Backend/MemoryCopies/NestedMemoryLoopControls.lean` | Aliased source children, separate destination pointers, retained words and successful-prefix refusal. |
 | `Backend/MemoryCopies/NestedMemoryMixedControls.lean` | Actual 2/0/64 source producer composed with memory traversal and full destination representation. |
+| `Backend/MemoryCopies/MemoryParentSnapshotInterface.lean` | Complete parent snapshot signature from actual heap-derived primitive child rows. |

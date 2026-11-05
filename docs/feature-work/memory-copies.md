@@ -1425,3 +1425,15 @@ identical to published master. The evidence records every addition and source
 hash, and a fresh normal pin gate remains required. Adoption preserves the
 existing branch history, prior sealed evidence and all owned proof bytes;
 only the five requested HeapContents message guards modify prior owned code.
+
+## Heap-derived parent snapshot bridge
+
+`MemoryParentSnapshotInterface` specifies equality between the existing complete
+parent snapshot and the existing storage-parent value constructed from actual
+heap-derived child rows. The signature quantifies over all primitive types,
+lengths and aliases at this intrinsic nested-array type. It adds no caller row,
+selection, capacity or shape premise. Parent entry/adoption compilation,
+recursive graph/compiler closure and Source/physical adequacy remain open.
+The proof will reuse type-rank fuel independence, `primitiveArray_snapshot`,
+`nestedStorageValues`, `memory_rows_length` and existing intrinsic snapshot
+semantics; no second traversal or snapshot implementation is introduced.
