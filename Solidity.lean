@@ -769,12 +769,14 @@ import Solidity.Backend.Scalar.Wrapping
 import Solidity.Backend.Selection.ArithmeticSelection
 import Solidity.Backend.Selection.BitwiseSelection
 import Solidity.Backend.Selection.FrameCapacityV2
+import Solidity.Backend.Selection.FramedLowering
 import Solidity.Backend.Selection.FramedLoweringInterface
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls
 import Solidity.Backend.Selection.LiteralSelection
 import Solidity.Backend.Selection.LiteralSelectionControls
+import Solidity.Backend.Selection.MixedSelection
 import Solidity.Backend.Selection.NumericSequence
 import Solidity.Backend.Selection.Premises
 import Solidity.Backend.Selection.PremisesV2
