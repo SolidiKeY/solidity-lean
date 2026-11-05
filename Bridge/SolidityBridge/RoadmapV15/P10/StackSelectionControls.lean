@@ -1,8 +1,10 @@
 import SolidityBridge.RoadmapV15.P10.StackSelectionAgreement
 import SolidityBridge.RoadmapV15.P10.WordPushFixtures
+import SolidityBridge.RoadmapV15.P10.PopControls
 
 /-! All16 actual selected depths, independent populated whole-State outputs,
-nonuniform operands/spill, index-origin and resource-separation negatives. -/
+nonuniform operands/spill, index-origin and resource-separation negatives;
+selected POP preserves caller tails and forgets only the discarded head. -/
 namespace SolidityBridge.RoadmapV15.P10.StackSelectionControls
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 open WordPushFixtures (u spill accounts)
@@ -102,6 +104,54 @@ theorem resource_separation (perm : Bool) :
   refine ⟨(dup_client 0 perm).2.1,?_,rfl⟩
   cases perm <;> rfl
 
+/-- The same public selection path reaches charged POP, at an independent
+populated fixture with an arbitrary legal caller tail and discarded word. -/
+theorem pop_client (a : Scalar.Word) (tail : Scalar.Stack)
+    (room : tail.length+1≤1024) (perm : Bool) :
+    Selection.selectStack .pop=some Selection.popCertificate ∧
+    Solidity.Evm.Instr.step .pop (ir (a::tail))=
+      .ok {ir (a::tail) with stack:=Selection.irStack tail} 0 ∧
+    Scalar.run Selection.popCertificate.code (a::tail)=some tail ∧
+    Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 11 perm (a::tail))=
+      .ok (PopControls.observed 11 perm a tail) ∧
+    EVM.X 2 PopControls.supplied (PopControls.input 11 perm (a::tail))=
+      EVM.X 1 PopControls.supplied (PopControls.observed 11 perm a tail) := by
+  have h := StackSelectionAgreement.pop PopControls.supplied (PopControls.site 11 perm)
+    a tail (ir (a::tail)) rfl room (by change 2≤11;decide) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (PopControls.input 11 perm (a::tail)) 2).replaceStackAndIncrPC
+      (tail.map (fun w=>UInt256.mk w.toFin))=PopControls.observed 11 perm a tail := by
+    first | rfl | (simp only [PopControls.input,PopControls.observed,PopControls.site,
+      modularSite,Site.state,WordPushFixtures.seed,WordPushFixtures.u,
+      EVM.State.replaceStackAndIncrPC,EVM.State.incrPC,Assembly.chargedPrepare];rfl)
+  simp only [PopControls.input] at shape
+  rw [shape] at h
+  exact ⟨StackSelectionAgreement.selected_pop,h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+/-- Actual fetched output is independent of the discarded head, including its
+entire native frame, rather than merely agreeing on a top-word projection. -/
+theorem pop_discards_head (a b : Scalar.Word) (tail : Scalar.Stack)
+    (room : tail.length+1≤1024) (perm : Bool) :
+    Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 11 perm (a::tail))=
+      Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 11 perm (b::tail)) := by
+  simp only [(pop_client a tail room perm).2.2.2.1,
+    (pop_client b tail room perm).2.2.2.1]
+  rfl
+
+theorem pop_resource_separation (perm : Bool) :
+    Solidity.Evm.Instr.step .pop (ir (511::spill))=
+      .ok {ir (511::spill) with stack:=Selection.irStack spill} 0 ∧
+    Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 1 perm (511::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 1 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 PopControls.supplied (PopControls.input 2 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 PopControls.supplied (PopControls.input 11 perm (511::spill))=.error .OutOfFuel ∧
+    Assembly.driverSteps 1 1 PopControls.supplied (PopControls.input 11 perm [])=.error .OutOfFuel := by
+  refine ⟨(pop_client 511 spill (by decide) perm).2.1,?_,?_,?_,rfl,rfl⟩
+  all_goals cases perm <;> rfl
+
+#print axioms pop_client
+#print axioms pop_discards_head
+#print axioms pop_resource_separation
 #print axioms dup_client
 #print axioms swap_client
 #print axioms complete_observation

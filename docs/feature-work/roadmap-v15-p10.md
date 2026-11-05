@@ -1819,3 +1819,19 @@ accounts/buffers. Independent whole-State expected records, complete ordered
 SWAP16 observations, wrong index partners and IR-versus-charged-gas/fuel
 separation are checked. Existing primitive adapters and failure controls are
 reused unchanged. No full opcode obligation is closed.
+
+
+## Selected POP correspondence
+
+The stack-selection consumer also derives the actual public POP certificate,
+legacy IR result, scalar run, charged fetched step and native continuation.
+Initial numeric stack correspondence, legal input capacity and at least two gas
+units remain explicit. Complete IR and native frames are preserved separately.
+
+The POP client reuses the existing populated fetched-POP fixture with arbitrary
+legal caller tail and discarded word. The head-discard law compares actual full
+fetched outcomes after rewriting through successful execution, rather than
+unfolding the driver directly. Matched numeric inputs distinguish IR success
+from native insufficient gas/fuel; empty-stack cases retain gas-before-arity and
+fuel-before-both observations. This adds no Source input-origin, whole-program
+resource, account/world or Osaka adequacy claim and closes no full opcode row.

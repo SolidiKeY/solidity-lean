@@ -1,7 +1,8 @@
 import Solidity.Backend.Selection.StackSelection
 import SolidityBridge.RoadmapV15.P10.StackFamilyConsumer
+import SolidityBridge.RoadmapV15.P10.PopConsumer
 
-/-! Published one-based IR selection to actual fetched DUP/SWAP families. Each
+/-! Published typed IR selection to actual fetched DUP/SWAP families and POP. Each
 machine retains its own full frame. The numeric initial-stack relation is not
 Source/compiler input origin or full Osaka/resource adequacy. -/
 namespace SolidityBridge.RoadmapV15.P10.StackSelectionAgreement
@@ -69,6 +70,33 @@ theorem swap (n : Fin 16) (site : Site (.SWAP n))
     have ir := (Selection.swapCertificate n).success (a::(middle ++ b::tail)) (b::(middle ++ a::tail)) m represented
     exact ⟨ir.mpr scalar,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
 
+/-- Public selection chooses the original POP certificate. -/
+theorem selected_pop : Selection.selectStack .pop = some Selection.popCertificate := by rfl
+
+theorem pop (valid : Array UInt256) (site : Site .POP)
+    (a : Scalar.Word) (tail : Scalar.Stack) (m : Solidity.Evm.Machine)
+    (represented : m.stack=Selection.irStack (a::tail))
+    (room : tail.length+1≤1024) (gas : 2≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::tail)).state
+    let next := (Assembly.chargedPrepare input 2).replaceStackAndIncrPC
+      (tail.map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .pop m=.ok {m with stack:=Selection.irStack tail} 0 ∧
+    Scalar.run Selection.popCertificate.code (a::tail)=some tail ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | simp only
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.popCertificate.code (a::tail)=some tail := by rfl
+    have ir := Selection.popCertificate.success (a::tail) tail m represented
+    have native := pop_agreement valid site a tail room gas fuel
+    exact ⟨ir.mpr scalar,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+#print axioms selected_pop
+#print axioms pop
 #print axioms selected_dup
 #print axioms selected_swap
 #print axioms dup
