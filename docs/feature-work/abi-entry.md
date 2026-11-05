@@ -1222,3 +1222,9 @@ Checkpoint outcomes accompany the sealed handoff. Native loading,
 aggregate/multiparameter decoding/binding, Source
 signature/body/profile association, full dispatch-entry composition and exact
 physical failure bytes remain open, as do G46.02 and fixture replay.
+
+`WordCarrierEntryBodyInterface.lean` specifies actual compiler selection and
+ordered value/head/primitive validation, raw carrier binding and body execution.
+The body is admitted by the existing core classifier; its run and result are
+not premises. Early non-payable rejection needs no local representation facts.
+The signature retains explicit raw loading and Source/body-linkage boundaries.

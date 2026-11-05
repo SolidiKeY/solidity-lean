@@ -211,3 +211,4 @@
 | `Backend/AbiEntry/WordCarrierBindingInterface.lean` | Compiler contract for validated primitive raw-word binding into the existing uint carrier. |
 | `Backend/AbiEntry/WordCarrierBinding.lean` | Actual validated primitive raw-word declaration, exact execution and raw semantic agreement. |
 | `Backend/AbiEntry/WordCarrierBindingControls.lean` | Enum/cardinality, fixed-bytes padding, raw bytes, saved-state and selected carrier-read controls. |
+| `Backend/AbiEntry/WordCarrierEntryBodyInterface.lean` | Compiler contract for value checking, primitive raw binding and actual typed body execution. |
