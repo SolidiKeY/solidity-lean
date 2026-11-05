@@ -742,8 +742,8 @@ by its `toNat`, as the Scalar endpoint's `signedShiftPrefix` does. Besides
 results for every pair of words or intrinsic operands and every stack tail;
 the last two are single concrete controls:
 
-- `sarCode_run`: the exact machine run, `sarWord (clamp n) a`;
-- `sarCode_simT`: `Evm.tail_simT`'s shape for `.shr` at `int` (never a revert);
+- `Evm.sarCode_run`: the exact machine run, `sarWord (sarClamp n) a`;
+- `sarCode_simT`: `Evm.tail_simT` at `.shr` and `int` (never a revert);
 - `machine_agrees_intShr`: the same source result `r` from `BinOp.evalT`, the
   machine word `sword r`, the Scalar `intShr.code` run yielding
   `encodeValue .int r`, and equal numeric words;
@@ -752,12 +752,22 @@ the last two are single concrete controls:
 - `saturated_fill` (positive witness): `-7 >> 256` is `-1` on the machine.
 
 `MachineSarPins` pins their axioms (`propext`, `Classical.choice`,
-`Quot.sound`). `binInFrag .shr .int` stays `false`: the memory compiler's
-admitted fragment, `compileVal` and its compiler theorem are unchanged, so
-lane v14 can reprove G25-SAR-1105 at machine level from these lemmas; adding
-signed shifts to the fragment is a separate decision. Adding a constructor
-to `Instr` recompiles every importer of `Evm/Machine.lean`; no proof budget
-was raised.
+`Quot.sound`; `shr_int_inFrag` uses none). First-round review fixes
+(finder/skeptic, read-only): docstrings of the two controls and this section's
+scope wording were made exact; no defect found.
+
+### Signed shift in the compiler fragment (user decision Q2, 2026-11-05)
+
+`binInFrag .shr` is now `p != .bool`, so `int >> int` is admitted and
+`compileVal` emits `binTail .int .shr = sarCode`. The machine lemmas moved to
+[Signed](../../Solidity/Evm/Signed.lean) (`sarClamp`, `sarCode_run`, `sarShr`,
+`sarShr_range`, `sarWord_clamp`, `sar_tail`, `sgn_sword`), and
+`SimLemmas.stail_simT` gains the `.shr` case from `sar_tail`, so
+`Evm.tail_simT`, and through it the memory compiler theorems, cover signed
+shifts. `MachineSar.sarCode_simT` is now that fragment theorem at `.shr`;
+`shr_int_inFrag` records the admission. Other bitwise operators and `<<` stay
+`uint`-only. `>>=` has no compound form (`hasCompoundAssign`), so
+`compound_frag` is unchanged.
 
 ## Lane-module registration (G25 packet integration, 2026-11-05)
 
