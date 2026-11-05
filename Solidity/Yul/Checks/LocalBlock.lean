@@ -827,4 +827,41 @@ theorem recursiveConjunctionContrast : Solidity.Yul.RawFrame.Logic.holds .box So
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.recursiveConjunctionContrast
 
+/-- A false alternative cannot replace the dirty program's exact successful result. -/
+theorem logicDisjoined : ∀ mode : Solidity.Modality,
+ Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.code
+ Solidity.Yul.Checks.LocalBlock.policy (fun result =>
+ False ∨ (Solidity.Yul.Checks.LocalBlock.logicPost result ∧ result = Solidity.Yul.Checks.LocalBlock.logicResult))
+ Solidity.Yul.Checks.LocalBlock.rawInitial := by
+  intro mode
+  exact (RawFrame.Logic.holds_or ctx ⟨false,false⟩ mode code policy
+    (fun _ => False) (fun result => logicPost result ∧ result = logicResult) rawInitial).mpr
+      (Or.inr (logicConjoined mode))
+
+/-- A disjunction of false posts is still vacuous for recursive boxes, never diamonds. -/
+theorem recursiveDisjunctionContrast : Solidity.Yul.RawFrame.Logic.holds .box Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => False ∨ False)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial ∧
+ ¬ Solidity.Yul.RawFrame.Logic.holds .diamond Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => False ∨ False)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial := by
+  constructor
+  · exact (RawFrame.Logic.holds_or recursiveCtx ⟨false,false⟩ .box recursiveCode
+      recursivePolicy (fun _ => False) (fun _ => False) recursiveInitial).mpr
+        (Or.inl recursiveFalseBox)
+  · rintro ⟨_,_,_,either⟩
+    cases either with
+    | inl impossible => exact impossible
+    | inr impossible => exact impossible
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_or' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_or
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicDisjoined' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicDisjoined
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveDisjunctionContrast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveDisjunctionContrast
+
 end Solidity.Yul.Checks.LocalBlock

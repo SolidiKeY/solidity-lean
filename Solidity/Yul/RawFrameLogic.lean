@@ -170,4 +170,42 @@ theorem holds_and : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Cont
         diamond_implies_box ctx control code policy second state right
       exact ⟨fuel,result,done,left,rightBox fuel result done⟩
 
+/-- Disjunction distributes over actual raw modalities. For box, this uses
+deterministic completed outcomes; noncompletion is treated as vacuity, not termination. -/
+theorem holds_or : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (first second : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds mode code policy (fun result => first result ∨ second result) state ↔
+ Solidity.Yul.RawFrame.Logic.holds mode code policy first state ∨
+ Solidity.Yul.RawFrame.Logic.holds mode code policy second state := by
+  intro ctx control mode code policy first second state
+  classical
+  by_cases completed : ∃ fuel result, RawFrame.run code policy fuel state = some result
+  · obtain ⟨fuel,result,done⟩ := completed
+    rw [holds_completed ctx control mode code policy _ state fuel result done,
+      holds_completed ctx control mode code policy first state fuel result done,
+      holds_completed ctx control mode code policy second state fuel result done]
+  · cases mode with
+    | box =>
+      have vacuous : ∀ post : RawFrame.Outcome ctx control → Prop,
+          holds .box code policy post state := by
+        intro post fuel result done
+        exact False.elim (completed ⟨fuel,result,done⟩)
+      exact ⟨fun _ => Or.inl (vacuous first),fun _ => vacuous _⟩
+    | diamond =>
+      have absent : ∀ post : RawFrame.Outcome ctx control → Prop,
+          ¬ holds .diamond code policy post state := by
+        intro post actual
+        obtain ⟨fuel,result,done,_⟩ := actual
+        exact completed ⟨fuel,result,done⟩
+      constructor
+      · intro actual
+        exact False.elim (absent _ actual)
+      · intro either
+        cases either with
+        | inl actual => exact False.elim (absent first actual)
+        | inr actual => exact False.elim (absent second actual)
+
 end Solidity.Yul.RawFrame.Logic
