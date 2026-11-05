@@ -2184,6 +2184,7 @@ import Solidity.Lowering.V08.Transactions
 import Solidity.Lowering.V08.TupleCallable
 import Solidity.Lowering.V08.UnsignedUpdateCallable
 import Solidity.Lowering.V08.UnsignedUpdateCallableControls
+import Solidity.Lowering.V08.WordCastCallable
 import Solidity.Lowering.V08.WorldCatalogue
 import Solidity.Lowering.V08.WorldCatalogueControls
 import Solidity.Lowering.V08.WorldCatalogueTransport

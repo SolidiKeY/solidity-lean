@@ -30598,6 +30598,103 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.argument_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.before_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.boundary_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.boundary_ranges": [],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.boundary_wraps": [],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.closed_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.initial_family": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.negative_one_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.negative_one_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.raw_return_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.reached_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.static_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.written_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.wrong_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.wrong_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WordCastCallable.lean:Solidity.Lowering.V08.WordCastCallable.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.initial_image": [
   "Classical.choice",
   "Quot.sound",
