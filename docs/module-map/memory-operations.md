@@ -176,6 +176,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
 | `Backend/MemoryCopies/CheckedDefault.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/CheckedReferenceInterface.lean` | memory-copies interface only: capacity guard and checked-reference certificate statement; the certificate is not inhabited here. |
+| `Backend/MemoryCopies/HeapContents.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/HeapContentsInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SingletonCopyInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
 | `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
 | `Backend/MemoryCopies/SourceFramesInterface.lean` | Exact Source allocation-frame obligations for all default and storage-load traversal families, including halted runs. |
@@ -185,8 +188,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SourceRootCopies.lean` | Derives a fresh-parent Source copy certificate from an actual successful load, preserving old objects and nonheap state. |
 | `Backend/MemoryCopies/SourceFramesControls.lean` | Declared nested bytes-array copy, fixed reference-array default and partial-timeout controls with retained child allocation. |
 | `Backend/MemoryCopies/SourceSizeInputs.lean` | Additive evaluation/conversion/oversize inputs; preserves the published panic premise and failure field. |
-| `Backend/MemoryCopies/HeapContentsInterface.lean` | Live-content roundtrip obligation over the existing intrinsic heap mirror, without a new copy evaluator. |
-| `Backend/MemoryCopies/HeapContents.lean` | Generic mirror readback and inhabited V2 live-storage contents certificates via existing rank-fuel independence. |
 | `Backend/MemoryCopies/HeapContentsControls.lean` | Populated nested 2/0/64-length children, fresh parent, struct/fixed holders and wrong-live-value/shadow controls. |
 | `Backend/MemoryCopies/DeepCopyContents.lean` | Inhabited fresh snapshot-copy heap certificate and initial live contents after actual old-object overlap schedules, with alias/empty/refusal controls. |
 | `Backend/MemoryCopies/AllocationPanicInterface.lean` | Explicit Source allocation-panic state and byte-exact emitted terminal-slice obligation; no size-selector premise hidden. |
@@ -253,7 +254,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/DefaultSelectionInterface.lean` | Actual existing statement-compiler selection for supported default roots, with availability and capacity kept separate. |
 | `Backend/MemoryCopies/DefaultSelection.lean` | Actual statement-compiler support for selected default roots and wrappers, exact allocation cost and checked emitted success with growth. |
 | `Backend/MemoryCopies/DefaultSelectionControls.lean` | Actual empty/nested/fixed64/primitive-struct default compiler choices and executions, with unsupported shape and wrong/skipped-code controls. |
-| `Backend/MemoryCopies/SingletonCopyInterface.lean` | Nonvacuous populated resolved singleton-array word-copy contract using existing allocation and typed-store emitters. |
 | `Backend/MemoryCopies/SingletonCopy.lean` | Populated resolved singleton array emission, actual source heap identity, complete allocator preservation and V2/root-gap certificate construction. |
 | `Backend/MemoryCopies/SingletonCopyControls.lean` | Nonzero uint/Boolean payloads, dynamic length, fresh repeated copies, reserved gaps, old-data framing and capacity/code negative controls. |
 | `Backend/MemoryCopies/LoadedSingletonInterface.lean` | Existing primitive-expression compiler load followed by populated singleton allocation, with explicit successful/refused source evaluations. |
