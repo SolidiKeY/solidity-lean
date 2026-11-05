@@ -140,7 +140,7 @@ def verify_snapshot(head):
     require(changed==GENERATED,"contract change-set mismatch")
     source_changed=git("diff","--name-only",BASE,SOURCE_COMMIT).decode().splitlines()
     require(source_changed==snap["source_changed_paths"],"source change-set mismatch")
-    require(all(p=="scripts/coord-tools/gate.sh" or p.startswith(REL+"/") for p in source_changed),"source ownership mismatch")
+    require(all(p in ("scripts/coord-tools/gate.sh","scripts/check-doc-paths.sh") or p.startswith(REL+"/") for p in source_changed),"source ownership mismatch")
     require(git("merge-base",BASE,SOURCE_COMMIT).decode().strip()==BASE,"base ancestry mismatch")
     actual={p.relative_to(ROOT).as_posix() for p in HERE.rglob("*") if p.is_file()}
     require(actual==set(snap["artifact_files"]),"artifact inventory mismatch")

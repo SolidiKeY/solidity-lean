@@ -49,3 +49,13 @@ module. A negative substitution control supplies an unpinned executable and
 requires rejection plus proof that its execution marker was never created.
 Historical override-based RED logs remain immutable predecessor evidence; the
 corrected fixture provides no executable-substitution interface.
+
+## Documentation-path placeholder repair (2026-11-05)
+
+User decision Q1 (2026-11-05): `test_cases.py` deliberately names two modules that
+exist only inside its disposable repositories. `scripts/check-doc-paths.sh` exempts
+exactly those two names when cited from `test_cases.py` only (its own missing-reference
+negative control, in another document, still fails), and the frozen
+source scope admits that one script beside `gate.sh`. No case, assertion, gate,
+budget or checker semantics otherwise changed; the contract was re-frozen with
+`freeze_acceptance.py freeze` on the new source commit.
