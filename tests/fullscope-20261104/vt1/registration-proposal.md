@@ -42,3 +42,16 @@ New standard-axiom inventory (all source-level axioms remain unchanged):
 - DataSelection.sound: []
 - selectData_complete: [propext]
 All names are in Solidity.SolcValidation. Central re-pin/registration remains COORD.
+
+## C04 addition after adopting f77cf60d
+
+Add `import Solidity.SolcValidation.DataResolution` to the generated root.
+Proposed docs/module-map/yul.md row:
+| `SolcValidation/DataResolution.lean` | Unique object-data table resolution, selection extensionality, exact completeness and success iff membership; source-label association remains separate. |
+Add exact `Solidity.SolcValidation.DataResolution` to CORE. Closure is DataLayout,
+Dialect and Yul.Builtins only. New public theorem axiom sets:
+- DataTable.selection_unique: [propext, Quot.sound]
+- DataSelection.ext: []
+- DataTable.select_complete: [propext, Quot.sound]
+- DataTable.select_iff: [propext]
+All names are in Solidity.SolcValidation. No new axioms declared; COORD owns pins.

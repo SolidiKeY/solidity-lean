@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Serial, bounded checks inside the verified Docker cgroup; sample aggregate RSS."""
 import json, os, pathlib, signal, subprocess, time, sys, re
-root=pathlib.Path.cwd(); kind=sys.argv[1] if len(sys.argv)>1 else 'import'; assert kind in ('import','data'); stamp=os.environ.get('VT1_EVIDENCE_STAMP',''); assert re.fullmatch('[A-Za-z0-9_-]*',stamp); evidence=root/'tests/fullscope-20261104/vt1/evidence'/(kind+('-'+stamp if stamp else '')); evidence.mkdir(parents=True,exist_ok=True)
+root=pathlib.Path.cwd(); kind=sys.argv[1] if len(sys.argv)>1 else 'import'; assert kind in ('import','data','resolution'); stamp=os.environ.get('VT1_EVIDENCE_STAMP',''); assert re.fullmatch('[A-Za-z0-9_-]*',stamp); evidence=root/'tests/fullscope-20261104/vt1/evidence'/(kind+('-'+stamp if stamp else '')); evidence.mkdir(parents=True,exist_ok=True)
 assert pathlib.Path('/sys/fs/cgroup/memory.max').read_text().strip()=='12884901888'
 assert pathlib.Path('/sys/fs/cgroup/memory.swap.max').read_text().strip()=='0'
 def available():
@@ -23,11 +23,12 @@ plan=[['lean','--version'],['lake','--version'],
  [node,'tests/fullscope-20261104/vt1/generate-fixtures.mjs'],
  [node,'tests/fullscope-20261104/vt1/verify-fixtures.mjs'],
  [node,'tests/fullscope-20261104/vt1/verify-fixtures.test.mjs']]
-if kind=='data':
+if kind in ('data','resolution'):
     dataOut=root/'.lake/build/lib/lean/Solidity/SolcValidation'; dataOut.mkdir(parents=True,exist_ok=True)
     plan=[['lean','--version'],['lake','--version'],
       [node,'tests/fullscope-20261104/vt1/generate-object-data.mjs','--check'],
       base+['-o',str(dataOut/'DataLayout.olean'),'Solidity/SolcValidation/DataLayout.lean'],
+      base+['-o',str(dataOut/'DataResolution.olean'),'Solidity/SolcValidation/DataResolution.lean'],
       base+['tests/fullscope-20261104/vt1/ObjectDataChecks.lean'],
       [node,'tests/fullscope-20261104/vt1/object-data.test.mjs']]
 results=[]

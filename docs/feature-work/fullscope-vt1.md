@@ -256,3 +256,77 @@ trust passes (3926 sources, 287 sites, zero findings), existing axiom pins pass
 (7546 pins, no unrecorded changes), documentation paths pass. Root/orphan/map
 gates fail only on the three owned modules awaiting central registration.
 These failures remain open; no full-build or H35 checkpoint readiness claim.
+
+## C04: follow-on adoption and exact unique-reference resolution
+
+Fetched and verified f77cf60d3cea8f7f1db8db29cc027532b0cd3fce as an ancestor of
+origin/master, then merged cleanly on the same owned branch. Merge head before
+C04 was c6c98f031131609683646c0a94db2e69c54841e4. All prior VT1 commits are
+preserved; original base remains e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3.
+Read integration-20261105-deferred.md: no final expression-uniqueness proof,
+ExtCall adequacy or frozen VX1 H38 relation is supplied by these increments.
+No protected Source, Core ExtCall, owner modules, roots/maps or trust pins edited.
+
+DataResolution.lean consumes the committed C03 interface without changing it.
+Uniqueness of names now proves equality of references, and the actual resolver
+reproduces the exact supplied membership witness. Missing names cannot fall back
+to another entry. This does not certify source-object/path association, object
+assembly, runtime memory or simulation; those remain required.
+
+Exact public signatures/premises in namespace Solidity.SolcValidation:
+- `DataTable.selection_unique {artifact : List DataByte} (table : DataTable artifact) {label : String} (left right : DataSelection table.entries label) : left.ref = right.ref`
+- `DataSelection.ext {artifact : List DataByte} {entries : List (String × DataRef artifact)} {label : String} (left right : DataSelection entries label) (same : left.ref = right.ref) : left = right`
+- `DataTable.select_complete {artifact : List DataByte} (table : DataTable artifact) {label : String} (selected : DataSelection table.entries label) : table.select label = some selected`
+- `DataTable.select_iff {artifact : List DataByte} (table : DataTable artifact) (label : String) : (table.select label).isSome = true ↔ ∃ ref, (label, ref) ∈ table.entries`
+Table uniqueness and membership are intrinsic, explicit static validity; no
+compiler/producer proof or final-run equality is a premise. Inventoried axiom
+sets are respectively [propext, Quot.sound], [], [propext, Quot.sound], [propext].
+No new axiom/sorry/native_decide, exclusion, observation or budget change.
+
+Pinned assembled-object witness now has two unique labels at different references:
+a zero-length endpoint and the nonempty payload. Controls exercise exact tail
+lookup, arbitrary competing selection uniqueness, empty head lookup and absent
+name failure. Existing interval/duplicate controls, compiler diagnostics and
+three source/artifact/witness mutation controls still pass. No intrinsic Stmt
+match or source-level simulation is inferred from these data-reference witnesses.
+
+Separate read-only finder and skeptic reviews found no concrete defect; neither
+used Lean/server. Both confirmed explicit uniqueness, proof irrelevance, exact
+resolver completeness and the stated separation from compiler label association.
+Bounded per-file MCP diagnostics for DataResolution and ObjectDataChecks report
+zero errors, with server stopped before subsequent checks.
+
+Revalidation commands:
+- check-dialect.sh: exit0, actual Lean/Lake and KEYSORT_PASS after adoption.
+- `VT1_EVIDENCE_STAMP=integrated-f77 bash tests/fullscope-20261104/vt1/check-resolution.sh`: exit0; source/axiom/witness/control logs under evidence/resolution-integrated-f77. Max sampled aggregate RSS296464384 bytes, cgroup peak171814912 bytes.
+- Corresponding check-import.sh: revalidates earlier IR extraction and fixtures on f77; separate logs under evidence/import-integrated-f77.
+Serial explicit -j1 / LEAN_NUM_THREADS=1, one CPU, <=180s each and 300s group,
+hard12GiB/swap0, 4GiB admission/ongoing reserve, no simultaneous Lean server/build.
+
+Cache prerequisite request: source-hashed missing .olean closure for
+Solidity.Backend.Environment.ByteConstants is in evidence/cache-request-f77/.
+Initial local scan found14 missing oleans. A bounded cache-only attempt
+`lake --no-build build +Solidity.Backend.Environment.ByteConstants:olean`
+fetched Opcode, Jumpdest, Assembler and Secp256k1, then exited3 because AST and
+Eqns are out of date. --no-build prevented recompilation; there was no cold
+foundation rebuild or proof-budget extension. Request the exact compatible
+cache closure through H21, including current AST/Eqns sources whose hashes are
+recorded. Some cache hits do not establish global H21 freshness/delivery.
+This holds the next physical-byte consumer while frozen VX4/G01 interfaces and
+memory adequacy also remain open. Do not invent their stubs or assume proofs.
+
+The registration proposal includes all four owned modules. No full-build or H35
+checkpoint readiness is claimed before central registration, integrated gates
+and cache delivery receipts. Existing relay requests for C01/C02/C03 remain
+pending. Full T01 parsing/operation execution and T02 helper/function/contract
+simulations, plus all previously enumerated final controls and obligations,
+remain open; this component is not whole-lane completion.
+
+C04 static gates: layers pass (636 enumerated core modules), trust passes
+(3942 sources, 287 sites, zero findings), existing axiom pins pass (7590 pins,
+zero errors/unrecorded changes), documentation paths pass. Root/orphan/map
+gates fail on four owned modules pending central serialized registration.
+Existing-pin success does not register the new theorems. New theorem inventories
+and registration rows are supplied in the proposal; final build/cache readiness
+remains open. Import revalidation max sampled RSS318464000 bytes, cgroup
+peak188448768 bytes.

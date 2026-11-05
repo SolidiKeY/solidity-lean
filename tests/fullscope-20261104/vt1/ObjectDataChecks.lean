@@ -1,4 +1,4 @@
-import Solidity.SolcValidation.DataLayout
+import Solidity.SolcValidation.DataResolution
 open Solidity.SolcValidation
 -- Generated from exact pinned assembled bytes; this file proves byte intervals,
 -- not compiler correctness, label association, gas or physical memory copying.
@@ -24,6 +24,22 @@ example (table : DataTable assembledObject)
   have invalid : ¬ (["payload", "payload"] : List String).Nodup := by decide
   apply invalid
   simpa only [duplicate, List.map_cons, List.map_nil] using table.unique
+def endpoint : DataRef assembledObject :=
+  ⟨⟨14, by decide⟩, ⟨0, by decide⟩, by decide⟩
+def twoLabels : DataTable assembledObject :=
+  ⟨[("empty", endpoint), ("payload", payload)], by decide⟩
+def tailSelection : DataSelection twoLabels.entries "payload" :=
+  ⟨payload, List.Mem.tail _ (List.Mem.head _)⟩
+example : twoLabels.select "payload" = some tailSelection :=
+  twoLabels.select_complete tailSelection
+example (other : DataSelection twoLabels.entries "payload") : other.ref = payload :=
+  twoLabels.selection_unique other tailSelection
+example : ((twoLabels.select "empty").map fun selected => selected.ref.bytes) = some [] := rfl
+example : (twoLabels.select "wrong").isSome = false := rfl
+#print axioms DataTable.selection_unique
+#print axioms DataSelection.ext
+#print axioms DataTable.select_complete
+#print axioms DataTable.select_iff
 #print axioms DataRef.bytes_length
 #print axioms DataRef.datasize_exact
 #print axioms DataRef.dataoffset_exact
