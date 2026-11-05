@@ -707,9 +707,10 @@ syntax "spec!{ " ident " }" : term
 macro_rules
   | `(spec!{ $f:ident }) => `(spec[InContract.contract]{ $f })
 
-/-- What `sol_spec_close` does before its last step: `sol_close`'s
-evaluation and reads, the landed states opened to binders. -/
-macro "sol_spec_prep" : tactic => `(tactic|
+/-- Whole-leaf specification evaluation and reads, the landed states
+opened to binders. The fallback for `sol_spec_prep`. -/
+private def wholeSpecPrep {m : Type → Type} [Monad m] [Lean.MonadQuotation m] :
+    m (Lean.TSyntax `tactic) := `(tactic|
   (sol_close_unwrap
    intro σ
    sol_close_eval
@@ -725,6 +726,21 @@ macro "sol_spec_prep" : tactic => `(tactic|
    -- a premise `Nonempty (Landed …)` where the rest no longer reads a landed
    -- state: every premise introduced, every conjunct its own goal
    all_goals (repeat' (first | intro _ | apply And.intro))))
+
+/-- The original whole-leaf specification preparation, also available
+explicitly when a solver needs that normalization. -/
+macro "sol_spec_whole_prep" : tactic => wholeSpecPrep
+
+/-- Specification preparation. `SolSpec` installs the guarded step handler;
+unsupported leaves fall through to the default whole-leaf handler. -/
+syntax "sol_spec_prep" : tactic
+
+initialize Lean.registerTraceClass `Solidity.spec.preparation
+
+@[tactic Solidity.tacticSol_spec_prep]
+def evalSolSpecWholePrep : Lean.Elab.Tactic.Tactic := fun _ => do
+  trace[Solidity.spec.preparation] "whole"
+  Lean.Elab.Tactic.evalTactic (← wholeSpecPrep)
 
 /-- Arithmetic, then the existing bounded KeY `allLeft` fallback or bounded
 `grind`. Every chosen universal instance is a checked proof application. -/

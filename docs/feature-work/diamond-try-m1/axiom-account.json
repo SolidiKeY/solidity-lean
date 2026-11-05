@@ -1,0 +1,1269 @@
+{
+  "expected": 290,
+  "actuallyPrinted": 290,
+  "newM1Theorems": 73,
+  "retainedTaskTheoremsFreshlyReaudited": 217,
+  "allowed": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "allStandardOnly": true,
+  "actual": {
+    "Solidity.Evm.TryByteImage.expandZero_old": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.expandZero_new": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.store32_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.store32_at": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.store32_outside": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.overlap_last": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.snapshot_length": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.snapshot_get": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.snapshot_empty": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.byteWord_roundtrip": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.captureBytes_read": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.capture_fresh": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.capture_keeps": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.capture_env": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.capture_globals": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.bytesHalt_exact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.snapshot_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.byteWord_bounded": [
+      "propext"
+    ],
+    "Solidity.Evm.TryByteImage.capture_not_old": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryByteImage.capture_not_bool": [
+      "propext"
+    ],
+    "Solidity.Evm.TryPanicProducer.scalarInput": [],
+    "Solidity.Evm.TryPanicProducer.produced_computed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.computed36_panic": [],
+    "Solidity.Evm.TryPanicProducer.computed36_length": [
+      "propext"
+    ],
+    "Solidity.Evm.TryPanicProducer.image_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.entry_resident": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.image_resident": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.initialized_word": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.produced_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.producer36_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.computed36_decode": [
+      "propext"
+    ],
+    "Solidity.Evm.TryPanicProducer.entry_exists": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.certified_data": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.certified_producer_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.pipeline_preserved": [],
+    "Solidity.Evm.TryPanicProducer.both_certificates": [],
+    "Solidity.Evm.TryPanicProducer.initial_constructed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.certified_bound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Evm.TryPanicProducer.certifiedProducer_exact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_invocation": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_pipeline": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_order": [],
+    "Solidity.Examples.Tactics.TryPanicProducer.reversed_same_bytes": [],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_target": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_source": [],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_size": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.last_writer_control": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.code_byte_order": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.short_refused": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.trailing_decodes": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_selector_refused": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.empty_refused": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_code": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_initialization": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.empty_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.long_length": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.long_initialized_byte": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.constructedBody_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.constructed_call_halt": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.constructed_raw_catch": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.raw_halt": [],
+    "Solidity.Examples.Tactics.TryPanicProducer.no_error_decode": [],
+    "Solidity.Examples.Tactics.TryPanicProducer.constructed_return": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.self_flag_required": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.empty_outside_capacity": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.overflowing_slice_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.long_zero_suffix": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.zero_receiver_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.wrong_receiver_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.guarded_source_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.success_body_uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.catch_body_uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.allocated_payload_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.continuation_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.frame_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.missing_context_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.zero_context_refused": [],
+    "Solidity.Examples.Tactics.TryConditions.wide_context_refused": [],
+    "Solidity.Examples.Tactics.TryConditions.reference_context_refused": [],
+    "Solidity.Examples.Tactics.TryConditions.short_error_data": [],
+    "Solidity.Examples.Tactics.TryConditions.short_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.trailing_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.complete_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.long_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.panic_word_order": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.zero_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.unsigned_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.wrong_panic_selector": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.truncated_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.missing_panic_selector": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.long_pattern_not_excluded": [],
+    "Solidity.Examples.Tactics.TryConditions.malformed_patterns_excluded": [],
+    "Solidity.Examples.Tactics.TryConditions.panic_callee_halts": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.deterministic_long_panic": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.deterministic_short_rethrown": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.raw_failure_preserved": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.callback_long_panic": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.panic_suffix_independent": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.maximum_panic_data": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.raw_long_preserved": [],
+    "Solidity.Examples.Tactics.TryConditions.wrong_selector_rethrown": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.actual_panic_code_capture": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryConditions.empty_failure_is_bare": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Pat.notPanic_decode": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Prog.panicCodes_call": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Prog.panicCodes_exec": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Proves.sound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Stmt.sound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ProvesC.fmlValid": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.RawLibrary.no_failure": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.argument_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.decode_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.caught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.resume_exact": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.storage_alias_root": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.callee_context": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.library_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.execute_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.success_tail_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.LibraryTryFrame.caught_tail_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.f_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.f_caught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.g_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.g_caught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.original_outputs": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.ordered_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.ordinary_execution": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.actual_prefix_storage": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.wrong_role": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.wrong_caller_frame": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.wrong_installed_identity": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.uninstalled_library": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.malformed_return_uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.wrong_catch_bytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.missing_result_shape": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.malformed_bool_input": [],
+    "Solidity.Examples.Tactics.LibraryTryControls.malformed_byte_input": [],
+    "Solidity.Examples.Tactics.LibraryTryControls.static_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.caller_storage_type": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.caller_storage_alias": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTryControls.atomic_prefix_rollback": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySourceIR.original_outputs_ir": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.Original.m0.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySource.Original.m1.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySourceIR.OriginalIR.m0.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.LibraryTrySourceIR.OriginalIR.m1.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.argument_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.caught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.tail_failure": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.tail_success": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.tail_body_failure": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.atomic_tail_failure": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.argument_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.errorData_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.errorData_decoded": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.errorData_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.tail_approx": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.CreationTryFrame.execute_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.original_outputs": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.both_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.both_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.ordinary_execution": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.wrong_reason_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.collision_uncaught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.actual_rollback_and_installation": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.actual_arguments": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySourceIR.original_outputs_ir": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.Original.m0.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySource.Original.m1.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySourceIR.OriginalIR.m0.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.CreationTrySourceIR.OriginalIR.m1.run_approx": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.call_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.call_serializes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.bounded_exact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.call_argument_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.call_body_failure": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.EntryReturn.capture_identity": [
+      "propext"
+    ],
+    "Solidity.EntryReturn.capture_caller": [
+      "propext"
+    ],
+    "Solidity.EntryReturn.alias_identity": [
+      "propext"
+    ],
+    "Solidity.EntryReturn.primitive_order": [
+      "propext"
+    ],
+    "Solidity.Tools.EntryReturn.admitted_arguments": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Tools.EntryReturn.admitted_result": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Tools.EntryReturn.original_declaration": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Tools.EntryReturn.function_marker_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Tools.EntryReturn.returnType_function": [
+      "propext"
+    ],
+    "Solidity.Tools.EntryReturn.function_arguments_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.success_summary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.caught_summary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.once_success": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.once_caught": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.success_bytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.caught_bytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.malformed_input": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.zero_self_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.snapshot_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.summary_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.success_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.caught_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.success_ordinary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.caught_ordinary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.wrong_reference_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.wrong_tuple_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.storage_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.unsigned_array_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturn.absent_declaration_refused": [
+      "propext",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlow.loop_alias_modifier": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlow.default_empty": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlow.ordinary_taken": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlowIR.loop_alias_modifier": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlowIR.default_empty": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFlowIR.ordinary_taken": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnMetadata.signed_fixed_bytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnMetadata.ordinary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFunction.packed_return": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFunction.ordinary": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFunction.packed_return_ir": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.EntryReturnFunction.ordinary_ir": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.tryCall_eq_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.catchData_eq_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.try_prefix_failure": [
+      "propext"
+    ],
+    "Solidity.TRun.try_prefix_success": [
+      "propext"
+    ],
+    "Solidity.ContractWorld.creationTry_eq_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.diamond_result_iff": [],
+    "Solidity.holds_diamond_outcomes_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.try_condition_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.catch_condition_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.holds_diamond_of_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.holds_diamond_cons_normal_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.holds_diamond_cons_state_normal_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.externalTry_ok_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.externalTry_error_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.externalTry_panic_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.externalTry_other_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.holds_diamond_cons_revert": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalCatchBytes": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.catchData_normal": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.catchData_decode_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.catchData_normal_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.normal_witness": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.checked_post": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.deterministic_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.wrong_post": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.missing_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.malformed_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.error_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.panic_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.other_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.payload_witness": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.payload_post": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.payload_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.reason_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.malformed_reason": [],
+    "Solidity.Examples.Tactics.ExternalTryFormula.callback_helper_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryFormula.zero_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_ok": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_error": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_panic": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_other": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_missing": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_decode_error": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_ok_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_error_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_panic_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.TRun.externalTry_other_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Counterexamples.DiamondTry.caller_revert": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Counterexamples.DiamondTry.callback_diamond_false": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.success_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.error_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.panic_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.other_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.missing_entry": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.malformed_return": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryWitness.callback_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.empty_oracle_admissible": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.successful_oracle_admissible": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.no_normal_source_family": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.deterministic_source_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.callback_source_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.ExternalTryUniversal.source_profile_refused": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.both_constructed_returns": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.aliases_raw_catch": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.capture_aliases": [
+      "propext"
+    ],
+    "Solidity.Examples.Tactics.TryPanicProducer.capture_identity_nonvacuous": [
+      "propext"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "baseCommit": "905df9958839e80843659475ed3054114ab174b1",
+  "actualRetainedBaseLog": "/workspace/next10-diamond-try-evidence/source-construction-design/doc-final.log",
+  "baseSHA256": "a14e7b55f0a40a1dff22d045e73f45f8b912f6579fc487356da5ed45296c7471",
+  "currentLog": "/workspace/next10-diamond-try-evidence/evm-memory-step/doc-paths.log",
+  "currentSHA256": "c33d7bca8cd62bb49476d747c838f3993b1aa80653db391abaf2f63d13c12e8f",
+  "baseExit": 1,
+  "currentExit": 1,
+  "completePreResourceFooterIdentical": true,
+  "missing": 20,
+  "newFindings": 0,
+  "finalConfirmationLog": "/workspace/next10-diamond-try-evidence/evm-memory-step/doc-final.log",
+  "finalConfirmationSHA256": "b689826ad8db4a83e79309d264d20c0df9a6c2d24d4e2a32c2dcdddb813bce77",
+  "finalExit": 1,
+  "finalOutputIdentical": true
+}

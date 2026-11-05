@@ -1,0 +1,71 @@
+{
+  "files": [
+    {
+      "path": ".lake/upstream/solidity/test/Common.h",
+      "sha256": "9161b97ae79069d0c89321a9ed0894367c14190589af0064e043015615fd492b",
+      "copy": ".lake__upstream__solidity__test__Common.h",
+      "pin": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": ".lake/upstream/solidity/test/EVMHost.h",
+      "sha256": "114a118d2a7cfcd4f200ef39098d1b468cbcf6599be9619b8ba0bf3c3d282a64",
+      "copy": ".lake__upstream__solidity__test__EVMHost.h",
+      "pin": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": ".lake/upstream/solidity/test/EVMHost.cpp",
+      "sha256": "a5f9c40b2a268f21be3e6c82aee68f2df79c4a161a041c4b62afa4f123375982",
+      "copy": ".lake__upstream__solidity__test__EVMHost.cpp",
+      "pin": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": ".lake/upstream/solidity/test/ExecutionFramework.cpp",
+      "sha256": "20aaee0ca741afd6812a90b27631138f2bfb8daae67cb5b4cabf106463fec06a",
+      "copy": ".lake__upstream__solidity__test__ExecutionFramework.cpp",
+      "pin": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": ".lake/upstream/solidity/test/evmc/evmc.h",
+      "sha256": "16d6440c6114c0b2699884fa23778405be1b98044ee3d6b65b2f9eee5db2c39f",
+      "copy": ".lake__upstream__solidity__test__evmc__evmc.h",
+      "pin": "1835d247de183f23e7b0e2bc4a50732af525b77c"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/package.json",
+      "sha256": "8a3c432434a6250963e416156e0387f016db477d95660114c9d595e3602b3b66",
+      "copy": "evm-package.json",
+      "pin": "@ethereumjs/evm10.1.3"
+    },
+    {
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/evm.d.ts",
+      "sha256": "9c939246516091b9bbb07e3aac70c5e139d579765f263f4d6801e532136ada64",
+      "copy": "evm-dist__esm__evm.d.ts",
+      "pin": "@ethereumjs/evm10.1.3"
+    },
+    {
+      "path": "scripts/evm-reference/replay.mjs",
+      "sha256": "54f60f857c89d3ff78a30ba61c60399c4214ac21c113ce1713254b5f130fe384",
+      "copy": "published-scripts__evm-reference__replay.mjs",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "b78289fad2aff746a973e2039ffcd78e0da45129"
+    },
+    {
+      "path": "scripts/evm-reference/package.json",
+      "sha256": "d105ac0296bdb1702134577f341d390f017a6fb0e3c905d7b5045de31f3b863e",
+      "copy": "published-scripts__evm-reference__package.json",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "9a82f23cd017e2284a03b863733efa1bd74da22e"
+    },
+    {
+      "path": "scripts/evm-reference/package-lock.json",
+      "sha256": "fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829",
+      "copy": "published-scripts__evm-reference__package-lock.json",
+      "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+      "blob": "f545b3b259300f37de72b38909d0c04fe66d1420"
+    }
+  ],
+  "evmcABI": 13,
+  "upstreamSuggestedBackend": "evmone0.22.0 release URL in Common.h, not an installed/binary hash pin",
+  "backendInstantiated": false,
+  "backendInstalled": false
+}

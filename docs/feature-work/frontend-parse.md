@@ -670,8 +670,9 @@ server). Findings and their disposition:
   `scripts/check-checked-frontend.mjs` are not in CI; `report --write`
   records a baseline without the unclassified check, a missing baseline
   exits 0, and the reason rules match on paths. Open.
-- **Checking cost.** `UnitExamples.lean` (about 4 min) and
-  `TypeExamples.lean` (about 110 s) are the heaviest new files. Open.
+- **Checking cost.** `UnitExamples.lean` (about 4 min) is the heaviest
+  new file. `TypeExamples.lean` (about 110 s) was split into per-group
+  modules (H6, [va1-h6-type-split.md](va1-h6-type-split.md)).
 - **Finder findings (open).** G05's `UnitParses`
   (`Frontend/Checked/Certificate.lean`) quantifies over any `Lexed` split,
   not `lex`'s output, and `Lexed`'s maximal-munch check skips pragma mode
@@ -679,3 +680,38 @@ server). Findings and their disposition:
   checks; generic printer helpers (`tk`, `pu`, `parens`, `braces`,
   `single`, …, `Frontend/Checked/Print.lean`) live in the shared
   `Solidity.Source` namespace and may clash with later S0x additions.
+
+## Bounded G11 proof checking (2026-11-02)
+
+`UnitExamples.lean` retains all 21 public declarations: names, theorem
+statements, definition bodies, corpus strings/order and negative controls.
+Thirteen private acceptance certificates and 59 exact per-program constructor
+list equalities split the closed kernel computations. Coverage assembles those
+lists before rewriting the complete aggregate equalities and checking the small
+constructor lists. Native evaluation supplied proposed literals only; every
+adopted list is justified by `decide +kernel` against the original parser and
+complete input, including the original wrapped-expression strings.
+
+The complete 25-job module check passed in 76.50 seconds at 2,841,886,720 bytes
+peak cgroup memory. Its prerequisites were warm; the target itself was rebuilt.
+One Lean job ran under a stricter 8 GiB hard cap, no swap and a 12 GiB host
+reserve; measured host availability stayed above 37,045,235,712 bytes. No
+heartbeat, recursion, acceptance or proof-export limit changed. Both original
+coverage axiom guards still report only `propext`; their inventory is unchanged.
+
+The acceptance-only candidate exhausted 8 GiB after 192.18 seconds including
+cold prerequisites; a warm instrumented check exhausted the same cap after
+62.65 seconds. These are retained failure receipts, not a controlled timing
+ratio. An aggregate equality also hit the original heartbeat limit, and a
+reflexivity attempt hit the original recursion limit. Neither limit was raised.
+
+Read-only finder and skeptic reviews checked the original inputs, exact ordered
+outputs, aggregate lists, public declarations and trust boundary. The first
+assembly introduced `Quot.sound` by simplifying under the coverage lambda;
+the unchanged guards caught it. Complete aggregate equalities now rewrite
+before that lambda, preserving the original axiom pins. Matching the original
+interpolation expression also removed unused profile-expression rewrite rules.
+
+This performance repair does not close the remaining frontend completeness,
+unambiguity, corpus/CI or original memory-copy compiler/EVM obligations above.
+Original worker source, failed candidates and diagnostics remain preserved.

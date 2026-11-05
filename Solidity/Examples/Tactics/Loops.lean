@@ -40,15 +40,23 @@ tested by its condition; the rest of a block after a statement that may set
 a flag runs under `if (!flag…)`, and a `for`'s update under the flags that
 end the loop, so that `continue` still runs it. -/
 
-/-- info: uint i = 0;
-while (i < 3) { i++; } -/
+/--
+warning: unannotated literal-bounded loop `while (i < 3)`; keeping symbolic unrolling
+---
+info: uint i = 0;
+while (i < 3) { i++; }
+-/
 #guard_msgs in
 #eval IO.println (Prog.show [] (sol{ uint i = 0; while (i < 3) { i++; } }))
 
-/-- info: uint s = 0;
+/--
+warning: unannotated literal-bounded loop `for (i < 9)`; keeping symbolic unrolling
+---
+info: uint s = 0;
 uint i = 0;
 bool brk2 = false;
-while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else { } if (!cnt1) { if (i == 5) { brk2 = true; } else { } if (!brk2) { s += i; } else { } } else { } if (!brk2) { i++; } else { } } -/
+while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else { } if (!cnt1) { if (i == 5) { brk2 = true; } else { } if (!brk2) { s += i; } else { } } else { } if (!brk2) { i++; } else { } }
+-/
 #guard_msgs in
 #eval IO.println (Prog.show [] (sol{ uint s = 0;
   for (uint i = 0; i < 9; i++) { if (i == 1) { continue; } if (i == 5) { break; } s += i; } }))
@@ -56,17 +64,25 @@ while (!brk2 && (i < 9)) { bool cnt1 = false; if (i == 1) { cnt1 = true; } else 
 /-! `do body while (c)` runs the body once before the condition, by a flag
 `first`: the body is not copied. -/
 
-/-- info: uint i = 5;
+/--
+warning: unannotated literal-bounded loop `do/while (i < 3)`; keeping symbolic unrolling
+---
+info: uint i = 5;
 bool first1 = true;
-while (first1 || (i < 3)) { first1 = false; i++; } -/
+while (first1 || (i < 3)) { first1 = false; i++; }
+-/
 #guard_msgs in
 #eval IO.println (Prog.show [] (sol{ uint i = 5; do { i++; } while (i < 3); }))
 
 /-! A statement after a `break` in its block is dropped, as solkey drops it. -/
 
-/-- info: uint i = 0;
+/--
+warning: unannotated literal-bounded loop `while (i < 3)`; keeping symbolic unrolling
+---
+info: uint i = 0;
 bool brk1 = false;
-while (!brk1 && (i < 3)) { i++; brk1 = true; } -/
+while (!brk1 && (i < 3)) { i++; brk1 = true; }
+-/
 #guard_msgs in
 #eval IO.println (Prog.show [] (sol{ uint i = 0; while (i < 3) { i++; break; i++; } }))
 
@@ -186,7 +202,11 @@ example : Prog StandardExample [] [.val .uint] := sol{ uint i = 0;
   /// @custom:key unwind 3
   while (i < 3) { i++; } }
 
-/-- error: Solidity elaboration failed: `break`, `continue` or `return` inside `try` inside a loop -/
+/--
+warning: unannotated literal-bounded loop `while (i < 3)`; keeping symbolic unrolling
+---
+error: Solidity elaboration failed: `break`, `continue` or `return` inside `try` inside a loop
+-/
 #guard_msgs in
 example : Prog StandardExample [] [.val .uint] := sol{ uint i = 0;
   while (i < 3) { try address(7).get() { break; } catch { } i++; } }
@@ -195,8 +215,12 @@ example : Prog StandardExample [] [.val .uint] := sol{ uint i = 0;
 `break` sets its flag (solkey's `LoopLowering` leaves a `try` as it is,
 `docs/solkey-feedback.md`). -/
 
-/-- info: uint i = 0;
-try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else { } if (!brk1) { i++; } else { } } } catch Error(string memory) { } catch Panic(uint) { } catch { } -/
+/--
+warning: unannotated literal-bounded loop `while (i < 3)`; keeping symbolic unrolling
+---
+info: uint i = 0;
+try address(7).get() { bool brk1 = false; while (!brk1 && (i < 3)) { if (i == 1) { brk1 = true; } else { } if (!brk1) { i++; } else { } } } catch Error(string memory) { } catch Panic(uint) { } catch { }
+-/
 #guard_msgs in
 #eval IO.println (Prog.show [] (sol{ uint i = 0;
   try address(7).get() { while (i < 3) { if (i == 1) { break; } i++; } } catch { } }))

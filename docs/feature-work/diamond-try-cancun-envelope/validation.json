@@ -1,0 +1,35 @@
+{
+  "scope": "source-only static checks, not compiler/EVM validation groups",
+  "checks": [
+    {
+      "check": "check",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 17708,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 31162368,
+      "maxOomEvents": 0
+    },
+    {
+      "check": "doc-paths",
+      "exit": 1,
+      "seconds": 4,
+      "peakAggregateRSSKiB": 24084,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 7725056,
+      "maxOomEvents": 0
+    },
+    {
+      "check": "whitespace",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 15412,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 4399104,
+      "maxOomEvents": 0
+    }
+  ]
+}

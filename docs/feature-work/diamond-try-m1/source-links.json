@@ -1,0 +1,80 @@
+[
+  {
+    "pipeline": "legacy",
+    "identities": {
+      "callee": 7,
+      "parameter": 2,
+      "caller": 105,
+      "calleeSpan": "17:216:0",
+      "callerSpan": "656:231:0",
+      "panicBinding": 87,
+      "sizeUse": "212:4:0"
+    },
+    "sourceSHA256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "inputSHA256": "f6b4902eeb6b24de09bbff2a551920bf9af16fce22c769d58e88c0c41a205dd8",
+    "outputSHA256": "d8dd80611bbc54581b3d9e6a1471c75045b01701439f39e6080a1098ff35e03a",
+    "compilerSHA256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "creationSHA256": "988857e8e73099fe3e0b04beb535cf254d303aa88db9a5bd25550126fe7fe2ad",
+    "runtimeSHA256": "e335ea9f2867baaaf40c876fa250ffd2bece75a4b833be111d97f9d2c1b799cc",
+    "staticRuntimeProloguePrefix": "6080604052",
+    "staticCreationProloguePrefix": "6080604052",
+    "prologueReachabilityOrResourceProof": false,
+    "negativeShapeControls": [
+      "wrong-order",
+      "wrong-word",
+      "wrong-parameter-type",
+      "wrong-external-reference",
+      "wrong-callee",
+      "wrong-argument",
+      "wrong-handler"
+    ],
+    "negativeBundleControls": [
+      "swapped-fields",
+      "swapped-pipeline-blocks",
+      "wrong-pipeline-tag",
+      "wrong-source-field"
+    ],
+    "newCompilation": false,
+    "newReferenceExecution": false,
+    "kernelSourceOrTargetAdequacy": false
+  },
+  {
+    "pipeline": "viaIR",
+    "identities": {
+      "callee": 7,
+      "parameter": 2,
+      "caller": 105,
+      "calleeSpan": "17:216:0",
+      "callerSpan": "656:231:0",
+      "panicBinding": 87,
+      "sizeUse": "212:4:0"
+    },
+    "sourceSHA256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "inputSHA256": "03fab305ff1a9b86b8b779aba695dd21bb53af7af66b78fd0f9e43ba23a21ac2",
+    "outputSHA256": "94f13db8438b5026fb5b6902565ef3759f807b769a84d9bbadb5a332f12f904f",
+    "compilerSHA256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+    "creationSHA256": "0a86ca6323640d3728309fe5b57961ef2c15c634714fd2959d6853855ca5d470",
+    "runtimeSHA256": "faf0d96218acbf1285125e35959e2ab4babebd7f6e64446c25445aa203c90d52",
+    "staticRuntimeProloguePrefix": "6080604052",
+    "staticCreationProloguePrefix": "6080604052",
+    "prologueReachabilityOrResourceProof": false,
+    "negativeShapeControls": [
+      "wrong-order",
+      "wrong-word",
+      "wrong-parameter-type",
+      "wrong-external-reference",
+      "wrong-callee",
+      "wrong-argument",
+      "wrong-handler"
+    ],
+    "negativeBundleControls": [
+      "swapped-fields",
+      "swapped-pipeline-blocks",
+      "wrong-pipeline-tag",
+      "wrong-source-field"
+    ],
+    "newCompilation": false,
+    "newReferenceExecution": false,
+    "kernelSourceOrTargetAdequacy": false
+  }
+]

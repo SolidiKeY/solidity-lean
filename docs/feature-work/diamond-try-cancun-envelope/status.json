@@ -1,0 +1,25 @@
+{
+  "groups": {
+    "source-admission": "UNRUN: mandatory5M envelope absent",
+    "vectors88": "UNRUN: mandatory5M envelope absent"
+  },
+  "executionApproval": "granted only unchanged Cancun groups, not budget waiver/instrumentation",
+  "scriptHashesMatchHumanPins": true,
+  "sourceHashesMatchReviewed": true,
+  "resolvedTree": "universal/reference",
+  "conditionalInterchangeable": false,
+  "engineCompilerLoadOrExecution": false,
+  "dependencyBuildInstallOrChange": false,
+  "existingPublicHook": "EVM.events step via EVMEvent.step; synchronous listener and awaited emission",
+  "hookWiredIntoUnchangedScripts": false,
+  "builtInRunOptsStepBudget": false,
+  "strictPreDynamicGasAttemptAbortGuarantee": false,
+  "publishedMaster": "b965d675e260a374401b131e59d501f8ce5da147",
+  "publishedForkDrift": "published0f92a28a switches these scripts to Osaka, does not supply missing envelope; not imported or used",
+  "normalAutomaticApprovalRejectionThisIncrement": false,
+  "originalDriverInvoked": false,
+  "nativeStrictExitRetained": 1,
+  "nativeWorkingRetained": 12,
+  "nativeBlockedRetained": 8,
+  "historicalExecutionOrCompilationThisIncrement": false
+}

@@ -123,10 +123,17 @@ theorem CallRet.leaveT_all {H : HTy} {P : (t : LTy) → t.TDenote C H → Prop} 
   | mem R x hd hm => exact ⟨hr.1, he⟩
   | storage R x => exact ⟨hr.1, he⟩
 
+/-- Entering several returns leaves the storage alone. -/
+theorem RetBinders.enterT_storage {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) →
+    (τ : State C ps) → (bs.enterT τ).st.storage = τ.storage
+  | _, .nil, _ => rfl
+  | _, .snoc bs _ _, τ => RetBinders.enterT_storage bs τ
+  | _, .snocMem bs _ _ _ _, τ => RetBinders.enterT_storage bs τ
+
 /-- Entering a call leaves the storage alone. -/
 theorem CallRet.enterT_storage {Γ rs Γ' ps : Ctx} (ret : CallRet Γ rs Γ') (τ : State C ps) :
     (ret.enterT τ).st.storage = τ.storage := by
-  cases ret <;> rfl
+  cases ret <;> first | rfl | exact RetBinders.enterT_storage _ τ
 
 /-! ## Invariants of the typed run -/
 
@@ -140,6 +147,16 @@ theorem env_wk {H H' : HTy} (x : H <+: H') : {Γ : Ctx} → {e : TEnv C H Γ} �
   | [], _, _ => trivial
   | _ :: _, _, he => ⟨I.loc_wk x he.1, env_wk x he.2⟩
 
+/-- Entering several returns: value returns and fresh memory objects, on top
+of the parameters. -/
+theorem retEnterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
+    (hm : ∀ H R v, I.loc (H := H) (.mem R) v) {ps : Ctx} :
+    {ρ : Ctx} → (bs : RetBinders ρ) → (τ : State C ps) → TEnv.All I.loc τ.env →
+      TEnv.All I.loc (bs.enterT τ).st.env
+  | _, .nil, _, he => he
+  | _, .snoc bs _ _, τ, he => ⟨hv _ _ _, retEnterT_env hv hm bs τ he⟩
+  | _, .snocMem bs _ _ _ _, τ, he => ⟨hm _ _ _, env_wk _ (retEnterT_env hv hm bs τ he)⟩
+
 /-- Entering a call: value returns, a fresh memory object or an unset storage
 alias, on top of the parameters. -/
 theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
@@ -150,8 +167,7 @@ theorem enterT_env (hv : ∀ H p v, I.loc (H := H) (.val p) v)
   cases ret with
   | none => exact he
   | val p x res => exact ⟨hv _ _ _, he⟩
-  | rets bs =>
-    exact TEnv.All.append _ (TEnv.All.of_valMem (hv _) (hm _) (Binders.valMem bs) _) he
+  | rets bs => exact retEnterT_env hv hm bs τ he
   | mem R x hd hm' => exact ⟨hm _ _ _, env_wk _ he⟩
   | storage R x => exact ⟨ha _ _, he⟩
 
@@ -315,7 +331,7 @@ theorem tkeeps_tryCall {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (hI : I.V
   split at h
   · split at h
     · rename_i o₁ hc
-      have h1 := tkeeps_call hI sargs (.rets rets) hs hsb σ o₁ hσ hc
+      have h1 := tkeeps_call hI sargs (.rets rets.toRet) hs hsb σ o₁ hσ hc
       cases hr : ok o₁.st with
       | error => rw [hr] at h; cases h
       | ok o' => rw [hr] at h; cases h; exact (hok _ o' h1 hr).drop _

@@ -228,8 +228,11 @@ partial def ppTermS (ns : List Expr) (e : Expr) : MetaM (TSyntax `dl_term) := do
     -- `+ - * /` read back as `uint` arithmetic, `&&` and `||` as `bool`, `==`
     -- at any type (`schemaTerm0`); the others escape at another type
     let t ← whnf ty
+    -- the wrapping operators and the shifts read back at `uint` only (an
+    -- `int`'s `>>` is arithmetic), whatever `pp.sol.pushArithmetic` says
+    let uintOnly := [">>", "<<", "+%", "-%", "*%"].contains sym
     unless sym == "⊕" || sym == "±" || sym == "==" || t.isConstOf ``PrimTy.uint
-        || pp.sol.pushArithmetic.get (← getOptions)
+        || pp.sol.pushArithmetic.get (← getOptions) && !uintOnly
         || (sym == "&&" || sym == "||") && t.isConstOf ``PrimTy.bool do return ← escapeS e
     mkBinTerm sym (← ppTermS ns a) (← ppTermS ns b)
   | .sym ``Op2.zcmp #[op, _] #[a, b] =>

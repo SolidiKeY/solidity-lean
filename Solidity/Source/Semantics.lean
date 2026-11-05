@@ -180,7 +180,7 @@ def runTx (G : Glob E) (n : Nat) (q : Request) : EM E [] Outcome := do
     | some c =>
       let r ← attempt do
         credit q.target q.value
-        let F : Fr := { this := q.target, sender := q.sender, value := q.value, static := false, contract := c }
+        let F : Fr := { this := q.target, sender := q.sender, value := q.value, static := false, contract := c, cd := q.input }
         dispatch G F n q.input
       modSt fun s => { s with heap := Heap.empty }
       match r with

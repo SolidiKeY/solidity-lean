@@ -1,0 +1,101 @@
+--- a/@ethereumjs/evm/dist/cjs/evm.js
++++ b/@ethereumjs/evm/dist/cjs/evm.js
+@@ -147,6 +147,8 @@
+      * @param opts The EVM options
+      */
+     constructor(opts) {
++        this.attemptBudgetAPIVersion = "solidity-lean-attempt-v1";
++        this._attemptBudget = undefined;
+         /**
+          * EIP-8037 transaction-level state-gas reservoir.
+          * Holds gas paid by the user that exceeds the EIP-7825 regular-gas budget
+@@ -1067,7 +1069,20 @@
+      * based on the `to` address. It checkpoints the state and reverts changes
+      * if an exception happens during the message execution.
+      */
++    /** Explicit host attempt budget, shared by all interpreters of this EVM. */
++    beginAttemptBudget(budget) {
++        this._attemptBudget?.assertLive();
++        if (this._attemptBudget !== undefined) throw new Error('attempt budget root already active');
++        budget.assertLive();
++        this._attemptBudget = budget;
++    }
++    endAttemptBudget(budget) {
++        this._attemptBudget?.assertLive();
++        if (this._attemptBudget !== budget) throw new Error('attempt budget root mismatch');
++        this._attemptBudget = undefined;
++    }
+     async runCall(opts) {
++        this._attemptBudget?.assertLive();
+         let timer;
+         if ((opts.depth === 0 || opts.message === undefined) &&
+             this._optsCached.profiler?.enabled === true) {
+@@ -1258,6 +1273,7 @@
+      * shouldn't be used directly from the evm class
+      */
+     async runCode(opts) {
++        this._attemptBudget?.assertLive();
+         this._block = opts.block ?? defaultBlock();
+         this._tx = {
+             gasPrice: opts.gasPrice ?? util_1.BIGINT_0,
+@@ -1453,4 +1469,3 @@
+     common_1.Hardfork.Bpo5,
+     common_1.Hardfork.Amsterdam,
+ ];
+-//# sourceMappingURL=evm.js.map
+\ No newline at end of file
+--- a/@ethereumjs/evm/dist/cjs/interpreter.js
++++ b/@ethereumjs/evm/dist/cjs/interpreter.js
+@@ -135,6 +135,8 @@
+         }
+         // Iterate through the given ops until something breaks or we hit STOP
+         while (this._runState.programCounter < this._runState.code.length) {
++            // Consume before lookup, jump analysis, dynamic gas, or opcode effects.
++            this._evm._attemptBudget?.consume(this._env.depth);
+             const programCounter = this._runState.programCounter;
+             let opCode;
+             let opCodeObj;
+@@ -1285,4 +1287,3 @@
+     }
+ }
+ exports.Interpreter = Interpreter;
+-//# sourceMappingURL=interpreter.js.map
+\ No newline at end of file
+--- a/@ethereumjs/evm/dist/cjs/types.d.ts
++++ b/@ethereumjs/evm/dist/cjs/types.d.ts
+@@ -573,4 +573,12 @@
+ /** EIP-7702 delegation prefix (`0xef0100`) at the start of delegated EOA code. */
+ export declare const DELEGATION_7702_FLAG: Uint8Array<ArrayBuffer>;
+ export {};
+-//# sourceMappingURL=types.d.ts.map
+\ No newline at end of file
++//# sourceMappingURL=types.d.ts.map
++/** Host-only API; a thrown non-EVM marker must abort/discard the machine. */
++export interface AttemptBudget {
++    readonly limit: number;
++    readonly used: number;
++    readonly aborted: boolean;
++    consume(depth: number): void;
++    assertLive(): void;
++}
+--- a/@ethereumjs/evm/dist/cjs/evm.d.ts
++++ b/@ethereumjs/evm/dist/cjs/evm.d.ts
+@@ -59,6 +59,11 @@
+  * - {@link createEVM}
+  */
+ export declare class EVM implements EVMInterface {
++    readonly attemptBudgetAPIVersion: "solidity-lean-attempt-v1";
++    protected _attemptBudget?: import('./types.ts').AttemptBudget;
++    beginAttemptBudget(budget: import('./types.ts').AttemptBudget): void;
++    endAttemptBudget(budget: import('./types.ts').AttemptBudget): void;
++
+     protected static supportedHardforks: ("chainstart" | "byzantium" | "istanbul" | "homestead" | "dao" | "tangerineWhistle" | "spuriousDragon" | "constantinople" | "petersburg" | "muirGlacier" | "berlin" | "london" | "arrowGlacier" | "grayGlacier" | "mergeNetsplitBlock" | "paris" | "shanghai" | "cancun" | "prague" | "osaka" | "bpo1" | "bpo2" | "bpo3" | "bpo4" | "bpo5" | "amsterdam")[];
+     protected _tx?: {
+         gasPrice: bigint;
+@@ -263,4 +268,4 @@
+     };
+     clearPerformanceLogs(): void;
+ }
+-//# sourceMappingURL=evm.d.ts.map
+\ No newline at end of file
++//# sourceMappingURL=evm.d.ts.map

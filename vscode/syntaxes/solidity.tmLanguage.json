@@ -1,0 +1,14 @@
+{
+  "name":"Solidity","scopeName":"source.solidity",
+  "patterns":[
+    {"name":"comment.block.solidity","begin":"/\\*","end":"\\*/"},
+    {"name":"comment.line.double-slash.solidity","match":"//.*$"},
+    {"name":"string.quoted.double.solidity","begin":"\"","end":"\"","patterns":[{"name":"constant.character.escape.solidity","match":"\\\\."}]},
+    {"name":"string.quoted.single.solidity","begin":"'","end":"'","patterns":[{"name":"constant.character.escape.solidity","match":"\\\\."}]},
+    {"name":"keyword.control.solidity","match":"\\b(contract|interface|library|function|constructor|modifier|event|error|struct|enum|pragma|import|return|returns|if|else|for|while|do|break|continue|revert|require|assert|emit|try|catch|unchecked|assembly|new|delete)\\b"},
+    {"name":"storage.modifier.solidity","match":"\\b(public|private|internal|external|view|pure|payable|constant|immutable|virtual|override|storage|memory|calldata|abstract)\\b"},
+    {"name":"storage.type.solidity","match":"\\b(address|bool|string|bytes(?:[1-9]|[12][0-9]|3[0-2])?|u?int(?:[0-9]+)?|mapping)\\b"},
+    {"name":"constant.language.solidity","match":"\\b(true|false|this|super)\\b"},
+    {"name":"constant.numeric.solidity","match":"\\b(?:0x[0-9a-fA-F_]+|[0-9][0-9_]*(?:\\.[0-9_]+)?)\\b"}
+  ]
+}

@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import {libraryTryContext,libraryTryVectorsFixture,linkLibraryObject} from '../library-try-adapter.mjs';
+import {creationTryContext} from '../creation-try-adapter.mjs';
+import {directSelfTryContext} from '../self-try-adapter.mjs';
 /** Optional machine reference, deliberately separate from Lean coverage. */
 import {readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync} from 'node:fs';
 import {dirname, resolve, join} from 'node:path';
@@ -46,7 +49,7 @@ export function creationObservation(exec, signature, metrics) {
   return {...actual, runtimeCodeSha256:sha(exec.returnValue), runtimeCodeBytes:exec.returnValue.length};
 }
 
-export async function machine(stepLimit = STEP_LIMIT) {
+export async function machine(stepLimit = STEP_LIMIT, captureCreations = false, captureCalls = false) {
   if (!Number.isSafeInteger(stepLimit) || stepLimit <= 0 || stepLimit > STEP_LIMIT) throw new HostLimit("invalid reference step budget");
   const evm = await createEVM({common:new Common({chain:Mainnet, hardfork:Hardfork.Osaka}),
     // Pinned test/EVMHost.cpp:418-441 deposits returned code without an
@@ -54,6 +57,19 @@ export async function machine(stepLimit = STEP_LIMIT) {
     allowUnlimitedContractSize:true, allowUnlimitedInitCodeSize:true});
   await evm.stateManager.putAccount(caller, new Account(0n, 10n**30n));
   let metrics;
+  let creations;
+  let calls, frames;
+  if (captureCalls) {
+    evm.events.on('beforeMessage', m => frames.push({to:m.to?.toString()??null,codeAddress:m.to?m.codeAddress.toString():null,
+      caller:m.caller.toString(),value:m.value.toString(),delegatecall:!!m.delegatecall,data:bytesToHex(m.data)}));
+    evm.events.on('afterMessage', r => calls.push({...frames.pop(),failed:!!r.execResult.exceptionError,returnData:bytesToHex(r.execResult.returnValue)}));
+  }
+  if (captureCreations) evm.events.on('afterMessage', result => {
+    if (result.createdAddress) creations.push({address:result.createdAddress.toString(),
+      failed:!!result.execResult.exceptionError,
+      ...(result.execResult.exceptionError ? {halt:result.execResult.exceptionError.error,returnData:bytesToHex(result.execResult.returnValue)} :
+        {runtimeCodeSha256:sha(result.execResult.returnValue),runtimeCodeBytes:result.execResult.returnValue.length})});
+  });
   evm.events.on('step', step => {
     metrics.steps++;
     metrics.maxStack = Math.max(metrics.maxStack, step.stack.length);
@@ -68,13 +84,32 @@ export async function machine(stepLimit = STEP_LIMIT) {
     evm.journal.addAlwaysWarmAddress(caller.toString().slice(2));
     if (options.to) evm.journal.addAlwaysWarmAddress(options.to.toString().slice(2));
     metrics = {steps:0, maxStack:0};
+    creations = []; calls = []; frames = [];
     const result = await evm.runCall({caller, origin:caller, gasLimit:INITIAL_GAS, ...options});
-    return {result, metrics:{...metrics}};
+    return {result, metrics:{...metrics,...(captureCreations ? {creations} : {}),...(captureCalls ? {calls} : {})}};
   }};
 }
 
-export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT) {
-  const vm = await machine(stepLimit);
+export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT, hostContext = null, linked = null) {
+  const vm = await machine(stepLimit, hostContext?.kind === 'creation-try-source'||!!linked,!!linked);
+  let libraryDeployment,linkManifest;
+  if(linked){
+   try {
+    const object=linked.artifact.evm.bytecode.object;
+    if(!/^(?:[0-9a-fA-F]{2})+$/.test(object))throw new HostLimit('unresolved library creation bytecode');
+    const {result,metrics}=await vm.call({data:hexToBytes('0x'+object)});
+    libraryDeployment={...creationObservation(result.execResult,'library '+linked.name,metrics),address:result.createdAddress?.toString()};
+    if(libraryDeployment.failed||!result.createdAddress)return {status:'blocked',reason:'actual library deployment failed',libraryDeployment,observed:[]};
+    const address=result.createdAddress.toString();
+    if(!hostContext?.libraryAddress||BigInt(address).toString()!==hostContext.libraryAddress)
+      return {status:'blocked',reason:'linked library context differs from actual deployment',libraryDeployment,linkManifest:null,observed:[]};
+    const creation=linkLibraryObject(artifact.evm.bytecode.object,artifact.evm.bytecode.linkReferences,linked.file,linked.name,address);
+    const runtime=linkLibraryObject(artifact.evm.deployedBytecode.object,artifact.evm.deployedBytecode.linkReferences,linked.file,linked.name,address);
+    linkManifest={file:linked.file,name:linked.name,address,creationReferences:artifact.evm.bytecode.linkReferences,runtimeReferences:artifact.evm.deployedBytecode.linkReferences,creationPositions:creation.positions,runtimePositions:runtime.positions,originalCreationObjectSha256:sha(artifact.evm.bytecode.object),linkedCreationSha256:sha(Buffer.from(creation.object,'hex')),linkedRuntimeTemplateSha256:sha(Buffer.from(runtime.object,'hex'))};
+    artifact={...artifact,evm:{...artifact.evm,bytecode:{...artifact.evm.bytecode,object:creation.object},deployedBytecode:{...artifact.evm.deployedBytecode,object:runtime.object}}};
+   } catch(e) {return {status:'blocked',reason:e.message,libraryDeployment:libraryDeployment??null,linkManifest:linkManifest??null,observed:[]};}
+  }
+  const prerequisites=()=>linked?{libraryDeployment,linkManifest}:{};
   const observed = [];
   let address;
   let deployment;
@@ -85,30 +120,41 @@ export async function replayBytecode(artifact, vectors, stepLimit = STEP_LIMIT) 
     const ctor = vector.signature === 'constructor';
     if (!address && !ctor) {
       const {result, metrics} = await vm.call({data:hexToBytes('0x'+artifact.evm.bytecode.object)});
-      deployment = creationObservation(result.execResult,'constructor',metrics);
-      if (deployment.exception || !result.createdAddress) return {status:'blocked',reason:'default reference deployment failed: '+(deployment.exception ?? 'no address'),deployment,observed};
+      deployment = {...creationObservation(result.execResult,'constructor',metrics),
+        address:result.createdAddress?.toString()};
+      if (deployment.exception || !result.createdAddress) return {status:'blocked',reason:'default reference deployment failed: '+(deployment.exception ?? 'no address'),deployment,observed,...prerequisites()};
       address = result.createdAddress;
     }
+    if (!ctor && hostContext?.selfAddress && BigInt(address.toString()).toString() !== hostContext.selfAddress)
+      throw new HostLimit('self-try context differs from actual reference deployment');
     const selector = ctor ? '' : artifact.evm.methodIdentifiers[vector.signature];
     if (!ctor && !selector) throw new HostLimit('no canonical method identifier: '+vector.signature);
-    const data = (ctor ? artifact.evm.bytecode.object : selector) + vector.args.map(word).join('');
+    const raw = Array.isArray(vector.calldata);
+    if (raw && !vector.calldata.every(b=>Number.isInteger(b) && b>=0 && b<256))
+      throw new HostLimit('invalid raw calldata byte');
+    const payload = raw ? Buffer.from(vector.calldata).toString('hex') : vector.args.map(word).join('');
+    const data = (ctor ? artifact.evm.bytecode.object : selector) + payload;
     const {result, metrics} = await vm.call({...(ctor ? {} : {to:address}),data:hexToBytes('0x'+data)});
     const actual = ctor ? creationObservation(result.execResult,vector.signature,metrics) :
       observation(result.execResult, vector.signature, metrics);
     observed.push(actual);
-    if (actual.failed !== vector.failure || JSON.stringify(actual.values) !== JSON.stringify(vector.expected) ||
-        (actual.failed && actual.returnData !== '0x'))
-      return {status:'broken',reason:'machine expectation mismatch',deployment,observed,expected:vector};
+    const expectedBytes = raw ? vector.expectedBytes : vector.failure ? (vector.revertBytes ?? []) : null;
+    if (expectedBytes && !expectedBytes.every(b=>Number.isInteger(b) && b>=0 && b<256))
+      throw new HostLimit('invalid expected ABI byte');
+    if (actual.failed !== vector.failure || (expectedBytes ?
+        actual.returnData !== '0x'+Buffer.from(expectedBytes).toString('hex') :
+        JSON.stringify(actual.values) !== JSON.stringify(vector.expected)))
+      return {status:'broken',reason:'machine expectation mismatch',deployment,observed,expected:vector,...prerequisites()};
     if (ctor) {
       deploymentFailed = actual.failed;
       address = result.createdAddress;
       if (!actual.failed && !address) throw new HostLimit('creation returned no address');
     }
     } catch (e) {
-      return {status:'blocked',reason:e.message,deployment,observed,blockedVector:vector};
+      return {status:'blocked',reason:e.message,deployment,observed,blockedVector:vector,...prerequisites()};
     }
   }
-  return {status:'working',reason:'all scalar vectors match on pinned reference EVM',deployment,observed};
+  return {status:'working',reason:'all admitted ABI vectors match on pinned reference EVM',deployment,observed,...(linked?{libraryDeployment,linkManifest}:{})};
 }
 
 function hasHost(node) {
@@ -134,22 +180,24 @@ export async function runFixture(path, directory, compile) {
   for (const pipeline of result.requiredPipelines) {
     try {
     const settings = {viaIR:pipeline === 'viaIR',evmVersion:'osaka',optimizer:{enabled:false,runs:200},
-      metadata:{appendCBOR:false},outputSelection:{'*':{'':['ast'],'*':['abi','evm.bytecode.object','evm.deployedBytecode.object','evm.methodIdentifiers']}}};
+      metadata:{appendCBOR:false},outputSelection:{'*':{'':['ast'],'*':['abi','evm.bytecode.object','evm.bytecode.linkReferences','evm.deployedBytecode.object','evm.deployedBytecode.linkReferences','evm.methodIdentifiers']}}};
     const sources = Object.fromEntries([...fixture.sources].map(([name,source])=>[name,{content:withPreamble(source)}]));
     const input = {language:'Solidity',sources,settings};
     const out = compile(input);
     const errors = (out.errors ?? []).filter(e=>e.severity === 'error');
     if (errors.length) { result.variants.push({pipeline,status:'blocked',reason:'reference compiler error',errors}); continue; }
     const ast = out.sources[fixture.mainSource].ast;
-    if (hasHost(ast)) throw new HostLimit('host-dependent behavior not adapted');
-    const contract = ast.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract).at(-1)?.name;
+    const definition = ast.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract).at(-1);
+    const hostContext = directSelfTryContext(ast, definition, {referenceOnly:true}) ?? creationTryContext(ast, definition) ?? libraryTryContext(ast, definition);
+    if (hasHost(ast) && !hostContext) throw new HostLimit('host-dependent behavior not adapted');
+    const contract = definition?.name;
     if (!contract) throw new HostLimit('no concrete deployment contract');
     const artifact = out.contracts[fixture.mainSource][contract];
-    const vectors = semanticVectors(fixture, artifact.abi);
-    const provenance = {pipeline,contract,settings,inputSha256:sha(JSON.stringify(input)),
-      creationSha256:sha(Buffer.from(artifact.evm.bytecode.object,'hex')),
-      runtimeSha256:sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex')), vectors};
-    try { result.variants.push({...provenance,...await replayBytecode(artifact,vectors)}); }
+    const linked=hostContext?.kind==='linked-library-try-source'?{file:fixture.mainSource,name:hostContext.libraryName,artifact:out.contracts[fixture.mainSource][hostContext.libraryName]}:null;
+    const vectors = semanticVectors(linked?libraryTryVectorsFixture(fixture,hostContext):fixture, artifact.abi);
+    const provenance = {pipeline,contract,settings,...(hostContext ? {hostContext} : {}),inputSha256:sha(JSON.stringify(input)),
+      ...(linked?{originalCreationObjectSha256:sha(artifact.evm.bytecode.object)}:{creationSha256:sha(Buffer.from(artifact.evm.bytecode.object,'hex')),runtimeSha256:sha(Buffer.from(artifact.evm.deployedBytecode.object,'hex'))}), vectors};
+    try { result.variants.push({...provenance,...await replayBytecode(artifact,vectors,STEP_LIMIT,hostContext,linked)}); }
     catch (e) { result.variants.push({...provenance,status:'blocked',reason:e.message}); }
     } catch (e) { result.variants.push({pipeline,status:'blocked',reason:e.message}); }
   }
@@ -183,6 +231,9 @@ async function main(args) {
   const report = {metadata:{commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     adapterSha256:sha(readFileSync(new URL('../solidity-upstream.mjs',import.meta.url))),
+    selfTryAdapterSha256:sha(readFileSync(new URL('../self-try-adapter.mjs',import.meta.url))),
+    creationTryAdapterSha256:sha(readFileSync(new URL('../creation-try-adapter.mjs',import.meta.url))),
+    libraryTryAdapterSha256:sha(readFileSync(new URL('../library-try-adapter.mjs',import.meta.url))),
     dependencyLockSha256:sha(readFileSync(new URL('package-lock.json',import.meta.url))),
     engine:'@ethereumjs/evm 10.1.3',hardfork:'osaka',
     allowUnlimitedContractSize:true,allowUnlimitedInitCodeSize:true,codeSizeRule:'pinned test/EVMHost.cpp:418-441 (code-deposit gas, no EIP-170 cap)',initialGas:INITIAL_GAS.toString(),stepLimit:STEP_LIMIT,

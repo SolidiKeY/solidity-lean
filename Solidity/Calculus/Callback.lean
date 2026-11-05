@@ -278,7 +278,7 @@ not. -/
   the parameters declared, the return variables at their defaults, the body
   as a block, the parameters thinned out from under the return variables. -/
   | callRets {Γ ps rs Γf Γ₁ Γ₂ : Ctx} {H : Hyps C Γ₀ Γ} {m : Modality} {f : Name}
-      {args : Args C Γ ps} {bs : Binders rs} {body : Prog C (rs ++ ps) Γf}
+      {args : Args C Γ ps} {bs : RetBinders rs} {body : Prog C (rs ++ ps) Γf}
       {ω : Prog C (rs ++ Γ) Γ₁} {κ : Frames C Γ₁ Γ₂} {φ : Fml C Γ₂}
       (h : ProvesC I pay Γ₀ H (.modal m (args.declsThen (bs.declsThen
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))

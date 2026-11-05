@@ -1,6 +1,7 @@
 import Solidity.Syntax.Quote
 import Solidity.Syntax.Inlined
 import Solidity.Syntax.Elab
+import Solidity.Syntax.LoopWarnings
 
 /-!
 # Elaborating a block, as a term
@@ -111,11 +112,27 @@ def elabAgainst (c : Lean.Term) (f : Lean.Term → TermElabM Lean.Term) : TermEl
     (fun msg => throwError "Solidity elaboration failed: {msg}") c f
 
 open Lean Elab Term Meta in
+/-- Called bodies have no original source span at this use. Name their
+function and stable raw block path at the program's source location instead.
+The existing elaboration evaluator returns a quoted string; no new trust site. -/
+def warnCalledLiteralLoops (c raw : Lean.Term) (ref : Syntax) : TermElabM Unit := do
+  let names ← elabAgainst c fun _ =>
+    `(show Except String Lean.Expr from
+      .ok (Lean.toExpr (String.intercalate "\n" (calledLiteralLoops $c $raw))))
+  let .lit (.strVal names) := names.consumeMData
+    | throwError "loop warning query did not return its string"
+  unless names.isEmpty do
+    for name in names.splitOn "\n" do
+      logWarningAt ref m!"unannotated literal-bounded loop `{name}`; keeping symbolic unrolling"
+
+open Lean Elab Term Meta in
 @[term_elab solBracket]
 def elabSolBracket : TermElab := fun stx _ => do
   match stx with
   | `(sol[ $c ]{ $[$ss:sol_stmt;]* }) =>
     let raw ← `(sol_raw!{ $[$ss;]* })
+    warnLiteralLoopSyntax stx
+    warnCalledLiteralLoops c raw stx
     -- an error is reported at the statement it arose in
     let errTy := mkApp2 (mkConst ``Prod [0, 0]) (mkConst ``Nat) (mkConst ``String)
     let ref ← getRef

@@ -30,7 +30,12 @@ elaborator.
   UpdRuleScoped,UpdateRules,TermLib.Rules}`;
 - what those import: `Calculus.{TermEval,TermEq,TermWk,LoopInvariantWk,Lower,LowerRun,Shift,
   WkOver,Lands,StateFacts,ReadWrite,DataIn,SeqRewrite,SyntaxSize,Graft,
-  CallSummary,KIntTwoAnchors}`.
+  CallSummary,KIntTwoAnchors}`;
+- static callback transport: `Calculus.StaticInvocation`; the typed Boolean
+  loop, nominal-view inventory and selfdestruct binding checkpoints under
+  `Yul/` are registered by exact names in `CORE`.
+- intrinsic sharing/join foundations: `Calculus.{AnonLocalCapture,CallResultCapture,
+  CallResultRestore,JoinSequence,JoinSequenceSize}`.
 - the hash bound and hashed layout: `Hash.{CollisionBound,Adaptive}`,
   `Storage.{HashedLayout,HashedKeccak,HashedSeparation}`;
 - the backend: `Backend.{Opcode,Jumpdest,Assembler,Control}`.
@@ -71,6 +76,15 @@ pieces costs about a second per piece more than the whole; measured on the
 largest workers fell (`Calculus/Closer` 3.2 → 2.0 GB, `Calculus/MemRead`
 2.9 → 2.1 GB).  `tests/trust-inventory.json` (`scripts/check-trust.sh`)
 names pieces, so a split updates it.
+
+A file split for **time**, not size, is cut differently: its definitions
+stay in the file its importers already name, and its checks (`#eval` pins,
+`decide +kernel` coverage) move to sibling pieces that each import it and
+nothing imports, so they build in parallel and off the importers' path.
+`Examples/Decision.lean` was split this way (2026-11-02; times in
+`docs/automation.md`, M7-next).  A module whose time is one declaration
+(`Examples/Tactics/OpenLoops.lean`'s `binomialRowsNine`) gains nothing from a
+split.
 
 **Pitfalls.**
 
@@ -157,3 +171,176 @@ the cost that design avoided, so the prototype was not written.  Changing
 it is the closer owner's decision, gated on measuring
 `Calculus/CloseTests.lean`, `Examples/Tactics/Decide.lean`, two
 `TestSuite/Derived*` modules and the whole `SolkeyTestSuite`.
+
+### Yul parser boundary
+
+The core Yul preparation modules retain intrinsic certificates and checker laws.
+Source parsing composition lives in Frontend/Yul; the layer gate also forbids
+transitive paths from enumerated core modules to these adapters and to
+Frontend.Checked.Check or Frontend.Checked.Parser. The existing lexer and pure
+structural precedence predicate remain reusable prerequisites. Dedicated legacy
+Yul parser modules are compatibility imports outside the core.
+
+## P5. Build and integration throughput
+
+Changes to how the package is built, registered and relayed to the lanes
+(decision H21, 2026-11-03), each measured before and after.  Host times are
+wall clock on 32 cores with Lake's artifact cache warm; "rebuilt" counts
+Lake's `Built` lines.  A probe edit appends `theorem h21Probe… : True :=
+trivial` to `Calculus/Close.lean` (it and its dependents: 414 modules, 205
+of them examples, 49 TestSuite modules and its root), a different name each time so that nothing
+comes from the cache.
+
+### One Lake invocation
+
+`run-lean.sh` builds the default targets (read from `lakefile.toml`'s
+`defaultTargets`) and `SolkeyTestSuite` in one `lake build`, so the
+TestSuite's chain (the memory-loop `Discover` modules, `Derived17`, `Report`)
+runs beside the default build's tail instead of after it.  The targets are
+the union of the two former calls; the exit is Lake's, under `set -e`, as
+before (a failure in either set fails the script, and Lake now also reports
+the other set's failures in the same run).  Lake's job limit and
+`LEAN_NUM_THREADS` apply as before.  The work is the same, so a VM building
+with one or few workers gains little; not measured there.
+
+| Probe edit | Rebuilt | Lake wall |
+|---|---|---|
+| two calls (before) | 364 + 50 | 606.7 + 249.4 = 856.1 s |
+| one call (after) | 414 (the same modules) | 697.6 s (−158.5 s, −18.5 %) |
+
+The one-call run shared the host with another session's Lake build (two
+other Lean/Lake processes at its start; the two-call run had none), so the
+gain is if anything understated.
+
+### Shared registries
+
+The library roots are generated: `scripts/coord-tools/register.sh` writes
+`Solidity.lean`, `SolidityExamples.lean` (since the next section) and
+`Bridge/SolidityBridge.lean` from the file tree, each importing every module
+under its prefix, sorted, minus other libraries' subtrees (`Examples/`,
+`Corpus/`, `TestSuite/`, `Solkey/TestSuite.lean`) and `Scratch/`.
+The generated `Solidity.lean` imports exactly the closure the hand-kept one
+reached (3487 modules at d7b05d68c; 3048 direct imports before).  `register.sh --check`
+fails on a stale root; `run-lean.sh`, `gate.sh checkpoint|full` and CI
+(`lean.yml`) run it.  `.gitattributes` merges the roots with `merge=union`,
+so a rebase rarely stops on them.  A union keeps both sides of overlapping
+hunks, so it can bring back a deleted module's import or leave the list
+unsorted without any conflict reported; only `--check` catches that, so run
+`register.sh` after every rebase or merge.  A lane runs `register.sh` after adding,
+moving or deleting a module and commits the result; the integrator drops the
+lanes' root hunks and regenerates.
+
+`docs/module-map.md` is an index; the rows are in one file per area under
+`docs/module-map/` (its former `##` sections, contents unchanged).  A lane
+adds rows only to its area's file; `scripts/coord-tools/module-map.py BASE`
+lists the modules added since BASE without a row and proposes the area file
+and a row (the integrator's former `mmrows`/`mmplace`).
+
+Measured on the history since 2026-10-27 (non-merge commits): 214 touched
+`Solidity.lean`, whose hunks are now regenerated instead of merged.  269
+touched `docs/module-map.md`; of their 36,046 pairs, 3,613 (10.0 %; 738 of
+the 6,912 concurrent pairs) edited the same section.  Edits in different
+sections rarely conflicted before either, so the split mainly shortens the
+file a lane reads and edits; it removes few module-map conflicts.  Rebuilds:
+every added, moved or deleted module now edits the root and rebuilds it
+(`Built Solidity`, 1.5–4.3 s); before, only those imported directly did.
+Only `scripts/AxiomAudit.lean` imports the root.  A rebase can still stop on
+a modify/delete conflict of a root; `register.sh` resolves it.
+
+### Catalog data and the decision examples' definitions off the hot paths
+
+`Language/Features.lean` (generated by `scripts/solidity-feature-audit.py`)
+keeps what the frontend reads: the `Feature` type, `Feature.scope`,
+`Feature.requirement`, the exclusions and the profile.  Each feature's
+inspection record (`Feature.info`: status, upstream source lines, local
+evidence), the status lists, `Feature.info_scope`/`info_requirement` and the
+two consistency theorems (statements unchanged; the light module's filters
+and `Unmodelled.reason` now read `Feature.scope`/`Feature.requirement`, equal
+to the old reads by `Feature.info_scope`/`info_requirement`) are the
+generated leaf `Language/FeatureInfo.lean`.  `--check` covers both.  A
+requirement-text, scope or new-feature edit still rebuilds the frontend's
+dependents (20 of the 34 past commits to the catalog); an upstream-line or
+evidence edit (the other 14, about 40 %) no longer does.
+
+`Examples/DecisionHashes.lean` keeps its formulas and imports `Names` from
+the new light `Examples/Tactics/HashingNames.lean` instead of the hashing
+examples; its checks (15 pins, 14 theorems, same names and statements) are
+the leaf `Examples/DecisionHashesChecks.lean`, the time split of P2.
+`Examples/DecisionFeatures.lean` now imports `Tools/Common.lean`, which it
+had reached through `Tactics/Hashing`.
+
+| Probe | Rebuilt before | Rebuilt after |
+|---|---|---|
+| a source line in `docs/solidity-features.json`, regenerated | 196 (199 dependents; 193 built, 3 killed by the host's OOM killer while another session built) | 2 (`FeatureInfo`, the root), 10.4 s |
+| a theorem appended to `Examples/Tactics/Hashing.lean` | 15, 365.2 s (the `Decision*` chain after it) | 2 (`Hashing`, the root), 68.2 s |
+| the `Calculus/Close.lean` probe: Lake wall | 416, 672.9 s (`DecisionGaps` last, at 667.9 s) | 417, 609.6 s (−63.3 s, −9.4 %; `OpenLoops` last, at 604.6 s) |
+
+The `Close` and `Hashing` probes ran on a host with no other build (the
+features probe before did not, so only its count is given).  `Decision`
+finishes at 354 s instead of 537 s; the tail is now `OpenLoops`' single
+declaration (P2).
+
+### The examples as their own library
+
+`Solidity/Examples/` is the library `SolidityExamples` (root
+`SolidityExamples.lean`, generated by `register.sh` like `Solidity.lean`,
+which no longer imports it).  It stays in `defaultTargets`, so `lake build`,
+`run-lean.sh`, CI and the site still build every example; a lane checkpoint
+builds `lake build Solidity` alone (`gate.sh checkpoint`), adding
+`SolidityExamples SolkeyTestSuite` when it touches `Syntax`, `Semantics` or
+`Calculus`, where examples most often break, and `gate.sh full` /
+`run-lean.sh` at the lane's end.  `gate.sh touched` follows the same rule:
+the touched modules' dependents within the library, plus the examples and
+TestSuite modules the lane edits and what imports them.  No module outside `Examples/` imports one
+(`TrustAudit.lean` and `scripts/AxiomAudit.lean`, which audit them, import
+`SolidityExamples` too).  Example regressions in other lanes now surface at
+the lane's end or at integration rather than at each checkpoint.  Folding
+the worked chains into the default build (322212cf7, 2026-09-26) is kept:
+the examples are still a default target.
+
+| Probe: a theorem appended to `Frontend/Source.lean`, `gate.sh checkpoint` | Built | Build gates |
+|---|---|---|
+| before: `build-touched` at `LEAN_NUM_THREADS=1`, then `run-lean.sh` | 170 + 2 | 1476 s + 4 s (its run-lean stopped at the known solkeycheck drift) |
+| after: `build-touched`, then `lake build Solidity` | 66 + 1 | 188 s + 2 s |
+
+The saving is the `build-touched` gate: 1476 → 188 s (−87 %).  The 104
+modules no longer built at the checkpoint are 53 examples, 50 TestSuite
+modules and `Corpus.Imported`.  A checkpoint that does not touch the core no
+longer checks the examples, the TestSuite, the executables or the SolKey sort
+check; those wait for `run-lean.sh` at the lane's end.  Examples have broken
+after `Tools`/`Frontend` edits before (4a7632415), so a lane editing those
+should set `GATE_EXAMPLES=1`.
+
+### Master's artifacts relayed to the lanes
+
+After a scheduled merge the coordinator runs
+`scripts/coord-tools/ship-cache.sh CHECKOUT` on the integration checkout
+whose gates just passed at `origin/master`.  Lake 4.24's artifact cache is
+content-addressed (`artifacts/<hash>.olean|ilean|c|o`) and indexed by input
+hash (`inputs/<package>.jsonl`); the integration build writes the host's
+under `~/.elan/toolchains/leanprover--lean4---v4.24.0/lake/cache` (112 GB;
+`~/.cache/lake` is another tool's), and a VM's is
+`$XDG_CACHE_HOME/lake` = `/workspace/.setup/cache/lake` (no elan there).  The
+script reads each module's trace (`depHash` = input hash, `outputs` =
+artifact hashes) in the checkout, keeps those whose outputs are cached, and
+for each active lane ships, zstd-packed and sha256-checked, exactly the
+artifacts that VM lacks (the shared pack is the delta against the previous
+shipment), then appends the input lines the VM lacks under Lake's own lock.
+Nothing is overwritten: a pack is extracted into a staging directory,
+checked file by file, and moved in with `mv -n`.  A VM short of disk for pack + contents + 2 GiB is
+skipped and listed.  A VM with the Bridge's Mathlib checkout at the host's
+pin but no Mathlib build gets the `lake exe cache` files it lacks.  Lanes need no extra
+step: after `git fetch` and a merge of master, `lake build` fetches every
+module whose sources and options match master (`Fetched` lines) instead of rebuilding it.
+
+Measured 2026-11-03 at 2c79634c7: master's set is 10,676 artifacts, 5.11 GB
+(oleans 4.2 GB; zstd packs them about 3.4×), 3,564 mappings.  A dry run over
+the 27 active lanes (548 s, read-only) found 28 to 10,676 missing per VM
+(0.19–5.11 GB): most VMs' caches were cleaned for disk.  The first real
+shipment to one lane (`memory-copies`: 28 artifacts, a 53 MB pack, 1,029
+mappings and 1,321 Mathlib cache files) took 105 s; a second run found
+nothing missing.  Uploads run at about 1.2 MB/s per VM (`vmexec.py --put`,
+4 MB parts), so a full first shipment (~1.5 GB packed) takes ~20 min per VM
+and is skipped on VMs short of disk; later shipments carry only the merge's
+delta.  The gain per lane, a rebuild of master's changes at the VMs' few
+workers (0.5–3.2 h after a core change in the receipts), is not yet measured.

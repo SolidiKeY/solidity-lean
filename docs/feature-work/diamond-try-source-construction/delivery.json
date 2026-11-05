@@ -1,0 +1,8 @@
+{
+  "base": "a67fa5d8eea431d2363b023b0dd3654d440bfb4c",
+  "acceptedPriorTurn": "01a18d6c-0aa1-7582-ba2d-f6b7780ab8ae",
+  "delivery": "direct new design-only user continuation, no redispatch or journal mutation",
+  "designApproval": "call_a47cfacd6a354b6aac6a315d9da0501a item0",
+  "newImplementationAuthorized": false,
+  "receipt": "no coordinator receipt minted by worker"
+}

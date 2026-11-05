@@ -36,8 +36,9 @@ function validateCounterexample(row) {
     return;
   }
   const evidence = row.counterexample;
-  if (!object(evidence) || evidence.kind !== 'model-state' || evidence.certified !== true || evidence.goalKind !== 'fmlValid' || !nonempty(evidence.certificateDeclaration)
-      || !Array.isArray(evidence.axioms) || !evidence.axioms.every(axiom => standardAxioms.has(axiom))
+  const direct=row.verification==='direct'&&evidence?.certified===false;
+  const certificate=direct ? evidence.certificateDeclaration===undefined&&evidence.axioms===undefined : evidence?.certified===true&&nonempty(evidence.certificateDeclaration)&&Array.isArray(evidence.axioms)&&evidence.axioms.every(axiom=>standardAxioms.has(axiom));
+  if (!object(evidence) || evidence.kind !== 'model-state' || !certificate || evidence.goalKind !== 'fmlValid'
       || !Array.isArray(evidence.arguments) || !evidence.arguments.every(modelValue)
       || !transaction(evidence.transaction) || typeof evidence.initialStorage !== 'string'
       || !Array.isArray(evidence.initialLedger) || !evidence.initialLedger.every(ledgerEntry)
@@ -61,8 +62,7 @@ function counterexampleDetail(row) {
   const ledger = evidence.initialLedger.map(({address,amount}) => ({address,amount}));
   const result = evidence.outcome === undefined ? undefined : evidence.outcome.kind === 'halt' ? {kind:'halt',halt:evidence.outcome.halt} : {kind:'postStorage',storage:evidence.outcome.storage};
   const lines = [
-    'certified model prestate',
-    `Certificate: ${escapedText(evidence.certificateDeclaration)}`,
+    ...(evidence.certified?['certified model prestate',`Certificate: ${escapedText(evidence.certificateDeclaration)}`]:['counterexample']),
     ...evidence.arguments.map(argument => {
       const source = argument.sourceName ? `; source ${escapedText(argument.sourceName)}${argument.sourceType ? `: ${escapedText(argument.sourceType)}` : ''}` : '';
       return `${escapedText(argument.modelName)} (${argument.type}${source}) = ${escapedText(argument.value)}`;

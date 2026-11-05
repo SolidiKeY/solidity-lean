@@ -16,6 +16,22 @@ function setup(backend) {
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
 
+test('a queued dependency notification clears old UI without cancelling a fresh verification',async()=>{
+  const env=mock(),disposable=()=>({dispose(){}}),service=new (require('node:events').EventEmitter)();
+  Object.assign(service,{open:async()=>{},cancel(){},dispose:async()=>{}});
+  for(const name of ['registerCompletionItemProvider','registerDefinitionProvider','registerReferenceProvider','registerDocumentSymbolProvider','registerSignatureHelpProvider','registerDocumentHighlightProvider','registerRenameProvider','registerDocumentFormattingEditProvider','registerCodeActionsProvider','registerWorkspaceSymbolProvider'])env.vscode.languages[name]=disposable;
+  Object.assign(env.vscode,{StatusBarAlignment:{Left:1},CodeActionKind:{QuickFix:{}},Uri:{file:path=>({fsPath:path})}});
+  Object.assign(env.vscode.window,{visibleTextEditors:[],createTextEditorDecorationType:disposable,createStatusBarItem:()=>({show(){},hide(){},dispose(){}}),onDidChangeVisibleTextEditors:disposable,onDidChangeActiveTextEditor:disposable});
+  Object.assign(env.vscode.workspace,{textDocuments:[env.doc],onDidOpenTextDocument:disposable,onDidChangeConfiguration:disposable,createFileSystemWatcher:()=>({dispose(){},onDidChange:disposable,onDidCreate:disposable,onDidDelete:disposable})});
+  let complete,signal;const api=createExtension(env.vscode,env.context,args=>{signal=args.signal;return new Promise(resolve=>{complete=resolve;});},service);
+  try{
+    const pending=api.verify(env.doc);await settle();api.reports.set(env.doc.uri.toString(),{results:[row(env)],errors:[]});
+    service.emit('invalidated',{uri:env.doc.uri.toString(),version:env.doc.version});
+    assert.equal(api.reports.has(env.doc.uri.toString()),false);assert.equal(signal.aborted,false);
+    complete({results:[row(env)],errors:[]});assert.equal((await pending).results[0].status,'proved');
+  }finally{await api.dispose();}
+});
+
 test('model distinguishes incomplete proof, import gap, runtime error and success', () => {
   assert.equal(model.resultKind({ status: 'pending' }), 'failed');
   assert.equal(model.resultKind({ status: 'unsupported' }), 'errored');
@@ -109,6 +125,39 @@ test('suppresses results from modified documents', async () => {
   env.doc.version++; env.events.change({ document: env.doc, contentChanges: [{}] });
   assert.equal(signal.aborted, true); finish(); assert.equal(await promise, null);
   assert.equal(env.diagnosticMap.size, 0); assert.equal(env.controller.items.size, 0);
+});
+for (const saved of [true,false]) test(`an edit during ${saved?'completed':'interrupted'} save prevents a superseded request from launching a backend`, async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc); await settle();
+  env.doc.version++; env.doc.text += '// newer';
+  env.events.change({document:env.doc,contentChanges:[{}]});
+  release(saved);
+  assert.equal(await old,null); assert.equal(calls,0); assert.equal(env.api.reports.size,0);
+  env.doc.isDirty = false;
+  await env.api.verify(env.doc);assert.equal(calls,1);
+});
+test('an unsuccessful save still reports an error for a current request',async()=>{
+  const env=setup();env.doc.isDirty=true;env.doc.save=async()=>false;
+  await assert.rejects(env.api.verify(env.doc),/Save the Solidity file/);
+});
+test('a joined save must leave the current buffer clean before a backend starts',async()=>{
+  let saves=0,calls=0;
+  const env=setup(async(_,env)=>{calls++;assert.equal(env.doc.isDirty,false);return {results:[row(env)],errors:[]};});
+  env.doc.isDirty=true;
+  env.doc.save=async()=>{saves++;if(saves===2)env.doc.isDirty=false;return true;};
+  await env.api.verify(env.doc);assert.equal(saves,2);assert.equal(calls,1);
+});
+test('new verification requests supersede older requests still saving the same file', async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc);await settle();
+  env.doc.isDirty = false;await env.api.verify(env.doc);
+  release(true);assert.equal(await old,null);assert.equal(calls,1);
 });
 test('rejects stale source hashes and reports for another source', async () => {
   const env = setup(async (_, env) => ({ results: [row(env, { sourceHash: '0'.repeat(64) })], errors: [] }));

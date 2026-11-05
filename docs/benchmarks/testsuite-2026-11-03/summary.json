@@ -1,0 +1,1121 @@
+{
+  "date": "2026-11-03",
+  "count": 83,
+  "inventory": "Bridge/SolidityVelvet/TestSuite.lean",
+  "inventorySha256": "a4c66b77ffbdc4337be20a8822f176a4b22d50a91247b159acd8024969c11f43",
+  "environment": {
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "cpuQuota": "400000 100000",
+    "node": "v24.21.0",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "startup": {
+    "nativeReadyMs": 4.9917150000000134,
+    "extensionInitializedMs": 93.80575300000001,
+    "extensionFirstResultMs": 610.41887,
+    "browserReadyMs": 1855.5006010000002,
+    "browserFirstResultMs": 2342.143114,
+    "solkeyColdResultMs": 2033.1285249999999,
+    "solkeyServerMarkerMs": 305.257333
+  },
+  "medians": {
+    "nativeMs": 0.8180770000000166,
+    "extensionMs": 65.99117599999954,
+    "extensionWasmMs": 70.01893699999982,
+    "browserMs": 155.74231099999997,
+    "solkeyMs": 100.1205289999998,
+    "solkeyProofMs": 24
+  },
+  "artifacts": {
+    "web/single-file/index.html": {
+      "bytes": 41479671,
+      "sha256": "472b6fc5b51cbaa0114a8fb49529ffbfaca9d9f92977c81aed22484b89f195af"
+    },
+    ".lake/artifacts/solidity-lean-0.5.5.vsix": {
+      "bytes": 10121823,
+      "sha256": "9696f4f36c0536b0300d25d895fa89212f1fb9fee6195cacefa119a3a1f42a91"
+    }
+  },
+  "rows": [
+    {
+      "name": "additionStorageWrite",
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "nativeMs": 1.727390000000014,
+      "extensionMs": 67.62498899999991,
+      "extensionWasmMs": 712.125207,
+      "browserMs": 174.9493599999987,
+      "solkeyMs": 138.66854800000146,
+      "solkeyProofMs": 58,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "additionSimple",
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "nativeMs": 0.6843580000000884,
+      "extensionMs": 64.7640220000012,
+      "extensionWasmMs": 77.63682300000005,
+      "browserMs": 153.31023899999855,
+      "solkeyMs": 94.75169900000037,
+      "solkeyProofMs": 9,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "additionStorageRead",
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "nativeMs": 0.8243360000000024,
+      "extensionMs": 65.78814500000044,
+      "extensionWasmMs": 85.38182699999993,
+      "browserMs": 154.7007369999992,
+      "solkeyMs": 99.74609599999894,
+      "solkeyProofMs": 23,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "subtractionSimple",
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "nativeMs": 0.7074870000000146,
+      "extensionMs": 64.94444399999975,
+      "extensionWasmMs": 88.73298199999999,
+      "browserMs": 156.25194399999964,
+      "solkeyMs": 79.55522000000201,
+      "solkeyProofMs": 9,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "subtractionStorageRead",
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "nativeMs": 0.7379270000000133,
+      "extensionMs": 64.55411000000004,
+      "extensionWasmMs": 81.53943299999992,
+      "browserMs": 159.18087000000014,
+      "solkeyMs": 94.37076199999865,
+      "solkeyProofMs": 25,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "multiplicationSimple",
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "nativeMs": 0.6409539999999652,
+      "extensionMs": 64.38272899999993,
+      "extensionWasmMs": 81.12282400000004,
+      "browserMs": 187.23697399999946,
+      "solkeyMs": 86.74796799999967,
+      "solkeyProofMs": 12,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "divisionSimple",
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "nativeMs": 0.6434269999999742,
+      "extensionMs": 62.63541500000065,
+      "extensionWasmMs": 68.29420299999992,
+      "browserMs": 156.63425800000186,
+      "solkeyMs": 92.15531700000065,
+      "solkeyProofMs": 13,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "moduloSimple",
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "nativeMs": 0.6352350000000229,
+      "extensionMs": 61.13333700000021,
+      "extensionWasmMs": 85.03069600000003,
+      "browserMs": 157.0792799999981,
+      "solkeyMs": 86.62745799999902,
+      "solkeyProofMs": 12,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "powerSimple",
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "nativeMs": 0.6247190000000273,
+      "extensionMs": 66.07141600000068,
+      "extensionWasmMs": 111.99511000000007,
+      "browserMs": 154.43954900000244,
+      "solkeyMs": 81.09816900000078,
+      "solkeyProofMs": 8,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "localArithmeticInRange",
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "nativeMs": 1.5707559999999603,
+      "extensionMs": 69.77792899999986,
+      "extensionWasmMs": 105.75139399999989,
+      "browserMs": 155.3336789999994,
+      "solkeyMs": 131.0553329999966,
+      "solkeyProofMs": 56,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "greaterEqualSimple",
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "nativeMs": 0.6354550000000927,
+      "extensionMs": 67.39629700000023,
+      "extensionWasmMs": 94.74858900000004,
+      "browserMs": 150.47027000000162,
+      "solkeyMs": 86.13474900000074,
+      "solkeyProofMs": 9,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "greaterThanSimple",
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "nativeMs": 0.7065000000000055,
+      "extensionMs": 67.1405649999997,
+      "extensionWasmMs": 87.36866299999997,
+      "browserMs": 152.94461600000068,
+      "solkeyMs": 81.28004999999757,
+      "solkeyProofMs": 5,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "lessEqualSimple",
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "nativeMs": 0.5795620000000099,
+      "extensionMs": 67.67193599999996,
+      "extensionWasmMs": 78.5714280000002,
+      "browserMs": 152.44385299999703,
+      "solkeyMs": 82.37723300000016,
+      "solkeyProofMs": 6,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "lessThanSimple",
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "nativeMs": 0.5859219999999823,
+      "extensionMs": 65.05185800000004,
+      "extensionWasmMs": 68.14320899999984,
+      "browserMs": 154.1826919999985,
+      "solkeyMs": 84.67507099999966,
+      "solkeyProofMs": 7,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "notEqualSimple",
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "nativeMs": 0.598590999999999,
+      "extensionMs": 65.31598099999997,
+      "extensionWasmMs": 63.72958399999993,
+      "browserMs": 154.81059599999935,
+      "solkeyMs": 75.58920399999988,
+      "solkeyProofMs": 4,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "logicalAndSimple",
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "nativeMs": 0.590598,
+      "extensionMs": 65.99117599999954,
+      "extensionWasmMs": 66.57087100000012,
+      "browserMs": 153.85867900000085,
+      "solkeyMs": 94.03335000000152,
+      "solkeyProofMs": 12,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "nativeMs": 0.8224129999999832,
+      "extensionMs": 67.25457000000006,
+      "extensionWasmMs": 76.36285300000009,
+      "browserMs": 152.866954000001,
+      "solkeyMs": 91.78462199999922,
+      "solkeyProofMs": 21,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "logicalNotSimple",
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "nativeMs": 0.5839189999999945,
+      "extensionMs": 64.06160799999998,
+      "extensionWasmMs": 70.31469900000002,
+      "browserMs": 152.45795699999871,
+      "solkeyMs": 78.63648499999908,
+      "solkeyProofMs": 4,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "logicalOrSimple",
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "nativeMs": 0.6432770000000119,
+      "extensionMs": 64.66215000000011,
+      "extensionWasmMs": 78.85303699999986,
+      "browserMs": 153.19804699999804,
+      "solkeyMs": 86.15257099999872,
+      "solkeyProofMs": 7,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "nativeMs": 0.860590000000002,
+      "extensionMs": 68.36769600000025,
+      "extensionWasmMs": 69.36605699999973,
+      "browserMs": 151.98145899999872,
+      "solkeyMs": 109.20445000000109,
+      "solkeyProofMs": 34,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "nativeMs": 0.8725369999999657,
+      "extensionMs": 66.44709599999987,
+      "extensionWasmMs": 72.88871699999982,
+      "browserMs": 160.058226000001,
+      "solkeyMs": 99.71184999999969,
+      "solkeyProofMs": 24,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ternaryToIf",
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "nativeMs": 0.7305069999999887,
+      "extensionMs": 66.49765000000025,
+      "extensionWasmMs": 67.46009200000026,
+      "browserMs": 155.78399400000126,
+      "solkeyMs": 88.90723699999944,
+      "solkeyProofMs": 16,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifUnfold",
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "nativeMs": 0.8116669999999999,
+      "extensionMs": 67.07018299999982,
+      "extensionWasmMs": 78.9126339999998,
+      "browserMs": 163.56843100000333,
+      "solkeyMs": 101.19647199999963,
+      "solkeyProofMs": 24,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifElseUnfold",
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "nativeMs": 0.8371659999999963,
+      "extensionMs": 65.67455400000017,
+      "extensionWasmMs": 70.41227300000037,
+      "browserMs": 160.858612,
+      "solkeyMs": 90.64988300000186,
+      "solkeyProofMs": 20,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifSplit",
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "nativeMs": 0.7620640000000094,
+      "extensionMs": 67.01792299999988,
+      "extensionWasmMs": 74.23146299999962,
+      "browserMs": 157.40281099999993,
+      "solkeyMs": 88.73605099999986,
+      "solkeyProofMs": 14,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifElseSplit",
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "nativeMs": 0.8152719999999931,
+      "extensionMs": 70.491579,
+      "extensionWasmMs": 72.81284199999982,
+      "browserMs": 159.53499200000078,
+      "solkeyMs": 93.302128000003,
+      "solkeyProofMs": 17,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifTrue",
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "nativeMs": 0.6993299999999181,
+      "extensionMs": 66.27224699999897,
+      "extensionWasmMs": 67.04838000000018,
+      "browserMs": 152.13169300000027,
+      "solkeyMs": 86.12527299999783,
+      "solkeyProofMs": 9,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifFalse",
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "nativeMs": 0.6899760000000015,
+      "extensionMs": 66.20778699999983,
+      "extensionWasmMs": 64.27953200000002,
+      "browserMs": 150.51023200000054,
+      "solkeyMs": 85.67007899999953,
+      "solkeyProofMs": 10,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifElseTrue",
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "nativeMs": 0.7604210000000649,
+      "extensionMs": 66.58269699999983,
+      "extensionWasmMs": 68.49752500000022,
+      "browserMs": 152.7000110000008,
+      "solkeyMs": 81.50188799999887,
+      "solkeyProofMs": 10,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifElseFalse",
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "nativeMs": 0.7474520000000098,
+      "extensionMs": 65.26977299999999,
+      "extensionWasmMs": 65.836186,
+      "browserMs": 156.07541099999798,
+      "solkeyMs": 80.86177400000088,
+      "solkeyProofMs": 9,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "ifElseNegated",
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "nativeMs": 0.8545409999999833,
+      "extensionMs": 69.64155500000015,
+      "extensionWasmMs": 65.58376099999987,
+      "browserMs": 154.69068799999968,
+      "solkeyMs": 90.2095339999978,
+      "solkeyProofMs": 18,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "requireTrueLiteral",
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "nativeMs": 0.5128919999999937,
+      "extensionMs": 64.44355700000051,
+      "extensionWasmMs": 64.84078599999975,
+      "browserMs": 156.9431880000002,
+      "solkeyMs": 80.06411899999875,
+      "solkeyProofMs": 4,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "requireFalseLiteral",
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "nativeMs": 0.5562219999999911,
+      "extensionMs": 64.84891799999968,
+      "extensionWasmMs": 66.0983269999997,
+      "browserMs": 153.58768899999995,
+      "solkeyMs": 74.46904799999902,
+      "solkeyProofMs": 4,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "requireGuardBox",
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "nativeMs": 1.0169229999999914,
+      "extensionMs": 65.68053599999985,
+      "extensionWasmMs": 66.87022500000012,
+      "browserMs": 154.75147200000356,
+      "solkeyMs": 103.55808900000193,
+      "solkeyProofMs": 30,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "nativeMs": 0.8978050000000053,
+      "extensionMs": 68.40508599999885,
+      "extensionWasmMs": 66.35325600000033,
+      "browserMs": 154.98147299999982,
+      "solkeyMs": 105.54673399999956,
+      "solkeyProofMs": 25,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "testSimpleAssert",
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "nativeMs": 0.7262200000000121,
+      "extensionMs": 65.04302699999971,
+      "extensionWasmMs": 64.3484540000004,
+      "browserMs": 154.25685100000555,
+      "solkeyMs": 90.64296900000045,
+      "solkeyProofMs": 16,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootReadWrite",
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "nativeMs": 0.6902959999999894,
+      "extensionMs": 64.16447200000039,
+      "extensionWasmMs": 64.44013099999984,
+      "browserMs": 157.24320699999953,
+      "solkeyMs": 92.15141200000289,
+      "solkeyProofMs": 19,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootAddAssign",
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "nativeMs": 0.7613219999999501,
+      "extensionMs": 65.47780300000159,
+      "extensionWasmMs": 64.49417099999982,
+      "browserMs": 155.33367399999952,
+      "solkeyMs": 90.7923809999993,
+      "solkeyProofMs": 21,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootSubAssign",
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "nativeMs": 0.7769959999999401,
+      "extensionMs": 63.294246999999814,
+      "extensionWasmMs": 68.29943000000003,
+      "browserMs": 153.33235499999864,
+      "solkeyMs": 97.8067910000027,
+      "solkeyProofMs": 21,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootMulAssign",
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "nativeMs": 0.7572059999999965,
+      "extensionMs": 64.57039500000064,
+      "extensionWasmMs": 64.40393700000004,
+      "browserMs": 152.1503900000007,
+      "solkeyMs": 97.00035699999717,
+      "solkeyProofMs": 22,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootDivAssign",
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "nativeMs": 0.8264289999999619,
+      "extensionMs": 64.73356599999897,
+      "extensionWasmMs": 63.86131000000023,
+      "browserMs": 154.38637500000004,
+      "solkeyMs": 102.57546900000307,
+      "solkeyProofMs": 22,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootModAssign",
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "nativeMs": 0.8054480000000126,
+      "extensionMs": 63.093926999999894,
+      "extensionWasmMs": 68.05208200000015,
+      "browserMs": 155.3137749999987,
+      "solkeyMs": 97.26423200000136,
+      "solkeyProofMs": 24,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "nativeMs": 0.898185999999896,
+      "extensionMs": 63.28840600000012,
+      "extensionWasmMs": 66.64123900000004,
+      "browserMs": 151.7686020000001,
+      "solkeyMs": 94.45082800000091,
+      "solkeyProofMs": 19,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootPostincrement",
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "nativeMs": 0.7428050000000042,
+      "extensionMs": 63.046628000000055,
+      "extensionWasmMs": 64.97965199999999,
+      "browserMs": 154.92345699999714,
+      "solkeyMs": 92.80892500000118,
+      "solkeyProofMs": 24,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootPreincrement",
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "nativeMs": 0.7057999999999538,
+      "extensionMs": 64.48509899999954,
+      "extensionWasmMs": 65.1958239999999,
+      "browserMs": 151.87514500000543,
+      "solkeyMs": 100.1205289999998,
+      "solkeyProofMs": 22,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootPredecrement",
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "nativeMs": 0.7276719999999841,
+      "extensionMs": 65.22323499999948,
+      "extensionWasmMs": 63.67451099999971,
+      "browserMs": 152.91138499999943,
+      "solkeyMs": 101.4509620000008,
+      "solkeyProofMs": 27,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootDelete",
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "nativeMs": 0.7435759999999618,
+      "extensionMs": 63.57816699999967,
+      "extensionWasmMs": 64.08816699999988,
+      "browserMs": 153.01641100000415,
+      "solkeyMs": 95.99807800000053,
+      "solkeyProofMs": 21,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootDisjoint",
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "nativeMs": 0.7369659999999953,
+      "extensionMs": 65.08064199999899,
+      "extensionWasmMs": 65.2849669999996,
+      "browserMs": 156.15508899999986,
+      "solkeyMs": 87.59117500000139,
+      "solkeyProofMs": 21,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "nativeMs": 2.891921000000025,
+      "extensionMs": 68.73390699999982,
+      "extensionWasmMs": 77.17306800000006,
+      "browserMs": 161.798437999998,
+      "solkeyMs": 161.30610399999932,
+      "solkeyProofMs": 93,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "nativeMs": 0.6183399999999892,
+      "extensionMs": 62.85007500000029,
+      "extensionWasmMs": 62.75642700000026,
+      "browserMs": 155.87078800000018,
+      "solkeyMs": 86.63680600000225,
+      "solkeyProofMs": 11,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "nativeMs": 0.7481430000000273,
+      "extensionMs": 65.24489700000049,
+      "extensionWasmMs": 65.31033399999978,
+      "browserMs": 153.2288980000012,
+      "solkeyMs": 100.38054600000032,
+      "solkeyProofMs": 20,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "nativeMs": 0.8395880000000489,
+      "extensionMs": 64.91991299999972,
+      "extensionWasmMs": 64.80340000000069,
+      "browserMs": 158.1139120000007,
+      "solkeyMs": 120.47453400000086,
+      "solkeyProofMs": 44,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "nativeMs": 1.2122430000000008,
+      "extensionMs": 65.16921600000023,
+      "extensionWasmMs": 66.53935300000012,
+      "browserMs": 155.40248399999837,
+      "solkeyMs": 122.63039800000115,
+      "solkeyProofMs": 47,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "nativeMs": 3.2011600000000158,
+      "extensionMs": 71.02263900000071,
+      "extensionWasmMs": 80.19200899999942,
+      "browserMs": 160.7850699999981,
+      "solkeyMs": 181.23705999999947,
+      "solkeyProofMs": 104,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "nativeMs": 0.8180770000000166,
+      "extensionMs": 65.01505499999985,
+      "extensionWasmMs": 65.77932200000032,
+      "browserMs": 152.51081500000146,
+      "solkeyMs": 113.74258100000043,
+      "solkeyProofMs": 31,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "nativeMs": 1.338630999999964,
+      "extensionMs": 67.25598700000046,
+      "extensionWasmMs": 66.27612099999988,
+      "browserMs": 153.566399000003,
+      "solkeyMs": 124.50821800000267,
+      "solkeyProofMs": 51,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "nativeMs": 1.748851000000002,
+      "extensionMs": 69.34456499999942,
+      "extensionWasmMs": 72.48872000000028,
+      "browserMs": 162.91839900000014,
+      "solkeyMs": 204.51877999999851,
+      "solkeyProofMs": 130,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "nativeMs": 4.467004000000003,
+      "extensionMs": 75.57336299999952,
+      "extensionWasmMs": 85.24160900000061,
+      "browserMs": 168.12509400000272,
+      "solkeyMs": 209.60109400000147,
+      "solkeyProofMs": 136,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageGridWriteRead",
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "nativeMs": 1.1964189999999917,
+      "extensionMs": 67.88701700000001,
+      "extensionWasmMs": 68.25229000000036,
+      "browserMs": 157.75779800000237,
+      "solkeyMs": 135.52272099999936,
+      "solkeyProofMs": 64,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "nativeMs": 0.7971960000000138,
+      "extensionMs": 66.35394600000109,
+      "extensionWasmMs": 65.04198499999984,
+      "browserMs": 162.1485329999996,
+      "solkeyMs": 112.13628899999821,
+      "solkeyProofMs": 36,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "nativeMs": 2.2292050000000074,
+      "extensionMs": 67.44752200000039,
+      "extensionWasmMs": 70.01893699999982,
+      "browserMs": 163.64150300000256,
+      "solkeyMs": 172.1968799999995,
+      "solkeyProofMs": 100,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "nativeMs": 2.1233080000000086,
+      "extensionMs": 66.24434399999882,
+      "extensionWasmMs": 71.13662000000022,
+      "browserMs": 156.45526600000085,
+      "solkeyMs": 168.60162299999865,
+      "solkeyProofMs": 99,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "nativeMs": 1.65601300000003,
+      "extensionMs": 65.51968500000021,
+      "extensionWasmMs": 68.91675900000064,
+      "browserMs": 156.66031199999998,
+      "solkeyMs": 164.62786099999357,
+      "solkeyProofMs": 86,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "nativeMs": 2.154574000000025,
+      "extensionMs": 67.63403000000017,
+      "extensionWasmMs": 72.18646100000024,
+      "browserMs": 158.85252200000104,
+      "solkeyMs": 166.01500600000145,
+      "solkeyProofMs": 95,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "nativeMs": 2.1671629999999595,
+      "extensionMs": 66.59072800000013,
+      "extensionWasmMs": 72.08283699999993,
+      "browserMs": 156.7123270000011,
+      "solkeyMs": 163.98355599999923,
+      "solkeyProofMs": 89,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexDelete",
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "nativeMs": 1.5891129999999976,
+      "extensionMs": 64.70067699999981,
+      "extensionWasmMs": 71.37234100000023,
+      "browserMs": 155.17619800000102,
+      "solkeyMs": 154.443808,
+      "solkeyProofMs": 82,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "nativeMs": 1.8190549999999348,
+      "extensionMs": 69.14210399999865,
+      "extensionWasmMs": 73.44236000000001,
+      "browserMs": 164.45622300000105,
+      "solkeyMs": 158.45395300000018,
+      "solkeyProofMs": 84,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "nativeMs": 1.0000369999999918,
+      "extensionMs": 64.19688900000074,
+      "extensionWasmMs": 71.1309769999998,
+      "browserMs": 152.2101399999956,
+      "solkeyMs": 103.20462499999849,
+      "solkeyProofMs": 26,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "nativeMs": 1.0547390000000405,
+      "extensionMs": 65.29857799999809,
+      "extensionWasmMs": 71.55375499999991,
+      "browserMs": 155.80133399999977,
+      "solkeyMs": 99.69375299999956,
+      "solkeyProofMs": 27,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "nativeMs": 2.8536740000000123,
+      "extensionMs": 68.43257799999992,
+      "extensionWasmMs": 72.47725300000002,
+      "browserMs": 158.28591100000267,
+      "solkeyMs": 229.37537999999768,
+      "solkeyProofMs": 159,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "nativeMs": 12.733197999999902,
+      "extensionMs": 81.16518500000166,
+      "extensionWasmMs": 98.13566499999979,
+      "browserMs": 190.74363599999924,
+      "solkeyMs": 388.28252799999973,
+      "solkeyProofMs": 308,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePushEmpty",
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "nativeMs": 1.125675000000001,
+      "extensionMs": 65.70073600000251,
+      "extensionWasmMs": 68.41709499999979,
+      "browserMs": 158.27377100000012,
+      "solkeyMs": 111.63186600000336,
+      "solkeyProofMs": 42,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "nativeMs": 0.8085529999999892,
+      "extensionMs": 62.78285499999947,
+      "extensionWasmMs": 69.87259100000028,
+      "browserMs": 155.74231099999997,
+      "solkeyMs": 109.657941999998,
+      "solkeyProofMs": 36,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "nativeMs": 3.9168449999999666,
+      "extensionMs": 72.2627390000016,
+      "extensionWasmMs": 83.92379800000072,
+      "browserMs": 161.89632900000288,
+      "solkeyMs": 209.7245269999985,
+      "solkeyProofMs": 135,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePushReadBack",
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "nativeMs": 1.5737310000000093,
+      "extensionMs": 69.05547300000035,
+      "extensionWasmMs": 71.08906899999965,
+      "browserMs": 155.1123090000001,
+      "solkeyMs": 174.36243199999808,
+      "solkeyProofMs": 103,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePopAfterPush",
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "nativeMs": 1.2153220000000147,
+      "extensionMs": 67.39540500000112,
+      "extensionWasmMs": 71.85848400000032,
+      "browserMs": 154.3448580000004,
+      "solkeyMs": 158.93265600000086,
+      "solkeyProofMs": 92,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePopNonempty",
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "nativeMs": 1.6157029999999395,
+      "extensionMs": 69.95015400000011,
+      "extensionWasmMs": 68.2385489999997,
+      "browserMs": 157.2989929999967,
+      "solkeyMs": 203.06096400000024,
+      "solkeyProofMs": 127,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "nativeMs": 0.49171100000000934,
+      "extensionMs": 63.86661699999968,
+      "extensionWasmMs": 62.30305200000021,
+      "browserMs": 150.81750699999975,
+      "solkeyMs": 136.51440100000036,
+      "solkeyProofMs": 48,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "whileCountsUp",
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "nativeMs": 1.1115130000000022,
+      "extensionMs": 66.26982599999974,
+      "extensionWasmMs": 87.04712300000028,
+      "browserMs": 157.17111099999966,
+      "solkeyMs": 120.70872299999974,
+      "solkeyProofMs": 44,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "nativeMs": 90.53626,
+      "extensionMs": 156.0778199999986,
+      "extensionWasmMs": 239.75630400000045,
+      "browserMs": 331.5307549999998,
+      "solkeyMs": 388.3180460000003,
+      "solkeyProofMs": 314,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "forWritesStorageArray",
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "nativeMs": 18.849534000000006,
+      "extensionMs": 86.48770100000002,
+      "extensionWasmMs": 115.34950800000024,
+      "browserMs": 194.84260500000164,
+      "solkeyMs": 415.1243739999991,
+      "solkeyProofMs": 350,
+      "solkeyStatuses": [
+        "OPEN"
+      ]
+    },
+    {
+      "name": "invariantCountsToBound",
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "nativeMs": 1.3453509999999937,
+      "extensionMs": 69.4601160000002,
+      "extensionWasmMs": 70.62256499999967,
+      "browserMs": 158.09250299999985,
+      "solkeyMs": 153.9455850000013,
+      "solkeyProofMs": 78,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "nativeMs": 1.7487059999999701,
+      "extensionMs": 66.98547199999848,
+      "extensionWasmMs": 82.98246300000028,
+      "browserMs": 160.90946099999928,
+      "solkeyMs": 173.8756519999988,
+      "solkeyProofMs": 104,
+      "solkeyStatuses": [
+        "PROVED"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import Solidity.Calculus.Decision
-import Solidity.Examples.Tactics.Hashing
+import Solidity.Examples.Tactics.HashingNames
 
 /-!
 # The closer's decision on leaves with hashes (M7, plan step 7)
@@ -8,6 +8,12 @@ import Solidity.Examples.Tactics.Hashing
 fresh strings read only by hashes of one kind or of two (`decideHash`):
 proofs by the swapped leaf, refutations by strings of a family,
 kernel-checked coverage (`Fml.hashCovered`), and leaves outside it.
+
+This module holds the formulas, which `Examples/Decision.lean` reads; their
+checks (the verdict pins and the coverage theorems) are the leaf
+`Examples/DecisionHashesChecks.lean`, so that the formulas build without them
+and without the hashing examples (`Names` is in
+`Examples/Tactics/HashingNames.lean`; `docs/parallelism.md`, P5).
 -/
 
 namespace Solidity.Examples.DecisionHashes
@@ -80,35 +86,6 @@ variant, refuted by one string twice. -/
 def namesTwoKinds : Fml Names [] := strings (.imp (.eq shaS shaT) (.eq hS hT))
 def namesTwoKindsBad : Fml Names [] := strings (.imp (.eq shaS shaT) (.not (.eq hS hT)))
 
-/-- info: ["proved", "refuted", "proved", "refuted", "proved", "refuted"] -/
-#guard_msgs in
-#eval [namesSet, namesSetBad, namesEq, namesEqBad, namesTwoKinds, namesTwoKindsBad].map verdict
-
-/-- info: [true, true, true, true, true, true] -/
-#guard_msgs in
-#eval [namesSet, namesSetBad, namesEq, namesEqBad, namesTwoKinds, namesTwoKindsBad].map Fml.hashCovered
-
-/-- info: [true, true, true, true, true, true] -/
-#guard_msgs in
-#eval [namesSet, namesSetBad, namesEq, namesEqBad, namesTwoKinds, namesTwoKindsBad].map (Fml.inTarget {})
-
-/-- Two kinds of hash, by the kernel: the reading with the `sha256` words
-and its instances covered. -/
-theorem namesTwoKinds_covered : namesTwoKinds.hashCovered = true := by decide +kernel
-
-/-- `decideGoal_complete_hash`, applied to two kinds. -/
-theorem namesTwoKinds_answers : decideGoal namesTwoKinds ≠ .unknown :=
-  decideGoal_complete_hash namesTwoKinds_covered
-
-/-- The leaf is covered, by the kernel: its swapped reading and its two
-instances (one class, two classes) in `Fml.Covered`, its keyed root `ids`. -/
-theorem namesSet_covered : namesSet.hashCovered = true := by decide +kernel
-
-/-- `decideGoal_complete_hash`, applied. -/
-theorem namesSet_answers : decideGoal namesSet ≠ .unknown := decideGoal_complete_hash namesSet_covered
-
-theorem namesEqBad_covered : namesEqBad.hashCovered = true := by decide +kernel
-
 /-! #### A hash past an update
 
 The usual shape past symbolic execution: the hypotheses at the top, the
@@ -144,21 +121,6 @@ def namesSetLocalBad : Fml Names [] :=
   withX (.imp (.eq (sha2 (.there .here)) (sha2 .here))
     (setX 1 (.and (.eq (kec2 (.there .here)) (kec2 .here)) (.eq xL (num 2)))))
 
-/-- info: ["proved", "refuted", "proved", "refuted"] -/
-#guard_msgs in #eval [namesLanded, namesLandedBad, namesSetLocal, namesSetLocalBad].map verdict
-
-/-- info: [true, true, true, true] -/
-#guard_msgs in
-#eval [namesLanded, namesLandedBad, namesSetLocal, namesSetLocalBad].map
-  (fun φ => φ.hashCovered && φ.inTarget {})
-
-/-- A hash past an update, by the kernel. -/
-theorem namesLanded_covered : namesLanded.hashCovered = true := by decide +kernel
-
-/-- `decideGoal_complete_hash`, applied past an update. -/
-theorem namesLanded_answers : decideGoal namesLanded ≠ .unknown :=
-  decideGoal_complete_hash namesLanded_covered
-
 /-! #### More strings than `famBound`
 
 A refutation picks one string of the family per class of equal strings,
@@ -188,16 +150,6 @@ def fiveChain : Fml Names [] :=
   strings5 (.imp (.eq (h5 s0) (h5 s1)) (.imp (.eq (h5 s1) (h5 s2)) (.imp (.eq (h5 s2) (h5 s3))
     (.imp (.eq (h5 s3) (h5 s4)) (.eq (h5 s0) (h5 s4))))))
 
-/-- info: ["refuted", "proved"] -/
-#guard_msgs in #eval [fiveStrings, fiveChain].map verdict
-
-/-- info: [true, true] -/
-#guard_msgs in #eval [fiveStrings, fiveChain].map (fun φ => φ.hashCovered && φ.inTarget {})
-
-/-- Five strings, by the kernel: the family of five checked (`famOKAll 5`,
-fifteen hashes) and the 52 instances covered. -/
-theorem fiveChain_covered : fiveChain.hashCovered = true := by decide +kernel
-
 /-! #### A value quantifier in the body
 
 The swap reads a value binder in the body as one (`Fml.sw`).  The premise
@@ -213,15 +165,6 @@ def namesUnderForall : Fml Names [] := strings (.imp (.eq hS hT) (.all (.user "x
 def namesUnderForallBad : Fml Names [] := strings (.all (.user "x") .uint
   (.imp (.eq (Tm.pvV .here) (num 0)) (.eq (Tm.wk (.drop .refl) hS) (Tm.wk (.drop .refl) hT))))
 
-/-- info: ["proved", "refuted"] -/
-#guard_msgs in #eval [namesUnderForall, namesUnderForallBad].map verdict
-
-/-- info: [true, true] -/
-#guard_msgs in #eval [namesUnderForall, namesUnderForallBad].map (fun φ => φ.hashCovered && φ.inTarget {})
-
-/-- A value quantifier in the body, by the kernel. -/
-theorem namesUnderForall_covered : namesUnderForall.hashCovered = true := by decide +kernel
-
 /-- The strings as hidden binders (`Fml.bind`), which range over an unset
 reference too: its hash reads nothing and a key of nothing reads the
 default key `0`, so the verdict turns on whether a string hashes to `0`, a
@@ -229,9 +172,6 @@ preimage question.  Outside the named fragment, and `unknown`. -/
 def namesBound : Fml Names [] :=
   .bind .box (.user "s") (.mem Str) (.bind .box (.user "t") (.mem Str)
     (.imp (.not (.eq hS hT)) (.imp (.eq (idsRead hS) (num 0)) (setT (.eq (idsRead hS) (num 0))))))
-
-/-- info: (false, "unknown") -/
-#guard_msgs in #eval (namesBound.inTarget {}, verdict namesBound)
 
 /-! #### Three kinds
 
@@ -248,11 +188,6 @@ refuted by one string twice. -/
 def namesThreeKinds : Fml Names [] := strings (.imp (.eq hS hT) (.imp (.eq shaS shaT) (.eq ripS ripT)))
 def namesThreeKindsBad : Fml Names [] :=
   strings (.imp (.eq hS hT) (.imp (.eq shaS shaT) (.not (.eq ripS ripT))))
-
-/-- info: ["proved", "refuted"] -/
-#guard_msgs in #eval [namesThreeKinds, namesThreeKindsBad].map verdict
-
-theorem namesThreeKindsBad_covered : namesThreeKindsBad.hashCovered = true := by decide +kernel
 
 /-! #### Strings of the second kind the first does not hash
 
@@ -282,14 +217,6 @@ def mixedSome : Fml Names [] :=
 def mixedSomeBad : Fml Names [] :=
   strings4 (.imp (.eq (h4 .keccak sD) (h4 .keccak sC)) (.imp (.eq (h4 .sha256 sB) (h4 .sha256 sD))
     (.not (.eq (h4 .sha256 sB) (h4 .sha256 sC)))))
-
-/-- info: ["proved", "refuted"] -/
-#guard_msgs in #eval [mixedSome, mixedSomeBad].map verdict
-
-theorem mixedSome_covered : mixedSome.hashCovered = true := by decide +kernel
-/-- Covered `keccak256` first, where `b` is unlinked (with `sha256` first,
-`keccak256` hashes `c` and `d` only, both linked: feature 12). -/
-theorem mixedSome_coveredK2 : mixedSome.coveredK2 .keccak .sha256 = true := by decide +kernel
 
 end Hashes
 
@@ -334,14 +261,6 @@ def twoKeysBad : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 0)) (.imp (.eq (rd2 "shas" rfl sS) (n2 1))
     (setIdsT (.and (.eq (rd2 "ids" rfl kS) (n2 0)) (.eq (rd2 "shas" rfl sS) (n2 1))))))
 
-/-- info: ["proved", "refuted"] -/
-#guard_msgs in #eval [twoKeys, twoKeysBad].map verdict
-
-/-- info: [true, true] -/
-#guard_msgs in #eval [twoKeys, twoKeysBad].map (fun φ => φ.hashCovered && φ.inTarget {})
-
-theorem twoKeys_covered : twoKeys.hashCovered = true := by decide +kernel
-
 /-- **A second kind hashing one string**, which the first kind does not
 hash (`gapMixedKinds`, M7 feature 27): its word needs no link, so the
 string needs no hash of the first kind.  `ids[keccak256(s)] == 1 →
@@ -350,11 +269,6 @@ shas[sha256(t)] == 2 → ids[keccak256(s)] != shas[sha256(t)]`, proved;
 def mixedKinds : Fml Names2 [] :=
   strings2 (.imp (.eq (rd2 "ids" rfl kS) (n2 1)) (.imp (.eq (rd2 "shas" rfl sT) (n2 2))
     (.not (.eq (rd2 "ids" rfl kS) (rd2 "shas" rfl sT)))))
-
-/-- info: "proved" -/
-#guard_msgs in #eval verdict mixedKinds
-
-theorem mixedKinds_covered : mixedKinds.hashCovered = true := by decide +kernel
 
 end TwoKeys
 

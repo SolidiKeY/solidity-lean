@@ -2,6 +2,10 @@ import Solidity.Frontend.Import
 import Solidity.Tools.Run
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RevertMemory
+import Solidity.Tools.EntryReturn
+import Solidity.Tools.CreationTryReplay
+import Solidity.Tools.LibraryTryReplay
+import Solidity.Tools.UpstreamEntry
 
 /-!
 # Replay upstream typed ABI semantic vectors
@@ -85,17 +89,33 @@ indexed guards generate concrete bytes before execution; no outcome is used
 to choose a panic code. Call arguments here are ABI-decoded locals or checked
 scalar literals; arbitrary effectful top-level argument expressions are outside
 this adapter. Ordinary calculus entry points remain unchanged. -/
-def entryProgParts (C : Contract) (pre body post : List RawStmt) : Except String (Blk C []) := do
+def entryProgParts (C : Contract) (pre body post : List RawStmt)
+    (encoded : Option (String × EntryReturn.Plan) := none)
+    (funs : Option (List (String × FunDecl)) := none) : Except String (Blk C []) := do
+  if funs.isSome && encoded.isSome then
+    throw "access-time calldata guards through a typed multi-return adapter are not admitted"
   let all := pre ++ body ++ post
   let k := RawStmt.maxIdxs all + 1
   let ss ← freshenBlocks (C.vars.map (·.1)) [] all
   unless ss.length == all.length do throw "entry statement boundaries changed during freshening"
   let action : ElabM (SProg C) := do
-    let P ← elabStmtsP C (ss.take pre.length)
-    let Q ← withReader (fun sc => { sc with retainFailureData := true })
-      (elabStmtsP C ((ss.drop pre.length).take body.length))
-    let R ← elabStmtsP C (ss.drop (pre.length + body.length))
-    pure (P ++ Q ++ R)
+    let funs ← match encoded with
+      | none => pure (funs.getD C.funs)
+      | some (f, plan) => EntryReturn.scope C f plan
+    withReader (fun sc => { sc with funs }) do
+      let P ← elabStmtsP C (ss.take pre.length)
+      let Q ← withReader (fun sc => { sc with retainFailureData := true }) do
+        let source := (ss.drop pre.length).take body.length
+        match encoded, source with
+        | some _, [.declMemory T x (some e)] =>
+          -- The synthetic name lives only in this elaboration scope. Hoisting
+          -- resolves it there and supplies the actual typed memory result;
+          -- the ordinary declaration then checks that result's exact shape.
+          let (P, value) ← hoist C e
+          pure (P ++ (← elabStmtsP C [.declMemory T x (some value)]))
+        | _, _ => elabStmtsP C source
+      let R ← elabStmtsP C (ss.drop (pre.length + body.length))
+      pure (P ++ Q ++ R)
   let P ← action.runFrom' { funs := C.funs } ([], k)
   SProg.chain [] [] P
 
@@ -162,6 +182,25 @@ def shape : Nat → Ty → List (String × Nat) → String → Except String Str
       return "(" ++ String.intercalate "," parts ++ ")"
     | .ref (.mapping ..) => throw "mapping has no ABI encoding"
 
+/-- `shape`, with the nested enum positions `below` (keys as
+`UpstreamEntry.shapeAt`'s, `pk` this value's) spelled `uint8`, their ABI
+type, whatever their carrier. -/
+def shapeEnum (below : List (String × Nat)) : Nat → Ty → List (String × Nat) → String → String →
+    Except String String
+  | 0, _, _, _, _ => throw "ABI schema depth budget exhausted"
+  | fuel + 1, T, ws, key, pk => do
+    match T with
+    | .prim _ => if (lookupBy pk below).isSome then return "uint8" else shape (fuel + 1) T ws key
+    | .ref (.array E) =>
+      if lookupBy (key ++ "[]#bytes") ws == some 1 then shape (fuel + 1) T ws key
+      else return (← shapeEnum below fuel E ws (key ++ "[]") (pk ++ "[]")) ++ "[]"
+    | .ref (.fixed E n) => return (← shapeEnum below fuel E ws (key ++ "[]") (pk ++ "[]")) ++ s!"[{n}]"
+    | .ref (.struct s) =>
+      let parts ← (structDef s).mapM fun (f, E) =>
+        shapeEnum below fuel E (structWidths s) f (pk ++ "." ++ f)
+      return "(" ++ String.intercalate "," parts ++ ")"
+    | .ref (.mapping ..) => throw "mapping has no ABI encoding"
+
 private def typeExpr : RawTy → Except String RawExpr
   | .named s => pure (.name s)
   | .array T => do
@@ -175,16 +214,29 @@ private def typeExpr : RawTy → Except String RawExpr
 def needsCanonical (d : FunDecl) : Bool :=
   d.params.any fun (x,T) => !(T matches .prim _) || (fnRow? d.widths x).isSome
 
-def validate (d : FunDecl) (inputs outputs : List String) : Except String Unit := do
-  let actualInputs ← d.params.mapM fun (x,T) => shape 128 T d.widths x
-  let actualOutputs ← d.rets.mapM fun (x,T) => shape 128 T d.widths x
+/-- `topEnums`: top-level primitive parameters and returns with a declared
+enum cardinality, read at their ABI type `uint8` (the replay passes the
+parameters when the entry has a nominal parameter range, and a v2 entry's
+top-level enum returns, `ImportRow.retEnums`, always); a parameter's range is
+the typed entry decoder's (`UpstreamEntry.params`). A nested enum position
+(`positions`, by parameter name: `paramEnumPositions`) is spelled `uint8`
+(`shapeEnum`). -/
+def validate (d : FunDecl) (inputs outputs : List String) (topEnums : List String := [])
+    (positions : List (String × List (String × Nat)) := []) : Except String Unit := do
+  let top (x : String) (T : Ty) : Except String String :=
+    if topEnums.contains x && T matches .prim _ then pure "uint8"
+    else match lookupBy x positions with
+      | some below => shapeEnum below 128 T d.widths x ""
+      | none => shape 128 T d.widths x
+  let actualInputs ← d.params.mapM fun (x,T) => top x T
+  let actualOutputs ← d.rets.mapM fun (x,T) => top x T
   unless actualInputs == inputs && actualOutputs == outputs do
     throw s!"ABI schema disagrees with admitted declarations: {actualInputs} -> {actualOutputs}"
 
 /-- Build both the canonical input probe and the once-only source execution from
 existing typed ABI operations. Source calls retain their ordinary admission. -/
 def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
-    (bytes : List Nat) : Except String (Blk C []) := do
+    (bytes : List Nat) (funs : Option (List (String × FunDecl)) := none) : Except String (Blk C []) := do
   if bytes.any (· >= 256) then throw "invalid calldata byte"
   let reserved := [dataName, outputName] ++ (List.range d.params.length).map argName ++
     (List.range d.rets.length).map retName
@@ -202,6 +254,19 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
       pure (RawStmt.declMemory raw (argName i) (some (decode i)))
   let args := (List.range d.params.length).map fun i => RawExpr.name (argName i)
   let call := RawExpr.call f args
+  -- Serialize the actual source return frame inside a single-memory-result
+  -- call. The observer takes these bytes directly: no outer ABI envelope.
+  if !probe && !ctor && d.rets.length > 1 && d.rets.any (fun (_, T) => T matches .ref _) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .memory)) funs
+  if !probe && !ctor && d.rets.length > 1 &&
+      d.rets.any (fun (n, _) => (fnRow? d.widths n).isSome) then
+    return ← entryProgParts C
+      ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
+      [.declMemory (.named "bytes") outputName
+        (some (.call EntryReturn.wrapperName args))] [] (some (f, .functionTuple)) funs
   let captures ← if probe then pure [] else if ctor then pure (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [RawStmt.call (.name "constructor") args])
     else if d.rets.length == 1 then do
       let [(x,T)] := d.rets | throw "single return shape mismatch"
@@ -219,7 +284,7 @@ def program (C : Contract) (d : FunDecl) (f : String) (ctor probe : Bool)
   let returns := if probe then args else
     (List.range d.rets.length).map fun i => RawExpr.name (retName i)
   entryProgParts C ([.declMemory (.named "bytes") dataName (some (.bytesLit bytes))] ++ declarations)
-    captures [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))]
+    captures [.declMemory (.named "bytes") outputName (some (.call "abi.encode" returns))] none funs
 
 private def findBytes (x : Var) : (Γ : Ctx) → List Var → Option (Idx Γ (.mem bytesR))
   | [], _ => none
@@ -260,6 +325,11 @@ def canonical (C : Contract) (d : FunDecl) (f : String) (bytes : List Nat)
 
 end ABI
 
+/-- Typed host-context validation, separate from runtime JSON/decimal parsing.
+No value outside the nonzero 160-bit deployment domain can reach the cast. -/
+def selfTryContextValid (kind : String) (address : Nat) : Bool :=
+  kind == "direct-self-try" && decide (address ≠ 0 ∧ address < 2^160)
+
 /-- Replay complete supported vector sequences. Fuel exhaustion is inconclusive. -/
 def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run do
   let bad := rows.filter fun r => r.status != .elaborated && r.status != .skipped
@@ -272,14 +342,29 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
   let .ok vectors := data.getObjValAs? (Array Json) "vectors"
     | return result "blocked" "missing execution vectors"
   if vectors.isEmpty then return result "blocked" "no execution vectors"
-  let tx : TTx := { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738 }
+  if (data.getObjValAs? Bool "requiresSelfContext").toOption == some true &&
+      !(data.getObjVal? "hostContext").isOk then
+    return result "blocked" "missing self-try deployment context"
+  let selfContext : Option Nat := if (data.getObjVal? "hostContext").isOk then do
+    let host ← (data.getObjVal? "hostContext").toOption
+    let kind ← (host.getObjValAs? String "kind").toOption
+    let address ← (host.getObjValAs? String "selfAddress").toOption
+    let n ← address.toNat?
+    if selfTryContextValid kind n then some n else none
+  else some 0
+  let some selfAddress := selfContext | return result "blocked" "invalid self-try deployment context"
+  let tx : TTx :=
+    { msgSender := PrimTy.ofIntD .uint 103164821458651970696730694074090566015747358738
+      selfAddress := PrimTy.ofIntD .uint (Int.ofNat selfAddress) }
   let mut state := State.deploy C tx
   let mut deployed := false
   let mut deploymentFailed := false
   let mut observed : Array Json := #[]
+  let contextEvidence : List (String × Json) := if (data.getObjVal? "hostContext").isOk then
+    [("selfAddress", toJson (toString selfAddress))] else []
   for vector in vectors do
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     if deploymentFailed then return stopped "blocked" "calls after failed deployment need the upstream empty-code host"
     let .ok signature := vector.getObjValAs? String "signature"
       | return stopped "blocked" "missing signature"
@@ -315,11 +400,29 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       -- Primitive ranges have byte widths; other nominal ranges need a decoder adapter.
       let row : Option ImportRow := if ctor then rows.find? (·.sourceName == "constructor") else
         function.bind fun name => rows.find? (·.name == name)
-      if row.any (fun (r : ImportRow) => (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
-          !(List.range 32).any fun k =>
+      let byteRange : Int × Int → Bool := fun (lo, hi) => (List.range 32).any fun k =>
             let bits := 8 * (k + 1)
             (lo == 0 && hi == (2^bits : Int) - 1) ||
-              (lo == -(2^(bits - 1) : Int) && hi == (2^(bits - 1) : Int) - 1)) then
+              (lo == -(2^(bits - 1) : Int) && hi == (2^(bits - 1) : Int) - 1)
+      -- a declared enum parameter (`paramEnums`) is nominal even when its
+      -- range is a byte range (an enum of 256 members): its word is
+      -- validated by the typed entry decoder, never truncated
+      let nominal := row.any fun (r : ImportRow) => !r.paramEnums.isEmpty ||
+        !r.paramEnumPositions.isEmpty ||
+        (r.paramRanges ++ r.elemRanges.map (fun (entry : String × Int × Int × Option Nat) => (entry.1, entry.2.1, entry.2.2.1))).any fun (_, lo, hi) =>
+          !byteRange (lo, hi)
+      -- Only parameter ranges (never element ranges) can be top-level enums
+      -- for the typed entry decoder; any other nominal range is refused.
+      -- (an array whose enum positions the row lists, `paramEnumPositions`,
+      -- is decoded at them instead)
+      let positioned : List String := (row.map fun (r : ImportRow) =>
+        r.paramEnumPositions.filterMap fun (i, _) => r.params[i]?.map (·.1)).getD []
+      let nominalElems := row.any fun (r : ImportRow) => r.elemRanges.any fun (x, lo, hi, _) =>
+        !byteRange (lo, hi) && !positioned.contains x
+      let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
+        | .error _ => pure false
+        | .ok j => fromJson? j
+      if nominal && (ctor || canonicalOnly || nominalElems) then
         throw "nominal enum ABI range needs a declaration adapter"
       let bytes ← vector.getObjValAs? (List Nat) "calldata"
       let inputs ← vector.getObjValAs? (List String) "inputTypes"
@@ -328,12 +431,86 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
         let some f := function | throw "missing unique source ABI declaration"
         let some d := Semantics.lookupBy f C.funs | throw "missing source ABI function"
         pure d
-      ABI.validate d inputs outputs
-      let canonicalOnly ← match vector.getObjVal? "canonicalOnly" with
-        | .error _ => pure false
-        | .ok j => fromJson? j
-      ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
-      ABI.program C d (function.getD "constructor") ctor false bytes
+      -- A top-level enum parameter's declared largest member, by position:
+      -- a nominal (not byte-width) range of the import row.
+      let enums : Nat → Option Nat := fun i => do
+        let r ← row
+        guard (r.params.length == d.params.length)
+        let (x, _) ← r.params[i]?
+        let (_, lo, hi) ← r.paramRanges.find? (·.1 == x)
+        guard (lo == 0 && 0 ≤ hi && (!byteRange (lo, hi) || r.paramEnums.contains i))
+        pure hi.toNat
+      -- a declared enum parameter whose position cannot be matched would
+      -- decode as a plain word: refuse rather than drop its bound
+      if row.any (fun r => !r.paramEnums.isEmpty && r.params.length != d.params.length) then
+        throw "nominal enum ABI range needs a declaration adapter"
+      let enumNames := (d.params.zipIdx.filter fun (_, i) => (enums i).isSome).map (·.1.1) ++
+        (d.params ++ d.rets).filterMap fun (x, _) =>
+          if (Semantics.lookupBy (x ++ "#enum") d.widths).isSome then some x else none
+      -- a top-level enum return is read at its ABI type `uint8` whenever
+      -- the import names it (`retEnums`): encoding a member is its value
+      let retEnums : List String := if ctor || canonicalOnly then [] else
+        match row with
+        | some r =>
+          if r.retEnums.any (· ≥ d.rets.length) then []
+          else r.retEnums.filterMap (fun i => d.rets[i]?.map (·.1))
+        | none => []
+      -- nested enum positions, by parameter position (`paramEnumPositions`)
+      let positions : Nat → List (String × Nat) := fun i => Option.getD (do
+        let r ← row
+        guard (r.params.length == d.params.length)
+        let (_, ps) ← r.paramEnumPositions.find? (·.1 == i)
+        pure ps) []
+      if row.any (fun r => !r.paramEnumPositions.isEmpty && r.params.length != d.params.length) then
+        throw "nominal enum ABI range needs a declaration adapter"
+      let namedPositions := d.params.zipIdx.filterMap fun ((x, _), i) =>
+        if (positions i).isEmpty then none else some (x, positions i)
+      ABI.validate d inputs outputs ((if nominal then enumNames else []) ++ retEnums) namedPositions
+      -- ABI coder v2 entries with typed parameter shapes use the typed
+      -- entry decoder (`Semantics/AbiEntry.lean`); v1, constructors and
+      -- function/nested-enum parameters keep the byte-identical gate.
+      let entryPlan := if ctor || canonicalOnly || (!ABI.needsCanonical d && !nominal) then UpstreamEntry.Plan.legacy
+        else UpstreamEntry.plan d signature bytes enums positions
+      match entryPlan with
+      | .legacy =>
+        if nominal then throw "nominal enum ABI range needs a declaration adapter"
+        -- ABI coder v1 value parameters are cleaned, not validated
+        -- (`UpstreamEntry.v1Plan`); everything else keeps the gate.
+        match (if canonicalOnly && !ctor then UpstreamEntry.v1Plan d bytes else .gate) with
+        | .revert =>
+          discard <| ABI.program C d (function.getD "constructor") ctor false bytes
+          entryProg C [.revert]
+        | .run cleaned =>
+          match ABI.canonical C d (function.getD "constructor") cleaned state true with
+          | .error reason => throw s!"generated decoder disagrees with the v1 cleanup: {reason}"
+          | .ok () => ABI.program C d (function.getD "constructor") ctor false cleaned
+        | .gate =>
+          ABI.canonical C d (function.getD "constructor") bytes state canonicalOnly
+          ABI.program C d (function.getD "constructor") ctor false bytes
+      | .blocked reason => throw reason
+      -- An entry check fails: an empty revert before the body.
+      | .revert => do
+        -- The source call must still be admissible (its own refusals apply);
+        -- building it runs nothing.
+        discard <| ABI.program C d (function.getD "constructor") ctor false bytes
+        entryProg C [.revert]
+      | .run canonicalBytes guarded =>
+        -- Cross-check: the generated decoder reproduces the typed values.
+        match ABI.canonical C d (function.getD "constructor") canonicalBytes state true with
+        | .error reason => throw s!"generated decoder disagrees with the typed entry decoder: {reason}"
+        | .ok () =>
+          -- Access-time calldata (`UpstreamEntry.guardDecl`): the body with
+          -- its reads guarded, and the guard, in this call's scope only.
+          let funs ← match guarded, function with
+            | none, _ => pure none
+            | some g, some name =>
+              if ctor then throw "access-time calldata guards for a constructor are not admitted"
+              if C.funs.any (·.1 == UpstreamEntry.accessGuardName) then
+                throw "reserved access guard name collision"
+              pure (some ((UpstreamEntry.accessGuardName, UpstreamEntry.accessGuardDecl) ::
+                C.funs.map fun (n, e) => if n == name then (n, g) else (n, e)))
+            | some _, none => throw "access-time calldata guards need a source function"
+          ABI.program C d (function.getD "constructor") ctor false canonicalBytes funs
     if raw then
       if let .error reason := rawProgram then return stopped "blocked" reason
     let program := if raw then rawProgram else if ctor then entryProg C (if C.ctor.isNone && C.inits.isEmpty && args.isEmpty then [] else [.call (.name "constructor") args]) else do
@@ -379,7 +556,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
       ("failed", toJson failed), ("values", toJson values), ("revertBytes", toJson bytes), ("returnBytes", toJson returned)] ++
       if raw then [("calldataBytes", (vector.getObjVal? "calldata").toOption.getD Json.null)] else []))
     let stopped (status reason : String) (extra : List (String × Json) := []) :=
-      result status reason (("observed", toJson observed) :: extra)
+      result status reason (contextEvidence ++ (("observed", toJson observed) :: extra))
     let .ok expectedFailure := vector.getObjValAs? Bool "failure"
       | return stopped "blocked" "missing expected outcome"
     let .ok expectedValues := if raw then .ok [] else vector.getObjValAs? (List String) "expected"
@@ -405,7 +582,7 @@ def replay (C : Contract) (rows : List ImportRow) (data : Json) : Json := Id.run
     if ctor then
       deployed := true
       deploymentFailed := failed
-  return result "working" "all supported runtime vectors match" [("observed", toJson observed)]
+  return result "working" "all supported runtime vectors match" (contextEvidence ++ [("observed", toJson observed)])
 
 syntax (name := upstreamBatch) "#upstream_batch " str " to " str : command
 
@@ -420,6 +597,10 @@ def elabUpstreamBatch : CommandElab := fun stx => do
     let path ← ofExcept (entry.getObjValAs? String "path")
     let outcome ← (do
       try
+      if ((entry.getObjVal? "hostContext").toOption.bind (fun h => (h.getObjValAs? String "kind").toOption)) == some "creation-try-source" then
+        return ← CreationTryReplay.elaborate entry
+      if ((entry.getObjVal? "hostContext").toOption.bind (fun h => (h.getObjValAs? String "kind").toOption)) == some "linked-library-try-source" then
+        return ← LibraryTryReplay.elaborate entry
       let fixture ← ofExcept (entry.getObjValAs? String "fixture")
       let contract ← ofExcept (entry.getObjValAs? String "contract")
       let name := Lean.Name.str `Upstream contract

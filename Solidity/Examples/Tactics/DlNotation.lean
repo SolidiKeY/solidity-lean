@@ -249,6 +249,27 @@ example : dl!{ 0 <= 5 <= selfBalance } = dl!{ 0 <= 5 ∧ 5 <= selfBalance } := r
 example : dl!{ { net := store(net, at(to), select(net, at(to)) - 5) } select(net, at(to)) = x } =
     dl!{ { net := store(net, at(to), net(to) - 5) } net(to) = x } := rfl
 
+/-- Solidity's conditional value has the same intrinsic term through
+program-expression equality and through the term reader. -/
+example : dl!{ (true ? 7 : 9) == 7 } = dl!{ (true ? 7 : 9) = 7 } := rfl
+
+/-- A nested Solidity conditional preserves the branch types in an update. -/
+example : dl!{ ∀ bool c; { x := (c ? 7 : (false ? 8 : 9)) } x = 7 } =
+    dl!{ ∀ bool c; { x := ite(c, 7, ite(false, 8, 9)) } x = 7 } := rfl
+
+/-- info: dl{ { x := (true ? 7 : 9) } x = 7 } : Fml StandardExample [] -/
+#guard_msgs in #check dl!{ { x := (true ? 7 : 9) } x = 7 }
+
+/-- error: Solidity elaboration failed: `alice.age` is a `uint`, used as a `bool` -/
+#guard_msgs in #check dl!{ (alice.age ? 7 : 9) = 7 }
+
+/-- Re-read the printer's conditional update body with the `dl!` reader. -/
+example : dl!{ { x := (true ? 7 : 9) } x = 7 } =
+    dl!{ { x := ite(true, 7, 9) } x = 7 } := rfl
+
+/-- error: Solidity elaboration failed: `7` is a number, used as a `bool` -/
+#guard_msgs in #check dl!{ (true ? 7 : false) = 7 }
+
 end Examples
 
 end Solidity

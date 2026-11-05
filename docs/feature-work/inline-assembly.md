@@ -1,14 +1,16 @@
-# Inline assembly (Yul): proposed extension
+# Inline assembly (Yul): authorized extension
 
-Status (2026-10-31): **proposal, not started.** `inlineAssembly` is an approved
-exclusion ([G00 Q1](../solidity-scope.md#user-decisions-2026-10-29)); only the
-whole-buffer rethrow `assembly { revert(add(data,32), mload(data)) }` is
+Status (2026-10-31): **implementation authorized for VY1–VY5; not yet implemented.**
+The human approved tiers A–C and YQ1–YQ7 in the
+[decision record](../solidity-scope.md#inline-assembly-decisions-2026-10-31).
+`inlineAssembly` remains excluded by current admission until implementation
+and validation replace that behavior; only the whole-buffer rethrow `assembly { revert(add(data,32), mload(data)) }` is
 recognized (`canonicalRethrow`, `memoryRethrow?` in
 `Solidity/Frontend/SolcJson/Body.lean`). This document plans the groups and
-lanes that would cover inline assembly. **No lane starts before the user
-answers the [decisions](#decisions-needed-before-any-lane) and they are recorded
-in [solidity-scope.md](../solidity-scope.md).** A worker must not reopen an
-exclusion or change a manifest status on its own.
+lanes to cover inline assembly. The decisions below are approved; the exact
+human answer is recorded in [solidity-scope.md](../solidity-scope.md#inline-assembly-decisions-2026-10-31).
+Workers may implement the authorized extension, but must keep manifest status
+honest and preserve all prerequisite gates.
 
 Pinned references (solc 0.8.38, commit `1835d247de183f23e7b0e2bc4a50732af525b77c`):
 `docs/assembly.rst`, `docs/yul.rst`, `docs/internals/layout_in_storage.rst`,
@@ -101,7 +103,7 @@ combination regressions, finder/skeptic review, handoff in this document.
 
 | Group | Deliverable | Depends on |
 |---|---|---|
-| Y01 | **Yul syntax and admission.** Intrinsic Yul AST (`Solidity/Yul/Syntax.lean`); import of solc JSON `InlineAssembly` (`AST`, `externalReferences`, `flags`, the `memory-safe-assembly` doc comment) in `Solidity/Frontend/SolcJson/Yul.lean`; builtin table pinned to Osaka and solc 0.8.38; admission per tier with precise refusals, including the compiler-dependent builtins; `canonicalRethrow` becomes an instance, not a special case. Checked Yul parsing over the G08–G11 lexer is child Y01.02. | S00, existing SolcJson frontend |
+| Y01 | **Yul syntax and admission.** Intrinsic Yul AST (planned: Solidity/Yul/Syntax.lean); import of solc JSON `InlineAssembly` (`AST`, `externalReferences`, `flags`, the `memory-safe-assembly` doc comment) in the planned Solidity/Frontend/SolcJson/Yul.lean; builtin table pinned to Osaka and solc 0.8.38; admission per tier with precise refusals, including the compiler-dependent builtins; `canonicalRethrow` becomes an instance, not a special case. Checked Yul parsing over the G08–G11 lexer is child Y01.02. | S00, existing SolcJson frontend |
 | Y02 | **Yul static semantics.** Scoping (functions visible in their whole block, no shadowing, function bodies see no outer variables), `leave`/`break`/`continue` placement, literal ranges; external references: value-type locals, `x.slot`/`x.offset` of storage references, `x.offset`/`x.length` of calldata, memory variables as pointers, `f.selector`/`f.address`. Checker sound and complete against the typing relation; solc's error tests as refusal controls. | Y01, S01 |
 | Y03 | **Word semantics.** Statements, functions and pure builtins over words with EVM results (`div`/`mod` by zero is `0`, no Panic); fuelled divergence matching S03's horizons; embedding into S02/S03 statements. Solidity locals written from assembly with dirty high bits follow decision YQ4. | Y02, S02, S03 |
 | Y04 | **Storage and transient views.** Physical slot map of persistent and transient storage from `Solidity/Storage/HashedLayout.lean` plus value packing and widths (the source half of G27.01–G27.05); residual slots; writeback; `sload`/`sstore`/`tload`/`tstore` with reset at transaction end and frame rollback (EIP-1153). Laws: decode∘encode = id; writeback of an unchanged view is the identity. | Y03, S04 |
@@ -120,7 +122,7 @@ groups, eight to ten hours each.
 | Lane | Checkpoints, in order | Starts after | Tier |
 |---|---|---|---|
 | VY1 | Y01, Y02, Y03, Y09.01 | YQ1–YQ5 answered; V04 integrated | A |
-| VY2 | Y04, Y05, Y06, Y09.02 | VY1; before V10/V11 start | B |
+| VY2 | Y04, Y05, Y06, Y09.02 | VY1; V10/V11 inherit layout agreement obligations | B |
 | VY3 | Y08.01, Y08.02 | V12 (Y08.01), V15 (Y08.02); backfill until then | B |
 | VY4 | Y07.01, Y07.02, Y09.03 | VY2, V13 (G42); YQ6 answered | C |
 | VY5 | Y10 | V16, VY3, VY4 | C |
@@ -131,9 +133,13 @@ lanes start first, add "agrees with Y04/Y05's layout" to their checkpoints.
 G27, G32, G46 and G47 grow by the corresponding opcode and view obligations;
 that growth is counted in VY3/VY4, not in V10–V15.
 
-## Decisions needed before any lane
+## Decision questions and original recommendations
 
-| ID | Question | Recommendation |
+The table preserves the original proposal recommendations. The human approved
+all five lanes and the choices in the [decision record](../solidity-scope.md#inline-assembly-decisions-2026-10-31),
+including tiers A–C together for YQ1. These questions are no longer pending.
+
+| ID | Question | Original recommendation |
 |---|---|---|
 | YQ1 | Reopen `inlineAssembly`, and which tier? | Tier A now; tiers B and C as separate decisions after VY1. |
 | YQ2 | Keep `gas`, `msize`, `pc` and own-code `codesize`/`codecopy` excluded? | Yes: refuse at admission. |
@@ -143,11 +149,281 @@ that growth is counted in VY3/VY4, not in V10–V15.
 | YQ6 | Logs become observations (tier C): extend G01's event type for Solidity `emit` too? | Yes, both at once, or tier C keeps `log*` refused. |
 | YQ7 | Non-`memory-safe` blocks? | Refuse: via-IR's stack-to-memory mover depends on the flag. |
 
+## Coordination review (2026-10-31)
+
+Separate read-only finder and skeptic reviews checked the five lane assignments,
+the complete Y01–Y10 child coverage, intrinsic and ownership constraints,
+dependency gates, compact persistent goals and exact human authorization.
+Neither used the Lean server. Both found stale proposal/pending wording in the
+navigation and coverage summaries; it was corrected. The decision table now
+labels its recommendations as historical. No implementation or runtime gate is
+claimed by this preparation review.
+
+The publication finder and skeptic reviews also checked the pending documentation
+against all five frozen lane assignments and verified the decision links. They
+found stale proposal wording in the title and a VY2 prerequisite that assumed
+V10/V11 had not started; both were corrected. The scope record now distinguishes
+the original launch authorization from the subsequent integration authorization.
+
 ## Handoffs
 
-None yet. Each checkpoint appends its handoff here (revision, theorems and
-premises, checks, remaining obligations).
+Each checkpoint appends its handoff here (revision, theorems and premises,
+checks, remaining obligations).
 
+- VY1 (2026-11-03): Yul syntax, static checks, closed execution and word
+  logic; see [inline-assembly-vy1.md](inline-assembly-vy1.md).
+- VY2 (2026-11-03): memory views and adapters; see
+  [yul-physical-memory.md](yul-physical-memory.md).
+- VY3 (2026-11-03): compilation combinators; see
+  [inline-assembly-vy3.md](inline-assembly-vy3.md).
+- VY4 (2026-11-03): world interface; see
+  [inline-assembly-vy4.md](inline-assembly-vy4.md).
+- VY5 (2026-11-03): composition pieces; see
+  [vy5-composition.md](vy5-composition.md).
+VY1 follow-up: Boolean-post and absent-condition Source adapters, concrete Rule-premise soundness, Lean-only rule-map rows, guarded Checks and restored generators/fixtures; general Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: shared Roadmap.Word reuse and universal signed-operation/target-step agreement for SDIV, SMOD, SLT and SGT, with intrinsic-expression and machine-composition controls; compiler lowering and general Source adequacy remain open. See inline-assembly-vy1.md.
+VY1 follow-up: parser composition moves to Frontend/Yul while intrinsic preparation retains its original certificates and premises; the layer gate rejects core paths to checked parser adapters. General Source embedding and final lane gates remain open. See inline-assembly-vy1.md.
+VY1 follow-up: universal ADD/SUB/MUL/DIV/MOD target-step agreement and wrapped MUL-then-DIV composition, with intrinsic fuel and malformed-stack controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: universal comparison, bitwise, shift and EXP target-step agreements, with mixed SHL/PUSH/SHR/AND composition and kernel boundary/refusal controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: concrete Source void-return, skipped-tail and enclosing-block equations with full raw-frame retention at every horizon; dirty-frame/context-changing-tail controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: concrete Source do/while, unchecked and literal-while void-return transport; skipped assignment effects, dirty-frame retention and existing initializer-refusal controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: an executed context-growing Boolean Source declaration with typed local snapshots, exact timeout/clean-projection equations and complete older raw-prefix/world preservation. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: executed Boolean declaration/scope closure with exact Source suffix restoration, full snapshot/frame agreement, existing adapter packaging and concrete two-scope controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: certified constant-default declarations and unconditional all-IntTy Source correspondence, with concrete uint8/uint256 growth and dirty-prefix controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY4 follow-up: intrinsic LOG, returndata and CALL-family port bindings retain full observations/return buffers, with constructive normal LOG rules, actual coupled transient rollback and lifecycle snapshot preparation. CALL completion survives output-copy refusal; source/world/static-operation/compiler/G01/G51 and final lane adequacy remain open. See [the VY4 lane record](inline-assembly-vy4.md) for exact premises and scoped controls.
+VY3 exponent checkpoint: actual EXP compiler-model execution is proved for all
+word operands, preserving machine fields and symbolic caller tails. Native gas,
+feasible large-power evaluation and general source/G24/frontend closure remain
+separate. See [the lane handoff](inline-assembly-vy3.md#exponent-compiler-model-execution).
+VY3 signed-comparison checkpoint: existing signed readings agree by a budget-
+preserving cast proof, and actual SLT/SGT compiler-model runs preserve full dirty
+words, machine fields and symbolic callers. General source/G24/native/frontend
+closure remains open. See [the lane handoff](inline-assembly-vy3.md#signed-comparison-compiler-model-execution).
+VY3 signed-quotient checkpoint: actual published VY1 step producers now drive
+complete SDIV/SMOD compiler-model runs, preserving raw results and caller/machine
+state. General Source/G24/native/frontend closure remains open. See
+[the lane handoff](inline-assembly-vy3.md#signed-quotient-consumption-of-published-word-producers).
+VY3 charged-bitwise checkpoint: actual AND/OR/XOR source/compiler origins and
+ordered code images connect to real three-gas P10 steps at emitted sites. DUP-
+prefix execution and general Source/G24/Osaka closure remain open. See
+[the lane handoff](inline-assembly-vy3.md#charged-bitwise-compiler-origin-correspondence).
+VY3 charged ISZERO checkpoint: see [lane handoff](inline-assembly-vy3.md#charged-raw-iszero-slice). Both native DUP1/ISZERO steps and X continuation are derived; full Source/G24/frontend/Bridge adequacy remains partial.
+VY3 charged NOT checkpoint: [lane handoff](inline-assembly-vy3.md#charged-raw-not-slice). Actual two-step native continuation; full original lane remains partial.
+VY3 logical shift compiler slices: [lane handoff](inline-assembly-vy3.md#charged-logical-shift-compiler-slices). Original source evaluation and complete native X continuations; full lane remains partial.
+VY3 SAR compiler slice: [lane handoff](inline-assembly-vy3.md#charged-arithmetic-shift-compiler-slice). Original source evaluation and native continuation; full lane remains partial.
+VY3 arity-three modular compiler slices: [lane handoff](inline-assembly-vy3.md#charged-arity-three-modular-compiler-slices). Original source/native continuations and exact DUP3 frames; full lane remains partial.
+VY3 dynamic-cost EXP compiler slice: [lane handoff](inline-assembly-vy3.md#charged-dynamic-cost-exponent-compiler-slice). Original source/native continuation with actual exponent-byte gas; full lane remains partial.
+VY3 concrete arithmetic selection clients: [lane handoff](inline-assembly-vy3.md#published-selection-interface-arithmetic-clients). Actual success/refusal certificate bodies; full native/Source-G24 lane remains partial.
+VY3 selection sequence composition: [lane handoff](inline-assembly-vy3.md#actual-selection-certificate-sequence-composition). Exact model/Scalar success and failure composition with real ADD/MUL instances; full lane remains partial.
+VY3 finite DUP selection: [lane handoff](inline-assembly-vy3.md#finite-dup-selection-and-actual-compiler-read-prefixes). Concrete all-index bodies connect actual ADD/MUL compiler read prefixes to sequence transport; full lane remains partial.
+VY3 source local-write/model composition: [lane handoff](inline-assembly-vy3.md#local-writes-through-actual-swappop-selection). Concrete SWAP/POP bodies and original assignment/read-after-write sequence instances; full lane remains partial.
+VY3 literal/scoped source-model composition: [lane handoff](inline-assembly-vy3.md#literal-push-and-initialized-source-scopes). Real PUSH body and initialized/zero scope instances; full lane remains partial.
+VY3 source-to-structured control: [lane handoff](inline-assembly-vy3.md#normal-source-control-to-the-published-structured-relation). Actual compiler branches/sequences establish the published stack relation; native realization/full lane remain partial.
+VY1 follow-up: concrete constant-default scope closure and existing integer adapters, with unconditional all-IntTy Source composition and mixed uint8/uint256 controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: concrete Boolean literal initialization with actual Source correspondence, both values, exact horizons and dirty-prefix/nondefault controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: concrete Boolean initializer scope closure, actual Source/frame correspondence and existing adapters, with literal/default mixed-scope controls. General Source embedding and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: universal in-range integer literal initialization with concrete Source conversion/typing laws, exact prefix preservation, boundary/refusal controls and actual signed/unsigned item composition. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: concrete in-range integer initializer scope closure, all-fuel Source/frame correspondence and existing adapters, with signed/unsigned/Boolean combinations and same-fuel empty-block controls. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: context-growing initialization by actual certified Boolean expressions, all-tree/all-fuel clean Source correspondence, retained partial effects, raw-copy and short-circuit controls. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: scope closure of actual Boolean-expression initialization, concrete all-tree/all-fuel Source composition and retained outer-local effects on success/timeout. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: actual Boolean binding followed by an expression in its extended context, with concrete all-fuel Source item composition and reached-context partial-state controls. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: intrinsic certificates and concrete all-list/all-fuel Source composition for Boolean declaration/expression lists, retaining typed reached contexts on failure. General P16 and final composition remain open. See inline-assembly-vy1.md.
+VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed suffix restoration, concrete Source block correspondence and retained reached-context failures. General P16 and final composition remain open. See inline-assembly-vy1.md.
+- VY1: LocalBoolIf adds concrete clean-input Source conditional/scope agreement with retained condition effects and partial branch contexts; full lane gates remain open. See [lane handoff](inline-assembly-vy1.md).
+- VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
+
+VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithmetic-source-branches-through-actual-model-execution). Real child-code certificates derive complete model execution; native/full lane remains partial.
+
+- VY3 checked control selection: `ControlRealization` constructs scalar iff
+  lowering certificates and forward whole-model sequence/conditional proofs,
+  including actual nested/prefixed source compiler instances. Exact leaf byte
+  origins are checked; loops/native/G24/full-lane closure remain open. See the
+  [lane document](inline-assembly-vy3.md) and sealed checkpoint handoff.
+
+- VY3 review follow-up: selection imports use published V2, signed quotient
+  axiom reports are enforced, and the excluded routine ledger stays archived.
+  No capacity or full-lane closure is inferred; see the lane handoff.
+
+- VY3 whole selected-block lowering now supplies the published iff certificate
+  and exact model-fault transport for supported scalar/sequence/conditional
+  blocks, with original source prefix witnesses. Native/G24/capacity and full
+  lane closure remain open; see the [lane document](inline-assembly-vy3.md).
+
+- VY3 concrete read/write/nested-update slices now inhabit nonvacuous V2 frame
+  certificates with real caller-tail capacity and transient-prefix witnesses.
+  Native/function/G24 and full-lane obligations remain open; see the
+  [lane document](inline-assembly-vy3.md).
+
+- VY3 SUB/DIV/MOD certificates now compose with an actual mixed source sequence
+  and exact emitted-program iff lowering witness. Earlier refusal tables and
+  admission remain unchanged; native/G24/full-lane work stays open. See the
+  [lane document](inline-assembly-vy3.md).
+
+- VY3 structured selection now consumes the concrete arithmetic table through
+  typed leaf certificates, with source/whole-iff witnesses for DIV-controlled
+  mixed arithmetic under live prefixes. Legacy verdicts remain unchanged;
+  native/G24/full-lane closure stays open. See the [lane document](inline-assembly-vy3.md).
+
+- VY3 bitwise/shift certificates now compose with actual guarded source and
+  whole-iff lowering under live prefixes, including full-word count boundaries.
+  Native/G24/full-lane work remains open; see the [lane document](inline-assembly-vy3.md).
+
+- VY3 signed structured selection: concrete SDIV/SMOD/SLT/SGT certificates,
+  original source conditional with ordered updates, general source/model and
+  whole-iff artifacts at depths0/2, exact candidate validation and negative
+  controls. Generated Bridge import closure passes. Full source/G24/native/
+  frontend composition remains partial; see [lane](inline-assembly-vy3.md).
+
+- VY3 unsigned comparison selection: concrete LT/GT/EQ certificates and an
+  original-source EQ conditional with ordered updates, general source/model
+  and whole-iff artifacts at depths0/2, full-word/unsigned/refusal controls.
+  Full source/G24/native/frontend closure remains partial; see
+  [lane](inline-assembly-vy3.md).
+
+- VY3 unary selection: actual ISZERO/NOT certificates, original nested-unary
+  conditional with ordered writes, general source/model and whole-iff artifacts
+  at depths0/2, and height-only capacity laws with separate operand refusal.
+  Full source/G24/native/frontend composition remains partial; see
+  [lane](inline-assembly-vy3.md).
+
+- VY3 EXP selection: concrete full-word certificate, ordered original-source
+  EXP/ISZERO conditional, general source/model and whole-iff artifacts at
+  depths0/2, and explicit height-capacity versus operand-arity controls. Native
+  gas and full source/G24/frontend closure remain open; see
+  [lane](inline-assembly-vy3.md).
+
+- VY3 software BYTE selection: bounded exact PUSH1 certificates and existing
+  expansion composed with original-source conditional/ordered updates and
+  source/model/whole-iff artifacts at depths0/2. Mixed-width refusals and native/
+  full Source/G24/frontend limits remain explicit; see
+  [lane](inline-assembly-vy3.md).
+
+- VY3 occurrence-indexed selection: exact mixed PUSH32/PUSH1 certificates,
+  constructive success/fault and scalar-leaf iff, and original BYTE literal
+  assignment source/model instances at depths0/2. Legacy interfaces remain;
+  structured/native/full Source/G24/frontend closure is pending. See
+  [lane](inline-assembly-vy3.md).
+
+- VY3 positional structured selection: constructed realization/classification
+  for code/sequence/conditional blocks, whole iff/failure transport and original
+  mixed-width BYTE conditional instances at depths0/2. Loop/native/full Source/
+  G24/frontend obligations remain open; see [lane](inline-assembly-vy3.md).
+
+VY3 finite target-loop preparation: `SolidityBridge.Yul.LoopRealization` derives
+finite iteration witnesses and whole forward model runs from actual
+`StructuredExec`, with terminating countdown and separate no-finite-outcome
+controls. This does not reopen loop admission or close source/G24/native
+correspondence; see [VY3](inline-assembly-vy3.md#finite-target-loop-realization).
+
+VY3 target-loop follow-up: finite-prefix reverse classification and a separate
+recursive target selector now construct existing whole-iff/failure certificates
+for nested loops. Model macro-turns are distinct from native/source divergence
+prefixes; [source/G24/native closure remains open](inline-assembly-vy3.md#target-loop-classification-and-selection).
+
+VY3 additional bounded handoff: actual closed checked-JSON preparation now
+feeds scoped scalar compilation, and original let/zero scopes compose with
+normal structured bodies. General kernel laws and synthetic controls are in
+[the VY3 lane record](inline-assembly-vy3.md); complete Source/G24/native and
+frontend adequacy, broad imports and final lane validation remain open.
+
+VY3 recursive-compiler handoff: original Yul scopes now recurse under branches
+and sequences with same-horizon source and structured target proofs. The
+[lane record](inline-assembly-vy3.md) retains unsupported constructs and the
+separate G24/native/frontend/final-validation obligations.
+
+VY3 checked-JSON handoff: actual checked word JSON now feeds recursive normal
+structured compilation with source/model proofs and a conditional arithmetic
+witness. [VY3](inline-assembly-vy3.md) records the separate admission, Source/G24,
+native and final joint-validation obligations.
+
+VY3 switch handoff: original case-list compilation now has same-horizon source
+and structured target proofs with one selector evaluation and exact retirement.
+[VY3](inline-assembly-vy3.md) records the root-component domain and separate
+recursive-visitor, Source/G24/native and final-validation obligations.
+
+
+VY3 ordered switch composition: `SolidityBridge.Yul.SwitchControl` adds an
+original-AST sequence/conditional visitor, with constructive exact-horizon
+source and whole-block target proofs. Reviewed controls show a second switch
+reads the first switch's updated locals, preserving dirty words and callers.
+Lexical-scope/case-body switch compilation and full Source/G24/native/final
+gates remain open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 lexical switch scopes: `SolidityBridge.Yul.ScopedSwitch` adds an
+original-statement scope adapter over concrete switch/control lowering, with
+exact source horizons and constructive initialized-prefix entry/retirement
+proofs preserving outer mutations and arbitrary caller tails. Reviewed nested
+scope/dirty-word/model controls pass. Case-body nesting and full source/native
+adequacy remain open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 recursive cases/defaults: `SolidityBridge.Yul.NestedSwitch` constructs
+original-AST source/structured-target certificates through mutually recursive
+statement/case compilation, including lexical scopes inside nested arms.
+Reviewed dirty-word, no-fallthrough, source/model and refusal controls pass.
+General source/native adequacy remains open; see [the lane record](inline-assembly-vy3.md).
+
+
+VY3 checked JSON consumer migration (partial): `StructuredJson` now uses the
+concrete nested-switch compiler without changing its kernel source/model
+contracts. Synthetic JSON and emitted-prefix controls distinguish21/999/42/17
+and preserve ingress refusals. A specific raw-JSON kernel certificate remains
+pending as H14 NJ1; no Body admission or source/native adequacy is claimed.
+See [the lane record](inline-assembly-vy3.md).
+
+
+VY3 NJ1 kernel components: the explicit typed syntax/preparation and concrete
+lowering are inhabited. Exact checked-packet reconstruction is proved only
+under the visible premise `blockAux 20 ast = .ok tree`; that raw decoder
+equality remains the H14 routine task, so NJ1 is still partial. See
+[the lane record](inline-assembly-vy3.md).
+
+
+VY3 NJ1 closed for the fixed fixture: `StructuredSwitchJsonKernelAttachment`
+proves the exact original decoder equality and unconditional packet,
+compilation and source endpoints. Its model theorem retains the actual
+represented-stack premise; a fixed low-fuel refusal is also proved. Bounds and
+observations are unchanged. Full lane/source/native obligations remain open;
+see [the lane record](inline-assembly-vy3.md).
+
+- VY3 finite emitted while: `SolidityBridge.Yul.LoweredWhile` derives exact finite structured/model runs from real emitted slice certificates with explicit pre-body/final guard premises and arbitrary prefix/caller preservation. Original AST leaf compiler controls are inhabited; Source FOR/native/resource/full-lane adequacy remains open. See [VY3](inline-assembly-vy3.md#finite-emitted-while-execution).
+
+- VY3 normal FOR slice: `SolidityBridge.Yul.NormalFor` prepares original intrinsic components and proves finite original closed-word FOR/horizon execution plus matching structured/model emission. Prelude/body/post ordering is witnessed with dirty words; guards and component bounds remain explicit. Logical Solidity Source/G24/native/full-lane adequacy stays open. See [VY3](inline-assembly-vy3.md#normal-original-for-compilation-slice).
+
+- VY3 direct MSTORE slice: concrete local byte-target/VY2 view refinement, typed-image disjoint framing, canonical hash composition and exact actual-prefix capacity. The published host-writer counterexample remains open and unexcluded; this is not native/global MemOK/Source-G24 adequacy. See [VY3](inline-assembly-vy3.md#direct-mstoreview-composition).
+
+- VY3 branch-bearing FOR: `StructuredFor` consumes actual normal-control compiler outputs for pre/body/post and proves original finite closed-source/whole-target/model execution. Shared `ForSource` laws are discharged by real old/new compiler facts; previous NormalFor interfaces/controls remain unchanged. General Source/G24/native/admission/divergence closure remains open. See [VY3](inline-assembly-vy3.md#branch-bearing-for-components).
+
+- VY3 FOR noncompletion: actual compiler facts now derive source noncompletion at every horizon and exact continuation after every finite model macro-turn count, with an inhabited branch-bearing invariant and whole selected-program denotation. Model `.fault` here encodes no finite outcome, not native exceptional halt. Full Source/G24/native/admission closure remains open. See [VY3](inline-assembly-vy3.md#all-horizon-for-noncompletion-and-finite-model-turns).
+
+- VY3 source-completion FOR transport: actual successful original evaluation now supplies the finite count/guards internally, then matches the exact source output through actual emitted/selected code. Branch, zero-guard and refused horizon/noncompletion controls preserve raw words and caller frames; full Source/G24/native/admission closure remains open. See [VY3](inline-assembly-vy3.md#source-completion-driven-for-transport).
+
+- VY3 finite FOR reflection: target determinism and actual compiler emissions now recover source counts/guards/output from finite structured/model success, including exact machine framing and pending zero. Real component horizon bounds remain explicit; native/G24/admission and final-lane adequacy stay open. See [VY3](inline-assembly-vy3.md#finite-for-target-to-source-reflection).
+
+- VY3 H26 P20 success-interface V1: original closed compiler alias plus explicit uninstantiated source/G24 success-link fields using actual Input/Rep, with real joint success and represented/payment-free witness requirements. Full P20 and original lane work remain open. See [VY3](inline-assembly-vy3.md#h26-p20-success-interface-v1).
+
+- VY3 emitted FOR shape: exact real instruction layout, operand/height refinements, scalar prefix capacities and separate expansion room now cover the actual branch-bearing FOR with caller bounds. Existing BlockShape iff is h+2<=1024 at h>=5; native realization/G24/full-lane closure remains open. See [VY3](inline-assembly-vy3.md#emitted-for-physical-shape-and-room).
+
+- VY3 scope/switch FOR: actual component compilers now lower lexical temporaries and switch/default within original FOR, with finite whole-source/structured/model proofs and a real order-sensitive dirty-word witness. Exact compile-entry equality and unsupported-flow controls are checked; full frontend/G24/native/lane closure remains open. See [VY3](inline-assembly-vy3.md#for-with-lexical-scope-and-switch-components).
+
+- VY3 scoped FOR completion: actual source success at any horizon now supplies count/guards internally for exact whole structured/model transport. Shared source induction retains real premises discharged by both concrete compilers; old completion contracts/controls are unchanged. Full Source/G24/native/frontend/lane adequacy remains open. See [VY3](inline-assembly-vy3.md#source-success-transport-for-scoped-for).
+
+- VY3 scoped FOR reflection: actual finite scope/switch target/selected-model success derives original source completion and exact caller/raw-word/frame/pending result; `compilerFuel ≤ base` remains explicit. See [lane handoff](inline-assembly-vy3.md#target-success-reflection-for-scoped-for). Full native/G24/frontend adequacy remains open.
+
+- VY3 closed scoped FOR: exact raw-output iff and all-horizon noncompletion correspondence for actual packets; genuine unending literal-true scoped/switch witness, never runtime-executed. See [lane handoff](inline-assembly-vy3.md#closed-scoped-for-result-and-noncompletion-equivalence). This remains mathematical-model preparation, not full G24/native adequacy.
+
+- VY3 finite scoped FOR prefixes: actual selected condition/body/post turns preserve exact raw locals/caller/full machine frame; actual prelude is proved separately. Universal unending prefixes and bounded third-turn wrap witness are kernel/model results, not native/G24 completion. See [lane handoff](inline-assembly-vy3.md#finite-scoped-for-macro-turn-prefixes).
+
+- VY3 target shape: actual execution/caller framing is derived from existing intrinsic CodeShape; exact shifted all-prefix capacity remains independent. Last-slot dirty update and underflow/peak-overflow controls are kernel target preparation, not native/G24 adequacy. See [lane handoff](inline-assembly-vy3.md#constructive-target-shape-and-caller-capacity).
+
+- VY3 pure-expression operand shapes: actual literal/local/binary emissions, original intrinsic subtraction visitor/source/target witness, shifted DUP16 and exact raw/caller/capacity controls. Explicit primitive-row and child-metadata premises remain; no full G24/native coverage. See [lane handoff](inline-assembly-vy3.md#actual-pure-expression-operand-certificates).
+
+- VY3 arithmetic visitor operand producer: actual successful original visitor/emission now derives recursive CodeShape without public child metadata or primitive-row premises. Nested original MUL/ADD/SUB source/target and peak-three/depth controls are kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-arithmetic-visitor-operand-producer).
+
+- VY3 statement visitor operand producer: actual skip/assignment/sequence visitor/emission derives balanced CodeShape with no public child metadata or slot-range premises. Dependent sequential-write source/target and shifted-prefix/capacity controls remain kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-statement-visitor-operand-producer).
+
+- VY3 word visitor operand producer: actual recursive word compiler/emission derives metadata for its arithmetic/quotient/comparison/unary domain. Mixed DIV/MOD/EQ/NOT source/target and universal zero-divisor/full-word-complement controls remain kernel preparation, not full G24/native adequacy. See [lane handoff](inline-assembly-vy3.md#recursive-word-visitor-operand-producer).
 
 ### VY5 partial backfill handoff (2026-10-31)
 

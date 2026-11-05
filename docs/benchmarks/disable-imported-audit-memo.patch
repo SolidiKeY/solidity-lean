@@ -1,0 +1,22 @@
+--- a/Solidity/Frontend/Testing.lean
++++ b/Solidity/Frontend/Testing.lean
+@@ -107,18 +107,7 @@
+ /-- Check the standard-axiom policy, reusing only successful imported closures.
+ This returns a policy decision, not a complete axiom inventory. -/
+ def usesOnlyStandardAxioms (name : Lean.Name) : CoreM Bool := do
+-  let env ← getEnv
+-  let cached ← importedAudit.get
+-  let visited := match cached with
+-    | some (old, visited) =>
+-      if !env.header.moduleData.isEmpty && (unsafe ptrEq env.header.moduleData old.header.moduleData) then visited else {}
+-    | none => {}
+-  let (_, state) := ((CollectAxioms.collect name).run env).run { visited }
+-  if state.axioms.all (standardAxioms.contains ·) then
+-    let imported := state.visited.foldl (fun names n =>
+-      if env.isImportedConst n && (env.checked.get.find? n).isSome then names.insert n else names) ({} : NameSet)
+-    importedAudit.set (some (env.importEnv?.getD env, imported))
+-  return state.axioms.all (standardAxioms.contains ·)
++  return (← collectAxioms name).all (standardAxioms.contains ·)
+ 
+ /-- Whether the obligation `p` may hand control to a callee that calls back
+ under `transferSemantics:noCallback` (`Fml.callsBack false`), run as compiled

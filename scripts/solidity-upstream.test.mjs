@@ -95,6 +95,15 @@ test('aggregate vectors retain offsets, lengths, bytes and exact tuple schemas',
   assert.deepEqual(v.expectedBytes,[97,98,99,100,...Array(28).fill(0)]);
   const nominal=structuredClone(aggregate);nominal[0].inputs[0].components[0].internalType='enum C.E';
   assert.throws(()=>semanticVectors(fixture(['f((uint8,bytes)[]): 32, 0 ->']),nominal),/nominal enum/);
+  // Top-level enums (ABI uint8) are admitted; their range is the Lean declaration's.
+  const topEnum=[{type:'function',name:'g',stateMutability:'nonpayable',
+    inputs:[{name:'e',type:'uint8',internalType:'enum C.E'}],outputs:[{name:'',type:'uint8',internalType:'enum C.E'}]}];
+  assert.equal(semanticVectors(fixture(['g(uint8): 1 -> 1']),topEnum).length,1);
+  const enumArray=[{type:'function',name:'h',stateMutability:'nonpayable',
+    inputs:[{name:'e',type:'uint8[]',internalType:'enum C.E[]'}],outputs:[]}];
+  assert.throws(()=>semanticVectors(fixture(['h(uint8[]): 32, 0 ->']),enumArray),/nominal enum/);
+  // ABI coder v1 masks enum words instead of checking them: still refused.
+  assert.throws(()=>semanticVectors({...fixture(['g(uint8): 1 -> 1']),abiCoderV1:true},topEnum),/nominal enum/);
 });
 
 test('unsupported gas, logs, revert data and extra observations prevent success',()=>{
@@ -300,4 +309,19 @@ test('compound array decoder vectors retain dimensions, all calls and raw suffix
   const expected=[[32,2,64,128,1,7,2,8,9],[32,32,3,12,13,14],[32,1,7,7],
     [32,2,64,128,1,7,2,8,9],[32,64,128,1,7,2,8,9],[32,2,5,6,7,8]];
   for(let i=0;i<c.length;i++){assert.equal(c[i].failure,false);assert.deepEqual(c[i].expectedBytes,expected[i].flatMap(word));}
+});
+
+test('retries cannot mix self-try host adapters',()=>{
+  assert.throws(()=>compatible({selfTryAdapterSha256:'a'},{selfTryAdapterSha256:'b'}),/selfTryAdapterSha256/);
+});
+
+
+test('retries preserve every runtime adapter and payment reference identity',()=>{
+  for (const key of ['selfTryAdapterSha256','creationTryAdapterSha256','libraryTryAdapterSha256',
+      'compilationUnitAdapterSha256','compilerCodeAdapterSha256','paymentSourceAdapterSha256',
+      'paymentReferenceSha256','paymentReferenceEngineSha256','paymentReferenceLockSha256']) {
+    assert.doesNotThrow(()=>compatible({[key]:'same'},{[key]:'same'}));
+    assert.throws(()=>compatible({[key]:'original'},{[key]:'changed'}),new RegExp(key));
+    assert.throws(()=>compatible({[key]:'present'},{}),new RegExp(key));
+  }
 });

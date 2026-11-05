@@ -3,6 +3,7 @@ import Solidity.Calculus.Surface
 import Solidity.Calculus.Closers
 import Solidity.Tools.Inspect
 import Solidity.Tools.Run
+import Solidity.Examples.Tactics.HashingNames
 
 /-!
 # `keccak256`, `abi.*`, `concat` and string-keyed mappings
@@ -22,7 +23,8 @@ out of its type's range.  A `mapping(string => V)` is keyed by the hash.
 * §2 — `abi.encode`, `abi.encodePacked` proved; `abi.decode`, a dynamic
   encoding and the `concat`s run (`#run`); a calldata slice decoded in
   place; nested types (`#run`, a static nested struct proved);
-* §3 — a mapping keyed by `string`.
+* §3 — a mapping keyed by `string` (`Names`, defined in
+  `Examples/Tactics/HashingNames.lean`).
 -/
 
 namespace Solidity.Examples.Tactics.Hashing
@@ -646,11 +648,7 @@ end Codec3
 
 /-! ## 3 · A mapping keyed by `string` -/
 
-/-- `mapping(string => uint)`: a `mapping(uint => uint)` keyed by the hash
-(`hashKeyRows`). -/
-def Names : Contract := contract!{
-  mapping(string => uint) ids;
-}
+-- `Names`, `mapping(string => uint) ids`, is in `Examples/Tactics/HashingNames.lean`.
 
 example : Names.widths = [("ids{}#hash", 1)] := rfl
 

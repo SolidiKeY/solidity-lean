@@ -1,0 +1,9 @@
+{
+  "name":"solidity-lean-parity-probe",
+  "displayName":"Solidity Lean Parity Probe",
+  "publisher":"local",
+  "version":"0.0.1",
+  "engines":{"vscode":"^1.85.0"},
+  "main":"./extension.cjs",
+  "contributes":{"commands":[{"command":"solidityLeanParity.capture","title":"Solidity Lean Parity: Capture"}]}
+}

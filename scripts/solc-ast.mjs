@@ -80,8 +80,13 @@ import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import {compilationUnitFixture} from './solc-unit.mjs';
+import projectTools from '../vscode/src/project.cjs';
+import textTools from '../vscode/src/solidity-text.cjs';
 
-const args = process.argv.slice(2);
+/** Shared compiler boundary for the CLI and persistent editor workers. */
+export function compileFixture(options = {}) {
+const args = options.args ?? [];
 const legacyFixture = args.includes("--legacy-fixture");
 const optionOf = (flag, fallback) => {
   const i = args.indexOf(flag);
@@ -95,12 +100,11 @@ const OUT = OUT_ARG ?? join(ROOT, "tests/solc/TestSuite.ast.json");
 const WRAPPER = optionOf("--wrapper", join(ROOT, "Solidity/Solkey/TestSuite.lean"));
 const SOURCE = optionOf("--source", "keyext.solidity.examples/TestSuite.sol");
 const SOURCE_PATH = isAbsolute(SOURCE) ? SOURCE
-  : existsSync(join(ROOT, SOURCE)) ? join(ROOT, SOURCE) : join(SOLKEY, SOURCE);
+  : args.includes('--project-root') ? resolve(optionOf('--project-root','.'),SOURCE) : existsSync(join(ROOT, SOURCE)) ? join(ROOT, SOURCE) : join(SOLKEY, SOURCE);
 const UNIT = SOURCE.split("/").pop();
 
 const fail = (msg) => {
-  console.error(`solc-ast: ${msg}`);
-  process.exit(1);
+  throw new Error(`solc-ast: ${msg}`);
 };
 if (args.includes("--source") && !OUT_ARG) {
   fail("--source needs --out: the default is the TestSuite fixture");
@@ -146,7 +150,7 @@ const pin = compilerPins.find(p => p.version === version && p.sha256 === soljson
 if (!legacyFixture && !pin) fail("modern provenance requires a supported exact compiler pin");
 if (legacyFixture && (args.includes("--via-ir") || args.includes("--evm-version")))
   fail("--legacy-fixture cannot record pipeline/settings overrides");
-const bytes = readFileSync(SOURCE_PATH);
+const bytes = options.sourceBytes === undefined ? readFileSync(SOURCE_PATH) : Buffer.from(options.sourceBytes);
 let source;
 try { source = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(bytes); }
 catch { fail("source is not valid UTF-8"); }
@@ -155,15 +159,24 @@ const settings = legacyFixture
   : { viaIR: args.includes("--via-ir"), evmVersion: optionOf("--evm-version", "osaka"),
       optimizer: { enabled: false, runs: 200 }, libraries: {}, remappings: [],
       outputSelection: { "*": { "": ["ast"] } } };
+const project = options.project ?? (textTools.imports(source).length ?
+  projectTools.snapshot(SOURCE_PATH,source,{projectRoot:optionOf('--project-root',dirname(SOURCE_PATH)),includePaths:args.flatMap((v,i)=>v==='--include-path'?[args[i+1]]:[]),remappings:args.flatMap((v,i)=>v==='--remapping'?[args[i+1]]:[])}) : null);
+if(project)settings.remappings=project.remappings;
+const mainSource=project?.mainSource??UNIT;
+if(project&&project.sources[mainSource]?.content!==source)fail('project primary source differs from the requested snapshot');
 const input = {
   language: "Solidity",
-  sources: { [UNIT]: { content: source } },
+  sources: project?.sources??{ [UNIT]: { content: source } },
   settings,
 };
 const output = JSON.parse(compile(JSON.stringify(input), 0, 0));
 const errors = (output.errors || []).filter((e) => e.severity === "error");
-if (errors.length) fail(errors.map((e) => e.formattedMessage || e.message).join("\n"));
-const ast = output.sources?.[UNIT]?.ast;
+if (errors.length) {
+  const error = new Error(errors.map((e) => e.formattedMessage || e.message).join("\n"));
+  error.diagnostics = output.errors;
+  throw error;
+}
+const ast = output.sources?.[mainSource]?.ast;
 if (!ast) fail("solc produced no AST");
 
 // src counts UTF-8 bytes. Index byte positions once, including non-ASCII
@@ -338,7 +351,8 @@ if (existsSync(join(SOLKEY, "snapshot.json"))) {
   // not a git checkout: the header says so
 }
 
-const fixture = {
+const annotationAst=trim(ast, "");
+let fixture = {
   header: {
     solcVersion: version,
     sourceSha256: sha256(bytes),
@@ -353,11 +367,20 @@ const fixture = {
       acceptedPragmas: ast.nodes.filter(n => n.nodeType === "PragmaDirective").map(n => n.literals),
     } : {}),
   },
-  ast: trim(ast, ""),
+  ast: annotationAst,
 };
-const code = compilerCode(input => JSON.parse(compile(JSON.stringify(input), 0, 0)),
-  input.sources, settings, ast, {compilerSha256:soljsonSha,sourceSha256:sha256(bytes)});
-if (code) {
+let proofGap;
+if(project&&Object.keys(input.sources).length>1){
+  if(legacyFixture)fail('multi-source imports require modern compilation-unit provenance');
+  try{fixture=compilationUnitFixture({output,sources:input.sources,mainSource,settings,pin,solkeyCommit});}
+  catch(error){if(!options.analysisOnly)throw error;proofGap=error.message;fixture=null;}
+}
+let code;
+try{code=compilerCode(input => JSON.parse(compile(JSON.stringify(input), 0, 0)),
+  input.sources, settings, ast, {compilerSha256:soljsonSha,sourceSha256:sha256(bytes)});}
+catch(error){if(!options.analysisOnly)throw error;proofGap=Object.keys(input.sources).length>1?'multi-source compiler-code constants require a compilation-unit code adapter: '+error.message:error.message;fixture=null;}
+if(code&&fixture?.sourceUnits){const reason='multi-source compiler-code constants require a compilation-unit code adapter';if(!options.analysisOnly)fail(reason);proofGap=reason;fixture=null;}
+if (code&&fixture) {
   if (legacyFixture) fail("compiled code constants require modern provenance");
   fixture.compilerCode=code;
   fixture.ast.absolutePath=ast.absolutePath;
@@ -378,7 +401,7 @@ function serialize(v, indent) {
   return `{\n${entries.map(([k, x]) => `${pad}${JSON.stringify(k)}: ${serialize(x, indent + 1)}`)
     .join(",\n")}\n${" ".repeat(indent)}}`;
 }
-const text = serialize(fixture, 0) + "\n";
+const text = fixture?serialize(fixture, 0) + "\n":null;
 
 // FNV-1a 64 over the actual bytes: what the importing commands check.
 function fixtureHash(data) {
@@ -389,9 +412,9 @@ function fixtureHash(data) {
 // Read the old bytes before replacing OUT: every valid import may name them,
 // while deliberate stale-fixture regressions must retain their wrong literal.
 const previousHash = existsSync(OUT) ? fixtureHash(readFileSync(OUT)) : null;
-const hash = `0x${fixtureHash(Buffer.from(text, "utf8")).toString(16).padStart(16, "0")}`;
+const hash = text?`0x${fixtureHash(Buffer.from(text, "utf8")).toString(16).padStart(16, "0")}`:null;
 mkdirSync(dirname(OUT), { recursive: true });
-writeFileSync(OUT, text);
+if(text)writeFileSync(OUT, text);
 
 if (!args.includes("--no-wrapper") && existsSync(WRAPPER)) {
   const w = readFileSync(WRAPPER, "utf8");
@@ -452,5 +475,14 @@ if (args.includes("--compare-cache")) {
   if (!compared) console.log("solc-ast: solkey has no cached output for this source (run solkey on it once)");
 }
 
-console.log(`solc-ast: ${OUT} (${text.length} bytes, hash ${hash}, solc ${version})`);
-if (cacheDiffers) process.exit(1);
+if (!options.quiet) console.log(`solc-ast: ${OUT} (${text?.length??0} bytes, hash ${hash}, solc ${version})`);
+if (cacheDiffers) throw new Error('solc-ast: cached AST differs');
+return {fixture,proofGap,annotationAst,primaryAst:fixture?.ast??fixture?.sourceUnits.find(u=>u.name===mainSource).ast,
+  rawAst:ast,rawAsts:Object.fromEntries(Object.entries(output.sources).map(([name,s])=>[name,s.ast])),
+  sourceHash:sha256(bytes),project,text,hash,diagnostics:output.errors??[],compiler:{version,sha256:soljsonSha}};
+}
+
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { compileFixture({args:process.argv.slice(2)}); }
+  catch (error) { console.error(error.message); process.exitCode = 1; }
+}

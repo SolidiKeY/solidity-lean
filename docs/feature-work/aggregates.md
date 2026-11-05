@@ -119,7 +119,7 @@ Getter identity and model-alias rejection are pinned in `Replay.lean`.
 
 Validation and exact per-fixture provenance are recorded in
 [`tests/upstream/group07-validation.json`](../../tests/upstream/group07-validation.json).
-Long logs are retained under `/workspace/.setup/logs/group07-*` in the managed
+Long logs are retained under VM location `.setup/logs/group07-*` in the managed
 executor. Early overlapping build runs produced bus errors and out-of-date
 artifact failures; they are inconclusive, not passing checks or demonstrated
 model failures. Final validation is serialized over the final source state.

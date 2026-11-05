@@ -700,7 +700,7 @@ def longWalkNote : String := "sol_prove: a walk of more than"
 leaves, one per leaf the closer leaves, each the walk's own sequent; a walk
 of more than `oneCheck` steps is an error (`longWalkNote`). -/
 def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none)
-    (oneCheck : Nat := fuel) : MetaM (List MVarId) := do
+    (oneCheck : Nat := fuel) (shareCheck : Bool := false) : MetaM (List MVarId) := do
   if let some steps := steps? then
     unless 0 < steps && steps ≤ fuel do
       throwError "sol_prove: steps must be between 1 and {fuel}"
@@ -716,7 +716,14 @@ def prove (g : MVarId) (C R Γ H φ : Expr) (steps? : Option Nat := none)
     let someLs := mkApp2 (mkConst ``Option.some [0]) (mkApp (mkConst ``List [0]) leafTy) ls
     let type := mkApp3 (mkConst ``Eq [1]) resTy
       (mkAppN (mkConst ``residueWithin) #[C, toExpr steps, R, Γ, H, φ]) someLs
-    Derive.kernelLemma type (mkApp2 (mkConst ``Eq.refl [1]) resTy someLs)
+    let value := mkApp2 (mkConst ``Eq.refl [1]) resTy someLs
+    -- Testing can check several exact residue certificates in the final
+    -- theorem's kernel context. The annotation retains the original equality;
+    -- the kernel must check this value at the explicit equality type.
+    -- All ordinary tactic callers retain the synchronous auxiliary theorem.
+    if shareCheck && !type.hasFVar && !type.hasMVar then
+      return mkApp2 (mkConst ``id [0]) type value
+    Derive.kernelLemma type value
   let assignWith (steps : Nat) (ls h : Expr) (hl : Expr) : MetaM Unit :=
     g.assign (mkAppN (mkConst ``Proves.of_residueWithin) #[C, toExpr steps, R, Γ, H, φ, ls, h, hl])
   let nil := mkApp (mkConst ``List.nil [0]) leafTy

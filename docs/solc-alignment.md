@@ -27,12 +27,13 @@ how these claims are tested against solc is `docs/solc-validation.md`.
 | `ignoringOverflow { }` | Lean only (KeY Java's `arithmeticSemanticsIgnoringOF`, read soundly): each checked operation is preceded by `if (range) {} else { assume(false); }`, so an overflowing run is assumed away under either modality, where outside the block it reverts; not solc (`docs/options.md`, O5) | `Prog.ignoreOF`, `Stmt.assumeFalse`, `LeanTaclet.assumeFalse` | `Examples/Tactics/CheckedBlock.lean` |
 | `unchecked { }`, shifts | `+ - * **` in `unchecked` wrap modulo `2^256` (`+%` …); `~` is the unsigned word complement; `<<` keeps the low source-width bits at either sign, and `>>` zero-fills unsigned values or sign-extends signed values with an unsigned count | `BinOp.arithInt`, `RawExpr.uncheck` | |
 | Narrow integers | `uint8` … `uint248`, `int8` … `int248`: an operation at a narrow type reverts outside its range, `unchecked` and `<<` wrap modulo `2^N`, an implicit narrowing is refused, a `uint` cast truncates (below) | `narrowTy?` (`Syntax.lean`), `narrowPost`, `narrowCapture`, `narrowWrapNode`, `castCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/Checked.lean` |
-| Byte types | Lean only (solkey gives `string` an opaque `int` and skips `bytes`): `bytesN` is a `uint` of `8N` bits holding its bytes big-endian, so `==`, `<`, `& \| ^ ~ << >>` are the narrow integer ones; a conversion between sizes keeps the left bytes or pads on the right, as an implicit widening does; `b[i]` reads byte `i` from the left and reverts past `N` (solc's `Panic(0x32)`, read as a revert as an array's is); a literal is left-aligned. `bytes` and `string` are a `bytes1[]` in storage and memory, `bytes(s)`/`string(b)` the identity, a literal a fresh memory array | `bytesPure`, `hoist` (`Syntax/Elab.lean`), `valueRows?` (`Syntax.lean`) | `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol` |
+| Byte types | Lean only (solkey gives `string` an opaque `int` and skips `bytes`): `bytesN` is a `uint` of `8N` bits holding its bytes big-endian, so `==`, `<`, `& \| ^ ~ << >>` are the narrow integer ones; a conversion between sizes keeps the left bytes or pads on the right, as an implicit widening does; `b[i]` reads byte `i` from the left and reverts past `N` (solc's `Panic(0x32)`: its data where a `catch` reads it or in a self frame, a plain revert elsewhere, as an array's index; `#bytesIndex`, lane FU2-D); a literal is left-aligned. `bytes` and `string` are a `bytes1[]` in storage and memory, `bytes(s)`/`string(b)` the identity, a literal a fresh memory array | `bytesPure`, `hoist` (`Syntax/Elab.lean`), `valueRows?` (`Syntax.lean`) | `Examples/Tactics/Bytes.lean`, `tests/solc/Bytes.sol` |
 | `calldata` and slices | calldata roots are read-only model memory inputs; ordinary aliases must originate at admitted calldata parameters/aliases, and writes or writable escape through ordinary shared aliases are refused. `b[i:j]` is a stable finite base/offset/length descriptor with relative bounds checks. Whole-slice uses with primitive elements allocate a fresh dynamic memory copy for internal calls/returns, hashes/ABI consumers and existing storage copying; readonly indexing, length and decoding use the descriptor directly. Reference/nominal elements and external reference arguments remain unsupported | `RawStmt.sliceViews`, `calldataCheck`, `#sliceCopy` (`Syntax/Elab/Context.lean`, `Syntax/Elab/Arms.lean`), `Frontend/Import.lean` | `Examples/Tactics/SliceCopies.lean`, `Examples/Tactics/SliceCopiesImport.lean`; [calldata-slice-copies.md](calldata-slice-copies.md) |
 | Hashing and the ABI | Lean only (solkey has neither): `keccak256`, `sha256`, `ripemd160` Keccak-256, SHA-256 and RIPEMD-160 of the bytes (`keccakBytes`, `sha256Bytes`, `ripemd160Bytes`; collision resistance not assumed), `ecrecover(h, v, r, s)` of the precompile's four words: `0` where `v` is not `27`/`28` or `r`, `s` lie outside `[1, n)`, as solc returns, else computed secp256k1 recovery (`ecrecoverKey`), accepting high `s` and returning zero on curve-recovery failure. The implementation uses checked curve points and bounded arithmetic; conformance vectors do not establish a general external-precompile equivalence theorem; `abi.encode`/`abi.encodePacked`/`bytes.concat`/`string.concat` a fresh memory `bytes` of solc's layout, `abi.decode` its inverse at value types, reverting on a word out of range; `mapping(string => V)` keyed by the hash | `Val.hash`, `Op2.hash`, `HashKind`, `LeanTaclet.hashAssignment`; `abiEncode`, `abiDecodeAt`, `hashKeyRows` (`Syntax/Elab.lean`, `Syntax.lean`) | `Examples/Tactics/Hashing.lean`, `tests/solc/Hashing.sol` |
 | Division | `/` and `%` by zero revert (KeY agrees) | `BinOp.arithInt` | |
 | `assert` | a failing `assert` panics (`Panic(0x01)`), a halt distinct from `require`'s revert that neither modality accepts; KeY's "Violated" goal, an obligation under the box too | `TRun.assert`, `Modality.afterRunTR`, `Taclet.assertSimple` | `Examples/Tactics/Revert.lean` |
 | Panic data | in the callee a self-call `try` runs, a failing `assert` reverts with `Panic(0x01)`'s data and a failing check in `checked { }` with `Panic(0x11)`'s, so the `try` binds solc's code; elsewhere they panic as above (no `try` reads their data) | `elabStmt1` (`assert`), `OFMode.guardStmt` | `Examples/Tactics/RevertData.lean` (`Panics`), `tests/solc/RevertData.sol` (`panicData`) |
+| Revert data read in formulas | `RFml`'s `↯` (`docs/semantic-gaps.md`, "Revert data", *Read in formulas*) reads the data the typed run returns.  Outside a self-call's callee, `revert("m")`, `require(c, "m")` and `revert E(…)` revert with `[]` where solc returns `Error("m")` or `E`'s data, failed checks (index, `pop`, checked overflow outside `checked { }`) with `[]` where solc returns `Panic(code)`, and `assert` panics (no `↯` formula holds of it) where solc reverts with `Panic(0x01)`; a `revert(hex"…")` reason is solc's `Error` data everywhere.  So a top-level `⟨ revert("m"); ⟩ false ↯ []` is provable and false of solc | `THalt.revertData?`, `RFml.revModal`, `elabStmt1` (`revertMsg`) | `Examples/Tactics/RevertFormulas.lean` (`stringReason_empty`, `stringReason_not_error`) |
 | Assignment order | right-hand side first, target resolved once | `Stmt.run` (`TRun.assign`, `TRun.opAssign`, `TRun.incDec`) | `Examples/Tools.lean` (`Prog.runT`) |
 | Effects in an expression | captured before the statement in solc's order (table below) | `hoist`, `captureExpr` | `Examples/Tools.lean` (`Prog.runT`) |
 | Repeated member names | a struct that declares two members of one name is refused ("Identifier already declared"): the elaborator refuses a type naming one (`refusedStructs`, `unknownStructMsg`, decision 16), so every struct of `structDef` has distinct member names | `structDef_nodup` | `Syntax/Splice.lean` (`BadDup`) |
@@ -50,12 +51,17 @@ how these claims are tested against solc is `docs/solc-validation.md`.
 | Enum conversions | `E(x)` asserts that `x` names a member (solc's Panic `0x21`), then is `x`; an enum is a `uint` | `enumCapture` (`Syntax/Elab.lean`) | `Examples/Tactics/SolcOpen.lean` |
 | A call's ABI | a function's obligation assumes what its dispatcher checks before the body: `msg.value == 0` where it is not `payable` and the body reads `msg.value`, a narrow integer or an enum parameter in its range (solc's decoder reverts otherwise); the specified obligation assumes the first already. **Chain fact:** `msg.value < 2^128` where the function is `payable` and its body reads `msg.value` (`etherBound`, `Calculus/SurfaceSpec.lean`; the specified obligation too): no transaction carries more than the ether supply, below `2^128` wei, so `5 + msg.value + msg.value` does not overflow. Every plain imported source obligation also assumes the EVM environment fact `address(this) < 2^160`, including constructors; the core transaction field remains a 256-bit word. Explicit self addresses outside that domain are rejected. See [source-inputs.md](source-inputs.md). | `Problem.callPre` (`Frontend/Problems.lean`) | solkey's `SolcPaymentsOpen`, `SolcTypesOpen` |
 | External calls | `r.f(a);` outside a `try` is `try r.f(a) { } catch { revert(); }`: a failed call reverts the caller, as a call to an address with no code does; `receive` and `fallback` are imported with no obligation of their own | `SolcJson.lean` (`isExternalMember`, `tagOf`) | |
+| Panic returndata | Exact selector, at least36 bytes; decode the first unsigned32-byte word at offset4 and ignore trailing bytes, matching pinned solc try_decode_panic_data. Short/wrong-selector data remains undecoded. Partial-data exclusions use minimum length, never exact length. | `Semantics.decodePanic`, `Pat.notPanic_decode` | `Examples/Tactics/TryConditions.lean`; [diamond-try account](feature-work/diamond-try.md) |
 | `try` | a call to an address with no code, and returned data that does not decode, revert in the caller and no `catch` catches them; KeY leaves both out (they are vacuous in its box rule). **Modelling assumption:** address `0` has no code, so a call to it reverts in the caller whatever the transaction's table says (`TRun.tryCall`'s first test; on the EVM `0` holds no contract on any chain this targets). A callee that is a function of the contract declared before the caller runs, in a frame of its own (`msg.sender` the contract, `msg.value` `0`), when the receiver is `address(this)`: its writes are seen on success and undone on failure, a revert going to the `Error` clause when its data decodes as `Error(string)`, to `Panic` when it decodes as `Panic(uint256)`, to the catch-all otherwise, a panic to `Panic` (`docs/options.md` O8); a named reason or data is bound from the callee's revert (`Stmt.catchData`, `docs/semantic-gaps.md`, "Revert data"). A value call `(bool ok, ) = r.call{value: v}("")` to `address(this)` runs the contract's `receive` so (`msg.value` `v`; a payment to oneself moves no ether), written by the elaborator as a self-call `try` behind `r == address(this)` (`elabValueCall`), `ok` false on any failure. The callee has all the gas, so it may call back under either `transferSemantics` (`ValidT`, `docs/options.md`); `holds` reads it as keeping the state, as solkey's `tryCallNoCallbackBox` does | `Stmt.run` (`.tryCall`), `Binders.decodeT`, `ExecS.tryOk` | `Examples/Tactics/TryCatch.lean` (`selfCall_noCallback`) |
 
 ## Evaluation order
 
 The default below models legacy codegen. `Contract.evalOrder := .viaIR`
-selects source-order binary expressions and `addmod`/`mulmod` arguments;
+selects source-order binary expressions and `addmod`/`mulmod` arguments,
+and the IR pipeline's copy point for a storage operand of a memory
+parameter (after every argument ran, `tests/solc/FunctionValueReferences.sol`
+`argumentOrder`/`argumentOrderDirect`: `901`, legacy `101`; `hoistCallArgs`,
+`dispatchCaptures`);
 [options.md](options.md#o9-expression-evaluation-order) gives the configuration
 and its limits. This choice is retained by the named contract, including when
 its callees are inlined or its source is imported.
@@ -405,12 +411,22 @@ The plain `holds` reading ignores callbacks, as solkey's `noCallback` does.
 
 ## Calls
 
-solc evaluates every argument of an internal call, left to right, before the
-callee runs. `Stmt.run` does the same: it evaluates the arguments in the
+The default legacy model evaluates supported positional internal-call arguments
+from left to right before entering the callee. `Stmt.run` evaluates them in the
 caller's context (`Args.evalT`) and runs the body in a frame of its own, its
 returns on its parameters (`Stmt.call`, `Syntax/Scoped.lean`), which sees
 no caller's local; KeY's function-body expansion declares the parameters one
 after another, and the two agree because no argument can read a parameter.
+
+The unchanged `tests/solc/ReferenceParameters.sol` function
+`copiesBeforeEffects` exposes a remaining compiler-pipeline limit. With pinned
+solc 0.8.34 (`80d5c536`), Osaka, and the optimizer both disabled and enabled,
+the native legacy executions return normally; both viaIR executions revert
+with assertion `Panic(0x01)`. The model's ordinary-call capture remains left to
+right under `EvalOrder.viaIR`, so this implicit-copy/side-effect interaction is
+an open viaIR alignment gap. These observations identify neither the failing
+assertion nor the precise compiler mechanism. A default legacy API proof does
+not establish viaIR agreement for this fixture.
 
 ### Returns and tuples
 
@@ -569,6 +585,58 @@ stronger obligation, not an additional assumption available to its proofs.
   external function types: such an argument is `stuck` (user-defined value
   types are decoded as their underlying type since lane V04b)
   ([source-soundness.md](feature-work/source-soundness.md#the-stuck-census)).
+  `abi.decode` (lane FU2-B) reuses this decoder on `bytes` data, so the
+  same `finalize_allocation` band applies; solc also reverts on an offset
+  word of `2^64` or more before its bounds check, where the source
+  semantics reverts by the bounds check (the same outcome for data shorter
+  than `2^64` bytes). The decoder's refused types (static arrays, structs,
+  nested arrays, fixed point, external function types) have no
+  `abi.decode` derivation
+  ([source-soundness.md](feature-work/source-soundness.md#lane-fu2-b-fu2-20261102-abidecode-and-calldata-references)).
+- **Tuple declarations** (lane FU2-B, `StmtD.declTuple`): a literal
+  component of the initializer is typed at its mobile type before the
+  per-slot conversion, so `(int8 a, uint b) = (1, 2);`,
+  `(bytes1 c, ) = (0x01, 1);` and `(bytes32 h, ) = ("abc", 1);` are refused
+  where solc converts each literal to its slot's type; a one-component
+  declaration with a non-tuple initializer (`(uint a) = f();`) is refused;
+  repeated names (`(uint a, uint a) = (1, 2);`, a `DeclarationError` in
+  solc) are accepted, the later one innermost
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **Inline arrays** (lane FU2-B, `Typed.inlineArray`): only one-word
+  element types are typed; `["a", "b"]` (`string memory[2]`), nested inline
+  arrays, struct elements and `[1/3]` (`ufixed256x77` in solc) are refused
+  where solc accepts them; storing one into storage (`uint[] public a =
+  [1, 2, 3];`, `s = [1, 2, 3]` for `uint[3] s`) is refused, since a memory
+  array copies to storage only at the same type (`STy.copiesTo`); each
+  element must also convert to the common type (`argsFit`), a check solc
+  does not make, so `[bytes1(x), 0x12, bytes2(y)]` is refused; fixed-point
+  elements are typed and evaluated, where solc's code generator stops; the
+  array is allocated after its elements are evaluated (solc's IR order;
+  the legacy code generator allocates first, unobservable without
+  assembly)
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
+- **`new` of memory arrays** (lane FU2-B, `Typed.newArray`): a length of
+  `2^64` or more panics `0x41`, solc's `array_allocation_size` check; solc
+  also panics when the free memory pointer would pass `2^64 - 1`
+  (`finalize_allocation`, e.g. a `uint256[]` of about `2^59` elements) or
+  runs out of gas, where the model succeeds; only one-word elements,
+  `bytes` and `string` are modelled (`new string[](n)` and function-type
+  elements are refused, solc accepts them; fixed-point elements are
+  accepted, solc's code generator stops); contract creation is not
+  modelled.
+- **`try`/`catch`** (lane FU2-B, `StmtD.tryCall`): only an external call
+  without value and one `catch { … }` or `catch (bytes memory r) { … }`
+  clause are typed; `Error(string)`/`Panic(uint)` clauses, several
+  clauses, `{value: v}` and `try new C(…)` are refused, where solc accepts
+  them; given `returns` types must equal the function's (`STy.sameList`);
+  dynamic returns are typed but `stuck` at run time; a target without code
+  reverts the caller before any call, where solc ≥ 0.8.10 makes the call
+  when there are returns to decode (the same revert, without the call).
+- **`fallback` with parameters** (lane FU2-B): the source semantics runs
+  `fallback(bytes calldata input) returns (bytes memory output)`, `input`
+  all of the call data and `output` returned unencoded, as solc; other
+  signatures, which solc refuses, elaborate and are `stuck` at run time
+  ([source-soundness.md](feature-work/source-soundness.md#item-4-checkpoint-4s-remaining-gaps)).
 - **Gas** is not modelled; resource exhaustion is `exhausted`, which both
   modalities accept. The EVM compiler's fragment is narrower than the run's
   (`Evm.inFrag`, `docs/compiler-verification.md`).
@@ -650,6 +718,13 @@ This lowering uses existing typed statements and sound rules. Runtime/EVM
 agreement and the fixed-program proof controls do not constitute a universal
 compiler-correctness theorem.
 
+## Overloads differing only in return types
+
+solc rejects two functions with the same name and parameter types and
+different return types. The Source elaborator (`Source.elaborate`) accepts
+them, and dispatch selects the first declaration.
+`Lowering/P9/ReturnControls.lean` checks that P9's whole-program checker
+refuses such a unit, but the elaborator itself does not reject it yet.
 
 ### VY5 H3: pinned canonical-rethrow operational traces (2026-11-02)
 

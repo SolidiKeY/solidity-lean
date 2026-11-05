@@ -705,9 +705,9 @@ theorem Pat.notPanic_decode {p : Pat} {d : List UInt8} (hp : p.notPanic = true)
     exfalso
     obtain ⟨h4, h36⟩ := h
     simp only [Pat.notPanic, bne_iff_ne, ne_eq, Bool.or_eq_true,
-      List.any_eq_true, List.mem_range] at hp
+      List.any_eq_true, List.mem_range, decide_eq_true_eq] at hp
     rcases hp with hl | ⟨i, hi, hb⟩
-    · exact hl (hm.1 ▸ h36)
+    · exact Nat.not_lt_of_ge (hm.1.symm ▸ h36) hl
     · split at hb
       · rename_i b hpi
         have hd := hm.2 i b hpi
@@ -726,7 +726,7 @@ data it reverts with that decode as `Panic` carry one of the codes. -/
 theorem Prog.panicCodes_call {Γ ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf}
     {ks : List Semantics.Word} (hK : sbody.panicCodes = some ks) (sargs : Args C Γ ps)
     (rets : Binders ρ) (σ : State C Γ) {e : THalt}
-    (h : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e) :
+    (h : TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ = .error e) :
     e ≠ .panic ∧ ∀ d v, e = .revertWith d → Semantics.decodePanic d = some v → v ∈ ks := by
   unfold Prog.panicCodes at hK
   split at hK
@@ -740,10 +740,10 @@ theorem Prog.panicCodes_call {Γ ρ ps Γf : Ctx} {sbody : Prog C (ρ ++ ps) Γf
       cases hK
       refine ⟨fun he => ?_, fun d v hd hv => ?_⟩
       · subst he
-        exact TRun.call_noPanic sargs (.rets rets) sbody.ext sbody.runR
+        exact TRun.call_noPanic sargs (.rets rets.toRet) sbody.ext sbody.runR
           (fun τ => Prog.run_noPanic sbody hat.1 τ) σ h
       · subst hd
-        rcases TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d h
+        rcases TRun.call_dataS sargs (.rets rets.toRet) _ _ (Prog.run_dataS true sbody hS) σ d h
             (.inl rfl) with hm | ⟨p, hp, hm⟩
         · exact List.mem_filterMap.2 ⟨d, hm, hv⟩
         · rw [Pat.notPanic_decode (List.all_eq_true.1 hall p hp) hm] at hv

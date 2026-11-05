@@ -1,0 +1,6 @@
+{
+  "temporaryLakeConfigRemoved": true,
+  "trackedLakeConfigToolchainAndFixturesUnchanged": true,
+  "originalDependencyDirectoryUntouched": true,
+  "noMCPBuildOverlap": true
+}

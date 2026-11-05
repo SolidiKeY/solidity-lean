@@ -1,4 +1,5 @@
-import Lean
+import Lean.Elab.Tactic
+import Lean.Elab.Deriving
 import Solidity.KeySort
 
 /-!
