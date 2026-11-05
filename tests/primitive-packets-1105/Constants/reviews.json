@@ -1,0 +1,28 @@
+{
+  "finder": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "findings": [
+      "F-CONST-ACCEPT-01 fixed: untracked scope candidates, two exact preserved hashes, complete modules/authored declarations, six refusal mutation controls."
+    ]
+  },
+  "skeptic": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "findings": [
+      "Explicit IntValueRel/native eval added; both acceptance gaps fixed. No further proof defect."
+    ]
+  },
+  "proof_sources": {
+    "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+    "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
+    "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+    "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+    "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
+  },
+  "checker_sha256": "07d7b4db6063203e98d6bae9df88243b8dddf31ed971269fb920de4621f9c85c",
+  "manifest_sha256": "2468ab9959f966074292a01d38fd79b33295bdc8173380f4a21a3a0e5bf62938",
+  "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted."
+}

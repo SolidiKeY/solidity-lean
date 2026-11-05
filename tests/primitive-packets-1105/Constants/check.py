@@ -16,8 +16,24 @@ def validate_inventory(rows):
   assert r['signature'] and r['kind'] not in ('axiom','opaque'),'invalid kernel declaration'
   assert not r['isUnsafe'] and not r['isPartial'],'unsafe or partial'
   assert set(r['axioms']) <= {'propext','Classical.choice','Quot.sound'},'unapproved axiom'
+def scope_candidates(diff,untracked): return set(diff)|set(untracked)
+def validate_scope(paths):
+ for p in paths:
+  owned=p.startswith(('Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or p=='docs/feature-work/primitive-packets-1105-Constants.md'
+  if not owned:
+   assert p in M['preserved_untracked'] and sha(ROOT/p)==M['preserved_untracked'][p],'foreign write '+p
+def validate_modules(paths):
+ assert set(paths)==set(M['modules']),'unlisted/missing module'
+def validate_authored():
+ rows=[]
+ for p in sorted(M['modules']):
+  prefix='Solidity.Backend.PrimitivePackets.Constants.'+('Controls.' if p.endswith('/Controls.lean') else '')
+  rows += [dict(name=prefix+n,kind=k,module=p[:-5].replace('/','.')) for k,n in re.findall(r'^(theorem|def|abbrev) (\w+)',(ROOT/p).read_text(),re.M)]
+ assert rows==M['declarations'],'authored declaration enumeration drift'
 def main():
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],'HEAD'],cwd=ROOT,check=True)
+ validate_modules(str(p.relative_to(ROOT)) for p in (ROOT/'Solidity/Backend/PrimitivePackets/Constants').rglob('*.lean'))
+ validate_authored()
  for group in ('modules','inputs'):
   for p,h in M[group].items():assert sha(ROOT/p)==h,'source pin '+p
  assert sha(F/'kernel-inventory.json')==M['kernel_inventory_sha256']
@@ -55,8 +71,16 @@ def main():
   except AssertionError:pass
   else:raise AssertionError('mutation accepted '+kind)
  changed=subprocess.check_output(['git','diff','--name-only',M['owned_start'],'--'],cwd=ROOT,text=True).splitlines()
- for p in changed:assert p.startswith(('Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or p=='docs/feature-work/primitive-packets-1105-Constants.md','foreign write '+p
+ untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines()
+ validate_scope(scope_candidates(changed,untracked))
+ for candidate in [scope_candidates([],['Solidity/UntrackedForeign.lean']),scope_candidates(['Solidity/TrackedForeign.lean'],[])]:
+  try:validate_scope(candidate)
+  except AssertionError:pass
+  else:raise AssertionError('foreign scope mutation accepted')
+ try:validate_modules(set(M['modules'])|{'Solidity/Backend/PrimitivePackets/Constants/Unlisted.lean'})
+ except AssertionError:pass
+ else:raise AssertionError('unlisted module mutation accepted')
  for p in M['modules']:
   text=(ROOT/p).read_text();assert not re.search(r'\b(sorry|admit|axiom|unsafe|native_decide|maxHeartbeats)\b',text),'forbidden proof token'
- print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and three mutation controls')
+ print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and six mutation controls')
 if __name__=='__main__':main()

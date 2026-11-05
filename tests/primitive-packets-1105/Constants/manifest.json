@@ -237,5 +237,9 @@
       "Controls.low_fuel"
     ]
   },
-  "boundary": "Existing structured Evm.Instr.push and Evm.run, not encoded PUSHn bytes, gas or deployed execution; intrinsic Source integer range admission unchanged."
+  "boundary": "Existing structured Evm.Instr.push and Evm.run, not encoded PUSHn bytes, gas or deployed execution; intrinsic Source integer range admission unchanged.",
+  "preserved_untracked": {
+    "tests/sol-numeric-literals/evidence/integrationb86-committed.json": "fc7a7dc17b468efa9643c49ecb6812687d870d573370ac0608930db743f55702",
+    "tests/sol-numeric-literals/evidence/integrationb86-committed.log": "0960084d6ccaf13d0bc93d405e2aac2a81601d142758c4425457f7a46b499d5f"
+  }
 }
