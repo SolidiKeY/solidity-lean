@@ -2676,6 +2676,7 @@ import Solidity.Yul.Checks.LocalBoolInitialization
 import Solidity.Yul.Checks.LocalBoolItemScope
 import Solidity.Yul.Checks.LocalBoolItems
 import Solidity.Yul.Checks.LocalBoolScope
+import Solidity.Yul.Checks.LocalBoolUnchecked
 import Solidity.Yul.Checks.LocalBoolWhile
 import Solidity.Yul.Checks.LocalCompareControl
 import Solidity.Yul.Checks.LocalExprStatement
@@ -2919,6 +2920,7 @@ import Solidity.Yul.LocalBoolInitialization
 import Solidity.Yul.LocalBoolItemScope
 import Solidity.Yul.LocalBoolItems
 import Solidity.Yul.LocalBoolScope
+import Solidity.Yul.LocalBoolUnchecked
 import Solidity.Yul.LocalBoolWhile
 import Solidity.Yul.LocalCompareControl
 import Solidity.Yul.LocalCoordinates

@@ -180,3 +180,5 @@
 | `Yul/Compilation/FramedControlControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/World/TerminalBuiltin.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/World/TerminalBuiltinControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Checks/LocalBoolUnchecked.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolUnchecked.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
