@@ -1374,3 +1374,17 @@ with `node scripts/check-axiom-pins.mjs --write`; that generator adds exactly
 these seven standard-axiom entries. All 8,059 existing entries are unchanged.
 A new committed candidate requires eleven fresh exact-head gates; this does
 not rerun an unchanged failed candidate or weaken the inventory check.
+
+## Canonical nested-memory traversal
+
+`NestedMemoryLoopInterface` specifies G35.04/G35.05 traversal using the
+existing checked child turn and loop controller. Public rows and count come
+from the actual typed source parent; callers supply no row, source-selection
+or capacity premise. Execution starts with those derived canonical control
+operands; this code does not itself load the outer header. Success retains
+full allocator, final sibling pointers, ordered fresh identities, source
+snapshot and old framing/gaps. Capacity refusal is explicit and finite.
+Independent design reviews required transport of every suffix observation,
+empty traversal at saturation, mixed retained payloads and a successful
+prefix before later refusal. Parent adoption, outer entry compilation and
+general recursive/Source/physical adequacy remain open.
