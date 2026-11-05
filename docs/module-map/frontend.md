@@ -147,3 +147,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/SignatureHiding.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/SignatureNormalization.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/TypePaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Audit.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |

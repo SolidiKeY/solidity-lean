@@ -1579,6 +1579,7 @@ import Solidity.Frontend.Admission.TypedExpressionPolicy
 import Solidity.Frontend.Admission.TypedObservationPolicy
 import Solidity.Frontend.Admission.TypedStatementPolicy
 import Solidity.Frontend.C3Exactness.Admission
+import Solidity.Frontend.C3Exactness.Audit
 import Solidity.Frontend.C3Exactness.Controls
 import Solidity.Frontend.C3Exactness.GraphControls
 import Solidity.Frontend.C3Exactness.Identity
