@@ -2054,6 +2054,8 @@ import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
 import Solidity.Lowering.V07.GraphRanks
 import Solidity.Lowering.V07.IntegerAssignmentPrefixes
+import Solidity.Lowering.V07.IntegerConstantAssignment
+import Solidity.Lowering.V07.IntegerConstantAssignmentControls
 import Solidity.Lowering.V07.IntegerConstantControls
 import Solidity.Lowering.V07.IntegerConstants
 import Solidity.Lowering.V07.IntegerLocalFamily
