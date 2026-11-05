@@ -6,7 +6,7 @@ dangling-else association inside blocks, and negative controls. -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source Solidity.Frontend.Checked
 
-/-- `{ while (x) { if (y) break; else continue; } return z; unchecked { return; } }` -/
+/-- The loop body `{ if (y) break; else continue; }`. -/
 def loopBody : Syn (.stmt ⟨true, false⟩) :=
   .blockStmt (.block (.cons (.stmtItem (.ifStmt (.ident "y") .breakStmt (.some .continueStmt))) .nil))
 
@@ -17,6 +17,7 @@ def loopBodyParts : List (List Tok) :=
 theorem loop_body_relation : AtomStmt loopBody (braces loopBodyParts.flatten) 13 :=
   .block (.stmtCons (.ifSome (ident_atom_rparen "y") .breakStmt .continueStmt rfl) .nil)
 
+/-- The items of `{ while (x) { if (y) break; else continue; } return z; unchecked { return; } }`. -/
 def outerItems : Syn (.list (.item .body)) :=
   .cons (.stmtItem (.whileStmt (.ident "x") loopBody))
     (.cons (.stmtItem (.returnStmt (.some (.ident "z"))))
@@ -37,7 +38,8 @@ theorem outer_block_coverage (n : Nat) (s : St) :
       .ok (.blockStmt (.block outerItems), s) :=
   atom_stmt_coverage (.block outer_relation) n s (Or.inl rfl)
 
-theorem outer_block_actual_parse :
+/-- An instance of the universal coverage theorem at zero excess fuel. -/
+theorem outer_block_at_fuel_32 :
     stmt 32 .body (locatedInput (braces outerParts.flatten) ⟨[], [], 0⟩) =
       .ok (.blockStmt (.block outerItems), ⟨[], [], 0⟩) :=
   outer_block_coverage 0 ⟨[], [], 0⟩
@@ -127,8 +129,83 @@ theorem nested_unchecked_actual_refusal (n : Nat) (l : Bool) (ts : List Tok) (s 
     ∃ err, item (n + 1) ⟨l, true⟩ (uncheckedInput ts s) = .error err :=
   ⟨_, unchecked_nested_refused n l ts s⟩
 
+/-- `for (;;) do { continue; } while (x);` with arbitrary suffix:
+the empty-header `forLoop` and `doLoop` constructors. -/
+def forDoTree : Syn (.stmt .body) :=
+  .forStmt .none .none .none (.doWhile (.blockStmt (.block (.cons (.stmtItem .continueStmt) .nil)))
+    (.ident "x"))
+
+def forDoTokens : List Tok :=
+  [.kw .for_, .punct .lparen, .punct .semi, .punct .semi, .punct .rparen] ++
+  ([.kw .do_] ++ braces [[.kw .continue_, .punct .semi]].flatten ++ [.kw .while_, .punct .lparen] ++
+    [.ident "x"] ++ [.punct .rparen, .punct .semi])
+
+theorem for_do_relation : AtomStmt forDoTree forDoTokens 14 :=
+  .forLoop (.doLoop (ident_atom_rparen "x") (.block (.stmtCons .continueStmt .nil)))
+
+theorem for_do_arbitrary_suffix (n : Nat) (s : St) :
+    stmt (n + 14 + 6) .body (locatedInput forDoTokens s) = .ok (forDoTree, s) :=
+  atom_stmt_coverage for_do_relation n s (Or.inl rfl)
+
+/-- `for (; c; u) break;` in all four shapes of the optional condition and update. -/
+def forHeaderTokens (cs vs : List Tok) : List Tok :=
+  [.kw .for_, .punct .lparen, .punct .semi] ++ cs ++ [.punct .semi] ++ vs ++ [.punct .rparen] ++
+    [.kw .break_, .punct .semi]
+
+theorem for_header_none_none (n : Nat) (s : St) :
+    stmt (n + 1 + 6) .body (locatedInput (forHeaderTokens [] []) s) =
+      .ok (.forStmt .none .none .none .breakStmt, s) :=
+  atom_stmt_coverage (.forAtom .none .none .breakStmt) n s (Or.inl rfl)
+
+theorem for_header_cond (n : Nat) (s : St) :
+    stmt (n + 6 + 6) .body (locatedInput (forHeaderTokens [.ident "c"] []) s) =
+      .ok (.forStmt .none (.some (.ident "c")) .none .breakStmt, s) :=
+  atom_stmt_coverage (.forAtom (.some (ident_atom_semi "c") (by intro h; cases h)
+    (by intro h; cases h)) .none .breakStmt) n s (Or.inl rfl)
+
+theorem for_header_update (n : Nat) (s : St) :
+    stmt (n + 6 + 6) .body (locatedInput (forHeaderTokens [] [.ident "v"]) s) =
+      .ok (.forStmt .none .none (.some (.ident "v")) .breakStmt, s) :=
+  atom_stmt_coverage (.forAtom .none (.some (ident_atom_rparen "v") (by intro h; cases h)
+    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl)
+
+theorem for_header_both (n : Nat) (s : St) :
+    stmt (n + 11 + 6) .body (locatedInput (forHeaderTokens [.bool true] [.ident "v"]) s) =
+      .ok (.forStmt .none (.some (.lit (.bool true))) (.some (.ident "v")) .breakStmt, s) :=
+  atom_stmt_coverage (.forAtom (.some (bool_atom_semi true) (by intro h; cases h)
+    (by intro h; cases h)) (.some (ident_atom_rparen "v") (by intro h; cases h)
+    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl)
+
+/-- The kernel evaluates the actual parser on the four-shape header. -/
+theorem for_header_both_kernel :
+    stmt 17 .body (locatedInput (forHeaderTokens [.bool true] [.ident "v"]) ⟨[], [], 0⟩) =
+      .ok (.forStmt .none (.some (.lit (.bool true))) (.some (.ident "v")) .breakStmt,
+        ⟨[], [], 0⟩) := by
+  rfl
+
+/-- Negative: an update atom may not start with `)` (the parser reads it as absent). -/
+theorem opt_atom_refuses_rparen_head (e : Syn .expr) (a : Nat) :
+    ¬ OptAtom .rparen (.some e) [.punct .rparen] a := by
+  intro h
+  cases h with
+  | some _ _ hh => exact hh rfl
+
+/-- Negative: `break` needs the loop context the relation's index demands;
+outside a loop the actual parser refuses it. -/
+theorem break_outside_loop_refused (n : Nat) (s : St) :
+    ∃ err, stmt (n + 1) .body (locatedInput [.kw .break_, .punct .semi] s) = .error err :=
+  ⟨_, break_outside_loop n false 0 0 0 0 s⟩
+
+#print axioms for_do_arbitrary_suffix
+#print axioms for_header_none_none
+#print axioms for_header_cond
+#print axioms for_header_update
+#print axioms for_header_both
+#print axioms for_header_both_kernel
+#print axioms opt_atom_refuses_rparen_head
+#print axioms break_outside_loop_refused
 #print axioms outer_block_coverage
-#print axioms outer_block_actual_parse
+#print axioms outer_block_at_fuel_32
 #print axioms outer_block_unique
 #print axioms arbitrary_width_block
 #print axioms arbitrary_depth_coverage

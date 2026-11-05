@@ -64,17 +64,13 @@ theorem g0_guard_cons_equations {k : SCtx} (s : Syn (.stmt k))
     FramedStatements (.cons s ss) = (FramedStatement s ∧ FramedStatements ss) ∧
     FramedItems (.cons x xs) = (FramedItem x ∧ FramedItems xs) := ⟨rfl,rfl⟩
 
-/-- The Gate G0 node twin agrees with `Syn.nodes` on an actual body, and the
-link theorem covers every syntax tree. -/
+/-- The Gate G0 node twin on an actual body, evaluated by the kernel on the
+twin only; agreement with `Syn.nodes` is the universal link theorem below,
+so no indexed match is kernel-evaluated here. -/
 theorem g0_node_ctors_twin_actual_body :
     g0NodeCtors (Syn.some (Syn.block (k := ⟨false, false⟩)
         (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))) =
-      [.some, .block, .cons, .stmtItem, .ifStmt, .lit, .returnStmt, .none, .none, .nil] ∧
-    g0NodeCtors (Syn.some (Syn.block (k := ⟨false, false⟩)
-        (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))) =
-      (Syn.some (Syn.block (k := ⟨false, false⟩)
-        (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))).nodes.map
-        Node.ctor := by
+      [.some, .block, .cons, .stmtItem, .ifStmt, .lit, .returnStmt, .none, .none, .nil] := by
   decide +kernel
 
 theorem g0_node_ctors_twin_link {c : Cat} (s : Syn c) :
