@@ -46,6 +46,16 @@ clean tails too (`ValidA.weaken`). -/
 theorem solc_row_admitted_under_clean :
     ({ deny := [.tail .solc] } : Policy).admits {} = true := by decide
 
+/-- Control: the policy does not accept the `.solc` record itself, so the
+admission is the weakening's (`Assumptions.weakenings`), not `allows`. -/
+theorem solc_record_not_allowed :
+    ({ deny := [.tail .solc] } : Policy).allows {} = false := by decide
+
+/-- Control: no weakening reaches `.solc` from `.clean`, so requiring `.solc`
+refuses a clean row (`table` below, sixth line). -/
+theorem clean_row_not_admitted_solc :
+    ({ require := [.tail .solc] } : Policy).admits { tail := .clean } = false := by decide
+
 /-! ## Callbacks -/
 
 /-- `uint amt = balance; to.transfer(amt); balance = 0; paidOut += amt;`
@@ -53,7 +63,14 @@ keeps the vault's invariant when a `transfer` does not call back. -/
 theorem withdrawUnsafe_validA : ValidA .top {} withdrawUnsafe :=
   (validA_iff_validT (.noCallback) withdrawUnsafe rfl).2 withdrawUnsafe_noCallback
 
-/-- Negative control: not when it calls back keeping the invariant. -/
+/-- The same at the vault's invariant: without payment callbacks the
+invariant a callee keeps is not read (`validC_false_iff`). -/
+theorem withdrawUnsafe_validA_inv : ValidA vaultInv {} withdrawUnsafe :=
+  validA_of_validTail vaultInv .solc withdrawUnsafe rfl rfl
+    ((validT_noCallback_iff (I := .top) rfl).1 withdrawUnsafe_noCallback)
+
+/-- Negative control, at the same invariant: not when a payment calls back
+keeping it.  Only the flag differs from `withdrawUnsafe_validA_inv`. -/
 theorem withdrawUnsafe_not_validA_callback : ¬ ValidA vaultInv { callback := true } withdrawUnsafe :=
   fun h => withdrawUnsafe_withCallback
     ((validA_iff_validT (.withCallback vaultInv) withdrawUnsafe rfl).1 h)
@@ -107,9 +124,65 @@ def table : List (List Atom × List Atom × TailMode × Verdict) := [
 theorem table_verdicts : table.all (fun (r, d, t, v) =>
     ({ require := r, deny := d } : Policy).verdict { tail := t } true == v) = true := by decide
 
-/-- Negative control: no row that is not proved is reported proved. -/
-theorem table_notProved : table.all (fun (r, d, t, _) =>
-    ({ require := r, deny := d } : Policy).verdict { tail := t } false == .notProved) = true := by
-  decide
+/-! ## The exhaustive table the CLI is checked against
+
+`tests/cli/assumption-policies.txt` holds every record under the empty
+policy, each single requirement or denial, and each requirement with a
+denial of another reading (3192 cases), as `policyTable` in
+`scripts/solidity-lean-assumptions.mjs` computes them; its test checks the
+file is that output.  Here each line is checked against `Policy.verdict`:
+the CLI's JavaScript verdict is Lean's on every case. -/
+
+/-- A reading as the CLI names it. -/
+def parseAtom : String → Option Atom
+  | "callback=noCallback" => some (.callback false)
+  | "callback=withCallback" => some (.callback true)
+  | "overflow=default" => some (.overflow .default)
+  | "overflow=checked" => some (.overflow .checked)
+  | "overflow=ignoring" => some (.overflow .ignoring)
+  | "tails=solc" => some (.tail .solc)
+  | "tails=clean" => some (.tail .clean)
+  | "order=legacy" => some (.order .legacy)
+  | "order=viaIR" => some (.order .viaIR)
+  | "hash=opaque" => some (.hash .opaque)
+  | "zeroAddress=noCode" => some (.zeroAddress .noCode)
+  | _ => none
+
+/-- `-` for none, else one reading. -/
+def parseAtoms (s : String) : Option (List Atom) :=
+  if s == "-" then some [] else (parseAtom s).map ([·])
+
+/-- A line `require deny callback overflow tails order verdict`: whether
+`Policy.verdict` of a proof under the record is the line's verdict
+(`none` for a malformed line). -/
+def checkLine (l : String) : Option Bool := do
+  match l.splitOn " " with
+  | [r, d, cb, ov, tl, od, v] =>
+    let require ← parseAtoms r
+    let deny ← parseAtoms d
+    let callback ← match cb with | "noCallback" => some false | "withCallback" => some true | _ => none
+    let overflow ← match ov with
+      | "default" => some .default | "checked" => some .checked | "ignoring" => some .ignoring
+      | _ => none
+    let tail ← match tl with | "solc" => some .solc | "clean" => some .clean | _ => none
+    let order ← match od with | "legacy" => some .legacy | "viaIR" => some .viaIR | _ => none
+    let verdict ← match v with | "proved" => some Verdict.proved | "refused" => some .refused | _ => none
+    let a : Assumptions := { callback, overflow, tail, order }
+    pure (({ require, deny } : Policy).verdict a true == verdict)
+  | _ => none
+
+/-- info: 3192 lines, 2040 refused, 0 mismatches -/
+#guard_msgs in
+#eval show IO Unit from do
+  let text ← IO.FS.readFile "tests/cli/assumption-policies.txt"
+  let lines := (text.splitOn "\n").filter (· ≠ "")
+  let bad := lines.filter (checkLine · != some true)
+  let refused := lines.filter (·.endsWith " refused")
+  IO.println s!"{lines.length} lines, {refused.length} refused, {bad.length} mismatches"
+
+/-- Negative controls: a flipped verdict, and a malformed line, fail. -/
+#guard checkLine "- tails=clean noCallback default clean legacy proved" = some false
+#guard checkLine "- tails=clean noCallback default clean legacy refused" = some true
+#guard checkLine "- tails=dirty noCallback default clean legacy refused" = none
 
 end Solidity.Examples.Tactics.Assumptions

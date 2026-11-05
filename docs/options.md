@@ -26,7 +26,7 @@ can never be read as one under another.
 | O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
-| O10 | assumption record of a verdict; `verify --require/--deny` (Lean-only) | done |
+| O10 | assumption record of a verdict; `verify --require/--deny` (Lean-only; overflow, hash and address `0` labels) | done |
 | O13 | target profile (solc version, pipeline, EVM fork) in result rows (Lean-only; fork a stub until VS4's S6.1) | partial |
 
 ## O1. Who calls back (bug 5)
@@ -730,7 +730,13 @@ elaborated, the blocks being in the formula already), `tail` (O6,
 `zeroAddress` (`noCode`, O8).  The last two are the model's only readings.
 `ValidA I a φ` is the validity the record selects: the contract's order is
 the record's, and `ValidC I (a.tail.wrap φ) a.callback`.  As every option
-here, the record is an argument of the statement.  The runner's statements
+here, the record is an argument of the statement, but `ValidA` reads only
+`callback`, `tail` and `order`; `overflow`, `hash` and `zeroAddress` are
+labels it ignores (`ValidA.labels`), the first because the blocks are in the
+formula, the other two because the model has one reading each.  A policy on
+a label is enforced on the label the CLI records.  A contract whose
+`EvalOrder` mixes the flags (a legacy fixture's custom order) has no
+`OrderReading`, so no record reads it.  The runner's statements
 are cases: `validA_iff_validT` (a calling-back obligation, `ValidT`) and
 `validA_of_validTail` (a plain one, `⊢ N.f.problem` or its `.clean` form,
 where nothing calls back).
@@ -740,22 +746,32 @@ implication (`ValidA.weaken`): equal records, or `.solc` tails weakened to
 `.clean` (`ValidTail.clean_of_solc`).  A `Policy` requires and denies
 readings (`Atom`); `Policy.admits` holds when some record the row entails is
 allowed, and `Policy.verdict` keeps a proved row proved exactly then
-(`verdict_proved_iff`, `admits_sound`).  A row that holds only under refused
-records is never reported proved (`Policy.verdict_refused`); `ProvedRow`
-packages the proof with its admission.
+(`verdict_proved_iff`).  What is reported proved is then valid under an
+allowed record (`Policy.admits_sound`; `ProvedRow` packages the proof with
+its admission, `ProvedRow.holds`), and a row whose record entails no allowed
+record is never reported proved (`Policy.verdict_refused`).
 
 **The CLI** (`docs/cli.md`): `verify --require KEY=VALUE --deny KEY=VALUE`;
-each source row carries `assumptions`, and under a policy `policy` (the
+each `verify` row that stated an obligation carries `assumptions`, and under a policy `policy` (the
 admitted record, or the refused readings) and status `refused` in place of
-`proved`.  `scripts/solidity-lean-assumptions.mjs` mirrors the Lean
-definitions; the decision table is pinned on both sides
-(`Examples/Tactics/Assumptions.lean`, `table_verdicts`;
-`scripts/solidity-lean.test.mjs`, `POLICY_TABLE`).  Witnesses and controls:
-`pushRead_validA_clean` / `pushRead_not_validA_solc`,
-`withdrawUnsafe_validA` / `withdrawUnsafe_not_validA_callback`,
-`not_validA_viaIR`.
+`proved`.  The verdict is computed by `scripts/solidity-lean-assumptions.mjs`,
+which mirrors the Lean definitions; it is checked, not proved, against them:
+`tests/cli/assumption-policies.txt` holds its verdict on every record under
+the empty policy, each single requirement or denial and each requirement
+with another denial (3192 cases), its test checks the file is the script's
+output, and `Examples/Tactics/Assumptions.lean` checks every line against
+`Policy.verdict` when it is built (`checkLine`).  Witnesses and controls:
+`pushRead_validA_clean` / `pushRead_not_validA_solc` (only the tail
+differs), `withdrawUnsafe_validA_inv` / `withdrawUnsafe_not_validA_callback`
+(only the flag differs), `not_validA_viaIR`, `solc_record_not_allowed`,
+`clean_row_not_admitted_solc`.
 
-**Not done.** The record of a row is derived by the CLI from what the runner
+**Not done.** No overflow control exists: the label is not read.  The
+callee invariant of a calling-back obligation (`invariant[N]`, the
+contract's declared `invariant`, or `⊤`) is the `I` of `ValidA I a φ`, not a
+field: no policy refuses it.  Nor is `--self-address`'s premise, which is in
+the formula.  `list` rows carry no record, since listing reports the
+contract's tail mode even for rows `verify` states under `.solc`.  The record of a row is derived by the CLI from what the runner
 reports (`reading`) and what it always does (no callbacks for payments,
 legacy order, no overflow block): `Frontend/Testing.lean` does not emit it,
 and does not emit a `ValidA` theorem.  `callback` is the existing flag;
@@ -768,9 +784,10 @@ address `0`, so denying either refuses every row.
 `TargetProfile` (`Calculus/Assumptions.lean`) bundles the solc version, the
 pipeline (`Pipeline.legacy`/`viaIR`, which selects the O9 order:
 `Pipeline.order`, `TargetProfile.fits`, `evalOrder_of_fits`) and the EVM
-fork.  `TargetProfile.pinned` is solkey's compiler (0.8.34), legacy, Osaka.
-The CLI writes `profile` on each source row: `solc` from the compiler file
-solkey's build pins (`ext.soljsonFile`, the one `scripts/solc-ast.mjs`
+fork.  `TargetProfile.pinned` is solkey's compiler at its current pin
+(0.8.34), legacy, Osaka; it is a constant and does not follow a re-pin.
+The CLI writes `profile` on each source row: `solc` read at run time from
+the compiler file solkey's build pins (`ext.soljsonFile`, the one `scripts/solc-ast.mjs`
 loads; `null` without a checkout), `pipeline` `legacy` and `evmFork`
 `osaka` (the compiler's `evmVersion`).
 

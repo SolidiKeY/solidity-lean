@@ -182,16 +182,20 @@ function envelope(command, report, policy) {
     ...report, summary};
 }
 
-/** The assumption report (O10) and target profile (O13) of every source row;
- * under `--require`/`--deny`, a proved row no admitted record covers becomes
- * `refused` (`Solidity/Calculus/Assumptions.lean`, `Policy.verdict`). */
+/** The assumption record (O10) of every `verify` row that stated an
+ * obligation, and the target profile (O13) of every source row; under
+ * `--require`/`--deny`, a proved row no admitted record covers becomes
+ * `refused` (`Solidity/Calculus/Assumptions.lean`, `Policy.verdict`).
+ * `list` and `inspect` carry no record: listing reports the contract's tail
+ * mode even for rows `verify` states under `solc`. */
+const STATED = ['proved', 'pending', 'refuted'];
 export function annotate(command, report, options = {}) {
   if (!['verify', 'list', 'inspect'].includes(command)) return report;
   const profile = targetProfile(options);
   const results = report.results.map(row => {
-    const assumptions = rowAssumptions(row);
-    const annotated = {...row, assumptions, profile};
-    return command === 'verify' && options.policy ? applyPolicy(annotated, options.policy) : annotated;
+    if (command !== 'verify' || !STATED.includes(row.status)) return {...row, profile};
+    const annotated = {...row, assumptions:rowAssumptions(row), profile};
+    return options.policy ? applyPolicy(annotated, options.policy) : annotated;
   });
   return {...report, results};
 }

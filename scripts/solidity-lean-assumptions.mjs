@@ -97,7 +97,7 @@ export function applyPolicy(row, policy) {
 /** The compiler file solkey's build pins (`scripts/solc-ast.mjs` reads the
  * same `ext.soljsonFile`), as a version, or null when no checkout is found. */
 export function pinnedSolc(options = {}, env = process.env) {
-  const solkey = resolve(options.solkey ?? env.SOLKEY_ROOT ?? resolve(ROOT, '../solkey'));
+  const solkey = resolve(options.solkey || env.SOLKEY_ROOT || resolve(ROOT, '../solkey'));
   const gradle = resolve(solkey, 'keyext.solidity.core/build.gradle');
   if (!existsSync(gradle)) return null;
   const file = readFileSync(gradle, 'utf8').match(/ext\.soljsonFile\s*=\s*"soljson-v([^"]+)\.js"/)?.[1];
@@ -109,4 +109,27 @@ export function pinnedSolc(options = {}, env = process.env) {
  * pinned and only one: `scripts/solc-ast.mjs`'s default `evmVersion`). */
 export function targetProfile(options = {}, env = process.env) {
   return {solc:pinnedSolc(options, env), pipeline:'legacy', evmFork:'osaka'};
+}
+
+/** The exhaustive decision table `tests/cli/assumption-policies.txt` holds:
+ * every record (hash and address `0` have one reading) under the empty
+ * policy, each single requirement or denial, and each requirement with a
+ * denial of another reading; one line `require deny callback overflow tails
+ * order verdict` per case, `-` for none. `Examples/Tactics/Assumptions.lean`
+ * reads the file and checks each verdict against `Policy.verdict`. */
+export function policyTable() {
+  const atoms = Object.entries(MODES).flatMap(([key, values]) => values.map(value => ({key, value})));
+  const policies = [[null, null], ...atoms.map(a => [a, null]), ...atoms.map(a => [null, a]),
+    ...atoms.flatMap(r => atoms.filter(d => atomText(d) !== atomText(r)).map(d => [r, d]))];
+  const lines = [];
+  for (const callback of MODES.callback) for (const overflow of MODES.overflow)
+    for (const tails of MODES.tails) for (const order of MODES.order) {
+      const record = {callback, overflow, tails, order, hash:'opaque', zeroAddress:'noCode'};
+      for (const [r, d] of policies) {
+        const policy = policyOf(r ? [r] : [], d ? [d] : []);
+        const verdict = applyPolicy({status:'proved', assumptions:record}, policy).status;
+        lines.push([r ? atomText(r) : '-', d ? atomText(d) : '-', callback, overflow, tails, order, verdict].join(' '));
+      }
+    }
+  return lines.join('\n') + '\n';
 }

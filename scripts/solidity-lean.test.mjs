@@ -6,7 +6,8 @@ import {tmpdir} from 'node:os';
 import {resolve, join, dirname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {annotate, parseArgs, reportExitCode, VERSION} from './solidity-lean.mjs';
-import {MODES, admitted, applyPolicy, parseAtoms, pinnedSolc, policyOf, rowAssumptions, targetProfile} from './solidity-lean-assumptions.mjs';
+import {MODES, admitted, applyPolicy, parseAtoms, pinnedSolc, policyOf, policyTable, rowAssumptions, targetProfile} from './solidity-lean-assumptions.mjs';
+import {readFileSync} from 'node:fs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const binary = resolve(ROOT, '.lake/build/bin/solidity-lean');
@@ -104,17 +105,34 @@ test('assumption policy: parsing, the shared decision table, and refusal reasons
   assert.equal(admitted(policyOf([], parseAtoms('tails=solc')), rowAssumptions({reading:'solc'})).tails, 'clean');
 });
 
-test('every source row carries its assumption record and target profile', () => {
-  const report = {results:[{status:'proved', reading:'solc'}, {status:'ready', reading:'clean'}], errors:[]};
-  for (const command of ['verify', 'list', 'inspect']) {
-    const out = annotate(command, report, {});
-    assert.deepEqual(out.results[1].assumptions, {callback:'noCallback', overflow:'default', tails:'clean',
-      order:'legacy', hash:'opaque', zeroAddress:'noCode'});
-    assert.equal(out.results[0].profile.pipeline, 'legacy');
-    assert.equal(out.results[0].profile.evmFork, 'osaka');
-    assert.equal(out.results[0].policy, undefined);
+test('the exhaustive table Lean checks is this module\'s output', () => {
+  // Examples/Tactics/Assumptions.lean checks each line against Policy.verdict.
+  const table = policyTable();
+  assert.equal(readFileSync(resolve(ROOT, 'tests/cli/assumption-policies.txt'), 'utf8'), table);
+  const lines = table.trimEnd().split('\n');
+  assert.equal(lines.length, 3192);
+  for (const [require, deny, tails, expected] of POLICY_TABLE) if (require.length <= 1 && deny.length <= 1)
+    assert.ok(lines.includes([require[0] ?? '-', deny[0] ?? '-', 'noCallback', 'default', tails, 'legacy', expected].join(' ')));
+});
+
+test('verify rows that state an obligation carry their record; every source row its profile', () => {
+  const report = {results:[{status:'proved', reading:'solc'}, {status:'pending', reading:'clean'},
+    {status:'internal', reading:'solc'}, {status:'ready', reading:'clean'}], errors:[]};
+  const out = annotate('verify', report, {});
+  assert.deepEqual(out.results[1].assumptions, {callback:'noCallback', overflow:'default', tails:'clean',
+    order:'legacy', hash:'opaque', zeroAddress:'noCode'});
+  assert.equal(out.results[0].assumptions.tails, 'solc');
+  assert.equal(out.results[0].policy, undefined);
+  // Negative controls: no record without an obligation, nor on listing/inspection rows.
+  assert.equal(out.results[2].assumptions, undefined);
+  for (const command of ['list', 'inspect']) {
+    const other = annotate(command, report, {});
+    assert.ok(other.results.every(r => r.assumptions === undefined));
+    assert.equal(other.results[0].profile.pipeline, 'legacy');
+    assert.equal(other.results[0].profile.evmFork, 'osaka');
   }
-  assert.equal(annotate('run', report, {}).results[0].assumptions, undefined);
+  assert.equal(annotate('run', report, {}).results[0].profile, undefined);
+  assert.equal(annotate('verify', report, {policy:policyOf([], parseAtoms('tails=clean'))}).results[2].status, 'internal');
   const dir = mkdtempSync(join(tmpdir(), 'solkey-pin-'));
   try {
     assert.equal(pinnedSolc({solkey:dir}), null);
@@ -151,6 +169,7 @@ test('native verification retains checked positives, open goals, and import gaps
   assert.equal(listed.results[0].status, 'ready');
   cli(['verify', source, '--function', 'missing', '--no-build'], 2);
   assert.equal(positive.results[0].assumptions.tails, positive.results[0].reading);
+  assert.equal(negative.results[0].assumptions.callback, 'noCallback');
   assert.equal(positive.results[0].profile.evmFork, 'osaka');
   const clean = resolve(ROOT, 'tests/solc/CliClean.sol');
   const cleanRow = cli(['verify', clean, '--no-build']).results[0];

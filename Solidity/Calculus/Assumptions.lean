@@ -11,15 +11,21 @@ model has only one of: hashes are `keccakBytes`, read as an atom (no
 collision resistance), and address `0` holds no code (O8).  `Assumptions`
 records them, one field each, and `ValidA I a φ` is the validity they
 select: as for every option here (`ValidT`, `ValidTail`) the record is an
-argument of the statement, never a setting, so a proof under one record is
-not one under another.
+argument of the statement, never a setting.  `ValidA` reads three fields
+(`callback`, `tail`, `order`); the other three are labels it does not read
+(`ValidA.labels`): `overflow` because the blocks are syntax of the formula
+already (`Prog.withOF`), `hash` and `zeroAddress` because the model has one
+reading of each.  A policy on a label is enforced on the label, which the
+CLI derives from what the runner does (`docs/options.md`, O10).
 
 What a policy refuses (`Policy`, the CLI's `--require`/`--deny`,
 `docs/cli.md`) is decided on the record: a row is reported proved only when
 some record it entails is allowed (`Policy.verdict_proved_iff`), and the
 entailment is proved, not assumed (`ValidA.weaken`: a `.solc` row holds
-under `.clean`, `ValidTail.clean_of_solc`).  So a row that holds only under a
-refused record is never reported proved (`Policy.verdict_refused`).
+under `.clean`, `ValidTail.clean_of_solc`).  So what is reported proved is
+valid under an allowed record (`Policy.admits_sound`, `ProvedRow.holds`),
+and a row whose record entails no allowed one is not reported proved
+(`Policy.verdict_refused`).
 
 The fields:
 
@@ -72,7 +78,9 @@ def OrderReading.toEvalOrder : OrderReading → EvalOrder
   | .legacy => {}
   | .viaIR => .viaIR
 
-/-- Whether a contract's elaboration preset is the order's. -/
+/-- Whether a contract's elaboration preset is the order's.  A preset that
+mixes the flags (a legacy fixture's custom order, `Frontend/Import.lean`)
+is neither, so no record reads it. -/
 def OrderReading.matches : OrderReading → EvalOrder → Bool
   | .legacy, o => !o.binaryLeftToRight && !o.modularLeftToRight && !o.modifierFrames
   | .viaIR, o => o.binaryLeftToRight && o.modularLeftToRight && o.modifierFrames
@@ -80,7 +88,9 @@ def OrderReading.matches : OrderReading → EvalOrder → Bool
 theorem OrderReading.matches_iff (r : OrderReading) (o : EvalOrder) :
     r.matches o = true ↔ o = r.toEvalOrder := by
   rcases o with ⟨b, m, f⟩
-  cases r <;> cases b <;> cases m <;> cases f <;> decide
+  cases r <;> cases b <;> cases m <;> cases f <;>
+    simp only [OrderReading.matches, OrderReading.toEvalOrder, EvalOrder.viaIR, EvalOrder.mk.injEq]
+    <;> decide
 
 /-- How a hash is read: `keccakBytes` (Keccak-256 of the bytes,
 `Semantics/Heap.lean`), `@[irreducible]`, so an atom to the closers, with no
@@ -107,7 +117,9 @@ structure Assumptions where
   order : OrderReading := .legacy
   hash : HashReading := .opaque
   zeroAddress : ZeroAddressReading := .noCode
-  deriving DecidableEq, Repr, Inhabited
+  deriving DecidableEq, Repr
+
+instance : Inhabited Assumptions := ⟨{}⟩
 
 /-- The formula a tail mode states (`ValidTail`'s). -/
 def TailMode.wrap (C : Contract) : TailMode → Fml C [] → Fml C []
@@ -119,6 +131,13 @@ record's order, and the formula, under the record's tail premise, is valid
 with callbacks at the callee invariant `I` and the record's payment flag. -/
 def ValidA (I : Invariant C) (a : Assumptions) (φ : Fml C []) : Prop :=
   a.order.matches C.evalOrder = true ∧ ValidC I (a.tail.wrap C φ) a.callback
+
+/-- **The labels**: `ValidA` does not read `overflow`, `hash` or
+`zeroAddress`. -/
+theorem ValidA.labels (I : Invariant C) (a : Assumptions) (φ : Fml C [])
+    (o : OverflowReading) (h : HashReading) (z : ZeroAddressReading) :
+    ValidA I { a with overflow := o, hash := h, zeroAddress := z } φ ↔ ValidA I a φ :=
+  Iff.rfl
 
 /-! ## The runner's statements are cases -/
 
@@ -166,7 +185,7 @@ theorem Assumptions.mem_weakenings {a b : Assumptions} :
     b ∈ a.weakenings ↔ a.Entails b := by
   unfold weakenings Entails
   by_cases h : a.tail = .solc
-  · simp only [h, if_true, List.mem_cons, List.mem_singleton, List.not_mem_nil, or_false,
+  · simp only [h, if_true, List.mem_cons, List.not_mem_nil, or_false,
       true_and]
   · simp only [h, if_false, List.mem_cons, List.not_mem_nil, or_false, false_and]
 
@@ -265,8 +284,8 @@ theorem Policy.verdict_proved_iff (P : Policy) (a : Assumptions) (proved : Bool)
   unfold verdict
   cases proved <;> cases P.admits a <;> decide
 
-/-- **A row that holds only under refused records is never reported
-proved.** -/
+/-- **A row whose record entails no allowed record is never reported
+proved.**  What a proved row does give is `admits_sound`. -/
 theorem Policy.verdict_refused (P : Policy) (a : Assumptions) (proved : Bool)
     (h : ∀ b, a.Entails b → P.allows b = false) : P.verdict a proved ≠ .proved := by
   intro hv
@@ -329,7 +348,9 @@ def TargetProfile.fits (p : TargetProfile) (a : Assumptions) : Bool :=
   a.order == p.pipeline.order
 
 /-- **A proof that fits the profile is about the profile's pipeline**: the
-contract elaborates with the pipeline's expression order. -/
+contract elaborates with the pipeline's expression order.  Only the
+pipeline is tied to validity; the version and the fork are labels until
+VS4's parameters (S5.1, S6.1) read them. -/
 theorem TargetProfile.evalOrder_of_fits {p : TargetProfile} {I : Invariant C}
     {a : Assumptions} {φ : Fml C []} (hp : p.fits a = true) (h : ValidA I a φ) :
     C.evalOrder = p.pipeline.order.toEvalOrder := by

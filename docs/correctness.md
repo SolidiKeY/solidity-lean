@@ -48,8 +48,12 @@ are one record, `Assumptions` (`Calculus/Assumptions.lean`,
 `ValidC I` of the formula under the record's tail premise and payment flag,
 for a contract elaborated in the record's order. `ValidT` and `ValidTail`
 statements are cases (`validA_iff_validT`, `validA_of_validTail`). A policy
-reports a row proved only under a record it accepts
-(`Policy.verdict_proved_iff`, `Policy.admits_sound`).
+reports a row proved only when it entails a record the policy accepts, and
+the row is then valid under it (`Policy.verdict_proved_iff`,
+`Policy.admits_sound`). `ValidA` reads the callback flag, the tail mode and
+the order; overflow, hash and address `0` are labels (`ValidA.labels`). The
+CLI's verdicts mirror these definitions and are checked against them on a
+table, not proved ([options.md](options.md), O10).
 
 ## Model choices behind the statements
 
