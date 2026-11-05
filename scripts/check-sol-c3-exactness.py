@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AREA = ROOT / "tests/sol-c3-exactness"
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-ADOPTED_UPSTREAM = "b86ae4568cef6d6226f4d170360bbb089debe3fb"
+ADOPTED_UPSTREAM = "e6849d3bdf516099d20c33d3581d523449764018"
 PREFIX = "Solidity.Frontend.C3Exactness."
 ALLOWED = ("Solidity/Frontend/C3Exactness/", "tests/sol-c3-exactness/",
            "scripts/check-sol-c3-exactness.py", "docs/feature-work/c3-exactness.md")

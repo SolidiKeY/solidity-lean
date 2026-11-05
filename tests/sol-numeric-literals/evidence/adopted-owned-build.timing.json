@@ -1,0 +1,15 @@
+{
+  "command": [
+    "env",
+    "GATE_BASE=8495f1deb0a95dd6b9301822d8649ab76b217681",
+    "GATE_LOGS=tests/sol-numeric-literals/evidence/adopted-owned-build",
+    "bash",
+    "scripts/coord-tools/gate.sh",
+    "touched"
+  ],
+  "exit": 0,
+  "seconds": 0.468452,
+  "peak_child_rss_kib": 59892,
+  "user_seconds": 0.31563199999999997,
+  "system_seconds": 0.074153
+}

@@ -1,3 +1,6 @@
+import Solidity.Yul.RawCoherent
+import Solidity.Yul.RawHorizon
+import Solidity.Yul.RawBoundary
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.Checks.LocalWordView
 import Solidity.Source.Semantics
@@ -111,4 +114,181 @@ def stateWitness : Nonempty (LocalState env ctx.tys) := ⟨initial⟩
 #print axioms localWordCells_write
 #print axioms writebackLocalWords_view
 #print axioms runLocalBlock_projection
+
+/- Completed assembly retains dirty words; canonical return observers alone clean them.
+These controls execute the existing intrinsically typed code and policy. -/
+def rawInitial : RawFrame.State ctx := RawFrame.ofClean locals initial.2
+def rawRun (fuel : Nat) := RawFrame.run code policy fuel rawInitial
+
+#guard (rawRun 0).isNone
+#guard (rawRun 32).isSome
+#guard (rawRun 64).isSome
+#guard (rawRun 32).map (fun result => (RawFrame.view result.state flag).val) = some 2
+#guard (rawRun 32).map (fun result => (RawFrame.view result.state small).val) = some 257
+#guard (rawRun 32).map (fun result => (RawFrame.returnBool (ctx := ctx) .legacy result.state (.here)).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnU8 (ctx := ctx) .legacy result.state (.there (.there .here))).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnBool (ctx := ctx) .viaIR result.state (.here)).key) = some (some 1)
+#guard (rawRun 32).map (fun result => (RawFrame.returnU8 (ctx := ctx) .viaIR result.state (.there (.there .here))).key) = some (some 1)
+
+/-- info: 'Solidity.Yul.RawFrame.run_returnBool_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_returnBool_agrees
+/-- info: 'Solidity.Yul.RawFrame.run_returnU8_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_returnU8_agrees
+
+
+/- Completed-horizon countercontrols observe all seven words and normal flow. -/
+def rawSnapshot (result : RawFrame.Outcome ctx ⟨false,false⟩) : List Nat :=
+  (List.finRange (wordCellCount X)).map (fun i => (RawFrame.view result.state (wordCellAt X i)).val)
+
+#guard (rawRun 32).map rawSnapshot = (rawRun 64).map rawSnapshot
+#guard (rawRun 64).map rawSnapshot =
+  some [2,2^256-1,2309737967,257,22136,2^256-1,171*2^248]
+#guard (rawRun 32).map (fun result => result.flow.isNormal) = some true
+#guard (rawRun 64).map (fun result => result.flow.isNormal) = some true
+/-- info: 'Solidity.Yul.RawFrame.run_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_stable
+/-- info: 'Solidity.Yul.RawFrame.run_completed_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_completed_unique
+
+
+/- Compare both concrete interpreters, including a failed finite horizon. -/
+def wordRun (fuel : Nat) :=
+  WordAdapter.run code policy fuel ⟨Fin.elim0, RawFrame.view rawInitial⟩
+#guard (wordRun 0).isNone
+#guard (wordRun 32).isSome
+#guard (wordRun 32).map (fun result =>
+  (List.finRange (wordCellCount X)).map (fun i => (result.state.cells (wordCellAt X i)).val)) =
+  (rawRun 32).map rawSnapshot
+#guard (wordRun 32).map (fun result => result.flow.isNormal) =
+  (rawRun 32).map (fun result => result.flow.isNormal)
+/-- info: 'Solidity.Yul.RawFrame.run_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_some_iff
+/-- info: 'Solidity.Yul.RawFrame.run_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_none_iff
+
+
+/- Actual S03 firstDone observes the same completed dirty frame. -/
+def selectedRaw (bound : Nat) := Solidity.Source.firstDone
+  (fun fuel => Closed.sourceResult (rawRun fuel)) bound
+def selectedSnapshot (bound : Nat) : Option (List Nat) :=
+  (selectedRaw bound).bind (fun chosen =>
+    match chosen.2.1 with
+    | .ok result => some (rawSnapshot result)
+    | .error _ => none)
+#guard (selectedRaw 0).isNone
+#guard (selectedRaw 32).isSome
+#guard selectedSnapshot 32 = (rawRun 32).map rawSnapshot
+#guard selectedSnapshot 64 = selectedSnapshot 32
+/-- info: 'Solidity.Yul.RawFrame.firstDone_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_agrees
+/-- info: 'Solidity.Yul.RawFrame.firstDone_none_iff_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_none_iff_word
+
+
+/- Finite selector failure agrees with actual execution at the existing horizons. -/
+#guard ([0,1,2,4,8,16,32,64] : List Nat).all (fun fuel =>
+  (selectedRaw fuel).isNone == (rawRun fuel).isNone)
+#guard (selectedRaw 1).isNone
+#guard (rawRun 1).isNone
+#guard (selectedRaw 32).map Prod.fst = (selectedRaw 64).map Prod.fst
+/-- info: 'Solidity.Yul.RawFrame.firstDone_none_iff_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_none_iff_bound
+
+
+/- The selected actual dirty frame feeds the existing canonical readback API. -/
+#guard (selectedRaw 32).any (fun chosen => chosen.1 < 32)
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnBool (ctx := ctx) .legacy result.state (.here)).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnU8 (ctx := ctx) .legacy result.state (.there (.there .here))).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnBool (ctx := ctx) .viaIR result.state (.here)).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnU8 (ctx := ctx) .viaIR result.state (.there (.there .here))).key
+  | .error _ => none)) = some 1
+
+/-- info: 'Solidity.Yul.RawFrame.run_some_iff_firstDone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_some_iff_firstDone
+
+
+/- Nonvacuous least-horizon controls inspect every strict preceding raw run. -/
+#guard (selectedRaw 32).any (fun selected =>
+  (rawRun selected.1).isSome &&
+    (List.range selected.1).all (fun fuel => (rawRun fuel).isNone))
+#guard (selectedRaw 64).any (fun selected =>
+  (rawRun selected.1).isSome &&
+    (List.range selected.1).all (fun fuel => (rawRun fuel).isNone))
+#guard (selectedRaw 32).any (fun selected => selected.1 > 0)
+/-- info: 'Solidity.Yul.RawFrame.firstDone_minimal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_minimal
+
+
+/- Independent return relations accept exactly the canonical intrinsic candidates.
+Local decision instances permit numeric checks without changing the core APIs. -/
+local instance (pipeline : RawFrame.Pipeline) (state : RawFrame.State ctx)
+    (index : Solidity.Source.Idx ctx.tys .bool) (value : Solidity.Source.Val ctx.env.layout .bool) :
+    Decidable (RawFrame.BoolReturnD pipeline state index value) :=
+  inferInstanceAs (Decidable (value.key = some
+    (if (RawFrame.boolWord state index).val != 0 then 1 else 0)))
+local instance (pipeline : RawFrame.Pipeline) (state : RawFrame.State ctx)
+    (index : Solidity.Source.Idx ctx.tys (.int IntTy.u8))
+    (value : Solidity.Source.Val ctx.env.layout (.int IntTy.u8)) :
+    Decidable (RawFrame.U8ReturnD pipeline state index value) :=
+  inferInstanceAs (Decidable (value.key = some
+    (((RawFrame.u8Word state index).val % 256 : Nat) : Int)))
+#guard (rawRun 32).any (fun result => decide (RawFrame.BoolReturnD (ctx := ctx) .legacy result.state (.here) (.bool true)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.BoolReturnD (ctx := ctx) .legacy result.state (.here) (.bool false))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.U8ReturnD (ctx := ctx) .legacy result.state (.there (.there .here)) (CleanLocals.small)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.U8ReturnD (ctx := ctx) .legacy result.state (.there (.there .here)) (.int 0 (by decide)))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.BoolReturnD (ctx := ctx) .viaIR result.state (.here) (.bool true)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.BoolReturnD (ctx := ctx) .viaIR result.state (.here) (.bool false))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.U8ReturnD (ctx := ctx) .viaIR result.state (.there (.there .here)) (CleanLocals.small)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.U8ReturnD (ctx := ctx) .viaIR result.state (.there (.there .here)) (.int 0 (by decide)))))
+/-- info: 'Solidity.Yul.RawFrame.returnBool_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnBool_complete
+/-- info: 'Solidity.Yul.RawFrame.returnU8_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnU8_complete
+
+
+/- Clean boundary identity is conditional; raw writes with a different value violate its premise. -/
+def dirtyFalse := RawFrame.write rawInitial flag (word 0)
+def dirtyTwo := RawFrame.write rawInitial small (word 258)
+#guard RawCoherent.coherent rawInitial
+#guard !RawCoherent.coherent dirtyFalse
+#guard !RawCoherent.coherent dirtyTwo
+#guard (RawFrame.returnBool (ctx := ctx) .legacy rawInitial (.here)).key = (locals.get (.here)).key
+#guard (RawFrame.returnU8 (ctx := ctx) .legacy rawInitial (.there (.there .here))).key = (locals.get (.there (.there .here))).key
+#guard (RawFrame.returnBool (ctx := ctx) .legacy dirtyFalse .here).key = some 0
+#guard (RawFrame.returnU8 (ctx := ctx) .legacy dirtyTwo (.there (.there .here))).key = some 2
+#guard (RawFrame.returnBool (ctx := ctx) .viaIR rawInitial (.here)).key = (locals.get (.here)).key
+#guard (RawFrame.returnU8 (ctx := ctx) .viaIR rawInitial (.there (.there .here))).key = (locals.get (.there (.there .here))).key
+#guard (RawFrame.returnBool (ctx := ctx) .viaIR dirtyFalse .here).key = some 0
+#guard (RawFrame.returnU8 (ctx := ctx) .viaIR dirtyTwo (.there (.there .here))).key = some 2
+/-- info: 'Solidity.Yul.RawFrame.returnBool_clean_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnBool_clean_view
+/-- info: 'Solidity.Yul.RawFrame.returnU8_clean_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnU8_clean_view
+
 end Solidity.Yul.Checks.LocalBlock

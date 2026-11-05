@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -eu
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+config=/workspace/solidity-lean/tests/sol-numeric-literals/runtime/lakefile.toml
+# The shared corpus gate launches six probes concurrently. Serialize the exact
+# probe form while preserving every argument, result and proof budget.
+if [ "${1:-}" = --quiet ] && [ "${2:-}" = --no-build ] && [ "${3:-}" = lean ]; then
+  exec flock /tmp/sol-nl-corpus-probe.lock "$real" -f "$config" "$@" -j1
+fi
+if [ "${1:-}" = env ] && [ "${2:-}" = lean ]; then
+  shift 2
+  exec "$real" -f "$config" env lean -j1 "$@"
+fi
+if [ "${1:-}" = serve ]; then
+  exec "$real" -f "$config" "$@" -j1
+fi
+exec "$real" -f "$config" "$@"

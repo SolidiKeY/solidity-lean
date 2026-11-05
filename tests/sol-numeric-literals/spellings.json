@@ -1,0 +1,212 @@
+[
+  {
+    "id": "S00",
+    "mode": "sol",
+    "spelling": "0"
+  },
+  {
+    "id": "S01",
+    "mode": "sol",
+    "spelling": "1"
+  },
+  {
+    "id": "S02",
+    "mode": "sol",
+    "spelling": "123456789012345678901234567890"
+  },
+  {
+    "id": "S03",
+    "mode": "sol",
+    "spelling": "1_2_3"
+  },
+  {
+    "id": "S04",
+    "mode": "sol",
+    "spelling": "0_1"
+  },
+  {
+    "id": "S05",
+    "mode": "sol",
+    "spelling": "01"
+  },
+  {
+    "id": "S06",
+    "mode": "sol",
+    "spelling": ".1"
+  },
+  {
+    "id": "S07",
+    "mode": "sol",
+    "spelling": "1."
+  },
+  {
+    "id": "S08",
+    "mode": "sol",
+    "spelling": "1.0"
+  },
+  {
+    "id": "S09",
+    "mode": "sol",
+    "spelling": "1.0_2"
+  },
+  {
+    "id": "S10",
+    "mode": "sol",
+    "spelling": "1e2"
+  },
+  {
+    "id": "S11",
+    "mode": "sol",
+    "spelling": "1E2"
+  },
+  {
+    "id": "S12",
+    "mode": "sol",
+    "spelling": "1e-2"
+  },
+  {
+    "id": "S13",
+    "mode": "sol",
+    "spelling": "1e+2"
+  },
+  {
+    "id": "S14",
+    "mode": "sol",
+    "spelling": "1e"
+  },
+  {
+    "id": "S15",
+    "mode": "sol",
+    "spelling": "1e-"
+  },
+  {
+    "id": "S16",
+    "mode": "sol",
+    "spelling": "1__2"
+  },
+  {
+    "id": "S17",
+    "mode": "sol",
+    "spelling": "1_"
+  },
+  {
+    "id": "S18",
+    "mode": "sol",
+    "spelling": "_1"
+  },
+  {
+    "id": "S19",
+    "mode": "sol",
+    "spelling": "0x"
+  },
+  {
+    "id": "S20",
+    "mode": "sol",
+    "spelling": "0X1"
+  },
+  {
+    "id": "S21",
+    "mode": "sol",
+    "spelling": "0x1_2"
+  },
+  {
+    "id": "S22",
+    "mode": "sol",
+    "spelling": "0x_1"
+  },
+  {
+    "id": "S23",
+    "mode": "sol",
+    "spelling": "0x1__2"
+  },
+  {
+    "id": "S24",
+    "mode": "sol",
+    "spelling": "0x1_"
+  },
+  {
+    "id": "S25",
+    "mode": "sol",
+    "spelling": "0xAb"
+  },
+  {
+    "id": "S26",
+    "mode": "sol",
+    "spelling": "0x0000000000000000000000000000000000000000"
+  },
+  {
+    "id": "S27",
+    "mode": "sol",
+    "spelling": "1wei"
+  },
+  {
+    "id": "S28",
+    "mode": "sol",
+    "spelling": "1 wei"
+  },
+  {
+    "id": "S29",
+    "mode": "sol",
+    "spelling": "1/*x*/wei"
+  },
+  {
+    "id": "S30",
+    "mode": "sol",
+    "spelling": "1uint8"
+  },
+  {
+    "id": "S31",
+    "mode": "sol",
+    "spelling": "1 uint8"
+  },
+  {
+    "id": "Y00",
+    "mode": "yul",
+    "spelling": "0"
+  },
+  {
+    "id": "Y01",
+    "mode": "yul",
+    "spelling": "01"
+  },
+  {
+    "id": "Y02",
+    "mode": "yul",
+    "spelling": "1_2"
+  },
+  {
+    "id": "Y03",
+    "mode": "yul",
+    "spelling": "0x12"
+  },
+  {
+    "id": "Y04",
+    "mode": "yul",
+    "spelling": "0x1_2"
+  },
+  {
+    "id": "Y05",
+    "mode": "yul",
+    "spelling": "0x"
+  },
+  {
+    "id": "Y06",
+    "mode": "yul",
+    "spelling": ".1"
+  },
+  {
+    "id": "Y07",
+    "mode": "yul",
+    "spelling": "1e2"
+  },
+  {
+    "id": "S32",
+    "mode": "sol",
+    "spelling": "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed"
+  },
+  {
+    "id": "S33",
+    "mode": "sol",
+    "spelling": "0x5aaeb6053F3E94C9b9A09f33669435E7Ef1BeAed"
+  }
+]

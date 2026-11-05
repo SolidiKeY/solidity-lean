@@ -276,54 +276,207 @@ theorem target_room_rejected :
     dif_neg (show ¬2+(2-0)≤targetHeap.len targetRoot .dyn from by rw [target_length];decide)]
 
 
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.entry_guard' depends on axioms: [propext,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms entry_guard
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.old_nonempty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms old_nonempty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.prefix_valid' does not depend on any axioms -/
+#guard_msgs in
 #print axioms prefix_valid
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.prefix_values' does not depend on any axioms -/
+#guard_msgs in
 #print axioms prefix_values
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.unequal' does not depend on any axioms -/
+#guard_msgs in
 #print axioms unequal
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.prefix_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms prefix_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.prefix_keeps_old' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms prefix_keeps_old
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_validation' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_validation
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_not_cleaned' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_not_cleaned
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.reached_prefix' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms reached_prefix
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_keeps_aliases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_keeps_aliases
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.maximum_dirty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms maximum_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.entry_full' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms entry_full
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.entry_values' does not depend on any axioms -/
+#guard_msgs in
 #print axioms entry_values
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.entry_valid' does not depend on any axioms -/
+#guard_msgs in
 #print axioms entry_valid
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.full_entry' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms full_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.bad_entry_guard_passes' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms bad_entry_guard_passes
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.bad_entry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms bad_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.missing_length_word' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms missing_length_word
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.truncated_head' does not depend on any axioms -/
+#guard_msgs in
 #print axioms truncated_head
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.truncated_len' does not depend on any axioms -/
+#guard_msgs in
 #print axioms truncated_len
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.truncated_bytes' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms truncated_bytes
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.entry_truncated' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms entry_truncated
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.truncated_entry' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms truncated_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.truncated_standalone' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms truncated_standalone
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.zero_entry' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms zero_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.zero_guarded_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms zero_guarded_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.zero_copy_even_dirty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms zero_copy_even_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.empty_standalone_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms empty_standalone_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.partial_word_dirty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms partial_word_dirty
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.oversized_head' does not depend on any axioms -/
+#guard_msgs in
 #print axioms oversized_head
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.oversized_len' does not depend on any axioms -/
+#guard_msgs in
 #print axioms oversized_len
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.oversized_bytes' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms oversized_bytes
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.oversized_entry' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms oversized_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.oversized_guarded_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms oversized_guarded_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_does_not_panic' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_does_not_panic
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.local_expression' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms local_expression
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.local_dirty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms local_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.zero_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms zero_horizon
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.one_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms one_horizon
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.wrong_order_rejected' does not depend on any axioms -/
+#guard_msgs in
 #print axioms wrong_order_rejected
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Controls.0.Solidity.Backend.CalldataPackets.RawBool.Controls.target_length' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms target_length
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.raw_transfer' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms raw_transfer
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.dirty_transfer_rejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_transfer_rejected
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.highbit_dirty' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms highbit_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.wrong_table_offset' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms wrong_table_offset
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.target_slice_rejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms target_slice_rejected
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.Controls.target_room_rejected' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms target_room_rejected
 
 end Solidity.Backend.CalldataPackets.RawBool.Controls

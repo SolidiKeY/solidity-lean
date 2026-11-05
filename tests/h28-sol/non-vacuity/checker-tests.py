@@ -61,6 +61,10 @@ class AccountingControls(unittest.TestCase):
  def test_structural_inventory(self): self.assertEqual(check.validate(BASE),[])
  def test_changed_historical_adoption_rejected(self):
   self.assertTrue(self.changed(lambda d:d['integration_history'][-1].update(merge='0'*40)))
+ def test_entered_turn_promotion_rejected(self):
+  self.assertTrue(self.changed(lambda d:d['loop_backfill'].update(body_turns=1)))
+ def test_omitted_loop_joint_witness_rejected(self):
+  self.assertTrue(self.changed(lambda d:d['loop_backfill']['theorems'].pop()))
  def test_vm_shipping_policy_rejected(self):
   self.assertTrue(self.changed(lambda d:d['cache_handoff'].update(vm_ship_cache=True)))
  def test_omitted_adoption_history_rejected(self):
@@ -220,5 +224,10 @@ class AccountingControls(unittest.TestCase):
    (out/'final-reviews.json').write_text(json.dumps({'reviews':reviews}))
    errors=check.validate(self.fabricated(),True,out)
    self.assertTrue(any(x.startswith('finder/skeptic not independent for ') for x in errors))
+
+ def test_completed_reverting_turn_promotion_rejected(self):
+  self.assertTrue(any('entered revert scope differs' in x for x in self.changed(lambda d:d['entered_revert_backfill'].update(completed_body_turns=1))))
+ def test_published_copy_anchor_mutation_rejected(self):
+  self.assertTrue(any('published copy record differs' in x for x in self.changed(lambda d:d['published_copy'].update(upstream='0'*40))))
 
 if __name__=='__main__': unittest.main()
