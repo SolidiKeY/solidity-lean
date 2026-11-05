@@ -8,6 +8,7 @@ Full combined gates and final reviews remain publication requirements.
 - type-grammar (`b00b91a9de659091f64c0bc4e1809b252365d1d7`): `Solidity/Frontend/TypeGrammarH28/ParserBasics.lean`, `Solidity/Frontend/TypeGrammarH28/ParserChecks.lean`.
 - shared-translator (`c3bc7282b8c7c3243c304045ecd665a063a46044`): `Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean`.
 - expression-uniqueness (`debf4c2665af826360e3e840c12bf356a9b966d8`): `Solidity/Frontend/ExpressionUniqueness/Statement.lean`.
+- readonly-external (`f54cf65e0ce809c47fcddfbc72c2139fd7a1e04f`): `Solidity/Calculus/StorageOnlyHavoc.lean`.
 
 The expression module freezes the original uniqueness target only; its exhaustive
 proof remains outside this increment. Its scope docstring is corrected without
