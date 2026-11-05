@@ -11,6 +11,19 @@ rel='tests/directruntime-20261104/memory-references/runtime/lakefile.toml'
 set -e
 if [ "$1" = env ] && [ "${{2:-}}" = lean ]; then
   shift 2
+  # Lake cache imports may supersede old materialized build files.
+  # Reuse the setup emitted by the successful owned-module build.
+  for arg in "$@"; do
+    case "$arg" in
+      tests/directruntime-20261104/memory-references/*.lean)
+        base="${{arg##*/}}"
+        setup=".lake/build/ir/${{base%.lean}}.setup.json"
+        if [ -f "$setup" ]; then
+          exec {real} -f {rel} env lean -j1 --setup "$setup" "$@"
+        fi
+        ;;
+    esac
+  done
   exec {real} -f {rel} env lean -j1 "$@"
 fi
 if [ "$1" = serve ]; then

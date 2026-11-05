@@ -1,4 +1,6 @@
 import Solidity.Frontend.ExecutableAst.Memory.Reader
+import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
+import Solidity.Frontend.Problems
 import Solidity.Syntax.Splice
 import Solidity.Semantics.Run
 
@@ -39,6 +41,7 @@ private def identityShape (body : List RawStmt) : Bool :=
   let mut accepted := 0
   let mut refused := 0
   let mut typedCount := 0
+  let mut obligationsCount := 0
   let mut typeRefusals := 0
   let mut results := #[]
   for row in rows do
@@ -52,6 +55,18 @@ private def identityShape (body : List RawStmt) : Bool :=
         unless identityShape d.body do throw (IO.userError "Identity raw constructor mismatch")
       accepted := accepted + 1
       let shouldType := (row.getObjValAs? Bool "typed").toOption.getD false
+      -- Exercise A's published builder with the exact existing producer helpers.
+      -- Formula construction is not proof closure or ordinary runtime acceptance.
+      let box := (file.splitOn ".").contains "box"
+      let built := Shared.obligation Solidity.Frontend.lowerBodyLoops
+        (fun C Γ => Solidity.Frontend.Problem.callPre C Γ false [] false [] true)
+        C "identity" false box
+      match built with
+      | .ok _ =>
+        unless shouldType do throw (IO.userError s!"built incompatible obligation {file}")
+        obligationsCount := obligationsCount + 1
+      | .error reason =>
+        if shouldType then throw (IO.userError s!"shared obligation rejection {file}: {reason}")
       match elabProgAtS.go C 0 d.body ([], RawStmt.maxIdxs d.body + 1) (source := true) with
       | .error (_, reason) =>
         if shouldType then throw (IO.userError s!"intrinsic type rejection {file}: {reason}")
@@ -73,5 +88,6 @@ private def identityShape (body : List RawStmt) : Bool :=
       refused := refused + 1
       results := results.push (Json.mkObj [("input",toJson file),("stage",toJson "decode-rejected"),("reason",toJson reason)])
   IO.FS.writeFile (root ++ "evidence/model-results.json") (Json.pretty (Json.arr results))
+  IO.println s!"PASS shared obligation construction: {obligationsCount} with existing producer callbacks (not proof closure)"
   IO.println s!"PASS intrinsic typing: {typedCount} admitted, {typeRefusals} incompatible initializers refused; initial-model outcomes checked (not universal validity)"
   IO.println s!"PASS admission: {accepted} accepted, {refused} malformed refused; Identity uses existing newArr/declMemory/index/assign/assert"

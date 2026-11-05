@@ -314,3 +314,45 @@ packet exactly (`owned-cache-reuse.json`); no new owned artifacts need shipping.
 This does not establish cache freshness for other merged modules. Separate
 read-only finder and skeptic adoption reviews found no defects; neither used
 the Lean server. Documentation paths and source whitespace checks pass.
+
+
+## Follow-on adoption and real shared-builder control: f77cf60d
+
+Merged published `f77cf60d3cea8f7f1db8db29cc027532b0cd3fce` into the same
+branch at `ce6a4819bb8bcfdcdbae71df543e9caea2631ca2`. Owned Reader and its
+existing proof matrix were preserved. The new Shared.Intrinsic interface is
+now available; its reference-parameter refusal and explicit callback
+dependencies are retained. The ordinary DirectRuntime still uses its private
+readers and obligation builder; this publication does not wire the consumer.
+
+Admission now imports Shared.Intrinsic and checks `Shared.obligation` for each
+decoded fixture with `Solidity.Frontend.lowerBodyLoops` and the existing
+`Solidity.Frontend.Problem.callPre C Γ false [] false [] true`, exactly the
+producer callbacks used by DirectRuntime. All 84 typed fixtures construct a
+real obligation; both incompatible initializers are refused. Both source
+modalities and compiler pipelines are covered. This is formula construction,
+not formula validity or an ordinary compiled-verifier verdict. No callback
+semantics or producer proof was copied or changed. A can use this exact
+callback application alongside the Memory.reader integration instructions.
+
+The merged VM module build, one-file MCP diagnostics, setup-aware per-file
+control, and 54 standard-only theorem axiom reports pass. KeySort again
+reports 377 taclets,131 read-bearing/table entries. All Lean runs remain
+serial,-j1,12 GiB/no swap with the headroom guard. The first plain per-file
+attempts failed because an old materialized monolithic SolcJson.olean
+conflicted with the new split cached modules. No artifact was deleted: the
+owned wrapper now uses the test module's Lake-generated setup.json, matching
+the successful Lake build. Failed receipts are retained separately.
+
+H41 pickup uses `pack-cache.py`, which collects available content-addressed
+trace outputs/mappings, verifies every archived member by SHA256 readback,
+and never sends data or mutates mappings. Packs remain coordinator-pending
+until receipt. The full merged gate and fresh ordinary native/browser
+acceptance, including positive diamond Identity, remain open. Neither the
+new shared builder nor these development controls discharge that boundary.
+
+Independent read-only finder and skeptic reviewed the follow-on controls and
+cache utility without a Lean server. The skeptic requested equality between
+trace outputs and mapping outputs before packing; this check is now mandatory.
+Fixture filenames choose the mode only inside this development harness;
+ordinary source metadata-to-modality selection still awaits runtime acceptance.

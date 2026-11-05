@@ -1,0 +1,4 @@
+Independent read-only finder and skeptic; neither ran Lean/server/builds or edited files.
+Finder: no material findings. Real producer callbacks match DirectRuntime; construction/proof/runtime distinguished.54 axiom reports backed by logs. Failed per-file attempts and setup recovery distinguished. Cache utility awaiting execution.
+Skeptic: cache hardening finding: verify mapping outputs equal trace.outputs before packing. Fixed with explicit equality assertion before selecting any artifacts. Current552 pairs inspected by skeptic agree. Other boundaries accurate. Filename modality chooses development fixture mode, not ordinary metadata acceptance.
+Archive execution/readback evidence follows separately.
