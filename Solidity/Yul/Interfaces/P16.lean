@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawPreparedDeclaration
 import Solidity.Yul.RawDeclarationFrame
 import Solidity.Yul.RawCheckedInitializedForPost
 import Solidity.Yul.RawCheckedForPost
@@ -95,3 +96,11 @@ runner grows ctx.push and retains the original frame on timeout. The Source law
 observes the explicit stored-clean projection; it does not imply dirty-read
 cleanup, lexical admission, or general context-growing loop composition.
 Dirty-word/growth/refusal controls are in Solidity.Yul.Checks.RawDeclarationFrame. -/
+
+/-! RawPreparedDeclaration supplies a concrete literal declaration runner using
+existing exact-word preparation. input_words preserves all represented bits;
+coherent_result retains the genuine input-coherence premise. dirty_agrees is
+full result/frame equality with the existing materialized runner on incoherent
+inputs. Source projection is concrete, not a premise. The extended-context
+checked-consumer witness is in Solidity.Yul.Checks.RawPreparedDeclaration;
+the enclosing growing block/loop composition remains a separate obligation. -/
