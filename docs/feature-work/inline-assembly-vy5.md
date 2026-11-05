@@ -3224,3 +3224,28 @@ new pins from the merged modules, and it reported no errors.
 orphans, layers, roots, doc-paths and axiom-pins all PASS. The full gate
 (`run-lean.sh`, testsuite, corpus, automatic) was not rerun after this merge.
 The last full-gate result is the one recorded in the move section above.
+
+### v14 `STy.cdStride` import attempt (2026-11-05)
+
+The coordinator asked this lane to take the Source part of v14 commit
+781938cf (`Source/CalldataLayout.lean` with `cdStaticWords`, `cdHeadBytes` and
+`STy.cdStride`; `Source/CalldataAggregates.lean`; and that commit's edits to
+Calldata, Eval, Types, Typing and WellTyped). Commit 960fb18d applied it
+cleanly and registered both modules. The checkpoint failed in build-touched
+and library. The new calldata locations (`cdBytes`, `cdString`, `cdArray`,
+`cdFixedArray`) and the wider slice predicate break six modules outside the
+commit:
+
+- `Source/Horizon` (983, 1605: unsolved goals)
+- `Source/Preservation/Combinators` (45: missing `cd*` alternatives)
+- `Lowering/V08/SliceFailureLowering` (57, 119: `rfl`)
+- `Lowering/Readonly/LocationEffects` (47, 69, 138)
+- `Yul/Adapters/SourceSliceFrame` (50: `simp` made no progress)
+- `Yul/Views/RetainedLocationRun` (6: missing alternatives; 21, 25)
+
+`cloud/v14-cdstride` carries these files unchanged, apart from the Horizon
+help-branch edit, so the commit is not library-clean there either. 339b425a
+reverts the import, and the tree is again identical to the one that passed the
+checkpoint at d83228da. Repairing the six modules needs proof work in modules
+outside this lane, and the semantic change belongs to v14. It is left to v14 or
+to an explicit assignment.
