@@ -443,6 +443,23 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/ConstantDepth/Rank.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Trace.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryRevert.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/TransientComposition.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/TransientSharingControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedMul/Controls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedMul/WidthControls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Families.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExpressionUniqueness/Refusals.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/RuntimeGuard.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/RuntimeGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashFamilyCheck.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashFiveChain.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureStatementReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/WordCastCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

@@ -34,6 +34,9 @@
 | `Yul/World/**` | Yul world interface: raw windows, observations, adapters, creation, lifecycle ([VY4](../feature-work/inline-assembly-vy4.md)). |
 | `Lowering/P8/FailureProjection.lean`, `Lowering/P8/SourceRealization.lean` | Failure-plan operations on `FailureResources.Bound`; Source session machine; no P8a instance ([VY5](../feature-work/vy5-composition.md)). |
 | `Yul/Composition/**` | Generic G01 stage composition with toy controls; P6 MSTORE/REVERT frame correctness. |
+| `Yul/Views/NominalInventory.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
+| `Yul/Views/NominalInventoryLaws.lean` | Bounded vy2-physical checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/Yul/ControlCompleteness.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/Yul/ControlRealization.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
 | `Bridge/SolidityBridge/Yul/QuotientControl.lean` | Bounded vy3-compilation checkpoint; typed scope and retained premises are in the module. |
@@ -51,6 +54,74 @@
 | `Bridge/SolidityBridge/Yul/BranchModelControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAlias.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Bridge/SolidityBridge/Yul/**` | VY3 concrete numeric instruction certificates, typed stack/frame and structured source/model lowering adapters; native/G24/full composition remains scoped ([lane](../feature-work/inline-assembly-vy3.md)). |
+
+| `Bridge/SolidityBridge/Yul/LoopClassification.lean`, `Bridge/SolidityBridge/Yul/LoopSelection.lean`, `Bridge/SolidityBridge/Yul/LoopSelectionControls.lean` | Derived finite macro-prefix classification and concrete nested target-loop whole-iff selection; source/native horizons remain open. |
+
+| `Bridge/SolidityBridge/Yul/JsonCompilation.lean`, `Bridge/SolidityBridge/Yul/JsonCompilationControls.lean` | Closed checked JSON word preparation to scoped instruction/model certificates; synthetic decoder, arithmetic and refusal controls. Source attachment, Body admission and full G24/native adequacy remain open. |
+
+| `Bridge/SolidityBridge/Yul/ScopedControl.lean`, `Bridge/SolidityBridge/Yul/ScopedControlControls.lean` | Original Yul let/zero scopes with concrete normal structured bodies; exact source/target prefix entry and retirement, arbitrary caller tail and explicit depth-zero domain. |
+
+| `Bridge/SolidityBridge/Yul/RecursiveScopes.lean`, `Bridge/SolidityBridge/Yul/RecursiveScopesControls.lean` | Original context/horizon-indexed recursive scope/branch/sequence compiler; same-horizon source and structured execution proofs with caller-tail preservation. |
+
+| `Bridge/SolidityBridge/Yul/StructuredJson.lean`, `Bridge/SolidityBridge/Yul/StructuredJsonControls.lean` | Actual checked JSON to nested normal scope/switch compilation; unchanged same-horizon source/model certificates, separate admission/native/G24 obligations. |
+
+| `Bridge/SolidityBridge/Yul/SwitchCompilation.lean`, `Bridge/SolidityBridge/Yul/SwitchCompilationControls.lean` | Original-case switch compiler component: single selector evaluation, ordered full-word matching, source/structured proofs and exact selector retirement before scoped body/default. |
+
+| `Bridge/SolidityBridge/Yul/SwitchControl.lean`, `Bridge/SolidityBridge/Yul/SwitchControlControls.lean` | Original-statement sequence/conditional visitor over concrete switch and normal-body compilers; same-horizon source and whole-block structured execution with exact caller tails. |
+
+| `Bridge/SolidityBridge/Yul/ScopedSwitch.lean`, `Bridge/SolidityBridge/Yul/ScopedSwitchControls.lean` | Original-statement lexical-scope adapter over concrete switch/control lowering; exact source horizons, initialized prefix entry/retirement and arbitrary caller-tail preservation. |
+
+| `Bridge/SolidityBridge/Yul/NestedSwitch.lean`, `Bridge/SolidityBridge/Yul/NestedSwitchControls.lean` | Concrete mutual original-statement/case compiler constructing source and structured-target certificates; nested normal-word cases/defaults/scopes, exact horizons and caller-tail transport. |
+
+| `Bridge/SolidityBridge/Yul/StructuredSwitchJsonControls.lean` | Synthetic actual JSON-to-nested-lowering/model controls, emitted-fixture prefix values and unchanged ingress refusals; exact fixture kernel certificate supplied by the NJ1 attachment module. |
+
+| `Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelControls.lean` | Kernel-inhabited exact syntax/preparation/lowering plus packet reconstruction under the explicit remaining decoder equality; conditional constructors reused by the concrete NJ1 attachment. |
+
+| `Bridge/SolidityBridge/Yul/StructuredSwitchJsonKernelAttachment.lean` | Exact original NJ1 decoder equality and unconditional fixed-fixture packet/compilation/source/model witnesses; existing decoder child equations, unchanged bounds20/16. |
+
+| `Bridge/SolidityBridge/Yul/LoweredWhile{,Controls}.lean` | Actual `lowerWhile` emission to finite structured/model execution with exact pre-body/final guards; original pure AST leaf compiler witnesses, prefix/caller preservation and separate capacity/refusal controls. Not a Source FOR-loop or native/resource theorem. |
+
+| `Bridge/SolidityBridge/Yul/NormalFor{,Controls}.lean` | Original intrinsic closed Yul normal FOR component preparation/emission; finite original evalLoop/for_ horizon proofs and matching structured/model execution, with explicit guards. Body-before-post dirty-word witness; not logical Source/G24 or native adequacy. |
+
+| `Bridge/SolidityBridge/Yul/DirectMemory{,Controls}.lean` | Direct MSTORE versus VY2 byte view/materializer; real typed-image framing and canonical hash composition; exact all-prefix local capacity. Native host-writer/global MemOK/Source-G24 closure remains open. |
+
+| `Bridge/SolidityBridge/Yul/ForSource.lean` | Shared original finite-loop source law with explicit normal body/post laws; concretely discharged by NormalFor and StructuredFor. No new source syntax or state. |
+| `Bridge/SolidityBridge/Yul/StructuredFor{,Controls}.lean` | Branch/sequence-aware original FOR component compilation, finite closed-source/structured/model proofs; actual high-only-word branch and zero-exit witnesses. Full G24/native/admission/early-flow/divergence remains open. |
+
+| `Bridge/SolidityBridge/Yul/ForPrefixes{,Controls}.lean` | Actual compiled FOR all-horizon source noncompletion and exact finite model macro-turn transport; real branch-bearing invariant, caller/frame preservation and whole selected noncompletion denotation. Not native prefixes/exception correspondence or general Source-G24. |
+
+| `Bridge/SolidityBridge/Yul/ForCompletion{,Controls}.lean` | Extract first-zero count/normal output from any actual successful original FOR horizon; exact source-output to real emission/selected model transport without caller-supplied stopping count. Branch/zero/horizon/noncompletion controls; no native/G24/capacity adequacy. |
+
+| `Bridge/SolidityBridge/Yul/StructuredUnique.lean` | Determinism of the unchanged finite StructuredExec relation, including branches/loops; no new target evaluator. |
+| `Bridge/SolidityBridge/Yul/ForReflection{,Controls}.lean` | Recover guard/count/exact locals from actual finite FOR target evidence, then original source completion from structured/selected model success; full frame/pending-zero and noncompletion/capacity controls. Not native/G24 adequacy. |
+
+| `Yul/Compilation/P20InterfaceV1{,Controls}.lean` | H26 closed-normal success interface: reuses real closed compiler certificates; uninstantiated G24 source/link/represented-success laws with genuine success and represented/payment-free witness fields. Not full P20 adequacy. |
+
+| `Bridge/SolidityBridge/Yul/ForShape{,Controls}.lean` | Actual compiled FOR numeric operand/height and all-prefix capacities; exact existing BlockShape threshold h+2<=1024 for h>=5, separate ExpansionRoom and caller boundaries. No ControlCertificate.realize/native/G24 claim. |
+
+| `Bridge/SolidityBridge/Yul/ScopedFor{,Controls}.lean` | Actual scope/switch component compilation within original FOR; concrete prepare/emission/selection, finite source/whole structured/model proofs, scoped-temp/order-sensitive dirty-word and early-flow refusals. Depth0/caller-only frame; full frontend/G24/native closure open. |
+
+| `Bridge/SolidityBridge/Yul/ForCompletionSource.lean` | Shared original-loop completion induction with explicit normal source laws; actual old/new compiler clients discharge both premises, not a final simulation interface. |
+| `Bridge/SolidityBridge/Yul/ScopedForCompletion{,Controls}.lean` | Actual scope/switch FOR source success at arbitrary horizon derives count/guards/normal exact output and selected-model transport; no supplied stopping count or minimum horizon. Source10/all-input witness and horizon/order refusals. |
+
+| `Bridge/SolidityBridge/Yul/ScopedForReflection{,Controls}.lean` | Actual scope/switch FOR finite target-to-original-source reflection; source horizon recovered from target, exact raw locals/caller/full model frame and pending0. Model/native capacity separation and order refusals; no G24/native adequacy. |
+
+| `Bridge/SolidityBridge/Yul/ScopedForAdequacy{,Controls}.lean` | Exact-output iff and all-horizon source noncompletion iff selected-model fault for actual closed normal scope/switch FOR packets; genuine literal-true unending compiler witness. Denotational model only, not native/G24/resource adequacy. |
+
+| `Bridge/SolidityBridge/Yul/ScopedForPrefixes{,Controls}.lean` | Actual scope/switch FOR finite model macro-turn prefixes with exact raw locals/caller/full-frame preservation; separate concrete prelude execution, universal unending prefixes and bounded modular-wrap controls. Not fetched/native prefixes or G24/resource adequacy. |
+
+| `Yul/Compilation/ShapeCapacity{,Controls}.lean` | Constructive actual scalar execution from intrinsic CodeShape, generic caller framing and static height lifting, exact all-boundary shifted capacity; actual last-slot dirty update and underflow/peak-overflow separation. Target preparation, not native/G24 adequacy. |
+
+| `Yul/Compilation/ExpressionShapes{,Controls}.lean` | Actual literal/local/binary emitted-code operand certificates, with explicit primitive row and child metadata; original intrinsic SUB visitor/source/target, shifted DUP16, raw order/caller and capacity-versus-underflow controls. Not full native/G24/compiler coverage. |
+
+| `Yul/Compilation/ArithmeticVisitorShapes{,Controls}.lean` | Actual successful ProducerExpressions arithmetic visitor/emission derives recursive operand metadata without public child/primitive-row assumptions; nested original MUL/ADD/SUB source/target, shifted access and peak-three controls. Wider visitors/native/G24 remain separate. |
+
+| `Yul/Compilation/StatementVisitorShapes{,Controls}.lean` | Actual normal statement visitor/emission derives balanced CodeShape, closing RHS metadata/slot range/recursive children; dependent two-assignment source/target witness, shifted prefix/caller and peak-three controls. Wider control/native/G24 remain separate. |
+
+| `Yul/Compilation/WordVisitorShapes{,Controls}.lean` | Actual word visitor/emission derives operand metadata for arithmetic, unsigned quotients, comparisons and unary word operations; mixed DIV/MOD/EQ/NOT source/target, universal zero-divisor/full-complement and access/capacity controls. Wider pure/native/G24 remain separate. |
+
 | `Yul/Compilation/P20InterfaceV1.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Compilation/P20InterfaceV1Controls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/CheckedAdd/Agreement.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
@@ -61,110 +132,45 @@
 | `Yul/Interfaces/P16.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLocalAliasImageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
-| `Yul/Views/NominalInventory{,Laws,Controls}` | Declared UDVT-array snapshot/update dispatch into the existing typed inventory; canonical decode/encode, complete raw reencoding and actual Source safety. |
-| `Yul/Views/NominalInventoryUnchanged{,Controls}`, `Yul/Views/NominalInventoryPreparation` | Actual image-derived unchanged-source identity and owner-MemOK completeness of the existing finite heap preparer for the nominal decoder profile. |
-| `Yul/Views/NominalInventoryView{,Controls}` | Constructive changed-snapshot Source result, output placement/history and exact full-map realization for canonical nominal inventories. |
-| `Yul/Views/NominalInventoryTransport`, `Yul/Views/NominalInventoryReplay{,Controls}` | Actual source-prefix decoder refresh and whole-poststate replay for permutations of nominal output inventories. |
-| `Yul/Views/NominalInventoryDynamic{,Controls}` | Exact retained-array/inventory result compatibility, shrink-to-zero/regrowth, original-capacity and constructed output-view controls. |
-| `Yul/Views/InventoryTraversal` | Shared typed decode/write/placement/history step with finite inventory traversal. |
-| `Yul/Views/InventorySnapshotCursor` | Actual Source-state-indexed physical step, exact Source projection, owner safety and complete raw reencoding. |
-| `Yul/Adapters/PhysicalSnapshotSlice{,Controls}` | Actual environment instruction-slice final bytes into typed Source writeback, separate target/preparation outcomes and whole-map bridge. |
-| `Yul/Adapters/SelectedPhysicalStore{,Controls}` | Published checked word/byte compiler into actual Source writeback; full Source identity for outside-image byte changes, separate reserved-safety controls. |
-| `Yul/Adapters/CheckedResidualStore{,Controls}` | Computed residual-window geometry into compiled byte stores: whole Source identity, complete residual map, both reserved words and state-indexed padding-growth controls. |
-| `Yul/Adapters/P6ResidualCopy{,Controls}` | Actual bounded P6 snapshot copies into complete Source/residual views; overlap, reserved bytes, reached accounting and empty-copy identity. |
-| `Yul/Adapters/P6ResidualSequence{,Controls}` | Actual P6 request-list execution with derived capacity transport, refreshed complete images and Source identity at every prefix; cascade/order/empty controls. |
-| `Yul/Adapters/P6ResidualCapacity{,Controls}` | Executable actual-frame capacity preparation with constructed successful-prefix room proofs, exact pending suffix and Source/residual closure. |
-| `Yul/Views/InventorySnapshotHistory{,Controls}` | Changing supplied snapshots with refreshed retained ownership, exact successful prefixes, pending suffix/resumption and final-map reconstruction. |
-| `Yul/Views/NominalInventorySequential{,Controls}` | Exact nominal snapshot/sequential Source-result agreement with refreshed candidates, duplicates and capacity controls. |
-| `Yul/Adapters/P6ResidualResume{,Controls}` | Existing zero-capacity extension and pending-only checked resumption with chronological full-map/Source closure and replay-sensitive controls. |
-| `Yul/Adapters/P6ResidualReserve{,Controls}` | Least sufficient pending-copy word reservation, constructive checked completion and chronological whole-map/Source closure. |
-| `Yul/Adapters/P6SnapshotCopy{,Controls}` | Actual P6 copies into owned regions with retained reached frames, canonical Source synchronization, complete reencoding and owner MemOK transport. |
-| `Yul/Adapters/P6CopyPreparation{,Controls}` | Canonical nominal update existence from copied words and a concrete changed-field kernel Source/full-map witness on a two-root codec image. |
-| `Yul/Adapters/P6CopySource{,Controls}` | Exact prepared Source actions and concrete whole-state/alias result for an owned P6 copy, with typed sibling identity and every-H safety. |
-| `Yul/Adapters/P6CopyHistory{,Controls}` | Finite actual P6 copies with per-success Source/cursor refresh, exact stopped synchronization suffix and retained failed physical output. |
-| `Yul/Adapters/P6HistoryHash{,Controls}` | Completed-history Source/KECCAK same-payload agreement and raw live-frame hashing across unsupported canonical preparation. |
-| `Yul/Adapters/P6HistoryHashRef{,Controls}` | Actual Source subcontext byte hashing after completed copies, exact caller restoration and a nonempty changed-history Source/KECCAK witness. |
-| `Yul/Adapters/P6ByteCopyPreparation` | Actual overlapping copy-byte readback and canonical byte-object update existence from header/payload and retained-capacity facts. |
-| `Yul/Adapters/P6ChangedPayloadHashControls` | Kernel exact changed-byte Source state, nonempty history and changed-payload Source/KECCAK witness with sibling/alias preservation. |
-| `Yul/Adapters/P6ByteObjectCopy{,Controls}` | General payload-only byte copying with derived retained capacity, actual Source action, complete refreshed view and unrelated-cell/layout preservation. |
-| `Yul/Adapters/P6ByteFamilyCopy{,Controls}` | Shared bytes/string payload-copy realization preserving intrinsic data types, with exact byte-API specialization and cross-word string controls. |
-| `Yul/Adapters/P6RetainedRegionCopy{,Controls}` | Checked header-changing copies in original retained byte/string regions; exact capacity failure, constructed Source/full-map closure and kernel shrink/regrowth. |
-| `Yul/Adapters/P6ByteReferenceReads{,Controls}` | Exact Source byte/string-backed memory location formation, length/read/write access and panic laws, with retained shrink/regrowth access controls. |
-| `Yul/Adapters/P6ByteReferenceWrite{,Controls}` | Actual Source byte writes and computed bounded MSTORE8 share exact typed writeback, selected full-map encoding, unchanged-state identity and exterior-byte preservation. |
-| `Yul/Adapters/P6ByteWriteInventory{,Controls}` | Constructed complete mixed-inventory refresh after actual Source/MSTORE8 byte writes; same-state writeback, whole-map reencoding, retained history and sequential controls. |
-| `Yul/Adapters/P6ByteWriteSub{,Controls}` | Actual Source substitution around represented byte writes, with linked success/late halt, exact caller restoration and whole mixed-map reconstruction. |
-| `Yul/Adapters/P6ByteAssignment{,Controls}` | Actual resolved Source indexed-byte assignment, exact local-operand horizon/errors and constructive shared Source/physical mixed-inventory result. |
-| `Yul/Adapters/P6ChainedByteAssignment{,Controls}` | Actual effectful byte-assignment RHS with two chronological Source/physical inventories and exact inner/outer failure prefixes. |
-| `Yul/Views/RetainedLocalAlias{,Controls}` | Actual typed local-assignment capture preserves overwritten entry aliases and returned references, with whole-store identity and dormant-path loss controls. |
-| `Yul/Views/RetainedLocalAliasImage{,Controls}` | Actual alias capture drives checked enlarged retained images, source traversal, whole-storage unchanged writeback and exact complementary raw-map reconstruction. |
-| `Yul/Views/RetainedAliasOwnership{,Controls}` | One actual alias-plus-Source storage run with success-only complementary journaling, full reencoding, static prefix retention and paired-boundary rollback controls. |
-| `Yul/Views/RetainedAliasSequence{,Controls}` | Actual Source-bind ownership sequencing keeps reached journals and capture prefixes through first/late refusals and two successes; checked fields reproduce public preparation. |
-| `Yul/Views/RetainedAliasFrames{,Controls}` | Derived actual sequence boundary, paired child/outer rollback and complete prefix/initial raw reconstruction with distinct retained-tail controls. |
-| `Yul/Views/RetainedAliasTransaction{,Controls}` | Actual success-only Source endTx sequence, complete persistent reconstruction, transient/journal reset, reached-error prefix and every-H memory safety. |
-| `Yul/Views/RetainedAliasSub{,Controls}` | Actual caller-local substitution of the checked ownership sequence with reached pair, full reencoding, late-static prefix and rollback transport. |
-| `Yul/Views/RetainedAliasSubSafety{,Controls}` | Universal unchanged heap and every-H caller MemOK through actual ownership substitution on all branches, with restored dormant RefOK and distinct-context controls. |
-| `Yul/Views/RetainedCallerCoverage{,Controls}` | Actual saved-caller capture selects duplicate-safe visits and checked child packs, with typed aliases, halted empty-callee source traversal and complete unchanged reconstruction. |
-| `Yul/Views/RetainedCallerHeaders{,Controls}` | Declaration-traced saved-child dynamic header registrations in actual prepared source inventories, with pre-alignment cursor, physical slot and typed-length controls. |
-| `Yul/Views/RetainedLiveCoverage{,Controls}` | Successful source traversal derives actual header lengths and all generated live fields across child/image inventories; dormant payload and roots-only loss controls. |
-| `Yul/Views/PackedCellUpdate{,Controls}` | Actual typed persistent scalar writes preserve complete canonical finite packed views and the entire complementary raw map, with full reencoding and padding/static controls. |
-| `Yul/Views/TransientCellUpdate{,Controls}` | Actual typed transient writes preserve finite packed agreement and original complement, with persistent isolation, rollback/reset and declared-root padding/account controls. |
-| `Yul/Views/MixedCellSequence{,Controls}` | One actual persistent/transient typed Source bind with same-state complete bank reconstructions, precise static prefixes and paired rollback; equal-slot bank controls. |
-| `Yul/Views/RepeatedCellWrites{,Controls}` | Arbitrary finite actual same-field typed Source writes in the computed bank, full raw reconstruction with original complement, every-H safety, rollback and duplicate/static controls. |
-| `Yul/Views/FiniteCellWrites{,Controls}` | Arbitrary finite different-path intrinsic requests through one Source run, actual bank dispatch, both complete raw views/original complements, safety/static/rollback and domain-boundary controls. |
-| `Yul/Views/DeclarationDefaults{,Controls}` | Zero payloads derived from declaration-selected codecs through relocation/registration/packing; reset-check availability equivalence and actual transient-root full reset controls. |
-| `Yul/Views/FixedDeclarationDefaults{,Controls}` | Actual recursive fixed-array/struct and ordered-root packing derives optional default payloads, reset-check availability and empty-store full encode/writeback; None/default distinction controls. |
-| `Yul/Views/CellWritesCalldataHash{,Controls}` | One actual typed storage-write/calldata-hash computation with same-state raw banks, clipped same-Fixed payload binding, allocation safety and exact timeout/static prefixes. |
-| `Yul/Views/CellHashFinalization{,Controls}` | Transaction finalization of one actual mixed typed-write/calldata-hash run: persistent reconstruction with original complement, transient/default and journal reset, late-timeout prefix controls. |
-| `Yul/Views/LinkedCellHash{,Controls}` | Computed account-tagged initial journal complements and whole persistent reencoding from the actual finalized journal, with nonzero unknown-slot and account/bank controls. |
-| `Yul/Views/CellHashFrames{,Controls}` | Actual mixed-write/hash external projection, child-prefix rollback, committed-child/enclosing rollback and restored journal-driven full-map reconstruction; retained calldata aliases and real child mutation controls. |
-| `Yul/Views/CellHashRollback{,Controls}` | Actual Source mark/write/hash/rollbackTo execution: exact whole reached state with restored external writes and retained heap allocation, journal-driven map reconstruction and late-timeout prefix controls. |
-| `Yul/Views/CellHashMemory{,Controls}` | Constructive full physical realization of actual mixed-write/calldata-hash allocation: header/payload/FMP, whole map and unchanged Source writeback, exact residual bytes and same-Fixed observed hash; computed-placement premises retained. |
-| `Yul/Views/AllocationRefresh{,Controls}` | Computed placement refresh after actual allocation: occupied-only coordinate/free agreement and typed image transport derive subsequent old reads, sequential allocation/full-map writeback, future-coordinate and zero-footprint controls. |
-| `Yul/Views/AllocationSequence{,Controls}` | Finite actual allocation producer certificates with reached-heap validity; constructive full-map/writeback/ReservedOK transport, typed returned-reference validity, pointer-to-prior-object and admission-boundary controls. |
-| `Yul/Views/NewMemory{,Controls}` | Actual newArray evaluator with intrinsic uint256-local length, existing size panic/timeout and newData; constructive full physical allocation/writeback with static bytes/bool[] and padding controls. |
-| `Yul/Views/NewMemoryOperand{,Controls}` | Universal actual newArray operand decomposition and reached-prefix success/panic/halt transport; physical realization at the reached state, postincrement and late-timeout controls. |
-| `Yul/Views/AllocationPointer{,Controls}` | Actual allocated-reference decoding and existing pointer writeback agree with newArray/getV/writeLoc execution, including writer halts and owner safety; aliases, bounds and decoder-boundary controls. |
-| `Yul/Views/ArrayWordStore{,Controls}` | Real one-word array patch derives updated codec reads and exact Source member writeback, whole selected-array/complement ByteView reconstruction, new-pointer sink and dynamic-header mutation controls. |
-| `Yul/Views/ArrayWordHeap{,Controls}` | Derived image reads for every object after actual array word writes, complete generated-heap reconstruction/unchanged whole Source writeback/MemOK/reserved transport, with four-object consumer and unknown-tail controls. |
-| `Yul/Views/ArrayWordRetained{,Controls}` | Existing allocation lineage extends through actual same-shape array word updates; whole-map/Source writeback retains the original capacity snapshot, dormant tail and free pointer after a real shrink/write sequence. |
-| `Yul/Views/StructWordStore{,Controls}` | Actual checked heterogeneous field updates derive canonical words and raw mstore/Source writeback equality, selected-struct/complement reconstruction, alias/scalar/bool and preparation-boundary controls. |
-| `Yul/Views/StructWordHeap{,Controls}` | Actual struct-field word writes derive every post-write heap image read, complete map reconstruction, whole Source writeback, every-H MemOK and reserved preservation; six-object alias/padding and canonicality/type-error controls. |
-| `Yul/Views/StructWordRetained{,Controls}` | Existing allocation history extends through typed struct field writes with whole-map reconstruction and whole Source writeback against the original snapshot; actual pointer/boolean sequence and failure-prefix controls. |
-| `Yul/Views/ByteElementStore{,Controls}` | Actual bytes/string memByte writes derive a one-byte patch, complete heap reads/reconstruction, original-history whole Source writeback and every-H MemOK; aliases, second-word byte, padding and exact bounds/static controls. |
-| `Yul/Views/ByteElementFrames{,Controls}` | Actual sub success/halt restore caller locals while preserving byte mutations and original-history whole-map/Source writeback; explicit mark/rollbackTo heap retention, caller-prefix/nested-context and bounds controls. |
-| `Yul/Views/MemoryDelete{,Controls}` | Actual zeroVal/deleteLoc transport for canonical array/struct defaults and byte elements, complete-map/original-history writeback, timeout/type/index controls and a separately observed reference-allocation boundary. |
-| `Yul/Views/ReferenceDelete{,Controls}` | Actual bytes/string reference deletion composes computed empty-object allocation and struct pointer write, deriving exact coordinates/FMP, complete-map/Source writeback, alias/padding and allocation-before-type-error controls. |
-| `Yul/Views/ReferenceDeleteRetained{,Controls}` | Allocating reference deletion extends actual retained origin/history with complete-map and whole Source writeback; earlier shrink capacities/dormant words survive, with checked regrowth alias recovery. |
-| `Yul/Views/RetainedArrayHeader{,Controls}` | Checked length changes derive all refreshed heap image reads, complete raw-map reconstruction and original-history whole Source writeback; shrink/delete/regrow closure, aliases/padding and capacity boundary controls. |
-| `Yul/Views/RetainedByteHeader{,Controls}` | Bytes/string payload computed from one raw map yields all resized heap reads, complete reconstruction and original-history whole Source writeback; sequential regrowth, four aliases, live padding and capacity boundary controls. |
-| `Yul/Views/ByteWriteSequence{,Controls}` | Arbitrary finite actual Source byte-write plans derive source erasure, complete reached-prefix map/whole Source writeback and original lineage, including late bounds failures; repeated/cross-word/skipped-suffix and sub-local controls. |
-| `Yul/Views/MultiRootByteWrites{,Controls}` | Actual heap lookup derives multi-root byte ownership or unchanged owner errors; arbitrary finite plans reconstruct complete reached-prefix maps and retain whole Source writeback/history, with non-byte/dangling/bounds controls. |
-| `Yul/Views/MultiRootByteFrames{,Controls}` | Universal heap-only/type-map preservation and actual sub-local caller transport for multi-root plans; complete caller map/writeback/history with distinct nonempty child/caller aliases and success/halt controls. |
-| `Yul/Views/BytePlanHash{,Controls}` | Actual keccak after finite multi-root writes derives final bytes and exact physical preimage from the same reached map, with owner error short-circuiting, restored-caller and noninjective preimage controls. |
-| `Yul/Views/BytePlanHashAlias{,Controls}` | Byte/string-backed bytes aliases derive reached hash contents and exact physical preimages after actual multi-root writes, with same-path aliases, prefix failure and caller restoration controls. |
-| `Yul/Views/BytePlanHashFrames{,Controls}` | Actual child write/hash return through Source local substitution, with arbitrary valid caller aliases, every-H safety and same-map complete Source writeback on success/halt. |
-| `Yul/Views/MultiRootByteBoundary` | Actual multi-root byte writes preserve the raw complement above the placement end, using selected typed object geometry and real source failures. |
-| `Yul/Adapters/P6MultiRootByte{,Controls}` | Derives finite-frame Fits for multi-root source byte plans and constructs exact same-map P6 frames with complete source writeback, original-H safety and metadata preservation. |
-| `Yul/Views/MultiRootByteAppend` | Exact chronological concatenation of actual multi-root coupled plans, retaining stopped prefixes and skipped suffixes. |
-| `Yul/Adapters/P6MultiRootByteRefresh{,Controls}` | Derives next-plan source/frame preparation from actual first output and connects successful sequential physical plans to one concatenated execution, with stale-state and failure controls. |
-| `Yul/Adapters/RawPhysicalInventory{,Controls}` | Complete published raw-local cell enumeration in a constructed separated finite frame, preserving all raw bits, clean/world fields and residual bytes while distinguishing absent overlays. |
-| `Yul/Adapters/RawPhysicalProducer` | Consumer of the actual bounded P16 Adapter.correct field, transporting its exact reached Source representation through complete raw-local physical capture under the unchanged coherent-input premise. |
-| `Yul/Adapters/RawPhysicalWriteback{,Controls}` | Whole raw-map and complete P6-frame identity after unchanged all-cell decode/reencode, retaining residual bytes and distinguishing view equality from overlay administration. |
-| `Yul/Adapters/RawPhysicalUpdate{,Controls}` | Derives complete raw-local inventory reencoding/readback after actual RawFrame.write and P6/MSTORE word updates, retaining other cells and residual bytes under explicit span/coordinate guards. |
-| `Yul/Adapters/RawPhysicalInterior{,Controls}` | Complete raw-local inventory transport after an interior-byte P6/MSTORE8 update, using exact full-word codecs and retaining other bytes/cells under explicit coordinate/fit guards. |
-| `Yul/Adapters/RawPhysicalAnyImage{,Controls}` | Universal arbitrary raw-byte image decode/reencode and finite-frame identity, applied to actual bounded overlapping/cross-cell P6 snapshot copies with derived reached room. |
-| `Yul/Adapters/RawPhysicalCalldata{,Controls}` | Actual Fr.cd copy into arbitrary raw-local images, with derived complete frame writeback and exact raw-word versus typed Source decoder success/error boundaries. |
-| `Yul/Adapters/SourceEnvironmentSlice{,Controls}` | Actual Source magic/balance reads paired with executed environment instruction slices, preserving ordered values/state/memory/tails and post-operand balance snapshots without claiming independent ledger or compiler adequacy. |
-| `Yul/Adapters/RawPhysicalHash{,Controls}` | Actual KECCAK/PUSH/MSTORE digest writeback into a complete raw-local image, retaining the old overlapping input snapshot and explicit P6 read/store access accounting. |
-| `Yul/Adapters/RawPhysicalReturndata{,Controls}` | Strict world returndata copying into the complete raw-local physical image, with separate window/capacity/nonwrap guards, derived reached room, whole-frame writeback and dirty-byte/empty-window controls. |
-| `Yul/Adapters/RawPhysicalCallOutput{,Controls}` | Actual World call-output prefix storage and call-adapter projection into a complete P6/raw-local image, retaining the unwritten tail and separately accounting for the full requested output span. |
-| `Yul/Adapters/RawPhysicalCallFrame{,Controls}` | Full World completed-call equality from actual pre-call snapshot loading and physical output copying, preserving typed journals and ordered success/revert observations under explicit invocation premises. |
-| `Yul/Adapters/RawPhysicalCallAccess{,Controls}` | Input/output physical call-access accounting with old-snapshot invocation input, complete World result/raw-frame preservation, overlapping input-dependent controls and independent input-extent negative. |
-| `Yul/Adapters/HeapCallOutput{,Controls}` | Actual physical call-output/access writes in the computed complete ordinary heap complement, deriving whole administrative Source writeback identity while retaining changed residual bytes and short-return tails. |
-| `Yul/Adapters/HeapOutputReserved{,Controls}` | Exact reserved free-pointer/zero-word preservation for physical call-output prefixes, with a computed-heap counterexample separating whole Source writeback identity from zero-slot safety. |
-| `Yul/Views/SharedZeroRead{,Controls}` | Actual empty dynamic-array Source length/index reads paired with the reserved zero header, plus ordinary-placement and typed inverse-identity obstructions for distinct retained logical references. |
-| `Yul/Views/SharedZeroLocalWriteback{,Controls}` | Provenance-dependent shared-zero local preparation from actual typed locals, deriving complete Source identity through real writeLoc while keeping binding/empty-object read premises and preparation failures explicit. |
-| `Yul/Adapters/P6HeapWordStore{,Controls}` | Executed P6/MSTORE sink for actual canonical array-member Source writes, deriving complete changed-heap reencoding and whole-state writeback; new-pointer consumption, alias and residual controls. |
-| `Yul/Adapters/P6RetainedHeapWordStore{,Controls}` | Physical MSTORE and canonical Source member writes with original RetainedAllocation lineage, complete changed-map writeback and actual allocate/shrink/write dormant-tail controls. |
-| `Yul/Adapters/P6RetainedArrayHeader{,Controls}` | Executed physical dynamic-header stores with canonical same-map dormant payload readback, original-capacity/history writeback and real heapPut transport; regrowth and over-capacity preparation controls. |
-| `Yul/Adapters/P6RetainedByteHeader{,Controls}` | Executed packed bytes/string header stores feeding canonical same-map payload recovery and original-history whole Source writeback, including nonzero padding growth and capacity-preparation controls. |
+| `Yul/Checks/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolDoWhile.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerCoverage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerCoverageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/ShapeCapacity.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/ShapeCapacityControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindow.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/CreationReturnWindowControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Yul/Compilation/ClzShapes{,Controls}.lean` | Operand shapes and exact every-boundary capacity for the existing256-step software CLZ; intrinsic Code packet, exact4867 size, dirty/zero/caller and underflow/1024-boundary controls. Explicit child-shape premise in lowering helper; no native/G24 closure. |
+
+| `Yul/Compilation/ArityShapes.lean` | Existing copied-argument/inline/unary/ternary operand transport with explicit child/body metadata and physical rows; not function-frame or capacity correctness. |
+| `Yul/Compilation/PureVisitorShapes{,Controls}.lean` | Actual full pure visitor success/emission derives recursive operand metadata, including ternary and software BYTE/CLZ; original closed-Yul source/target conjunction, separately capacity-checked packet, dirty-index and unbounded modular controls. No logical Source/G24/native closure. |
+
+| `Yul/Compilation/PureAssignmentShapes{,Controls}.lean` | Actual full-pure assignment and two-assignment sequence operand producers, original closed-source/update/run transport and separately capacity-checked packets; dirty read-after-write and physical SWAP16 controls. Reuses the existing statement assignment proof; no general statement/native/G24 closure. |
+
+| `Yul/Compilation/ScopedVisitorShapes{,Controls}.lean` | Actual scoped visitor success derives operand metadata for skip/sequence/full-pure assignment/singleton let/arbitrary zero prefixes; original closed-source/update/run, independently capacity-checked packets and nested/17-local access controls. Scope emission keeps its depthzero restriction; no native/G24/general-control closure. |
+
+| `Yul/Compilation/NumericExecution{,Controls}.lean` | General success transport for unchanged ten-operator NumericMachine selection plus stack operations; real lowerer/original closed-Yul compiler consumers discharge scalar-run premises, preserve symbolic caller/nonstack fields. Actual21-instruction/all-ten-operator and scoped-update controls; no native/byte/PC/gas/capacity/G24 closure. |
+
+| `Yul/Compilation/NormalNumericTransport{,Controls}.lean` | Whole numeric normal branch/sequence execution using existing compiler derivations and selector; same-horizon closed-Yul result, symbolic caller/newer-prefix preservation, high-bit/shifted-slot/refusal controls. Capacity, native execution and Source/G24 adequacy remain separate. |
+
+| `Yul/Compilation/WordExecution{,Controls}.lean` | General unchanged WordMachine success transport, six additional word-step laws and real expression/statement source/compiler consumers; combined dirty-word, dependent-write, symbolic-tail and DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |
+
+| `Yul/Compilation/NormalWordTransport{,Controls}.lean` | Whole normally completing branch/sequence execution under the existing WordControl selector and actual compiler derivations; original closed-source result, raw EXP guard/EQ join, dependent writes, symbolic framing and shifted-slot controls. No native/resource/general-loop/G24 closure. |
+
+| `Yul/Compilation/SignedExecution{,Controls}.lean` | General existing SignedMachine success transport consuming concrete signed producers plus WordExecution; original-source/compiler consumers, signed corner cases, dirty words, dependent writes, symbolic framing and shifted DUP16 controls. Native/resource and Source/G24 adequacy remain separate. |
+
+| `Yul/Compilation/WhileWordExecution{,Controls}.lean` | Concrete unchanged word-selected lowerWhile turns, finite running prefixes/exits, whole model execution and all-prefix model fault; actual emitter consumer without abstract realization, raw-word counter/NOT/zero/boundary controls. No source-divergence/native/resource/G24 adequacy. |
+
+| `Bridge/SolidityBridge/Yul/WordForExecution{,Controls}.lean` | Existing original normal FOR source theorem composed with concrete WordControl-selected prelude/loop execution, without abstract realization callback; general raw-local/newer/symbolic-tail, ordered post, horizon and access controls. Native/resource/Source-G24 closure remains separate. |
+
+| `Yul/Compilation/WordBlockExecution.lean` | Forward actual finite StructuredExec transport under unchanged WordControl selection, one-sided branches and real loop witnesses; symbolic caller/nonstack preservation. No termination/failure iff/native/G24 claim. |
+| `Bridge/SolidityBridge/Yul/WordStructuredCompilation{,Controls}.lean` | Actual nested scope/switch and scoped FOR source/compiler consumers of concrete structured word execution, without realization callbacks; original horizon13/10, selector mutation, lexical scratch, symbolic framing and skipped bad/endless-arm controls. |
+| `Yul/Checks/LocalBoolDoDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolDoDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerHeaders.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerHeadersControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLowering.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLoweringControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/ReturndataByteLoad.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/ReturndataByteLoadControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
