@@ -1190,3 +1190,11 @@ and multiparameter decoding/binding, native loading/frame realization, general
 profile/dispatch-entry composition and physical failure bytes remain open.
 G46.02, its writer counterexample, fixture replay and full assignment gates
 remain pending.
+
+`WordCarrierBindingInterface.lean` specifies public compiler selection and exact
+singleton primitive validation followed by declaration of the existing typed
+uint carrier, including enum and fixed-bytes words. The carrier stores raw
+accepted bits; it does not replace typed Boolean/signed binding or authenticate
+Source type erasure. Raw semantic failure agreement retains `fuel + 2` and
+explicit word/size loading obligations. Implementation and controls follow this
+signature checkpoint; native loading and general entry composition remain open.
