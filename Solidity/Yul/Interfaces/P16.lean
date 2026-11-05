@@ -280,3 +280,11 @@ concrete read-uint8 initializer/continue-loop/binder-close path at every horizon
 for genuinely coherent inputs. Controls use both clean frames and explicitly
 populated coherent overlays. Arbitrary dirty initialized-view preservation
 and general initializer/admission/Source-readback remain separate obligations. -/
+
+/-! RawContinueLoop.initializer_run/world/source compose every supported uint8
+initializer with the concrete absent-guard/post continue loop. Initializer errors
+retain their exact partial raw frame; successful initialization reaches timeout
+with its own world preserved. The exact Source error/world equation retains
+checked/coherent premises. Controls include mutating initialization at every
+horizon and distinct legacy/viaIR partial initializer words.
+This supplies no arbitrary dirty Source readback or general initializer admission. -/

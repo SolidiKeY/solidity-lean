@@ -7,6 +7,10 @@ namespace Old
 export Solidity.Yul.Checks.RawU8Statement (ctx clean initial xCell argCell flagCell)
 export Solidity.Yul.Checks.RawPreparedInteger.Old (unsignedCtx)
 end Old
+namespace Init
+export Solidity.Yul.Checks.RawU8Declaration (changed next)
+export Solidity.Yul.Checks.RawU8Declaration.Old (assign timeout canonical)
+end Init
 def argument : Solidity.Source.Idx Old.ctx.tys LocalU8Expr.Ty := .there .here
 def breakBody := RawCheckedAdapter.fromAdapter (RawSourceAdapter.body
  (ctx := Old.ctx) (returns := []) (modifier := false) (u := false) .break_)
@@ -130,6 +134,65 @@ theorem initializedOverlayAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel
   exact ⟨invariant.1,invariant.2,RawContinueLoop.initialized_view_coherent
     Old.ctx "n" [] false false argument pipeline fuel state same⟩
 
+theorem assignInitializerAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+Solidity.Yul.RawU8Declaration.run "n" Solidity.Yul.Checks.RawContinueLoop.Init.assign
+ pipeline (fuel+3) (Solidity.Yul.Checks.RawContinueLoop.Init.canonical world) =
+ .inr (Solidity.Yul.Checks.RawContinueLoop.Init.next world) := by
+  intro pipeline fuel world
+  rfl
+
+theorem mutatingInitializerAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawU8ForAbsent.run Solidity.Yul.Checks.RawContinueLoop.Init.assign
+   (Solidity.Yul.RawContinueLoop.body Solidity.Yul.Checks.RawContinueLoop.Old.unsignedCtx [] false false)
+   pipeline (fuel+4) (Solidity.Yul.Checks.RawContinueLoop.Init.canonical world)
+ actual.1 = .error .timeout ∧ actual.2.clean = Solidity.Yul.Checks.RawContinueLoop.Init.changed ∧
+ actual.2.world = world := by
+  intro pipeline fuel world
+  have completed := assignInitializerAll pipeline fuel world
+  have observed := RawContinueLoop.initializer_world Old.ctx "n" [] false false
+    _ Init.assign pipeline (fuel+3) (Init.canonical world) (Init.next world) completed
+  have actual := RawContinueLoop.initializer_run Old.ctx "n" [] false false
+    _ Init.assign pipeline (fuel+3) (Init.canonical world)
+  rw [completed] at actual
+  have same : RawCoherent.coherent (Init.next world) = true :=
+    (RawCoherent.coherent_iff _).mpr rfl
+  have stable := RawContinueLoop.all_fuel_clean Old.unsignedCtx [] false false
+    pipeline (fuel+3) (Init.next world) same
+  refine ⟨observed.1,?_,observed.2⟩
+  change (RawU8ForAbsent.run Init.assign
+    (RawContinueLoop.body (Old.ctx.push "n" LocalU8Expr.Ty) [] false false)
+    pipeline ((fuel+3)+1) (Init.canonical world)).2.clean = Init.changed
+  rw [actual]
+  change (RawContinueLoop.run Old.unsignedCtx [] false false
+    pipeline (fuel+3) (Init.next world)).2.clean.drop 1 = Init.changed
+  rw [stable.1]
+  rfl
+
+theorem initializerLegacyPartial : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawU8ForAbsent.run Solidity.Yul.Checks.RawContinueLoop.Init.timeout
+   (Solidity.Yul.RawContinueLoop.body Solidity.Yul.Checks.RawContinueLoop.Old.unsignedCtx [] false false)
+   Solidity.Roadmap.Pipeline.legacy 6 (Solidity.Yul.Checks.RawContinueLoop.Old.initial 257 2 1 world)
+ actual.1 = .error .timeout ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.xCell).val = 257 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.flagCell).val = 1 ∧
+ actual.2.world = world := by
+  intro world
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
+
+theorem initializerViaIRPartial : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawU8ForAbsent.run Solidity.Yul.Checks.RawContinueLoop.Init.timeout
+   (Solidity.Yul.RawContinueLoop.body Solidity.Yul.Checks.RawContinueLoop.Old.unsignedCtx [] false false)
+   Solidity.Roadmap.Pipeline.viaIR 6 (Solidity.Yul.Checks.RawContinueLoop.Old.initial 257 2 1 world)
+ actual.1 = .error .timeout ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.xCell).val = 2 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.flagCell).val = 1 ∧
+ actual.2.world = world := by
+  intro world
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -156,3 +219,11 @@ end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.initialized_view_coherent
 #print axioms Solidity.Yul.Checks.RawContinueLoop.initializedCleanAll
 #print axioms Solidity.Yul.Checks.RawContinueLoop.initializedOverlayAll
+
+#print axioms Solidity.Yul.RawContinueLoop.initializer_run
+#print axioms Solidity.Yul.RawContinueLoop.initializer_world
+#print axioms Solidity.Yul.RawContinueLoop.initializer_source
+#print axioms Solidity.Yul.Checks.RawContinueLoop.assignInitializerAll
+#print axioms Solidity.Yul.Checks.RawContinueLoop.mutatingInitializerAll
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializerLegacyPartial
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializerViaIRPartial

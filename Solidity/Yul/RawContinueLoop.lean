@@ -242,4 +242,77 @@ theorem initialized_view_coherent : ∀ (ctx : Solidity.Source.Ctx) (name : Stri
   rw [(RawCoherent.coherent_iff _).mp invariant.2,invariant.1]
   exact ((RawCoherent.coherent_iff state).mp same).symm
 
+/-- Preserve exact initializer failures; successful initialization reaches the actual continue loop. -/
+theorem initializer_run : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawU8ForAbsent.run initial
+   (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+   pipeline (fuel+1) state =
+ match Solidity.Yul.RawU8Declaration.run name initial pipeline fuel state with
+ | .inl failure => (.error failure.1,failure.2)
+ | .inr next => (.error .timeout,Solidity.Yul.RawTypedScope.drop
+     (Solidity.Yul.RawContinueLoop.run (ctx.push name Solidity.Yul.LocalU8Expr.Ty)
+       returns modifier u pipeline fuel next).2) := by
+  intro ctx name returns modifier u initializer initial pipeline fuel state
+  unfold RawU8ForAbsent.run
+  rw [RawU8For.run]
+  cases actual : RawU8Declaration.run name initial pipeline fuel state with
+  | inl failure => rfl
+  | inr next =>
+    change ((run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline fuel next).1,
+      RawTypedScope.drop (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline fuel next).2) =
+      (.error .timeout,RawTypedScope.drop
+        (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline fuel next).2)
+    rw [(all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline fuel next).1]
+
+/-- Successful initialization is followed by timeout, retaining the initializer world. -/
+theorem initializer_world : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx)
+ (next : Solidity.Yul.RawFrame.State (ctx.push name Solidity.Yul.LocalU8Expr.Ty)),
+ Solidity.Yul.RawU8Declaration.run name initial pipeline fuel state = .inr next →
+ let actual := Solidity.Yul.RawU8ForAbsent.run initial
+   (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+   pipeline (fuel+1) state
+ actual.1 = .error .timeout ∧ actual.2.world = next.world := by
+  intro ctx name returns modifier u initializer initial pipeline fuel state next completed
+  rw [initializer_run ctx name returns modifier u initializer initial pipeline fuel state,completed]
+  exact ⟨rfl,(all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline fuel next).2.2⟩
+
+/-- Exact checked Source observation for every supported uint8 initializer. -/
+theorem initializer_source : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (glob : Solidity.Source.Glob ctx.env) (frame : Solidity.Source.Fr),
+ frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph ctx.env))
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawCoherent.coherent state = true →
+ (Solidity.Source.execS glob frame (fuel+1) nps ph
+   (Solidity.Source.RStmt.forLoop (R := returns) (M := modifier) (l := true) (u := u)
+     (.declInit (τ := Solidity.Yul.LocalU8Expr.Ty) initializer (by rfl)) .none .none .cont)
+   state.clean).run (Solidity.Source.L0 ctx.env,state.world) =
+ match Solidity.Yul.RawU8Declaration.run name initial glob.pipeline fuel state with
+ | .inl failure => (.error failure.1,(Solidity.Source.L0 ctx.env,failure.2.world))
+ | .inr next => (.error .timeout,(Solidity.Source.L0 ctx.env,next.world)) := by
+  intro ctx name returns modifier u initializer initial glob frame checked fuel nps ph state same
+  have agrees := (RawU8ForAbsent.correct ctx name returns modifier u initializer initial
+    .cont (body (ctx.push name LocalU8Expr.Ty) returns modifier u)
+    glob frame checked (fuel+1) nps ph state same).2
+  rw [agrees,initializer_run ctx name returns modifier u initializer initial glob.pipeline fuel state]
+  cases actual : RawU8Declaration.run name initial glob.pipeline fuel state with
+  | inl failure => rfl
+  | inr next =>
+    change ((.error .timeout : Solidity.Source.R (Solidity.Source.Out ctx.env.layout ctx.tys ctx.tys)),(Solidity.Source.L0 ctx.env,
+      (run (ctx.push name LocalU8Expr.Ty) returns modifier u glob.pipeline fuel next).2.world)) =
+      (.error .timeout,(Solidity.Source.L0 ctx.env,next.world))
+    rw [(all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u glob.pipeline fuel next).2.2]
+
 end Solidity.Yul.RawContinueLoop
