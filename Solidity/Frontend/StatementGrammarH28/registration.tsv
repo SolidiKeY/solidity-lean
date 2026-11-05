@@ -88,3 +88,4 @@ Solidity.Frontend.StatementGrammarH28.ConditionalPrefix	Exact Boolean if parser 
 Solidity.Frontend.StatementGrammarH28.ConditionalCoverage	Recursive Boolean conditional and loop structural fuel with exact open-if suffix framing
 Solidity.Frontend.StatementGrammarH28.ConditionalYield	Actual Boolean fragment yields, nearest else and framed prefix tree/suffix uniqueness
 Solidity.Frontend.StatementGrammarH28.ConditionalList	Arbitrary-width intrinsic Boolean item list tree/segment uniqueness and balanced block prefix splitting
+Solidity.Frontend.StatementGrammarH28.ConditionalFuel	Constructive Boolean item-list nesting bounds and actual block/statement/unchecked parser coverage

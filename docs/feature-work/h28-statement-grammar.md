@@ -1954,3 +1954,76 @@ association/uniqueness beyond this fragment, remaining true structural-fuel
 parser coverage, full repository final gates and whole-scope acceptance/reviews
 remain open. SG-CEX-01/02 remain OPEN/REFUTED and SOL-EU remains excluded.
 This checkpoint neither resets nor completes the existing persistent objective.
+
+
+## Checkpoint X: constructive list and block parser fuel
+
+Adopted published `3ad22f66d8fc6431378c22e71823436c79dede7f` at merge
+`3bed59f4e76cc0aee2a9c4858f58eddf94beb4f9`, verifying remote ancestry and
+preserving every owned file and seven pinned inputs. Receipt:
+`/workspace/h28-statement-grammar-evidence/adopt-3ad-locations.json`.
+
+ConditionalFuel adds BooleanListBound, a Prop relation over existing intrinsic
+item-list syntax, actual token segments and a natural budget. Nil has budget
+zero. Cons takes the maximum of the head statement's structural budget plus
+seven and the tail budget. Every existing BooleanItemList witness constructs
+such a bound; no successful parse or external fuel oracle is a premise.
+The relation forgets to BooleanItemList and remains inhabited by both nil and
+arbitrarily wide/deep cons lists. No untyped AST or computational indexed
+syntax observer is introduced, and no previous theorem or relation is changed.
+
+The actual blockLeafStep item equation is derived from the existing recursive
+statement coverage. Its proof retains the parser's two nested Except binds
+through stmtItem and some, rather than assuming they are definitionally one
+bind. Represented token heads ensure that neither unchecked dispatch nor block
+termination is taken at an item. The next represented item provides the open-if
+frame, and the final closing brace provides the last frame.
+
+ItemsAt uses the maximum nesting budget independently of width. List-loop fuel
+is separately derived from intrinsic item count and actual token nonemptiness,
+including the stopping step. The actual parser's token-length repetition budget
+is therefore sufficient. For bound b and arbitrary excess n, block coverage is
+at `n + b + 1`, block-statement coverage at `n + b + 2`, and an unchecked item
+wrapper at `n + b + 2` in its existing permitted context. All preserve arbitrary
+suffix/layout/EOF state. The public completeness theorem constructs a b for
+every old BooleanItemList witness and proves success for every excess/suffix.
+It is completeness for that inhabited fixed-Boolean fragment, not general
+statement/unchecked syntax, expression uniqueness or whole-language parsing.
+
+ConditionalFuelControls checks all relation constructors and entry points:
+arbitrary positive width of open ifs with constant nesting budget eight;
+arbitrary conditional depth with its derived budget; all intrinsic contexts;
+block, block-statement and unchecked parsing; a closing brace preserving an
+external else; empty block at fuel one; and actual zero block-fuel and zero
+many-loop-counter refusals. The twelve control theorems and all nine source
+theorems/two relation constructors have public axiom/signature audits.
+No new external solc fixture is claimed; previous pinned external tests remain
+separate from these universal kernel token-parser proofs and source validity.
+
+Initial failed checks remain immutable. run-1793897681667089197 had wrapper
+elaboration errors and was stopped by the unchanged VM headroom guard; the
+container peak was below1GiB while VM memory accounting was dominated by file
+cache. run-1793897760876666389 showed the exact two-bind mismatch. The task-only
+POSIX_FADV_DONTNEED advice receipt resource-cache-advice-1793897760687633281.json
+records current memory12148416512 to10818916352 bytes, releasing cached pages
+from this task's evidence/archive files only, without modifying bytes, global
+drop_caches, swap or resource/proof limits. run-1793897935298655335 needed the
+final unchecked-wrapper rfl. None of these failures counts as a passing gate.
+Final source diagnostics: run-1793897990902814240; controls diagnostics:
+run-1793898105131616279. Serial build has no new warnings.
+
+Separate read-only finder and skeptic source reviews passed without findings;
+neither used Lean, a server, builds, solc or writes. Final acceptance additionally
+requires committed-head controls, axiom/build/KeySort gates and evidence review.
+Exact commands/exits/timing/RSS, source identities, final reviews, cache receipt
+and sealed handoff are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-x-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-x-locations.json`.
+H41 verified cache delivery stays coordinator-pending; never run ship-cache.sh
+on this VM. No producer, shared root/map/trust registry or budget was changed.
+
+Original G11 remains partial: general compound/item framing and association
+outside this fragment, remaining true parser coverage, full repository gates
+and whole-scope acceptance/reviews remain open. SOL-EU remains excluded and
+SG-CEX-01/02 remain OPEN/REFUTED. This checkpoint neither resets nor completes
+the existing frozen persistent objective.
