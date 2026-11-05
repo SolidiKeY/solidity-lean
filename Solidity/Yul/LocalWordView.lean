@@ -171,4 +171,29 @@ def initialLocalWordState (ctx : Solidity.Source.Ctx)
     WordState (localExternalTypes ctx) 0 :=
   ⟨Fin.elim0,localWordCells ctx (LocalValues.ofClean locals)⟩
 
+theorem SourceFunctionCell.ref_injective : ∀ (ctx : Solidity.Source.Ctx) (first second : Solidity.Yul.SourceFunctionCell ctx),
+ first.ref = second.ref → first = second := by
+  intro ctx first second same
+  rcases first with ⟨one,da⟩
+  rcases second with ⟨two,db⟩
+  dsimp only at same
+  cases same
+  have certificates := Option.some.inj (da.complete.symm.trans db.complete)
+  cases certificates
+  rfl
+
+theorem sourceFunctionAt_surjective : ∀ (ctx : Solidity.Source.Ctx) (cell : Solidity.Yul.SourceFunctionCell ctx),
+ ∃ index, Solidity.Yul.sourceFunctionAt ctx index = cell := by
+  intro ctx cell
+  let entry : SourceLocalEntry ctx := ⟨cell.ref,.externalFunction,cell.shape⟩
+  obtain ⟨mapped,present,same⟩ := localExternalMap_complete ctx entry
+  rcases mapped with ⟨actual,index⟩
+  change actual = entry at same
+  subst actual
+  refine ⟨index,?_⟩
+  have selected := sourceEntryAt_mapped ctx ⟨entry,index⟩ present
+  apply SourceFunctionCell.ref_injective ctx _ cell
+  change (sourceEntryAt ctx index).val.ref = cell.ref
+  exact congrArg SourceLocalEntry.ref selected
+
 end Solidity.Yul

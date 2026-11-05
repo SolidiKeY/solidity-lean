@@ -7,10 +7,11 @@ arbitrary-depth boundary/AST/layout exactness, frozen-fuel and source corollarie
 The 18 modules contain 444 source-bound checked statements. Read-only length
 atom contracts remain explicit external dependencies; no universal expression
 support, resolution, evaluation or whole-compiler correctness is claimed.
-The actual full policy run passes every stage except run-lean, roots and
-orphans, which report 11 missing reserved central-root imports after adopting
-published master 8bf83218 (unchanged from b86;earlier trees reported13,14,16,18). The separate default-target/TestSuite build and actual sort checker pass; neither
-can waive the required root-policy failures.
+All18 modules are now centrally registered after rebase onto e6849d3b. Fresh
+full VM validation passes run-lean, roots, orphans and every other stage except
+shared axiom pins:0errors,479unrecorded changes,0owned TypeGrammarH28 entries.
+This shared inventory is outside the lane's write scope; whole acceptance remains
+blocked without a trust waiver.
 
 ## Frozen scope and source identities
 
@@ -1522,3 +1523,61 @@ Whole-assignment acceptance remains blocked by reserved central-root integration
 Separate read-only finder and skeptic accepted adoption, complete VM evidence
 and H41 handoff with no findings, without Lean server use;
 `evidence/adopted8bf/reviews.json`.
+
+## Required rebase onto e6849d3b, 2026-11-05
+
+Rebased the existing assigned branch onto `e6849d3bdf516099d20c33d3581d523449764018`
+before making this handoff commit. All18 proof modules, four frozen producer inputs
+and non-pruned owned helpers/docs were already byte-identical upstream. Empty
+replay avoided duplicating integrated fragments or republishing pruned evidence.
+The29historical commits remain under `refs/codex-backups/type-grammar/pre-e6849d3b`
+and `/workspace/scratch/h28-type-grammar/rebase-e6849d3b/pre-rebase.bundle`.
+All509preserved files hash-match the pre-rebase work;485upstream-pruned runtime
+assets were restored only locally and Git-ignored. This includes every original
+fixture and generated case: nothing was dropped from grammar/control coverage.
+The fresh solc receipt is intentionally updated; no proof/fixture source changed.
+
+The thin committed ledger is `tests/h28-sol/type-grammar/evidence/rebase-e6849d3b-summary.json`.
+It enumerates all18 module hashes/counts, all constructor/field/layout clauses,
+all29fixture identities and exact commands/exits/timing/RSS. Complete raw receipts
+and logs remain outside Git in `/workspace/scratch/h28-type-grammar/rebase-e6849d3b/raw-gates/`,
+respecting upstream pruning. Fresh actual VM gates at e6849d3b:
+
+| Gate | Result | Decisive output |
+| --- | --- | --- |
+| runtime | PASS3.358s | Lean4.24.0/Lake5.0.0-src+797c613;actual KeySort before RUNTIME_GATE_PASS |
+| solc | PASS4.260s | all29positive/negative grammar fixtures |
+| owned build+axioms | PASS11.663s | 18modules,444inventories:177empty,267propext |
+| parser controls | PASS8.505s | 13218positive/23negative,zero failures |
+| full policy | FAIL232.359s,exit1,guard null | touched2346jobs;all stages PASS exceptaxiom-pins |
+| default build | PASS2.849s | 4178jobs,defaulttargets+TestSuite |
+| SolKey | PASS1.277s | 377taclets/131annotations |
+
+All checks were serial Lean -j1,12GiB/no swap,4GiB headroom guard.
+Full minimum headroom7866126336bytes,sampled RSS2547249152bytes.
+All source-unchanged guards pass; no proof budget or gate was weakened.
+
+**Current blocker:** `node scripts/check-axiom-pins.mjs` reports0errors and
+479unrecorded changes, with0TypeGrammarH28 notes. All are outside this lane.
+Exact output is `/workspace/scratch/h28-type-grammar/rebase-e6849d3b/unrecorded-pins.txt`;
+classification is `pin-blocker.json` beside it. Shared pin inventory remains untouched.
+Passing a required full rerun after central reconciliation is still outstanding.
+Historical ledgers saying root-registration blocked remain historical; this
+section and the fresh ledger explicitly supersede that blocker.
+
+Read-only original-queue finder/skeptic found no unfinished owned proof/fixture
+obligation within the permitted local LengthAtom boundary. Arbitrary-expression
+LengthAtom support remains external, source completeness remains conditional on
+those explicit facts, and the false raw-yield claim retains its counterexample.
+Fixture evidence is grammar acceptance/root-kind agreement, not AST/compiler
+equivalence. No whole-expression/compiler correctness or whole-goal completion.
+
+H41: no VM ship-cache invocation. Verified18mappings/54artifact members ready
+for coordinator pull at `/workspace/scratch/h28-type-grammar/rebase-e6849d3b/cache-h41/owned-artifacts.tar.zst`,
+SHA256 `da52ab498a74f0760aaa71ab9e8b8eb4386e95776383c1f8c518756f38946981`.
+Mappings/manifest/traces/receipt are beside it. Pull/import pending;no delivery
+or freshness claim. No scope waiver or shared-inventory edit is requested.
+
+Separate read-only finder/skeptic accepted rebase fidelity, original-queue
+accounting, complete fresh VM evidence and this thin handoff with no findings,
+without Lean server use. Their verdicts are in the committed summary.

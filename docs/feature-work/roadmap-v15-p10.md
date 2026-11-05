@@ -1915,3 +1915,35 @@ empty-stack refusals. Complete native records retain ordered code, stack, buffer
 calldata, accounts and initial accounts; each model preserves its own frame.
 Eight new axiom reports have exact guarded expectations. No full opcode,
 Source-origin, physical, world or Osaka adequacy obligation is closed.
+
+### Selected unsigned order
+
+The instruction-selection agreement now connects the published LT/GT certificates to the charged fetched step and its continuation. The input stack representation, numeric capacity, gas and fuel bounds remain explicit; account state, memory and both return-byte fields are preserved separately from the IR frame. Controls distinguish equal-low-byte words, equality and unsigned high-bit ordering, preserve the complete populated stack and state, and check gas-before-arity and fuel priority. This is primitive agreement, not Source, account-call or full Osaka adequacy.
+
+### Selected AND and OR
+
+The published numeric AND/OR certificates now compose with the charged fetched reference steps, with explicit stack representation, capacity, gas and fuel premises. Populated controls cover mixed-bit words, equal low bytes, a high bit beyond byte width, complete separate model frames and gas-before-arity/fuel priority. A review caught and corrected a calldata-byte transcription in the new observation statement; the original fixture was preserved. These are primitive consumers, not physical input, Source, account-world or full Osaka adequacy.
+
+### Selected XOR
+
+The published numeric XOR certificate now composes with the charged fetched reference law. Stack representation, capacity, gas and fuel remain explicit. Full-word controls distinguish equal low bytes, cancellation and high-bit identity, preserve the populated separate frames, and check wrong results, tail order and gas-before-arity/fuel priority. This supplies primitive selection agreement, not physical input origin, Source or account-world adequacy.
+
+### Selected bitwise NOT
+
+The numeric NOT certificate now composes with the charged fetched reference law, retaining explicit stack representation, capacity, gas and fuel premises. Controls cover zero, the maximum word and the complement of256; they distinguish full-word complement from Boolean negation, preserve complete separate frames and check wrong results, ordered tails and gas-before-arity/fuel priority. No physical input origin, Source, account-world or full Osaka adequacy follows.
+
+### Selected signed LT
+
+The numeric SLT certificate now composes with the charged fetched reference theorem, retaining explicit stack representation, capacity, gas and fuel premises. Controls distinguish signed from unsigned order using negative one and the minimum signed word, check equality and reversed operands, preserve populated separate frames, and establish gas-before-arity and fuel priority. This is raw numeric selection agreement; checked Source behavior, physical input origin and account-world adequacy remain separate.
+
+### Selected signed GT
+
+The numeric SGT certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Negative-one, minimum-signed-word, equality and reversed-operand controls distinguish signed order, preserve the populated separate frames and reject wrong result/tail observations while retaining gas-before-arity and fuel priority. This proves a primitive selection leaf, not checked Source behavior, physical input origin or account-world adequacy.
+
+### Selected signed division
+
+The SDIV certificate now composes with the charged fetched reference theorem, retaining explicit numeric representation, capacity, gas and fuel premises. Controls cover truncation toward zero with both divisor signs, raw zero-divisor success and minimum-word division by negative one; populated observations reject floor rounding and tail permutation and retain gas-before-arity/fuel priority. These are raw primitive outcomes, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Selected signed remainder
+
+The SMOD certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Sign-combination, zero-divisor and minimum-word boundary controls preserve the dividend's remainder sign, populated separate frames and gas-before-arity/fuel priority; wrong Euclidean results and permuted tails are rejected. These are raw primitive facts, not checked Source failure policy, physical input origin or account-world adequacy.

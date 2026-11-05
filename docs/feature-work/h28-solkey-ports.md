@@ -181,3 +181,10 @@ runtime pass on the VM; exact final-head commands, exits, timings/RSS, resource
 bounds, sealed handoff and H41 pull pack are in
 `tests/h28-sol/solkey-ports/artifacts/rebase-e6849d3b/`. Coordinator import
 remains separate; no new whole-tree/Bridge gate is asserted.
+
+Published `70845978ab616a63b13d0dee8b31b28893ccf591` contains the prior
+reviewed head and was adopted by rebase without owned content changes. The
+fixed approved-publication list adds that exact ancestor. Initial selected
+acceptance rejected upstream files against the older scope base; that failed
+receipt is retained separately. No proof/trust/scope condition was weakened.
+Final VM receipts and H41 handoff are in `artifacts/rebase-70845978/`.

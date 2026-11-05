@@ -655,3 +655,70 @@ RSS252528KiB,min6243352576bytes. Fresh6module18artifact/6mapping cache verified:
 Byte-identical to prior pendingeb91pack;delivery still coordinator-pending. No
 ship-cache.sh invocation. Fresh source/compiled fingerprint receipt and gate/cache
 logs are in adoption-3ad. RUNTIME_GATE_PASS and whole-lane completion remain pending.
+
+
+## Published708 adoption
+
+Coordinator published the complete prior owned head1d8e6c30 as an ancestor of
+70845978. Required rebase completed cleanly to708;all owned files are byte-identical
+across those heads and original history is preserved. Recovery ref:
+refs/codex-recovery/shared-translator/pre-70845978. This is adoption of integrated
+work,not completion or delivery of the pending CR AST importer migration.
+
+Fresh bounded344-job owned build,axiom inventory,modal/direct controls,native18+2
+and ownership audit passed32.846s,RSS1250056KiB,min5558743040bytes. Exact source/C/
+binary manifest bindings still match the original native binary1d327a56;no changed
+source modules were found in its manifest. Latest instrumented native replay0.205s,
+not a before/after benchmark. Lean4.24.0/Lake5.0.0-src+797c613 remain actual versions.
+Read-only finder/skeptic,no Lean/server,confirmed ancestry,owned preservation,gate
+exit0 and appropriate limits. Native replay archive remains dc2e7041 and current
+Lean cache eb91e1e4,local/coordinator-pending absent further byte-delivery receipt.
+CR migration/DR-A-META,exhaustive binary/source/form parity,WASM,before-after runtime
+and full final gates remain open. Existing goal is not reset or completed.
+
+
+Fresh708 KeySort and SolKey377/131/131 checks passed with actual scope memory.max
+12884901888,swap.max0,cpu.max100000 100000. KeySort/cache25.906s,RSS251196KiB,
+minimum outer available5536673792bytes. Current verified6module18artifact/6mapping
+cache964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/8f03f21288f3/owned-delta.tar.zst
+Local/coordinator-pending,not shipment/installation. H41 no ship-cache.sh invocation.
+Current source/compiled fingerprints and cache/gate receipt are under adoption-708.
+No get_goal capability is exposed;the existing goal is not reset or completed.
+
+
+## Published1ae rebase and durable ownership audit
+
+Coordinator integrated19f8973d through source-equivalent cherry-picks1dcfab2e/
+79dca631,not original commit ancestry. All owned files matched the published tree.
+Required rebase onto1aeaf276 completed cleanly,skipping already-applied8f03f212/
+19f8973d;old identities remain in recovery ref
+refs/codex-recovery/shared-translator/pre-1aeaf276. No runtime source changed.
+
+The optional static ownership audit now uses the unique merge base of HEAD and
+fetched refs/remotes/origin/master,requiring pinnedb419 ancestry. This prevents a
+new hard-coded SHA edit for each publication and continues checking unpublished
+tracked/untracked tree deviations. Ambiguous ancestry fails closed. Caller MUST
+still establish authorized fetch/rebase;the audit grants no authorization and is
+not an audit of every historical edit. Original decoder/proof-search/builder/
+wrapper comparisons remain pinned to their original bases and are unchanged.
+No runtime API,semantic exclusion,premise,proof budget or trust boundary changed.
+
+Fresh344-job owned build,axiom inventory,modal/direct controls,native18+2 and new
+ownership audit passed38.161s,RSS1250152KiB,min5537415168bytes. Native binary source/
+C bindings remain exact;no Source AST importer migration was delivered. Independent
+read-only finder/skeptic(no Lean/server/writes) found no scope-guard defect and
+confirmed source-equivalence versus ancestry distinction. Remaining CR/DR-A-META,
+complete form/source parity,exhaustive binary closure,WASM,before-after and final
+full gates remain open. No RUNTIME_GATE_PASS or whole-goal completion is claimed.
+
+
+Post-commit audit with local HEAD1b55edee ahead of publication still selected1ae,
+so unpublished local work was not hidden. Output/source proof checks passed.
+Fresh KeySort/SolKey377/131/131 and6module18artifact cache verification passed:
+17.005s,RSS251532KiB,min5508968448bytes;actual scope12GiB/swap0/CPU1. Lean4.24.0/
+Lake5.0.0-src+797c613 remain actual. Current964484-byte cache SHA256
+ eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519 is locally verified:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/1b55edee9249/owned-delta.tar.zst
+H41 delivery remains coordinator-pending;no ship-cache.sh invoked. Native archive
+dc2e7041 remains immutable. Full goal/CR metadata decision/WASM/closure are unchanged.

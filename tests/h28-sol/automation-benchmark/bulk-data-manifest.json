@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "purpose": "Archival data only; not a runtime input to compact scripts/tests. Bulk files are not tracked or reachable through the rewritten delivery branch.",
+  "original_task_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "rewrite_base": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "archived_task_head": "fa3ca9ee7d7b418131422bf236b776caf013c818",
+  "local_only_recovery_ref": "codex/solidity-h28-sol-20261104/automation-benchmark-held-fa3ca9ee",
+  "delivery_rule": "Fetch/push only the assigned rewritten branch or supplied clean bundle, never archival refs.",
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/adopted-master-axioms-v1/files/summary.json",
+      "bytes": 61739851,
+      "sha256": "16155dda60e6a00bd1bc360d071c820d1be202e9825949481b77fb2f3ec09712",
+      "kind": "historical oversized summary"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/codegen-matched-v2/summary.json",
+      "bytes": 61898651,
+      "sha256": "75c30b2c8a0bd3a4c514d99e652c3b7466d79d0b47283a8814948aeaf6b7e370",
+      "kind": "historical oversized summary"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/followon-master-axioms-v1/files/summary.json",
+      "bytes": 61739942,
+      "sha256": "59383016e5b971f57e9e1eb5a4e768604ed939b415fd1d1258baa09beb9d1bfb",
+      "kind": "historical oversized summary"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/production-matched-replacement-v1/summary.json",
+      "bytes": 62003270,
+      "sha256": "e70b6e653e6039cf794cc81f0dddd5cca9398bf3836a821ba0e64eb1f1130b5f",
+      "kind": "historical oversized summary"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/artifacts/completion-326bd090cbc8/evidence.tar.gz",
+      "bytes": 408870192,
+      "sha256": "91a80e429b785b01920a397ff81aec544b0a2572427ce874df52dcf7d12fc989",
+      "kind": "archival evidence/cache"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/artifacts/completion-326bd090cbc8/SHA256SUMS",
+      "bytes": 734,
+      "sha256": "93440cfa5871b3a6ace734898d533af73ed2ed6dbf3410e43aa757499d009bc2",
+      "kind": "archival evidence/cache"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/artifacts/compact-d66c565f18a0/evidence.tar.gz",
+      "bytes": 5611432,
+      "sha256": "b757365d2f4020c70c6809f8cd5fd19a4c78674e975145aca46c7e52f3df33b3",
+      "kind": "archival evidence/cache"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/artifacts/compact-d66c565f18a0/SHA256SUMS",
+      "bytes": 664,
+      "sha256": "bc6c78e29516beccc7cfe7644bfabb3f28d0c1d2a9536849b6f8bd9dd7586e89",
+      "kind": "archival evidence/cache"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h35-local-owned-cache-v1/owned-cache.tar.gz",
+      "bytes": 85667,
+      "sha256": "7d26e0e9ced1e06095f48b1d95e6c0ebf32f7869b69187edd1b64f330e0867b7",
+      "kind": "archival evidence/cache"
+    }
+  ],
+  "h41": "Cache pack stays on VM for coordinator pull; no ship-cache invocation."
+}

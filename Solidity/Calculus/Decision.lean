@@ -10,6 +10,11 @@ import Solidity.Calculus.ArrayBlock
 import Solidity.Calculus.MemHoist
 import Solidity.Calculus.MemNegPrep
 import Solidity.Calculus.MemStructCut
+import Solidity.Calculus.DecisionMemoryExtension
+import Solidity.Calculus.DecisionCompoundExtension
+import Solidity.Calculus.DecisionSourceAnswer
+import Solidity.Calculus.DecisionGivenHeapComputedExtension
+import Solidity.Calculus.DecisionGivenHeapFixedExtension
 import Solidity.Calculus.MemoryWitness
 import Solidity.Calculus.KIntBinder
 import Solidity.Calculus.KIntEncode
@@ -358,7 +363,7 @@ def _root_.Solidity.Fml.hasAllocAll {Γ : Ctx} : Fml C Γ → Bool
 /-- Decide the certified fresh-struct field schema. Refutations carry the
 realized child heap, rather than reusing the arithmetic pipeline's state. -/
 def decideStruct (φ : Fml C []) : LeafVerdict C :=
-  match MemoryWitness.structAnswer φ with
+  match structAnswerWithCompound φ with
   | some (.proved _) => .proved
   | some (.refuted state _) => .refuted (state (State.init C))
   | none => .unknown
@@ -383,26 +388,98 @@ theorem decideStruct_refutes {φ : Fml C []} {σ : State C []}
     exact refutes (State.init C)
   · cases h
 
-/-- Recognition produces a proved or a refuted verdict, never unknown. -/
-theorem decideStruct_complete {φ : Fml C []}
-    (h : (MemoryWitness.structAnswer φ).isSome = true) : decideStruct φ ≠ .unknown := by
+/-- Every recognized certified answer produces an actual verdict. -/
+theorem decideStruct_complete_combined {φ : Fml C []}
+    (h : (structAnswerWithCompound φ).isSome = true) : decideStruct φ ≠ .unknown := by
   unfold decideStruct
-  cases ha : MemoryWitness.structAnswer φ with
+  cases ha : structAnswerWithCompound φ with
   | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
   | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
 
+/-- The prior reversed-composition completeness signature is retained. -/
+theorem decideStruct_complete_merged {φ : Fml C []}
+    (h : (structAnswerWithReversed φ).isSome = true) : decideStruct φ ≠ .unknown :=
+  decideStruct_complete_combined (structAnswerWithCompound_original h)
+
+/-- The original public completeness signature is retained. -/
+theorem decideStruct_complete {φ : Fml C []}
+    (h : (MemoryWitness.structAnswer φ).isSome = true) : decideStruct φ ≠ .unknown :=
+  decideStruct_complete_merged (structAnswerWithReversed_original h)
+
+/-- This exact given-heap source has no fresh allocation, in every context. -/
+theorem ResidueReason.GivenHeapLiteralReadReflexive.noAlloc {Γ : Ctx} {φ : Fml C Γ}
+    (w : ResidueReason.GivenHeapLiteralReadReflexive φ) : φ.hasAllocAll = false := by
+  rcases w with ⟨name, key, heq⟩
+  subst φ
+  rfl
+
+/-- Existing given-heap countermodels first, then an exact global source certificate. -/
+def decideGiven (φ : Fml C []) : LeafVerdict C :=
+  match givenHeapAnswerWithFixed φ with
+  | some (.proved _) => .proved
+  | some (.refuted state _) => .refuted (state (State.init C))
+  | none => .unknown
+
+/-- A positive answer is valid over every heap and binder value. -/
+theorem decideGiven_sound {φ : Fml C []} (h : decideGiven φ = .proved) : Fml.Valid φ := by
+  unfold decideGiven at h
+  split at h
+  · rename_i valid _
+    exact valid
+  · cases h
+  · cases h
+
+/-- The actual returned countermodel is certified. -/
+theorem decideGiven_refutes {φ : Fml C []} {σ : State C []}
+    (h : decideGiven φ = .refuted σ) : ¬ holds σ φ := by
+  unfold decideGiven at h
+  split at h
+  · cases h
+  · rename_i state refutes _
+    cases h
+    exact refutes (State.init C)
+  · cases h
+
+/-- Every actual certified answer yields an answered verdict. -/
+theorem decideGiven_complete_fixed {φ : Fml C []}
+    (h : (givenHeapAnswerWithFixed φ).isSome = true) : decideGiven φ ≠ .unknown := by
+  unfold decideGiven
+  cases ha : givenHeapAnswerWithFixed φ with
+  | none => simp only [ha, Option.isSome_none, Bool.false_eq_true] at h
+  | some a => cases a <;> simp only [ne_eq, reduceCtorEq, not_false_eq_true]
+
+/-- Preserve the computed-index completeness interface. -/
+theorem decideGiven_complete_computed {φ : Fml C []}
+    (h : (givenHeapAnswerWithComputed φ).isSome = true) : decideGiven φ ≠ .unknown :=
+  decideGiven_complete_fixed (givenHeapAnswerWithFixed_old_complete h)
+
+/-- Preserve the previous source-answer completeness interface. -/
+theorem decideGiven_complete_sources {φ : Fml C []}
+    (h : (givenHeapAnswerWithSources φ).isSome = true) : decideGiven φ ≠ .unknown :=
+  decideGiven_complete_computed (givenHeapAnswerWithComputed_old_complete h)
+
+/-- Compatibility: every previously recognized given-heap answer still receives
+an answered verdict through the extended lazy route. -/
+theorem decideGiven_complete {φ : Fml C []}
+    (h : (givenHeapAnswerWithReflexive φ).isSome = true) : decideGiven φ ≠ .unknown :=
+  decideGiven_complete_sources (givenHeapAnswerWithSources_old_complete h)
+
+/-- Preserve every successful old countermodel's exact returned state. -/
+theorem decideGiven_preserves_countermodel {φ : Fml C []}
+    (w : {σ : State C [] // ¬ holds σ φ}) (h : MemoryWitness.countermodel? φ = some w) :
+    decideGiven φ = .refuted w.1 := by
+  unfold decideGiven
+  rw [givenHeapAnswerWithFixed_preserves_countermodel w h]
+
 /-- Exact negative-block preparation and fresh-array cutting, with a certified
-fresh-struct fallback or a concrete given-heap countermodel. Truth at one
-witness state is never promoted to validity. -/
+fresh-struct fallback or a given-heap answer. Global positive answers carry
+an exact all-heap source certificate; truth at one witness is never promoted. -/
 def decideMem (φ : Fml C []) : LeafVerdict C :=
   if φ.hasAllocAll then
     match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => decideLeafA ψ
     | none => decideStruct φ
-  else
-    match MemoryWitness.countermodel? φ with
-    | some w => .refuted w.1
-    | none => .unknown
+  else decideGiven φ
 
 theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid φ := by
   unfold decideMem at h
@@ -413,7 +490,7 @@ theorem decideMem_sound {φ : Fml C []} (h : decideMem φ = .proved) : Fml.Valid
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).1
           ((Fml.mxTop_valid hψ).2 (decideLeafA_sound h) σ))
     · exact decideStruct_sound h
-  · split at h <;> cases h
+  · exact decideGiven_sound h
 
 theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = .refuted σ) :
     ¬ holds σ φ := by
@@ -425,11 +502,7 @@ theorem decideMem_refutes {φ : Fml C []} {σ : State C []} (h : decideMem φ = 
         ((Fml.hoist_holds 1024 (mxNegativePrepare φ).body σ).2
           (((mxNegativePrepare φ).exact σ).2 hφ)))
     · exact decideStruct_refutes h
-  · split at h
-    · rename_i w _
-      cases h
-      exact w.2
-    · cases h
+  · exact decideGiven_refutes h
 
 /-! ### Binders of KeY's `int` (M7, feature 26)
 
@@ -582,13 +655,17 @@ theorem decideLeaf_not_valid {φ : Fml C []} {σ : State C []} (h : decideLeaf �
     ¬ Fml.Valid φ :=
   fun hv => decideLeaf_refutes h (hv σ)
 
-/-- **The fragment with fresh memory objects**: after the same exact
-preparation and hoisting as `decideMem`, its array cut is in `Fml.CoveredA`,
-or the cut is unavailable and the fresh-struct schema is certified. -/
+/-- **The complete memory fragment**: a covered fresh-array cut, a certified
+fresh-struct answer, the exact given-heap literal-read source certificate, or
+a discovered source chain without fresh allocation, or an exact computed-index
+reflexive given-heap read of a dynamic or fixed array. These source routes never
+promote truth at one candidate heap to validity. -/
 def _root_.Solidity.Fml.memCovered (φ : Fml C []) : Bool :=
-  φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
+  (φ.hasAllocAll && match ((mxNegativePrepare φ).body.hoist 1024).mxTop with
     | some ψ => ψ.CoveredA
-    | none => (MemoryWitness.structAnswer φ).isSome
+    | none => (structAnswerWithCompound φ).isSome) || φ.givenHeapLiteralReadReflexive ||
+    (!φ.hasAllocAll && sourceUIntLiteralSkeleton φ && (sourceUIntLiteralDiscovery? φ).isSome) ||
+    (φ.givenHeapLinearReadReflexive || φ.givenHeapFixedReadReflexive)
 
 /-- **The fragment with binders of KeY's `int`**: the leaf binds one where
 `Fml.zT` reads it, is in `Fml.zOK`, and its rewriting is in `Fml.CoveredA`. -/
@@ -602,7 +679,8 @@ def _root_.Solidity.Fml.kencCovered (φ : Fml C []) : Bool :=
   φ.kencB.2 && (φ.kencB.1.CoveredA || φ.kencB.1.kintCovered)
 
 /-- **The fragment proved complete**: `Fml.CoveredA`, or a leaf with a covered
-fresh-array cut or a certified fresh-struct schema (`Fml.memCovered`, M7 step 6),
+fresh-array cut, a certified fresh-struct schema or the exact given-heap literal-read
+certificate (`Fml.memCovered`, M7 step 6/AU02),
 or one with binders of KeY's `int` whose rewriting is in it (`Fml.kintCovered`,
 feature 26), or one with them over two words (`Fml.kencCovered`,
 features 30 and 31), or a certified quantified ledger reduction
@@ -612,13 +690,50 @@ def _root_.Solidity.Fml.Covered (φ : Fml C []) : Bool :=
 
 theorem decideMem_complete {φ : Fml C []} (h : φ.memCovered = true) : decideMem φ ≠ .unknown := by
   unfold Fml.memCovered at h
-  simp only [Bool.and_eq_true] at h
-  obtain ⟨ha, h⟩ := h
-  unfold decideMem
-  rw [if_pos ha]
-  split at h
-  · exact decideLeafA_complete h
-  · exact decideStruct_complete h
+  simp only [Bool.or_eq_true] at h
+  rcases h with ((hfresh | hgiven) | hsource) | (hcomputed | hfixed)
+  · simp only [Bool.and_eq_true] at hfresh
+    obtain ⟨ha, hc⟩ := hfresh
+    unfold decideMem
+    rw [if_pos ha]
+    split at hc
+    · exact decideLeafA_complete hc
+    · exact decideStruct_complete_combined hc
+  · obtain ⟨w⟩ := ResidueReason.givenHeapLiteralRead_witness hgiven
+    unfold decideMem
+    rw [w.noAlloc]
+    exact decideGiven_complete (givenHeapAnswerWithReflexive_source hgiven)
+
+  · simp only [Bool.and_eq_true] at hsource
+    obtain ⟨⟨ha, _⟩, hs⟩ := hsource
+    cases halloc : φ.hasAllocAll with
+    | false =>
+      unfold decideMem
+      rw [halloc]
+      exact decideGiven_complete_sources (givenHeapAnswerWithSources_source hs)
+    | true => rw [halloc] at ha; cases ha
+
+  · obtain ⟨w⟩ := ResidueReason.givenHeapLinearRead_witness hcomputed
+    have ha : φ.hasAllocAll = false :=
+      (congrArg (fun ψ : Fml C [] => ψ.hasAllocAll) w.equation).trans rfl
+    unfold decideMem
+    rw [ha]
+    exact decideGiven_complete_computed (givenHeapAnswerWithComputed_source hcomputed)
+
+  · obtain ⟨w⟩ := ResidueReason.givenHeapFixedRead_witness hfixed
+    have ha : φ.hasAllocAll = false :=
+      (congrArg (fun ψ : Fml C [] => ψ.hasAllocAll) w.equation).trans rfl
+    unfold decideMem
+    rw [ha]
+    exact decideGiven_complete_fixed (givenHeapAnswerWithFixed_source hfixed)
+
+/-- Actual finite source discovery supplies coverage on the existing no-fresh-allocation
+route. This is a syntactic hit premise, not an arbitrary supplied validity proof. -/
+theorem sourceUIntLiteral_covered {φ : Fml C []} (ha : φ.hasAllocAll = false)
+    (h : (sourceUIntLiteralDiscovery? φ).isSome = true) : φ.Covered = true := by
+  unfold Fml.Covered Fml.memCovered
+  rw [ha, sourceUIntLiteralSkeleton_of_discovery h, h]
+  simp only [Bool.false_and, Bool.not_false, Bool.true_and, Bool.or_true, Bool.true_or]
 
 theorem decideKInt_complete {φ : Fml C []} (h : φ.kintCovered = true) :
     decideKInt φ ≠ .unknown := by
@@ -1364,6 +1479,19 @@ theorem decideGoal_complete {φ : Fml C []} (h : φ.Covered = true) (hh : φ.has
   unfold decideGoal
   rw [hh]
   exact decideLeaf_complete h
+
+/-- A computed intrinsic source-chain hit yields a kernel-certified public positive
+verdict on this exact no-allocation, hash-free class. All premises are explicit. -/
+theorem sourceUIntLiteral_proved {φ : Fml C []} (ha : φ.hasAllocAll = false)
+    (h : (sourceUIntLiteralDiscovery? φ).isSome = true) (hh : φ.hasHash = false) :
+    decideGoal φ = .proved := by
+  have hc : φ.Covered = true := sourceUIntLiteral_covered ha h
+  have hv : Fml.ValidH φ := sourceUIntLiteralDiscovery_validH h hh
+  have hd : decideGoal φ ≠ .unknown := decideGoal_complete hc hh
+  cases he : decideGoal φ with
+  | proved => rfl
+  | refuted σ => exact False.elim (decideGoal_refutes he (hv σ))
+  | unknown => exact False.elim (hd he)
 
 /-- **Completeness on the covered leaves with hashes** (`Fml.hashCovered`). -/
 theorem decideGoal_complete_hash {φ : Fml C []} (h : φ.hashCovered = true) :
