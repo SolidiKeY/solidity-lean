@@ -335,3 +335,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedFixedPathCopyInterface.lean` | Total checked fixed-path copy/binding contracts with full state adoption and distinct path/capacity failures. |
 | `Backend/MemoryCopies/CheckedFixedPathCopy.lean` | Existing pointer resolution followed by checked fixed-copy/adoption/local binding with distinct path/capacity refusals. |
 | `Backend/MemoryCopies/CheckedFixedPathCopyControls.lean` | Represented empty/pair/long and indexed bindings, alias controls, complete saturated inputs and bounds-before-capacity witnesses. |
+| `Backend/MemoryCopies/CheckedFixedStoragePathInterface.lean` | Total checked fixed storage-path body/declaration/rebinding with retained Source success and explicit capacity/path refusals. |
