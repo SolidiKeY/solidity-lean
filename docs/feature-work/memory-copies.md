@@ -1264,3 +1264,17 @@ targets give 1,302 scoped reports over 220 modules, preserving 217 predecessors.
 Exact-head gates, axiom audit, patch reconstruction and seal remain required.
 This two-location fragment leaves full composition, Source/physical adequacy
 and original producer obligations open.
+
+## Checked nested-memory child turn
+
+`NestedMemoryTurnInterface` specifies G35.04/G35.05 selection through the
+existing checked array reader, followed by the existing checked primitive
+child copier and reserved-parent store. The source is an actual typed nested
+array; no child pointer, source-bounds or capacity premise is supplied. Target
+index validity is separate from checked source bounds. Refusal records either
+actual absent source index or successful child selection with insufficient
+capacity. Full allocator, old aliases/gaps/frame and fresh snapshot contents
+remain explicit. Independent design finder/skeptic reviews required repeated
+source-alias controls, successful source selection before capacity refusal and
+source refusal even at saturation. This is one child turn, with whole traversal,
+typed parent adoption, Source/physical adequacy and original queue still open.
