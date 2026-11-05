@@ -179,7 +179,7 @@ theorem machine_agrees_intShr (a n : PrimTy.int.Denote) (m : Machine) (tail : Sc
 
 /-- **Negative control**: raw `SAR` without the clamp reads the count `-1`
 (the word `2^256 - 1`) as a saturating count and fills with the sign,
-whereas the source (and `sarCode`) leave `8` unchanged. -/
+whereas `sarCode` leaves `8` unchanged (the source value, by `sarWord_clamp`). -/
 theorem raw_sar_differs (m : Machine) :
     run [.sar] { m with stack := .val wMax :: w[8] :: [] } ≠
       run sarCode { m with stack := .val wMax :: w[8] :: [] } := by
@@ -205,7 +205,7 @@ theorem raw_sar_differs (m : Machine) :
   omega
 
 /-- **Positive witness** at a saturated count: `-7 >> 256` fills with the
-sign on the machine, as in the source. -/
+sign on the machine (the source's `-1` there follows from `sarWord_clamp`). -/
 theorem saturated_fill (m : Machine) :
     run sarCode { m with stack := w[256] :: .val (sword (-7)) :: [] } =
       .ok { m with stack := .val wMax :: [] } 0 := by

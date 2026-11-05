@@ -734,12 +734,13 @@ top) with `sarWord`: floor division of the signed reading by `2^n`, and the
 sign fill `-1`/`0` from count `256`. [Layout](../../Solidity/Evm/Layout.lean)
 emits `sarCode = DUP1 PUSH 0 SGT ISZERO MUL SAR` as `sTail .shr`: the count is
 clamped to `0` when negative, because the source reads a negative `int` count
-by its `toNat`, as the Scalar endpoint's `signedShiftPrefix` does. The two
-exhaustive `Instr` matches (`Evm/Sim.lean`'s `step_mem`, and
+by its `toNat`, as the Scalar endpoint's `signedShiftPrefix` does. Besides
+`Instr.step` and `ToString` in `Machine.lean`, the two other exhaustive `Instr` matches (`Evm/Sim.lean`'s `step_mem`, and
 `Backend/InternalFlow/RuntimeFrameCodeEquality.instruction`) gain the new arm.
 
-[MachineSar](../../Solidity/Backend/Passes/MachineSar.lean) proves, for every
-pair of words or intrinsic operands and every stack tail:
+[MachineSar](../../Solidity/Backend/Passes/MachineSar.lean) proves the first three
+results for every pair of words or intrinsic operands and every stack tail;
+the last two are single concrete controls:
 
 - `sarCode_run`: the exact machine run, `sarWord (clamp n) a`;
 - `sarCode_simT`: `Evm.tail_simT`'s shape for `.shr` at `int` (never a revert);
@@ -757,6 +758,16 @@ lane v14 can reprove G25-SAR-1105 at machine level from these lemmas; adding
 signed shifts to the fragment is a separate decision. Adding a constructor
 to `Instr` recompiles every importer of `Evm/Machine.lean`; no proof budget
 was raised.
+
+## Lane-module registration (G25 packet integration, 2026-11-05)
+
+The moved lane head had 87 `Backend/Passes` modules (including the G25
+signed division/remainder/subtraction, shift and unsigned-width captures)
+outside the generated root and without module-map rows. They are now
+registered by `scripts/coord-tools/register.sh`, have rows in
+[compiler-transport](../module-map/compiler-transport.md), and their 533
+axiom pins are recorded in `scripts/g07-axiom-pins.json` (additions only).
+This puts them in the default `Solidity` build.
 
 ## Open
 
