@@ -176,3 +176,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Backend/PrimitivePackets/Constants/Agreement.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Constants/Target.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Typed H22 call metadata from the retained whole-source resolution. |
+| `Frontend/ConstantDepth/Controls.lean` | SOL-CB controls: a chain whose rank is the declaration count (one level fewer refuses), a shared diamond, contract scopes with inheritance and shadowing, duplicates, used and unused cycles, and `uint8` overflow, each decided at the public `levels` bound and tied to `TEval` through `evalConst_iff`. |
+| `Frontend/ConstantDepth/Correspondence.lean` | SOL-CB backfill: a declared constant's graph edges are exactly the resolved constant paths of its initializer; rank decreases on each, qualified paths included; typed evaluation, named constants and array lengths are functional under the clash-free acyclic contract. |

@@ -2252,6 +2252,8 @@ import Solidity.Frontend.Checked.TypePrintText
 import Solidity.Frontend.Checked.UnitExamples
 import Solidity.Frontend.Cli
 import Solidity.Frontend.ConstantDepth.Complete
+import Solidity.Frontend.ConstantDepth.Controls
+import Solidity.Frontend.ConstantDepth.Correspondence
 import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
 import Solidity.Frontend.CreationTryImport
