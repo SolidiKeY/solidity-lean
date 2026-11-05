@@ -786,4 +786,45 @@ theorem rootRejectWrong : ∀ mode : Solidity.Modality,
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.rootRejectWrong
 
+/-- Conjunction preserves the concrete dirty program's whole captured outcome. -/
+theorem logicConjoined : ∀ mode : Solidity.Modality,
+ Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.code
+ Solidity.Yul.Checks.LocalBlock.policy (fun result =>
+ Solidity.Yul.Checks.LocalBlock.logicPost result ∧ result = Solidity.Yul.Checks.LocalBlock.logicResult)
+ Solidity.Yul.Checks.LocalBlock.rawInitial := by
+  intro mode
+  apply (RawFrame.Logic.holds_and ctx ⟨false,false⟩ mode code policy
+    logicPost (fun result => result = logicResult) rawInitial).mpr
+  constructor
+  · cases mode with
+    | box => exact logicBox
+    | diamond => exact logicDiamond
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode code policy
+      (fun result => result = logicResult) rawInitial 32 logicResult logicFinished).mpr rfl
+
+/-- All-fuel recursion keeps a vacuous conjunction box distinct from a diamond. -/
+theorem recursiveConjunctionContrast : Solidity.Yul.RawFrame.Logic.holds .box Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => False ∧ True)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial ∧
+ ¬ Solidity.Yul.RawFrame.Logic.holds .diamond Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => False ∧ True)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial := by
+  constructor
+  · intro fuel result done
+    exact False.elim (recursiveFalseBox fuel result done)
+  · intro actual
+    exact recursiveNoDiamond
+      ((RawFrame.Logic.holds_and recursiveCtx ⟨false,false⟩ .diamond recursiveCode
+        recursivePolicy (fun _ => False) (fun _ => True) recursiveInitial).mp actual).2
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_and' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_and
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicConjoined' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicConjoined
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveConjunctionContrast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveConjunctionContrast
+
 end Solidity.Yul.Checks.LocalBlock
