@@ -1211,3 +1211,23 @@ Design finder/skeptic reviews confirmed stack order, header/child derivation
 and the distinction between malformed representation and runtime refusal.
 Numeric hashing, Source evaluation/authority, gas and general recursive graph
 selection remain open; no producer premise is silently discharged.
+
+Header implementation/handoff (interface `2962f59eff1aab0f5928908e6a57e09fef80f5b8`):
+`nestedStorageHeader` derives the actual loaded count and all child
+representations from one outer representation, then reuses the checked parent
+copier. Arbitrary outer shadows have the same copied heap as canonical live
+rows. No external count/child premise or input capacity premise remains.
+
+Controls use stored headers 0/3/64, mixed pointers 44/47/48 and retained nonzero
+payloads, shadows 0/64, invalid-header representation and erased-payload
+negatives. At one cursor, loaded header 0 succeeds and header 1 refuses;
+saturated empty and later-child refusal remain distinct. Both independent
+semantic reviews passed with no findings. Named vector equations repaired the
+direct nil reduction; a typed allocation expression repaired a fixture rewrite.
+All three diagnostics have zero errors/empty warnings. Standalone nil-vector
+simplification passed without budget changes. Nine main and thirteen control
+targets bring this checkpoint to 1,283 scoped reports over 217 modules,
+preserving all 214 predecessors. Exact-head gates, axiom audit, canonical patch
+reconstruction and reviewed seal remain required before acceptance. Symbolic
+data-slot selection does not establish numeric hashing, Source/compiler
+admission, gas or general recursive graph adequacy; original holds remain.
