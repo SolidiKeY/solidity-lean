@@ -365,10 +365,13 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingQuotations
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingResume
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEndpoint
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEntry
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn
@@ -427,6 +430,11 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeCoverage
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeFamily
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeHorizons
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FrozenScopeRuntime
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoop
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarLoopControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarPrefixes
+import Solidity.Backend.InternalFlow.RuntimeFrameV3FullScalarUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedCaller
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3GuardedRecursion
@@ -480,6 +488,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerReturn
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarChildEntry
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaims
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarClaimsControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarContinuation
@@ -524,6 +533,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3SecondAllocatingEntry
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
@@ -1999,11 +2009,17 @@ import Solidity.Evm.MemoryLoopHorizonCostControls
 import Solidity.Evm.MemoryLoopHorizonCostGrowth
 import Solidity.Evm.MemoryLoopHorizonCostGrowthControls
 import Solidity.Evm.MemoryLoopHorizonObjectAllocating
+import Solidity.Evm.MemoryLoopHorizonObjectAllocatingPrefixes
+import Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget
 import Solidity.Evm.MemoryLoopHorizonObjectBodyScope
 import Solidity.Evm.MemoryLoopHorizonObjectCapacity
+import Solidity.Evm.MemoryLoopHorizonObjectCapacityControls
+import Solidity.Evm.MemoryLoopHorizonObjectCompile
+import Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating
 import Solidity.Evm.MemoryLoopHorizonObjectCompletedAllocator
 import Solidity.Evm.MemoryLoopHorizonObjectCost
 import Solidity.Evm.MemoryLoopHorizonObjectCoverage
+import Solidity.Evm.MemoryLoopHorizonObjectCursorControls
 import Solidity.Evm.MemoryLoopHorizonObjectFinite
 import Solidity.Evm.MemoryLoopHorizonObjectFiniteControls
 import Solidity.Evm.MemoryLoopHorizonObjectObservedRoom
@@ -4351,6 +4367,7 @@ import Solidity.Yul.RawFrame
 import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingSequence
+import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawIfElse
 import Solidity.Yul.RawIfThen
 import Solidity.Yul.RawInitializedForHorizon
