@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/abi-world.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # ABI packet consumers
 
 These modules provide component observations; presence does not establish full ABI compilation.

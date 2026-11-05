@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.original_proved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.shifted_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DecisionQuantLedger.lean:Solidity.Examples.DecisionQuantLedger.unbounded_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

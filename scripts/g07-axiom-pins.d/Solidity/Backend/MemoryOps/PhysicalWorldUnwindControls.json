@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.initial_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.live_payload_and_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.not_automatic_and_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.restored_numeric_observer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.saved_prefix_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.saved_prefix_wrong_restoration": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.source_and_byte_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.source_rollback_heap_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.source_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalWorldUnwindControls.lean:Solidity.Backend.MemoryOps.Physical.WorldControls.wrong_caller_payload": []
+}

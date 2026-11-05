@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.full_context": [],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.growth_empty_ordered": [],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.growth_empty_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.self_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.shrinking_ordered": [],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.shrinking_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.unsafe_ordered": [],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.unsafe_rejected": [],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.unsafe_runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayRepeatControls.lean:Solidity.Backend.StorageOps.TargetArrayRepeatControls.wrong_push_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

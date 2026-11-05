@@ -1,0 +1,47 @@
+{
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.aliased_errors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.compiler34_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.false_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.module_condition_effects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.normal_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.normal_viaIR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.ordinary_error_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.qualified_errors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/SourceUnitsImport.lean:Solidity.Examples.Tactics.SourceUnitsImport.selected_error_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/ReadTrace.lean:Solidity.Decide.TraceReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ReadTrace.lean:Solidity.ReadRealization.Query.replay_realizable_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

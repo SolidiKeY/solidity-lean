@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.direct_mapping_calldata_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.direct_mapping_memory_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.graph_without_source_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.inline_cycle_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.mapping_calldata_policy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.mapping_memory_policy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.mixed_view_counts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/DeclarationGraphControls.lean:Solidity.Lowering.P8.DeclarationGraphControls.mixed_views": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

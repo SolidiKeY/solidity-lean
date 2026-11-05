@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.bool_range_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.captured_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.element_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.load_array": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.load_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.range_clear_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.scalar_clear_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.store_array": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.store_elems": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolStorageCopy.lean:Solidity.Backend.StorageOps.SourceBoolStorageCopy.store_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

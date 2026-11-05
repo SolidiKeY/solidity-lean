@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/LeafSplit.lean:Solidity.Fml.SplitTo.here": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

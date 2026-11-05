@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.agreement_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.context_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.outside_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.run_writes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetDefaultInit.lean:Solidity.Backend.StorageOps.TargetDefaultInit.updates_fit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

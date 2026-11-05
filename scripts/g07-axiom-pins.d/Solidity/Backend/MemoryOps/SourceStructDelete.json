@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.source_struct_delete_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDelete.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.delete_child_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -30,20 +30,15 @@ theorem reached_value {C : Contract} {Γ : Ctx} (pipeline : Roadmap.Pipeline) (t
       x-(if pipeline = .legacy then y else x) ≤ t.hi) :
     (value (C := C) (Γ := Γ) pipeline t).evalT (reached pipeline target t i x y hx hy) =
       .ok (integerValue t (x-(if pipeline = .legacy then y else x)) hz) := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | cases pipeline with
-    | legacy =>
-      simpa only [value,reached,if_true] using intrinsic_sub_run
-        (reached .legacy target t i x y hx hy) t
-        (.simple (.local .here)) (.simple (.local (.there .here))) x y hx hy hz rfl rfl
-    | viaIR =>
-      simpa only [value,reached,reduceCtorEq,if_false] using intrinsic_sub_run
-        (reached .viaIR target t i x y hx hy) t
-        (.simple (.local (.there .here))) (.simple (.local .here)) x x hx hx hz rfl rfl
+  cases pipeline with
+  | legacy =>
+    simpa only [value,reached,if_true] using intrinsic_sub_run
+      (reached .legacy target t i x y hx hy) t
+      (.simple (.local .here)) (.simple (.local (.there .here))) x y hx hy hz rfl rfl
+  | viaIR =>
+    simpa only [value,reached,reduceCtorEq,if_false] using intrinsic_sub_run
+      (reached .viaIR target t i x y hx hy) t
+      (.simple (.local (.there .here))) (.simple (.local .here)) x x hx hx hz rfl rfl
 
 theorem execution {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx}
     (G : Source.Glob E) (SF : Source.Fr) (fuel : Nat)
@@ -75,23 +70,18 @@ theorem execution {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ct
         run operand.code {canonical with stack := tail} = .ok ({canonical with stack := tail}.push word) 0 ∧
         run (programCode.code ++ operand.code) {machine with stack := tail} =
           .ok ({canonical with stack := tail}.push word) 0 := by
-  first
-  | (solve | simp only)
-  | (solve | decide)
-  | (solve | omega)
-  | (solve | rfl)
-  | have sourceRun := assignment_subtraction_transport G SF fuel source target t i a j b x y hx hy
-      sourceA sourceI targetA targetI hz
-    have prefixRun := assign_read_prefix_run G.pipeline target j b _ _ targetA targetI
-    have noPay : Evm.Prog.pays (assignReadPrefix (C := C) G.pipeline j b) = false := by cases G.pipeline <;> rfl
-    obtain ⟨canonical,addresses,_,empty,runs⟩ := compilation_success_shared_mapped (.memory programCode) input noPay prefixRun
-    have represented := (runs []).2.1
-    obtain ⟨word,repr,values⟩ := CapturedValueStability.value_shared _ operand represented _
-      (reached_value G.pipeline target t j x y hx hy hz)
-    refine ⟨sourceRun.1,sourceRun.2.2,canonical,addresses,word,repr,empty,?_⟩
-    intro tail
-    have vr := values tail
-    refine ⟨(runs tail).1,(runs tail).2,vr,?_⟩
-    exact (run_append_ok (c₂ := operand.code) (runs tail).1).trans vr
+  have sourceRun := assignment_subtraction_transport G SF fuel source target t i a j b x y hx hy
+    sourceA sourceI targetA targetI hz
+  have prefixRun := assign_read_prefix_run G.pipeline target j b _ _ targetA targetI
+  have noPay : Evm.Prog.pays (assignReadPrefix (C := C) G.pipeline j b) = false := by cases G.pipeline <;> rfl
+  obtain ⟨canonical,addresses,_,empty,runs⟩ := compilation_success_shared_mapped (.memory programCode) input noPay prefixRun
+  have represented := (runs []).2.1
+  obtain ⟨word,repr,values⟩ := CapturedValueStability.value_shared _ operand represented _
+    (reached_value G.pipeline target t j x y hx hy hz)
+  refine ⟨sourceRun.1,sourceRun.2.2,canonical,addresses,word,repr,empty,?_⟩
+  intro tail
+  have vr := values tail
+  refine ⟨(runs tail).1,(runs tail).2,vr,?_⟩
+  exact (run_append_ok (c₂ := operand.code) (runs tail).1).trans vr
 
 end Solidity.Backend.Passes.AssignmentSubtractionPass

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.execute_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.execute_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.execute_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.execute_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.log_stable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.log_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutation.lean:Solidity.Backend.StorageOps.NestedPopCommutation.pop_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

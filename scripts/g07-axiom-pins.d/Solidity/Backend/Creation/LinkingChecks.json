@@ -1,0 +1,48 @@
+{
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.actual_assembly_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.assembler_link_package": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.assembler_link_wrapper": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.assembler_regions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.linked_installs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.linkSites_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.tableOfAssembly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.truncated_arguments_refused": [
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.two_links_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LinkingChecks.lean:Solidity.Backend.Creation.unresolved_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

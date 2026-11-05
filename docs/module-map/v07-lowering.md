@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/v07-lowering.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V07 source lowering
 
 | Module | Purpose |

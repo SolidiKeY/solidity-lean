@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.context_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.phase_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStoragePreparedControls.lean:Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls.timeout_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

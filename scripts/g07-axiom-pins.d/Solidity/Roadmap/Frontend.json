@@ -1,0 +1,8 @@
+{
+ "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Chain.checked": [
+  "propext"
+ ],
+ "Solidity/Roadmap/Frontend.lean:Solidity.Roadmap.Frontend.Digests.identity_list": [
+  "propext"
+ ]
+}

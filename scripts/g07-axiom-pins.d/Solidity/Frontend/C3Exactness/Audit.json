@@ -1,0 +1,715 @@
+{
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.active": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.active_map": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.admissible": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.admissible_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.admissible_map": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.base_rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.bases_empty_of_rank_eq": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.collect_root_scope": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CommonOrder": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.alternative_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.alternative_not_trace": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.blocked_prefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.choiceFamily": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.cycle_not_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.cycle_obstruction": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.cycle_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.cycle_stuck": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.delayed_obstruction": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.delayed_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.diamond_merge": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.duplicate_obstruction": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.empty_one_fuel": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.empty_trace": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.empty_zero_fuel": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.every_head_position": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.identity_trace": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.independent_heads": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.last_head_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.later_head_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.legal_last": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.repeated_shared_merge": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.singleton_insufficient": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Controls.singleton_sufficient": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ctor_direct_order": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ctor_monotone": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ctor_nodup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.descendant": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.direct": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.linearizeF_none": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.not_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.CyclePath.step": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.decode_bases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.exact_ctorOrder": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.base_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.direct_order": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.mem_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.mk": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.monotone": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.nodup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.rank_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.tail_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.tail_nodup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.tail_rank": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.ExactLin.unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.filter_head": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.filter_map_ne": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.find_getIdx": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.findSome_congr": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.findSome_result_map": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_empty": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_head": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_map": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_mem": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.first_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.flatten_active": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.flatten_residual": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.fuelBound": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GoodId": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graph_trace_or_blocked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_all_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_certificate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_identity_no_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_identity_stuck": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_inherited_all_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_inherited_certificate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_merge_no_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_merge_stuck": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBad_public_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBadInterface": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBadInterface_merge_only": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphBadInterface_not_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GraphBlocked": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GraphBlocked.base": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GraphBlocked.linearizeF_none": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GraphBlocked.merge": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.GraphBlocked.not_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_C_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_constructor_subsequence": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_constructors": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_graph_nodes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_identity_order_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_reaches": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDiamond_refl": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDuplicate": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDuplicate_clashes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDuplicate_first_selected": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDuplicate_public_first": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphDuplicate_unselected": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphEmpty": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphEmpty_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphInterfaceDiamond": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphInterfaceDiamond_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphInterfaceDiamond_identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphInterfaceDiamond_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphInterfaceUnit": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMixed": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMixed_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMixed_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMutualCycle": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMutualCycle_all_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMutualCycle_fallback": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMutualCycle_not_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphMutualCycle_path": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphRedundant": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphRedundant_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphRedundant_constructors": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphRedundant_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphResolution": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphResolution_identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphResolution_resolves": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSelfCycle": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSelfCycle_all_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSelfCycle_not_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSelfCycle_path": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSentinel_not_global_injective": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSettings": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared_admitted": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared_constructor_nodup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared_constructors": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphShared_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphSpecs": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphUnit": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphUnknown_identity_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.graphUnknown_public": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.identity_input_good": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.graph_nodes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.mk": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.nodup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.IdentityLin.unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.InjectsOn": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearize_exact_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearize_identity_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearize_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearize_none_iff_blocked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearize_selected_identity_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearizeF_exact_sound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearizeF_self_cycle": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.linearizeF_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.mapM_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.mapM_none": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.mem_map_reflect": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_bound_exists_iff_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_bound_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_bound_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_bound_none_iff_no_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_input_known": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_none_iff_order_or_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_sound": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.merge_succ": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.nameAt": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.nameAt_injects": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.nameAt_rank": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.nodup_subset_length": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Obstruction": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.obstruction_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Obstruction.not_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.paired_get": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.public_merge_fuel": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_good": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_graph": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_injective": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_injects": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_le_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_lt_of_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_name_mem": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rank_selected": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Reaches": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Reaches.refl": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Reaches.step": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.rename_exists_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.residual": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.residual_decreases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.residual_map": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.resolved_identity_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.selects": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.selects_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.stuck_iff_no_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.here": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.merge_none": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.not_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.not_trace": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.rename": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Stuck.step": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.trace_exists_iff_common_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.trace_or_stuck": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.trace_rank_lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.common_order": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.done": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.length_le": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.local_order": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.mem_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.nodup": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.rename": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.step": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.Trace.unique": [],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.unit_contract_selected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.unit_decl_selected": [
+  "propext"
+ ],
+ "Solidity/Frontend/C3Exactness/Audit.lean:Solidity.Frontend.C3Exactness.unit_identity_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

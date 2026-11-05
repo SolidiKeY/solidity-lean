@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewIdentity_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_aliases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_bound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewKey_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.calldataViewTable_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataViewPacking.lean:Solidity.Backend.MemoryOps.overlappingCalldataViews": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

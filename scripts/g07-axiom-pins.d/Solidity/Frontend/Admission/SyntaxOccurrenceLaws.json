@@ -1,0 +1,16 @@
+{
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxDescendants_children": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxOccurrences_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxOccurrences_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/SyntaxOccurrenceLaws.lean:Solidity.Frontend.Admission.syntaxOccurrences_sound": [
+  "propext"
+ ]
+}

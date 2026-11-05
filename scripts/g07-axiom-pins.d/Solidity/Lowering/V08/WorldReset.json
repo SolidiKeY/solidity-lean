@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/V08/WorldReset.lean:Solidity.Lowering.V08.WorldImage.account_reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldReset.lean:Solidity.Lowering.V08.WorldImage.image_reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

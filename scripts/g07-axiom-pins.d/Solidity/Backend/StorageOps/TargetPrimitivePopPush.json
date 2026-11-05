@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/TargetPrimitivePopPush.lean:Solidity.Backend.StorageOps.TargetPrimitivePopPush.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePopPush.lean:Solidity.Backend.StorageOps.TargetPrimitivePopPush.element_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePopPush.lean:Solidity.Backend.StorageOps.TargetPrimitivePopPush.push_exists": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetPrimitivePopPush.lean:Solidity.Backend.StorageOps.TargetPrimitivePopPush.run_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

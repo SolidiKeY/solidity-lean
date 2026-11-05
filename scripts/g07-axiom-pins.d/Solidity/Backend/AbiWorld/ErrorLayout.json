@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/AbiWorld/ErrorLayout.lean:Solidity.Backend.AbiWorld.error_payload": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ErrorLayout.lean:Solidity.Backend.AbiWorld.packet_byte": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiWorld/ErrorLayout.lean:Solidity.Backend.AbiWorld.padded_alignment": [
+  "Quot.sound",
+  "propext"
+ ]
+}
