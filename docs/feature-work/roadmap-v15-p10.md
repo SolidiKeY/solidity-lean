@@ -1919,3 +1919,7 @@ Source-origin, physical, world or Osaka adequacy obligation is closed.
 ### Selected unsigned order
 
 The instruction-selection agreement now connects the published LT/GT certificates to the charged fetched step and its continuation. The input stack representation, numeric capacity, gas and fuel bounds remain explicit; account state, memory and both return-byte fields are preserved separately from the IR frame. Controls distinguish equal-low-byte words, equality and unsigned high-bit ordering, preserve the complete populated stack and state, and check gas-before-arity and fuel priority. This is primitive agreement, not Source, account-call or full Osaka adequacy.
+
+### Selected AND and OR
+
+The published numeric AND/OR certificates now compose with the charged fetched reference steps, with explicit stack representation, capacity, gas and fuel premises. Populated controls cover mixed-bit words, equal low bytes, a high bit beyond byte width, complete separate model frames and gas-before-arity/fuel priority. A review caught and corrected a calldata-byte transcription in the new observation statement; the original fixture was preserved. These are primitive consumers, not physical input, Source, account-world or full Osaka adequacy.

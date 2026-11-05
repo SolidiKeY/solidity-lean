@@ -760,4 +760,109 @@ theorem order_resource_priority (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms order_resource_priority
+theorem bitAnd_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .and (ir a b)=.ok (irExpected a b ((a &&& b))) 0 ∧
+    Scalar.run Selection.andCertificate.code (a::b::spill)=some ((a &&& b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (a::b::spill))=
+      .ok (nativeExpected .AND 3 a b ((a &&& b)) perm) ∧
+    EVM.X 2 #[] (F.input .AND 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .AND 3 a b ((a &&& b)) perm) := by
+  have h := InstructionSelectionAgreement.bitAnd (F.site .AND 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .AND a b ((a &&& b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem bitOr_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .or (ir a b)=.ok (irExpected a b ((a ||| b))) 0 ∧
+    Scalar.run Selection.orCertificate.code (a::b::spill)=some ((a ||| b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (a::b::spill))=
+      .ok (nativeExpected .OR 3 a b ((a ||| b)) perm) ∧
+    EVM.X 2 #[] (F.input .OR 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .OR 3 a b ((a ||| b)) perm) := by
+  have h := InstructionSelectionAgreement.bitOr (F.site .OR 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .OR a b ((a ||| b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem and_or_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (240::60::spill))=
+      .ok (nativeExpected .AND 3 240 60 48 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (240::60::spill))=
+      .ok (nativeExpected .OR 3 240 60 252 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (1::257::spill))=
+      .ok (nativeExpected .AND 3 1 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (1::257::spill))=
+      .ok (nativeExpected .OR 3 1 257 257 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .AND 3 (BitVec.ofNat 256 (2^255)) 0 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .OR 3 (BitVec.ofNat 256 (2^255)) 0 (BitVec.ofNat 256 (2^255)) perm) := by
+  exact ⟨(bitAnd_client 240 60 perm).2.2.1,(bitOr_client 240 60 perm).2.2.1,
+    (bitAnd_client 1 257 perm).2.2.1,(bitOr_client 1 257 perm).2.2.1,
+    (bitAnd_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1,
+    (bitOr_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1⟩
+
+theorem and_or_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (240::60::spill))=
+      .ok (nativeExpected .OR 3 240 60 252 perm) ∧
+    (nativeExpected .AND 3 240 60 48 perm).stack=[u 48,u 258,u 513] ∧
+    (nativeExpected .OR 3 240 60 252 perm).stack=[u 252,u 258,u 513] ∧
+    (nativeExpected .AND 3 240 60 48 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .OR 3 240 60 252 perm).stack≠[u 252,u 513,u 258] ∧
+    (nativeExpected .AND 3 240 60 48 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x16,0] ∧
+    (nativeExpected .OR 3 240 60 252 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x17,0] ∧
+    (nativeExpected .AND 3 240 60 48 perm).pc=u 4 ∧
+    (nativeExpected .AND 3 240 60 48 perm).gasAvailable=u 9 ∧
+    (nativeExpected .AND 3 240 60 48 perm).execLength=42 ∧
+    (nativeExpected .AND 3 240 60 48 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .AND 3 240 60 48 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .AND 3 240 60 48 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .AND 3 240 60 48 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .AND 3 240 60 48 perm).accountMap=accounts ∧
+    (nativeExpected .AND 3 240 60 48 perm).σ₀=accounts := by
+  refine ⟨(bitOr_client 240 60 perm).2.2.1,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 48,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 252,u 258,u 513]≠[u 252,u 513,u 258];decide
+
+theorem and_or_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .AND 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 2 perm (257::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .AND 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitAnd_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitAnd_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitOr_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitOr_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_resource_priority
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
