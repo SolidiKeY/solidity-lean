@@ -1801,6 +1801,7 @@ import Solidity.Lowering.P8.SourcePrograms
 import Solidity.Lowering.P8.SourceRealization
 import Solidity.Lowering.P8.SourceResolutionControls
 import Solidity.Lowering.P8.SourceResolutions
+import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
@@ -2247,8 +2248,10 @@ import Solidity.Roadmap.TypedRun
 import Solidity.Roadmap.V16.CreationReturnConsumer
 import Solidity.Roadmap.V16.H24Input
 import Solidity.Roadmap.V16.NativeParentConsumer
+import Solidity.Roadmap.V16.NativeRevertConsumer
 import Solidity.Roadmap.V16.SSCP2.NewAllocation
 import Solidity.Roadmap.V16.SSCP2.NewAllocationControls
+import Solidity.Roadmap.V16.SourceSizeControls
 import Solidity.Roadmap.V16.SourceTransactionConsumer
 import Solidity.Scope
 import Solidity.Secp256k1
