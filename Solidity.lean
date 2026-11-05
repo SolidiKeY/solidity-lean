@@ -1673,6 +1673,8 @@ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part05
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part06
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part07
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part08
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Compatibility
 import Solidity.Frontend.OverrideValidation.Extraction
