@@ -1,0 +1,73 @@
+import Solidity.Frontend.ExecutableAst.Shared.Translate
+
+/-! Source-anchored standalone reader observation controls. They exercise the
+actual Shared entrypoints, not a second translator. Kinds without standalone entrypoints are
+classified explicitly. No intrinsic/source/backend proof is claimed. -/
+namespace SharedTranslatorConstructControls
+open Lean Solidity Solidity.Frontend Solidity.Frontend.ExecutableAst.Shared
+private def checked {α : Type} : Except String α → IO α
+  | .ok value => pure value | .error e => throw (IO.userError e)
+private def select (j : Json) (pointer : String) : Except String Json := do
+  let mut value := j
+  for part in (pointer.splitOn "/").drop 1 do
+    let key := (part.replace "~1" "/").replace "~0" "~"
+    match value with
+    | .arr values =>
+      let some index := key.toNat? | throw "non-numeric array pointer"
+      let some next := values[index]? | throw "array pointer outside fixture"
+      value := next
+    | _ => value ← value.getObjVal? key
+  return value
+private def outcome {α : Type} : Except String α → Json
+  | .ok _ => Json.mkObj [("status", "decoded")]
+  | .error reason => Json.mkObj [("status", "refused"), ("reason", toJson reason)]
+private def invoke (route : String) (node : Json) : Json :=
+  match route with
+  | "expression" => outcome (checkedExpression node)
+  | "statements" => outcome (checkedStatements node)
+  | "typeName" => outcome (typeName node)
+  | "function" => outcome (function reader node node.compress)
+  | "contract" => outcome (contract reader node)
+  | _ => Json.mkObj [("status", "not-standalone")]
+private def producerObservation (route : String) (node : Json) : Json :=
+  if route != "expression" then .null else
+  match (Solidity.Frontend.expr node).run' {} with
+  | .ok text => Json.mkObj [("status", "printed"), ("text", toJson text)]
+  | .error (.unsupported text line) => Json.mkObj [("status", "refused"), ("reason", toJson text), ("line", toJson line)]
+  | .error (.excluded text line) => Json.mkObj [("status", "excluded"), ("reason", toJson text), ("line", toJson line)]
+private def observe (casesPath : String) : IO Json := do
+  let cases ← checked (Json.parse (← IO.FS.readFile casesPath))
+  let mut rows : Array Json := #[]
+  for row in ← checked (cases.getObjValAs? (Array Json) "cases") do
+    let kind ← checked (row.getObjValAs? String "nodeType")
+    let route ← checked (row.getObjValAs? String "route")
+    unless ["expression", "statements", "typeName", "function", "contract", "none"].contains route do
+      throw (IO.userError "unrecognized standalone route")
+    let fixture ← checked (row.getObjValAs? String "fixture")
+    let pointer ← checked (row.getObjValAs? String "pointer")
+    let input ← checked (Json.parse (← IO.FS.readFile fixture))
+    let node ← checked (select input pointer)
+    unless J.kind node == kind do throw (IO.userError "source witness kind changed")
+    let natural := invoke route node
+    let negative := if route == "none" then .null else invoke route (node.setObjVal! "nodeType" "UnknownCompilerNode")
+    unless route == "none" || J.str? negative "status" == some "refused" do
+      throw (IO.userError s!"unknown {kind} root was accepted by {route}")
+    rows := rows.push (Json.mkObj [("nodeType", toJson kind), ("route", toJson route),
+      ("natural", natural), ("unknownRoot", negative), ("producerExpression", producerObservation route node)])
+  unless rows.size == 57 && (rows.toList.map J.kind).eraseDups.length == 57 do
+    throw (IO.userError "modern construct coverage changed")
+  return toJson rows
+private def controls : IO Unit := do
+  let owned := "tests/directruntime-20261104/shared-translator/"
+  for suitePrefix in ["", "fresh-"] do
+    let observed ← observe (owned ++ suitePrefix ++ "construct-reader-cases.json")
+    let expectedPath := owned ++ suitePrefix ++ "construct-reader-matrix.json"
+    if (← IO.getEnv "SHARED_CONSTRUCT_CAPTURE") == some "1" then
+      IO.FS.writeFile expectedPath (observed.pretty ++ "\n")
+      IO.println s!"Captured {suitePrefix}standalone observations; review/frozen comparison still required."
+    else
+      let expected ← checked (Json.parse (← IO.FS.readFile expectedPath))
+      unless observed == expected do throw (IO.userError s!"{suitePrefix}construct reader observation changed")
+      IO.println s!"Construct reader {suitePrefix}controls: 57 modern kinds, exact standalone outcomes and unknown-root refusals matched; no proof/backend support claim."
+#eval controls
+end SharedTranslatorConstructControls

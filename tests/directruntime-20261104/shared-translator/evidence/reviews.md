@@ -114,3 +114,28 @@ further verifier defect. Source-hash/trace freshness relies on the recorded
 build, not on colocating hashes in a receipt. Local consistency proves neither
 delivery, installed-cache compatibility nor executable closure. H35-CACHE remains
 pending and no H35 checkpoint completion is claimed.
+
+## H41 cache custody and source-reader observation backfill
+
+Separate read-only finder/skeptic reviews used no Lean/server or verifier runs.
+They verified57 distinct modern kinds per suite:37standalone entrypoint witnesses
+and20syntax kinds with no standalone entrypoint (not all are mere metadata).
+Existing-fixture outcomes are11decoded/26refused; freshly compiled outcomes are
+14decoded/23refused. Both record37unknown-root refusals. Each has14producer
+expression attempts: existing11printed/3refused, fresh9printed/5refused. Different
+suite outcomes use different selected nodes and are not same-input regressions.
+
+All8fresh output hashes match their compilation receipts; exact0.8.34/0.8.38
+binary/source anchors were checked. Driver uses only existing Shared APIs and
+existing producer expression printing; no new translator/IR. Whole subtree
+refusals may come from children; decoded/printed is not intrinsic/source/backend
+support. Capture is an observation step, not a semantic oracle; independent
+identity preflight, frozen noncapture MCP and all12 per-file gates subsequently
+passed. Initial excluded-Gap exhaustiveness and reserved-variable syntax errors
+in the new test were fixed, with failed logs retained. No source sorry was added.
+
+H41 custody evidence correctly attributes coordinator receipt/SHA verification
+to the user message and leaves host receipt unread locally and installation
+unverified. H35-CACHE is resolved. No VM ship-cache invocation followed H41.
+Four owned source/trace mappings remain those of the received pack. Full lane
+adoption, source proofs and runtime closure remain open.

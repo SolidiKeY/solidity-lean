@@ -1,0 +1,1 @@
+H41 supersedes the historical H35 worker-shipping blocker. The coordinator reports receipt/SHA verification; host receipt was not read on this VM. Local cache retained. No VM ship-cache command was run after H41. Evidence text copies trim trailing whitespace; raw logs remain in artifacts.

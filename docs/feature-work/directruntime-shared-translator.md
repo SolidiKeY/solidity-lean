@@ -330,3 +330,48 @@ build-trace outputs; receipt versions/exit/failure are derived from gate logs.
 This strengthened check passed in24.991s with19812KiB child maximum RSS. Source
 trace freshness relies on the preceding build gates. Independent finder/skeptic
 final reviews found no further defect; no delivery/installability claim follows.
+
+## H41 custody and 57-kind source-reader backfill
+
+H41 amends H35: retain verified packs on this VM with their path/SHA; the
+coordinator pulls them; never run ship-cache.sh on this VM; future delivery is
+coordinator-pending. The coordinator reports receipt at
+/home/guilherme/.local/state/cloudvm-coord/receipts/shared-translator-cache-received-20261105T025521Z.json
+and verification of SHA cac02c95edef9190666bd7e11333438c348039e09251ed9415645fc14ddeb6f2.
+The600359272-byte pack remains in its original artifacts/h35/cache-ship path;
+its SHA was rechecked locally. The host receipt itself was not read here.
+Installation/runtime closure does not follow. H35-CACHE is resolved, not a
+remaining permission request; historical failed-shipment logs remain unchanged.
+
+This backfill freezes observations for57modern Solidity kinds in each of two
+suites.37kinds have standalone Shared reader entrypoints and20have none. The
+existing-fixture suite records11decoded/26refused; fresh exact-pinned compiler
+ASTs record14decoded/23refused; both have20no-entry outcomes and37unknown-root
+refusals. Each records14producer expression-printing attempts (existing11printed/
+3refused; fresh9printed/5refused). Different selected source nodes explain suite
+differences; these counts are neither same-input regression nor performance data.
+
+Eight selected sources were actually recompiled on this VM with exact0.8.34/
+0.8.38 compiler binaries, through the existing compiler helper. Full raw ASTs are
+saved unchanged under tests/directruntime-20261104/shared-translator/fresh/.
+Receipts record compiler/source/output hashes; all57modern kinds are present,
+with no unexpected non-Yul kind. Source ranges, declaration IDs and JSON pointers
+are stored in cases; independent preflight checks114witness identities,8fresh
+output hashes and2compiler pins. Legacy Throw remains separately compiler-refused.
+
+All4owned modules built (340jobs); frozen noncapture per-file MCP had0errors;
+all12repository per-file gates passed, including exact-base/current axiom checks.
+The340-job build/MCP/preflight run took14.554s, cgrouppeak714182656bytes, minimum
+outer reserve7425843200bytes. Twelve per-file gates took50.277s, child maximum
+RSS1263572KiB. Actual Lean4.24.0/Lake5.0.0-src+797c613 and12GiB/no-swap/-j1 bounds
+remain recorded. Source-reader matrices/receipts are linked from the inventory.
+No implementation theorem or production source changed in this increment. Four
+owned source/trace mappings match the coordinator-received cache packet; no new
+owned-module cache outputs were produced. Future packs remain coordinator-pending.
+
+Both independent reviews are recorded in evidence/reviews.md. These observations
+exercise whole witness subtrees; child refusals may dominate. Decoding and
+printing do not establish identity resolution, intrinsic closure, source
+equivalence, or backend support. Full producer adoption/proofs/native-WASM gates
+remain open. The next step is user-authorized adoption of published8495f1de and
+its exact reviewed Memory/ControlTuple packets, preserving this committed work.
