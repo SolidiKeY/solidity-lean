@@ -12142,6 +12142,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.evalT_shr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.machine_agrees_intShr": [
   "Classical.choice",
   "Quot.sound",
@@ -12152,17 +12157,23 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.sarCode_run": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.sarCode_simT": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
  "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.saturated_fill": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Backend.Passes.MachineSar.shr_int_inFrag": [],
+ "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Evm.sar_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MachineSarPins.lean:Solidity.Evm.sarCode_run": [
   "Classical.choice",
   "Quot.sound",
   "propext"
