@@ -137,3 +137,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/StatementGrammarH28/FixtureData.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/StatementGrammarH28/G0List.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/TypeGrammarH28/Composition.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/BoundaryControls.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Quoted.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/LiteralGrammarH28/Scanner.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |

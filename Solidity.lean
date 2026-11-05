@@ -1638,8 +1638,11 @@ import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.LiteralGrammarH28.Body
 import Solidity.Frontend.LiteralGrammarH28.BodyControls
+import Solidity.Frontend.LiteralGrammarH28.BoundaryControls
 import Solidity.Frontend.LiteralGrammarH28.Hex
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
+import Solidity.Frontend.LiteralGrammarH28.Quoted
+import Solidity.Frontend.LiteralGrammarH28.Scanner
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
