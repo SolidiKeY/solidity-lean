@@ -2420,6 +2420,10 @@ import Solidity.Source.Progress.AllocationBodyCallControls
 import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Source.Progress.AllocationReturns
 import Solidity.Source.Progress.ArithmeticBuiltins
+import Solidity.Source.Progress.BoundCatalogue
+import Solidity.Source.Progress.BoundCatalogueControls
+import Solidity.Source.Progress.BoundCataloguePanicControls
+import Solidity.Source.Progress.BoundCatalogueParentControls
 import Solidity.Source.Progress.BoundParentControls
 import Solidity.Source.Progress.BoundParentPanicControls
 import Solidity.Source.Progress.BoundParents

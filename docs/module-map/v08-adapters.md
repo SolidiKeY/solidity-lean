@@ -571,3 +571,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundParents.lean` | Typed allocation-parent local prefixes, actual declaration/frame/scope progress, joint memory preservation and elaborated-call adaptation. |
 | `Source/Progress/BoundParentControls.lean` | Elaborated parent-initialized local and returned reference, retained default/fresh heap objects, inhabited caller restoration and old-body refusal. |
 | `Source/Progress/BoundParentPanicControls.lean` | Elaborated division panic after allocating a local, retained memory growth and restored caller state in both evaluator pipelines. |
+
+| `Source/Progress/BoundCatalogue.lean` | Bound-parent body catalogues with elaboration-derived frame metadata, checked complete function coverage and ready/parent argument adapters. |
+| `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
+| `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
+| `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |

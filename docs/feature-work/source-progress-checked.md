@@ -856,3 +856,57 @@ pins: both gates now pass, as does the documentation-path gate. Earlier failed
 logs remain historical evidence. The historical full-build timeout remains
 unresolved; the integration notice alone does not establish VM cache freshness
 or a VM full-build pass.
+
+
+## Bound-body catalogues with elaboration-derived frames
+
+`Progress.BoundCatalogue` lifts the bound-parent body fragment into the
+existing catalogue interfaces. `BoundMemoryCatalogue` records declared source
+and selected-target signatures, actual selected-body identity, empty modifiers,
+finite default certificates and syntactic `BoundParentItems` admission.
+It stores neither parameter/return/local frame equations nor semantic execution
+or preservation premises.
+
+`bound_memory_catalogue_sound` derives target declaration membership and uses
+the actual `Elaborated.body_sig`, `Elaborated.body_locals` and dispatch
+parameter-coherence theorems to recover those frame equations. The adapters
+reuse `MemoryCatalogue`, `ReadyMemoryCalls` and `ReadyProgramCalls`.
+The complete-call theorem combines P9's checked value domain with the bound-body
+catalogue under the existing `readyCoverage` Boolean check. Coverage requires
+every listed source function to belong to that union; it does not require a
+disjoint partition or establish graph acyclicity. Body/default admission and
+actual selected-body identity remain explicit proof obligations, not automatic
+recognition. Memory bodies still call only the checked value domain.
+
+The ready-argument and parent-argument expression adapters derive their callee
+contracts from this catalogue and preserve actual caller substitution and
+reached memory. The program expression-context theorem retains the existing
+`ValFragC`/`OpsOK` restrictions; it does not admit arbitrary reference
+expressions or a recursive memory-call graph.
+
+`BoundCatalogueControls` and `BoundCataloguePanicControls` reuse the earlier
+actually elaborated local-initializer units, consuming the new complete-call
+and expression adapters on inhabited success and post-initializer panic inputs.
+Neither consumer supplies frame equations. Omitted function coverage returns
+false. An otherwise typed body with a false parameter list cannot match the
+actual elaborated program body, and the older catalogue still refuses these
+fixed-array defaults.
+
+`BoundCatalogueParentControls` supplies an actually elaborated function with
+a `bool[2] memory` parameter and its own bound local array. Its intrinsic caller
+passes an allocating parent: argument object 1, default object 2 and local
+object 3 are distinct, object 3 is returned, old nonempty bytes object 0 remains,
+and caller locals, saved function locals and logs are restored. The declaration
+unit uses the legacy frontend; observations quantify over both evaluator
+pipelines and arbitrary fixed parameters. The caller node is intrinsic, not
+claimed frontend-elaborated.
+
+The general catalogue build passed in 5.586 seconds with 522,129,408 bytes peak
+aggregate RSS; the allocating-argument consumer passed in 10.897 seconds with
+576,393,216 bytes. All 55 new theorem reports use only `propext`,
+`Classical.choice` and `Quot.sound` or subsets. Independent read-only finder
+and skeptic reviews found no confirmed defect. These are Source-only admitted
+call-program results, not universal source coverage, automatic admission,
+function-value reference-argument elaboration, compiler/EVM correspondence,
+physical adequacy or termination. Existing full-build and cache-delivery
+obligations remain separate from this bounded proof increment.

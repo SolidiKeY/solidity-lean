@@ -294,3 +294,11 @@ frame extension, scope exit, call and post-initializer panic are covered; see
 [source-progress-checked.md](source-progress-checked.md#allocation-parents-bound-to-local-variables).
 The old readiness/default certificates and general memory-call graph boundaries
 remain unchanged.
+
+Bound-parent body catalogues now derive parameter, return and local-frame
+equations from actual elaboration. Existing complete-coverage and memory-call
+contracts are reused, including inhabited success, post-initializer panic and
+allocating-parent argument consumers; see
+[source-progress-checked.md](source-progress-checked.md#bound-body-catalogues-with-elaboration-derived-frames).
+Syntactic body/default admission and actual selected-body identity remain
+explicit; no semantic execution premise or universal/compiler claim is added.
