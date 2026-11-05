@@ -29961,6 +29961,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.context_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.context_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.inhabited": [
   "Classical.choice",
   "Quot.sound",
@@ -30002,6 +30012,21 @@
   "propext"
  ],
  "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.transport_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_live_binding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LocalCallableTransport.lean:Solidity.Lowering.V08.EffectfulCallableArgument.wrong_context_snapshot": [
   "Classical.choice",
   "Quot.sound",
   "propext"
