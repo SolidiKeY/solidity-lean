@@ -1309,3 +1309,25 @@ capacity or per-child snapshot premise is added. Independent design reviews
 confirmed the gap beyond mirror-specific laws and required changed-old-object
 negative controls. This is observation invariance for the existing intrinsic
 operation, not recursive Source admission or compiled graph coverage.
+
+Transport implementation/handoff (interface `04159fc57fd6b4f5fa98ee4877ce53c54dd31fc0`):
+`snapshotTransport` preserves every existing intrinsic typed snapshot and
+indexed observation through a kept extension. The selected-child corollary
+connects lookup with the same child's preserved snapshot. Proofs follow the
+existing rank-bounded fields/array/fixed traversal; the impossible mapping
+reference is eliminated through its actual empty object type. No shape,
+map-free, capacity or extra snapshot premise is added to the transport laws.
+
+Actual allocation controls preserve shared aliases, primitive/nested/fixed/
+struct/empty/64 snapshots and absent indices. A reachable old7→8 replacement
+changes the parent snapshot and refutes `Heap.Keeps`, without a decidable-object
+equality assumption. Both semantic reviews passed without findings. An invalid
+import produced unavailable diagnostics and was removed; that receipt remains
+failed evidence. List-content equality repaired a dependent array rewrite; two
+unused simplifier arguments were removed. Final three diagnostics have zero
+errors/empty warnings. Standalone list congruence passed; six alternatives
+failed. Five main and fifteen control targets bring this checkpoint to 1,339
+scoped reports over 226 modules, preserving 223 predecessors. Exact-head gates,
+axiom audit, canonical patch reconstruction and seal remain required. This
+proves observation invariance, leaving traversal compilation, Source/physical
+adequacy and the full original G33/G35 obligations open.

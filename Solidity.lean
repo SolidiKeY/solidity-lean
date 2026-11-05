@@ -450,6 +450,8 @@ import Solidity.Backend.MemoryCopies.SingletonCopyInterface
 import Solidity.Backend.MemoryCopies.SnapshotPathControls
 import Solidity.Backend.MemoryCopies.SnapshotPathInterface
 import Solidity.Backend.MemoryCopies.SnapshotPaths
+import Solidity.Backend.MemoryCopies.SnapshotTransport
+import Solidity.Backend.MemoryCopies.SnapshotTransportControls
 import Solidity.Backend.MemoryCopies.SnapshotTransportInterface
 import Solidity.Backend.MemoryCopies.SourceBytes
 import Solidity.Backend.MemoryCopies.SourceBytesControls
