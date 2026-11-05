@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8Declaration
 import Solidity.Yul.RawIntegerBlock
 import Solidity.Yul.RawIntegerSequence
 import Solidity.Yul.RawPreparedInteger
@@ -204,3 +205,10 @@ Checks.RawIntegerBlock witnesses older mutation, nested checked blocks,
 break/continue, signed literals, dirty retained words and timeout boundaries.
 Arbitrary initializer expressions/groups, dirty ordinary Source readback and
 general frontend admission remain separate obligations. -/
+
+/-! RawU8Declaration.run/correct executes existing supported uint8 expressions
+as actual context-growing declarations, retaining partial errors and raw values.
+The Source.declInit law requires checked/coherent input. Its zero backup is only
+metadata for an incoherent result, not truncation or clean-on-write. Checks include
+dirty copies, legacy/viaIR partial timeout differences and unsupported subtraction.
+General initializer admission and composition with grown Items remain separate. -/
