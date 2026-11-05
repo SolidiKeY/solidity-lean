@@ -491,6 +491,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/FailurePaths/LogicalGuard.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/LogicalGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawUintN/Controls.lean` | Bounded memory-storage-copy checkpoint; typed scope and retained obligations are stated in the module. |
+| `Calculus/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

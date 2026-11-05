@@ -1221,6 +1221,7 @@ import Solidity.Calculus.ExpandLaws
 import Solidity.Calculus.FilteredMembership
 import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.FirstOrder
+import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FlattenReads
 import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.FloorRegion
