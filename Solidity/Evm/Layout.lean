@@ -529,6 +529,11 @@ def uTail : BinOp → List Instr
   | .mulW => [.mul]
   | .powW => [.swap 1, .exp]
 
+/-- `… a n → … a >> n` (`n` on top) on `int`s: `SAR` on the count clamped
+to `0` when negative, since the source reads a negative count as `0` (its
+`toNat`) where raw `SAR` would read it as a huge unsigned count. -/
+def sarCode : List Instr := [.dup 1, .push (w[0]), .sgt, .iszero, .mul, .sar]
+
 /-- `… x y → … x ⊕ y` (`y` on top) on `int`s, two's complement, with solc's
 guards (`checked_add_t_int256` and its siblings): `+` reverts unless the
 wrapped sum is below `y` exactly when `x` is negative, `-` unless `x` is
@@ -552,8 +557,9 @@ def sTail : BinOp → List Instr
   | .ge => [.sgt, .iszero]
   | .eqB => [.eq]
   | .neB => [.eq, .iszero]
+  | .shr => sarCode
   | .pow | .and | .or => []
-  | .band | .bor | .bxor | .shl | .shr | .addW | .subW | .mulW | .powW => []
+  | .band | .bor | .bxor | .shl | .addW | .subW | .mulW | .powW => []
 
 /-- An operator's tail at its operand type: signed at `int`. -/
 def binTail : PrimTy → BinOp → List Instr
