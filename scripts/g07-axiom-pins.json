@@ -34087,6 +34087,46 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.consumed_skip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.pending_prefix_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.prefix_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedControlControls.lean:Solidity.Yul.Compilation.FramedControl.Controls.reflect_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Compilation/FramedWordLowering.lean:Solidity.Yul.Compilation.FramedWordLowering.expression_reflect": [
   "Classical.choice",
   "Quot.sound",

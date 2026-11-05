@@ -2743,6 +2743,8 @@ import Solidity.Yul.Compilation.ExponentMachine
 import Solidity.Yul.Compilation.ExponentMachineControls
 import Solidity.Yul.Compilation.ExpressionShapes
 import Solidity.Yul.Compilation.ExpressionShapesControls
+import Solidity.Yul.Compilation.FramedControl
+import Solidity.Yul.Compilation.FramedControlControls
 import Solidity.Yul.Compilation.FramedWordLowering
 import Solidity.Yul.Compilation.FramedWordLoweringControls
 import Solidity.Yul.Compilation.LocalScopeLowering

@@ -176,3 +176,5 @@
 | `Yul/World/ReturndataByteLoadControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLiveCoverage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedLiveCoverageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedControl.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedControlControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
