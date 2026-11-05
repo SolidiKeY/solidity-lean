@@ -6,6 +6,8 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
+Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
+
 ## X01 interface checkpoint (in progress)
 
 `Solidity/Roadmap/Contracts.lean`, namespace `Solidity.Roadmap.FullScope`,
@@ -434,3 +436,45 @@ co-edited.
 - No push, merge, PR, VM replacement or goal reset occurred. H38 resolves the
   prior human question; subsequent review is requested from producers, not
   treated as already approved.
+
+## H41 cache receipt and delivery-policy amendment
+
+Coordinator-reported receipt for the checkpoint-02 H35 packet:
+
+- Receipt (coordinator host):
+  `/home/guilherme/.local/state/cloudvm-coord/receipts/vx1-contracts-environment-cache-received-20261105T020232Z.json`.
+- Archive (this VM): `/workspace/vx1-handoff-830d2598/cache-packet.tar.gz`.
+- SHA256: `eb7b14bbf7f75e173b0548c225fa1ef3beb7e9b24dbe7ef3903b87de78f4d745`.
+- Coordinator verified against the reported SHA: yes, as stated in H41.
+- Local SHA256 was recomputed and matches exactly. The remote receipt's contents
+  are coordinator-reported, not represented as locally read evidence.
+- Delivery status for this exact packet: **coordinator-received**.
+
+**H41 amendment (verbatim):**
+
+> Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue.
+
+This amendment supersedes requests to install/transfer a host cache helper or
+run shipment tooling on this VM. No `ship-cache.sh` invocation is needed or made.
+All existing verified packets and prior seals remain preserved.
+
+The receipt above covers the older checkpoint-02 packet only. The H38 packet is
+still available for coordinator pull:
+
+- Archive: `/workspace/vx1-handoff-06f5ae08-final/cache-packet.tar.gz`.
+- SHA256: `bfcecd39a46edb5c08ede4c387d10bc697c12a5adcbe5fcccdfbbd2348c2f0c4`.
+- Local SHA256 recomputed: pass. Delivery: **coordinator-pending**.
+- Its source head is `06f5ae081ca5e01a976b3ae3cb9b43a3d369d033`; this receipt-only
+  documentation update does not change its checked Lean source or cache contents.
+
+A received partial cache packet is not an integrated build, complete dependency
+cache, producer approval, interface freeze or checkpoint readiness. H38's
+producer-review relay/receipt remains pending, along with the remaining X01/X02
+implementation and validation obligations. H41 closes the earlier packet's
+transfer obligation and removes the host-helper blocker; it does not resolve
+those independent source/EVM/generator prerequisites.
+
+Validation for this documentation-only update: exact local hashes of both
+preserved packets, matching the supplied receipt for checkpoint-02; `git diff
+--check`. No Lean source changed, so no Lean rebuild or repeated proof checks
+were performed. No new scope question, goal creation/reset, push or publication.
