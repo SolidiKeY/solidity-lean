@@ -84,6 +84,7 @@ import Solidity.Examples.ReadRealization
 import Solidity.Examples.ReadTrace
 import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.Roadmap.V16.FramedReasonConsumer
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample

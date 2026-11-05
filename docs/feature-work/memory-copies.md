@@ -1189,3 +1189,12 @@ seventeen control targets bring the checkpoint to 1,261 scoped reports across
 reconstruction and reviewed seal remain required before acceptance. Outer
 storage-header loading/child-base selection, approved Source compilation and
 all original Source/physical/producer obligations remain open.
+
+Published-master adoption after parent checkpoint: `b86ae4568cef6d6226f4d170360bbb089debe3fb`
+imports `PublishedStorage` and `PublishedStorageInterface` with identical owned
+source content. The sealed parent-copy checkpoint at `c7ef0591` remains separate.
+All 214 owned Lean files are unchanged. The sole merge conflict was the area
+module map: published rows were retained verbatim and unique owned rows appended;
+roots were regenerated. Fresh exact-candidate gates, reviews and seal are
+required for this adoption; upstream combined passes do not establish a local
+pass. Original Source/physical/producer obligations and full G33/G35 remain open.

@@ -168,6 +168,12 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStack.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStackExact.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Actual resolved calldata slicing followed by the existing Boolean conversion. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Actual Boolean calldata views select or exclude a malformed word. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | A real two-statement Source program, with an actual sliced first copy and a later malformed Boolean decoder. |
+| `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Discharge the existing two-statement slice program's decoder premises from actual raw words. |
+| `Backend/MemoryCopies/PublishedStorage.lean` | Exact fields of the published storage endpoint discharge the existing local execution premise. |
+| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
 | `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
 | `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
 | `Backend/MemoryCopies/SourceFramesInterface.lean` | Exact Source allocation-frame obligations for all default and storage-load traversal families, including halted runs. |
@@ -266,8 +272,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CanonicalArrayInterface.lean` | Copied-path selection of all finite primitive index loads, checked empty-path prefix and actual declaration/refusal certificates. |
 | `Backend/MemoryCopies/CanonicalArray.lean` | Derive all finite index reads from actual copied storage lookup, construct load inputs, guard empty paths and prove full declarations/refusals. |
 | `Backend/MemoryCopies/CanonicalArrayControls.lean` | Nested storage paths copying arbitrary finite uint payloads, distinct64-element observations, empty success and invalid empty-path refusal. |
-| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Exact published StorageOps.ReachedEndpoint consumed at the unchanged local execution/composition boundary. |
-| `Backend/MemoryCopies/PublishedStorage.lean` | Published reached-storage execution converted to existing local composition certificates; same-store endpoint transport preserves every producer field. |
 | `Backend/MemoryCopies/PublishedStorageControls.lean` | Actual represented memory-array copy followed by published scalar SSTORE, reached allocator preservation and skipped-store rejection. |
 | `Backend/MemoryCopies/RuntimeStorageArrayInterface.lean` | Runtime storage-header/word loop using existing controller and allocator, with actual typed source representation and full reached allocator contract. |
 | `Backend/MemoryCopies/RuntimeStorageArray.lean` | Constant storage-header-driven SLOAD/MSTORE loop, finite termination witness, typed source-word extraction and complete allocator/root-gap simulation. |
