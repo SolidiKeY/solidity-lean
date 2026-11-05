@@ -1141,6 +1141,11 @@ import Solidity.Backend.PrimitivePackets.SignedCast.CastControls
 import Solidity.Backend.PrimitivePackets.SignedCast.CastSource
 import Solidity.Backend.PrimitivePackets.SignedCast.Selected
 import Solidity.Backend.PrimitivePackets.SignedCast.Target
+import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Agreement
+import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls
+import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Selected
+import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Source
+import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Target
 import Solidity.Backend.PrimitivePackets.SignedCheckedSub.Agreement
 import Solidity.Backend.PrimitivePackets.SignedCheckedSub.Controls
 import Solidity.Backend.PrimitivePackets.SignedCheckedSub.Selected

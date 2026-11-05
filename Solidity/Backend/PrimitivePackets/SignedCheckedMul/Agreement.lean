@@ -1,10 +1,15 @@
 import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Target
 
-/-! Selected checked int256 addition from arbitrary Source locals.
+/-! Selected checked int256 multiplication from arbitrary Source locals.
 Initial local correspondence and the existing full StateRepr are real premises;
 no compiled value, desired run or desired poststate is a caller argument. -/
 namespace Solidity.Backend.PrimitivePackets.SignedCheckedMul
 open Evm Evm.Memory Solidity.Lowering.V07
+
+theorem overflow_iff (x y : Int)
+    (_hx : U.lo ≤ x ∧ x ≤ U.hi) (_hy : U.lo ≤ y ∧ y ≤ U.hi) :
+    ¬ (U.lo ≤ x*y ∧ x*y ≤ U.hi) ↔ x*y < U.lo ∨ U.hi < x*y := by
+  omega
 
 variable {E : Source.Env} {srcΓ : Source.RCtx} {C : Contract} {Γ : Ctx} {ι : Type}
 

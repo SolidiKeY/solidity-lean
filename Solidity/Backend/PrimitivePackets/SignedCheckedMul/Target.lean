@@ -2,7 +2,7 @@ import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Source
 import Solidity.Backend.PrimitivePackets.SignedCheckedMul.Selected
 import Solidity.Backend.Passes.ValueCertificate
 
-/-! Actual selected signed checked-multiply target execution. Overflow uses the original
+/-! Actual selected checked-multiplication target execution. Overflow uses the original
 coarse Evm.Out.revert, which carries no payload or final machine. No equality
 between this target verdict and Source panic bytes is claimed. -/
 namespace Solidity.Backend.PrimitivePackets.SignedCheckedMul
@@ -33,8 +33,10 @@ theorem value_overflow {C : Contract} {Γ : Ctx} (s : State C Γ)
   have hr : PrimTy.int.inRange (x*y) ≠ true := by
     intro h
     simp only [PrimTy.inRange,decide_eq_true_eq] at h
+    change ¬ (-((2^255:Nat):Int) ≤ x*y ∧ x*y ≤ ((2^255:Nat):Int)-1) at overflow
     apply overflow
-    simp only [U,Source.IntTy.lo,Source.IntTy.hi] at ⊢
+    change -((2^255:Nat):Int) ≤ x*y ∧ x*y ≤ ((2^255:Nat):Int)-1
+    change -((2^255:Nat):Int) ≤ x*y ∧ x*y < ((2^255:Nat):Int) at h
     omega
   simp only [PrimTy.ofInt?,dif_neg hr,TRes.ofOpt]
 

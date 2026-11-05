@@ -5,7 +5,7 @@ run is a premise. The frame and full input state are retained. -/
 namespace Solidity.Backend.PrimitivePackets.SignedCheckedMul
 open Solidity.Lowering.V07
 
-abbrev U : Source.IntTy := { Source.IntTy.u256 with signed := true }
+abbrev U : Source.IntTy := ⟨true,256,by decide⟩
 
 theorem source_success {E : Source.Env} {Γ : Source.RCtx}
     (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (s : Source.EMState E Γ)

@@ -85,13 +85,10 @@ def pins():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["inventory", "build", "pins"])
+    parser.add_argument("mode", choices=["inventory", "pins"])
     parser.add_argument("--tag", default="balance")
     args = parser.parse_args()
     if args.mode == "inventory":
         inventory(args.tag)
-    elif args.mode == "pins":
-        pins()
     else:
-        modules = sorted({r["module"] for r in read("declarations.json")})
-        subprocess.run(["python3", str(DATA/"serial-build.py"), *modules], cwd=ROOT, check=True)
+        pins()
