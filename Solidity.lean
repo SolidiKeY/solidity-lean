@@ -3223,10 +3223,15 @@ import Solidity.Lowering.V08.WorldImageAccess
 import Solidity.Lowering.V08.WorldImageAccessControls
 import Solidity.Lowering.V08.WorldReset
 import Solidity.Lowering.V08.WorldResetControls
+import Solidity.Optimizer.ConstFold
 import Solidity.Optimizer.Controls
 import Solidity.Optimizer.Laws
 import Solidity.Optimizer.Pass
+import Solidity.Optimizer.Propagate
 import Solidity.Optimizer.RoadmapComposition
+import Solidity.Optimizer.Simplify
+import Solidity.Optimizer.StmtFold
+import Solidity.Optimizer.UnusedVar
 import Solidity.Precompiles.Basic
 import Solidity.Precompiles.Blake2f
 import Solidity.Precompiles.Bls12381
