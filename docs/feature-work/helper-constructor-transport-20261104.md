@@ -168,3 +168,7 @@ Fetched exact origin/master b86ae4568cef6d6226f4d170360bbb089debe3fb, descending
 Coordinator master-gate receipt sched-20261105T1200Z is reported publication evidence, not helper full validation. Master still lacks four helper imports. Full validation/delivery remain pending coordinator merge/coordinator-pending; the retained cache pack hash is unchanged and no global freshness/import or VM shipping is inferred. All original queues, backfill, premises, refusals and ownership holds remain as recorded. The prior9584 sealed packet remains the current implementation handoff; this supplement is an API/fetch audit only.
 
 Separate read-only finder and skeptic accepted the b86 publication-only audit without findings. See publication-b86ae456/reviews.md. The stable audit/review/documentation snapshot is checksum-bound by publication-b86ae456/SHA256SUMS; the unchanged9584 implementation seal remains current.
+
+### Publication 3ad22f66 audit
+
+Fetched and verified `3ad22f66d8fc6431378c22e71823436c79dede7f`; preserved validated adopted master `9584f9e7df09f638d9e0cb8930501d1660aa4b2f`. All 194 dependency hashes and build configuration remain unchanged. No proof edits or Lean rerun. Evidence: `tests/helpers-20261104/constructor-transport/publication-3ad22f66/audit.json`. Shared registration/axiom inventory and full validation remain pending coordinator merge. H41 delivery remains coordinator-pending; retained pack hash verified, no recipient-import or global freshness claim.
