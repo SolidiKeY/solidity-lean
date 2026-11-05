@@ -348,3 +348,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedFiniteDefault.lean` | Guarded existing finite-plan body and declaration execution with complete retained success guarantees. |
 | `Backend/MemoryCopies/CheckedFiniteDefaultControls.lean` | Actual nonzero-root plans, declarations, retained old children and represented saturation/refusal controls. |
 | `Backend/MemoryCopies/MemoryCopyDemandInterface.lean` | Actual intrinsic snapshot/copy demand, stable recopy cost and zero-allocation alias-rebinding obligations. |
+| `Backend/MemoryCopies/MemoryCopyDemand.lean` | Strip-invariant demand, actual snapshot and repeated-copy cell growth, and real alias-rebinding zero growth. |
+| `Backend/MemoryCopies/MemoryCopyDemandControls.lean` | Real shared-child heaps, distinct copied descendants, repeated/empty/long demand and same-input intrinsic/compiled alias controls. |
