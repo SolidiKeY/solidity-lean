@@ -2506,6 +2506,7 @@ import Solidity.Frontend.StatementGrammarH28.FramedItemList
 import Solidity.Frontend.StatementGrammarH28.FramedStatementList
 import Solidity.Frontend.StatementGrammarH28.G0List
 import Solidity.Frontend.StatementGrammarH28.G0Nodes
+import Solidity.Frontend.StatementGrammarH28.G0Rejections
 import Solidity.Frontend.StatementGrammarH28.HeadPr
 import Solidity.Frontend.StatementGrammarH28.LeafCoverage
 import Solidity.Frontend.StatementGrammarH28.LoopCoverage

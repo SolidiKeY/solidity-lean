@@ -1,6 +1,7 @@
 import Lean
 import Solidity.Frontend.StatementGrammarH28.FixtureData
 import Solidity.Frontend.StatementGrammarH28.G0Nodes
+import Solidity.Frontend.StatementGrammarH28.G0Rejections
 import Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage
 import Solidity.Frontend.StatementGrammarH28.FramedItemList
 
@@ -13,7 +14,8 @@ run_cmd do
   let targets := ["rootAt", "listCellAt", "listValuesAt", "listLengthAt",
     "optionalBodyCtorsAt", "functionBodyCtorsAt", "topBodyCtorsAt",
     "fixtureBodyCtorsAt", "framedItemAt", "rootResult", "listCellResult",
-    "listValuesResult", "framedItemResult", "nodeCtorsAt"]
+    "listValuesResult", "framedItemResult", "nodeCtorsAt", "optValueAt", "optValueResult",
+    "identAt", "litAt", "placeholdersAt", "nodesAt"]
   let declarations := (← getEnv).constants.fold (init := #[]) fun acc name info =>
     if "_private.Solidity.Frontend.StatementGrammarH28.".isPrefixOf name.toString &&
         targets.any (fun suffix => name.toString.endsWith ("." ++ suffix)) then

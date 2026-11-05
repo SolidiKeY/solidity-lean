@@ -76,6 +76,18 @@ theorem g0_node_ctors_twin_actual_body :
 theorem g0_node_ctors_twin_link {c : Cat} (s : Syn c) :
     g0NodeCtors s = s.nodes.map Node.ctor := g0NodeCtors_eq_nodes s
 
+/-- The rejections twin on actual excluded and admitted syntax: an unchecked
+block with a placeholder, `>>>`, `years`, and an admitted unchecked block. -/
+theorem g0_rejections_twin_actual :
+    g0Rejections (Syn.uncheckedItem (l := false) (.block (.cons (.stmtItem
+      (.simpleStmt (.exprStmt (.ident "_")))) .nil))) = [.invalidModifierBody] ∧
+    g0Rejections (Syn.shift .shr (.ident "x") (.ident "y")) = [.unsignedRightShift] ∧
+    g0Rejections (Syn.litUnit (.dec 1 0 0) .years) = [.removedUnits] ∧
+    g0Rejections (Syn.uncheckedItem (l := false) (.block (.cons (.stmtItem
+      (.simpleStmt (.exprStmt (.ident "x")))) .nil))) = [] := by
+  decide +kernel
+
+#print axioms g0_rejections_twin_actual
 #print axioms g0_node_ctors_twin_actual_body
 #print axioms g0_node_ctors_twin_link
 #print axioms g0_typed_list_empty_and_cons

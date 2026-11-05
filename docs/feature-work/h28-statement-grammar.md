@@ -2104,19 +2104,42 @@ axioms `propext`). `optionalBodyCtorsAt` now reads `g0NodeCtors body`.
 No fixture, statement, required-constructor list or budget (fuel 64, name
 `f`) changed; the observation is equal by the link theorem.
 
-Checks (Lean MCP, severity error, fresh on this VM): `G0Nodes`,
-`FixtureData`, all 45 `FixtureControls/Case00..44` (each closes by
-`decide +kernel`, axioms `[propext]`), `tests/…/G0ObserverControls`
-(new `g0_node_ctors_twin_actual_body` by `decide +kernel`, and the link),
-`G0PublicAxioms`, `G0ElaborationAudit` (inventory now 14 eliminators,
-including `nodeCtorsAt`). Remaining kernel-evaluated indexed matches reached
-by the fixtures are inside the producer (`parse`, `Unit.rejections`), which
-is the parser under test and read-only here; they are not lane observers.
+The profile half of the same observer (`statementFixtureCheck` compares
+`u.rejections.isEmpty` with the fixture's `profile`) also reached indexed
+matches: `Syn.rejections = s.nodes.filterMap Node.excl`, with `Syn.excl`,
+`Syn.placeholders` and `isLiteralBase` (finder Y-1, below). `G0Rejections.lean`
+adds their twins (`g0Nodes`, `g0Placeholders`, `g0IsLiteralBase`,
+`g0Rejections`, plus the typed views `g0OptValue`, `identAt`, `litAt`), all by
+`Syn.casesOn` with generalising motives, linked by `g0Nodes_eq`,
+`g0Placeholders_eq`, `g0IsLiteralBase_eq` and `g0Rejections_eq`
+(`g0Rejections s = s.rejections`; axioms `propext`). FixtureData reads
+`(g0Rejections u).isEmpty`; `statementFixtureCheck_profile` states that this
+is the old observation.
 
-Warned refactor: the twin replaces a `match`-compiled observer by the
-`casesOn` form Gate G0 prescribes. A matched before/after timing on this VM
-was not taken (no `lean` in Bash under the repository settings); the full
-build log records the new per-module times of the 45 cases.
+Residual, not repaired: an `assembly` node's exclusion still calls Source's
+`isRethrow`, an indexed `match` with string-literal patterns. Lean 4.24
+cannot generate equation lemmas for its matcher ("failed to generate
+equality theorems for `match` expression `isRethrow.match_1`"), so a twin
+could not be linked to it; an unlinked twin was written, proved sound, and
+removed rather than kept without its link. It is evaluated only on
+`assembly` nodes. The producer's `parse` (the system under test, read-only
+here) also matches on indexed syntax; neither is a Gate G0 exemption, and
+the held finding is closed for the lane's observers only.
+
+Checks (Lean MCP, severity error, fresh on this VM): `G0Nodes`,
+`G0Rejections`, `FixtureData`, all 45 `FixtureControls/Case00..44` (each
+closes by `decide +kernel`, axioms `[propext]`; re-run after the rejections
+twin), `tests/…/G0ObserverControls` (`g0_node_ctors_twin_actual_body` and
+`g0_rejections_twin_actual` by `decide +kernel` on the twins only),
+`G0PublicAxioms`, `G0ElaborationAudit` (target list now 20 entries: 15
+private eliminators and 5 result families; the audit asserts only the
+inventory size and logs the terms, so the absence of matchers rests on
+inspection).
+
+Warned refactor: the twins replace `match`-compiled observers by the
+`casesOn` form Gate G0 prescribes. A matched before/after timing was not
+taken on this VM (no `lean` in Bash under the repository settings); it is
+listed as a limitation.
 
 ## Checkpoint Z: expression-atom conditional framing
 
@@ -2130,7 +2153,7 @@ needed expression assumption exposed exactly.
       ∀ n s, expr (n + a) (locatedInput (es ++ [)]) s) = .ok (e, punctBefore ) s)
 
 (the atom's tokens parse back to exactly `e` before `)`, leaving `)`
-unread, at every fuel above `a`). It is proved for Boolean literals and
+unread, at every fuel of at least `a`). It is proved for Boolean literals and
 identifiers (`bool_atom_rparen`, `ident_atom_rparen`, budget 5) and is
 otherwise a premise: expression parser completeness and SOL-EU stay with the
 expression lanes. `AtomStatements` extends `BooleanStatements` (embedded by
@@ -2148,8 +2171,10 @@ width and depth whose items are atom statements, empty return, break and
 continue in their intrinsic loop contexts, `return e;` (premise
 `ExprAtomSemi`, plus the token side condition `NoSemiHead`: nonempty and not
 starting with `;`), `unchecked { … }` items only in an unchecked-free context
-(the type index forbids nesting; the actual parser refusal is checked), and
-the atom conditionals. Coverage is proved by mutual structural recursion
+(the type index forbids nesting; the actual parser refusal is checked), the
+atom conditionals, and `for (; c; u)` with an empty initialiser and optional
+atom condition and update (`OptAtom`, `for_atom_step`; initialiser statements
+are not covered). Coverage is proved by mutual structural recursion
 (`atom_stmt_coverage`, `atom_items_at`), with budgets computed from the
 witness (`max (d + 7) b` per item, `+2` per unchecked wrapper) and loop
 fuel from the actual token length (`atom_items_count_le`); no successful
@@ -2159,7 +2184,9 @@ contract and nearest else, token uniqueness and prefix/suffix uniqueness
 (`atom_items_of_leaf_items`). All axioms are within `propext`/`Quot.sound`.
 
 Controls (`tests/…/AtomConditionalControls.lean`,
-`AtomNestedControls.lean`): every constructor inhabited; identifier
+`AtomNestedControls.lean`): every constructor of `AtomStatements`,
+`AtomStmt`, `AtomItems` and `OptAtom` inhabited (all four `for` header
+shapes, the last also by a kernel `rfl` at fuel 17); identifier
 conditions in every position; dangling else `if (x) if (y) {} else {}`
 parsed to the inner association (kernel `rfl` at fuel 18) and unique; the
 outer association excluded by the contract; closed loops preserving an
@@ -2170,7 +2197,37 @@ a three-item block with `while`/`if-else`/`break`/`continue`/`return z;`/
 (`ident "y"` refused for token `x`), refuses extra tokens and an
 insufficient budget; `NoSemiHead` refuses `[]` and `[;]`.
 
+"Arbitrary" conditions means arbitrary expressions satisfying the exposed
+premise; only single-token atoms (identifiers, Boolean literals) are shown to
+satisfy it here.
+
 Not claimed: yield/`Derives` uniqueness for the atom fragments (it needs
-the atoms' yields, i.e. a printer premise), `for` headers with
-init/condition/update, simple/expression statements, emit/revert/try/
+the atoms' yields, i.e. a printer premise), `for` initialisers,
+simple/expression statements, emit/revert/try/
 assembly, and any expression-level fact beyond the stated premises.
+
+### Reviews of checkpoints Y and Z
+
+Separate read-only finder and skeptic reviews (no Lean server, no builds) of
+commits `cffc480d..5694e8e0`. Skeptic verdict PASS-with-fixes. Confirmed
+findings and their fixes:
+
+- Y-1 (finder): `statementFixtureCheck` kernel-evaluated `u.rejections`
+  (indexed matches in `Syn.nodes`/`Syn.excl`); the doc misnamed it as
+  producer code. Fixed by `G0Rejections.lean` (above); the `isRethrow`
+  residual is recorded.
+- Z-1 (both): "every constructor inhabited" was false for `AtomStmt.forLoop`
+  and `AtomStmt.doLoop`. Fixed: `for_do_relation`, plus the new `forAtom`
+  shapes.
+- Z-2 (both): `simp_all` in `atom_items_of_leaf_items`. Replaced by
+  `simp only`, with the statement restated as a budget bound `b ≤ 7`.
+- Y-2 (both): the G0 control kernel-evaluated `Syn.nodes` in a second
+  conjunct. Dropped; the link theorem covers it.
+- Y-3 (skeptic): eliminator count in the doc. Corrected above.
+- Z-3 (both): misleading docstring on `loopBody` and the name
+  `outer_block_actual_parse` (an instance, not a computed parse). Fixed
+  (`outer_block_at_fuel_32`); kernel-computed parses are
+  `ident_nearest_actual_parse` and `for_header_both_kernel`.
+- Suspected, addressed in wording: "arbitrary" conditions (only single-token
+  atoms are shown to satisfy the premise); "above `a`" → "at least `a`";
+  the parser's own matches are not a G0 exemption.
