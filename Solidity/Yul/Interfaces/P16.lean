@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawGrowingSequence
 import Solidity.Yul.RawPreparedDeclaration
 import Solidity.Yul.RawDeclarationFrame
 import Solidity.Yul.RawCheckedInitializedForPost
@@ -104,3 +105,11 @@ full result/frame equality with the existing materialized runner on incoherent
 inputs. Source projection is concrete, not a premise. The extended-context
 checked-consumer witness is in Solidity.Yul.Checks.RawPreparedDeclaration;
 the enclosing growing block/loop composition remains a separate obligation. -/
+
+/-! RawGrowingSequence.run/correct join an actual prepared Boolean declaration
+and actual checked Items tail across the grown context, proving concrete
+Source.execItems correspondence. Result distinguishes old-context declaration
+errors from reached grown frames; project uses actual Source.Out.up for control.
+Checked/coherent premises remain explicit. This joins the child laws, while
+final block scope closure and general growing-for admission remain separate.
+Concrete joined/control/error-prefix witnesses are in Solidity.Yul.Checks.RawGrowingSequence. -/
