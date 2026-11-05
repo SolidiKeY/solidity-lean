@@ -305,3 +305,12 @@ Source error/world pair under checked/coherent input, leaving the actual halt
 existentially quantified. Partial locals are retained; neither rollback nor
 universal timeout is inferred. Controls instantiate assignment, partial-failure
 bodies and a mutating checked-add Source body. Other effects remain separate. -/
+
+/-! RawContinueLoop.uint8_for_world/uint8_for_no_success/source_uint8_for_error
+compose the supported uint8 initializer, actual grown-context expression-loop
+body and typed binder close. Initialization failures keep their partial frame;
+successful initialization enters the concrete body runner. Every raw horizon
+preserves Source.St and cannot succeed; exact Source error/world equality
+retains checked/coherent input and existential actual halt. Controls use a new
+binder in x:=x+n and distinguish per-pipeline initialization failures.
+This supplies no arbitrary dirty Source readback or general loop admission. -/

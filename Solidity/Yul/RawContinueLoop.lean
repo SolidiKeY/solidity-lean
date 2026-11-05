@@ -508,4 +508,109 @@ theorem source_uint8_error : ∀ (ctx : Solidity.Source.Ctx) (returns : List Sol
     rw [actual] at rejected
     cases rejected
 
+/-- Local-word declaration preserves world on either actual result branch. -/
+theorem uint8_declaration_world : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ match Solidity.Yul.RawU8Declaration.run name initial pipeline fuel state with
+ | .inl failure => failure.2.world = state.world
+ | .inr next => next.world = state.world := by
+  intro ctx name initializer initial pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    unfold RawU8Declaration.run
+    dsimp only
+    have unchanged : (LocalU8Expr.eval initial pipeline fuel (RawCoherent.prepare state)).2.2 =
+        state.world :=
+      (LocalU8Expr.world initial pipeline fuel (RawCoherent.prepare state)).trans (refresh_world ctx state)
+    cases actual : LocalU8Expr.eval initial pipeline fuel (RawCoherent.prepare state) with
+    | mk tag next =>
+      rw [actual] at unchanged
+      cases tag <;> exact unchanged
+
+/-- Concrete initializer, grown expression-loop and binder close preserve world. -/
+theorem uint8_for_world : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (bodyExpr : Solidity.Source.RExpr ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys Solidity.Yul.LocalU8Expr.Ty)
+ (bodyProof : Solidity.Yul.LocalU8Expr.Supported ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys bodyExpr)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ (Solidity.Yul.RawU8ForAbsent.run initial
+   (Solidity.Yul.RawContinueLoop.uint8Body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u bodyProof)
+   pipeline fuel state).2.world = state.world := by
+  intro ctx name returns modifier u initializer initial bodyExpr bodyProof pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    have unchanged := uint8_declaration_world ctx name initializer initial pipeline fuel state
+    unfold RawU8ForAbsent.run
+    rw [RawU8For.run]
+    cases actual : RawU8Declaration.run name initial pipeline fuel state with
+    | inl failure =>
+      rw [actual] at unchanged
+      exact unchanged
+    | inr next =>
+      rw [actual] at unchanged
+      change (uint8Run (ctx.push name LocalU8Expr.Ty) returns modifier u bodyProof pipeline fuel next).2.world = state.world
+      exact (uint8_world (ctx.push name LocalU8Expr.Ty) returns modifier u bodyExpr bodyProof pipeline fuel next).trans unchanged
+
+theorem uint8_for_no_success : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (bodyExpr : Solidity.Source.RExpr ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys Solidity.Yul.LocalU8Expr.Ty)
+ (bodyProof : Solidity.Yul.LocalU8Expr.Supported ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys bodyExpr)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ (Solidity.Yul.RawU8ForAbsent.run initial
+   (Solidity.Yul.RawContinueLoop.uint8Body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u bodyProof)
+   pipeline fuel state).1.isOk = false := by
+  intro ctx name returns modifier u initializer initial bodyExpr bodyProof pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    unfold RawU8ForAbsent.run
+    rw [RawU8For.run]
+    cases actual : RawU8Declaration.run name initial pipeline fuel state with
+    | inl failure => rfl
+    | inr next =>
+      exact uint8_no_success (ctx.push name LocalU8Expr.Ty) returns modifier u bodyExpr bodyProof pipeline fuel next
+
+/-- Exact Source error/world composition for the concrete initialized expression loop. -/
+theorem source_uint8_for_error : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (initializer : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (initial : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys initializer)
+ (bodyExpr : Solidity.Source.RExpr ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys Solidity.Yul.LocalU8Expr.Ty)
+ (bodyProof : Solidity.Yul.LocalU8Expr.Supported ctx.env (ctx.push name Solidity.Yul.LocalU8Expr.Ty).tys bodyExpr)
+ (glob : Solidity.Source.Glob ctx.env) (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph ctx.env))
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawCoherent.coherent state = true →
+ ∃ halt : Solidity.Source.Halt,
+ (Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.forLoop (R := returns) (M := modifier) (l := true) (u := u)
+     (.declInit (τ := Solidity.Yul.LocalU8Expr.Ty) initializer (by rfl)) .none .none
+     (.block (.stmt (.expr bodyExpr) .nil))) state.clean).run
+   (Solidity.Source.L0 ctx.env,state.world) =
+ (.error halt,(Solidity.Source.L0 ctx.env,state.world)) := by
+  intro ctx name returns modifier u initializer initial bodyExpr bodyProof glob frame checked fuel nps ph state same
+  have compared := (RawU8ForAbsent.correct ctx name returns modifier u initializer initial
+    (.block (.stmt (.expr bodyExpr) .nil))
+    (uint8Body (ctx.push name LocalU8Expr.Ty) returns modifier u bodyProof)
+    glob frame checked fuel nps ph state same).2
+  have unchanged := uint8_for_world ctx name returns modifier u initializer initial bodyExpr bodyProof glob.pipeline fuel state
+  have rejected := uint8_for_no_success ctx name returns modifier u initializer initial bodyExpr bodyProof glob.pipeline fuel state
+  cases actual : (RawU8ForAbsent.run initial
+      (uint8Body (ctx.push name LocalU8Expr.Ty) returns modifier u bodyProof)
+      glob.pipeline fuel state).1 with
+  | error halt =>
+    refine ⟨halt,?_⟩
+    rw [compared]
+    simp only [RawSequence.represented,actual,Except.map,unchanged]
+  | ok value =>
+    rw [actual] at rejected
+    cases rejected
+
 end Solidity.Yul.RawContinueLoop
