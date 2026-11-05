@@ -1,0 +1,18 @@
+$ git show --no-patch --format=%H%n%P%n%s 2ee2266425da6b950a1731103289e71f97902299
+2ee2266425da6b950a1731103289e71f97902299
+f99245421406baa70a89f1015e393f19fe56ea19 059eb83d4e1d494f42c532513ffbcd3e65adaf75
+Merge commit '059eb83d4e1d494f42c532513ffbcd3e65adaf75' into codex/solidity-sol-20261103/precompile-agreement
+EXIT=0
+
+$ python3 scripts/check-precompile-agreement.py --inventory-only
+PASS source inventory: 18 unique addresses, actual vendor dispatch/definitions, exact input hashes
+Source inventory only; no kernel or cryptographic equality claim
+EXIT=0
+
+$ python3 Bridge/tests/precompile-agreement/test_inventory.py
+............
+----------------------------------------------------------------------
+Ran 12 tests in 0.095s
+
+OK
+EXIT=0
