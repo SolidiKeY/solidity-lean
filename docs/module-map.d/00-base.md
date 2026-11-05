@@ -68,8 +68,10 @@ the typed laws of `Theory/Typed/Mem.lean` (`Calculus/MemRead.lean`).
 
 ## Areas
 
-One file per area under `docs/module-map/`; a new module gets its row in its
-area's file (`docs/parallelism.md`, "Shared registries").
+One file per area under `docs/module-map/`, generated from its fragment
+directory `docs/module-map/<area>.d/`; a new module gets its row in the lane's
+fragment `docs/module-map/<area>.d/<lane>.md` (`docs/parallelism.md`, "Shared
+registries").
 
 | Area | File |
 |---|---|
