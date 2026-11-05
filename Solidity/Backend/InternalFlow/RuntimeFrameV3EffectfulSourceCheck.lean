@@ -55,3 +55,15 @@ theorem checked_cons {C : Contract} (depth : Nat)
  simp only [check,effectRoot,tailRoot,bind,Option.bind,pure]
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.write_complete' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.write_complete
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.complete' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.complete
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.checked_cons' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.checked_cons

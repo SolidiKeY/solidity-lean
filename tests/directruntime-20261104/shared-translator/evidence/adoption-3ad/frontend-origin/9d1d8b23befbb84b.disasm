@@ -1,0 +1,245 @@
+
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000013f960 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0>:
+  13f960:	55                   	push   %rbp
+  13f961:	41 57                	push   %r15
+  13f963:	41 56                	push   %r14
+  13f965:	41 55                	push   %r13
+  13f967:	41 54                	push   %r12
+  13f969:	53                   	push   %rbx
+  13f96a:	50                   	push   %rax
+  13f96b:	48 89 f3             	mov    %rsi,%rbx
+  13f96e:	49 89 fe             	mov    %rdi,%r14
+  13f971:	48 8d 2d c1 ae ed ff 	lea    -0x12513f(%rip),%rbp        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  13f978:	49 89 ef             	mov    %rbp,%r15
+  13f97b:	eb 0d                	jmp    13f98a <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x2a>
+  13f97d:	0f 1f 00             	nopl   (%rax)
+  13f980:	b0 01                	mov    $0x1,%al
+  13f982:	84 c0                	test   %al,%al
+  13f984:	0f 84 9a 03 00 00    	je     13fd24 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c4>
+  13f98a:	41 f6 c6 01          	test   $0x1,%r14b
+  13f98e:	75 10                	jne    13f9a0 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x40>
+  13f990:	41 0f b6 46 07       	movzbl 0x7(%r14),%eax
+  13f995:	85 c0                	test   %eax,%eax
+  13f997:	75 15                	jne    13f9ae <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x4e>
+  13f999:	e9 8a 03 00 00       	jmp    13fd28 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c8>
+  13f99e:	66 90                	xchg   %ax,%ax
+  13f9a0:	4c 89 f0             	mov    %r14,%rax
+  13f9a3:	48 d1 e8             	shr    $1,%rax
+  13f9a6:	85 c0                	test   %eax,%eax
+  13f9a8:	0f 84 7a 03 00 00    	je     13fd28 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c8>
+  13f9ae:	f6 c3 01             	test   $0x1,%bl
+  13f9b1:	75 0d                	jne    13f9c0 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x60>
+  13f9b3:	0f b6 43 07          	movzbl 0x7(%rbx),%eax
+  13f9b7:	85 c0                	test   %eax,%eax
+  13f9b9:	75 13                	jne    13f9ce <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x6e>
+  13f9bb:	e9 64 03 00 00       	jmp    13fd24 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c4>
+  13f9c0:	48 89 d8             	mov    %rbx,%rax
+  13f9c3:	48 d1 e8             	shr    $1,%rax
+  13f9c6:	85 c0                	test   %eax,%eax
+  13f9c8:	0f 84 56 03 00 00    	je     13fd24 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c4>
+  13f9ce:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13f9d2:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13f9d7:	0f 83 d0 00 00 00    	jae    13faad <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x14d>
+  13f9dd:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  13f9e2:	0f 84 eb 00 00 00    	je     13fad3 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x173>
+  13f9e8:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13f9ed:	0f 87 0a 01 00 00    	ja     13fafd <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x19d>
+  13f9f3:	4d 8b 6e 08          	mov    0x8(%r14),%r13
+  13f9f7:	a9 00 00 fe 00       	test   $0xfe0000,%eax
+  13f9fc:	0f 84 5d 01 00 00    	je     13fb5f <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x1ff>
+  13fa02:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fa07:	0f 83 7c 01 00 00    	jae    13fb89 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x229>
+  13fa0d:	4d 8b 76 10          	mov    0x10(%r14),%r14
+  13fa11:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fa14:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fa19:	0f 83 ab 01 00 00    	jae    13fbca <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x26a>
+  13fa1f:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  13fa24:	0f 84 c5 01 00 00    	je     13fbef <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x28f>
+  13fa2a:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13fa2f:	0f 87 e3 01 00 00    	ja     13fc18 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x2b8>
+  13fa35:	4c 8b 63 08          	mov    0x8(%rbx),%r12
+  13fa39:	a9 00 00 fe 00       	test   $0xfe0000,%eax
+  13fa3e:	0f 84 37 02 00 00    	je     13fc7b <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x31b>
+  13fa44:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fa49:	0f 83 55 02 00 00    	jae    13fca4 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x344>
+  13fa4f:	48 8b 5b 10          	mov    0x10(%rbx),%rbx
+  13fa53:	4d 39 e5             	cmp    %r12,%r13
+  13fa56:	0f 84 24 ff ff ff    	je     13f980 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x20>
+  13fa5c:	41 0f b6 45 07       	movzbl 0x7(%r13),%eax
+  13fa61:	c1 e0 18             	shl    $0x18,%eax
+  13fa64:	3d 00 00 00 f9       	cmp    $0xf9000000,%eax
+  13fa69:	0f 85 75 02 00 00    	jne    13fce4 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x384>
+  13fa6f:	49 8b 6d 08          	mov    0x8(%r13),%rbp
+  13fa73:	41 0f b6 44 24 07    	movzbl 0x7(%r12),%eax
+  13fa79:	c1 e0 18             	shl    $0x18,%eax
+  13fa7c:	3d 00 00 00 f9       	cmp    $0xf9000000,%eax
+  13fa81:	0f 85 7a 02 00 00    	jne    13fd01 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3a1>
+  13fa87:	49 3b 6c 24 08       	cmp    0x8(%r12),%rbp
+  13fa8c:	0f 85 92 02 00 00    	jne    13fd24 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c4>
+  13fa92:	4c 89 ef             	mov    %r13,%rdi
+  13fa95:	4c 89 e6             	mov    %r12,%rsi
+  13fa98:	e8 93 8f 0d 01       	call   1218a30 <lean_string_eq_cold>
+  13fa9d:	4c 89 fd             	mov    %r15,%rbp
+  13faa0:	84 c0                	test   %al,%al
+  13faa2:	0f 85 e2 fe ff ff    	jne    13f98a <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x2a>
+  13faa8:	e9 77 02 00 00       	jmp    13fd24 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3c4>
+  13faad:	48 8d 3d a2 5c ed ff 	lea    -0x12a35e(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fab4:	be 54 02 00 00       	mov    $0x254,%esi
+  13fab9:	4c 89 fa             	mov    %r15,%rdx
+  13fabc:	e8 2f b9 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fac1:	4c 89 fd             	mov    %r15,%rbp
+  13fac4:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13fac8:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  13facd:	0f 85 15 ff ff ff    	jne    13f9e8 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x88>
+  13fad3:	48 8d 3d 7c 5c ed ff 	lea    -0x12a384(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fada:	be 6a 02 00 00       	mov    $0x26a,%esi
+  13fadf:	48 8d 15 94 71 ed ff 	lea    -0x128e6c(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  13fae6:	e8 05 b9 0c 01       	call   120b3f0 <lean_notify_assert>
+  13faeb:	4c 89 fd             	mov    %r15,%rbp
+  13faee:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13faf2:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13faf7:	0f 86 f6 fe ff ff    	jbe    13f9f3 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x93>
+  13fafd:	4c 8d 2d 52 5c ed ff 	lea    -0x12a3ae(%rip),%r13        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fb04:	4c 89 ef             	mov    %r13,%rdi
+  13fb07:	be 59 02 00 00       	mov    $0x259,%esi
+  13fb0c:	48 89 ea             	mov    %rbp,%rdx
+  13fb0f:	e8 dc b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fb14:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13fb18:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13fb1d:	0f 86 d0 fe ff ff    	jbe    13f9f3 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x93>
+  13fb23:	4c 89 ef             	mov    %r13,%rdi
+  13fb26:	be 14 02 00 00       	mov    $0x214,%esi
+  13fb2b:	48 89 ea             	mov    %rbp,%rdx
+  13fb2e:	e8 bd b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fb33:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13fb37:	4c 89 ef             	mov    %r13,%rdi
+  13fb3a:	4d 8b 6e 08          	mov    0x8(%r14),%r13
+  13fb3e:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fb43:	0f 82 ae fe ff ff    	jb     13f9f7 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x97>
+  13fb49:	be 54 02 00 00       	mov    $0x254,%esi
+  13fb4e:	48 89 ea             	mov    %rbp,%rdx
+  13fb51:	e8 9a b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fb56:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13fb5a:	e9 98 fe ff ff       	jmp    13f9f7 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x97>
+  13fb5f:	48 8d 3d f0 5b ed ff 	lea    -0x12a410(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fb66:	be 6a 02 00 00       	mov    $0x26a,%esi
+  13fb6b:	48 8d 15 08 71 ed ff 	lea    -0x128ef8(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  13fb72:	e8 79 b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fb77:	4c 89 fd             	mov    %r15,%rbp
+  13fb7a:	41 8b 46 04          	mov    0x4(%r14),%eax
+  13fb7e:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fb83:	0f 82 84 fe ff ff    	jb     13fa0d <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xad>
+  13fb89:	48 8d 3d c6 5b ed ff 	lea    -0x12a43a(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fb90:	be 59 02 00 00       	mov    $0x259,%esi
+  13fb95:	4c 89 fa             	mov    %r15,%rdx
+  13fb98:	e8 53 b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fb9d:	4c 89 fd             	mov    %r15,%rbp
+  13fba0:	41 81 7e 04 00 00 00 	cmpl   $0xf4000000,0x4(%r14)
+  13fba7:	f4 
+  13fba8:	0f 82 5f fe ff ff    	jb     13fa0d <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xad>
+  13fbae:	48 8d 3d a1 5b ed ff 	lea    -0x12a45f(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fbb5:	be 14 02 00 00       	mov    $0x214,%esi
+  13fbba:	4c 89 fa             	mov    %r15,%rdx
+  13fbbd:	e8 2e b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fbc2:	4c 89 fd             	mov    %r15,%rbp
+  13fbc5:	e9 43 fe ff ff       	jmp    13fa0d <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xad>
+  13fbca:	48 8d 3d 85 5b ed ff 	lea    -0x12a47b(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fbd1:	be 54 02 00 00       	mov    $0x254,%esi
+  13fbd6:	4c 89 fa             	mov    %r15,%rdx
+  13fbd9:	e8 12 b8 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fbde:	4c 89 fd             	mov    %r15,%rbp
+  13fbe1:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fbe4:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  13fbe9:	0f 85 3b fe ff ff    	jne    13fa2a <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xca>
+  13fbef:	48 8d 3d 60 5b ed ff 	lea    -0x12a4a0(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fbf6:	be 6a 02 00 00       	mov    $0x26a,%esi
+  13fbfb:	48 8d 15 78 70 ed ff 	lea    -0x128f88(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  13fc02:	e8 e9 b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fc07:	4c 89 fd             	mov    %r15,%rbp
+  13fc0a:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fc0d:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13fc12:	0f 86 1d fe ff ff    	jbe    13fa35 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xd5>
+  13fc18:	4c 8d 25 37 5b ed ff 	lea    -0x12a4c9(%rip),%r12        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fc1f:	4c 89 e7             	mov    %r12,%rdi
+  13fc22:	be 59 02 00 00       	mov    $0x259,%esi
+  13fc27:	48 89 ea             	mov    %rbp,%rdx
+  13fc2a:	e8 c1 b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fc2f:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fc32:	3d ff ff ff f3       	cmp    $0xf3ffffff,%eax
+  13fc37:	0f 86 f8 fd ff ff    	jbe    13fa35 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xd5>
+  13fc3d:	4c 89 e7             	mov    %r12,%rdi
+  13fc40:	be 14 02 00 00       	mov    $0x214,%esi
+  13fc45:	48 89 ea             	mov    %rbp,%rdx
+  13fc48:	e8 a3 b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fc4d:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fc50:	4c 8b 63 08          	mov    0x8(%rbx),%r12
+  13fc54:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fc59:	0f 82 da fd ff ff    	jb     13fa39 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xd9>
+  13fc5f:	48 8d 3d f0 5a ed ff 	lea    -0x12a510(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fc66:	be 54 02 00 00       	mov    $0x254,%esi
+  13fc6b:	48 89 ea             	mov    %rbp,%rdx
+  13fc6e:	e8 7d b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fc73:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fc76:	e9 be fd ff ff       	jmp    13fa39 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xd9>
+  13fc7b:	48 8d 3d d4 5a ed ff 	lea    -0x12a52c(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fc82:	be 6a 02 00 00       	mov    $0x26a,%esi
+  13fc87:	48 8d 15 ec 6f ed ff 	lea    -0x129014(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  13fc8e:	e8 5d b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fc93:	4c 89 fd             	mov    %r15,%rbp
+  13fc96:	8b 43 04             	mov    0x4(%rbx),%eax
+  13fc99:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  13fc9e:	0f 82 ab fd ff ff    	jb     13fa4f <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xef>
+  13fca4:	48 8d 3d ab 5a ed ff 	lea    -0x12a555(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fcab:	be 59 02 00 00       	mov    $0x259,%esi
+  13fcb0:	4c 89 fa             	mov    %r15,%rdx
+  13fcb3:	e8 38 b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fcb8:	4c 89 fd             	mov    %r15,%rbp
+  13fcbb:	81 7b 04 00 00 00 f4 	cmpl   $0xf4000000,0x4(%rbx)
+  13fcc2:	0f 82 87 fd ff ff    	jb     13fa4f <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xef>
+  13fcc8:	48 8d 3d 87 5a ed ff 	lea    -0x12a579(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fccf:	be 14 02 00 00       	mov    $0x214,%esi
+  13fcd4:	4c 89 fa             	mov    %r15,%rdx
+  13fcd7:	e8 14 b7 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fcdc:	4c 89 fd             	mov    %r15,%rbp
+  13fcdf:	e9 6b fd ff ff       	jmp    13fa4f <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0xef>
+  13fce4:	48 8d 3d 6b 5a ed ff 	lea    -0x12a595(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fceb:	be 18 02 00 00       	mov    $0x218,%esi
+  13fcf0:	48 8d 15 f8 09 ee ff 	lea    -0x11f608(%rip),%rdx        # 206ef <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x2065f>
+  13fcf7:	e8 f4 b6 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fcfc:	e9 6e fd ff ff       	jmp    13fa6f <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x10f>
+  13fd01:	48 8d 3d 4e 5a ed ff 	lea    -0x12a5b2(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  13fd08:	be 18 02 00 00       	mov    $0x218,%esi
+  13fd0d:	48 8d 15 db 09 ee ff 	lea    -0x11f625(%rip),%rdx        # 206ef <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x2065f>
+  13fd14:	e8 d7 b6 0c 01       	call   120b3f0 <lean_notify_assert>
+  13fd19:	49 3b 6c 24 08       	cmp    0x8(%r12),%rbp
+  13fd1e:	0f 84 6e fd ff ff    	je     13fa92 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x132>
+  13fd24:	31 c0                	xor    %eax,%eax
+  13fd26:	eb 13                	jmp    13fd3b <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3db>
+  13fd28:	f6 c3 01             	test   $0x1,%bl
+  13fd2b:	75 06                	jne    13fd33 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3d3>
+  13fd2d:	0f b6 5b 07          	movzbl 0x7(%rbx),%ebx
+  13fd31:	eb 03                	jmp    13fd36 <l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0+0x3d6>
+  13fd33:	48 d1 eb             	shr    $1,%rbx
+  13fd36:	85 db                	test   %ebx,%ebx
+  13fd38:	0f 94 c0             	sete   %al
+  13fd3b:	48 83 c4 08          	add    $0x8,%rsp
+  13fd3f:	5b                   	pop    %rbx
+  13fd40:	41 5c                	pop    %r12
+  13fd42:	41 5d                	pop    %r13
+  13fd44:	41 5e                	pop    %r14
+  13fd46:	41 5f                	pop    %r15
+  13fd48:	5d                   	pop    %rbp
+  13fd49:	c3                   	ret
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section __lcxx_override:
+
+Disassembly of section .plt:

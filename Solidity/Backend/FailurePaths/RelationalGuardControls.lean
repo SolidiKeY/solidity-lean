@@ -90,14 +90,44 @@ theorem zero_horizon (p : Roadmap.Pipeline) :
       (Source.L0 _,PrimitivePackets.Comparisons.Controls.sourceState) =
       (.error .timeout,(Source.L0 _,PrimitivePackets.Comparisons.Controls.sourceState)) := rfl
 
-#print axioms checked
-#print axioms equality
-#print axioms sign_boundary
-#print axioms unsigned_maximum
-#print axioms signed_extremes
-#print axioms equal_lt_reverts
-#print axioms negative_lt_zero_succeeds
-#print axioms maximum_lt_zero_reverts
-#print axioms old_selector_refuses
-#print axioms zero_horizon
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.checked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms checked
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.equality' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms equality
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.sign_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms sign_boundary
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.unsigned_maximum' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms unsigned_maximum
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.signed_extremes' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms signed_extremes
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.equal_lt_reverts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms equal_lt_reverts
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.negative_lt_zero_succeeds' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms negative_lt_zero_succeeds
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.maximum_lt_zero_reverts' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms maximum_lt_zero_reverts
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.old_selector_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms old_selector_refuses
+/-- info: 'Solidity.Backend.FailurePaths.RelationalGuard.Controls.zero_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms zero_horizon
 end Solidity.Backend.FailurePaths.RelationalGuard.Controls

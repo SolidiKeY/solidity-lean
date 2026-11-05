@@ -86,4 +86,48 @@ theorem ContractSelection.sound {output : Json} {source name : String} {mode : I
   simp only [lookup, selection.contracts_eq, selection.source_eq,
     selection.contract_eq, bind, Except.bind, selection.selection.selected]
 
+/-- Erasing the channel derivation preserves success and error exactly. -/
+theorem select_lookup (contract : Json) (mode : IrMode) :
+    (select contract mode).map Selection.text = contract.getObjValAs? String (field mode) := by
+  unfold select
+  split
+  · next reason h => exact h.symm
+  · next text h => exact h.symm
+
+/-- Erasing the retained derivation gives exactly the ordinary lookup,
+including every error branch. No successful selection is a premise. -/
+theorem selectContract_lookup (output : Json) (source name : String) (mode : IrMode) :
+    (selectContract output source name mode).map (fun s => s.selection.text) =
+      lookup output source name mode := by
+  unfold selectContract lookup
+  split
+  · next reason h₁ => simp only [h₁, bind, Except.bind, Except.map]
+  · next contracts h₁ =>
+    simp only [bind, Except.bind]
+    split
+    · next reason h₂ => simp only [h₁, h₂, Except.map]
+    · next sourceContracts h₂ =>
+      split
+      · next reason h₃ => simp only [h₁, h₂, h₃, Except.map]
+      · next contract h₃ =>
+        simp only [h₁, h₂, h₃]
+        rw [← select_lookup contract mode]
+        cases select contract mode <;> rfl
+
+/-- Every successful ordinary path lookup is reproduced with its exact text. -/
+theorem ContractSelection.complete {output : Json} {source name : String} {mode : IrMode}
+    {text : String} (h : lookup output source name mode = .ok text) :
+    ∃ selection, selectContract output source name mode = .ok selection ∧
+      selection.selection.text = text := by
+  have mapped := selectContract_lookup output source name mode
+  rw [h] at mapped
+  cases hs : selectContract output source name mode with
+  | error reason => simp only [hs, Except.map] at mapped; contradiction
+  | ok selection =>
+    simp only [hs, Except.map] at mapped
+    exact ⟨selection, rfl, Except.ok.inj mapped⟩
+
+#print axioms select_lookup
+#print axioms selectContract_lookup
+#print axioms ContractSelection.complete
 end Solidity.Frontend.SolcJson.Ir

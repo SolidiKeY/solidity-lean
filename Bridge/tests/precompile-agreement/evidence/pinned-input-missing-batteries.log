@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/workspace/solidity-lean/Bridge/tests/precompile-agreement/build-inputs.py", line 26, in <module>
+    for name in ['Solidity.Precompiles.Osaka','EvmYul.EVM.PrecompiledContracts']:visit(name)
+                                                                                 ^^^^^^^^^^^
+  File "/workspace/solidity-lean/Bridge/tests/precompile-agreement/build-inputs.py", line 24, in visit
+    for dep in line.split()[1:]: visit(dep)
+                                 ^^^^^^^^^^
+  File "/workspace/solidity-lean/Bridge/tests/precompile-agreement/build-inputs.py", line 24, in visit
+    for dep in line.split()[1:]: visit(dep)
+                                 ^^^^^^^^^^
+  File "/workspace/solidity-lean/Bridge/tests/precompile-agreement/build-inputs.py", line 20, in visit
+    raise RuntimeError('Missing pinned external cache artifact: '+name)
+RuntimeError: Missing pinned external cache artifact: Batteries.Data.RBMap

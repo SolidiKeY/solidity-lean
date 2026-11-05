@@ -3151,5 +3151,52 @@
     "id": "H41",
     "mode": "coordinator-pull",
     "vm_ship_cache": false
+  },
+  "loop_backfill": {
+    "scope": "zero-body-turn",
+    "condition_checks": 1,
+    "body_turns": 0,
+    "allocation_cost": 0,
+    "compiled_body_family": "require flag",
+    "arbitrary_compiled_bodies": false,
+    "positive_allocating_capacity": false,
+    "arbitrary_termination": false,
+    "file": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean",
+    "theorems": [
+      "Solidity.Assurance.NonVacuityH28.false_loop_stmt_source",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_source",
+      "Solidity.Assurance.NonVacuityH28.skipped_body_reverts",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_input",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty",
+      "Solidity.Assurance.NonVacuityH28.zero_condition_target",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_target",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_demand",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_cost",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_checked",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_joint",
+      "Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout"
+    ]
+  },
+  "published_copy": {
+    "old_head": "8f6e7e626cd5d2b6b444616a5a17294ff29cc605",
+    "published_import": "de1d76d922d7ff42d3a07bc020b740f8ec9f0105",
+    "upstream": "e6849d3bdf516099d20c33d3581d523449764018",
+    "restored_ledger": "tests/h28-sol/non-vacuity/public-contracts.json"
+  },
+  "entered_revert_backfill": {
+    "scope": "first-body-attempt-reverts",
+    "condition_checks": 1,
+    "attempted_body_turns": 1,
+    "completed_body_turns": 0,
+    "allocation_cost": 0,
+    "positive_allocating_capacity": false,
+    "arbitrary_termination": false,
+    "theorems": [
+      "Solidity.Assurance.NonVacuityH28.entered_revert_source",
+      "Solidity.Assurance.NonVacuityH28.entered_revert_target",
+      "Solidity.Assurance.NonVacuityH28.entered_revert_input",
+      "Solidity.Assurance.NonVacuityH28.entered_revert_demand",
+      "Solidity.Assurance.NonVacuityH28.entered_revert_joint"
+    ]
   }
 }

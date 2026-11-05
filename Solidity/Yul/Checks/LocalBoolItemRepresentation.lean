@@ -1,6 +1,7 @@
 import Solidity.Yul.LocalBoolItemRepresentation
 import Solidity.Yul.Checks.LocalBoolControlRepresentation
 
+/-! Raw Boolean declaration and initialization controls with pinned axiom reports. -/
 namespace Solidity.Yul.Checks.LocalBoolItemRepresentation
 export Solidity.Yul.Checks.LocalBoolControlRepresentation (env state raw cleanTrue cleanFalse)
 def body : Solidity.Source.RItems env [] false ⟨false,false⟩ [.bool] [.bool,.bool] :=
@@ -50,15 +51,35 @@ theorem reachedContextDistinct : ∀ (world : Solidity.Source.St Solidity.Yul.Ch
     (.halted .timeout (Solidity.Yul.Checks.LocalBoolItemRepresentation.state (Solidity.Yul.Checks.LocalBoolItemRepresentation.raw 2) world)) (.halted .timeout (Solidity.Yul.Checks.LocalBoolItemRepresentation.extended world)) at related
   cases related
 
+/-- info: 'Solidity.Yul.LocalBoolItemRepresentation.finish' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.LocalBoolItemRepresentation.finish
+/-- info: 'Solidity.Yul.LocalBoolItemRepresentation.initialization' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.LocalBoolItemRepresentation.initialization
+/-- info: 'Solidity.Yul.LocalBoolItemRepresentation.items' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.LocalBoolItemRepresentation.items
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.completed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms completed
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.beforeDeclaration' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms beforeDeclaration
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.afterDeclaration' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms afterDeclaration
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.zeroFuel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms zeroFuel
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.normalProjectionRefused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms normalProjectionRefused
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.haltProjection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms haltProjection
+/-- info: 'Solidity.Yul.Checks.LocalBoolItemRepresentation.reachedContextDistinct' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
 #print axioms reachedContextDistinct
 
 end Solidity.Yul.Checks.LocalBoolItemRepresentation

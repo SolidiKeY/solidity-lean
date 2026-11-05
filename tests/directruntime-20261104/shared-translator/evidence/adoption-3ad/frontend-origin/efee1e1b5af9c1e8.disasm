@@ -1,0 +1,190 @@
+
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000140ec0 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0>:
+  140ec0:	40 f6 c7 01          	test   $0x1,%dil
+  140ec4:	0f 85 b8 00 00 00    	jne    140f82 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xc2>
+  140eca:	0f b6 47 07          	movzbl 0x7(%rdi),%eax
+  140ece:	85 c0                	test   %eax,%eax
+  140ed0:	0f 84 ba 00 00 00    	je     140f90 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xd0>
+  140ed6:	40 f6 c6 01          	test   $0x1,%sil
+  140eda:	0f 85 bc 00 00 00    	jne    140f9c <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xdc>
+  140ee0:	0f b6 46 07          	movzbl 0x7(%rsi),%eax
+  140ee4:	85 c0                	test   %eax,%eax
+  140ee6:	0f 84 be 00 00 00    	je     140faa <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xea>
+  140eec:	41 57                	push   %r15
+  140eee:	41 56                	push   %r14
+  140ef0:	53                   	push   %rbx
+  140ef1:	8b 47 04             	mov    0x4(%rdi),%eax
+  140ef4:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  140ef9:	0f 83 be 00 00 00    	jae    140fbd <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xfd>
+  140eff:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  140f04:	0f 84 e8 00 00 00    	je     140ff2 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x132>
+  140f0a:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  140f0f:	0f 83 12 01 00 00    	jae    141027 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x167>
+  140f15:	48 8b 7f 08          	mov    0x8(%rdi),%rdi
+  140f19:	8b 46 04             	mov    0x4(%rsi),%eax
+  140f1c:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  140f21:	0f 83 57 01 00 00    	jae    14107e <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x1be>
+  140f27:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  140f2c:	0f 84 82 01 00 00    	je     1410b4 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x1f4>
+  140f32:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  140f37:	0f 83 ad 01 00 00    	jae    1410ea <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x22a>
+  140f3d:	48 8b 76 08          	mov    0x8(%rsi),%rsi
+  140f41:	48 39 f7             	cmp    %rsi,%rdi
+  140f44:	74 70                	je     140fb6 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xf6>
+  140f46:	0f b6 47 07          	movzbl 0x7(%rdi),%eax
+  140f4a:	c1 e0 18             	shl    $0x18,%eax
+  140f4d:	3d 00 00 00 f9       	cmp    $0xf9000000,%eax
+  140f52:	0f 85 ea 01 00 00    	jne    141142 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x282>
+  140f58:	48 8b 5f 08          	mov    0x8(%rdi),%rbx
+  140f5c:	0f b6 46 07          	movzbl 0x7(%rsi),%eax
+  140f60:	c1 e0 18             	shl    $0x18,%eax
+  140f63:	3d 00 00 00 f9       	cmp    $0xf9000000,%eax
+  140f68:	0f 85 00 02 00 00    	jne    14116e <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x2ae>
+  140f6e:	48 3b 5e 08          	cmp    0x8(%rsi),%rbx
+  140f72:	0f 85 27 02 00 00    	jne    14119f <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x2df>
+  140f78:	e8 b3 7a 0d 01       	call   1218a30 <lean_string_eq_cold>
+  140f7d:	e9 1f 02 00 00       	jmp    1411a1 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x2e1>
+  140f82:	48 89 f8             	mov    %rdi,%rax
+  140f85:	48 d1 e8             	shr    $1,%rax
+  140f88:	85 c0                	test   %eax,%eax
+  140f8a:	0f 85 46 ff ff ff    	jne    140ed6 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x16>
+  140f90:	40 f6 c6 01          	test   $0x1,%sil
+  140f94:	75 17                	jne    140fad <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xed>
+  140f96:	0f b6 76 07          	movzbl 0x7(%rsi),%esi
+  140f9a:	eb 14                	jmp    140fb0 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xf0>
+  140f9c:	48 89 f0             	mov    %rsi,%rax
+  140f9f:	48 d1 e8             	shr    $1,%rax
+  140fa2:	85 c0                	test   %eax,%eax
+  140fa4:	0f 85 42 ff ff ff    	jne    140eec <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x2c>
+  140faa:	31 c0                	xor    %eax,%eax
+  140fac:	c3                   	ret
+  140fad:	48 d1 ee             	shr    $1,%rsi
+  140fb0:	85 f6                	test   %esi,%esi
+  140fb2:	0f 94 c0             	sete   %al
+  140fb5:	c3                   	ret
+  140fb6:	b0 01                	mov    $0x1,%al
+  140fb8:	e9 e4 01 00 00       	jmp    1411a1 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x2e1>
+  140fbd:	48 8d 05 92 47 ed ff 	lea    -0x12b86e(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  140fc4:	48 8d 15 6e 98 ed ff 	lea    -0x126792(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  140fcb:	48 89 fb             	mov    %rdi,%rbx
+  140fce:	48 89 c7             	mov    %rax,%rdi
+  140fd1:	49 89 f6             	mov    %rsi,%r14
+  140fd4:	be 54 02 00 00       	mov    $0x254,%esi
+  140fd9:	e8 12 a4 0c 01       	call   120b3f0 <lean_notify_assert>
+  140fde:	48 89 df             	mov    %rbx,%rdi
+  140fe1:	4c 89 f6             	mov    %r14,%rsi
+  140fe4:	8b 43 04             	mov    0x4(%rbx),%eax
+  140fe7:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  140fec:	0f 85 18 ff ff ff    	jne    140f0a <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x4a>
+  140ff2:	48 8d 05 5d 47 ed ff 	lea    -0x12b8a3(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  140ff9:	48 8d 15 7a 5c ed ff 	lea    -0x12a386(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  141000:	48 89 fb             	mov    %rdi,%rbx
+  141003:	48 89 c7             	mov    %rax,%rdi
+  141006:	49 89 f6             	mov    %rsi,%r14
+  141009:	be 6a 02 00 00       	mov    $0x26a,%esi
+  14100e:	e8 dd a3 0c 01       	call   120b3f0 <lean_notify_assert>
+  141013:	48 89 df             	mov    %rbx,%rdi
+  141016:	4c 89 f6             	mov    %r14,%rsi
+  141019:	8b 43 04             	mov    0x4(%rbx),%eax
+  14101c:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  141021:	0f 82 ee fe ff ff    	jb     140f15 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x55>
+  141027:	48 8d 05 28 47 ed ff 	lea    -0x12b8d8(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  14102e:	48 8d 15 04 98 ed ff 	lea    -0x1267fc(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  141035:	48 89 fb             	mov    %rdi,%rbx
+  141038:	48 89 c7             	mov    %rax,%rdi
+  14103b:	49 89 f6             	mov    %rsi,%r14
+  14103e:	be 59 02 00 00       	mov    $0x259,%esi
+  141043:	e8 a8 a3 0c 01       	call   120b3f0 <lean_notify_assert>
+  141048:	48 89 df             	mov    %rbx,%rdi
+  14104b:	4c 89 f6             	mov    %r14,%rsi
+  14104e:	81 7b 04 00 00 00 f4 	cmpl   $0xf4000000,0x4(%rbx)
+  141055:	0f 82 ba fe ff ff    	jb     140f15 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x55>
+  14105b:	48 8d 3d f4 46 ed ff 	lea    -0x12b90c(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141062:	48 8d 15 d0 97 ed ff 	lea    -0x126830(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  141069:	be 14 02 00 00       	mov    $0x214,%esi
+  14106e:	e8 7d a3 0c 01       	call   120b3f0 <lean_notify_assert>
+  141073:	48 89 df             	mov    %rbx,%rdi
+  141076:	4c 89 f6             	mov    %r14,%rsi
+  141079:	e9 97 fe ff ff       	jmp    140f15 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x55>
+  14107e:	48 8d 05 d1 46 ed ff 	lea    -0x12b92f(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141085:	48 8d 15 ad 97 ed ff 	lea    -0x126853(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  14108c:	48 89 fb             	mov    %rdi,%rbx
+  14108f:	48 89 c7             	mov    %rax,%rdi
+  141092:	49 89 f6             	mov    %rsi,%r14
+  141095:	be 54 02 00 00       	mov    $0x254,%esi
+  14109a:	e8 51 a3 0c 01       	call   120b3f0 <lean_notify_assert>
+  14109f:	48 89 df             	mov    %rbx,%rdi
+  1410a2:	4c 89 f6             	mov    %r14,%rsi
+  1410a5:	41 8b 46 04          	mov    0x4(%r14),%eax
+  1410a9:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  1410ae:	0f 85 7e fe ff ff    	jne    140f32 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x72>
+  1410b4:	48 8d 05 9b 46 ed ff 	lea    -0x12b965(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  1410bb:	48 8d 15 b8 5b ed ff 	lea    -0x12a448(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  1410c2:	48 89 fb             	mov    %rdi,%rbx
+  1410c5:	48 89 c7             	mov    %rax,%rdi
+  1410c8:	49 89 f6             	mov    %rsi,%r14
+  1410cb:	be 6a 02 00 00       	mov    $0x26a,%esi
+  1410d0:	e8 1b a3 0c 01       	call   120b3f0 <lean_notify_assert>
+  1410d5:	48 89 df             	mov    %rbx,%rdi
+  1410d8:	4c 89 f6             	mov    %r14,%rsi
+  1410db:	41 8b 46 04          	mov    0x4(%r14),%eax
+  1410df:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  1410e4:	0f 82 53 fe ff ff    	jb     140f3d <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x7d>
+  1410ea:	48 8d 05 65 46 ed ff 	lea    -0x12b99b(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  1410f1:	48 8d 15 41 97 ed ff 	lea    -0x1268bf(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  1410f8:	48 89 fb             	mov    %rdi,%rbx
+  1410fb:	48 89 c7             	mov    %rax,%rdi
+  1410fe:	49 89 f6             	mov    %rsi,%r14
+  141101:	be 59 02 00 00       	mov    $0x259,%esi
+  141106:	e8 e5 a2 0c 01       	call   120b3f0 <lean_notify_assert>
+  14110b:	48 89 df             	mov    %rbx,%rdi
+  14110e:	4c 89 f6             	mov    %r14,%rsi
+  141111:	41 81 7e 04 00 00 00 	cmpl   $0xf4000000,0x4(%r14)
+  141118:	f4 
+  141119:	0f 82 1e fe ff ff    	jb     140f3d <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x7d>
+  14111f:	48 8d 3d 30 46 ed ff 	lea    -0x12b9d0(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141126:	48 8d 15 0c 97 ed ff 	lea    -0x1268f4(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  14112d:	be 14 02 00 00       	mov    $0x214,%esi
+  141132:	e8 b9 a2 0c 01       	call   120b3f0 <lean_notify_assert>
+  141137:	48 89 df             	mov    %rbx,%rdi
+  14113a:	4c 89 f6             	mov    %r14,%rsi
+  14113d:	e9 fb fd ff ff       	jmp    140f3d <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x7d>
+  141142:	48 8d 05 0d 46 ed ff 	lea    -0x12b9f3(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141149:	48 8d 15 9f f5 ed ff 	lea    -0x120a61(%rip),%rdx        # 206ef <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x2065f>
+  141150:	48 89 fb             	mov    %rdi,%rbx
+  141153:	48 89 c7             	mov    %rax,%rdi
+  141156:	49 89 f6             	mov    %rsi,%r14
+  141159:	be 18 02 00 00       	mov    $0x218,%esi
+  14115e:	e8 8d a2 0c 01       	call   120b3f0 <lean_notify_assert>
+  141163:	4c 89 f6             	mov    %r14,%rsi
+  141166:	48 89 df             	mov    %rbx,%rdi
+  141169:	e9 ea fd ff ff       	jmp    140f58 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0x98>
+  14116e:	48 8d 05 e1 45 ed ff 	lea    -0x12ba1f(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141175:	48 8d 15 73 f5 ed ff 	lea    -0x120a8d(%rip),%rdx        # 206ef <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x2065f>
+  14117c:	49 89 fe             	mov    %rdi,%r14
+  14117f:	48 89 c7             	mov    %rax,%rdi
+  141182:	49 89 f7             	mov    %rsi,%r15
+  141185:	be 18 02 00 00       	mov    $0x218,%esi
+  14118a:	e8 61 a2 0c 01       	call   120b3f0 <lean_notify_assert>
+  14118f:	4c 89 fe             	mov    %r15,%rsi
+  141192:	4c 89 f7             	mov    %r14,%rdi
+  141195:	48 3b 5e 08          	cmp    0x8(%rsi),%rbx
+  141199:	0f 84 d9 fd ff ff    	je     140f78 <l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0+0xb8>
+  14119f:	31 c0                	xor    %eax,%eax
+  1411a1:	5b                   	pop    %rbx
+  1411a2:	41 5e                	pop    %r14
+  1411a4:	41 5f                	pop    %r15
+  1411a6:	c3                   	ret
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section __lcxx_override:
+
+Disassembly of section .plt:

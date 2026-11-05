@@ -1,0 +1,32 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/coord-tools/lean-mcp",
+      "diag",
+      "Solidity/SolcValidation/DataResolution.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 2.2544893369995407,
+    "stdout": "diag: 0 errors\n",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/coord-tools/lean-mcp",
+      "diag",
+      "tests/fullscope-20261104/vt1/ObjectDataChecks.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 1.7007216599995445,
+    "stdout": "diag: 0 errors\n",
+    "stderr": ""
+  },
+  {
+    "command": "lean-mcp stop",
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]
