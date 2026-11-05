@@ -6,7 +6,7 @@ integration gates without claiming assignment completion. Never updates a pin.
 import argparse,copy,importlib.util,json,os,pathlib,re,subprocess,sys,tempfile
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'tests/sol-numeric-literals'))
-from packetlib import BASE,FOLDER,PREFIX,CONSTRUCTOR_CONTROLS,REQUIRED_THEOREMS,blank_lean,case_families,controls,git,normalized_inventory,permitted,sha,source_snapshot
+from packetlib import BASE,ADOPTED_MASTER,FOLDER,PREFIX,CONSTRUCTOR_CONTROLS,REQUIRED_THEOREMS,blank_lean,case_families,controls,git,normalized_inventory,permitted,sha,source_snapshot
 
 def require(condition,message):
  if not condition:raise ValueError(message)
@@ -34,6 +34,17 @@ def validate_inventory(actual,pinned,modules):
  return byname
 
 def run(command):subprocess.run(command,cwd=ROOT,check=True)
+
+def changed_paths(tree=None):
+ target=[tree] if tree else []
+ return set(git('diff','--name-only',BASE,*target,'--').splitlines()) | set(git('diff','--name-only',ADOPTED_MASTER,*target,'--').splitlines()) | set(git('ls-files','--others','--exclude-standard').splitlines())
+
+def validate_foreign_paths(foreign,untracked,tree=None):
+ require(not (set(foreign)&set(untracked)),'untracked foreign write')
+ if foreign:
+  command=['git','diff','--quiet',ADOPTED_MASTER]+([tree] if tree else [])+['--',*sorted(foreign)]
+  result=subprocess.run(command,cwd=ROOT)
+  require(result.returncode==0,'foreign work differs from adopted publication')
 
 def validate_registration(registration):
  require(sha(ROOT/'Solidity.lean')==registration['desired_root_sha256'],'coordinator root registration is not present')
@@ -112,13 +123,24 @@ def check(implementation=False,self_test=False):
  require(manifest['base']==BASE,'wrong base pin')
  require(git('branch','--show-current')=='codex/solidity-sol2-20261104/numeric-literals','wrong branch')
  run(['git','merge-base','--is-ancestor',BASE,'HEAD'])
- changed=set(git('diff','--name-only',BASE).splitlines())|set(git('ls-files','--others','--exclude-standard').splitlines())
+ adoption=json.loads((FOLDER/'adoption.json').read_text())
+ require(adoption['original_base']==BASE and adoption['adopted_master']==ADOPTED_MASTER,'adoption identity drift')
+ require(manifest['adopted_master']==ADOPTED_MASTER,'acceptance adoption pin differs')
+ run(['git','merge-base','--is-ancestor',BASE,ADOPTED_MASTER])
+ run(['git','merge-base','--is-ancestor',ADOPTED_MASTER,'HEAD'])
+ run(['git','merge-base','--is-ancestor',adoption['pre_adoption_head'],'HEAD'])
+ changed=changed_paths()
  registration=json.loads((FOLDER/'registration.json').read_text())
  # The worker never writes these files. A coordinator may apply the exact
  # predeclared integration proposal; accepting it is observation, not authority.
  coordinator_files={'Solidity.lean':registration['desired_root_sha256'],registration['module_map_file']:registration['desired_module_map_sha256']}
  outside={p for p in changed if not permitted(p)}
- require(all(not implementation and p in coordinator_files and sha(ROOT/p)==coordinator_files[p] for p in outside),'write scope exceeded: '+str(sorted(outside)))
+ # Adopted upstream bytes are authorized inherited work, never a blanket
+ # foreign-edit exemption. Every other foreign path must match that exact tree.
+ untracked=set(git('ls-files','--others','--exclude-standard').splitlines())
+ require(not (outside & untracked),'untracked foreign write: '+str(sorted(outside & untracked)))
+ foreign=[p for p in outside if not (not implementation and p in coordinator_files and (ROOT/p).is_file() and sha(ROOT/p)==coordinator_files[p])]
+ validate_foreign_paths(foreign,untracked)
  pins=json.loads((FOLDER/'source-pins.json').read_text())
  require(pins['base']==BASE,'wrong scanner base')
  for path,digest in pins['sha256'].items():
@@ -194,6 +216,7 @@ def check(implementation=False,self_test=False):
   finally:pathlib.Path(temporary).unlink()
   run([sys.executable,'tests/sol-numeric-literals/runtime/test-check.py'])
   run([sys.executable,'tests/sol-numeric-literals/h35/test-h41.py'])
+  run([sys.executable,'tests/sol-numeric-literals/test-adoption.py'])
   print('acceptance negative controls: 5 inventory mutations, forged completion, uncommitted input and MOCK resource-stop reporting passed')
  authored=sum(len(m['authored']) for m in modules)
  print(f'implementation acceptance: {len(modules)} modules, {authored} authored declarations, {len(actual)} kernel declarations, {len(CONSTRUCTOR_CONTROLS)} inhabited constructors, {len(controls())} scanner controls, 42 paired fixtures')

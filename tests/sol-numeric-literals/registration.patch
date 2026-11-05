@@ -1,9 +1,9 @@
 --- a/Solidity.lean
 +++ b/Solidity.lean
-@@ -1501,6 +1501,48 @@
- import Solidity.Frontend.CreationTryImport
- import Solidity.Frontend.Import
- import Solidity.Frontend.LibraryTryImport
+@@ -1613,11 +1613,48 @@
+ import Solidity.Frontend.LiteralGrammarH28.BodyControls
+ import Solidity.Frontend.LiteralGrammarH28.Hex
+ import Solidity.Frontend.LiteralGrammarH28.HexEncoding
 +import Solidity.Frontend.NumericLiteralProofs.Audit
 +import Solidity.Frontend.NumericLiteralProofs.Backfill
 +import Solidity.Frontend.NumericLiteralProofs.Classification
@@ -16,11 +16,11 @@
 +import Solidity.Frontend.NumericLiteralProofs.Underscores
 +import Solidity.Frontend.NumericLiteralProofs.Values
 +import Solidity.Frontend.NumericLiteralProofs.WordTable
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part05
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part06
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part07
@@ -47,5 +47,5 @@
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part28
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part29
  import Solidity.Frontend.OverrideValidation.Attributes
+ import Solidity.Frontend.OverrideValidation.Compatibility
  import Solidity.Frontend.OverrideValidation.Graph
- import Solidity.Frontend.OverrideValidation.Identity

@@ -33,21 +33,22 @@ pinned=json.loads((f/'kernel-inventory.json').read_text());byname={r['name']:r f
 assert set(actual)==set(expected['authored_theorems'])
 for name,axioms in actual.items():assert axioms==sorted(byname[name]['axioms']),name
 assert hashlib.sha256((here/'PrintAllAxioms.lean').read_bytes()).hexdigest()==expected['print_all_file_sha256']
-all_raw=json.loads((f/'evidence/h35-print-all-axioms.log').read_text())
-assert all_raw['success'] and not all_raw['partial'] and not all_raw['timed_out'] and not all_raw.get('failed_dependencies')
-all_actual={}
-for item in all_raw['items']:
- assert item['severity']=='info'
- text=item['message'];assert text.startswith("'")
- name,text=text[1:].rsplit("' ",1)
- assert name not in all_actual
- if text=='does not depend on any axioms':axioms=[]
- else:
-  assert text.startswith('depends on axioms: [') and text.endswith(']')
-  axioms=sorted(x.strip() for x in text[len('depends on axioms: ['):-1].split(',') if x.strip())
- all_actual[name]=axioms
-assert len(all_actual)==808 and set(all_actual)=={r['name'] for r in pinned if r['kind']=='theorem'}
-for name,axioms in all_actual.items():assert axioms==sorted(byname[name]['axioms']),name
+for label in ('h35-print-all-axioms','adopted-print-axioms'):
+ all_raw=json.loads((f/'evidence'/(label+'.log')).read_text())
+ assert all_raw['success'] and not all_raw['partial'] and not all_raw['timed_out'] and not all_raw.get('failed_dependencies')
+ all_actual={}
+ for item in all_raw['items']:
+  assert item['severity']=='info'
+  text=item['message'];assert text.startswith("'")
+  name,text=text[1:].rsplit("' ",1)
+  assert name not in all_actual
+  if text=='does not depend on any axioms':axioms=[]
+  else:
+   assert text.startswith('depends on axioms: [') and text.endswith(']')
+   axioms=sorted(x.strip() for x in text[len('depends on axioms: ['):-1].split(',') if x.strip())
+  all_actual[name]=axioms
+ assert len(all_actual)==808 and set(all_actual)=={r['name'] for r in pinned if r['kind']=='theorem'}
+ for name,axioms in all_actual.items():assert axioms==sorted(byname[name]['axioms']),name
 
 ns=runpy.run_path(str(root/'scripts/check-sol-numeric-literals.py'))
 modules=ns['source_snapshot']()
@@ -56,6 +57,12 @@ build=json.loads((f/'evidence/h35-owned-build.json').read_text())
 assert build['exit']==0 and not build['resource_stop']
 assert build['proof_sources']=={m['path']:m['sha256'] for m in modules}
 assert build['minimum_parent_headroom_bytes']>=4*1024**3
+for label in ('adopted-owned-build','adopted-audit','adopted-print-axioms'):
+ gate=json.loads((f/'evidence'/(label+'.json')).read_text())
+ assert gate['exit']==0 and not gate['resource_stop']
+ assert gate['proof_sources']==build['proof_sources']
+ assert gate['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1)
+ assert gate['minimum_parent_headroom_bytes']>=4*1024**3
 result=dict(authored_prints=627,all_theorem_prints=808,all_printed_theorem_axioms=all_actual,kernel_theorem_constants=sum(r['kind']=='theorem' for r in pinned),all_owned_constants=len(pinned),new_axioms=[],axioms_by_authored_theorem=actual,proof_sources=build['proof_sources'],print_diagnostics_complete=True,generated_helpers_checked_by_full_inventory=True)
 (f/'evidence/h35-axiom-validation.json').write_text(json.dumps(result,indent=2)+'\n')
 print('H35 axioms: 627 authored prints and all808 theorem-constant prints match pins; full991 inventory checked; no new axioms or unsafe declarations')

@@ -1,0 +1,16 @@
+{
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "pre_adoption_head": "7dc7de2d8581fd54766318fb20670511acd68ed6",
+  "merge_commit": "221c2eaee71760bac888cb309645c2afaf90109b",
+  "authorization": "Coordinator: Adopt the published master while preserving your owned branch/work.",
+  "owned_proofs_unchanged": true,
+  "preserved_work": "/workspace/sol-numeric-literals-pre-adopt-8495f1de/preserved.json",
+  "integrated_modules": [
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part00.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part01.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part02.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part03.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part04.lean"
+  ]
+}

@@ -47,7 +47,7 @@
   {
     "id": "static-gates",
     "status": "blocked",
-    "evidence": "Fresh H41 full suite: build/trust/layers/docs/axiom pins/TestSuite/corpus/automation pass; root/orphan failures remain coordinator registration. H41 cache handoff is verified coordinator-pending, not a blocker."
+    "evidence": "Post-adoption fullsuite passes build/trust/layers/docs/axiompins/TestSuite/corpus/automation;37rootimports and38maprows remain coordinator-owned. H41 handoff verifiedcoordinator-pending."
   },
   {
     "id": "coordinator-registration",
