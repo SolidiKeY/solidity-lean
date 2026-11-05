@@ -290,6 +290,7 @@ import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
 import Solidity.Backend.MemoryCopies.CheckedFixedMemory
 import Solidity.Backend.MemoryCopies.CheckedFixedMemoryControls
 import Solidity.Backend.MemoryCopies.CheckedFixedMemoryInterface
+import Solidity.Backend.MemoryCopies.CheckedFixedPathCopyInterface
 import Solidity.Backend.MemoryCopies.CheckedFixedStorage
 import Solidity.Backend.MemoryCopies.CheckedFixedStorageControls
 import Solidity.Backend.MemoryCopies.CheckedFixedStorageInterface

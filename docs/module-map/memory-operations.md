@@ -332,3 +332,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedFixedMemoryInterface.lean` | Total guarded fixed memory-copy contracts retaining allocator, framing, gaps and strict fresh identity. |
 | `Backend/MemoryCopies/CheckedFixedMemory.lean` | Existing guard and fixed-copy execution transport, complete fresh-copy success and total target capacity cases. |
 | `Backend/MemoryCopies/CheckedFixedMemoryControls.lean` | Represented old aliases, fresh empty/pair/long copies, saturation and strict capacity boundaries with code-only huge demand. |
+| `Backend/MemoryCopies/CheckedFixedPathCopyInterface.lean` | Total checked fixed-path copy/binding contracts with full state adoption and distinct path/capacity failures. |
