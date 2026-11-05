@@ -433,6 +433,10 @@ namespace Solidity.Frontend.LiteralGrammarH28
 #print axioms Plain.length_le
 #check @HexLiteral.length_bounds
 #print axioms HexLiteral.length_bounds
+#check @HexBody.length_tight
+#print axioms HexBody.length_tight
+#check @HexLiteral.length_le_tight
+#print axioms HexLiteral.length_le_tight
 #check @UnicodeLiteral.length_le
 #print axioms UnicodeLiteral.length_le
 #check @Fragments.length_eq

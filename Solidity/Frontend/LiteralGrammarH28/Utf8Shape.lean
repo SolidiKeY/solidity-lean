@@ -92,4 +92,12 @@ example : ¬ Utf8Shape [0xC0, 0x80] := by
   simp only [Utf8Shape, Continuation]
   decide
 
+/-- Negative control: an overlong three-byte spelling (lead 0xE0, second byte below 0xA0). -/
+example : ¬ Utf8Shape [0xE0, 0x80, 0x80] := by
+  simp only [Utf8Shape, Continuation]
+  decide
+/-- Inhabited two-byte control. -/
+example : utf8 0x80 = [0xC2, 0x80] ∧ Utf8Shape (utf8 0x80) :=
+  ⟨by decide, (codepoint_sound _).shape (by decide)⟩
+
 end Solidity.Frontend.LiteralGrammarH28

@@ -5,18 +5,28 @@ Usage: audit.py [--scope-base REV] [AXIOM_LOG]
 
 AXIOM_LOG is fresh Lean output containing the `#print axioms` reports of
 `FullPins.lean` (for example a `lake build` log, which replays cached
-messages).  Without it the committed `evidence/axioms.log` is used, and its
-SHA256 must equal the one recorded next to the reviewed source hashes in
-`proof-source-identities.json`.  The script reads only committed files, git
-and the optional log; it does not run Lean.  Scope is checked against
-REV (default: the merge base of HEAD and origin/master, skipped if neither
-resolves).
+messages) and must show FullPins being built or replayed.  Without it the
+committed log named in `proof-source-identities.json` is used, and its SHA256
+must equal the one recorded there next to the reviewed source hashes.  A
+supplied log is not bound to the sources beyond that marker: record a fresh
+one with `--record` (which rewrites the identities) to make it the committed
+evidence.  The script reads only committed files, git and the optional log; it
+does not run Lean.
+
+Scope is checked against REV (default: the merge base of HEAD and
+origin/master; the audit fails if neither resolves).  It covers the lane's
+changes since that base only; the lane's earlier Codex history (from
+`pins['base']`) was checked by the earlier audit on the Codex VM, whose
+adoption commits are not published.  The shared generated files
+`Solidity.lean` and `docs/module-map/frontend.md` may change only in lines
+naming this lane's modules.
 """
 import argparse, hashlib, json, pathlib, re, subprocess, sys
 root = pathlib.Path(__file__).resolve().parents[3]
 here = pathlib.Path(__file__).resolve().parent
 ap = argparse.ArgumentParser()
 ap.add_argument('--scope-base')
+ap.add_argument('--record', action='store_true', help='copy AXIOM_LOG to the committed log and rewrite the identities')
 ap.add_argument('axiom_log', nargs='?')
 args = ap.parse_args()
 pins = json.loads((here/'pins.json').read_text())
@@ -30,6 +40,8 @@ if args.axiom_log is None:
 else:
     log_path = pathlib.Path(args.axiom_log)
 log = log_path.read_text(errors='replace')
+if args.axiom_log is not None:
+    assert re.search(r'(Built|Replayed) Solidity\.Frontend\.LiteralGrammarH28\.FullPins\b', log) or 'LiteralGrammarH28/FullPins.lean:1:0' in log, 'supplied log shows no FullPins build'
 found = {}
 # A long axiom list wraps onto indented continuation lines; rejoin them.
 lines = []
@@ -48,6 +60,16 @@ for line in lines:
     assert name not in found, ('duplicate axiom report', name)
     found[name] = [] if tail.startswith('does not') else re.split(r',\s*', tail.split('[', 1)[1][:-1])
 assert found == pins['axioms'], ('axiom reports differ from pins', set(found) ^ set(pins['axioms']), [k for k in found if k in pins['axioms'] and found[k] != pins['axioms'][k]])
+if args.record:
+    assert args.axiom_log is not None, '--record needs AXIOM_LOG'
+    kept = [l for l in lines if 'LiteralGrammarH28/FullPins.lean:' in l or 'LiteralGrammarH28/ProofSafety.lean:' in l]
+    target = here/'evidence/axioms.log'
+    target.write_text('\n'.join(kept) + '\n')
+    identities = dict(sources={str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+                               for p in sorted((root/'Solidity/Frontend/LiteralGrammarH28').rglob('*.lean'))},
+                      axiom_log=str(target.relative_to(root)),
+                      axiom_log_sha256=hashlib.sha256(target.read_bytes()).hexdigest())
+    (here/'proof-source-identities.json').write_text(json.dumps(identities, indent=2) + '\n')
 controls = (root/'Solidity/Frontend/LiteralGrammarH28/HexControls.lean').read_text()
 assert len(re.findall(r'\("(?:[^"\\]|\\.)*", (?:some|none)', controls)) == pins['hex_control_count']
 body = (root/'Solidity/Frontend/LiteralGrammarH28/BodyControls.lean').read_text()
@@ -67,16 +89,19 @@ def owned_path(name):
 def rev_ok(rev):
     return subprocess.run(['git', 'rev-parse', '--verify', '-q', rev+'^{commit}'], cwd=root, capture_output=True).returncode == 0
 scope_base = args.scope_base
-if scope_base is None and rev_ok('origin/master'):
+if scope_base is None:
+    assert rev_ok('origin/master'), 'no scope base: pass --scope-base or fetch origin/master'
     scope_base = subprocess.check_output(['git', 'merge-base', 'HEAD', 'origin/master'], cwd=root, text=True).strip()
-scope_checked = 0
-if scope_base is not None:
-    assert rev_ok(scope_base), ('scope base does not resolve', scope_base)
-    paths = subprocess.check_output(['git', 'diff', '--name-only', scope_base], cwd=root, text=True).splitlines()
-    paths += subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], cwd=root, text=True).splitlines()
-    bad = [name for name in paths if not owned_path(name)]
-    assert not bad, ('scope', bad)
-    scope_checked = len(paths)
+assert rev_ok(scope_base), ('scope base does not resolve', scope_base)
+paths = subprocess.check_output(['git', 'diff', '--no-renames', '--name-only', scope_base], cwd=root, text=True).splitlines()
+paths += subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], cwd=root, text=True).splitlines()
+bad = [name for name in paths if not owned_path(name)]
+assert not bad, ('scope', bad)
+for shared in ('Solidity.lean', 'docs/module-map/frontend.md'):
+    diff = subprocess.check_output(['git', 'diff', '--no-renames', '-U0', scope_base, '--', shared], cwd=root, text=True).splitlines()
+    changed = [l for l in diff if l[:1] in '+-' and not l.startswith(('+++', '---'))]
+    assert all('LiteralGrammarH28' in l for l in changed), ('shared file changed outside lane lines', shared, changed)
+scope_checked = len(paths)
 for source in (root/'Solidity/Frontend/LiteralGrammarH28').rglob('*.lean'):
     text = source.read_text()
     assert not re.search(r'\b(sorry|admit|unsafe|native_decide|maxHeartbeats)\b', text), source
