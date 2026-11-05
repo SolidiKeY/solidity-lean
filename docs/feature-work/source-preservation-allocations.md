@@ -279,3 +279,11 @@ parents can use them through the existing single-return body/call frames;
 states the explicit admission premises and inhabited fixed-array return control.
 This is Source-only preservation/progress, not a general call graph or compiler
 result, and leaves the existing default/readiness certificates unchanged.
+
+Ready expressions and allocating inline-array/struct parents may now be exact
+arguments to an explicitly selected ordinary ready-body call. Argument
+evaluation preserves earlier references through later allocations, including
+an actual later-child panic with retained earlier memory; see
+[source-progress-checked.md](source-progress-checked.md#allocating-parents-as-direct-call-arguments).
+This leaves old argument certificates and general memory-call graph admission
+unchanged and makes no function-value frontend or compiler correspondence claim.

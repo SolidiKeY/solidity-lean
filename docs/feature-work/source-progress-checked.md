@@ -601,8 +601,8 @@ aggregate RSS. All twenty-one printed theorem axiom reports use only
 `propext`, `Classical.choice` and `Quot.sound` or subsets. Independent read-only
 finder and skeptic reviews found no confirmed defect. This is Source progress
 and preservation, not termination, physical resource adequacy, compiler/EVM
-refinement or universal source coverage. The historical full-build timeout and
-published documentation-path failure remain open.
+refinement or universal source coverage. The historical full-build timeout remains open; earlier failed
+documentation checks are retained as historical evidence.
 
 
 ## Ready struct-constructor allocation parents
@@ -688,8 +688,9 @@ controls were added. A deep direct panic reduction failed at the existing
 recursion limit; explicit evaluator/body/frame cuts prove the same observation
 without raising any limit. This is Source progress and preservation, not
 termination, general allocating-call graph admission, physical resource
-adequacy, compiler/EVM correspondence or universal coverage. Historical
-full-build and published documentation-path failures remain open.
+adequacy, compiler/EVM correspondence or universal coverage. The historical
+full-build timeout remains open; earlier documentation failures are retained
+as historical evidence.
 
 
 ## Finite aggregate defaults and returned allocation parents
@@ -745,5 +746,55 @@ call run is composed; the expected heap observations are unchanged. Source
 semantics, allocation/halt policies and proof limits are unchanged. These
 results do not establish termination, general allocating call graphs,
 physical resource adequacy, compiler/EVM correspondence or universal coverage.
-The retained full-build timeout and exact published documentation/pin baseline
-failures are not passed by these focused checks.
+The historical full-build timeout and published axiom-pin baseline remain open.
+Earlier documentation failures are retained as historical evidence.
+
+
+## Allocating parents as direct-call arguments
+
+`Progress.ParentArguments` adds `ParentArgument` and `ParentArgs` certificates
+over existing typed expressions and argument lists. Each argument is a ready
+expression or an inline-array/struct allocation parent with ready children.
+Same-type conversion and plain extraction remain explicit. This does not change
+`ReadyArgs`, `ExactArgs`, `ReadyExpr` or the evaluator, and does not admit
+unrestricted nesting or cross-type argument conversion.
+
+The proofs follow actual left-to-right `evalConvArgs` evaluation. Earlier
+argument reference witnesses are carried through later heap growth. A separate
+ready-body call proof derives aggregate return defaults from `FiniteDefault`;
+the call-expression composition then uses the actual caller substitution and
+existing memory-body preservation. The checked-elaboration adapter derives
+`CallsOK`. Actual selected-body equality, parameter/return/local layout,
+empty modifiers, finite defaults and syntactic ready-body admission remain
+explicit premises. No body execution or desired poststate is assumed.
+
+`ParentArgumentControls` proves actual frontend inference, elaboration,
+program-body identity and dispatch for a private `echo(bool[2] memory a)`
+that returns `a`. The declaration unit uses the legacy frontend. Its caller
+node is intrinsic: it passes the newly allocated `[true, false]` to the
+callee, which returns argument object 1 by alias while retaining default
+object 2. The old nonempty bytes object 0, caller locals, saved function locals
+and logs are preserved. Inhabited consumers establish memory and returned
+reference validity in both evaluator pipelines with arbitrary fixed parameters.
+The old `ReadyArgs` still refuses this argument family, and zero horizon
+retains timeout and the unchanged state.
+
+`ParentArgumentFlowControls` checks two allocating arguments: object 1 remains
+valid after object 2 is allocated. A division-by-zero child propagates the
+existing panic through the actual call before any argument parent or callee
+default is allocated. A separate later-argument panic occurs after the first
+argument allocated object 1; that object is retained, object 2 is absent, and
+the reached state satisfies `MemOK`. These are argument-order and halt-state
+observations, not a transaction rollback claim.
+
+The focused control build passed in 7.316 seconds with 526,802,944 bytes peak
+aggregate RSS. All 51 new theorem reports use only `propext`,
+`Classical.choice` and `Quot.sound` or subsets. Independent read-only finder
+and skeptic reviews found no confirmed defect. The Source-only result does not
+cover function-value reference-argument elaboration, general memory-call graph
+admission, recursive/external/world calls, compiler/EVM correspondence,
+physical resource adequacy, termination or universal source coverage.
+Published VC1 now supplies the formerly missing Assumptions module, and the
+documentation-path check passes; earlier failed logs remain historical evidence.
+The axiom-pin gate still has the exact published baseline of 82 unrecorded pins
+and zero errors, and the historical full-build timeout remains unresolved.

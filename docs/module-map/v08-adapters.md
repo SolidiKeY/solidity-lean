@@ -556,3 +556,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/AllocationReturns.lean` | Allocating-parent return statements, modifier-free body/internal-call progress, memory preservation and checked-elaboration adapters. |
 | `Source/Progress/AggregateReturnControls.lean` | Actual elaborated fixed-array return, distinct default/fresh references, inhabited caller restoration and unchanged default/readiness refusals in both pipelines. |
 | `Source/Progress/AggregateDefaultControls.lean` | Inhabited reference-field struct defaults, retained earlier allocation on timeout and old default-certificate refusal. |
+
+| `Source/Progress/ParentArguments.lean` | Exact allocating-parent argument certificates, actual left-to-right evaluation, reference growth transport and checked-elaboration direct-call composition. |
+| `Source/Progress/ParentArgumentControls.lean` | Elaborated reference identity callee, intrinsic allocating argument, returned alias distinct from retained default, inhabited caller restoration and old-argument refusal. |
+| `Source/Progress/ParentArgumentFlowControls.lean` | Two allocating arguments, early panic before callee allocation and later panic preserving earlier argument memory in both pipelines. |
