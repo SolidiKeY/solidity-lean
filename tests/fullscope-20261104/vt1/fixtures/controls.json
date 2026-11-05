@@ -1,0 +1,218 @@
+{
+  "negative": [
+    {
+      "id": "memoryguard-dynamic",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { let n := calldatasize() let p := memoryguard(n) pop(p) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "TypeError: Function expects direct literals as arguments.\n --> control.yul:1:54:\n  |\n1 | object \"A\" { code { let n := calldatasize() let p := memoryguard(n) pop(p) } }\n  |                                                      ^^^^^^^^^^^\n\n",
+          "message": "Function expects direct literals as arguments.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 64,
+            "file": "control.yul",
+            "start": 53
+          },
+          "type": "TypeError"
+        }
+      ]
+    },
+    {
+      "id": "datasize-dynamic",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { let n := calldatasize() let p := datasize(n) pop(p) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "TypeError: Function expects direct literals as arguments.\n --> control.yul:1:54:\n  |\n1 | object \"A\" { code { let n := calldatasize() let p := datasize(n) pop(p) } }\n  |                                                      ^^^^^^^^\n\n",
+          "message": "Function expects direct literals as arguments.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 61,
+            "file": "control.yul",
+            "start": 53
+          },
+          "type": "TypeError"
+        }
+      ]
+    },
+    {
+      "id": "wrong-datacopy-arity",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { datacopy(0, 0) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "TypeError: Function \"datacopy\" expects 3 arguments but got 2.\n --> control.yul:1:21:\n  |\n1 | object \"A\" { code { datacopy(0, 0) } }\n  |                     ^^^^^^^^\n\n",
+          "message": "Function \"datacopy\" expects 3 arguments but got 2.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 28,
+            "file": "control.yul",
+            "start": 20
+          },
+          "type": "TypeError"
+        }
+      ]
+    },
+    {
+      "id": "loadimmutable-dynamic",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { let n := calldatasize() let p := loadimmutable(n) pop(p) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "TypeError: Function expects direct literals as arguments.\n --> control.yul:1:54:\n  |\n1 | object \"A\" { code { let n := calldatasize() let p := loadimmutable(n) pop(p) } }\n  |                                                      ^^^^^^^^^^^^^\n\n",
+          "message": "Function expects direct literals as arguments.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 66,
+            "file": "control.yul",
+            "start": 53
+          },
+          "type": "TypeError"
+        }
+      ]
+    },
+    {
+      "id": "unknown-builtin",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { vt1_unknown(0) } }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "DeclarationError: Function \"vt1_unknown\" not found.\n --> control.yul:1:21:\n  |\n1 | object \"A\" { code { vt1_unknown(0) } }\n  |                     ^^^^^^^^^^^\n\n",
+          "message": "Function \"vt1_unknown\" not found.",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 31,
+            "file": "control.yul",
+            "start": 20
+          },
+          "type": "DeclarationError"
+        }
+      ]
+    },
+    {
+      "id": "malformed-object",
+      "input": {
+        "language": "Yul",
+        "sources": {
+          "control.yul": {
+            "content": "object \"A\" { code { stop() }"
+          }
+        },
+        "settings": {
+          "evmVersion": "osaka",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "evm.bytecode.object"
+              ]
+            }
+          }
+        }
+      },
+      "diagnostics": [
+        {
+          "component": "general",
+          "formattedMessage": "ParserError: Expected keyword \"data\" or \"object\" or \"}\".\n --> control.yul:1:29:\n  |\n1 | object \"A\" { code { stop() }\n  |                             ^\n\n",
+          "message": "Expected keyword \"data\" or \"object\" or \"}\".",
+          "severity": "error",
+          "sourceLocation": {
+            "end": 28,
+            "file": "control.yul",
+            "start": 28
+          },
+          "type": "ParserError"
+        }
+      ]
+    }
+  ],
+  "positive": {
+    "id": "memoryguard-literal",
+    "diagnostics": []
+  }
+}

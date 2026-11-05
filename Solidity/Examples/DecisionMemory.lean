@@ -1,5 +1,9 @@
-import Solidity.Examples.Decision
+import Solidity.Examples.DecisionMemoryParameterData
+import Solidity.Examples.DecisionMemoryFixtureData
+import Solidity.Examples.DecisionVerdictData
 import Solidity.Examples.MemoryStructWitness
+import Solidity.Calculus.DecisionGivenHeapBoundary
+import Solidity.Calculus.DecisionCompoundCoverage
 
 /-!
 # Fresh memory arrays and given-heap parameter witnesses (M7)
@@ -286,7 +290,7 @@ example : memStructMapping =
 #guard_msgs in #eval [verdict memStructSame, verdict memStructFive, verdict memStructBool,
   verdict memStructFixed, verdict memStructMapping]
 
-/-- A reversed equation is a classifier near miss, not a recognized field/literal schema. -/
+/-- A reversed equation misses the original producer schema and reaches the certified fallback. -/
 def memStructReversed : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Person p; 0 = p.age }
 
 example : memStructReversed =
@@ -310,7 +314,19 @@ example : memStructSigned =
   (.eq (MemoryWitness.fieldRead (p := .int) (f := "b") (by decide))
     (.app0 (.lit (p := .int) ⟨-7, by decide⟩))) := rfl
 
-/-- info: ["unknown", "unknown", "refuted"] -/
+/-- Exact source recognition supplies the closed compound countermodel. -/
+def memStructBuried_source : ResidueReason.NonliteralUIntFreshField memStructBuried :=
+  (ResidueReason.nonliteralUIntFreshField? memStructBuried).get (by decide +kernel)
+
+/-- The actual certified compound route is complete for this original pin. -/
+theorem memStructBuried_covered : memStructBuried.Covered = true := memStructBuried_source.covered
+
+/-- Certify the actual returned refutation without assuming its chosen state. -/
+theorem memStructBuried_refuted : ∃ σ : State StandardExample [],
+    decideGoal memStructBuried = .refuted σ ∧ ¬ Fml.holdsH σ memStructBuried :=
+  memStructBuried_source.refuted
+
+/-- info: ["refuted", "refuted", "refuted"] -/
 #guard_msgs in #eval [verdict memStructReversed, verdict memStructBuried, verdict memStructSigned]
 
 /-- Every recognized control has a kernel-checked coverage certificate. -/
@@ -382,10 +398,6 @@ section MemoryParameters
 local instance memoryParameterContract : InContract := ⟨Gaps⟩
 open scoped Solidity.Scoped
 
-/-- A repeated Theory read is equal even at an unset memory parameter. -/
-def memParamSame : Fml Gaps [] :=
-  dl![.box]{ s[0] = s[0] where uint[] memory s }
-
 /-- Two hidden locals can name the same array; no fresh-apart premise exists. -/
 def memParamAliasBad : Fml Gaps [] :=
   dl![.box]{ (s[0] = 1 → t[0] = 2 where uint[] memory t) where uint[] memory s }
@@ -414,6 +426,19 @@ theorem gapMemParam_verdict : verdict gapMemParam = "refuted" := by
 theorem memParamSame_valid : Fml.Valid memParamSame := by
   intro σ v
   rfl
+
+/-- The actual exact-source parser supplies the all-heap certificate. -/
+def memParamSame_source : ResidueReason.GivenHeapLiteralReadReflexive memParamSame :=
+  (ResidueReason.givenHeapLiteralRead? memParamSame).get (by decide +kernel)
+
+/-- The supported given-heap source now has an actual complete memory route. -/
+theorem memParamSame_covered : memParamSame.Covered = true := memParamSame_source.covered
+
+/-- The actual global result is proved, not just true at the candidate heap. -/
+theorem memParamSame_proved : decideGoal memParamSame = .proved := memParamSame_source.proved
+
+/-- Certify the actual positive verdict under the unchanged hash reading. -/
+theorem memParamSame_certified : Fml.ValidH memParamSame := decideGoal_sound memParamSame_proved
 
 /-- The concrete checker includes unset when validating the positive control. -/
 theorem memParamSame_checked :
@@ -472,7 +497,7 @@ theorem memoryParameter_emptyDomains :
       (fun r => r.map HRef.id) = [none] := by
   decide +kernel
 
-/-- info: ["unknown", "refuted"] -/
+/-- info: ["proved", "refuted"] -/
 #guard_msgs in #eval [verdict memParamSame, verdict memParamAliasBad]
 /-- info: [true, true] -/
 #guard_msgs in #eval [(memParamSame.checkMemoryAt (MemoryWitness.candidate Gaps)).isYes,

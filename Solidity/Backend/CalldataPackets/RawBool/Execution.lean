@@ -247,20 +247,52 @@ theorem transfer {D : Source.Layout} {H : HTy} {R : RefTy}
   · simp only [if_neg accepted,Bind.bind,Option.bind]
 
 
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.payload_length' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms payload_length
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.valid_iff' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms valid_iff
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.decode_bool' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms decode_bool
+/-- info: '_private.Solidity.Backend.CalldataPackets.RawBool.Execution.0.Solidity.Backend.CalldataPackets.RawBool.decode_indices' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms decode_indices
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.copy_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms copy_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.dirty_at' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms dirty_at
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.copy_dirty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms copy_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.copy_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms copy_observations
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.guarded_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms guarded_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.valid_frame' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms valid_frame
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.payload_frame' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms payload_frame
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.guarded_frame_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms guarded_frame_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.eval_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms eval_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.table_bools' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms table_bools
+/-- info: 'Solidity.Backend.CalldataPackets.RawBool.transfer' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms transfer
 
 end Solidity.Backend.CalldataPackets.RawBool

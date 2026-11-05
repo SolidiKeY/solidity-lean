@@ -544,4 +544,811 @@ theorem shifts_resource_order (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms shifts_resource_order
+
+def unaryExpected (a result : Scalar.Word) (perm : Bool) : EVM.State :=
+  {F.input .ISZERO 12 perm (a::spill) with
+    pc:=u 4,gasAvailable:=u 9,execLength:=42,
+    stack:=(result::spill).map (fun w=>UInt256.mk w.toFin)}
+
+theorem eq_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .eq (ir a b)=.ok (irExpected a b (Scalar.flag (a == b))) 0 ∧
+    Scalar.run Selection.eqCertificate.code (a::b::spill)=some (Scalar.flag (a == b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (a::b::spill))=
+      .ok (nativeExpected .EQ 3 a b (Scalar.flag (a == b)) perm) ∧
+    EVM.X 2 #[] (F.input .EQ 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .EQ 3 a b (Scalar.flag (a == b)) perm) := by
+  have h := InstructionSelectionAgreement.eq #[] (F.site .EQ 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .EQ a b (Scalar.flag (a == b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem iszero_client (a : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .iszero {ir a 0 with stack:=Selection.irStack (a::spill)}=
+      .ok {ir a 0 with stack:=Selection.irStack (Scalar.flag (a == 0)::spill)} 0 ∧
+    Scalar.run Selection.iszeroCertificate.code (a::spill)=some (Scalar.flag (a == 0)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (a::spill))=
+      .ok (unaryExpected a (Scalar.flag (a == 0)) perm) ∧
+    EVM.X 2 #[] (F.input .ISZERO 12 perm (a::spill))=
+      EVM.X 1 #[] (unaryExpected a (Scalar.flag (a == 0)) perm) := by
+  have h := InstructionSelectionAgreement.iszero #[] (F.site .ISZERO 12 perm) a spill
+    {ir a 0 with stack:=Selection.irStack (a::spill)} rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (F.input .ISZERO 12 perm (a::spill)) 3).replaceStackAndIncrPC
+      ((Scalar.flag (a == 0)::spill).map (fun w=>UInt256.mk w.toFin))=
+        unaryExpected a (Scalar.flag (a == 0)) perm := by
+    first | rfl | (simp only [F.input,WrappingArithmeticFixtures.input,WrappingArithmeticFixtures.site,
+      unaryExpected,modularSite,Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+      EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem flags_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (1::257::spill))=
+      .ok (nativeExpected .EQ 3 1 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (257::257::spill))=
+      .ok (nativeExpected .EQ 3 257 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (0::spill))=
+      .ok (unaryExpected 0 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (256::spill))=
+      .ok (unaryExpected 256 0 perm) := by
+  exact ⟨(eq_client 1 257 perm).2.2.1,(eq_client 257 257 perm).2.2.1,
+    (iszero_client 0 perm).2.2.1,(iszero_client 256 perm).2.2.1⟩
+
+theorem flags_complete_observation (perm : Bool) :
+    (nativeExpected .EQ 3 1 257 0 perm).stack=[u 0,u 258,u 513] ∧
+    (unaryExpected 256 0 perm).stack=[u 0,u 258,u 513] ∧
+    (unaryExpected 0 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .EQ 3 1 257 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (unaryExpected 256 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (unaryExpected 0 1 perm).stack≠[u 1,u 513,u 258] ∧
+    (nativeExpected .EQ 3 1 257 0 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x14,0] ∧
+    (unaryExpected 256 0 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x15,0] ∧
+    (unaryExpected 256 0 perm).pc=u 4 ∧ (unaryExpected 256 0 perm).gasAvailable=u 9 ∧
+    (unaryExpected 256 0 perm).execLength=42 ∧
+    (unaryExpected 256 0 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (unaryExpected 256 0 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (unaryExpected 256 0 perm).H_return.data.toList=[0xee,0xff] ∧
+    (unaryExpected 256 0 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (unaryExpected 256 0 perm).accountMap=accounts ∧ (unaryExpected 256 0 perm).σ₀=accounts := by
+  refine ⟨rfl,rfl,rfl,?_,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+  · change [u 1,u 258,u 513]≠[u 1,u 513,u 258];decide
+
+theorem flags_resource_order (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 2 perm (256::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .EQ 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.eq_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms eq_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.iszero_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms iszero_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_resource_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_resource_order
+
+theorem lt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .lt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (a.toNat < b.toNat)))) 0 ∧
+    Scalar.run Selection.ltCertificate.code (a::b::spill)=some (Scalar.flag (decide (a.toNat < b.toNat))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (a::b::spill))=
+      .ok (nativeExpected .LT 3 a b (Scalar.flag (decide (a.toNat < b.toNat))) perm) ∧
+    EVM.X 2 #[] (F.input .LT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .LT 3 a b (Scalar.flag (decide (a.toNat < b.toNat))) perm) := by
+  have h := InstructionSelectionAgreement.lt #[] (F.site .LT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .LT a b (Scalar.flag (decide (a.toNat < b.toNat))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem gt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .gt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (a.toNat > b.toNat)))) 0 ∧
+    Scalar.run Selection.gtCertificate.code (a::b::spill)=some (Scalar.flag (decide (a.toNat > b.toNat))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (a::b::spill))=
+      .ok (nativeExpected .GT 3 a b (Scalar.flag (decide (a.toNat > b.toNat))) perm) ∧
+    EVM.X 2 #[] (F.input .GT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .GT 3 a b (Scalar.flag (decide (a.toNat > b.toNat))) perm) := by
+  have h := InstructionSelectionAgreement.gt #[] (F.site .GT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .GT a b (Scalar.flag (decide (a.toNat > b.toNat))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem order_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (1::257::spill))=
+      .ok (nativeExpected .LT 3 1 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (1::257::spill))=
+      .ok (nativeExpected .GT 3 1 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (17::17::spill))=
+      .ok (nativeExpected .LT 3 17 17 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (17::17::spill))=
+      .ok (nativeExpected .GT 3 17 17 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (BitVec.ofNat 256 (2^255)::1::spill))=
+      .ok (nativeExpected .GT 3 (BitVec.ofNat 256 (2^255)) 1 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 12 perm (BitVec.ofNat 256 (2^255)::1::spill))=
+      .ok (nativeExpected .LT 3 (BitVec.ofNat 256 (2^255)) 1 0 perm) := by
+  exact ⟨(lt_client 1 257 perm).2.2.1,(gt_client 1 257 perm).2.2.1,
+    (lt_client 17 17 perm).2.2.1,(gt_client 17 17 perm).2.2.1,
+    (gt_client (BitVec.ofNat 256 (2^255)) 1 perm).2.2.1,
+    (lt_client (BitVec.ofNat 256 (2^255)) 1 perm).2.2.1⟩
+
+theorem order_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .GT 12 perm (257::1::spill))=
+      .ok (nativeExpected .GT 3 257 1 1 perm) ∧
+    (nativeExpected .LT 3 1 257 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .GT 3 257 1 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .LT 3 1 257 1 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .GT 3 257 1 1 perm).stack≠[u 1,u 513,u 258] ∧
+    (nativeExpected .LT 3 1 257 1 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x10,0] ∧
+    (nativeExpected .GT 3 257 1 1 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x11,0] ∧
+    (nativeExpected .LT 3 1 257 1 perm).pc=u 4 ∧
+    (nativeExpected .LT 3 1 257 1 perm).gasAvailable=u 9 ∧
+    (nativeExpected .LT 3 1 257 1 perm).execLength=42 ∧
+    (nativeExpected .LT 3 1 257 1 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .LT 3 1 257 1 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .LT 3 1 257 1 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .LT 3 1 257 1 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .LT 3 1 257 1 perm).accountMap=accounts ∧
+    (nativeExpected .LT 3 1 257 1 perm).σ₀=accounts := by
+  refine ⟨(gt_client 257 1 perm).2.2.1,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 1,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 1,u 258,u 513]≠[u 1,u 513,u 258];decide
+
+theorem order_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .LT 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 2 perm (257::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .LT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .GT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .LT 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.lt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms lt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.gt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms gt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms order_resource_priority
+theorem bitAnd_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .and (ir a b)=.ok (irExpected a b ((a &&& b))) 0 ∧
+    Scalar.run Selection.andCertificate.code (a::b::spill)=some ((a &&& b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (a::b::spill))=
+      .ok (nativeExpected .AND 3 a b ((a &&& b)) perm) ∧
+    EVM.X 2 #[] (F.input .AND 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .AND 3 a b ((a &&& b)) perm) := by
+  have h := InstructionSelectionAgreement.bitAnd (F.site .AND 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .AND a b ((a &&& b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem bitOr_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .or (ir a b)=.ok (irExpected a b ((a ||| b))) 0 ∧
+    Scalar.run Selection.orCertificate.code (a::b::spill)=some ((a ||| b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (a::b::spill))=
+      .ok (nativeExpected .OR 3 a b ((a ||| b)) perm) ∧
+    EVM.X 2 #[] (F.input .OR 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .OR 3 a b ((a ||| b)) perm) := by
+  have h := InstructionSelectionAgreement.bitOr (F.site .OR 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .OR a b ((a ||| b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem and_or_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (240::60::spill))=
+      .ok (nativeExpected .AND 3 240 60 48 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (240::60::spill))=
+      .ok (nativeExpected .OR 3 240 60 252 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (1::257::spill))=
+      .ok (nativeExpected .AND 3 1 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (1::257::spill))=
+      .ok (nativeExpected .OR 3 1 257 257 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .AND 3 (BitVec.ofNat 256 (2^255)) 0 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .OR 3 (BitVec.ofNat 256 (2^255)) 0 (BitVec.ofNat 256 (2^255)) perm) := by
+  exact ⟨(bitAnd_client 240 60 perm).2.2.1,(bitOr_client 240 60 perm).2.2.1,
+    (bitAnd_client 1 257 perm).2.2.1,(bitOr_client 1 257 perm).2.2.1,
+    (bitAnd_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1,
+    (bitOr_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1⟩
+
+theorem and_or_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .OR 12 perm (240::60::spill))=
+      .ok (nativeExpected .OR 3 240 60 252 perm) ∧
+    (nativeExpected .AND 3 240 60 48 perm).stack=[u 48,u 258,u 513] ∧
+    (nativeExpected .OR 3 240 60 252 perm).stack=[u 252,u 258,u 513] ∧
+    (nativeExpected .AND 3 240 60 48 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .OR 3 240 60 252 perm).stack≠[u 252,u 513,u 258] ∧
+    (nativeExpected .AND 3 240 60 48 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x16,0] ∧
+    (nativeExpected .OR 3 240 60 252 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x17,0] ∧
+    (nativeExpected .AND 3 240 60 48 perm).pc=u 4 ∧
+    (nativeExpected .AND 3 240 60 48 perm).gasAvailable=u 9 ∧
+    (nativeExpected .AND 3 240 60 48 perm).execLength=42 ∧
+    (nativeExpected .AND 3 240 60 48 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .AND 3 240 60 48 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .AND 3 240 60 48 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .AND 3 240 60 48 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .AND 3 240 60 48 perm).accountMap=accounts ∧
+    (nativeExpected .AND 3 240 60 48 perm).σ₀=accounts := by
+  refine ⟨(bitOr_client 240 60 perm).2.2.1,rfl,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 48,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 252,u 258,u 513]≠[u 252,u 513,u 258];decide
+
+theorem and_or_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .AND 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 2 perm (257::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .AND 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .OR 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .AND 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitAnd_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitAnd_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitOr_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitOr_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms and_or_resource_priority
+theorem bitXor_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .xor (ir a b)=.ok (irExpected a b ((a ^^^ b))) 0 ∧
+    Scalar.run Selection.xorCertificate.code (a::b::spill)=some ((a ^^^ b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (a::b::spill))=
+      .ok (nativeExpected .XOR 3 a b ((a ^^^ b)) perm) ∧
+    EVM.X 2 #[] (F.input .XOR 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .XOR 3 a b ((a ^^^ b)) perm) := by
+  have h := InstructionSelectionAgreement.bitXor (F.site .XOR 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .XOR a b ((a ^^^ b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem xor_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (240::60::spill))=
+      .ok (nativeExpected .XOR 3 240 60 204 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (1::257::spill))=
+      .ok (nativeExpected .XOR 3 1 257 256 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (257::257::spill))=
+      .ok (nativeExpected .XOR 3 257 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .XOR 3 (BitVec.ofNat 256 (2^255)) 0 (BitVec.ofNat 256 (2^255)) perm) := by
+  exact ⟨(bitXor_client 240 60 perm).2.2.1,(bitXor_client 1 257 perm).2.2.1,
+    (bitXor_client 257 257 perm).2.2.1,(bitXor_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1⟩
+
+theorem xor_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (1::257::spill))=
+      .ok (nativeExpected .XOR 3 1 257 256 perm) ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack=[u 256,u 258,u 513] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack≠[u 256,u 513,u 258] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x18,0] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).pc=u 4 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).gasAvailable=u 9 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).execLength=42 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).accountMap=accounts ∧
+    (nativeExpected .XOR 3 1 257 256 perm).σ₀=accounts := by
+  refine ⟨(bitXor_client 1 257 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 256,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 256,u 258,u 513]≠[u 256,u 513,u 258];decide
+
+theorem xor_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .XOR 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitXor_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitXor_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_resource_priority
+def notExpected (a result : Scalar.Word) (perm : Bool) : EVM.State :=
+  {F.input .NOT 12 perm (a::spill) with
+    pc:=u 4,gasAvailable:=u 9,execLength:=42,
+    stack:=(result::spill).map (fun w=>UInt256.mk w.toFin)}
+
+theorem bitNot_client (a : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .not {ir a 0 with stack:=Selection.irStack (a::spill)}=
+      .ok {ir a 0 with stack:=Selection.irStack ((~~~a)::spill)} 0 ∧
+    Scalar.run Selection.notCertificate.code (a::spill)=some ((~~~a)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 12 perm (a::spill))=
+      .ok (notExpected a ((~~~a)) perm) ∧
+    EVM.X 2 #[] (F.input .NOT 12 perm (a::spill))=
+      EVM.X 1 #[] (notExpected a ((~~~a)) perm) := by
+  have h := InstructionSelectionAgreement.bitNot #[] (F.site .NOT 12 perm) a spill
+    {ir a 0 with stack:=Selection.irStack (a::spill)} rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (F.input .NOT 12 perm (a::spill)) 3).replaceStackAndIncrPC
+      (((~~~a)::spill).map (fun w=>UInt256.mk w.toFin))=
+        notExpected a ((~~~a)) perm := by
+    first | rfl | (simp only [F.input,WrappingArithmeticFixtures.input,WrappingArithmeticFixtures.site,
+      notExpected,modularSite,Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+      EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem not_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 12 perm (0::spill))=
+      .ok (notExpected 0 (BitVec.ofNat 256 ((2^256:Nat)-1)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::spill))=
+      .ok (notExpected (BitVec.ofNat 256 ((2^256:Nat)-1)) 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 12 perm (256::spill))=
+      .ok (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm) := by
+  exact ⟨(bitNot_client 0 perm).2.2.1,
+    (bitNot_client (BitVec.ofNat 256 ((2^256:Nat)-1)) perm).2.2.1,
+    (bitNot_client 256 perm).2.2.1⟩
+
+theorem not_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 12 perm (256::spill))=
+      .ok (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm) ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).stack=[u ((2^256:Nat)-257),u 258,u 513] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).stack≠[u 0,u 258,u 513] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).stack≠[u ((2^256:Nat)-257),u 513,u 258] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x19,0] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).pc=u 4 ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).gasAvailable=u 9 ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).execLength=42 ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).H_return.data.toList=[0xee,0xff] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).accountMap=accounts ∧
+    (notExpected 256 (BitVec.ofNat 256 ((2^256:Nat)-257)) perm).σ₀=accounts := by
+  refine ⟨(bitNot_client 256 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u ((2^256:Nat)-257),u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u ((2^256:Nat)-257),u 258,u 513]≠[u ((2^256:Nat)-257),u 513,u 258];decide
+
+theorem not_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 2 perm (256::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .NOT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .NOT 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitNot_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitNot_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_resource_priority
+theorem slt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .slt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (a.toInt < b.toInt)))) 0 ∧
+    Scalar.run Selection.sltCertificate.code (a::b::spill)=some (Scalar.flag (decide (a.toInt < b.toInt))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm (a::b::spill))=
+      .ok (nativeExpected .SLT 3 a b (Scalar.flag (decide (a.toInt < b.toInt))) perm) ∧
+    EVM.X 2 #[] (F.input .SLT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .SLT 3 a b (Scalar.flag (decide (a.toInt < b.toInt))) perm) := by
+  have h := InstructionSelectionAgreement.slt #[] (F.site .SLT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .SLT a b (Scalar.flag (decide (a.toInt < b.toInt))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem slt_signed_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=
+      .ok (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm (1::(BitVec.ofNat 256 ((2^256:Nat)-1))::spill))=
+      .ok (nativeExpected .SLT 3 1 (BitVec.ofNat 256 ((2^256:Nat)-1)) 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm ((BitVec.ofNat 256 (2^255))::0::spill))=
+      .ok (nativeExpected .SLT 3 (BitVec.ofNat 256 (2^255)) 0 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::(BitVec.ofNat 256 ((2^256:Nat)-1))::spill))=
+      .ok (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) (BitVec.ofNat 256 ((2^256:Nat)-1)) 0 perm) := by
+  exact ⟨(slt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 perm).2.2.1,
+    (slt_client 1 (BitVec.ofNat 256 ((2^256:Nat)-1)) perm).2.2.1,
+    (slt_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1,
+    (slt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) (BitVec.ofNat 256 ((2^256:Nat)-1)) perm).2.2.1⟩
+
+theorem slt_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=
+      .ok (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm) ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).stack≠[u 1,u 513,u 258] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x12,0] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).pc=u 4 ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).gasAvailable=u 9 ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).execLength=42 ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).accountMap=accounts ∧
+    (nativeExpected .SLT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 1 perm).σ₀=accounts := by
+  refine ⟨(slt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 1,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 1,u 258,u 513]≠[u 1,u 513,u 258];decide
+
+theorem slt_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 2 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SLT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .SLT 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_signed_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt_signed_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt_resource_priority
+theorem sgt_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .sgt (ir a b)=.ok (irExpected a b (Scalar.flag (decide (b.toInt < a.toInt)))) 0 ∧
+    Scalar.run Selection.sgtCertificate.code (a::b::spill)=some (Scalar.flag (decide (b.toInt < a.toInt))::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm (a::b::spill))=
+      .ok (nativeExpected .SGT 3 a b (Scalar.flag (decide (b.toInt < a.toInt))) perm) ∧
+    EVM.X 2 #[] (F.input .SGT 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .SGT 3 a b (Scalar.flag (decide (b.toInt < a.toInt))) perm) := by
+  have h := InstructionSelectionAgreement.sgt (F.site .SGT 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .SGT a b (Scalar.flag (decide (b.toInt < a.toInt))) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem sgt_signed_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=
+      .ok (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm (1::(BitVec.ofNat 256 ((2^256:Nat)-1))::spill))=
+      .ok (nativeExpected .SGT 3 1 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm ((BitVec.ofNat 256 (2^255))::0::spill))=
+      .ok (nativeExpected .SGT 3 (BitVec.ofNat 256 (2^255)) 0 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::(BitVec.ofNat 256 ((2^256:Nat)-1))::spill))=
+      .ok (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) (BitVec.ofNat 256 ((2^256:Nat)-1)) 0 perm) := by
+  exact ⟨(sgt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 perm).2.2.1,
+    (sgt_client 1 (BitVec.ofNat 256 ((2^256:Nat)-1)) perm).2.2.1,
+    (sgt_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1,
+    (sgt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) (BitVec.ofNat 256 ((2^256:Nat)-1)) perm).2.2.1⟩
+theorem sgt_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 12 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=
+      .ok (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm) ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).stack=[u 0,u 258,u 513] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).stack≠[u 0,u 513,u 258] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x13,0] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).pc=u 4 ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).gasAvailable=u 9 ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).execLength=42 ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).accountMap=accounts ∧
+    (nativeExpected .SGT 3 (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 0 perm).σ₀=accounts := by
+  refine ⟨(sgt_client (BitVec.ofNat 256 ((2^256:Nat)-1)) 1 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+  · change [u 0,u 258,u 513]≠[u 0,u 513,u 258];decide
+theorem sgt_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 2 perm ((BitVec.ofNat 256 ((2^256:Nat)-1))::1::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SGT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .SGT 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sgt_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_signed_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sgt_signed_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sgt_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sgt_resource_priority
+theorem sdiv_client (a b : Scalar.Word) (perm : Bool) :
+    let result := (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt))
+    Solidity.Evm.Instr.step .sdiv (ir a b)=.ok (irExpected a b result) 0 ∧
+    Scalar.run Selection.sdivCertificate.code (a::b::spill)=some (result::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm (a::b::spill))=
+      .ok (nativeExpected .SDIV 5 a b result perm) ∧
+    EVM.X 2 #[] (F.input .SDIV 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .SDIV 5 a b result perm) := by
+  dsimp only
+  have h := InstructionSelectionAgreement.sdiv (F.site .SDIV 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 5≤12;decide) 0
+  dsimp only at h
+  have shape := five_shape .SDIV a b (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem sdiv_signed_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm ((BitVec.ofInt 256 (-17))::5::spill))=
+      .ok (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm (17::(BitVec.ofInt 256 (-5))::spill))=
+      .ok (nativeExpected .SDIV 5 17 (BitVec.ofInt 256 (-5)) (BitVec.ofInt 256 (-3)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm ((BitVec.ofInt 256 (-17))::(BitVec.ofInt 256 (-5))::spill))=
+      .ok (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) (BitVec.ofInt 256 (-5)) 3 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm (17::0::spill))=
+      .ok (nativeExpected .SDIV 5 17 0 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm ((BitVec.ofNat 256 (2^255))::(BitVec.ofInt 256 (-1))::spill))=
+      .ok (nativeExpected .SDIV 5 (BitVec.ofNat 256 (2^255)) (BitVec.ofInt 256 (-1)) (BitVec.ofNat 256 (2^255)) perm) := by
+  exact ⟨(sdiv_client (BitVec.ofInt 256 (-17)) 5 perm).2.2.1,
+    (sdiv_client 17 (BitVec.ofInt 256 (-5)) perm).2.2.1,
+    (sdiv_client (BitVec.ofInt 256 (-17)) (BitVec.ofInt 256 (-5)) perm).2.2.1,
+    (sdiv_client 17 0 perm).2.2.1,
+    (sdiv_client (BitVec.ofNat 256 (2^255)) (BitVec.ofInt 256 (-1)) perm).2.2.1⟩
+
+theorem sdiv_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 12 perm ((BitVec.ofInt 256 (-17))::5::spill))=
+      .ok (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm) ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).stack=[u ((2^256:Nat)-3),u 258,u 513] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).stack≠[u ((2^256:Nat)-4),u 258,u 513] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).stack≠[u ((2^256:Nat)-3),u 513,u 258] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x05,0] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).pc=u 4 ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).gasAvailable=u 7 ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).execLength=42 ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).accountMap=accounts ∧
+    (nativeExpected .SDIV 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-3)) perm).σ₀=accounts := by
+  refine ⟨(sdiv_client (BitVec.ofInt 256 (-17)) 5 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u ((2^256:Nat)-3),u 258,u 513]≠[u ((2^256:Nat)-4),u 258,u 513];decide
+  · change [u ((2^256:Nat)-3),u 258,u 513]≠[u ((2^256:Nat)-3),u 513,u 258];decide
+
+theorem sdiv_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 4 perm ((BitVec.ofInt 256 (-17))::5::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 4 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SDIV 5 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .SDIV 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_signed_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv_signed_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv_resource_priority
+theorem smod_client (a b : Scalar.Word) (perm : Bool) :
+    let result := (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tmod b.toInt))
+    Solidity.Evm.Instr.step .smod (ir a b)=.ok (irExpected a b result) 0 ∧
+    Scalar.run Selection.smodCertificate.code (a::b::spill)=some (result::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm (a::b::spill))=
+      .ok (nativeExpected .SMOD 5 a b result perm) ∧
+    EVM.X 2 #[] (F.input .SMOD 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .SMOD 5 a b result perm) := by
+  dsimp only
+  have h := InstructionSelectionAgreement.smod (F.site .SMOD 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 5≤12;decide) 0
+  dsimp only at h
+  have shape := five_shape .SMOD a b (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tmod b.toInt)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem smod_signed_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm ((BitVec.ofInt 256 (-17))::5::spill))=
+      .ok (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm (17::(BitVec.ofInt 256 (-5))::spill))=
+      .ok (nativeExpected .SMOD 5 17 (BitVec.ofInt 256 (-5)) 2 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm ((BitVec.ofInt 256 (-17))::(BitVec.ofInt 256 (-5))::spill))=
+      .ok (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) (BitVec.ofInt 256 (-5)) (BitVec.ofInt 256 (-2)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm (17::0::spill))=
+      .ok (nativeExpected .SMOD 5 17 0 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm ((BitVec.ofNat 256 (2^255))::(BitVec.ofInt 256 (-1))::spill))=
+      .ok (nativeExpected .SMOD 5 (BitVec.ofNat 256 (2^255)) (BitVec.ofInt 256 (-1)) 0 perm) := by
+  exact ⟨(smod_client (BitVec.ofInt 256 (-17)) 5 perm).2.2.1,
+    (smod_client 17 (BitVec.ofInt 256 (-5)) perm).2.2.1,
+    (smod_client (BitVec.ofInt 256 (-17)) (BitVec.ofInt 256 (-5)) perm).2.2.1,
+    (smod_client 17 0 perm).2.2.1,
+    (smod_client (BitVec.ofNat 256 (2^255)) (BitVec.ofInt 256 (-1)) perm).2.2.1⟩
+theorem smod_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 12 perm ((BitVec.ofInt 256 (-17))::5::spill))=
+      .ok (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm) ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).stack=[u ((2^256:Nat)-2),u 258,u 513] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).stack≠[u 3,u 258,u 513] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).stack≠[u ((2^256:Nat)-2),u 513,u 258] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x07,0] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).pc=u 4 ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).gasAvailable=u 7 ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).execLength=42 ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).accountMap=accounts ∧
+    (nativeExpected .SMOD 5 (BitVec.ofInt 256 (-17)) 5 (BitVec.ofInt 256 (-2)) perm).σ₀=accounts := by
+  refine ⟨(smod_client (BitVec.ofInt 256 (-17)) 5 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u ((2^256:Nat)-2),u 258,u 513]≠[u 3,u 258,u 513];decide
+  · change [u ((2^256:Nat)-2),u 258,u 513]≠[u ((2^256:Nat)-2),u 513,u 258];decide
+theorem smod_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 4 perm ((BitVec.ofInt 256 (-17))::5::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 4 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SMOD 5 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .SMOD 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms smod_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_signed_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms smod_signed_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms smod_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms smod_resource_priority
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls

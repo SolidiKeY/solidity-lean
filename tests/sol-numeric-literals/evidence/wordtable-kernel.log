@@ -1,0 +1,398 @@
+ERROR 13:3 Expected type must not contain free variables
+  solWordTable [97, 98, 115, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 17:3 Expected type must not contain free variables
+  solWordTable [97, 110, 111, 110, 121, 109, 111, 117, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 21:3 Expected type must not contain free variables
+  solWordTable [97, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 25:3 Expected type must not contain free variables
+  solWordTable [97, 115, 115, 101, 109, 98, 108, 121] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 29:3 Expected type must not contain free variables
+  solWordTable [98, 114, 101, 97, 107] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 33:3 Expected type must not contain free variables
+  solWordTable [99, 97, 108, 108, 100, 97, 116, 97] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 37:3 Expected type must not contain free variables
+  solWordTable [99, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 41:3 Expected type must not contain free variables
+  solWordTable [99, 111, 110, 115, 116, 97, 110, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 45:3 Expected type must not contain free variables
+  solWordTable [99, 111, 110, 115, 116, 114, 117, 99, 116, 111, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 49:3 Expected type must not contain free variables
+  solWordTable [99, 111, 110, 116, 105, 110, 117, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 53:3 Expected type must not contain free variables
+  solWordTable [99, 111, 110, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 57:3 Expected type must not contain free variables
+  solWordTable [100, 101, 108, 101, 116, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 61:3 Expected type must not contain free variables
+  solWordTable [100, 111] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 65:3 Expected type must not contain free variables
+  solWordTable [101, 108, 115, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 69:3 Expected type must not contain free variables
+  solWordTable [101, 109, 105, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 73:3 Expected type must not contain free variables
+  solWordTable [101, 110, 117, 109] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 77:3 Expected type must not contain free variables
+  solWordTable [101, 118, 101, 110, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 81:3 Expected type must not contain free variables
+  solWordTable [101, 120, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 85:3 Expected type must not contain free variables
+  solWordTable [102, 97, 108, 108, 98, 97, 99, 107] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 89:3 Expected type must not contain free variables
+  solWordTable [102, 111, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 93:3 Expected type must not contain free variables
+  solWordTable [102, 117, 110, 99, 116, 105, 111, 110] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 97:3 Expected type must not contain free variables
+  solWordTable [104, 101, 120] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 101:3 Expected type must not contain free variables
+  solWordTable [105, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 105:3 Expected type must not contain free variables
+  solWordTable [105, 109, 109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 109:3 Expected type must not contain free variables
+  solWordTable [105, 109, 112, 111, 114, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 113:3 Expected type must not contain free variables
+  solWordTable [105, 110, 100, 101, 120, 101, 100] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 117:3 Expected type must not contain free variables
+  solWordTable [105, 110, 116, 101, 114, 102, 97, 99, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 121:3 Expected type must not contain free variables
+  solWordTable [105, 110, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 125:3 Expected type must not contain free variables
+  solWordTable [105, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 129:3 Expected type must not contain free variables
+  solWordTable [108, 105, 98, 114, 97, 114, 121] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 133:3 Expected type must not contain free variables
+  solWordTable [109, 97, 112, 112, 105, 110, 103] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 137:3 Expected type must not contain free variables
+  solWordTable [109, 101, 109, 111, 114, 121] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 141:3 Expected type must not contain free variables
+  solWordTable [109, 111, 100, 105, 102, 105, 101, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 145:3 Expected type must not contain free variables
+  solWordTable [110, 101, 119] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 149:3 Expected type must not contain free variables
+  solWordTable [111, 118, 101, 114, 114, 105, 100, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 153:3 Expected type must not contain free variables
+  solWordTable [112, 97, 121, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 157:3 Expected type must not contain free variables
+  solWordTable [112, 114, 97, 103, 109, 97] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 161:3 Expected type must not contain free variables
+  solWordTable [112, 114, 105, 118, 97, 116, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 165:3 Expected type must not contain free variables
+  solWordTable [112, 117, 98, 108, 105, 99] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 169:3 Expected type must not contain free variables
+  solWordTable [112, 117, 114, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 173:3 Expected type must not contain free variables
+  solWordTable [114, 101, 99, 101, 105, 118, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 177:3 Expected type must not contain free variables
+  solWordTable [114, 101, 116, 117, 114, 110] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 181:3 Expected type must not contain free variables
+  solWordTable [114, 101, 116, 117, 114, 110, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 185:3 Expected type must not contain free variables
+  solWordTable [115, 116, 111, 114, 97, 103, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 189:3 Expected type must not contain free variables
+  solWordTable [115, 116, 114, 117, 99, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 193:3 Expected type must not contain free variables
+  solWordTable [116, 114, 121] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 197:3 Expected type must not contain free variables
+  solWordTable [116, 121, 112, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 201:3 Expected type must not contain free variables
+  solWordTable [117, 110, 99, 104, 101, 99, 107, 101, 100] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 205:3 Expected type must not contain free variables
+  solWordTable [117, 110, 105, 99, 111, 100, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 209:3 Expected type must not contain free variables
+  solWordTable [117, 115, 105, 110, 103] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 213:3 Expected type must not contain free variables
+  solWordTable [118, 105, 101, 119] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 217:3 Expected type must not contain free variables
+  solWordTable [118, 105, 114, 116, 117, 97, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 221:3 Expected type must not contain free variables
+  solWordTable [119, 104, 105, 108, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 225:3 Expected type must not contain free variables
+  solWordTable [97, 100, 100, 114, 101, 115, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 229:3 Expected type must not contain free variables
+  solWordTable [98, 111, 111, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 233:3 Expected type must not contain free variables
+  solWordTable [115, 116, 114, 105, 110, 103] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 237:3 Expected type must not contain free variables
+  solWordTable [119, 101, 105] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 241:3 Expected type must not contain free variables
+  solWordTable [103, 119, 101, 105] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 245:3 Expected type must not contain free variables
+  solWordTable [101, 116, 104, 101, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 249:3 Expected type must not contain free variables
+  solWordTable [115, 101, 99, 111, 110, 100, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 253:3 Expected type must not contain free variables
+  solWordTable [109, 105, 110, 117, 116, 101, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 257:3 Expected type must not contain free variables
+  solWordTable [104, 111, 117, 114, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 261:3 Expected type must not contain free variables
+  solWordTable [100, 97, 121, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 265:3 Expected type must not contain free variables
+  solWordTable [119, 101, 101, 107, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 269:3 Expected type must not contain free variables
+  solWordTable [121, 101, 97, 114, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 273:3 Expected type must not contain free variables
+  solWordTable [116, 114, 117, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 277:3 Expected type must not contain free variables
+  solWordTable [102, 97, 108, 115, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 281:3 Expected type must not contain free variables
+  solWordTable [97, 102, 116, 101, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 285:3 Expected type must not contain free variables
+  solWordTable [97, 108, 105, 97, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 289:3 Expected type must not contain free variables
+  solWordTable [97, 112, 112, 108, 121] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 293:3 Expected type must not contain free variables
+  solWordTable [97, 117, 116, 111] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 297:3 Expected type must not contain free variables
+  solWordTable [98, 121, 116, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 301:3 Expected type must not contain free variables
+  solWordTable [99, 97, 115, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 305:3 Expected type must not contain free variables
+  solWordTable [99, 111, 112, 121, 111, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 309:3 Expected type must not contain free variables
+  solWordTable [100, 101, 102, 97, 117, 108, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 313:3 Expected type must not contain free variables
+  solWordTable [100, 101, 102, 105, 110, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 317:3 Expected type must not contain free variables
+  solWordTable [102, 105, 110, 97, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 321:3 Expected type must not contain free variables
+  solWordTable [105, 109, 112, 108, 101, 109, 101, 110, 116, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 325:3 Expected type must not contain free variables
+  solWordTable [105, 110] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 329:3 Expected type must not contain free variables
+  solWordTable [105, 110, 108, 105, 110, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 333:3 Expected type must not contain free variables
+  solWordTable [108, 101, 116] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 337:3 Expected type must not contain free variables
+  solWordTable [109, 97, 99, 114, 111] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 341:3 Expected type must not contain free variables
+  solWordTable [109, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 345:3 Expected type must not contain free variables
+  solWordTable [109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 349:3 Expected type must not contain free variables
+  solWordTable [110, 117, 108, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 353:3 Expected type must not contain free variables
+  solWordTable [111, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 357:3 Expected type must not contain free variables
+  solWordTable [112, 97, 114, 116, 105, 97, 108] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 361:3 Expected type must not contain free variables
+  solWordTable [112, 114, 111, 109, 105, 115, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 365:3 Expected type must not contain free variables
+  solWordTable [114, 101, 102, 101, 114, 101, 110, 99, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 369:3 Expected type must not contain free variables
+  solWordTable [114, 101, 108, 111, 99, 97, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 373:3 Expected type must not contain free variables
+  solWordTable [115, 101, 97, 108, 101, 100] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 377:3 Expected type must not contain free variables
+  solWordTable [115, 105, 122, 101, 111, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 381:3 Expected type must not contain free variables
+  solWordTable [115, 116, 97, 116, 105, 99] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 385:3 Expected type must not contain free variables
+  solWordTable [115, 117, 112, 112, 111, 114, 116, 115] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 389:3 Expected type must not contain free variables
+  solWordTable [115, 119, 105, 116, 99, 104] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 393:3 Expected type must not contain free variables
+  solWordTable [116, 121, 112, 101, 100, 101, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 397:3 Expected type must not contain free variables
+  solWordTable [116, 121, 112, 101, 111, 102] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 401:3 Expected type must not contain free variables
+  solWordTable [118, 97, 114] ≠ WordClass.tok (Tok.num n)
+
+Hint: Use the `+revert` option to automatically clean up and revert free variables
+ERROR 404:41 (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached
+
+Note: Use `set_option maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+diag: 99 errors

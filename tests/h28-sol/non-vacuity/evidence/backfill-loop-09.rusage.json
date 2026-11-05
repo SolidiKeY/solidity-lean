@@ -1,0 +1,18 @@
+{
+  "command": [
+    "lake",
+    "env",
+    "python3",
+    "tests/h28-sol/non-vacuity/kernel.py",
+    "--module",
+    "Solidity.Assurance.NonVacuityH28.LoopContracts",
+    "--fresh"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 5.741909044998465,
+  "children_user_seconds": 5.430044,
+  "children_system_seconds": 0.308216,
+  "children_max_rss_kib": 843568,
+  "children_major_faults": 0,
+  "children_minor_faults": 140150
+}

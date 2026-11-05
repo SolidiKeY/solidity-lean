@@ -572,3 +572,55 @@ exits, times, RSS and the measured merge head are committed in
 Separate read-only finder and skeptic reviews passed all four source areas.
 Final gates will run on the committed snapshot. Central registration remains
 pending; no shared write or scope exception is requested.
+
+### Published source-copy rebase and inhabited loop backfill
+
+The coordinator published H28 by source copy at
+`de1d76d922d7ff42d3a07bc020b740f8ec9f0105`, within requested master
+`e6849d3bdf516099d20c33d3581d523449764018`. The assigned branch was rebased
+onto that exact master before this checkpoint; the old owned head
+`8f6e7e626cd5d2b6b444616a5a17294ff29cc605` and working changes were preserved.
+All 54 retained reviewed inputs are byte-identical between those immutable
+old/published trees. The sole pruned reviewed input, `public-contracts.json`,
+is restored byte-for-byte. The small pruned rusage fixture used by existing
+resource negative controls is also restored exactly. Bulk pruned evidence is
+preserved in the local immutable pre-rebase archive, rather than reintroduced
+into tracked master. Historical writer audits still end at the retained old
+head; published-copy ancestry and the new owned delta are checked separately.
+This records the actual source-copy delivery and does not assert that the old
+worker commits became ancestors of published master.
+
+Seventeen additive universal loop lemmas inhabit existing Main/scoped compiler
+contracts with an actually constructed one-object live heap. Twelve cover a
+nonempty false-condition loop, including a body that would revert if entered;
+source execution, independent compiled target execution, zero demand/cost and
+the actual `Main.compiler_checked` application are supplied. Five complement
+these with a true-condition loop that enters the same reverting body: source
+and independent EVM evaluation revert, the reached demand branch exists, and
+the complete compiler Input is constructively inhabited. This is one attempted
+body execution and zero completed successful turns. Universality over contracts
+and annotations is retained; it does not establish annotation validity.
+
+No completed allocating turn, positive allocating capacity, arbitrary compiled
+body acceptance, arbitrary termination, callback-loop semantics or LoopScopes
+finding is promoted. Existing 137-contract classifications, 169 constructor
+clauses, ten delegated leaf gaps and ten resource findings remain unchanged.
+There are 431 exact signature/axiom entries in 26 private modules. Direct measurement shows that none of the original 414 pins are centrally
+registered in the adopted master; all 431 require coordinator-owned
+registration. No shared registry or producer implementation is changed here.
+The external controls include explicit rejection of completed-turn promotion
+and changed published-copy anchors. Fresh exact-head runtime gates and cache
+packing follow this committed checkpoint; pending/failed gates remain explicit.
+H41 requires a verified local pack with path and SHA for coordinator pull;
+no VM `ship-cache.sh` invocation or remote-transfer receipt is claimed.
+
+Preparation handoff: bounded per-file loop proof, all 431 measured signatures,
+all 431 exact axiom guards and 45 external controls pass. Exact commands,
+exits, timing, child RSS and headroom are in `backfill-preparation.json` and
+its immutable raw evidence. The unapplied proposal preserves 8,120 registered
+entries and adds exactly 431 owned pins; 65 upstream-only unregistered pins
+remain unchanged and byte-verified against adopted master. The repository
+gate is not bypassed. Failed draft checks and the two rejected proposal-count
+assumptions remain explicitly failed evidence. Final committed-head gates,
+independent reviews and cache/seal evidence are recorded in the local
+`sealed/loop-backfill-e684-<head>` handoff after this commit.

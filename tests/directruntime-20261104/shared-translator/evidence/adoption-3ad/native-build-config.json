@@ -1,0 +1,18 @@
+{
+  "leanPrefix": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-prefix",
+  "realToolchain": "/workspace/.setup/tools/lean-4.24.0-linux",
+  "lakePolicyWrapper": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/bin/lake",
+  "pinnedLeanSource": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613",
+  "leanSourceCommit": "797c613eb9b6d4ec95db23e3e00af9ac6657f24b",
+  "leanSourceClean": true,
+  "nativeBuilder": "scripts/build-direct-native.py",
+  "nativeBuilderSha256": "7b72740325b11c6e427e1d351a3d3f3d715b5cded5c0800ce007183d5ca81888",
+  "closureExtractorSha256": "bfb277b2be3496fae001d62b29bf3ea59c6bb3ffe297b8d38526a966ed9cbad2",
+  "boundary": "Existing producer build script unchanged;local prefix redirects only Lake through existing bounded-j1 policy wrapper. Other toolchain files are exact symlinks. No producer edits.",
+  "bridgeCompiler": {
+    "path": "/usr/bin/x86_64-linux-gnu-gcc-14",
+    "version": "gcc (Debian 14.2.0-19) 14.2.0",
+    "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f"
+  },
+  "leanSourceCleanAfterBuild": true
+}

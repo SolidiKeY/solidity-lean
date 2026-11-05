@@ -1210,7 +1210,7 @@
     "order_obstruction": "done"
   },
   "open_obligations": [
-    "Actual full VM driver runtime, final full-readiness reviews and successful full acceptance remain pending; current source and corpus gates pass"
+    "Actual full VM driver runtime, published shared source-inventory registration, final full-readiness reviews and successful full acceptance remain pending"
   ],
   "axiom_sets": {
     "Solidity.Frontend.C3Exactness.selects": [],

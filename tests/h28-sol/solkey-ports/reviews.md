@@ -39,3 +39,16 @@ all hashes and axiom sets), all five frozen-input identities, fetched-base
 ancestry, successful broad/selected exits, and accurate resource accounting.
 Both returned pass with no mandatory fix. Neither ran Lean, server, build or
 probe. Exact-head receipts and seal are the remaining mechanical delivery gates.
+
+## e6849d3b rebase review (2026-11-05)
+
+Independent read-only finder and skeptic: PASS, no findings. Neither invoked
+Lean/server/build tools. Both verified four owned Lean files and five frozen
+inputs match the backup, all 67 restored private files exactly match the backup,
+and the only metadata adaptation adds the fixed approved ancestor and documents
+the rebase/H41 policy. Both original and published bases remain ancestors.
+
+VM handoff: serial owned build, actual axiom ledger, 46 controls, selected
+acceptance and KeySort runtime passed. Exact final-head rerun receipts and
+verified H41 cache pack are sealed under `artifacts/rebase-e6849d3b/`. No
+whole-tree/Bridge rerun, global cache freshness or coordinator transfer is claimed.

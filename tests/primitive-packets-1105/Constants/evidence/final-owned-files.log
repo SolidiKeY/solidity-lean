@@ -1,0 +1,6 @@
+PASS lean:Solidity/Backend/PrimitivePackets/Constants/Source.lean 1s /workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/final-owned-files/1.log
+PASS lean:Solidity/Backend/PrimitivePackets/Constants/Selected.lean 1s /workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/final-owned-files/2.log
+PASS lean:Solidity/Backend/PrimitivePackets/Constants/Target.lean 1s /workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/final-owned-files/3.log
+PASS lean:Solidity/Backend/PrimitivePackets/Constants/Agreement.lean 1s /workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/final-owned-files/4.log
+PASS lean:Solidity/Backend/PrimitivePackets/Constants/Controls.lean 1s /workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/final-owned-files/5.log
+{"exit": 0, "seconds": 5.534162684009061, "peak_child_rss_kib": 684024, "user_seconds": 3.868795, "system_seconds": 1.6491319999999998}
