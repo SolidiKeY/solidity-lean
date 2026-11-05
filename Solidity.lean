@@ -1779,12 +1779,16 @@ import Solidity.Frontend.PaymentPlan
 import Solidity.Frontend.Problems
 import Solidity.Frontend.QualifiedUnits.Checked
 import Solidity.Frontend.QualifiedUnits.CheckedControls
+import Solidity.Frontend.QualifiedUnits.ConstructorFixtures
 import Solidity.Frontend.QualifiedUnits.Controls
 import Solidity.Frontend.QualifiedUnits.DifferentialControls
 import Solidity.Frontend.QualifiedUnits.Inheritance
+import Solidity.Frontend.QualifiedUnits.Layout
 import Solidity.Frontend.QualifiedUnits.Lookup
+import Solidity.Frontend.QualifiedUnits.MergeSpecification
 import Solidity.Frontend.QualifiedUnits.NormalizationControls
 import Solidity.Frontend.QualifiedUnits.ReferenceControls
+import Solidity.Frontend.QualifiedUnits.ReferenceCoverage
 import Solidity.Frontend.QualifiedUnits.References
 import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.QualifiedUnits.SignatureGap
@@ -1792,6 +1796,8 @@ import Solidity.Frontend.QualifiedUnits.SignatureHiding
 import Solidity.Frontend.QualifiedUnits.SignatureMemberControls
 import Solidity.Frontend.QualifiedUnits.SignatureMembers
 import Solidity.Frontend.QualifiedUnits.SignatureNormalization
+import Solidity.Frontend.QualifiedUnits.SignatureResolution
+import Solidity.Frontend.QualifiedUnits.SignatureResolutionControls
 import Solidity.Frontend.QualifiedUnits.Specification
 import Solidity.Frontend.QualifiedUnits.TypePaths
 import Solidity.Frontend.QualifiedUnits.UnitPaths
