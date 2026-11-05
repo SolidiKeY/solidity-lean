@@ -330,3 +330,64 @@ Existing-pin success does not register the new theorems. New theorem inventories
 and registration rows are supplied in the proposal; final build/cache readiness
 remains open. Import revalidation max sampled RSS318464000 bytes, cgroup
 peak188448768 bytes.
+
+
+## C05 — full-path IR lookup completeness and controls
+
+Coordinator follow-up on published master8bf8321873befa3f35ca31e97e5339a1baee93e6.
+Adopted in merge d666751e260c6fdcc9d2446751009a010b329ff6, preserving the
+original branch and RawBool checkpoint. No source producer or shared registry
+edit. This additive proof/controls checkpoint leaves original full T01/T02 and
+all recorded physical-memory/G01/interface/compiler obligations open.
+
+`Ir.select_lookup` erases the channel certificate to the exact ordinary lookup
+on both success and error. `Ir.selectContract_lookup` does the same for the full
+contracts/source/name/channel path, with arbitrary JSON and no success premise.
+`Ir.ContractSelection.complete` assumes only
+`lookup output source name mode = Except.ok text` and constructs an actual
+selection with `selectContract ... = Except.ok selection` and exact text. Old
+statements and extraction implementation are unchanged. Complete quantified
+signatures are in ImportFollowup/Signatures.lean and its measured output.
+
+`Solidity.Frontend.SolcJson.IrImportControls` supplies22 kernel controls: decoy
+source/contract, both channels, exact newline/quoted text, empty-string success,
+missing contracts/source/name/channel, null path components, wrong field spelling,
+number/bool/null/object channel types, inhabited completeness and no fallback.
+The partial Lean JSON parser is tested externally (escaped text and malformed
+JSON) in ParserChecks.lean; it is not a kernel parsing theorem. The unchanged
+saved real-solc output test reports IR_CHANNEL_FIXTURES_PASS4. Neither JSON
+selection nor these controls authenticate solc, parse Yul or establish T02
+simulation. No new premise, exclusion, axiom, sorry, native_decide or budget lift.
+
+Separate read-only finder and skeptic reviews used no Lean/server or writes.
+Both found no concrete defect: completeness only assumes ordinary lookup success,
+error strings are preserved, decoy controls discriminate exact paths, and the
+parser/compiler boundary is explicit. Initial dependent-case proof elaboration
+failures were fixed with match splitting and channel erasure, retaining the
+statement. Constructor inference in the executable parser check was fixed with
+explicit Json.str. Initial attempted parser reduction controls were moved to
+executable checks because Json.parse is partial; no kernel parsing claim is made.
+All failed diagnostics/build logs are retained alongside successful evidence.
+
+Final per-file MCP diagnostics:0 errors each, stopped before builds. Individual
+import check0.490s/RSS332505088 bytes; controls2.196s/RSS332779520 bytes. External
+parser0.345s and real-fixture0.469s pass. Axiom inventory covers all28 theorems
+(six importer plus22 controls), only existing propext/Classical.choice/Quot.sound.
+Fresh runtime: Lean4.24.0 (797c613), Lake5.0.0-src+797c613. KeySort exit0,0.936s:
+RUNTIME_GATE_PASS. No module above60s in these focused checks.
+
+Reproduction tools are scoped in tests/fullscope-20261104/vt1/ImportFollowup/.
+They use the previously verified Docker12GiB/no-swap/CPU1 envelope, explicit
+Lean-j1/LEAN_NUM_THREADS1, writer lock, observed aggregate RSS, max one Lean
+frontend,4GiB admission/ongoing reserve and unchanged180s file/300s group guards.
+Lake CLI lacks-j; scope-local TOML adds-j1 to frontend weakLeanArgs. The copied
+configuration changes no tracked root configuration or generated registry.
+
+After committing, required gate.sh touched/checkpoint run at that committed HEAD;
+exact commands, outcomes, wall/RSS, gate HEAD and all failures are sealed in the
+scoped seal/HANDOFF.md. Per-file success is not checkpoint readiness. Coordinator
+owns generated roots/maps/pins: register the new IrImportControls module and
+new theorem inventory; original IrImport is now centrally registered. RawBool
+registration requests and its separately sealed handoff remain unchanged.
+H41: export a verified source/toolchain/checksum-bound cache packet for pull;
+never run ship-cache.sh on this VM or claim delivery without a receipt.
