@@ -864,6 +864,10 @@ Final read-only finder and skeptic independently verified the14-file split, unch
 
 ## Moved lane (Claude VM) — O02 value passes checkpoint — 2026-11-05
 
+Status lines in the sections above that say O02 is "OPEN", "not begun" or that "No
+O02 pass implementation is claimed" are historical (Codex VM) and superseded by this
+section and the ones after it.
+
 Batch moved4-20261105, branch `cloud/moved4-20261105/vo1-optimizer`, started from
 `origin/cloud/vo1-optimizer-move` (cdfa3601) merged with origin/master (aec9adf1,
 already contained). The Codex-VM receipts, `bounded.py`/`bin/lake`/`runtime.toml`
@@ -903,7 +907,10 @@ gas value is equated or fabricated.
 - Short circuit: a literal left operand that decides `&&`/`||` drops the right operand
   exactly when `BinOp.shortT` does.
 - Dead code: `if (lit)` becomes the block of the branch taken; `require(true);`,
-  `assert(true);`, `while (false) …` are dropped from the sequence.
+  `assert(true);`, `while (false) …` are dropped from the sequence (with the loop's
+  `LoopAnn`, which the run does not read; a verification layer reading annotations of
+  an optimized program would see none for that loop). No pass recurses into `call`,
+  `callRec`, `callReceiver`, `tryCall` or `catchData` bodies.
 - Positions rewritten: local assignments, local declarations, `require`, `assert`,
   `transfer`/`send` operands, `if`/`while` conditions, recursively in branches,
   blocks and loop bodies. Not rewritten (left exactly as written, so trivially
@@ -911,21 +918,32 @@ gas value is equated or fabricated.
   writes, calls and their bodies, `try`/`catch`, receiver calls, revert data.
 - Propagation records a fact only from `x = e;` / `T x = e;` whose propagated and
   folded right side is a literal or a local (never an environment read); assigning a
-  local kills every fact reading it; facts survive only `require`/`assert`; branches,
+  local kills the fact for it and every fact reading it; facts survive local
+  assignments (except killed ones), declarations, `require` and `assert`; other
+  statements reset to no facts; `transfer`/`send` operands are folded but not
+  propagated into; branches,
   blocks and loop exits reset to no facts; loop bodies and conditions start with no
   facts. Controls: `prop_constant`, `prop_copy`, `prop_killed`.
 - Simplifier (solc `RuleList.h` reference): `X+0`, `0+X`, `X-0`, `X*1`, `1*X`, `X/1`
   at `uint`/`int`; `X&&true`, `true&&X`, `X||false`, `false||X`; `s-s → 0`,
-  `s==s → true`, `s!=s → false` only for a simple `s`. Omitted because they would hide
-  a halt under checked semantics: `X*0`, `X-X`, `X&0` for a compound `X`, and the
-  wrapping-arithmetic rules stated modulo `2^256`. Negative controls:
+  `s==s → true`, `s!=s → false` only for a simple `s`. Not implemented: `X*0 → 0`
+  (for any `X`; for a compound `X` it would hide a halt), `X-X → 0` for a compound `X`
+  (same reason), bitwise and shift identities, and the wrapping-arithmetic rules
+  stated modulo `2^256`. Negative controls:
   `simp_sub_overflow_kept`, `unrestricted_sub_wrong`, `simp_mul_zero_kept`,
   `unrestricted_mul_wrong`.
-- Unused variables: the first declaration of a block whose initialiser is absent or
-  simple and whose remaining body strengthens (`Prog.str?`, fragment: local
+- Unused variables: a declaration that is the block's *first statement*, whose
+  initialiser is absent or simple and whose remaining body strengthens (`Prog.str?`, fragment: local
   assignment/declaration, `require`, `assert`, `revert`, `assume(false)`, `transfer`,
-  `if`, blocks, over path-free values) is removed; one per block per run (iterate the
-  pass for more). A failing initialiser is kept (`failing_init_kept`,
+  `if`, blocks, over path-free values) is removed. Iterating the pass removes a run of leading unused declarations
+  only; a declaration after another kept statement, a declaration at a body's top
+  level outside a block (its removal would change the context type), an unused but
+  assigned local (`x = …` does not strengthen), and any block whose rest uses storage
+  or memory paths, `send`, a loop or a call are left as written. Only an explicit `{ … }` block is a candidate: `if` branches, loop
+  bodies, function bodies and the top-level program are not (an `if (lit)` becomes a
+  block under `Prog.cfold` first). Names: `ConstFold.Prog.str?_wk`,
+  `ConstFold.Prog.uve_runC`, `ConstFold.Prog.cprop_runC` live in namespace
+  `Solidity.Optimizer.ConstFold`. A failing initialiser is kept (`failing_init_kept`,
   `failing_init_drop_wrong`). Semantics reuse the existing `Prog.run_wk` and
   `TWkRel.drop` unchanged.
 
@@ -940,10 +958,31 @@ Registration: the five modules are in the generated `Solidity.lean`
 (`fragments.sh`). `scripts/check-layers.mjs`: 857 core modules, 0 reach the
 elaborator (the Optimizer CORE enumeration stays COORD's, unchanged).
 
+### Composition with `Compilation.correct` (caveat)
+
+`SameRun` is equality of `Prog.runC`; `Compilation.correct` (`Evm/Compiler.lean`) is
+stated over `P.run` (the recursor form; rewrite with `Prog.runR_eq`) and its
+agreement premise reads syntactic properties of the program (`Prog.asserts`,
+`Evm.Prog.pays`, the `Evm.Prog.pushes` frame). A pass can change those
+(`if (false) { push }` changes `pushes`; dropping `assert(true)` changes `asserts`),
+and compilation is partial (`Option`), with no proof here that optimizer output stays
+in the compiled fragment. So composing an O02 pass before the compiler gives the
+compiler theorem about the optimized program, not literally the original's
+statement; the bridge (coverage plus the agreement premises over `SameRun`) is part
+of the open O01 composition item and needs the V09/VY3 adapters. `SameRun` also fixes
+heap typing/contents and final locals, which is exact for O02 but stronger than D6
+for future memory passes (dead allocation, memory dead stores) in O03.
+
 ### Remaining O02 obligations
 
 - D6 binding (X01) and D1 artifact/gas oracle: open, waiting on X01.
 - Optimizing inside storage/memory index expressions, compound assignments and call
-  arguments: not done (left as written); these need path-level congruences.
+  arguments, and recursing into call/try/catch bodies: not done (left as written);
+  these need path-level congruences.
+- Dead-code elimination beyond literal conditions: code after `revert`/`assert(false)`,
+  dead stores and unused pure assignments are not removed.
+- solc rules not implemented (valid under checked semantics): bitwise/shift
+  identities, `X%1`, `X**0`, `X^X`, `X&X`, `!!X` (see the Simplify update below for
+  the ones added later).
 - Unused-variable elimination outside the strengthening fragment and of non-first
   declarations within one pass: not done.
