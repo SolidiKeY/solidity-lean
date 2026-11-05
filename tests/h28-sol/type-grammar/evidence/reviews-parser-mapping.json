@@ -1,0 +1,22 @@
+{
+  "scope": "ParserMapping all44statements; actualkey/name/child constructor composition; genericconditionalcertificateprojections; concreteinhabitedarbitrary-depthmappingfamilies",
+  "finder": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "checkpoint accepted",
+    "findings": []
+  },
+  "skeptic": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "ParserMapping checkpoint accepted only",
+    "findings": []
+  },
+  "trust": {
+    "audit": "h28-type-f7330c1853bd.json",
+    "current_statement_count": 252,
+    "new_empty": 12,
+    "new_propext": 32,
+    "allowlist_unchanged": true
+  },
+  "clarification": "Certified is an explicit universal-yield/precedence/fuel completeness target. Generic projections do not assert all types certified. Mapping preservation uses strict-child evidence only. Concrete nested families discharge all certificates and exhibit actual yields/checked parses.",
+  "remaining": "Function/static-length certification; arrays around mappings; whole-language identity/completeness; final full gates/acceptance"
+}
