@@ -28,8 +28,10 @@ may-equivalence, and a data-free `revert` and a loop are equivalent there
 resource choices; refinement lets the refining side have fewer.
 
 **Honest contracts.**  A `Deployed` may read its adversary through any
-`env`; `Contract.Faithful` asks that it read the whole session (an inverse
-`session ∘ env = id`) and that allowed sessions give allowed environments.
+`env`; `Contract.Faithful` asks that `env` be injective (a left inverse) and
+send allowed sessions to allowed environments.  It is a check on instances,
+not a hypothesis of the relations, and it says nothing about `Counts` or
+whether the semantics reads the environment.
 Every contract this library builds is faithful (`srcContract`,
 `SourceSpec.contract`, `EvmSpec.contract`, the controls').
 
@@ -49,8 +51,9 @@ observe logs once X07 adds them.
 **Final observable state.**  State is observed the only way the G01
 adversary can: by later transactions and callbacks, which read the history
 only.  A difference in final state that some function of the system returns
-(or turns into an outcome or a call) shows in some adversary's events
-(`Controls.store_not_ctxEquiv`).  External balances follow from the events
+(or turns into an outcome or a call) is expected to show in some adversary's
+events; the controls witness a second transaction reading what the first
+left (`AdversaryControls.twoTx_not_ctxEquiv`), not a general theorem.  External balances follow from the events
 through the fixed ledger (G03).  Not observed: state no function exposes,
 raw layout and gas values (G00), and what real code could read beside the
 ABI, such as `BALANCE` of the system's own instances or their code hash.
@@ -58,7 +61,7 @@ ABI, such as `BALANCE` of the system's own instances or their code hash.
 Lemmas: preorder (`CtxRefines.refl`, `.trans`), equivalence
 (`CtxEquiv.refl`, `.symm`, `.trans`), completion and safety transfer,
 weakening of the adversary set (callback-free environments are a special
-case, strictly weaker: `Controls.guard_ctxEquiv_noCallback`), and congruence
+case, strictly weaker: `AdversaryControls.noCallback_strictly_weaker`), and congruence
 under sequencing of behaviours (`CtxRefinesOn.seq`, `Behav.seq`).
 -/
 

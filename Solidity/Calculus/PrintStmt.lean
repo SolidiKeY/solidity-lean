@@ -373,7 +373,8 @@ def labelHead (s : Expr) : Lean.Name :=
 
 /-- A `UInt8` or `Nat` numeral's value. -/
 def byteLit? (e : Expr) : Option Nat :=
-  if e.isAppOfArity ``OfNat.ofNat 3 then (e.getArg! 1).rawNatLit? else e.rawNatLit?
+  let n? := if e.isAppOfArity ``OfNat.ofNat 3 then (e.getArg! 1).rawNatLit? else e.rawNatLit?
+  n?.bind fun n => if n < 256 then some n else none
 
 /-- Two lowercase hex digits of a byte. -/
 def hexByte (b : UInt8) : String :=

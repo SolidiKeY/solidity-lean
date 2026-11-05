@@ -23,8 +23,8 @@ matches):
 
 So `[ P ] φ ↯ _` is `[ P ] φ` (`revModal_box_any`), and
 `⟨ P ⟩ φ ↯ ⊥` is `⟨ P ⟩ φ` (`revModal_diamond_none`): the new modality is a
-conservative extension.  `⟨ P ⟩ false ↯ ψ` says that `P` reverts, with data
-satisfying `ψ`.
+conservative extension.  `⟨ P ⟩ false ↯ ψ` says that `P` reverts with data
+satisfying `ψ`, or exhausts.
 
 **Data predicates** (`DataPred`, decidable by `DataPred.eval`): any data,
 exact bytes, `Error(m)` (`encodeError`), any decodable `Error(string)`,
@@ -38,12 +38,16 @@ returns.  The elaborator keeps a revert's data where a `catch` can read it
 (`revert(hex"…")`, the solc import's form); elsewhere `revert("m")` and
 `require(c, "m")` elaborate to a data-free `revert` (`docs/semantic-gaps.md`,
 "Revert data", *Where data is computed*), so a top-level `[ revert("m"); ]`
-reverts with empty data in the model.  `Controls` pins both readings.
+reverts with empty data in the model, and so does a failed index, `pop` or
+checked operation outside `checked { }`; `assert` panics, which no `↯`
+formula accepts (`revModal_not_panic`).  This is less data than solc returns
+(`docs/solc-alignment.md`, "Revert data read in formulas").
+`Examples/Tactics/RevertFormulas.lean` pins the readings.
 
-**At the ABI boundary.**  A transaction's revert data is the bytes of
-`Outcome.revert`; `THalt.toOutcome?` maps a halt with revert data to that
-outcome, so a data predicate proved of a run is a predicate on the outcome
-the contextual relations of `Basic.lean` observe (`DataPred.outcome`).
+**At the ABI boundary.**  `THalt.toOutcome?` maps a halt with revert data
+to the `Outcome.revert` that would carry it, and `DataPred.outcome` reads a
+predicate there; a panic has no outcome here.  No theorem yet relates a
+typed run's halt to a session's outcome in `Basic.lean`.
 -/
 
 namespace Solidity
@@ -226,6 +230,15 @@ theorem revModal_revertBytes {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (bs : List
     (P : Prog C Γ Γ₁) (κ : Frames C Γ₁ Γ₀) (φ : Fml C Γ₀) (ψ : DataPred) :
     RFml.holds σ (.revModal m (.cons (.revertData [.bytes bs]) P) κ φ ψ) ↔ ψ.eval bs = true :=
   revModal_of_revert m φ ψ (runFrames_revertBytes σ bs P κ)
+
+/-- **A panic satisfies no revert-reading formula**, under either modality. -/
+theorem revModal_not_panic {Γ Γ₁ Γ₀ : Ctx} {σ : State C Γ} {P : Prog C Γ Γ₁}
+    {κ : Frames C Γ₁ Γ₀} (m : Modality) (φ : Fml C Γ₀) (ψ : DataPred)
+    (h : Prog.runFrames σ P κ = .error .panic) : ¬ RFml.holds σ (.revModal m P κ φ ψ) := by
+  rw [RFml.holds]
+  unfold Modality.afterRunRev
+  rw [h]
+  exact fun hh => hh.2 rfl
 
 /-- A data-free `revert` reverts with the empty data. -/
 theorem revModal_revert {Γ Γ₁ Γ₀ : Ctx} (σ : State C Γ) (m : Modality)

@@ -84,6 +84,38 @@ theorem branch_not_taken (σ : State StandardExample []) :
   intro h
   exact (revModal_of_ok (τ := _) .diamond _ _ rfl).1 h trivial
 
+/-- A top-level `assert` panics: no data predicate reads it (solc reverts with
+`Panic(1)`; recorded in `docs/solc-alignment.md`). -/
+theorem assert_not_panic (σ : State StandardExample []) :
+    ¬ RFml.holds σ dl!{ ⟨ assert(false); ⟩ false ↯ Panic(1) } :=
+  revModal_not_panic _ _ _ rfl
+
+/-- `↯ none` is stronger than the box: `revert()` satisfies `[ revert(); ] true`
+but not `[ revert(); ] true ↯ none`. -/
+theorem box_none_stronger (σ : State StandardExample []) :
+    σ ⊧ dl!{ [ revert(); ] true } ∧ ¬ RFml.holds σ dl!{ [ revert(); ] true ↯ none } :=
+  ⟨(revModal_box_any σ _ _ _).1 ((revModal_revert σ _ _ _ _ _).2 rfl),
+    fun h => absurd ((revModal_revert σ _ _ _ _ _).1 h) (by decide)⟩
+
+/-- `↯ _` is weaker than the diamond: `revert()` satisfies
+`⟨ revert(); ⟩ false ↯ _` but not `⟨ revert(); ⟩ false`. -/
+theorem diamond_any_weaker (σ : State StandardExample []) :
+    RFml.holds σ dl!{ ⟨ revert(); ⟩ false ↯ _ } ∧ ¬ σ ⊧ dl!{ ⟨ revert(); ⟩ false } :=
+  ⟨(revModal_revert σ _ _ _ _ _).2 rfl, fun h =>
+    absurd ((revModal_revert σ _ _ _ _ _).1 ((revModal_diamond_none σ _ _ _).2 h)) (by decide)⟩
+
+/-! `↯` needs a modality: a formula without one is refused, not read with
+`ψ` ignored. -/
+
+/--
+error: `↯` reads the revert data of a modality: write `[ P ] φ ↯ ψ` or `⟨ P ⟩ φ ↯ ψ`
+-/
+#guard_msgs in #check dl!{ true ↯ Error("x") }
+
+/-- The printed form reads back to the same formula. -/
+example : dl{ [ revert(hex"626f6f6d"); ] true ↯ Error("boom") } =
+    dl!{ [ revert(hex"626f6f6d"); ] true ↯ Error("boom") } := rfl
+
 /-! ## Axiom guards -/
 
 /-- info: 'Solidity.revModal_box_any' depends on axioms: [propext, Classical.choice, Quot.sound] -/

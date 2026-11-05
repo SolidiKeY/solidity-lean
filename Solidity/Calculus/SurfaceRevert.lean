@@ -8,13 +8,13 @@ import Solidity.Semantics.CtxEquiv.RevertFml
 The surface of `Solidity/Semantics/CtxEquiv/RevertFml.lean`.  A modal
 formula followed by `↯` and a data predicate reads a revert's data:
 
-    dl!{ [ revert(hex"01"); ] true ↯ [1] }
-    dl!{ ⟨ s; ⟩ false ↯ Error("boom") }
+    dl!{ [ revert(hex"626f6f6d"); ] true ↯ Error("boom") }
+    dl!{ ⟨ revert(); ⟩ false ↯ [] }
 
-`dl!{ φ ↯ ψ }` (and `dl[C]{ φ ↯ ψ }`) is `RFml.ofModal dl!{ φ } data{ ψ }`:
-`φ` is any formula the existing notation reads; when it is a modality
-`[ P ] φ'` or `⟨ P ⟩ φ'` the result is `RFml.revModal`, `P` ending
-normally in `φ'`, reverting with data satisfying `ψ`.  It prints back as
+`dl!{ φ ↯ ψ }` (and `dl[C]{ φ ↯ ψ }`) is `RFml.ofModal dl!{ φ } data{ ψ }`,
+where `φ` must be a modality `[ P ] φ'` or `⟨ P ⟩ φ'` (anything else is
+refused, rather than `ψ` ignored): `RFml.revModal`, `P` ending normally in
+`φ'`, a revert's data satisfying `ψ`.  It prints back as
 `dl{ φ ↯ ψ }` (the scoped formulas print as `dl{ … }`, `Calculus/DelabRules.lean`),
 and `dl{ φ ↯ ψ }` reads as `dl!{ φ ↯ ψ }`.
 
@@ -145,10 +145,20 @@ syntax "dl[" term "]{ " dl_fml " ↯ " rev_data " }" : term
 /-- `dl{ φ ↯ ψ }`, as printed: `dl!{ φ ↯ ψ }`. -/
 syntax "dl{ " dl_fml " ↯ " rev_data " }" : term
 
+/-- Elaborate `RFml.ofModal fm data{ ψ }` after checking that `fm` is a
+modality. -/
+def elabRev (fm : Term) (ψ : TSyntax `rev_data) : Elab.Term.TermElabM Expr := do
+  let e ← instantiateMVars (← Elab.Term.elabTerm fm none)
+  unless e.isAppOf ``Fml.modal do
+    throwError "`↯` reads the revert data of a modality: write `[ P ] φ ↯ ψ` or `⟨ P ⟩ φ ↯ ψ`"
+  Elab.Term.elabTerm (← `(RFml.ofModal $fm data{ $ψ })) none
+
+elab_rules : term
+  | `(dl!{ $φ:dl_fml ↯ $ψ }) => do elabRev (← `(dl!{ $φ })) ψ
+  | `(dl[ $c ]{ $φ:dl_fml ↯ $ψ }) => do elabRev (← `(dl[$c]{ $φ })) ψ
+
 macro_rules
-  | `(dl!{ $φ:dl_fml ↯ $ψ }) => `(RFml.ofModal dl!{ $φ } data{ $ψ })
-  | `(dl[ $c ]{ $φ:dl_fml ↯ $ψ }) => `(RFml.ofModal dl[$c]{ $φ } data{ $ψ })
-  | `(dl{ $φ:dl_fml ↯ $ψ }) => `(RFml.ofModal dl!{ $φ } data{ $ψ })
+  | `(dl{ $φ:dl_fml ↯ $ψ }) => `(dl!{ $φ ↯ $ψ })
 
 /-- Print `φ ↯ ψ` from the modal formula's expression and the predicate's. -/
 def ppRev (fm ψ : Expr) : DelabM Term := do

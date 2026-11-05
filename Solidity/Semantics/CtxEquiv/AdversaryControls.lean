@@ -12,8 +12,12 @@ transaction event, and a program may call an external account whose answer
 - **Requests observe state.**  `store 1` and `store 2` (a getter returning
   the stored byte) agree on the session without requests
   (`store_agree_quiet`) but not on one with a request
-  (`store_not_ctxEquiv`): a later transaction reads the final state, and the
-  relation quantifies over sessions, not one.
+  (`store_not_ctxEquiv`): the relation quantifies over sessions, not one.
+  `twoTx 1` and `twoTx 2` answer the first transaction alike and differ in
+  what the second reads (`twoTx_agree_one`, `twoTx_not_ctxEquiv`), read
+  through the history-indexed `requests`.
+- **Events alone.**  `pay 1` and `pay 2` end alike but call `ext` with
+  different values (`pay_not_ctxEquiv`).
 - **Callbacks.**  `guarded` reverts when the callee calls back, `unguarded`
   never: equivalent against every callback-free session
   (`guard_ctxEquiv_noCallback`), not against every session
@@ -46,6 +50,10 @@ inductive Adv where
   | guarded
   /-- Calls `ext`; succeeds whatever it does. -/
   | unguarded
+  /-- Succeeds on the first transaction; the second returns `k`. -/
+  | twoTx (k : UInt8)
+  /-- Pays `v` to `ext`, then succeeds. -/
+  | pay (v : Word)
   deriving DecidableEq
 
 /-- The outcome of the first transaction. -/
@@ -55,17 +63,28 @@ def Adv.out : Adv → SessionEnv → Outcome
     | .reenter .. => .revert [1]
     | _ => .success []
   | .unguarded, _ => .success []
+  | .twoTx _, _ => .success []
+  | .pay _, _ => .success []
 
 /-- The events a program's run emits before its transaction completes. -/
 def Adv.calls : Adv → List Event
   | .store _ => []
+  | .twoTx _ => []
+  | .pay v => [.call ext v [] false]
   | _ => [callExt]
 
 /-- The session: the first request's transaction, or nothing. -/
 def Adv.run (p : Adv) (e : SessionEnv) : Prefix Event Outcome :=
   match e.requests [] 0 with
   | some (.request q) =>
-    ⟨p.calls ++ [.tx q.sender q.target q.value q.timestamp q.input (p.out e)], some (p.out e)⟩
+    let ev := Event.tx q.sender q.target q.value q.timestamp q.input (p.out e)
+    match p with
+    | .twoTx k => match e.requests [ev] 1 with
+      | some (.request q') =>
+        ⟨[ev, .tx q'.sender q'.target q'.value q'.timestamp q'.input (.success [k])],
+          some (.success [k])⟩
+      | _ => ⟨[ev], some (.success [])⟩
+    | _ => ⟨p.calls ++ [ev], some (p.out e)⟩
   | _ => ⟨[], some (.success [])⟩
 
 /-- The language: one bound, every session environment allowed by G01. -/
@@ -134,6 +153,29 @@ theorem store_agree_quiet : (advC (.store 1)).behav quietEnv = (advC (.store 2))
 theorem store_not_ctxEquiv : ¬ CtxEquiv (advC (.store 1)) (advC (.store 2)) :=
   not_ctxEquivOn_of_done reqEnv_allowed (o := .success [1]) ⟨(), trivial, rfl⟩
     fun ⟨r, _, h⟩ => by cases r; exact prefix_ne_of_final (by decide) h
+
+/-- Two requests. -/
+def twoEnv : SessionEnv :=
+  { quietEnv with requests := fun _ i => if i ≤ 1 then some (.request q0) else none }
+
+theorem twoEnv_allowed : twoEnv.Allowed :=
+  ⟨fun _ => rfl, fun _ _ _ => rfl, fun _ _ _ _ _ _ => rfl⟩
+
+theorem twoTx_agree_one : (advC (.twoTx 1)).behav reqEnv = (advC (.twoTx 2)).behav reqEnv :=
+  advC_behav_eq rfl
+
+/-- **Negative control**: the second transaction reads what the first left. -/
+theorem twoTx_not_ctxEquiv : ¬ CtxEquiv (advC (.twoTx 1)) (advC (.twoTx 2)) :=
+  not_ctxEquivOn_of_done twoEnv_allowed (o := .success [1]) ⟨(), trivial, rfl⟩
+    fun ⟨r, _, h⟩ => by cases r; exact prefix_ne_of_final (by decide) h
+
+/-- **Negative control**: an event alone is observed. -/
+theorem pay_not_ctxEquiv : ¬ CtxEquiv (advC (.pay 1)) (advC (.pay 2)) :=
+  not_ctxEquivOn_of_done reqEnv_allowed (o := .success []) ⟨(), trivial, rfl⟩
+    fun ⟨r, _, h⟩ => by
+      cases r
+      have he := congrArg Prefix.events h
+      exact absurd he (by decide)
 
 /-! ## Callbacks -/
 
@@ -206,6 +248,10 @@ theorem seq_history_observed :
 
 end Solidity.CtxEquiv.AdversaryControls
 
+/-- info: 'Solidity.CtxEquiv.AdversaryControls.twoTx_not_ctxEquiv' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.CtxEquiv.AdversaryControls.twoTx_not_ctxEquiv
+/-- info: 'Solidity.CtxEquiv.AdversaryControls.pay_not_ctxEquiv' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.CtxEquiv.AdversaryControls.pay_not_ctxEquiv
 /-- info: 'Solidity.CtxEquiv.AdversaryControls.store_not_ctxEquiv' depends on axioms: [propext] -/
 #guard_msgs in #print axioms Solidity.CtxEquiv.AdversaryControls.store_not_ctxEquiv
 /-- info: 'Solidity.CtxEquiv.AdversaryControls.noCallback_strictly_weaker' depends on axioms: [propext, Quot.sound] -/

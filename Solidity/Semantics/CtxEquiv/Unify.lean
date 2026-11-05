@@ -27,15 +27,19 @@ contextual refinement or equivalence (`Solidity/Semantics/CtxEquiv/Basic.lean`):
   shape is exactly these two (`artifactRefines_iff`).  Specification
   transfer follows from them and `envAbs_eq` (`PublicCorrectness.transfer'`,
   the statement of `PublicCorrectness.transfer`; the original stays in
-  `Roadmap/Contracts.lean`, owned by X01).  The guarded side is not vacuous:
-  a non-vacuous source gives a success the guarded bytes show
-  (`PublicCorrectness.ctx_succeeds`).
+  `Roadmap/Contracts.lean`, owned by X01).  The bytes counting every
+  admissible bound are not vacuous: a non-vacuous source gives a success
+  they show (`PublicCorrectness.ctx_succeeds`).  Non-vacuity of the guarded
+  bytes, which `ctxRefines_back` counts, is open: `RefinesUnder`'s forward
+  half gives no target premise.
 
 **Interface stubs.**  O01 (`Solidity/Optimizer/**`) and T07
 (`Solidity/SolcValidation/**`) are not on master.  `Preserves π p h` states
-D6 for one pass and input: every observation is preserved under the hash
-premises of both sides, gas values aside (they are resource choices, not
-part of a `Prefix`); it is exactly the two contextual refinements
+D6 for one pass and input, restricted: the source's forward runs meeting
+their premise are preserved, and the target's runs meeting theirs are the
+source's, over G01's observations, gas values aside (they are resource
+choices, not part of a `Prefix`).  It does not compose (the middle
+language's premises are not carried); a pipeline needs `Cert`; it is exactly the two contextual refinements
 (`preserves_iff`), follows from a certificate (`Cert.preserves`), and is an
 equivalence without premises (`Preserves.ctxEquiv`).  D1's clause (a
 program that reads gas is related to the artifact the optimizer produced)
@@ -348,9 +352,9 @@ theorem PublicCorrectness.ctxRefines_forward (h : PublicCorrectness S V compiler
     CtxRefines (S.contractForward (S.meaning r w p art)) (V.contract art) :=
   (h.artifactRefines adm w p hc).ctxRefines_forward
 
-/-- **The guarded side is not vacuous**: a non-vacuous source gives an
-admitted input whose bytes, at some allowed session, show a nonempty
-success among the runs meeting their premise. -/
+/-- **The unguarded bytes are not vacuous**: a non-vacuous source gives an
+admitted input whose bytes, at some allowed session and admissible bound,
+show a nonempty success.  (The guarded bytes' non-vacuity is open.) -/
 theorem PublicCorrectness.ctx_succeeds (h : PublicCorrectness S V compiler envAbs X)
     (hv : S.NonVacuous) : ∃ i art s π d, compiler i = some art ∧ s.Allowed ∧
       (V.contract art).behav s π ∧ π.final = some (.success d) ∧ d ≠ [] := by

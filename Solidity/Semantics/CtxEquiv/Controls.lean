@@ -240,7 +240,8 @@ theorem not_mangle_preserves : ¬ Preserves mangle (.fail [1]) trivial := by
   cases x <;> exact prefix_ne_of_final (by decide) he
 
 /-- **Inhabited (T07 stub)**: a computable check, comparing the artifact's
-runtime bytes with the admitted program's text, is a validator. -/
+runtime bytes with the admitted program's text, is a validator.  Sound only
+because the toy EVM loads the main runtime and nothing else. -/
 def toyValidator : Validator toySource toyEvm where
   validate := fun i art => match accept i with
     | some r => mainRuntime art == r.prog.text
