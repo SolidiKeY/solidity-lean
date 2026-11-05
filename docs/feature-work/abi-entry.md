@@ -1305,8 +1305,9 @@ Final guarded per-file diagnostics report zero errors.
 `SelectorBranchesInterface.lean` specifies actual public compiler selection of
 both typed branches and exact selector dispatch including the compiler join.
 The matched branch retains its trailing jump over the miss branch; no normal
-return, desired body execution or poststate is assumed. Generic join removal,
-Source association, short special routing and native loading remain separate.
+return, desired body execution or poststate is assumed. Represented-input join
+removal is supplied by `CoreJoin` below; Source association, short special
+routing and native loading remain separate.
 
 
 `SelectorBranches.lean` selects the actual typed conditional, both branch
@@ -1314,9 +1315,10 @@ artifacts and the joined output fragment through the existing public compiler.
 Exact dispatch reuses the proved selector test at the chosen local. The match
 executes the selected left code followed by the compiler's jump over the right
 code; a miss executes the right code directly. The real left outcome feeds that
-join, preserving its skip instead of assuming a normal return. Generic join
-removal for arbitrary core bodies remains open; no body run/poststate or new
-normal-return premise appears in the certificate.
+join, preserving its skip instead of assuming a normal return. This certificate
+retains the join; `CoreJoin` below removes it for represented core inputs within
+the existing resource bound. No body run/poststate or normal-return premise
+appears in the certificate.
 
 Controls weaken the existing primitive entry/body program with a distinct
 selector local, retaining definitionally identical decoder code at the shifted
@@ -1332,8 +1334,8 @@ miss continuation does not authenticate Source fallback declarations/parameters.
 Focused compilation and scoped standard-only axiom guards pass. Repairs and
 bounded bridge trial timeouts remain in the handoff. Diagnostic containers are
 restarted and worker absence verified before builds; no concurrent diagnostic
-worker/build is claimed for this checkpoint. General dispatch trees, generic
-join removal, receive/fallback Source association, native loaders, aggregate
+worker/build is claimed for this checkpoint. General dispatch trees, native
+construction of represented inputs, receive/fallback Source association, loaders, aggregate
 input decoding and full G40/G46.02 remain open, as do fixture replay and final
 assignment gates.
 
@@ -1346,3 +1348,30 @@ represented typed input and the unchanged compiler allocation bound. It assumes
 neither a normal return nor a body execution/result. Source/native construction
 of that input representation remains separate; earlier arbitrary-machine exact
 join statements remain unchanged.
+
+
+`CoreJoin.lean` removes the trailing join for every actual core compilation from
+an existing `Evm.Sim` input within the unchanged `L + Prog.pushes ≤ Lmax` bound.
+The proof reuses `Evm.compile_correct` to derive all actual outcomes: a return
+with skip zero, a revert or a fault, including divergence. It supplies no body
+run/result or normal-return premise and builds no replacement checker. Public
+compiler selection identifies the actual artifact; the branch consequence now
+returns the selected body's complete outcome under those existing input facts.
+Earlier arbitrary-machine exact-join statements remain unchanged.
+
+Controls construct an actual typed local state and prove its representation,
+then select and execute returning, reverting and infinite-loop bodies. The loop
+fault is proved from the existing loop semantics and preserved by the join.
+Represented selector match and miss execute different writes while retaining
+saved state and stack. A raw escaping-jump counterexample shows why the result
+is not an unconditional statement about arbitrary instruction lists. These are
+intrinsic compiler controls; Source/native construction of represented frames
+and full-profile authority are not supplied. Focused compilation and scoped
+standard-only axiom guards pass; bounded proof-repair evidence is retained.
+Full dispatch/source association, aggregate decoding, native calldata/frame
+realization, failure bytes, G46.02 and fixture replay remain open.
+
+Independent read-only finder and skeptic reviews found no semantic issues.
+Both confirmed unchanged representation/resource premises, coverage of every
+compiler-correctness outcome and nonvacuous divergence/negative controls. Final
+guarded diagnostics report zero errors; exact gate outcomes are in the handoff.

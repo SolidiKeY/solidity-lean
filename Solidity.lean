@@ -19,6 +19,8 @@ import Solidity.Backend.AbiEntry.CalldataWord
 import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
 import Solidity.Backend.AbiEntry.Consumers
+import Solidity.Backend.AbiEntry.CoreJoin
+import Solidity.Backend.AbiEntry.CoreJoinControls
 import Solidity.Backend.AbiEntry.CoreJoinInterface
 import Solidity.Backend.AbiEntry.DispatchRefusal
 import Solidity.Backend.AbiEntry.DispatchRefusalControls
