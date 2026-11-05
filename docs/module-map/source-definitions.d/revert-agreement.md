@@ -14,3 +14,5 @@
 | `Source/Agreement/BoolSlot.lean` | Existing intrinsic indices at an arbitrary typed primitive prefix and actual local-set correspondence. |
 | `Source/Agreement/BoolSlotAssign.lean` | Arbitrary-position boolean assignment producer, internally instantiated normal client and short-horizon control. |
 | `Source/Agreement/BoolSlotControls.lean` | Actual middle-slot Source/model preservation and a wrong-slot countercontrol. |
+| `Source/Agreement/BoolSlotRead.lean` | Actual arbitrary-slot get correspondence, local-read initialization and later original-slot write producers. |
+| `Source/Agreement/BoolSlotReadControls.lean` | Concrete read-copy/write histories and importing client; horizon and primitive-copy-versus-alias controls. |
