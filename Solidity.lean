@@ -301,6 +301,8 @@ import Solidity.Backend.MemoryCopies.CheckedDefault
 import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
 import Solidity.Backend.MemoryCopies.CheckedReferenceInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
+import Solidity.Backend.MemoryCopies.HeapContents
+import Solidity.Backend.MemoryCopies.HeapContentsInterface
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
@@ -312,6 +314,7 @@ import Solidity.Backend.MemoryCopies.PublishedStorage
 import Solidity.Backend.MemoryCopies.PublishedStorageInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
+import Solidity.Backend.MemoryCopies.SingletonCopyInterface
 import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
