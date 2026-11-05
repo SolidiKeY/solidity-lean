@@ -1767,3 +1767,9 @@ The three producer laws and eight populated controls in `Bridge/SolidityBridge/R
 The sibling native refusal laws use the published `Assembly.X_unfold` equality to prove actual `EVM.X (fuel+1)` underflow. The explicit fuel-boundary control distinguishes native X at fuel one (which reaches the refusal gate) from `driverSteps 1 1` (which refuses with `OutOfFuel`). No driver/native fuel-policy equality is inferred.
 
 Independent read-only finder and skeptic reviews found no remaining issue after native-X refusal and the distinct fuel-boundary control were made explicit. Seven public laws have standard-only axiom reports.
+
+### Concrete arithmetic sequence
+
+`Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` composes the published ADD/MUL selection certificates for arbitrary word operands, arbitrary represented IR frames and a spill bounded by `tail.length+3≤1024`. The populated native input has twelve gas units. Its actual first result is proved equal to the second fetched site; the two-step driver and native continuation derive `(a+b)*c`, gas twelve to nine to four, and PCs three to four to five. The complete expected record preserves the input world, memory, return buffers and other fields outside stack/PC/gas/execLength. No execution or frame-origin result is assumed.
+
+Controls distinguish result fifty from twenty-two, preserve the ordered spill, exercise modular wrap and retain gas/fuel failures. The encoded prefix before the entry PC is not claimed executed, and the final STOP is retained as a native continuation rather than a proved terminal outcome. Source/physical/account origin, whole-program resources and Osaka adequacy remain open. Focused build and per-file checks report standard axioms only. Independent read-only finder/skeptic reviews found no semantic or ownership issue; diagnostic-directed unfolding and linter cleanup preserve the statements.
