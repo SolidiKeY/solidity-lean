@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "c3bc7282b8c7c3243c304045ecd665a063a46044",
+  "headAtGeneration": "da86ace12ee87f0f9dc207ec2e7f7686e606ccfd",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -8493,7 +8493,11 @@
   "localIntrinsicImportClosure": {
     "Solidity.Frontend.ExecutableAst.Shared.Intrinsic": {
       "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
-      "sha256": "fbe70d07e9c4a8a12f8ef331108e4b2792c67938eeafac5f39ed5c4239ec4c35"
+      "sha256": "272ce9d6ffa2e19739de6252e84ba4bbb804677c54ce6750aa9226eabe310ef2"
+    },
+    "Solidity.Frontend.ExecutableAst.Shared.Scope": {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
+      "sha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e"
     },
     "Solidity.Calculus.Spec": {
       "path": "Solidity/Calculus/Spec.lean",

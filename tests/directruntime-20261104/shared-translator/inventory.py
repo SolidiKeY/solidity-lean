@@ -133,7 +133,7 @@ rawClosure=dict(seen)
 seen={}
 visit('Solidity.Frontend.ExecutableAst.Shared.Intrinsic')
 intrinsicClosure=dict(seen)
-assert all(n=='Solidity.Frontend.ExecutableAst.Shared.Intrinsic' or not n.startswith('Solidity.Frontend.') for n in seen)
+assert all(n in {'Solidity.Frontend.ExecutableAst.Shared.Intrinsic', 'Solidity.Frontend.ExecutableAst.Shared.Scope'} or not n.startswith('Solidity.Frontend.') for n in seen)
 seen=rawClosure
 assert 'Solidity.Frontend.Import' not in seen and 'Solidity.Frontend.Testing' not in seen
 result={'schemaVersion':1,'status':'initial census; full coverage gates pending','base':base,
