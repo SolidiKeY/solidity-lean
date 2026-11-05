@@ -1,5 +1,6 @@
 import Solidity.Optimizer.Simplify
 import Solidity.Optimizer.Laws
+import Solidity.Optimizer.UnusedVar
 
 /-!
 # O02 value-pass controls
@@ -130,10 +131,41 @@ theorem unrestricted_mul_wrong (σ : State C []) :
   intro h
   cases h
 
+/-! ## Unused-variable elimination -/
+
+/-- `{ uint y = 5; require(1 > 0); }`: `y` is unused and dropped. -/
+def unusedBlock : Stmt C [] [] :=
+  .block (.cons (.declLocal .uint (.user "y") (some (lit 5)))
+    (.cons (.require (gt (lit 1) (lit 0))) .nil))
+
+theorem unused_dropped :
+    Stmt.uve unusedBlock = .block (.cons (.require (gt (lit 1) (lit 0))) .nil) := rfl
+
+/-- `{ uint y = 5; require(y > 1); }`: `y` is read and kept. -/
+def usedBlock : Stmt C [] [] :=
+  .block (.cons (.declLocal .uint (.user "y") (some (lit 5)))
+    (.cons (.require (gt (.simple (.local .here)) (lit 1))) .nil))
+
+theorem used_kept : Stmt.uve usedBlock = usedBlock := rfl
+
+/-- `{ uint y = max + 1; }`: the unused initialiser reverts, so it is kept. -/
+def failingInit : Stmt C [] [] :=
+  .block (.cons (.declLocal .uint (.user "y") (some (add maxU (lit 1)))) .nil)
+
+theorem failing_init_kept : Stmt.uve failingInit = failingInit := rfl
+
+theorem failing_init_reverts (σ : State C []) : Stmt.runC failingInit σ = .error .revert := rfl
+
+/-- Negative control: dropping that declaration anyway would hide the revert. -/
+theorem failing_init_drop_wrong (σ : State C []) :
+    Stmt.runC failingInit σ ≠ Stmt.runC (.block (.nil : Prog C [] [])) σ := by
+  intro h
+  cases h
+
 /-- Composition of the O02 passes in the O01 pipeline is still certified. -/
 theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
-      (Pass.pipeline [Prog.cprop Facts.empty, Prog.simplify, Prog.cfold]) :=
+      (Pass.pipeline [Prog.cprop Facts.empty, Prog.simplify, Prog.cfold, Prog.uve]) :=
   Preserves.pipeline (Related := SameRun) (fun _ => rfl)
     (fun a b => show SameRun _ _ from Eq.trans a b) _ fun pass mem => by
     rcases List.mem_cons.mp mem with rfl | mem
@@ -142,6 +174,8 @@ theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
     · exact vopt_preserves simpFoldPass Γ Γ'
     rcases List.mem_cons.mp mem with rfl | mem
     · exact cfold_preserves Γ Γ'
+    rcases List.mem_cons.mp mem with rfl | mem
+    · exact uve_preserves Γ Γ'
     exact absurd mem List.not_mem_nil
 
 #print axioms Val.cfold_evalT
@@ -153,5 +187,8 @@ theorem o02_pipeline_preserves (Γ Γ' : Ctx) :
 #print axioms assert_panics
 #print axioms prop_constant
 #print axioms unrestricted_mul_wrong
+#print axioms Prog.uve_runC
+#print axioms blockDecl_runC
+#print axioms unused_dropped
 
 end Solidity.Optimizer.O02Controls
