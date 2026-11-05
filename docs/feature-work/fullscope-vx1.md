@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: published `8495f1deb0a95dd6b9301822d8649ab76b217681`, adopted by preservation merge `38613ec0b319d866d7fbd597dc2285e115956b63`. Original assigned base remains recorded unchanged. H38 approval is still pending; publication does not imply producer completion or cache freshness.
+Current integrated prerequisite: published `f77cf60d3cea8f7f1db8db29cc027532b0cd3fce`, adopted by preservation merge `620772e25d14c81e6a5f1670ec55800a274fa34e`; this includes the previous `8495f1de` publication. Original assigned base remains recorded unchanged. H38 approval is still pending; publication does not imply producer completion or cache freshness.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -569,3 +569,66 @@ Final integrated build/complete inventory, exact-head combined imports and
 applicable cache receipts remain pending on actual prerequisites. Coordinator
 publication claims are recorded as upstream evidence, not relabeled as VM checks.
 No push, PR, goal creation/reset, VM replacement or host relay was performed.
+
+## Checkpoint 05: follow-on publication adoption
+
+Published prerequisite: `f77cf60d3cea8f7f1db8db29cc027532b0cd3fce`.
+It contains the previous `8495f1deb0a95dd6b9301822d8649ab76b217681`.
+Preserved owned parent: `cecce55114a0ea859ce8000ced268c9204bf002d`.
+Exact preservation merge: `620772e25d14c81e6a5f1670ec55800a274fa34e`.
+Original base remains `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`.
+
+Fetch/readback and ancestry verified the exact published master. The existing
+clean branch was merged without conflicts, reset/rebase, discarded work or
+manual integration edits. Separate read-only finder/skeptic reviews confirmed
+both parents, previous publication/base ancestry, all ten reserved files
+preserved, and no protected Source/Scoped change. Neither reviewer used Lean,
+a server or writes. Imported generated roots/maps/pins are published coordinator
+content; no lane co-edit was made.
+
+The exact scope is `docs/feature-work/integration-20261105-deferred.md`:
+
+- Type grammar adds ParserBasics/ParserChecks.
+- Shared.Intrinsic is a relative obligation builder. Its loop/entry callbacks
+  remain explicit producer dependencies and reference inputs remain refused.
+- ExpressionUniqueness.Statement supplies the target statement; the exhaustive
+  proof is not integrated.
+- StorageOnlyHavoc derives the existing typed formula. It supplies neither an
+  ExtCall implementation, callback restriction nor Source/native adequacy.
+
+The cumulative 31 increments/63 modules/two fixtures are not whole-lane
+completion. Statement-grammar G0 repair, VY5 Monetary.wide and all ownership
+holds remain with their producers; no coordinator/consumer substitute was made.
+The V16 history notice is not permission to duplicate integrated content.
+
+No H38 producer approval, RunIndexed adapter or generator change arrived. The
+Source/EVM interface, catalog generator, owned source and owned direct dependency
+closure are unchanged. The H38 stub at `06f5ae081ca5e01a976b3ae3cb9b43a3d369d033`
+still awaits VY5 Source and EVM/resource review before freeze.
+
+VM revalidation at the actual follow-on merge head passed runtime versions,
+KeySort and the owned Contracts/control closure with all 39 axiom inventories:
+exit 0, 8.447s. Current static checks passed in 14.376s: 3938 sources, 287
+inventoried sites, zero findings; 636 core modules, no elaborator/parser paths;
+current generated roots; baseline catalog still 212 features/783 symbols with
+30 exclusion rows awaiting rescope. G07 rerun failed in 28.428s with 20
+producer-owned violations (4521 modules scanned). No failure or gate was waived.
+
+All checks were serial in the existing verified 12GiB/no-swap envelope,
+explicit -j1/LEAN_NUM_THREADS=1 with continuous 4GiB parent-reserve monitoring.
+Evidence: `/workspace/vx1-evidence/checkpoint-05-follow-on/`. No unrelated cold
+build was launched and full imported-closure validation remains pending.
+
+H21 target outcomes (49 successes, one capacity skip, five failures under H30)
+are coordinator-reported aggregate outcomes. They are not this VM's freshness
+receipt. Applicable target receipt/cache provenance remains unverified; no
+successful full consumer adoption or cache freshness is inferred. H41 still
+requires verified packets preserved for coordinator pull, never on-VM
+ship-cache.sh. Old packet receipt coverage is not extended to the new tree.
+
+Queue accounting is unchanged: X01 complete D1–D6/public contract freeze,
+all-30 manifest/diagnostic/ledger regeneration, X02 source/admission/lowering/
+compiler and production controls, and final integrated gates remain open. The
+completed census and schema controls remain scoped evidence only. Producer
+review/adapter requests are retained until receipt; no new scope question is
+introduced. No push, PR, goal creation/reset or VM replacement occurred.
