@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -eu
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+config=tests/calldata-packets-1105/RawBool/lake.serial.toml
+if [[ ${1-} == --version || ${1-} == --help ]]; then
+ exec "$real" "$@"
+elif [[ ${1-} == env && ${2-} == lean ]]; then
+ shift 2; exec "$real" -f "$config" env lean -j1 "$@"
+elif [[ ${1-} == serve ]]; then
+ exec "$real" -f "$config" "$@" -j1
+else
+ exec "$real" -f "$config" "$@"
+fi

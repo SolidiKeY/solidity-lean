@@ -1,0 +1,12 @@
+PASS build-touched 0s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/1.log
+FAIL run-lean 1s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/2.log
+FAIL trust 12s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/3.log
+FAIL orphans 0s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/4.log
+PASS layers 0s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/5.log
+FAIL roots 1s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/6.log
+PASS doc-paths 10s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/7.log
+PASS axiom-pins 13s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/8.log
+FAIL testsuite 0s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/9.log
+FAIL corpus 352s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/10.log
+PASS automatic-strict 0s /workspace/solidity-lean/tests/sol-numeric-literals/evidence/final-full-gates/11.log
+{"command": ["env", "GATE_BASE=6f3eedf0788ee1f8a3bcf230558c712ecdca04d5", "GATE_LOGS=tests/sol-numeric-literals/evidence/final-full-gates", "bash", "scripts/coord-tools/gate.sh", "full"], "exit": 1, "seconds": 389.341438, "peak_child_rss_kib": 1152296, "user_seconds": 358.877756, "system_seconds": 27.912806}

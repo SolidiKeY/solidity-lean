@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+config=tests/directruntime-20261104/shared-translator/bounded-lakefile.toml
+if [[ ${1:-} == env && ${2:-} == lean ]]; then
+  shift 2
+  exec "$real" -f "$config" env lean -j1 "$@"
+elif [[ ${1:-} == serve ]]; then
+  shift
+  exec "$real" -f "$config" serve "$@" -j1
+else
+  exec "$real" -f "$config" "$@"
+fi

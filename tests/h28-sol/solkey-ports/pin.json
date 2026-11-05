@@ -1,0 +1,26 @@
+{
+  "commit": "473da8944ca7329e6b76819863591407db26e7ec",
+  "rules": [
+    {
+      "file": "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/memoryRules.key",
+      "clause": "newFromWrite",
+      "source_sha256": "35536aea3e2fa70519147614d9b50bdf13a0e3a005be4b1a03ec88ba7847260e",
+      "body_sha256": "8fd78f93f974861fc5f1e337d3a3611e9b160c9ab767c4bca97565d88fca5336",
+      "start_line": 241,
+      "body": "    newFromWrite {\n        \\find(new(write(mem, id1, a1, v), idp2))\n        \\replacewith(new(mem, idp2))\n        \\heuristics(simplify_enlarging)\n    };"
+    },
+    {
+      "file": "tests/migration/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/structMemoryRules.key",
+      "clause": "newFromCopySt",
+      "source_sha256": "b771b1573578ad9eb9d5317d7127db905767cb39f714e55bda2543fe476fc048",
+      "body_sha256": "7861ce0ccb1f74e707b24ffa3c6ecf20fd23200d7cfb482e6365ee6b067cac77",
+      "start_line": 40,
+      "body": "    newFromCopySt {\n        \\find(new(copySt(mem, idp1, st), idp2))\n        \\replacewith(new(mem, idp2))\n        \\heuristics(simplify_enlarging)\n    };"
+    }
+  ],
+  "map_rows": [
+    "| `newFromAdd` | `LTm.identApart?`: two identities differ where one is fresh over a memory (`LTm.freshOver?`) the other is older than (`LTm.boundedIn`) | `LTm.identApart?_ne`, `LTm.freshOver?_eval` | `Grown.alloc_fresh` (`Grown.alloc_id_ge`, Lean only) | deviation: no `new` term |",
+    "| `newFromWrite` | none, likewise: a memory on the spine below another grows to it (`LTm.onSpine_grows`) | \u2014 | \u2014 | deviation |",
+    "| `newFromCopySt` (solkey `473da8944c`) | none, likewise: a copy is an allocation on the spine (`copySt(m, S)`, `Grown`), and the identities fresh over it are apart from the older ones (`LTm.identApart?`) | \u2014 | \u2014 | deviation: no `new` term |"
+  ]
+}

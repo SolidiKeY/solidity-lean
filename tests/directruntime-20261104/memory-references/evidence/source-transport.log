@@ -1,0 +1,1 @@
+PASS existing compileFixture source transport: four fresh Identity compilations retain required full metadata in rawAst/rawAsts; no verifier invoked

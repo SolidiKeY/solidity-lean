@@ -1,0 +1,150 @@
+
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000141740 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18>:
+  141740:	40 f6 c7 01          	test   $0x1,%dil
+  141744:	0f 85 8c 00 00 00    	jne    1417d6 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x96>
+  14174a:	0f b6 47 07          	movzbl 0x7(%rdi),%eax
+  14174e:	85 c0                	test   %eax,%eax
+  141750:	0f 84 8e 00 00 00    	je     1417e4 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xa4>
+  141756:	40 f6 c6 01          	test   $0x1,%sil
+  14175a:	0f 85 90 00 00 00    	jne    1417f0 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xb0>
+  141760:	0f b6 46 07          	movzbl 0x7(%rsi),%eax
+  141764:	85 c0                	test   %eax,%eax
+  141766:	0f 84 92 00 00 00    	je     1417fe <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xbe>
+  14176c:	41 56                	push   %r14
+  14176e:	53                   	push   %rbx
+  14176f:	50                   	push   %rax
+  141770:	8b 47 04             	mov    0x4(%rdi),%eax
+  141773:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  141778:	0f 83 96 00 00 00    	jae    141814 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xd4>
+  14177e:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  141783:	0f 84 c0 00 00 00    	je     141849 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x109>
+  141789:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  14178e:	0f 83 ea 00 00 00    	jae    14187e <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x13e>
+  141794:	48 8b 5f 08          	mov    0x8(%rdi),%rbx
+  141798:	8b 46 04             	mov    0x4(%rsi),%eax
+  14179b:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  1417a0:	0f 83 2f 01 00 00    	jae    1418d5 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x195>
+  1417a6:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  1417ab:	0f 84 51 01 00 00    	je     141902 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x1c2>
+  1417b1:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  1417b6:	0f 83 73 01 00 00    	jae    14192f <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x1ef>
+  1417bc:	48 8b 76 08          	mov    0x8(%rsi),%rsi
+  1417c0:	89 f0                	mov    %esi,%eax
+  1417c2:	21 d8                	and    %ebx,%eax
+  1417c4:	a8 01                	test   $0x1,%al
+  1417c6:	74 42                	je     14180a <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xca>
+  1417c8:	48 39 f3             	cmp    %rsi,%rbx
+  1417cb:	0f 94 c0             	sete   %al
+  1417ce:	48 83 c4 08          	add    $0x8,%rsp
+  1417d2:	5b                   	pop    %rbx
+  1417d3:	41 5e                	pop    %r14
+  1417d5:	c3                   	ret
+  1417d6:	48 89 f8             	mov    %rdi,%rax
+  1417d9:	48 d1 e8             	shr    $1,%rax
+  1417dc:	85 c0                	test   %eax,%eax
+  1417de:	0f 85 72 ff ff ff    	jne    141756 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x16>
+  1417e4:	40 f6 c6 01          	test   $0x1,%sil
+  1417e8:	75 17                	jne    141801 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xc1>
+  1417ea:	0f b6 76 07          	movzbl 0x7(%rsi),%esi
+  1417ee:	eb 14                	jmp    141804 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0xc4>
+  1417f0:	48 89 f0             	mov    %rsi,%rax
+  1417f3:	48 d1 e8             	shr    $1,%rax
+  1417f6:	85 c0                	test   %eax,%eax
+  1417f8:	0f 85 6e ff ff ff    	jne    14176c <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x2c>
+  1417fe:	31 c0                	xor    %eax,%eax
+  141800:	c3                   	ret
+  141801:	48 d1 ee             	shr    $1,%rsi
+  141804:	85 f6                	test   %esi,%esi
+  141806:	0f 94 c0             	sete   %al
+  141809:	c3                   	ret
+  14180a:	48 89 df             	mov    %rbx,%rdi
+  14180d:	e8 1e 3f 0d 01       	call   1215730 <lean_nat_big_eq>
+  141812:	eb ba                	jmp    1417ce <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x8e>
+  141814:	48 8d 05 3b 3f ed ff 	lea    -0x12c0c5(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  14181b:	48 8d 15 17 90 ed ff 	lea    -0x126fe9(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  141822:	48 89 fb             	mov    %rdi,%rbx
+  141825:	48 89 c7             	mov    %rax,%rdi
+  141828:	49 89 f6             	mov    %rsi,%r14
+  14182b:	be 54 02 00 00       	mov    $0x254,%esi
+  141830:	e8 bb 9b 0c 01       	call   120b3f0 <lean_notify_assert>
+  141835:	48 89 df             	mov    %rbx,%rdi
+  141838:	4c 89 f6             	mov    %r14,%rsi
+  14183b:	8b 43 04             	mov    0x4(%rbx),%eax
+  14183e:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  141843:	0f 85 40 ff ff ff    	jne    141789 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x49>
+  141849:	48 8d 05 06 3f ed ff 	lea    -0x12c0fa(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141850:	48 8d 15 23 54 ed ff 	lea    -0x12abdd(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  141857:	48 89 fb             	mov    %rdi,%rbx
+  14185a:	48 89 c7             	mov    %rax,%rdi
+  14185d:	49 89 f6             	mov    %rsi,%r14
+  141860:	be 6a 02 00 00       	mov    $0x26a,%esi
+  141865:	e8 86 9b 0c 01       	call   120b3f0 <lean_notify_assert>
+  14186a:	48 89 df             	mov    %rbx,%rdi
+  14186d:	4c 89 f6             	mov    %r14,%rsi
+  141870:	8b 43 04             	mov    0x4(%rbx),%eax
+  141873:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  141878:	0f 82 16 ff ff ff    	jb     141794 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x54>
+  14187e:	48 8d 05 d1 3e ed ff 	lea    -0x12c12f(%rip),%rax        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141885:	48 8d 15 ad 8f ed ff 	lea    -0x127053(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  14188c:	48 89 fb             	mov    %rdi,%rbx
+  14188f:	48 89 c7             	mov    %rax,%rdi
+  141892:	49 89 f6             	mov    %rsi,%r14
+  141895:	be 59 02 00 00       	mov    $0x259,%esi
+  14189a:	e8 51 9b 0c 01       	call   120b3f0 <lean_notify_assert>
+  14189f:	48 89 df             	mov    %rbx,%rdi
+  1418a2:	4c 89 f6             	mov    %r14,%rsi
+  1418a5:	81 7b 04 00 00 00 f4 	cmpl   $0xf4000000,0x4(%rbx)
+  1418ac:	0f 82 e2 fe ff ff    	jb     141794 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x54>
+  1418b2:	48 8d 3d 9d 3e ed ff 	lea    -0x12c163(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  1418b9:	48 8d 15 79 8f ed ff 	lea    -0x127087(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  1418c0:	be 14 02 00 00       	mov    $0x214,%esi
+  1418c5:	e8 26 9b 0c 01       	call   120b3f0 <lean_notify_assert>
+  1418ca:	48 89 df             	mov    %rbx,%rdi
+  1418cd:	4c 89 f6             	mov    %r14,%rsi
+  1418d0:	e9 bf fe ff ff       	jmp    141794 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x54>
+  1418d5:	48 8d 3d 7a 3e ed ff 	lea    -0x12c186(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  1418dc:	48 8d 15 56 8f ed ff 	lea    -0x1270aa(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  1418e3:	49 89 f6             	mov    %rsi,%r14
+  1418e6:	be 54 02 00 00       	mov    $0x254,%esi
+  1418eb:	e8 00 9b 0c 01       	call   120b3f0 <lean_notify_assert>
+  1418f0:	4c 89 f6             	mov    %r14,%rsi
+  1418f3:	41 8b 46 04          	mov    0x4(%r14),%eax
+  1418f7:	a9 00 00 ff 00       	test   $0xff0000,%eax
+  1418fc:	0f 85 af fe ff ff    	jne    1417b1 <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x71>
+  141902:	48 8d 3d 4d 3e ed ff 	lea    -0x12c1b3(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141909:	48 8d 15 6a 53 ed ff 	lea    -0x12ac96(%rip),%rdx        # 16c7a <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x16bea>
+  141910:	49 89 f6             	mov    %rsi,%r14
+  141913:	be 6a 02 00 00       	mov    $0x26a,%esi
+  141918:	e8 d3 9a 0c 01       	call   120b3f0 <lean_notify_assert>
+  14191d:	4c 89 f6             	mov    %r14,%rsi
+  141920:	41 8b 46 04          	mov    0x4(%r14),%eax
+  141924:	3d 00 00 00 f4       	cmp    $0xf4000000,%eax
+  141929:	0f 82 8d fe ff ff    	jb     1417bc <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x7c>
+  14192f:	48 8d 3d 20 3e ed ff 	lea    -0x12c1e0(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141936:	48 8d 15 fc 8e ed ff 	lea    -0x127104(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  14193d:	49 89 f6             	mov    %rsi,%r14
+  141940:	be 59 02 00 00       	mov    $0x259,%esi
+  141945:	e8 a6 9a 0c 01       	call   120b3f0 <lean_notify_assert>
+  14194a:	4c 89 f6             	mov    %r14,%rsi
+  14194d:	41 81 7e 04 00 00 00 	cmpl   $0xf4000000,0x4(%r14)
+  141954:	f4 
+  141955:	0f 82 61 fe ff ff    	jb     1417bc <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x7c>
+  14195b:	48 8d 3d f4 3d ed ff 	lea    -0x12c20c(%rip),%rdi        # 15756 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x156c6>
+  141962:	48 8d 15 d0 8e ed ff 	lea    -0x127130(%rip),%rdx        # 1a839 <_ZZN10__cxxabiv112_GLOBAL__N_19__globalsEvE10eh_globals+0x1a7a9>
+  141969:	be 14 02 00 00       	mov    $0x214,%esi
+  14196e:	e8 7d 9a 0c 01       	call   120b3f0 <lean_notify_assert>
+  141973:	4c 89 f6             	mov    %r14,%rsi
+  141976:	e9 41 fe ff ff       	jmp    1417bc <l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18+0x7c>
+
+Disassembly of section .init:
+
+Disassembly of section .fini:
+
+Disassembly of section __lcxx_override:
+
+Disassembly of section .plt:

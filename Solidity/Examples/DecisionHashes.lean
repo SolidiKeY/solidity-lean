@@ -26,6 +26,8 @@ def verdict {C : Contract} (φ : Fml C []) : String :=
   | .refuted _ => "refuted"
   | .unknown => "unknown"
 
+attribute [noinline] verdict
+
 /-! ### Leaves with hashes (M7, plan step 7)
 
 The string-keyed mapping of `Examples/Tactics/Hashing.lean` §3 (`Names`,

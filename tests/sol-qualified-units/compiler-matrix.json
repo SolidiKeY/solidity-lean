@@ -1,0 +1,708 @@
+{
+  "version": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "rows": [
+    {
+      "id": "multi-hop",
+      "sources": {
+        "A.sol": "fixtures/multi-hop/A.sol",
+        "B.sol": "fixtures/multi-hop/B.sol",
+        "C.sol": "fixtures/multi-hop/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.multi_hop",
+        "SignatureResolutionControls.multi_hop_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.M.T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "hopsInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.M.T",
+          "path": [
+            "N",
+            "M",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "missing-symbol",
+      "sources": {
+        "A.sol": "fixtures/missing-symbol/A.sol",
+        "B.sol": "fixtures/missing-symbol/B.sol",
+        "C.sol": "fixtures/missing-symbol/C.sol"
+      },
+      "accepted": false,
+      "kernel_theorems": [
+        "DifferentialControls.missing_symbol",
+        "SignatureResolutionControls.missing_symbol_0"
+      ],
+      "references": [],
+      "error_codes": [
+        "7920"
+      ],
+      "resolution_gap": false,
+      "error_texts": [
+        "N.M.Missing"
+      ],
+      "input": "missingInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.M.Missing",
+          "path": [
+            "N",
+            "M",
+            "Missing"
+          ],
+          "expected_refusal": "missing"
+        }
+      ]
+    },
+    {
+      "id": "ambiguous-namespace",
+      "sources": {
+        "A.sol": "fixtures/ambiguous-namespace/A.sol",
+        "B.sol": "fixtures/ambiguous-namespace/B.sol",
+        "C.sol": "fixtures/ambiguous-namespace/C.sol"
+      },
+      "accepted": false,
+      "kernel_theorems": [
+        "DifferentialControls.ambiguous_namespace",
+        "SignatureResolutionControls.ambiguous_namespace_0"
+      ],
+      "references": [],
+      "error_codes": [
+        "2333"
+      ],
+      "resolution_gap": false,
+      "error_texts": [
+        "import * as N from \"C.sol\";"
+      ],
+      "input": "ambiguousInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_refusal": "ambiguous"
+        }
+      ]
+    },
+    {
+      "id": "same-spelling-units",
+      "sources": {
+        "A.sol": "fixtures/same-spelling-units/A.sol",
+        "B.sol": "fixtures/same-spelling-units/B.sol",
+        "C.sol": "fixtures/same-spelling-units/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.left_identity",
+        "DifferentialControls.right_identity",
+        "SignatureResolutionControls.same_spelling_units_0",
+        "SignatureResolutionControls.same_spelling_units_1"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "L.T",
+          "target_unit": "B.sol",
+          "target_name": "T",
+          "target_index": 0
+        },
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "R.T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "spellingInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "L.T",
+          "path": [
+            "L",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "B.sol",
+              "index": 0
+            }
+          ]
+        },
+        {
+          "reference": "R.T",
+          "path": [
+            "R",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "symbol-namespace-alias",
+      "sources": {
+        "A.sol": "fixtures/symbol-namespace-alias/A.sol",
+        "B.sol": "fixtures/symbol-namespace-alias/B.sol",
+        "C.sol": "fixtures/symbol-namespace-alias/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.symbol_namespace_alias",
+        "SignatureResolutionControls.symbol_namespace_alias_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "aliasInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "transitive-all",
+      "sources": {
+        "A.sol": "fixtures/transitive-all/A.sol",
+        "B.sol": "fixtures/transitive-all/B.sol",
+        "C.sol": "fixtures/transitive-all/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.transitive_all",
+        "SignatureResolutionControls.transitive_all_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "allInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diamond-identity",
+      "sources": {
+        "A.sol": "fixtures/diamond-identity/A.sol",
+        "B.sol": "fixtures/diamond-identity/B.sol",
+        "D.sol": "fixtures/diamond-identity/D.sol",
+        "C.sol": "fixtures/diamond-identity/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.diamond_identity",
+        "SignatureResolutionControls.diamond_identity_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "diamondInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "T",
+          "path": [
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cyclic-namespace",
+      "sources": {
+        "A.sol": "fixtures/cyclic-namespace/A.sol",
+        "B.sol": "fixtures/cyclic-namespace/B.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.cyclic_namespace",
+        "SignatureResolutionControls.cyclic_namespace_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.Back.N.T",
+          "target_unit": "B.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "cycleInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.Back.N.T",
+          "path": [
+            "N",
+            "Back",
+            "N",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "B.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "private-base-fallback",
+      "sources": {
+        "A.sol": "fixtures/private-base-fallback/A.sol",
+        "C.sol": "fixtures/private-base-fallback/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.private_base_fallback",
+        "SignatureResolutionControls.private_base_fallback_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.T",
+          "target_unit": "C.sol",
+          "target_name": "T",
+          "target_index": 0
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "shadowInput .priv",
+      "scope": {
+        "unit": "A.sol",
+        "index": 2
+      },
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "C.sol",
+              "index": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "visible-base-shadow",
+      "sources": {
+        "A.sol": "fixtures/visible-base-shadow/A.sol",
+        "C.sol": "fixtures/visible-base-shadow/C.sol"
+      },
+      "accepted": false,
+      "kernel_theorems": [
+        "DifferentialControls.visible_base_shadow",
+        "SignatureResolutionControls.visible_base_shadow_0"
+      ],
+      "references": [],
+      "error_codes": [
+        "7920"
+      ],
+      "resolution_gap": false,
+      "error_texts": [
+        "N.T"
+      ],
+      "input": "shadowInput .internal",
+      "scope": {
+        "unit": "A.sol",
+        "index": 2
+      },
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_refusal": "missing"
+        }
+      ]
+    },
+    {
+      "id": "local-shadow",
+      "sources": {
+        "A.sol": "fixtures/local-shadow/A.sol",
+        "C.sol": "fixtures/local-shadow/C.sol"
+      },
+      "accepted": false,
+      "kernel_theorems": [
+        "DifferentialControls.local_shadow",
+        "SignatureResolutionControls.local_shadow_0"
+      ],
+      "references": [],
+      "error_codes": [
+        "7920"
+      ],
+      "resolution_gap": false,
+      "error_texts": [
+        "N.T"
+      ],
+      "input": "localInput",
+      "scope": {
+        "unit": "A.sol",
+        "index": 0
+      },
+      "locals": [
+        "N"
+      ],
+      "queries": [
+        {
+          "reference": "N.T",
+          "path": [
+            "N",
+            "T"
+          ],
+          "expected_refusal": "localShadow"
+        }
+      ]
+    },
+    {
+      "id": "inherited-type",
+      "sources": {
+        "A.sol": "fixtures/inherited-type/A.sol",
+        "B.sol": "fixtures/inherited-type/B.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "DifferentialControls.qualified_base_identity",
+        "DifferentialControls.inherited_struct_identity",
+        "DifferentialControls.qualified_base_query",
+        "SignatureResolutionControls.inherited_type_0",
+        "SignatureResolutionControls.inherited_type_1"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "N.Base",
+          "target_unit": "B.sol",
+          "target_name": "Base",
+          "target_index": 0
+        },
+        {
+          "file": "A.sol",
+          "nodeType": "IdentifierPath",
+          "name": "D.S",
+          "target_unit": "B.sol",
+          "target_name": "S",
+          "target_index": 1
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "input": "inheritedInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "N.Base",
+          "path": [
+            "N",
+            "Base"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "B.sol",
+              "index": 0
+            }
+          ]
+        },
+        {
+          "reference": "D.S",
+          "path": [
+            "D",
+            "S"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "B.sol",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ambiguous-base",
+      "sources": {
+        "A.sol": "fixtures/ambiguous-base/A.sol",
+        "B.sol": "fixtures/ambiguous-base/B.sol",
+        "C.sol": "fixtures/ambiguous-base/C.sol"
+      },
+      "accepted": false,
+      "kernel_theorems": [
+        "DifferentialControls.ambiguous_base",
+        "SignatureResolutionControls.ambiguous_base_0"
+      ],
+      "references": [],
+      "error_codes": [
+        "2333"
+      ],
+      "resolution_gap": false,
+      "error_texts": [
+        "import * as N from \"C.sol\";"
+      ],
+      "input": "ambiguousBaseInput",
+      "scope": null,
+      "locals": [],
+      "queries": [
+        {
+          "reference": "D.S",
+          "path": [
+            "D",
+            "S"
+          ],
+          "expected_refusal": "missing"
+        }
+      ]
+    },
+    {
+      "id": "inherited-overload-gap",
+      "sources": {
+        "A.sol": "fixtures/inherited-overload-gap/A.sol",
+        "B.sol": "fixtures/inherited-overload-gap/B.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "SignatureGap.current_overload_gap",
+        "SignatureGap.base_overload_exists",
+        "DifferentialControls.inherited_overload_query_gap",
+        "SignatureResolutionControls.inherited_overload_gap_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "Identifier",
+          "name": "f",
+          "target_unit": "B.sol",
+          "target_name": "f",
+          "target_index": 1
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "required_candidates": [
+        {
+          "unit": "A.sol",
+          "index": 1
+        },
+        {
+          "unit": "B.sol",
+          "index": 1
+        }
+      ],
+      "input": "inheritedOverloadInput",
+      "scope": {
+        "unit": "A.sol",
+        "index": 0
+      },
+      "locals": [],
+      "queries": [
+        {
+          "reference": "f",
+          "path": [
+            "f"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "A.sol",
+              "index": 1
+            },
+            {
+              "unit": "B.sol",
+              "index": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qualified-parameter-overload-gap",
+      "sources": {
+        "A.sol": "fixtures/qualified-parameter-overload-gap/A.sol",
+        "B.sol": "fixtures/qualified-parameter-overload-gap/B.sol",
+        "C.sol": "fixtures/qualified-parameter-overload-gap/C.sol"
+      },
+      "accepted": true,
+      "kernel_theorems": [
+        "SignatureGap.current_overload_gap",
+        "SignatureGap.base_overload_exists",
+        "DifferentialControls.qualified_overload_query_gap",
+        "SignatureResolutionControls.qualified_parameter_overload_gap_0"
+      ],
+      "references": [
+        {
+          "file": "A.sol",
+          "nodeType": "Identifier",
+          "name": "f",
+          "target_unit": "B.sol",
+          "target_name": "f",
+          "target_index": 2
+        }
+      ],
+      "error_codes": [],
+      "resolution_gap": false,
+      "error_texts": [],
+      "required_candidates": [
+        {
+          "unit": "A.sol",
+          "index": 1
+        },
+        {
+          "unit": "B.sol",
+          "index": 2
+        }
+      ],
+      "input": "qualifiedOverloadInput",
+      "scope": {
+        "unit": "A.sol",
+        "index": 0
+      },
+      "locals": [],
+      "queries": [
+        {
+          "reference": "f",
+          "path": [
+            "f"
+          ],
+          "expected_candidates": [
+            {
+              "unit": "A.sol",
+              "index": 1
+            },
+            {
+              "unit": "B.sol",
+              "index": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

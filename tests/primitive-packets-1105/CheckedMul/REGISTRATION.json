@@ -1,0 +1,21 @@
+{
+  "register": [
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Source",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Selected",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Target",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Agreement",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Populated",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Controls"
+  ],
+  "area": "docs/module-map/bytecode-selection.md",
+  "rows": {
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Source": "Checked uint256 multiplication Source preserving exact failure boundaries.",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Selected": "Checked uint256 multiplication Selected preserving exact failure boundaries.",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Target": "Checked uint256 multiplication Target preserving exact failure boundaries.",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Agreement": "Checked uint256 multiplication Agreement preserving exact failure boundaries.",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Populated": "Checked uint256 multiplication Populated preserving exact failure boundaries.",
+    "Solidity.Backend.PrimitivePackets.CheckedMul.Controls": "Checked uint256 multiplication Controls preserving exact failure boundaries."
+  },
+  "controls": "Solidity.Backend.PrimitivePackets.CheckedMul.Controls",
+  "newCompilerArm": false
+}

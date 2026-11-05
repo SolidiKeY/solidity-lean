@@ -1,0 +1,100 @@
+ERROR 11:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 12:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 13:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 10:3 'change' tactic failed, pattern
+  (let p := numberSpan false (48 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (48 :: r) = Except.error "number followed by an identifier character"
+ERROR 21:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 22:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 23:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 20:3 'change' tactic failed, pattern
+  (let p := numberSpan false (49 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (49 :: r) = Except.error "number followed by an identifier character"
+ERROR 31:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 32:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 33:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 30:3 'change' tactic failed, pattern
+  (let p := numberSpan false (50 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (50 :: r) = Except.error "number followed by an identifier character"
+ERROR 41:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 42:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 43:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 40:3 'change' tactic failed, pattern
+  (let p := numberSpan false (51 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (51 :: r) = Except.error "number followed by an identifier character"
+ERROR 51:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 52:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 53:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 50:3 'change' tactic failed, pattern
+  (let p := numberSpan false (52 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (52 :: r) = Except.error "number followed by an identifier character"
+ERROR 61:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 62:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 63:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 60:3 'change' tactic failed, pattern
+  (let p := numberSpan false (53 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (53 :: r) = Except.error "number followed by an identifier character"
+ERROR 71:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 72:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 73:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 70:3 'change' tactic failed, pattern
+  (let p := numberSpan false (54 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (54 :: r) = Except.error "number followed by an identifier character"
+ERROR 81:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 82:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 83:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 80:3 'change' tactic failed, pattern
+  (let p := numberSpan false (55 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (55 :: r) = Except.error "number followed by an identifier character"
+ERROR 91:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 92:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 93:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 90:3 'change' tactic failed, pattern
+  (let p := numberSpan false (56 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (56 :: r) = Except.error "number followed by an identifier character"
+ERROR 101:36 Invalid dotted identifier notation: The expected type of `.error` could not be determined
+ERROR 102:22 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 103:13 Invalid dotted identifier notation: The expected type of `.ok` could not be determined
+ERROR 100:3 'change' tactic failed, pattern
+  (let p := numberSpan false (57 :: r);
+    ?m.26) =
+    ?m.30
+is not definitionally equal to target
+  split Mode.sol (57 :: r) = Except.error "number followed by an identifier character"
+ERROR 149:80 unsolved goals
+case x_4
+b c : UInt8
+r digits suffix : Bytes
+hd : isDigit b = true
+hs : numberSpan false (b :: r) = (digits, c :: suffix)
+hc : isIdPart c = true
+hg : split Mode.sol (b :: r) = Except.error "number followed by an identifier character"
+⊢ b :: r = [] → False
+diag: 41 errors

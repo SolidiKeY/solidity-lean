@@ -1,0 +1,11 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "scripts/check-automatic.mjs",
+    "--strict"
+  ],
+  "exit": 0,
+  "seconds": 0.06347641500178725,
+  "log_sha256": "b2b841479106ada50111d792351a6dde92b28c5529fbbde0ab768d3bbd67d83f",
+  "boundary": "Separate unchanged static gate after resource-stopped full attempt; not a full gate pass."
+}

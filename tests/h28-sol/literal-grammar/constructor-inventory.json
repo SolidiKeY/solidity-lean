@@ -1,0 +1,61 @@
+{
+  "Body.Escape": [
+    "single",
+    "double",
+    "slash",
+    "n",
+    "r",
+    "t",
+    "lf",
+    "cr"
+  ],
+  "Body.Body": [
+    "nil",
+    "char",
+    "crlf",
+    "esc",
+    "hex",
+    "uni"
+  ],
+  "Hex.HexBody": [
+    "nil",
+    "pair",
+    "sep"
+  ],
+  "Scanner.Scan": [
+    "close",
+    "char",
+    "esc",
+    "crlf"
+  ],
+  "EncodingValue.CodepointBytes": [
+    "one",
+    "two",
+    "three"
+  ],
+  "Fragments.Fragments": [
+    "nil",
+    "cons"
+  ],
+  "Global.Flavor": [
+    "plain",
+    "hex",
+    "unicode"
+  ],
+  "ModeGrammar.ModeLiteral": [
+    "sol",
+    "yulPlain",
+    "yulHex",
+    "assembly"
+  ],
+  "ModeGrammar.ModeSequence": [
+    "nil",
+    "cons"
+  ],
+  "BodyControls.BodyMode": [
+    "all",
+    "none",
+    "plain",
+    "unicode"
+  ]
+}

@@ -1,0 +1,20 @@
+CWD: /workspace/solidity-lean
+COMMAND: python3 Bridge/tests/precompile-agreement/test_inventory.py
+............E...................
+======================================================================
+ERROR: test_address_change_rejected (__main__.InventoryControls.test_address_change_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/solidity-lean/Bridge/tests/precompile-agreement/test_inventory.py", line 33, in test_address_change_rejected
+    self.assertTrue(checker.validate(self.data))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/solidity-lean/scripts/check-precompile-agreement.py", line 128, in validate
+    func = funcs[row["address"]]
+           ~~~~~^^^^^^^^^^^^^^^^
+KeyError: 18
+
+----------------------------------------------------------------------
+Ran 32 tests in 9.497s
+
+FAILED (errors=1)
+EXIT=1 SECONDS=9.565

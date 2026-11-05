@@ -1,0 +1,20 @@
+559 core modules, 0 reach the elaborator
+559 core modules, 0 reach the checked parser adapters
+register: stale roots; run scripts/coord-tools/register.sh
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Calculus
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Callbacks
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.CheckedFamilies
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.CheckedObjects
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Environments
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Families
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Fragile
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Locals
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.MemoryControls
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.MemoryInputs
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Outcomes
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Pins
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Preconditions
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Signatures
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.Storage
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.TailSensitive
+Solidity.lean: missing import Solidity.Assurance.NonVacuityH28.VacuityControls
