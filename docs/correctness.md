@@ -47,6 +47,21 @@ starting states: `ValidStart (.reachable M) φ`
 over the entry points; `ValidTail .clean` statements carry over
 (`ValidTail.validStart_reachable`).
 
+## Assumption records
+
+A verdict's readings (callbacks, overflow, tails, order, hash, address `0`)
+are one record, `Assumptions` (`Calculus/Assumptions.lean`,
+[options.md](options.md) O10), and `ValidA I a φ` the validity it selects:
+`ValidC I` of the formula under the record's tail premise and payment flag,
+for a contract elaborated in the record's order. `ValidT` and `ValidTail`
+statements are cases (`validA_iff_validT`, `validA_of_validTail`). A policy
+reports a row proved only when it entails a record the policy accepts, and
+the row is then valid under it (`Policy.verdict_proved_iff`,
+`Policy.admits_sound`). `ValidA` reads the callback flag, the tail mode and
+the order; overflow, hash and address `0` are labels (`ValidA.labels`). The
+CLI's verdicts mirror these definitions and are checked against them on a
+table, not proved ([options.md](options.md), O10).
+
 ## Model choices behind the statements
 
 - **Payments.** Transfers and sends check both available funds and the
