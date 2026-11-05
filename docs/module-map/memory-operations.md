@@ -162,3 +162,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/NestedDefaults.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
