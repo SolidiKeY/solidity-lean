@@ -1,6 +1,6 @@
 # H26 constructor initialization/capture packet
 
-Current status (H41 plus adopted master8495f1de, 2026-11-05): worker components and VM gates are ready; delivery is **coordinator-pending**. The coordinator reports receipt/hash verification of the retained cache pack. QREG/H35CACHE are resolved; full validation is **pending coordinator merge**. Historical blocked statuses below describe earlier attempts and are superseded by h41/coordinator-receipt.json and HANDOFF-CURRENT.md. Shared roots remain read-only; never run ship-cache.sh on this VM again. No full validation pass is claimed.
+Current status (H41 plus adopted master f77cf60d, 2026-11-05): worker components and VM gates are ready; delivery is **coordinator-pending**. The coordinator reports receipt/hash verification of the retained cache pack. QREG/H35CACHE are resolved; full validation is **pending coordinator merge**. Historical blocked statuses below describe earlier attempts and are superseded by h41/coordinator-receipt.json and HANDOFF-CURRENT.md. Shared roots remain read-only; never run ship-cache.sh on this VM again. No full validation pass is claimed.
 
 ## Identity and scope
 
@@ -136,3 +136,15 @@ Fresh adopted-tree gates pass: owned195-job build, four kernel checks, four MCP 
 Full validation remains pending coordinator merge. Read-only registration still reports4 helper imports missing; global axiom-registry audit reports0 errors but28 unrecorded standard additions and exits1. Correction: earlier summary wording called that global inventory check a pass based only on0 errors. The global gate is a failure until coordinator registration; the separate28 exact kernel guards pass. Current metadata records both accurately without changing any shared inventory/scanner or weakening a gate. Trust reports0 findings. H41/QREG already assigns these shared registration/full checks to coordinator merge; no new question is raised.
 
 Separate read-only finder and skeptic accepted the adopted-context milestone and closed the merge-wording correction; see adoption-8495f1de/reviews.md. Documentation paths resolve. The current worker handoff will be sealed relative to adopted master8495 while retaining the original base/immutable packets and coordinator-pending statuses.
+
+## Follow-on adoption f77cf60d
+
+Fetched exact published master f77cf60d3cea8f7f1db8db29cc027532b0cd3fce, including 8495, and adopted it without discarding work in merge d9c9a7e2050bf1b2fb264a7ebbf69bb0f6410d60. Parents are prior owned 610c83cf2e0c6940f45903d31e2c82c4fbae4524 and the exact published head. Initial base 6f3 and all prior packets/receipts remain ancestors/preserved. Worker-only scope now compares against f77; shared roots/config match upstream and are not manually edited. Protected constructor inputs/Source/Scoped and all four helper proofs remain byte-identical.
+
+Read both integration scope documents and the announced follow-on modules. Shared.Intrinsic retains explicit callback dependencies/reference refusals and supplies no Source adequacy certificate. The expression module defines the uniqueness target without its exhaustive proof. StorageOnlyHavoc derives existing typed formulas and supplies no ExtCall implementation/adequacy. Bounded type-parser additions do not replace this intrinsic constructor fixture. No producer is duplicated or unrelated import added; withheld owner repairs remain untouched.
+
+Fresh 195-job build, four kernel checks, four MCP diagnostics with 0 errors,28 guards and explicit inventories, runtime/KeySort and both pinned-solc controls pass under unchanged serial-j1/12GiB/no-swap/reserve bounds. Trust reports 0 findings. Current evidence is in adoption-f77cf60d; acceptance uses those logs. Root4/global-pin28 coordinator registration failures remain actual exit 1, not passes. Full validation remains pending coordinator merge under H41/QREG.
+
+Post-build cache comparison independently verifies that the unchanged H35 archive still matches all 12 owned artifact files/four mappings. No notice-based global cache freshness, complete dependency transfer or recipient import is inferred. Delivery remains coordinator-pending; no ship-cache invocation occurs. Original work/backfill statuses and pending external producer duties remain unchanged; no whole-lane completion is claimed.
+
+Separate read-only finder and skeptic accepted the f77 adoption without findings; see adoption-f77cf60d/reviews.md. Documentation references resolve. The current worker-only handoff is sealed against integration base f77, with original base and prior packets preserved and all coordinator-pending statuses retained.

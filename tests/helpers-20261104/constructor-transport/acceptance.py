@@ -5,7 +5,7 @@ packet = root/'Solidity/Lowering/V08/HelperPackets/ConstructorTransport'
 ns = 'Solidity.Lowering.V08.HelperPackets.ConstructorTransport.'
 modules = []
 theorems = set()
-evidence = 'adoption-8495f1de'
+evidence = 'adoption-f77cf60d'
 diags = {name:f'{evidence}/mcp-{name}.log' for name in ['Source','Target','Producer','Controls']}
 gates = [line.split('\t',2) for line in (owned/evidence/'gates.tsv').read_text().splitlines()]
 owned_gate = next(row for row in gates if row[0]=='owned-build')
@@ -34,7 +34,7 @@ assert '12884901888\n0\n' in (owned/evidence/'runtime.log').read_text()
 assert 'error:' not in (owned/evidence/'axiom-inventory.log').read_text()
 assert 'c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8' in (owned/evidence/'compiler-controls.log').read_text()
 allowed=('Solidity/Lowering/V08/HelperPackets/ConstructorTransport/', 'tests/helpers-20261104/constructor-transport/', 'docs/feature-work/helper-constructor-transport-20261104.md')
-scope_base = '8495f1deb0a95dd6b9301822d8649ab76b217681'
+scope_base = 'f77cf60d3cea8f7f1db8db29cc027532b0cd3fce'
 for ancestor in ['6f3eedf0788ee1f8a3bcf230558c712ecdca04d5', scope_base]:
  subprocess.run(['git','merge-base','--is-ancestor',ancestor,'HEAD'],cwd=root,check=True)
 changed = set(subprocess.check_output(['git','diff','--name-only',scope_base],text=True,cwd=root).splitlines())
