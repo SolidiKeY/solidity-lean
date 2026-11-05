@@ -331,3 +331,17 @@ the four owned paths. Metadata added by this seal is separately committed.
 (which applies to its historical committed snapshot, not the revised files).
 The final seal head is recorded in the result report and generated artifact
 receipt; the handoff records the exact proof and adoption heads.
+
+## Published dependency adoption, 2026-11-05T1422Z
+
+Adopted publication `8bf8321873befa3f35ca31e97e5339a1baee93e6` via merge
+`f24960a1fafc195e7d5320ad7bb6060fd5d6f429`, preserving the original lane
+and separate Exp packet. Five precompile modules and all 75 input pins are
+unchanged. Independent read-only finder/skeptic adoption reviews PASS, no
+findings or Lean/server/build use. Fresh scope/kernel-evidence checker and
+roots pass. Central axiom inventory remains EXIT1: zero errors and 164
+unrecorded changes; coordinator-owned registration and full local validation
+remain pending. No original obligation or whole-lane completion follows.
+Exact commands/results: `evidence/adoption-8bf.json`; handoff and current
+adoption manifest: `evidence/HANDOFF-adoption-8bf.md` and
+`evidence/SHA256SUMS-adoption-8bf`. Historical proof seals are preserved.
