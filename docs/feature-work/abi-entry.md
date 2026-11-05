@@ -1464,3 +1464,28 @@ equality type; the statement and premises are unchanged. Finder found no issues.
 The import correction preserves all statements, proofs and resource bounds.
 Independent read-only finder and skeptic reviews confirmed preservation of the
 owned sources and generated-root imports; both passed without findings.
+
+`LengthCheck.lean` directly imports the Selection V2 frame interface. Its
+numeric `belowCode`, correctness and capacity prerequisites already exist in
+published WordValidation; the packet does not require that file's unpublished
+signed/fixed-bytes extensions or their transitive imports. LengthCheckInterface,
+LengthCheck and LengthCheckControls form the complete new-module packet.
+
+An isolated check compiles the published WordValidation source and those three
+packet sources against 36 reused common artifacts whose source hashes match the
+published dependency closure. It passes all fourteen packet axiom guards and
+actual certificate axiom reports. A negative import check rejects the unpublished
+signed validator, confirming that branch-only extensions are unavailable.
+This is four explicit source checks, not a fresh rebuild of the entire closure.
+Independent read-only finder and skeptic reviews passed without findings.
+
+The emitted loaded-length flag, stack capacity and semantic lazy-revert versus
+eager-panic/fuel/head ordering are unchanged. Native loading, guarded runtime
+allocation, physical panic bytes and complete entry composition remain open.
+
+`SizeBranchesInterface.lean` specifies short/full input branching over actual
+intrinsic core bodies. The threshold is size four; both raw compiler joins and
+complete represented body outcomes are retained in the contract. It uses the
+existing compiler, core classifier, input simulation and allocation bounds;
+no desired run or body result is supplied. Native size loading, Source metadata
+and full runtime-entry composition remain open.
