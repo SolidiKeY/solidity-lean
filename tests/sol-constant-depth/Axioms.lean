@@ -157,7 +157,7 @@ the same pins close `Controls.lean`, so the library build enforces them too. -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_contract
-/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge' depends on axioms: [propext] -/
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_refused

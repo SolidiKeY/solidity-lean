@@ -1,4 +1,5 @@
 import Solidity.Frontend.ConstantDepth.Complete
+-- `Determinism` is not used here; importing it puts it in `Controls`, which pins it.
 import Solidity.Frontend.ConstantDepth.Determinism
 
 /-! # Exact dependency correspondence and determinism (backfill)

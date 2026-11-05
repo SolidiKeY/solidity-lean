@@ -43,7 +43,7 @@ theorem empty_copy {E : Source.Env} {Γ : Source.RCtx} (F : Source.Fr)
   rfl
 
 /-- The standalone copy reads past the end of calldata as zero words; at entry
-`cdTail` refuses such spans first (`entry_truncated_copy`, `entry_short_head`). -/
+`cdTail` refuses such spans first (`entry_truncated_copy`, `entry_short_head_copy`). -/
 theorem eof_padding {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
     (Source.cdToMem (frame []) (ArrayTy int8) 123 1).run y=
       (.ok (.val (.memRef rfl y.2.heap.next)),
@@ -295,7 +295,11 @@ theorem large_entry : Source.cdTail largeArgs 0 32=.error (.revert []) := by
   rw [large_len]
   rfl
 
-/-- Oversized length: `2^64 ≤ len` is refused before any word is read. -/
+/-- Oversized length: refused before any element word is read (only the offset
+and length words are). `cdTail` tests
+`2^64 ≤ len` first (`large_entry` unfolds it); with finite calldata the later
+span test would refuse such a length too, so this control shows the refusal,
+not which branch alone produces it. -/
 theorem entry_large_length_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
     ((Source.EM.lift (Source.cdTail largeArgs 0 32)) >>= fun p =>
       Source.cdToMem (frame (selectorBytes++largeArgs)) (ArrayTy int8) p.1 p.2).run y=

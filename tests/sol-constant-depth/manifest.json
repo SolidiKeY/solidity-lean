@@ -100,5 +100,27 @@
   "axiom ",
   "unsafe"
  ],
- "inline_pins": "Solidity/Frontend/ConstantDepth/Controls.lean"
+ "inline_pins": "Solidity/Frontend/ConstantDepth/Controls.lean",
+ "rawint": {
+  "namespace": "Solidity.Backend.CalldataPackets.RawInt",
+  "dir": "Solidity/Backend/CalldataPackets/RawInt",
+  "axiom_pins": "tests/calldata-packets-1105/RawInt/Axioms.lean",
+  "inline_pins": "Solidity/Backend/CalldataPackets/RawInt/Controls.lean",
+  "modules": [
+   "Solidity.Backend.CalldataPackets.RawInt.Execution",
+   "Solidity.Backend.CalldataPackets.RawInt.Controls"
+  ],
+  "headline": [
+   "range_iff_accepted",
+   "accepted_sign_bits",
+   "accepted_value",
+   "decode_ok_iff",
+   "values_ok_iff",
+   "values_frame",
+   "guarded_frame_run",
+   "copy_run",
+   "copy_observations",
+   "eval_copy"
+  ]
+ }
 }

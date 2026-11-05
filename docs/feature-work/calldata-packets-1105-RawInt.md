@@ -62,7 +62,7 @@ selector independence. `eof_padding` now says that past-EOF zero reads are the
 standalone helper's; at entry `cdTail` refuses such spans.
 
 Pins: `tests/calldata-packets-1105/RawInt/Axioms.lean` has exact `#guard_msgs`
-pins for all 55 public theorems (standard axioms only; seven controls use none);
+pins for all 55 public theorems (standard axioms only; nine controls use none);
 the same block closes `Controls.lean`, so the library build checks it.
 
 Reviews (read-only, no Lean server). Skeptic — ACCEPT-WITH-FINDINGS: `accepted`

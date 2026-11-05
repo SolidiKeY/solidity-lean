@@ -1,80 +1,91 @@
 #!/usr/bin/env python3
-"""Scope-complete acceptance for SOL-CB (G13 constant depth).
+"""Scope-complete acceptance for the constant-depth lane: SOL-CB (G13 constant
+depth) and its G35-INT-RAW-1105 refill (RawInt).
 
-Reads tests/sol-constant-depth/manifest.json and checks, without Lean:
-- every listed module exists, is imported by the generated `Solidity.lean`
-  root, and has a row in the module-map fragment;
-- the same pin block closes the inline-pin module (so `lake build` checks it);
-- every theorem declared in `Solidity/Frontend/ConstantDepth/**` has exactly
-  one `#guard_msgs` pin in tests/sol-constant-depth/Axioms.lean, recording
-  only standard axioms, and the pin file pins nothing else;
-- every headline theorem and every control of each family is declared;
-- no forbidden token occurs in the lane's Lean sources (comments included);
+Reads tests/sol-constant-depth/manifest.json and checks, without Lean, for each
+area (`Solidity/Frontend/ConstantDepth`, `Solidity/Backend/CalldataPackets/RawInt`):
+- every listed module exists and is imported by the generated `Solidity.lean`;
+  ConstantDepth's new modules have a row in the lane's module-map fragment, and
+  every module has a row somewhere under docs/module-map/;
+- every non-private theorem (attributes and `protected` allowed) has exactly
+  one `#guard_msgs` pin in the area's pin file, with standard axioms only; the
+  pin file pins nothing else;
+- the pin file's block is exactly the block that closes the inline-pin module
+  (so `lake build` checks the same pins);
+- every headline theorem and every ConstantDepth control-family member exists;
+- no `sorry`/`admit`/`native_decide`/`maxHeartbeats`/`unsafe` token and no
+  `axiom` declaration in the area's Lean sources;
 - the read-only inputs are byte-identical to their recorded sha256 pins.
-Lean checks the pins themselves (the MCP diagnostics of the pin file, or
-`lake env lean tests/sol-constant-depth/Axioms.lean`).
-Exit 0 = accepted, 1 = a check failed.
+Lean checks the pins themselves (MCP diagnostics of the pin files, or the build
+of the inline-pin modules). Exit 0 = accepted, 1 = a check failed.
 """
 import hashlib, json, pathlib, re, sys
 
 root = pathlib.Path(__file__).resolve().parents[1]
 man = json.loads((root / "tests/sol-constant-depth/manifest.json").read_text())
 fail = []
-ns = "Solidity.Frontend.ConstantDepth"
-lane = root / "Solidity/Frontend/ConstantDepth"
-
 roots = (root / "Solidity.lean").read_text().splitlines()
+maps = "".join(f.read_text() for f in sorted((root / "docs/module-map").glob("*.md")))
 frag = (root / man["module_map_fragment"]).read_text()
-base_map = "".join(f.read_text() for f in sorted((root / "docs/module-map").glob("*.md")))
-for m in man["modules"]:
-    p = root / (m.replace(".", "/") + ".lean")
-    if not p.is_file(): fail.append(f"missing module {m}")
-    if f"import {m}" not in roots: fail.append(f"not registered in Solidity.lean: {m}")
+THM = re.compile(r"^(?:@\[[^\]]*\]\s*)?((?:private|protected|noncomputable)\s+)*theorem\s+(\S+)", re.M)
+AXIOM = re.compile(r"^(?:@\[[^\]]*\]\s*)?((?:private|protected|noncomputable|unsafe)\s+)*axiom\s", re.M)
+PIN = re.compile(r"/-- info: '([^']+)' (does not depend on any axioms|depends on axioms: \[([^\]]*)\]) -/\n"
+                 r"#guard_msgs in #print axioms (\S+)")
+MARK = "/-! Exact axiom pins (mirrored in"
+
+def area(name, ns, directory, pin_file, inline_file, modules, headline, sub_of):
+    for m in modules:
+        if not (root / (m.replace(".", "/") + ".lean")).is_file(): fail.append(f"{name}: missing module {m}")
+        if f"import {m}" not in roots: fail.append(f"{name}: not registered in Solidity.lean: {m}")
+        row = "`" + m.removeprefix("Solidity.").replace(".", "/") + ".lean`"
+        if row not in maps: fail.append(f"{name}: no module-map row {row}")
+    decls = {}
+    for p in sorted((root / directory).glob("*.lean")):
+        text = p.read_text()
+        for tok in ["sorry", "admit", "native_decide", "maxHeartbeats", "unsafe"]:
+            if re.search(r"\b" + tok + r"\b", text): fail.append(f"{name}: forbidden token {tok!r} in {p.name}")
+        if AXIOM.search(text): fail.append(f"{name}: axiom declaration in {p.name}")
+        for mods, n in THM.findall(text):
+            if "private" not in mods: decls[f"{ns}.{sub_of(p.stem)}{n}"] = p.stem
+    pins = (root / pin_file).read_text()
+    pinned = PIN.findall(pins)
+    seen = {}
+    for full, _, axioms, target in pinned:
+        if full != target: fail.append(f"{name}: pin message {full} != target {target}")
+        seen[full] = seen.get(full, 0) + 1
+        bad = {a.strip() for a in axioms.split(",") if a.strip()} - {"propext", "Classical.choice", "Quot.sound"}
+        if bad: fail.append(f"{name}: non-standard axioms for {full}: {sorted(bad)}")
+    if pins.count("#print axioms") != len(pinned): fail.append(f"{name}: unparsed or unguarded #print axioms in {pin_file}")
+    for d in decls:
+        if seen.get(d, 0) != 1: fail.append(f"{name}: theorem {d} pinned {seen.get(d, 0)} times")
+    for s in seen:
+        if s not in decls: fail.append(f"{name}: pin for unknown theorem {s}")
+    block = pins.split("-/\n\n", 1)[1]
+    inline = (root / inline_file).read_text()
+    if MARK not in inline or inline.split(MARK, 1)[1].split("-/\n\n", 1)[1] != block:
+        fail.append(f"{name}: the pin block closing {inline_file} differs from {pin_file}")
+    short = {d.split(".")[-1] for d in decls}
+    for h in headline:
+        if h not in short: fail.append(f"{name}: missing headline theorem {h}")
+    print(f"{name}: modules {len(modules)}, theorems {len(decls)}, pins {len(pinned)}")
+    return decls
+
+cd = "Solidity.Frontend.ConstantDepth"
+decls = area("ConstantDepth", cd, "Solidity/Frontend/ConstantDepth", man["axiom_pins"], man["inline_pins"],
+             man["modules"], man["headline"], lambda stem: "Controls." if stem == "Controls" else "")
+for m in man["new_modules"]:
     row = "`" + m.removeprefix("Solidity.").replace(".", "/") + ".lean`"
-    if m in man["new_modules"] and row not in frag: fail.append(f"no module-map fragment row: {row}")
-    if row not in base_map: fail.append(f"no row in docs/module-map/*.md: {row}")
-
-decls = {}
-for p in sorted(lane.glob("*.lean")):
-    text = p.read_text()
-    for tok in man["forbidden"]:
-        pat = (r"^\s*(private\s+)?axiom\s" if tok.strip() == "axiom" else r"\b" + re.escape(tok.strip()) + r"\b")
-        if re.search(pat, text, re.M):
-            fail.append(f"forbidden token {tok.strip()!r} in {p.relative_to(root)}")
-    sub = "Controls." if p.stem == "Controls" else ""
-    for n in re.findall(r"^(?:private )?theorem (\S+)", text, re.M):
-        decls[f"{ns}.{sub}{n}"] = p.stem
-
-pins = (root / man["axiom_pins"]).read_text()
-pinned = re.findall(r"/-- info: '([^']+)' (does not depend on any axioms|depends on axioms: \[([^\]]*)\]) -/\n#guard_msgs in #print axioms (\S+)", pins)
-seen = {}
-for name, _, axioms, target in pinned:
-    if name != target: fail.append(f"pin message {name} != target {target}")
-    seen[name] = seen.get(name, 0) + 1
-    bad = {a.strip() for a in axioms.split(",") if a.strip()} - {"propext", "Classical.choice", "Quot.sound"}
-    if bad: fail.append(f"non-standard axioms for {name}: {sorted(bad)}")
-if pins.count("#print axioms") != len(pinned): fail.append("unparsed or unguarded #print axioms in the pin file")
-for d in decls:
-    if seen.get(d, 0) != 1: fail.append(f"theorem {d} pinned {seen.get(d, 0)} times")
-for s in seen:
-    if s not in decls: fail.append(f"pin for unknown theorem {s}")
-
-inline = (root / man["inline_pins"]).read_text()
-if pins.split("-/\n\n", 1)[1] not in inline: fail.append(f"inline pins in {man['inline_pins']} differ from {man['axiom_pins']}")
-
-short = {d.split(".")[-1] for d in decls}
-for h in man["headline"]:
-    if h not in short: fail.append(f"missing headline theorem {h}")
+    if row not in frag: fail.append(f"ConstantDepth: no module-map fragment row {row}")
 for fam, names in man["control_families"].items():
     for n in names:
-        if f"{ns}.Controls.{n}" not in decls: fail.append(f"missing control {n} ({fam})")
-
+        if f"{cd}.Controls.{n}" not in decls: fail.append(f"ConstantDepth: missing control {n} ({fam})")
+r = man["rawint"]
+area("RawInt", r["namespace"], r["dir"], r["axiom_pins"], r["inline_pins"], r["modules"], r["headline"],
+     lambda stem: "Controls." if stem == "Controls" else "")
 for path, digest in man["read_only_inputs"].items():
-    got = hashlib.sha256((root / path).read_bytes()).hexdigest()
-    if got != digest: fail.append(f"read-only input changed: {path} (re-pin after review)")
-
-print(f"modules {len(man['modules'])}, theorems {len(decls)}, pins {len(pinned)}, "
-      f"control families {len(man['control_families'])}, inputs {len(man['read_only_inputs'])}")
+    if hashlib.sha256((root / path).read_bytes()).hexdigest() != digest:
+        fail.append(f"read-only input changed: {path} (re-pin after review)")
+print(f"control families {len(man['control_families'])}, inputs {len(man['read_only_inputs'])}")
 for f in fail: print("FAIL", f)
 print("ACCEPT" if not fail else f"REJECT ({len(fail)})")
 sys.exit(1 if fail else 0)

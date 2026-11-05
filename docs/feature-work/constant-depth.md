@@ -20,7 +20,7 @@ under the existing contract: the clash-free projection
 | `ConstantDepth/Lookup.lean` (on master) | a resolved constant normalizes to itself (`lookup_constant_canonical`); `rank_resolved_dependency_lt` |
 | `ConstantDepth/Complete.lean` (on master) | `nconst_rank_complete` (rank many levels suffice), `nconst_levels_complete`, `evalConst_complete`, `evalConst_iff`, `evalConst_none_iff` (overflow refusals included), `arrayLenB_complete/iff/none_iff`, and the `*_resolved_complete` corollaries taking `WellFormed (resolveUnit s u)` |
 | `ConstantDepth/Correspondence.lean` (new, backfill) | `constDeps_declared_iff` (a declared constant's edges are exactly its initializer's resolved constant paths), `rank_declared_dependency_lt`, `depPath_rank_no_return`, `teval_unique`, `nconst_unique`, `arrayLen_unique`, `arrayLen_static_value` |
-| `ConstantDepth/Determinism.lean` (new, backfill) | `teval_det`, `nconst_det`, `arrayLen_det`: deterministic in every environment, no premise (mutual structural recursion) |
+| `ConstantDepth/Determinism.lean` (new, backfill) | `teval_det`, `nconst_det`, `arrayLen_det`: deterministic in every environment, no premise (mutual recursion on the derivations) |
 | `ConstantDepth/Controls.lean` (new, item 4) | kernel `decide` controls on the real `evalConst`/`nconstP`/`rank`/`acyclicB`; exact axiom pins of all 83 lane theorems |
 
 The original bound is therefore **true**; no counterexample or additive evaluator
@@ -76,8 +76,18 @@ the contract versions are kept unchanged.
 ConstantDepth skeptic — ACCEPT-WITH-FINDINGS: premises are projections of the
 existing contract; controls run the real checkers; Rank/Lookup/Complete unchanged.
 Findings: the antisymmetry naming (fixed above); cycle members' lack of a `TEval`
-value is shown only as `evalConst = none` here (their absence of `TEval` is the
-existing `InferExamples.cyc_nc`; the iff lemmas need acyclicity).
+value is shown only as `evalConst = none` here (the iff lemmas need acyclicity;
+the existing `InferExamples.cyc_nc` proves absence for a separate `A ↔ B` unit).
+
+Second round (on the fixes), finder and skeptic — skeptic ACCEPT-WITH-FINDINGS.
+Fixed: `entry_large_length_copy` docstring now says which branch it cannot
+isolate and that offset/length words are read; "structural" dropped from the
+determinism description (Lean may choose well-founded recursion; the statements
+are the same); `qualified_no_edge` now also shows `K.X = 5` in `K`; the controls
+docstring was tidied and no longer credits `cyc_nc` with `cyclicE`; a stale pin
+count and a wrong theorem name in docs were corrected; the checker now finds
+attribute-prefixed/`protected` theorems and `axiom` declarations, compares the
+inline pin block exactly, and covers RawInt (pins, mirror, forbidden tokens).
 
 RawInt reviews: see the RawInt document.
 
@@ -87,6 +97,8 @@ Recorded in the RawInt document's increment section (one build covers both).
 
 ## Limitations
 
+- Absence of a `TEval` value for the members of `Controls.cyclicE` is not proved
+  (only `evalConst = none`).
 - No general family of environments with rank = `decls.length` for every size: the
   tightness is a witness (6 declarations), the bound itself is general.
 - A qualified constant reference (`K.X`) is no graph edge and has no typed value in

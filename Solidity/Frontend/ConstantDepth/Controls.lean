@@ -2,16 +2,19 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 
 /-! # Constant-depth controls
 
-Kernel-checked (`decide`) controls for the declaration-derived bound: a
-chain whose rank equals the declaration count (one level below the rank
-refuses), a shared diamond, contract scopes with inheritance and
-shadowing, duplicate declarations, used and unused cycles, and overflow
-refusal, a chain one below the declaration count, and a qualified member
-reference. Each acyclic, clash-free unit instantiates `evalConst_iff` /
-`evalConst_none_iff`, so its decided values and refusals are exactly the
-`TEval` facts; for the cyclic unit the contract fails, so only soundness
-(`evalConst_sound`) applies. Absence of a `TEval` value for cycle members is
-the existing `InferExamples.cyc_nc`.
+Kernel-checked (`decide`) controls for the declaration-derived bound, on the
+real `evalConst`/`nconstP`/`rank`/`acyclicB`:
+- a chain whose rank equals the declaration count, and one whose rank is one
+  below it (in both, one level fewer than the rank refuses);
+- a shared diamond; contract scopes with inheritance and shadowing;
+- duplicate declarations; used and unused cycles; a qualified member
+  reference; overflow refusal.
+
+Each acyclic, clash-free unit instantiates `evalConst_iff`/`evalConst_none_iff`,
+so its decided values and refusals are exactly the `TEval` facts. For the cyclic
+unit the contract fails, so only soundness (`evalConst_sound`) applies and its
+members are shown refused by `evalConst`, not shown to lack a `TEval` value
+(the existing `InferExamples.cyc_nc` proves that for a separate `A ↔ B` unit).
 -/
 namespace Solidity.Frontend.ConstantDepth.Controls
 open Solidity.Source Solidity.Frontend.Static Solidity.Frontend.ConstantDepth
@@ -167,7 +170,9 @@ def qualifiedE : Env := (Syn.unit (listTop [
 theorem qualified_contract : (qualifiedE.decls.Pairwise fun a b => a.clash qualifiedE b = false) ∧
     ConstsAcyclic qualifiedE :=
   ⟨noClashB_sound (by decide), acyclic_iff.mp (by decide)⟩
-theorem qualified_no_edge : qualifiedE.constDeps (none, "V") = [] ∧ rank qualifiedE (none, "V") = 1 := by
+/-- `K.X` itself evaluates in `K`; only the qualified reference has no edge. -/
+theorem qualified_no_edge : valueOf qualifiedE (some "K") "X" = some 5 ∧
+    qualifiedE.constDeps (none, "V") = [] ∧ rank qualifiedE (none, "V") = 1 := by
   decide
 theorem qualified_refused : ¬ ∃ v, TEval qualifiedE none (.ident "V") v :=
   (evalConst_none_iff qualified_contract.1 qualified_contract.2).mp (by decide)
@@ -351,7 +356,7 @@ end Solidity.Frontend.ConstantDepth.Controls
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_contract
-/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge' depends on axioms: [propext] -/
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_refused
