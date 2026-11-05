@@ -1260,3 +1260,10 @@ Source/profile/dispatch composition and physical failure bytes remain open.
 G46.02, fixture replay and full assignment gates remain pending. Independent
 read-only finder and skeptic reviews found no semantic issues. Checkpoint
 results accompany the sealed handoff.
+
+`SelectorGateBodyInterface.lean` specifies actual public compiler selection and
+execution of a selector guard on an arbitrary intrinsic uint local followed by
+an existing core-admitted body. Distinct selector/argument/length cells can be
+represented without changing the decoder framework. The contract is a single
+match/reject continuation, retaining selector loading, short routing and Source
+table/body authenticity as separate obligations; no body run/result is assumed.

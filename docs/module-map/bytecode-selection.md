@@ -214,3 +214,4 @@
 | `Backend/AbiEntry/WordCarrierEntryBodyInterface.lean` | Compiler contract for value checking, primitive raw binding and actual typed body execution. |
 | `Backend/AbiEntry/WordCarrierEntryBody.lean` | Public compiler composition of value guard, raw primitive binding and actual typed body execution. |
 | `Backend/AbiEntry/WordCarrierEntryBodyControls.lean` | Whole-artifact enum/fixed-bytes bodies, failure ordering, wide metadata and saved-state controls. |
+| `Backend/AbiEntry/SelectorGateBodyInterface.lean` | Actual compiler contract for an arbitrary typed selector-local guard and continuation body. |
