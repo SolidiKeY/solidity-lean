@@ -166,3 +166,18 @@ workers must not run `ship-cache.sh`: this lane leaves byte-verified native
 cache packs with absolute paths and SHA-256 for coordinator pull. The previous
 worker-shipment blocker is historical; no actual coordinator pull or global
 cache freshness is asserted without its separate receipt.
+
+Published `e6849d3bdf516099d20c33d3581d523449764018` was adopted by rebase
+as explicitly requested. The original completed snapshot is preserved at
+`codex/solidity-h28-sol-20261104/solkey-ports-pre-e6849d3b`
+(`dd07c7efb30c3cfdfa24b7cb2e40a254b485703a`) and in the existing sealed bundles.
+The publication pruned private evidence; this branch retains those fixtures,
+receipts and ignore files. All owned Lean files remain byte-identical.
+Acceptance adds only this fixed approved ancestor; H41 remains in force.
+
+The rebase metadata passed independent read-only finder and skeptic reviews.
+The owned build, actual axiom ledger, controls, selected acceptance and KeySort
+runtime pass on the VM; exact final-head commands, exits, timings/RSS, resource
+bounds, sealed handoff and H41 pull pack are in
+`tests/h28-sol/solkey-ports/artifacts/rebase-e6849d3b/`. Coordinator import
+remains separate; no new whole-tree/Bridge gate is asserted.
