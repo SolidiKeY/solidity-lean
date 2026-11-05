@@ -149,3 +149,19 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/TypePaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Audit.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/OverrideValidation/Memoized.lean` | Materialized typed relation tables, proved equivalent to the original candidate. |
+| `Frontend/NumericLiteralProofs/WordTable/Part07.lean` | Generated direct structural word-table proof. |
+| `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Generated direct structural word-table proof. |
+| `Frontend/ExpressionUniqueness/SeparatorSplit.lean` | Comma-separated token span reconstruction The result allows empty component words, as intrinsic tuple holes require. |
+| `Frontend/ExpressionUniqueness/TokenSplit.lean` | Delimiter execution and token splitting for expression uniqueness The machine reads the existing checked tokens. |
+| `Frontend/StatementGrammarH28/Balance.lean` | Balanced brace boundaries and intrinsic block witnesses BraceBalanced is a token predicate, not an AST. |
+| `Frontend/StatementGrammarH28/YieldSplit.lean` | Exact block/list yield decomposition These lemmas expose the actual state-threaded yield of existing Syn lists and blocks, including the intermediate layout. |
+| `Frontend/TypeGrammarH28/ParserArrays.lean` | Array spine parser composition. |
+| `Frontend/TypeGrammarH28/ParserPaths.lean` | Independent qualified-name parsing contracts, with arbitrary locations. |
+| `Frontend/LiteralGrammarH28/HexControls.lean` | Hex body kernel controls Rows are enumerated independently from the decoder recursion: empty; every pair digit category and case; adjacent and separated groups; odd counts;. |
+| `Frontend/LiteralGrammarH28/HexPins.lean` | Exact hex theorem signatures and transitive axiom reports. |
+| `SolcValidation/DataLayout.lean` | Checked object-data references into assembled artifact bytes This is the label-resolution/data-size boundary of the solc dialect adapter. |
+| `SolcValidation/DataResolution.lean` | Unique object-data resolution A checked per-object table resolves a present label to its exact reference, not merely to some reference. |
+| `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Kernel controls for executed collection, not an assumed owner order or supplied collection result. |
+| `Frontend/QualifiedUnits/SignatureMembers.lean` | Identity-based inherited overload collection. |
+| `Frontend/ExecutableAst/Shared/Compose.lean` | One executable callback composition for producer-owned memory and control packets. |
