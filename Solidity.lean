@@ -1804,6 +1804,8 @@ import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
 import Solidity.Lowering.G19.AssignmentReturnFlag
+import Solidity.Lowering.G19.ConditionalSequence
+import Solidity.Lowering.G19.ConditionalSequenceControls
 import Solidity.Lowering.G19.ConditionalStatement
 import Solidity.Lowering.G19.ConditionalStatementControls
 import Solidity.Lowering.G19.WhileReturn

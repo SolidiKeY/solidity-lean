@@ -71,3 +71,5 @@
 | `Backend/StructuredFlow/MappedBranchControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/StructuredFlow/ScopedMappedSequence.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/StructuredFlow/ScopedMappedSequenceControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/ConditionalSequence.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/ConditionalSequenceControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
