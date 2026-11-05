@@ -239,4 +239,33 @@ def selectedSnapshot (bound : Nat) : Option (List Nat) :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.firstDone_minimal
 
+
+/- Independent return relations accept exactly the canonical intrinsic candidates.
+Local decision instances permit numeric checks without changing the core APIs. -/
+local instance (pipeline : RawFrame.Pipeline) (state : RawFrame.State ctx)
+    (index : Solidity.Source.Idx ctx.tys .bool) (value : Solidity.Source.Val ctx.env.layout .bool) :
+    Decidable (RawFrame.BoolReturnD pipeline state index value) :=
+  inferInstanceAs (Decidable (value.key = some
+    (if (RawFrame.boolWord state index).val != 0 then 1 else 0)))
+local instance (pipeline : RawFrame.Pipeline) (state : RawFrame.State ctx)
+    (index : Solidity.Source.Idx ctx.tys (.int IntTy.u8))
+    (value : Solidity.Source.Val ctx.env.layout (.int IntTy.u8)) :
+    Decidable (RawFrame.U8ReturnD pipeline state index value) :=
+  inferInstanceAs (Decidable (value.key = some
+    (((RawFrame.u8Word state index).val % 256 : Nat) : Int)))
+#guard (rawRun 32).any (fun result => decide (RawFrame.BoolReturnD (ctx := ctx) .legacy result.state (.here) (.bool true)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.BoolReturnD (ctx := ctx) .legacy result.state (.here) (.bool false))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.U8ReturnD (ctx := ctx) .legacy result.state (.there (.there .here)) (CleanLocals.small)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.U8ReturnD (ctx := ctx) .legacy result.state (.there (.there .here)) (.int 0 (by decide)))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.BoolReturnD (ctx := ctx) .viaIR result.state (.here) (.bool true)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.BoolReturnD (ctx := ctx) .viaIR result.state (.here) (.bool false))))
+#guard (rawRun 32).any (fun result => decide (RawFrame.U8ReturnD (ctx := ctx) .viaIR result.state (.there (.there .here)) (CleanLocals.small)))
+#guard (rawRun 32).any (fun result => decide (¬ (RawFrame.U8ReturnD (ctx := ctx) .viaIR result.state (.there (.there .here)) (.int 0 (by decide)))))
+/-- info: 'Solidity.Yul.RawFrame.returnBool_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnBool_complete
+/-- info: 'Solidity.Yul.RawFrame.returnU8_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnU8_complete
+
 end Solidity.Yul.Checks.LocalBlock

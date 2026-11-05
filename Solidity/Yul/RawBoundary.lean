@@ -156,4 +156,57 @@ theorem run_returnU8_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidit
     exact congrArg some (returnU8_agrees ctx pipeline (capture first result.state.cells)
       (capture second result.state.cells) rfl index)
 
+/-- The independent canonical Boolean return relation determines the entire intrinsic value. -/
+theorem returnBool_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (state : Solidity.Yul.RawFrame.State ctx)
+ (index : Solidity.Source.Idx ctx.tys .bool)
+ (value : Solidity.Source.Val ctx.env.layout .bool),
+ Solidity.Yul.RawFrame.BoolReturnD pipeline state index value ↔
+ value = Solidity.Yul.RawFrame.returnBool pipeline state index := by
+  intro ctx pipeline state index value
+  constructor
+  · intro relation
+    cases value with
+    | bool b =>
+      change some (if b then 1 else 0) = some (if (boolWord state index).val != 0 then 1 else 0) at relation
+      have numeric := Option.some.inj relation
+      cases pipeline <;>
+        change Solidity.Source.Val.bool b =
+          Solidity.Source.Val.bool ((boolWord state index).val != 0)
+      all_goals
+        cases b <;> cases truth : ((boolWord state index).val != 0) <;>
+          simp only [truth, Bool.false_eq_true, if_false, if_true] at numeric ⊢
+        all_goals contradiction
+    | memRef h _ => cases h
+    | storRef h _ => cases h
+    | cdRef h _ _ => cases h
+  · intro same
+    rw [same]
+    exact returnBool_sound pipeline state index
+
+/-- The independent canonical uint8 return relation determines the entire intrinsic value. -/
+theorem returnU8_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (state : Solidity.Yul.RawFrame.State ctx)
+ (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8))
+ (value : Solidity.Source.Val ctx.env.layout (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.U8ReturnD pipeline state index value ↔
+ value = Solidity.Yul.RawFrame.returnU8 pipeline state index := by
+  intro ctx pipeline state index value
+  constructor
+  · intro relation
+    cases value with
+    | int n range =>
+      change some n = some (((u8Word state index).val % 256 : Nat) : Int) at relation
+      have numeric := Option.some.inj relation
+      cases pipeline <;>
+        change Solidity.Source.Val.int n range =
+          Solidity.Source.Val.int (((u8Word state index).val % 256 : Nat) : Int) _
+      all_goals cases numeric; rfl
+    | memRef h _ => cases h
+    | storRef h _ => cases h
+    | cdRef h _ _ => cases h
+  · intro same
+    rw [same]
+    exact returnU8_sound pipeline state index
+
 end Solidity.Yul.RawFrame
