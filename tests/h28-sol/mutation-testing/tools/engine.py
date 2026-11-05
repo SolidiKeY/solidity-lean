@@ -16,7 +16,7 @@ import checked
 from runner import mutate, relative, digest
 
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-DELIVERY_BASE = "32dd5befce264eb9a5d1b622b9270e71c50a0f5a"
+DELIVERY_BASE = "a6fa01380efd373d85f7a8e6c13811e2d552ae7c"
 BRANCH = "codex/solidity-h28-sol-20261104/mutation-testing"
 PREFIX = "tests/h28-sol/mutation-testing/"
 KINDS = {"mutant", "negative-control", "known-kill", "equivalent-control", "invalid-control", "runner-survivor-control"}
