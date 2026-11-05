@@ -1420,3 +1420,42 @@ including value guards and absent-endpoint rejection. Empty input prefers
 receive with fallback when absent; nonempty input uses fallback. The interface
 anchors endpoint code to the existing guard/compiler, not supplied body runs.
 Source declaration/payability authority and native parameter binding remain open.
+
+
+`CoreSpecial.lean` compiles receive/fallback choice through `CoreDispatch` on
+an intrinsic uint size local. Empty input prefers receive, then fallback;
+nonempty input selects fallback. Each present endpoint wraps its existing typed
+core body with `ValueGateBody`; absence compiles to actual revert. Public whole
+and endpoint selection are proved, as are complete outcome equality and endpoint
+allocation counts. The general execution theorem retains the existing input
+simulation and allocation bound for the empty-input endpoint. The nonempty
+proof needs only the size cell and nonzero size: unused receive representation
+and capacity are irrelevant on the actual miss path. Neither theorem assumes a
+body run, desired result, poststate or replacement compiler.
+
+Controls build an inhabited typed input with size and an incoming uint local,
+then execute receive assignment or fallback bool allocation reading that local.
+They cover empty receive preference, absent receive, arbitrary nonempty size,
+missing fallback, both endpoints absent, arbitrary value on payable receive,
+terminal nonpayable receive despite an independently successful payable fallback,
+value refusal before a malformed argument, body revert and saved state/stack.
+The complete machine outcomes retain untouched state. These are core target
+controls; the size/local binding, Source declarations and payable metadata are
+not authenticated by these results. Source fallback calldata parameter binding,
+raw fallback output, native dispatch loading and exact physical failure bytes
+remain separate G40 obligations, alongside aggregate decoding and whole-profile
+composition. G46.02 and ordered G46.03 remain open.
+
+Independent read-only finder and skeptic reviews found no semantic issues in
+actual selection, routing, terminal failure, intrinsic typing or retained
+resource/input premises. Following heartbeat failures in whole-program control
+reduction, proof repair separated code equalities and used existing dispatch and
+value-guard execution plus explicit instruction-step simplification. No theorem,
+exclusion or heartbeat budget changed. The resulting controls also check in a
+scratch diagnostic with a smaller budget. Final per-file diagnostics report zero
+errors; focused importing-consumer compilation and nineteen scoped standard-only
+axiom guards pass. Failed attempts and checkpoint gate outcomes are retained in
+the sealed handoff; this increment does not close the whole lane.
+The final skeptic review identified one proof-style issue: an inferred local
+execution equality lacked an explicit type. It now has its full input/output
+equality type; the statement and premises are unchanged. Finder found no issues.
