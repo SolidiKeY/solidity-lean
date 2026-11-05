@@ -896,3 +896,7 @@ They checked signed endpoints, zero/wide-width semantics, actual emitted
 comparison/branch joins and public selection, raw decoder iff and unchanged
 valid negative words/saved state. Neither used a build or Lean server. Focused
 compilation has no warnings in the changed modules.
+
+`BytesGateInterface.lean` specifies actual fixed-byte padding validation;
+`WordGateInterface.lean` unifies actual compiler validation for every existing
+ABI word kind. Input loading and aggregate/body execution remain separate.
