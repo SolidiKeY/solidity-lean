@@ -142,4 +142,32 @@ theorem holds_completed : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yu
     · intro valid
       exact ⟨fuel,result,done,valid⟩
 
+/-- Conjunction distributes over both actual raw modalities. The diamond
+reverse direction uses deterministic completed outcomes, without assuming termination. -/
+theorem holds_and : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (first second : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds mode code policy (fun result => first result ∧ second result) state ↔
+ Solidity.Yul.RawFrame.Logic.holds mode code policy first state ∧
+ Solidity.Yul.RawFrame.Logic.holds mode code policy second state := by
+  intro ctx control mode code policy first second state
+  cases mode with
+  | box =>
+    constructor
+    · intro valid
+      exact ⟨fun fuel result done => (valid fuel result done).1,
+        fun fuel result done => (valid fuel result done).2⟩
+    · rintro ⟨left,right⟩ fuel result done
+      exact ⟨left fuel result done,right fuel result done⟩
+  | diamond =>
+    constructor
+    · rintro ⟨fuel,result,done,left,right⟩
+      exact ⟨⟨fuel,result,done,left⟩,⟨fuel,result,done,right⟩⟩
+    · rintro ⟨⟨fuel,result,done,left⟩,right⟩
+      have rightBox : holds .box code policy second state :=
+        diamond_implies_box ctx control code policy second state right
+      exact ⟨fuel,result,done,left,rightBox fuel result done⟩
+
 end Solidity.Yul.RawFrame.Logic
