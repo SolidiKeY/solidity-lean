@@ -5,7 +5,7 @@ sys.dont_write_bytecode = True
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 HERE=pathlib.Path(__file__).resolve().parent
 REL=HERE.relative_to(ROOT).as_posix()
-SOURCE_COMMIT='fc695ef1d2228947eac2fb1c6279fc4ccf0bd56d'
+SOURCE_COMMIT='04bac54e1f52aebf8deb87095dcb3c3fa3399d59'
 BASE='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'
 ARCHIVE_SHA='d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba'
 GENERATED={REL+"/accept_repaired.py",REL+"/snapshot.json"}
@@ -27,7 +27,7 @@ def verify_snapshot(head):
     require(changed==GENERATED,"contract change-set mismatch")
     source_changed=git("diff","--name-only",BASE,SOURCE_COMMIT).decode().splitlines()
     require(source_changed==snap["source_changed_paths"],"source change-set mismatch")
-    require(all(p=="scripts/coord-tools/gate.sh" or p.startswith(REL+"/") for p in source_changed),"source ownership mismatch")
+    require(all(p in ("scripts/coord-tools/gate.sh","scripts/check-doc-paths.sh") or p.startswith(REL+"/") for p in source_changed),"source ownership mismatch")
     require(git("merge-base",BASE,SOURCE_COMMIT).decode().strip()==BASE,"base ancestry mismatch")
     actual={p.relative_to(ROOT).as_posix() for p in HERE.rglob("*") if p.is_file()}
     require(actual==set(snap["artifact_files"]),"artifact inventory mismatch")

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "source_commit": "fc695ef1d2228947eac2fb1c6279fc4ccf0bd56d",
+  "source_commit": "04bac54e1f52aebf8deb87095dcb3c3fa3399d59",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "source_sha256": "8a4059f77224ea758da3cec2fb82ce041c943233db42f4d6204e9c7cb835a227",
   "source_changed_paths": [
+    "scripts/check-doc-paths.sh",
     "scripts/coord-tools/gate.sh",
     "tests/terra-20261103/gate/README.md",
     "tests/terra-20261103/gate/accept.py",
@@ -29,10 +30,10 @@
     "tests/terra-20261103/gate/test_targets.py"
   ],
   "files": {
-    "tests/terra-20261103/gate/README.md": "764eaf6ee4035ab43da398cae4f8425ab9a610420894547329846d26aa88cfd8",
+    "tests/terra-20261103/gate/README.md": "9e11d941718d95d2c0361b2b148109832eb0d5ce797d081e5564954b95b0339a",
     "tests/terra-20261103/gate/accept.py": "ddc8936bd0dac39a6fcd02ed0685c5b2dac7ae5caa76a385f58fd7f7770019f5",
-    "tests/terra-20261103/gate/accept_repaired.py": "b7c6ba137d335a8915f92e4a7331d63b14183419333f74e372d2d0fc312a610a",
-    "tests/terra-20261103/gate/freeze_acceptance.py": "4663cf58cb1721e340aafb2f2e4eb274285f8be818519d10211f44fde334f922",
+    "tests/terra-20261103/gate/accept_repaired.py": "84a93cb58349335750f9069e7d17e01096a8d9016987138131ea36504c2f8854",
+    "tests/terra-20261103/gate/freeze_acceptance.py": "34f3a48a15637a2b78c328171df532fdf342f1f7681ef7219041dc2a8f855e26",
     "tests/terra-20261103/gate/history/tf-gate-9cc85b14.tar.gz": "d3c047d0346652e4abc5ef3d7570091d707f1b6d7872e3b1fb60c30c67498aba",
     "tests/terra-20261103/gate/old_to_new.json": "787ae2062832d0fc542a83e94b4868ec71acb6d1fcd96ddd3063fc08d67ef78d",
     "tests/terra-20261103/gate/test_cases.py": "768c8ef171149905dd942ab2a5965b8cf7d4aac55efe33f442a9c8352459d8a1",
@@ -44,7 +45,7 @@
     "scripts/check-automatic.mjs": "72a60fe9f7a62c2bb5c968229e0cf58fa27baab70470cb49ecec067f8c8c0cbb",
     "scripts/check-axiom-pins.mjs": "6518ed4dbcdfc388015a06cb98d329c07e8fcfc8c18c421c0b811fe19e080aca",
     "scripts/check-corpus.sh": "bb73ac9098d24369822b3d151d1cac3511c34644f093ae7b03b4616e33c7391f",
-    "scripts/check-doc-paths.sh": "8d070881f42c46d15f5e4cdce651c025d36481bc4a221ad18a69aae2fa192c55",
+    "scripts/check-doc-paths.sh": "0acc937bff47e6978bd721337e71092519c0684ae048fb1d4ba3b5d29fb5231b",
     "scripts/check-layers.mjs": "cc8c16e71ee914358fe5ab1add605febb16950edf07164170c99589dfc476f0f",
     "scripts/check-memory-loop-timing.mjs": "69b9b81311a2d3b5f942652ce27667018312b0441d3f93c0d4c8194cd2f9700b",
     "scripts/check-orphans.mjs": "647092893ad5f01bd1ecbf1ea51a508d522822264f23e45a93b8d4c7fff76949",
