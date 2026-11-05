@@ -1,6 +1,6 @@
 # Calculus modes O10–O13
 
-Status (2026-11-05): **authorized; not yet implemented.** Ideas from a
+Status (2026-11-05): **VC2 (O11) and VC3 (O12) done and integrated; VC1 running** (see Handoffs). Ideas from a
 comparison with verity (Profile, `--deny-*` gates, AdversaryModel,
 EntryPointInvariants). Rule ([options.md](../options.md)): a mode is an
 argument of the validity statement, as `ValidT`/`ValidTail` are, never a global
