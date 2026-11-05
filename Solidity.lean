@@ -3659,6 +3659,7 @@ import Solidity.Yul.World.LogPortRules
 import Solidity.Yul.World.LogSuccess
 import Solidity.Yul.World.LogSuccessControls
 import Solidity.Yul.World.Observations
+import Solidity.Yul.World.PendingCoupling
 import Solidity.Yul.World.Raw
 import Solidity.Yul.World.ReturnSize
 import Solidity.Yul.World.ReturnSizeChecks
