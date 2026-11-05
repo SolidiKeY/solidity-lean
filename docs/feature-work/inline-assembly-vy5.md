@@ -3188,3 +3188,34 @@ are not passes, and none of this evidence is Lean correspondence.
 With this local root, the JS suite reports 322 tests: 293 pass and 29 fail.
 Every remaining failure needs a Codex-VM report directory, the private
 producer tree or a held-module path.
+
+### Help-branch merge (2026-11-05, H37 continued)
+
+The lane merged `origin/master` (8bf83218), then `origin/cloud/vy5-help-move`
+(30a978c0). The help branch commits the Source producer
+`Solidity/Source/Monetary.lean` (`wide`, `wide_exact`, `wide_not_fits`). It
+also carries `Solidity/Yul/Composition/MonetaryLifecycleControls.lean`, so that
+module is included rather than left out. At 34:12 the numeral is annotated
+`(2 ^ 256 : Nat)`; no control statement changed. `STy.cdStride` is not on either
+branch, so lane v14 is still waiting on it. The four VY4-dependent modules in
+`tests/yul-composition/held/` remain held.
+
+The help branch changes three Source shapes:
+
+- `St` gains `resource : FailureExecution.Cursor`.
+- `Account.balance` is a plain `Nat`.
+- `evalE` takes an explicit `plan`.
+
+Six modules that arrived from master after the help branch forked still used
+the old shapes. They are ported the same way the help branch ported its own
+modules:
+
+- `Backend/CalldataPackets/RawAddress/Controls` and
+  `Backend/PrimitivePackets/UnsignedCast/Controls` get the cursor field.
+- `Lowering/StorageOps/SourceByteStorageCopyControls` and
+  `SourceNestedByteCaptureControls` use plain balances.
+- `Lowering/G19/ConditionalSequence` and `Yul/LocalBoolDoWhile` pass
+  `(plan := none)`.
+
+No statement or pinned value changed. `check-axiom-pins --write` recorded the
+new pins from the merged modules, and it reported no errors.
