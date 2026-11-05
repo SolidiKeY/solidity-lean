@@ -1,3 +1,4 @@
+import Solidity.Yul.RawFrameLogic
 import Solidity.Yul.RawCoherent
 import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawBoundary
@@ -290,5 +291,78 @@ def dirtyTwo := RawFrame.write rawInitial small (word 258)
 /-- info: 'Solidity.Yul.RawFrame.returnU8_clean_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.returnU8_clean_view
+
+
+/- Inhabited modal controls for actual dirty LOCAL execution. -/
+theorem logicCompletes : (rawRun 32).isSome = true := by rfl
+def logicResult : RawFrame.Outcome ctx ⟨false,false⟩ := (rawRun 32).get logicCompletes
+def logicPost (result : RawFrame.Outcome ctx ⟨false,false⟩) : Prop :=
+  RawFrame.view result.state flag = word 2 ∧
+  RawFrame.view result.state small = word 257 ∧ result.flow.isNormal = true
+
+
+theorem logicFinished : rawRun 32 = some logicResult := by rfl
+theorem logicValid : logicPost logicResult := ⟨rfl,rfl,rfl⟩
+theorem logicBox : RawFrame.Logic.holds .box code policy logicPost rawInitial := by
+  intro fuel result done
+  have same := RawFrame.run_completed_unique ctx ⟨false,false⟩ code policy rawInitial
+    fuel 32 result logicResult done logicFinished
+  rw [same]
+  exact logicValid
+theorem logicDiamond : RawFrame.Logic.holds .diamond code policy logicPost rawInitial :=
+  ⟨32,logicResult,logicFinished,logicValid⟩
+theorem logicFalseBox : ¬ RawFrame.Logic.holds .box code policy (fun _ => False) rawInitial := by
+  intro invalid
+  exact invalid 32 logicResult logicFinished
+theorem logicFalseDiamond : ¬ RawFrame.Logic.holds .diamond code policy (fun _ => False) rawInitial := by
+  rintro ⟨_,_,_,bad⟩
+  exact bad
+
+
+theorem logicPremiseWitness : ∀ mode : Solidity.Modality,
+ ∃ premise : Solidity.Yul.Logic.Fml (0 + Solidity.Yul.wordCellCount Solidity.Yul.Checks.LocalBlock.X),
+ Nonempty (Solidity.Yul.Logic.Rule
+ (Solidity.Yul.RawFrame.Logic.formula mode Solidity.Yul.Checks.LocalBlock.code Solidity.Yul.Checks.LocalBlock.policy Solidity.Yul.Checks.LocalBlock.logicPost Solidity.Yul.Checks.LocalBlock.rawInitial) premise) ∧
+ premise.holds (Solidity.Yul.WordState.pack ⟨Fin.elim0,Solidity.Yul.RawFrame.view Solidity.Yul.Checks.LocalBlock.rawInitial⟩) := by
+  intro mode
+  obtain ⟨premise,⟨rule⟩⟩ := WordAdapter.rule_exists mode code policy
+    (fun result => logicPost (RawFrame.Outcome.ofWord rawInitial result))
+  refine ⟨premise,⟨rule⟩,?_⟩
+  apply (RawFrame.Logic.rule_premise_sound ctx ⟨false,false⟩ mode code policy
+    logicPost rawInitial premise rule).mp
+  cases mode with
+  | box => exact logicBox
+  | diamond => exact logicDiamond
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.formula_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.formula_iff
+/-- info: 'Solidity.Yul.RawFrame.Logic.rule_premise_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.rule_premise_sound
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicFinished' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicFinished
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicValid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicValid
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicBox' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicBox
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicDiamond' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicDiamond
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicFalseBox' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicFalseBox
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicFalseDiamond' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicFalseDiamond
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicPremiseWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicPremiseWitness
 
 end Solidity.Yul.Checks.LocalBlock
