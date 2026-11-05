@@ -161,7 +161,12 @@ and called body containing the node. `blockExt_sound`/`nestedDecl_ends`
 
 **Gates.** MCP diagnostics clean on the seven modules; `#print axioms` on
 every main theorem and control: `propext`, `Classical.choice`, `Quot.sound`
-only; `./run-lean.sh`: see the lane's CLOUD-RESULT marker. No `sorry`, no
+only; `./run-lean.sh`: `lake build` of the default targets and the
+SolkeyTestSuite completed (3842 jobs; two earlier runs lost unrelated
+modules to out-of-memory kills, code 137, and were resumed); its last step,
+`check-solkey.sh`, reports 57 mismatches against the container's `../solkey`
+checkout (69e251f, newer than the pin `473da8944c`) and passes against the
+pinned snapshot `tests/migration/solkey` (`solkeycheck --key …`: OK). No `sorry`, no
 axiom, no `maxHeartbeats`, no Source or Core module edited.
 
 **Witnesses and controls** (`Theory/Progress/Controls.lean`): a tuple
