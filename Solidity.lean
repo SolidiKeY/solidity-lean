@@ -288,7 +288,9 @@ import Solidity.Backend.LabelExec.Packets
 import Solidity.Backend.LabelExec.Placement
 import Solidity.Backend.LabelExec.ScalarTransfer
 import Solidity.Backend.LabelExec.Step
+import Solidity.Backend.MemoryCopies.CheckedDefault
 import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
+import Solidity.Backend.MemoryCopies.CheckedReferenceInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2

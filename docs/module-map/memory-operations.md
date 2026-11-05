@@ -174,3 +174,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Discharge the existing two-statement slice program's decoder premises from actual raw words. |
 | `Backend/MemoryCopies/PublishedStorage.lean` | Exact fields of the published storage endpoint discharge the existing local execution premise. |
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
+| `Backend/MemoryCopies/CheckedDefault.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/CheckedReferenceInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
