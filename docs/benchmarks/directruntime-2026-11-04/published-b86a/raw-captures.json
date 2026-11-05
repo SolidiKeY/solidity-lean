@@ -1,0 +1,44 @@
+[
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls/control-native-with-guard.strace",
+    "sha256": "9e47563cf844b6d95a4d63b10fe5e01711e1799034683176feda7347f59082c2",
+    "bytes": 1597,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls/control-native-with-guard.strace.gz",
+    "archiveSha256": "f7e26d2f00f917f312c1391b89fab116ea491d9d608c327aff70adf89c31915b"
+  },
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls.log",
+    "sha256": "b440d75e9fca7643d98920daa6dc0ac424c0b5b3215f60931b1574cab1f6e96f",
+    "bytes": 1496,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls.log.gz",
+    "archiveSha256": "33620162f0aff548eb86d05b1de7b03e09bafd4969bf1ca091bd97e69896e2ed"
+  },
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/api.log",
+    "sha256": "bc89c045a03e19e2202856789f923c3aa8eb8d273f2e11c1f0c1cac27f3ce353",
+    "bytes": 1575,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/api.log.gz",
+    "archiveSha256": "9f047fad85fa4ebe5e67ecc526940d7ba6776219a311dc0411ddbb3926f1b670"
+  },
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/mcp.log",
+    "sha256": "a748bd032ca0aa510b444a09a115afbd830679c55305cf783299724fb74c3b37",
+    "bytes": 630,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/mcp.log.gz",
+    "archiveSha256": "9adbb9221587ac6673a538df2bc7f4337e24250dc5b0c89e8bd82c904b94b7d4"
+  },
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/producer-signatures-admission.log",
+    "sha256": "50d4926d3e7fa0912a6e34a0b18ad3fab452abd352c0361eed96f00ce5710be4",
+    "bytes": 644,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/producer-signatures-admission.log.gz",
+    "archiveSha256": "447d9fc88997d17dc5e2f8d207c3eef4118bb486917c95f9084b71f43231b7a6"
+  },
+  {
+    "path": "docs/benchmarks/directruntime-2026-11-04/published-b86a/validation-cache.log",
+    "sha256": "b279620265e3c7907d981754980b118b3a9736bc9d718f5ad965ca903e1f3930",
+    "bytes": 3423,
+    "committedArchive": "docs/benchmarks/directruntime-2026-11-04/published-b86a/validation-cache.log.gz",
+    "archiveSha256": "2d9eb99d2450712ccbd4bb0c370f8a15d6d6742e4d177e88d3c63a57ed49c9f2"
+  }
+]

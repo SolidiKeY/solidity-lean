@@ -1,0 +1,74 @@
+[
+  {
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/published-8495-controls.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls-gate.json",
+    "wallSeconds": 10.21464061801089,
+    "sampledRssPeakBytes": 953704448,
+    "minimumOuterHeadroomBytes": 5330862080
+  },
+  {
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/published-b86a-api.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/api-gate.json",
+    "wallSeconds": 2.015689331004978,
+    "sampledRssPeakBytes": 634511360,
+    "minimumOuterHeadroomBytes": 8482160640
+  },
+  {
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/published-b86a-cache.py"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/cache-pack-gate.json",
+    "wallSeconds": 0.10085993701068219,
+    "sampledRssPeakBytes": 12361728,
+    "minimumOuterHeadroomBytes": 8239378432
+  },
+  {
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/published-b86a-mcp.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/mcp-gate.json",
+    "wallSeconds": 3.7775686630047858,
+    "sampledRssPeakBytes": 998830080,
+    "minimumOuterHeadroomBytes": 8033566720
+  },
+  {
+    "command": [
+      "python3",
+      "tests/directruntime-20261104/native-browser/published-b86a-checks.py"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/metadata-gate.json",
+    "wallSeconds": 1.8114814020082122,
+    "sampledRssPeakBytes": 29290496,
+    "minimumOuterHeadroomBytes": 8413966336
+  },
+  {
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/published-f77-validation.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "evidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/validation-gate.json",
+    "wallSeconds": 2.558105253992835,
+    "sampledRssPeakBytes": 656830464,
+    "minimumOuterHeadroomBytes": 8029196288
+  }
+]

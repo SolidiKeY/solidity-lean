@@ -1,0 +1,825 @@
+{
+  "original": "tests/directruntime-20261104/control-tuples/Controls.sol",
+  "sourceSha256": "11c44271ac2572801215483a7922e984e58b1cd554c289f0bd7bdc679a883ab7",
+  "fixtureSha256": "e916e2b4f1b7192ba07609ed5e4453d71df8321e77926eff9f4cb7be3f1d3464",
+  "compilerHeader": {
+    "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sourceSha256": "11c44271ac2572801215483a7922e984e58b1cd554c289f0bd7bdc679a883ab7",
+    "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+    "source": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls/controls-with-guard/Controls.sol",
+    "provenanceVersion": 1,
+    "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "validationStage": "analysis",
+    "settings": {
+      "viaIR": false,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "libraries": {},
+      "remappings": [],
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ]
+        }
+      }
+    },
+    "acceptedPragmas": [
+      [
+        "solidity",
+        "^",
+        "0.8",
+        ".24"
+      ]
+    ]
+  },
+  "names": [
+    "executeFirst",
+    "whileZero",
+    "continueTest",
+    "breakTest",
+    "earlyReturn",
+    "swap",
+    "declaration",
+    "skipped",
+    "repeated",
+    "aliased",
+    "sideEffect",
+    "inlineArray",
+    "callTuple"
+  ],
+  "expectedControlRequests": 13,
+  "expectedRequestsPerBackend": 14,
+  "positiveHarnessGuard": {
+    "name": "additionSimple",
+    "sourceSha256": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+    "fixtureSha256": "a3a1d147253a7acdcee0e513537ba56d48b4e72ac5eb2bb1fec7e8722336a638",
+    "compilerHeader": {
+      "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sourceSha256": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-b86a/C-controls/controls-with-guard/Wheat.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".34"
+        ]
+      ]
+    },
+    "passed": true
+  },
+  "freshness": {
+    "native": {
+      "sourceFiles": 336,
+      "binarySha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+      "manifestSha256": "c4455410292affdec9a1b988bfffd1ce7205120db64829c63d8465b24fd76865"
+    },
+    "wasm": {
+      "sourceFiles": 336,
+      "binarySha256": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+      "manifestSha256": "04e426100b16b9a6118e66808c2fa6f78cbafb2ead3c7f3467562af16f68b7e8"
+    }
+  },
+  "native": [
+    {
+      "name": "additionSimple",
+      "wireSha256": "9e13419b89cec316ba116c60292f61509e462e70946a03da07ac015db64ba611",
+      "reply": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "executeFirst",
+      "wireSha256": "79884cd0b7dc208e0781e61c5654c71c184ccacb20fb974735c45b95b34653ab",
+      "reply": {
+        "results": [
+          {
+            "function": "executeFirst",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 16,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "whileZero",
+      "wireSha256": "59c35952ba6a86e377c2af829973db314dc292bbf2d341f8f1e611465d044035",
+      "reply": {
+        "results": [
+          {
+            "function": "whileZero",
+            "reading": "solc",
+            "reason": "plain return obligation",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "continueTest",
+      "wireSha256": "da945c86682f9bb6abb2323b28116ba37ed524c02e431a98c7bcf3777d197d50",
+      "reply": {
+        "results": [
+          {
+            "function": "continueTest",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 49,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "breakTest",
+      "wireSha256": "af1d5888303dd0ee4ce5ab6722afc5e1c7daf911dd975b45aebccac1b15d0f37",
+      "reply": {
+        "results": [
+          {
+            "function": "breakTest",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 65,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "earlyReturn",
+      "wireSha256": "02928f34fd8d43b42aeb92665df6774f919082f6dd36b3721c45ca36dc320873",
+      "reply": {
+        "results": [
+          {
+            "function": "earlyReturn",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 76,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "swap",
+      "wireSha256": "5f5e28f1b722e80e92835ca1b35a89e45e17585355a65336d92a0cedcc74efbe",
+      "reply": {
+        "results": [
+          {
+            "function": "swap",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 100,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "declaration",
+      "wireSha256": "bf39c91eb2906f9b6a738ebcc86c3c698377ca0f852d4d1c223e2e2afad1d58f",
+      "reply": {
+        "results": [
+          {
+            "function": "declaration",
+            "reading": "solc",
+            "reason": "tuple declaration",
+            "sourceId": 121,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "skipped",
+      "wireSha256": "a884013d611623cc90172ae4e28177c2e88e764e6dbb4c7b334458612df2a451",
+      "reply": {
+        "results": [
+          {
+            "function": "skipped",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 138,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repeated",
+      "wireSha256": "2788879507ae66ae6b23bb7592f39abfb1e87f21dfdb9122d34ee8aa6d52582d",
+      "reply": {
+        "results": [
+          {
+            "function": "repeated",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 156,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "aliased",
+      "wireSha256": "1d7eb0d2aa34de6349eb4906df237c96ddd52cfbba05c114d2c05af414dace08",
+      "reply": {
+        "results": [
+          {
+            "function": "aliased",
+            "reading": "solc",
+            "reason": "reference declaration",
+            "sourceId": 187,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sideEffect",
+      "wireSha256": "cb07cbc1038b54b369a4b6196d032d354523981f189e4737e56d91e8605f63d3",
+      "reply": {
+        "results": [
+          {
+            "function": "sideEffect",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 211,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "inlineArray",
+      "wireSha256": "8369db5bf412feab41f622105581107403747dd2bcebe2c0749ac25943f37127",
+      "reply": {
+        "results": [
+          {
+            "function": "inlineArray",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported type uint8",
+            "sourceId": 234,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    },
+    {
+      "name": "callTuple",
+      "wireSha256": "05466e6b6a2ad69defe37a526538b28687ddec36c581fb64362b48b4eb7d20c3",
+      "reply": {
+        "results": [
+          {
+            "function": "callTuple",
+            "reading": "solc",
+            "reason": "tuple declaration",
+            "sourceId": 265,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ]
+      }
+    }
+  ],
+  "browser": [
+    {
+      "name": "additionSimple",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "9e13419b89cec316ba116c60292f61509e462e70946a03da07ac015db64ba611",
+      "reply": {
+        "results": [
+          {
+            "function": "additionSimple",
+            "reading": "solc",
+            "reason": "",
+            "sourceId": 55,
+            "status": "proved",
+            "tag": "box",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 382.54500000178814,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "executeFirst",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "79884cd0b7dc208e0781e61c5654c71c184ccacb20fb974735c45b95b34653ab",
+      "reply": {
+        "results": [
+          {
+            "function": "executeFirst",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 16,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 82.25,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "whileZero",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "59c35952ba6a86e377c2af829973db314dc292bbf2d341f8f1e611465d044035",
+      "reply": {
+        "results": [
+          {
+            "function": "whileZero",
+            "reading": "solc",
+            "reason": "plain return obligation",
+            "sourceId": 31,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 110.01000000536442,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "continueTest",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "da945c86682f9bb6abb2323b28116ba37ed524c02e431a98c7bcf3777d197d50",
+      "reply": {
+        "results": [
+          {
+            "function": "continueTest",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 49,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 89.72999998927116,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "breakTest",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "af1d5888303dd0ee4ce5ab6722afc5e1c7daf911dd975b45aebccac1b15d0f37",
+      "reply": {
+        "results": [
+          {
+            "function": "breakTest",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 65,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 16.365000009536743,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "earlyReturn",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "02928f34fd8d43b42aeb92665df6774f919082f6dd36b3721c45ca36dc320873",
+      "reply": {
+        "results": [
+          {
+            "function": "earlyReturn",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported statement",
+            "sourceId": 76,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 17.82999999821186,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "swap",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "5f5e28f1b722e80e92835ca1b35a89e45e17585355a65336d92a0cedcc74efbe",
+      "reply": {
+        "results": [
+          {
+            "function": "swap",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 100,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 81.21500000357628,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "declaration",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "bf39c91eb2906f9b6a738ebcc86c3c698377ca0f852d4d1c223e2e2afad1d58f",
+      "reply": {
+        "results": [
+          {
+            "function": "declaration",
+            "reading": "solc",
+            "reason": "tuple declaration",
+            "sourceId": 121,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 23.099999994039536,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "skipped",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "a884013d611623cc90172ae4e28177c2e88e764e6dbb4c7b334458612df2a451",
+      "reply": {
+        "results": [
+          {
+            "function": "skipped",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 138,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 27.794999986886978,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "repeated",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "2788879507ae66ae6b23bb7592f39abfb1e87f21dfdb9122d34ee8aa6d52582d",
+      "reply": {
+        "results": [
+          {
+            "function": "repeated",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 156,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 84.04500000178814,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "aliased",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "1d7eb0d2aa34de6349eb4906df237c96ddd52cfbba05c114d2c05af414dace08",
+      "reply": {
+        "results": [
+          {
+            "function": "aliased",
+            "reading": "solc",
+            "reason": "reference declaration",
+            "sourceId": 187,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 88.93499998748302,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "sideEffect",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "cb07cbc1038b54b369a4b6196d032d354523981f189e4737e56d91e8605f63d3",
+      "reply": {
+        "results": [
+          {
+            "function": "sideEffect",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported expression",
+            "sourceId": 211,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 24.344999998807907,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "inlineArray",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "8369db5bf412feab41f622105581107403747dd2bcebe2c0749ac25943f37127",
+      "reply": {
+        "results": [
+          {
+            "function": "inlineArray",
+            "reading": "solc",
+            "reason": "compact verifier: unsupported type uint8",
+            "sourceId": 234,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 77.17000000178814,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    },
+    {
+      "name": "callTuple",
+      "boot": {
+        "version": "4.24.0",
+        "kind": "generated-c-wasm",
+        "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+        "wasmBytes": 16378154
+      },
+      "wireSha256": "05466e6b6a2ad69defe37a526538b28687ddec36c581fb64362b48b4eb7d20c3",
+      "reply": {
+        "results": [
+          {
+            "function": "callTuple",
+            "reading": "solc",
+            "reason": "tuple declaration",
+            "sourceId": 265,
+            "status": "unsupported",
+            "tag": "diamond",
+            "verification": "direct"
+          }
+        ],
+        "timings": {
+          "checkSequence": 1,
+          "checkMs": 71.47499999403954,
+          "environmentImports": 0,
+          "backend": "generated-c-wasm"
+        }
+      }
+    }
+  ],
+  "assetRequests": [
+    "http://127.0.0.1:37965/bootstrap.json",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm",
+    "http://127.0.0.1:37965/direct-worker.js",
+    "http://127.0.0.1:37965/direct/build.json",
+    "http://127.0.0.1:37965/direct/direct.js",
+    "http://127.0.0.1:37965/direct/direct.wasm"
+  ],
+  "errors": [],
+  "semanticAcceptanceComplete": false,
+  "identityNonVacuityComplete": false,
+  "boundary": "Freshly compiled current C fixture, real pinned native/WASM requests. The pinned runtime has not integrated the published reader adapters; build freshness is evidenced separately by build receipts. Completion of this inventory is not admission/proof/backend acceptance, and no Identity substitute is used.",
+  "forbiddenNativeLoads": [],
+  "forbiddenBrowserAssets": [],
+  "externalRequests": [],
+  "inventoryCompleted": true
+}

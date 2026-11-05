@@ -1,0 +1,10 @@
+{
+  "gitDiffCheck": "pass",
+  "documentationPaths": {
+    "command": "bash scripts/check-doc-paths.sh",
+    "exitCode": 0,
+    "log": "docs/benchmarks/directruntime-2026-11-04/published-b86a/doc-paths.log.gz"
+  },
+  "workerLeanChanges": [],
+  "finalRuntimeGate": "pending"
+}

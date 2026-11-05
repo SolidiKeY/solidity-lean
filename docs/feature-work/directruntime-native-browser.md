@@ -360,3 +360,26 @@ The two API modules' verified relative build-cache snapshot remains
 coordinator-pending under H41, not a Lake artifact catalog/full dependency pack.
 No VM shipping was attempted. Evidence, actual commands/resources and boundaries:
 [published9584 adoption](../benchmarks/directruntime-2026-11-04/published-9584/README.md).
+
+## Published b86a composition adoption
+
+Merged exact published b86ae456 as 10a22913, preserving this lane. The committed
+Shared.Compose reader combines the existing memory and control callbacks; local
+build, exact definition-axiom inventory and per-file MCP checks pass. Fresh C
+AST admission records9translated/4refused functions and separate root storage
+validation, not function population, source adequacy or proof/runtime support.
+The test artifact adds only IO/error handling around the published API. D adds
+no registered Lean module, theorem, translator or producer edit.
+
+All336 runtime source/generated-C pins and selected build inputs remain current;
+f77 binaries are explicitly reused. Fresh native/browser C requests still give
+13unsupported controls plus a proved scalar harness guard. The private runtime
+consumer and H40 stack repair remain unchanged; exact allocation Identity and
+paired controls, semantic integration, matched post-A benchmark and final full/
+corpus gates remain pending. No new stack test or83benchmark is claimed.
+
+The original executed wrapper is archived; review's exact-target guard suggestion
+was applied and validated independently without rewriting prior evidence. The
+one-module verified build-cache snapshot remains coordinator-pending under H41,
+not a Lake catalog/full dependency pack. Evidence and queue boundaries:
+[publishedb86a inventory](../benchmarks/directruntime-2026-11-04/published-b86a/README.md).

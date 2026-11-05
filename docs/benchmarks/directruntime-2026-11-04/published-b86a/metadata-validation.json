@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "head": "10a2291320c930f644587f828ff45be9a082f675",
+  "publishedBase": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "exactDefinitionAxiomTargetSet": [
+    "Solidity.Frontend.ExecutableAst.Shared.executableExpression",
+    "Solidity.Frontend.ExecutableAst.Shared.executableReader",
+    "Solidity.Frontend.ExecutableAst.Shared.executableStatements"
+  ],
+  "workerLeanChanges": [],
+  "bindings": {
+    "native": {
+      "binary": "/workspace/solidity-lean/.lake/native-browser-f77/native/direct-check",
+      "binarySha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+      "manifestSha256": "c4455410292affdec9a1b988bfffd1ce7205120db64829c63d8465b24fd76865",
+      "currentSourceAndCFilesVerified": 336,
+      "buildInputsVerified": 60,
+      "freshBuildThisTurn": false
+    },
+    "wasm": {
+      "binary": "/workspace/solidity-lean/.lake/native-browser-f77/direct/direct.wasm",
+      "binarySha256": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+      "manifestSha256": "04e426100b16b9a6118e66808c2fa6f78cbafb2ead3c7f3467562af16f68b7e8",
+      "currentSourceAndCFilesVerified": 336,
+      "buildInputsVerified": 308,
+      "freshBuildThisTurn": false
+    }
+  },
+  "wasmBuildMountAliases": {
+    "/emsdk/": "/workspace/solidity-lean/.lake/native-browser-sdk/",
+    "/work/": "/workspace/solidity-lean/.lake/native-browser-wasm/",
+    "/usr/": "/workspace/solidity-lean/.lake/native-browser-sdk-usr/"
+  },
+  "unchangedSinceF77": [
+    "Solidity/Tools/DirectRuntime.lean",
+    "Solidity/Calculus/ReadBounds.lean",
+    "Solidity/Calculus/QueryReadBounds.lean",
+    "web/browser/direct-bridge.c",
+    "tests/directruntime-20261104/control-tuples/Controls.sol"
+  ],
+  "functionAdmissionAccepted": 9,
+  "functionAdmissionRefused": 4,
+  "rootStorageValidationOnly": true,
+  "cachedVerdictsUsed": false,
+  "newBenchmarkOrStackRetest": false,
+  "boundary": "Observed inventory, not a complete expected-admission regression oracle. Reuses revalidated f77 binaries, not new builds. Published composition admission, intrinsic proof and runtime support remain separate."
+}
