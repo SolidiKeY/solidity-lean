@@ -1004,10 +1004,12 @@ Horizon's step proofs take them without new lemmas, except
   fails at the read, not at entry;
 - `b[i]` on `bytes calldata` (`cdByte`): past the length, Panic `0x32`;
 - `x[s:e]`, `x[s:]`, `x[:e]`, `x[:]` (`Typed.slice`, `sliceFrom`,
-  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata` and
-  one-word-element dynamic `calldata` arrays (`STy.sliceable`; `string
-  calldata` slices, and slices of arrays of static multi-word elements,
-  are refused here; solc may accept them, not checked against solc); after evaluating the base, the start and the end (in
+  `sliceTo`, `sliceAll`; `RExpr.slice`; `sliceR`): on `bytes calldata`,
+  `string calldata`, and dynamic `calldata` arrays whose element is
+  statically encoded (`STy.sliceable`, stepping by `STy.cdStride`; solc
+  0.8.38 accepts `string calldata` slices, as its
+  `viaYul/conversion/explicit_string_bytes_calldata_cast.sol` shows; slices
+  of dynamically encoded elements remain refused, solc 2148); after evaluating the base, the start and the end (in
   that order, as solc), `e < s` or a length below `e` reverts with no data
   (solc's `calldata_array_index_range_access`); the slice is a reference at
   the base's type (solc's slice type converts implicitly to it);
