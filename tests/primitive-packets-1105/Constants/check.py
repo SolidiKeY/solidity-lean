@@ -34,6 +34,15 @@ def main():
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],'HEAD'],cwd=ROOT,check=True)
  validate_modules(str(p.relative_to(ROOT)) for p in (ROOT/'Solidity/Backend/PrimitivePackets/Constants').rglob('*.lean'))
  validate_authored()
+ delivery=M['published_delivery']
+ subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],delivery['master']],cwd=ROOT,check=True)
+ subprocess.run(['git','merge-base','--is-ancestor',delivery['master'],'origin/master'],cwd=ROOT,check=True)
+ assert set(delivery['integrated'])|set(delivery['remaining'])==set(M['modules']) and not set(delivery['integrated'])&set(delivery['remaining'])
+ published_root=subprocess.check_output(['git','show',delivery['master']+':Solidity.lean'],cwd=ROOT,text=True)
+ for p,h in delivery['integrated'].items():
+  assert h==M['modules'][p] and hashlib.sha256(subprocess.check_output(['git','show',delivery['master']+':'+p],cwd=ROOT)).hexdigest()==h,'integrated source differs'
+  assert 'import '+p[:-5].replace('/','.')+'\n' in published_root,'published registration absent'
+ for p,h in M['inputs'].items():assert hashlib.sha256(subprocess.check_output(['git','show',delivery['master']+':'+p],cwd=ROOT)).hexdigest()==h,'published read-only API drift'
  for group in ('modules','inputs'):
   for p,h in M[group].items():assert sha(ROOT/p)==h,'source pin '+p
  assert sha(F/'kernel-inventory.json')==M['kernel_inventory_sha256']

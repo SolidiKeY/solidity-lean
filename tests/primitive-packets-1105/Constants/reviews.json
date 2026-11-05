@@ -22,7 +22,12 @@
     "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
     "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
   },
-  "checker_sha256": "07d7b4db6063203e98d6bae9df88243b8dddf31ed971269fb920de4621f9c85c",
-  "manifest_sha256": "2468ab9959f966074292a01d38fd79b33295bdc8173380f4a21a3a0e5bf62938",
-  "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted."
+  "checker_sha256": "a1dd2c41a52be30600979e038010bf5162dc6f9a607855e517c09aa7b1300f24",
+  "manifest_sha256": "f447ac711fb33aede9c2ed102bb9921c740506256b46888ae1839c441d46a14f",
+  "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted.",
+  "publication_review": {
+    "master": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
+    "finder": "PASS: exact Source/Selected published bytes/root imports, remote ancestry,13APIpins, disjoint2/3partition, provenance clear; read-only/noLeanserver.",
+    "skeptic": "PASS: exact integrated subset, other3absent frompublication, sourcepins unchanged, existing scope safeguards retained; read-only/noLeanserver."
+  }
 }
