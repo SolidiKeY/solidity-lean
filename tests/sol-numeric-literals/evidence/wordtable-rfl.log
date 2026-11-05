@@ -1,0 +1,1182 @@
+ERROR 13:9 failed to synthesize
+  Decidable (solWordTable [97, 98, 115, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 13:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [97, 98, 115, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 17:9 failed to synthesize
+  Decidable (solWordTable [97, 110, 111, 110, 121, 109, 111, 117, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 17:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.36 = ?m.36
+but is expected to have type
+  decide (solWordTable [97, 110, 111, 110, 121, 109, 111, 117, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 21:9 failed to synthesize
+  Decidable (solWordTable [97, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 21:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [97, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 25:9 failed to synthesize
+  Decidable (solWordTable [97, 115, 115, 101, 109, 98, 108, 121] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 25:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [97, 115, 115, 101, 109, 98, 108, 121] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 29:9 failed to synthesize
+  Decidable (solWordTable [98, 114, 101, 97, 107] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 29:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [98, 114, 101, 97, 107] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 33:9 failed to synthesize
+  Decidable (solWordTable [99, 97, 108, 108, 100, 97, 116, 97] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 33:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [99, 97, 108, 108, 100, 97, 116, 97] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 37:9 failed to synthesize
+  Decidable (solWordTable [99, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 37:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [99, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 41:9 failed to synthesize
+  Decidable (solWordTable [99, 111, 110, 115, 116, 97, 110, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 41:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [99, 111, 110, 115, 116, 97, 110, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 45:9 failed to synthesize
+  Decidable (solWordTable [99, 111, 110, 115, 116, 114, 117, 99, 116, 111, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 45:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.42 = ?m.42
+but is expected to have type
+  decide (solWordTable [99, 111, 110, 115, 116, 114, 117, 99, 116, 111, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 49:9 failed to synthesize
+  Decidable (solWordTable [99, 111, 110, 116, 105, 110, 117, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 49:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [99, 111, 110, 116, 105, 110, 117, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 53:9 failed to synthesize
+  Decidable (solWordTable [99, 111, 110, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 53:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [99, 111, 110, 116, 114, 97, 99, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 57:9 failed to synthesize
+  Decidable (solWordTable [100, 101, 108, 101, 116, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 57:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [100, 101, 108, 101, 116, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 61:9 failed to synthesize
+  Decidable (solWordTable [100, 111] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 61:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [100, 111] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 65:9 failed to synthesize
+  Decidable (solWordTable [101, 108, 115, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 65:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [101, 108, 115, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 69:9 failed to synthesize
+  Decidable (solWordTable [101, 109, 105, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 69:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [101, 109, 105, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 73:9 failed to synthesize
+  Decidable (solWordTable [101, 110, 117, 109] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 73:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [101, 110, 117, 109] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 77:9 failed to synthesize
+  Decidable (solWordTable [101, 118, 101, 110, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 77:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [101, 118, 101, 110, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 81:9 failed to synthesize
+  Decidable (solWordTable [101, 120, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 81:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [101, 120, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 85:9 failed to synthesize
+  Decidable (solWordTable [102, 97, 108, 108, 98, 97, 99, 107] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 85:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [102, 97, 108, 108, 98, 97, 99, 107] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 89:9 failed to synthesize
+  Decidable (solWordTable [102, 111, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 89:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [102, 111, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 93:9 failed to synthesize
+  Decidable (solWordTable [102, 117, 110, 99, 116, 105, 111, 110] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 93:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [102, 117, 110, 99, 116, 105, 111, 110] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 97:9 failed to synthesize
+  Decidable (solWordTable [104, 101, 120] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 97:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [104, 101, 120] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 101:9 failed to synthesize
+  Decidable (solWordTable [105, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 101:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [105, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 105:9 failed to synthesize
+  Decidable (solWordTable [105, 109, 109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 105:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.36 = ?m.36
+but is expected to have type
+  decide (solWordTable [105, 109, 109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 109:9 failed to synthesize
+  Decidable (solWordTable [105, 109, 112, 111, 114, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 109:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [105, 109, 112, 111, 114, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 113:9 failed to synthesize
+  Decidable (solWordTable [105, 110, 100, 101, 120, 101, 100] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 113:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [105, 110, 100, 101, 120, 101, 100] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 117:9 failed to synthesize
+  Decidable (solWordTable [105, 110, 116, 101, 114, 102, 97, 99, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 117:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.36 = ?m.36
+but is expected to have type
+  decide (solWordTable [105, 110, 116, 101, 114, 102, 97, 99, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 121:9 failed to synthesize
+  Decidable (solWordTable [105, 110, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 121:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [105, 110, 116, 101, 114, 110, 97, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 125:9 failed to synthesize
+  Decidable (solWordTable [105, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 125:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [105, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 129:9 failed to synthesize
+  Decidable (solWordTable [108, 105, 98, 114, 97, 114, 121] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 129:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [108, 105, 98, 114, 97, 114, 121] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 133:9 failed to synthesize
+  Decidable (solWordTable [109, 97, 112, 112, 105, 110, 103] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 133:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [109, 97, 112, 112, 105, 110, 103] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 137:9 failed to synthesize
+  Decidable (solWordTable [109, 101, 109, 111, 114, 121] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 137:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [109, 101, 109, 111, 114, 121] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 141:9 failed to synthesize
+  Decidable (solWordTable [109, 111, 100, 105, 102, 105, 101, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 141:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [109, 111, 100, 105, 102, 105, 101, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 145:9 failed to synthesize
+  Decidable (solWordTable [110, 101, 119] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 145:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [110, 101, 119] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 149:9 failed to synthesize
+  Decidable (solWordTable [111, 118, 101, 114, 114, 105, 100, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 149:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [111, 118, 101, 114, 114, 105, 100, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 153:9 failed to synthesize
+  Decidable (solWordTable [112, 97, 121, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 153:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [112, 97, 121, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 157:9 failed to synthesize
+  Decidable (solWordTable [112, 114, 97, 103, 109, 97] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 157:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [112, 114, 97, 103, 109, 97] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 161:9 failed to synthesize
+  Decidable (solWordTable [112, 114, 105, 118, 97, 116, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 161:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [112, 114, 105, 118, 97, 116, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 165:9 failed to synthesize
+  Decidable (solWordTable [112, 117, 98, 108, 105, 99] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 165:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [112, 117, 98, 108, 105, 99] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 169:9 failed to synthesize
+  Decidable (solWordTable [112, 117, 114, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 169:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [112, 117, 114, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 173:9 failed to synthesize
+  Decidable (solWordTable [114, 101, 99, 101, 105, 118, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 173:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [114, 101, 99, 101, 105, 118, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 177:9 failed to synthesize
+  Decidable (solWordTable [114, 101, 116, 117, 114, 110] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 177:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [114, 101, 116, 117, 114, 110] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 181:9 failed to synthesize
+  Decidable (solWordTable [114, 101, 116, 117, 114, 110, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 181:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [114, 101, 116, 117, 114, 110, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 185:9 failed to synthesize
+  Decidable (solWordTable [115, 116, 111, 114, 97, 103, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 185:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [115, 116, 111, 114, 97, 103, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 189:9 failed to synthesize
+  Decidable (solWordTable [115, 116, 114, 117, 99, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 189:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 116, 114, 117, 99, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 193:9 failed to synthesize
+  Decidable (solWordTable [116, 114, 121] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 193:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [116, 114, 121] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 197:9 failed to synthesize
+  Decidable (solWordTable [116, 121, 112, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 197:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [116, 121, 112, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 201:9 failed to synthesize
+  Decidable (solWordTable [117, 110, 99, 104, 101, 99, 107, 101, 100] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 201:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.36 = ?m.36
+but is expected to have type
+  decide (solWordTable [117, 110, 99, 104, 101, 99, 107, 101, 100] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 205:9 failed to synthesize
+  Decidable (solWordTable [117, 110, 105, 99, 111, 100, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 205:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [117, 110, 105, 99, 111, 100, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 209:9 failed to synthesize
+  Decidable (solWordTable [117, 115, 105, 110, 103] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 209:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [117, 115, 105, 110, 103] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 213:9 failed to synthesize
+  Decidable (solWordTable [118, 105, 101, 119] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 213:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [118, 105, 101, 119] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 217:9 failed to synthesize
+  Decidable (solWordTable [118, 105, 114, 116, 117, 97, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 217:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [118, 105, 114, 116, 117, 97, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 221:9 failed to synthesize
+  Decidable (solWordTable [119, 104, 105, 108, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 221:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [119, 104, 105, 108, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 225:9 failed to synthesize
+  Decidable (solWordTable [97, 100, 100, 114, 101, 115, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 225:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [97, 100, 100, 114, 101, 115, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 229:9 failed to synthesize
+  Decidable (solWordTable [98, 111, 111, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 229:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [98, 111, 111, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 233:9 failed to synthesize
+  Decidable (solWordTable [115, 116, 114, 105, 110, 103] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 233:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 116, 114, 105, 110, 103] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 237:9 failed to synthesize
+  Decidable (solWordTable [119, 101, 105] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 237:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [119, 101, 105] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 241:9 failed to synthesize
+  Decidable (solWordTable [103, 119, 101, 105] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 241:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [103, 119, 101, 105] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 245:9 failed to synthesize
+  Decidable (solWordTable [101, 116, 104, 101, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 245:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [101, 116, 104, 101, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 249:9 failed to synthesize
+  Decidable (solWordTable [115, 101, 99, 111, 110, 100, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 249:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [115, 101, 99, 111, 110, 100, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 253:9 failed to synthesize
+  Decidable (solWordTable [109, 105, 110, 117, 116, 101, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 253:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [109, 105, 110, 117, 116, 101, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 257:9 failed to synthesize
+  Decidable (solWordTable [104, 111, 117, 114, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 257:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [104, 111, 117, 114, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 261:9 failed to synthesize
+  Decidable (solWordTable [100, 97, 121, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 261:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [100, 97, 121, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 265:9 failed to synthesize
+  Decidable (solWordTable [119, 101, 101, 107, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 265:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [119, 101, 101, 107, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 269:9 failed to synthesize
+  Decidable (solWordTable [121, 101, 97, 114, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 269:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [121, 101, 97, 114, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 273:9 failed to synthesize
+  Decidable (solWordTable [116, 114, 117, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 273:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [116, 114, 117, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 277:9 failed to synthesize
+  Decidable (solWordTable [102, 97, 108, 115, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 277:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [102, 97, 108, 115, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 281:9 failed to synthesize
+  Decidable (solWordTable [97, 102, 116, 101, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 281:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [97, 102, 116, 101, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 285:9 failed to synthesize
+  Decidable (solWordTable [97, 108, 105, 97, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 285:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [97, 108, 105, 97, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 289:9 failed to synthesize
+  Decidable (solWordTable [97, 112, 112, 108, 121] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 289:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [97, 112, 112, 108, 121] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 293:9 failed to synthesize
+  Decidable (solWordTable [97, 117, 116, 111] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 293:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [97, 117, 116, 111] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 297:9 failed to synthesize
+  Decidable (solWordTable [98, 121, 116, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 297:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [98, 121, 116, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 301:9 failed to synthesize
+  Decidable (solWordTable [99, 97, 115, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 301:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [99, 97, 115, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 305:9 failed to synthesize
+  Decidable (solWordTable [99, 111, 112, 121, 111, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 305:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [99, 111, 112, 121, 111, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 309:9 failed to synthesize
+  Decidable (solWordTable [100, 101, 102, 97, 117, 108, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 309:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [100, 101, 102, 97, 117, 108, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 313:9 failed to synthesize
+  Decidable (solWordTable [100, 101, 102, 105, 110, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 313:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [100, 101, 102, 105, 110, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 317:9 failed to synthesize
+  Decidable (solWordTable [102, 105, 110, 97, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 317:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [102, 105, 110, 97, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 321:9 failed to synthesize
+  Decidable (solWordTable [105, 109, 112, 108, 101, 109, 101, 110, 116, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 321:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.39 = ?m.39
+but is expected to have type
+  decide (solWordTable [105, 109, 112, 108, 101, 109, 101, 110, 116, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 325:9 failed to synthesize
+  Decidable (solWordTable [105, 110] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 325:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [105, 110] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 329:9 failed to synthesize
+  Decidable (solWordTable [105, 110, 108, 105, 110, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 329:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [105, 110, 108, 105, 110, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 333:9 failed to synthesize
+  Decidable (solWordTable [108, 101, 116] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 333:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [108, 101, 116] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 337:9 failed to synthesize
+  Decidable (solWordTable [109, 97, 99, 114, 111] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 337:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [109, 97, 99, 114, 111] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 341:9 failed to synthesize
+  Decidable (solWordTable [109, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 341:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.24 = ?m.24
+but is expected to have type
+  decide (solWordTable [109, 97, 116, 99, 104] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 345:9 failed to synthesize
+  Decidable (solWordTable [109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 345:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [109, 117, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 349:9 failed to synthesize
+  Decidable (solWordTable [110, 117, 108, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 349:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.21 = ?m.21
+but is expected to have type
+  decide (solWordTable [110, 117, 108, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 353:9 failed to synthesize
+  Decidable (solWordTable [111, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 353:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.15 = ?m.15
+but is expected to have type
+  decide (solWordTable [111, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 357:9 failed to synthesize
+  Decidable (solWordTable [112, 97, 114, 116, 105, 97, 108] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 357:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [112, 97, 114, 116, 105, 97, 108] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 361:9 failed to synthesize
+  Decidable (solWordTable [112, 114, 111, 109, 105, 115, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 361:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [112, 114, 111, 109, 105, 115, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 365:9 failed to synthesize
+  Decidable (solWordTable [114, 101, 102, 101, 114, 101, 110, 99, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 365:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.36 = ?m.36
+but is expected to have type
+  decide (solWordTable [114, 101, 102, 101, 114, 101, 110, 99, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 369:9 failed to synthesize
+  Decidable (solWordTable [114, 101, 108, 111, 99, 97, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 369:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.42 = ?m.42
+but is expected to have type
+  decide (solWordTable [114, 101, 108, 111, 99, 97, 116, 97, 98, 108, 101] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 373:9 failed to synthesize
+  Decidable (solWordTable [115, 101, 97, 108, 101, 100] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 373:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 101, 97, 108, 101, 100] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 377:9 failed to synthesize
+  Decidable (solWordTable [115, 105, 122, 101, 111, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 377:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 105, 122, 101, 111, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 381:9 failed to synthesize
+  Decidable (solWordTable [115, 116, 97, 116, 105, 99] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 381:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 116, 97, 116, 105, 99] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 385:9 failed to synthesize
+  Decidable (solWordTable [115, 117, 112, 112, 111, 114, 116, 115] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 385:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.33 = ?m.33
+but is expected to have type
+  decide (solWordTable [115, 117, 112, 112, 111, 114, 116, 115] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 389:9 failed to synthesize
+  Decidable (solWordTable [115, 119, 105, 116, 99, 104] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 389:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [115, 119, 105, 116, 99, 104] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 393:9 failed to synthesize
+  Decidable (solWordTable [116, 121, 112, 101, 100, 101, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 393:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.30 = ?m.30
+but is expected to have type
+  decide (solWordTable [116, 121, 112, 101, 100, 101, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 397:9 failed to synthesize
+  Decidable (solWordTable [116, 121, 112, 101, 111, 102] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 397:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.27 = ?m.27
+but is expected to have type
+  decide (solWordTable [116, 121, 112, 101, 111, 102] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 401:9 failed to synthesize
+  Decidable (solWordTable [118, 97, 114] ≠ WordClass.tok (Tok.num n))
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 401:27 Application type mismatch: The argument
+  rfl
+has type
+  ?m.18 = ?m.18
+but is expected to have type
+  decide (solWordTable [118, 97, 114] ≠ WordClass.tok (Tok.num n)) = true
+in the application
+  of_decide_eq_true rfl
+ERROR 404:41 (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached
+
+Note: Use `set_option maxHeartbeats <num>` to set the limit.
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+diag: 197 errors

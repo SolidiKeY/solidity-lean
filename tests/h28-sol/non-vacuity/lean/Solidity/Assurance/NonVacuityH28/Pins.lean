@@ -998,6 +998,57 @@ import Solidity.Assurance.NonVacuityH28.VacuityControls
 /-- info: 'Solidity.Assurance.NonVacuityH28.scalar_scope_cost' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.scalar_scope_cost
 
+/-- info: 'Solidity.Assurance.NonVacuityH28.false_loop_stmt_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.false_loop_stmt_source
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_source
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_body_reverts' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_body_reverts
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_input' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_input
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.zero_condition_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.zero_condition_target
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_target
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_demand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_demand
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_cost' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_cost
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_checked
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_joint
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.entered_revert_source' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.entered_revert_source
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.entered_revert_target' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.entered_revert_target
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.entered_revert_input' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.entered_revert_input
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.entered_revert_demand' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.entered_revert_demand
+
+/-- info: 'Solidity.Assurance.NonVacuityH28.entered_revert_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.entered_revert_joint
+
 /-- info: 'Solidity.Assurance.NonVacuityH28.near_end_state' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Assurance.NonVacuityH28.near_end_state
 

@@ -1,0 +1,3006 @@
+import Solidity.Backend.MemoryOps.SourceReferenceGrowthDelete
+import Solidity.Backend.MemoryOps.SourceReferenceGrowthWrite
+import Solidity.Backend.MemoryOps.SourceReferenceRead
+import Solidity.Backend.MemoryOps.SourceReferenceReadSequence
+import Solidity.Backend.MemoryOps.SourceReferenceAliasSequence
+import Solidity.Backend.MemoryOps.SourceReferenceAliasDelete
+import Solidity.Backend.MemoryOps.SourceReferenceAliasReject
+import Solidity.Backend.MemoryOps.SourceRhsAssignment
+import Solidity.Backend.MemoryOps.SourceRhsValue
+import Solidity.Backend.MemoryOps.SourceShortCircuit
+import Solidity.Backend.MemoryOps.SourceReferenceGrowth
+import Solidity.Backend.MemoryOps.SourceMemoryShortCircuit
+import Solidity.Backend.MemoryOps.SourceLocalReferenceOrder
+import Solidity.Backend.MemoryOps.SourceLocalReferenceReject
+import Solidity.Backend.MemoryOps.SourceLocalReferenceDelete
+import Solidity.Backend.MemoryOps.SourceConditional
+import Solidity.Evm.Correct
+import Solidity.Source.SemanticsExamples
+
+/-! Reuses the original owned populated nested fixture, checked against current
+published interfaces. No constructor/heap/copy semantics is reimplemented. -/
+namespace Solidity.Backend.MemoryOps.SourceReferenceReadControls
+open Evm Evm.Memory
+open Source.SemanticsExamples (E0 F0 G0 s0)
+private def C : Contract := {vars := []}
+private abbrev B : RefTy := .array (.prim .bool)
+private abbrev R : RefTy := BoolRefsRef
+private abbrev H : HTy := [B,B,R,R,R]
+private def left : HRef H B := ⟨0,rfl⟩
+private def right : HRef H B := ⟨1,rfl⟩
+private def old : HRef H R := ⟨2,rfl⟩
+private def fresh : HRef H R := ⟨3,rfl⟩
+private def empty : HRef H R := ⟨4,rfl⟩
+private def hp : Heap H := (⟨[true,false,false],by decide⟩,(⟨[false,true,false],by decide⟩,
+  (⟨[left],by decide⟩,(⟨[left,right,left],by decide⟩,(⟨[],by decide⟩,())))))
+private abbrev Γ0 : Ctx := [.mem R,.mem R,.mem R]
+private def σ0 : State C Γ0 := {storage := Storage.init C,H := H,heap := hp,env := (some fresh,(some old,(some old,())))}
+private def base (i : Nat) : Fin W := if i=0 then ⟨16,by decide⟩ else if i=1 then ⟨24,by decide⟩ else if i=2 then ⟨32,by decide⟩ else if i=3 then ⟨36,by decide⟩ else ⟨44,by decide⟩
+private def machine0 : Machine := {Machine.init with stack := [w[42]],mem := fun a =>
+  if a=0 then w[48] else if a=1 then w[32] else if a=2 then w[32] else if a=3 then w[36] else if a=7 then w[99]
+  else if a=16 then w[3] else if a=17 then w[1] else if a=24 then w[3] else if a=26 then w[1]
+  else if a=32 then w[1] else if a=33 then w[16] else if a=36 then w[3] else if a=37 then w[16]
+  else if a=38 then w[24] else if a=39 then w[16] else w[0]}
+private theorem prim_refs {p : PrimTy} (q : HRef H (.array (.prim p))) : p=.bool ∧ (HEq q left ∨ HEq q right) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi;exact ⟨rfl,.inl HEq.rfl⟩
+  | succ i => cases i with
+    | zero => cases hi;exact ⟨rfl,.inr HEq.rfl⟩
+    | succ i => cases i with
+      | zero => cases hi
+      | succ i => cases i with
+        | zero => cases hi
+        | succ i => cases i with
+          | zero => cases hi
+          | succ i => cases hi
+private theorem ref_refs {Q : RefTy} (q : HRef H (.array (.ref Q))) : Q=B ∧ (HEq q old ∨ HEq q fresh ∨ HEq q empty) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi
+  | succ i => cases i with
+    | zero => cases hi
+    | succ i => cases i with
+      | zero => cases hi;exact ⟨rfl,.inl HEq.rfl⟩
+      | succ i => cases i with
+        | zero => cases hi;exact ⟨rfl,.inr (.inl HEq.rfl)⟩
+        | succ i => cases i with
+          | zero => cases hi;exact ⟨rfl,.inr (.inr HEq.rfl)⟩
+          | succ i => cases hi
+private theorem no_struct {s : Name} (q : HRef H (.struct s)) : False := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi
+  | succ i => cases i with
+    | zero => cases hi
+    | succ i => cases i with
+      | zero => cases hi
+      | succ i => cases i with
+        | zero => cases hi
+        | succ i => cases i with
+          | zero => cases hi
+          | succ i => cases hi
+private theorem left_repr : ArrayRepr hp left (base left.id) machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using (show 16+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,left,MObj.elems_dyn] using (show machine0.mem 16=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem right_repr : ArrayRepr hp right (base right.id) machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn] using (show 24+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,right,MObj.elems_dyn] using (show machine0.mem 24=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem old_repr : RefArrayRepr hp old base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,old,MObj.elems_dyn] using (show 32+1+1≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,old,MObj.elems_dyn] using (show machine0.mem 32=.val (wmod 1) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases hi
+private theorem fresh_repr : RefArrayRepr hp fresh base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using (show 36+1+3≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] using (show machine0.mem 36=.val (wmod 3) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn] at hi
+    cases i with
+    | zero => cases Option.some.inj hi;rfl
+    | succ i => cases i with
+      | zero => cases Option.some.inj hi;rfl
+      | succ i => cases i with
+        | zero => cases Option.some.inj hi;rfl
+        | succ i => cases hi
+private theorem empty_repr : RefArrayRepr hp empty base machine0 := by
+  refine ⟨?_,?_,?_⟩
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn] using (show 44+1+0≤W from by decide)
+  · simpa only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn] using (show machine0.mem 44=.val (wmod 0) from rfl)
+  · intro i v hi
+    simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn] at hi
+    cases hi
+private theorem initial_state0 : StateRepr 1 1 8 (Frag.init Γ0) σ0 base machine0 := by
+  have hc := Sim.init C 0 W_pos (fun _ => 0) ⟨0,W_pos⟩ rfl
+  refine ⟨?_,?_,?_,by decide,?_,?_,RefFieldsRepr.withoutStructs _ _ _ (fun q => no_struct q)⟩
+  · refine ⟨hc.store,?_,?_,hc.net,hc.netSelf,hc.bound,?_,hc.env,hc.funds,hc.oracle⟩
+    all_goals intro p i;cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+  · refine ⟨?_,?_,?_⟩
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      · exact left_repr
+      · exact right_repr
+    · intro p q;obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq <;> decide
+    · intro p t q z hne
+      obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+      all_goals obtain ⟨rfl,hz|hz⟩ := prim_refs z <;> cases hz
+      all_goals first | exact (hne rfl).elim | (simp only [Heap.len,Heap.get,left,right,MObj.elems_dyn] <;> decide)
+  · intro Q i
+    cases i with
+    | here => exact ⟨fresh,rfl,rfl⟩
+    | there i => cases i with
+      | here => exact ⟨old,rfl,rfl⟩
+      | there i => cases i with
+        | here => exact ⟨old,rfl,rfl⟩
+        | there i => nomatch i
+  · exact ⟨fun q => (no_struct q).elim,fun q => (no_struct q).elim,fun q _ _ => (no_struct q).elim⟩
+  · intro p s arr q;exact (no_struct q).elim
+private theorem initial_refs0 : RefArrayHeapRepr hp base 8 machine0 := by
+  constructor
+  · intro Q q;obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    · exact old_repr
+    · exact fresh_repr
+    · exact empty_repr
+  · intro Q q;obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq <;> decide
+  · intro Q T q t hne
+    obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    all_goals obtain ⟨rfl,ht|ht|ht⟩ := ref_refs t <;> cases ht
+    all_goals first | exact (hne rfl).elim | (simp only [Heap.len,Heap.get,Objs.get,hp,old,fresh,empty,MObj.elems_dyn] <;> decide)
+  · intro Q p q t
+    obtain ⟨rfl,ht|ht⟩ := prim_refs t <;> cases ht
+    all_goals obtain ⟨rfl,hq|hq|hq⟩ := ref_refs q <;> cases hq
+    all_goals right;simp only [Heap.len,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn] <;> decide
+  · intro Q s q t;exact (no_struct t).elim
+private abbrev Γ : Ctx := [.val .uint,.val .uint,.mem R,.mem R,.mem R]
+private def σ1 := σ0.push (t := .val .uint) (uintOfNat 1)
+private def σ := σ1.push (t := .val .uint) (uintOfNat 0)
+private def machine1 := writeMachine machine0 4 w[1]
+private def machine := writeMachine machine1 5 w[0]
+private def frag := (((Frag.init Γ0).push (.val .uint) .ok).push (.val .uint) .ok)
+private theorem initial_repr : RefArrayStateRepr 1 1 8 frag σ base machine := by
+  have h1 := initial_state0.consVal (uintOfNat 1) w[1] (ReprV.uint_of rfl) (by decide)
+  have h2 := h1.consVal (uintOfNat 0) w[0] (ReprV.uint_of rfl) (by decide)
+  exact ⟨h2,(initial_refs0.localWrite 4 (by decide) w[1]).localWrite 5 (by decide) w[0]⟩
+
+private abbrev SB : Source.STy := .array .memory .bool none
+private abbrev SR : Source.STy := SourceBoolRefsTy
+private abbrev SΓ : Source.RCtx := [.int .u256,.int .u256,SR,SR,SR]
+private def addresses (i : Nat) := i
+private def pdata (rs : List (HRef H B)) : Source.Data E0.layout SR := sourceBoolRefMemory addresses rs
+private def y0 : Source.EMState E0 [] := (.nil,s0)
+private def yl : Source.EMState E0 [] := ((Source.allocRef (sourceBoolMemory [true,false,false])).run y0).2
+private def yr : Source.EMState E0 [] := ((Source.allocRef (sourceBoolMemory [false,true,false])).run yl).2
+private def yo : Source.EMState E0 [] := ((Source.allocRef (pdata [left])).run yr).2
+private def yn : Source.EMState E0 [] := ((Source.allocRef (pdata [left,right,left])).run yo).2
+private def ye : Source.EMState E0 [] := ((Source.allocRef (pdata [])).run yn).2
+private def sy : Source.EMState E0 SΓ :=
+  (.cons (sourceUint (uintOfNat 0)) (.cons (sourceUint (uintOfNat 1))
+    (.cons (.memRef rfl 3) (.cons (.memRef rfl 2) (.cons (.memRef rfl 2) .nil)))),ye.2)
+private abbrev SH : Source.HeapTy := (Source.Heap.empty (D := E0.layout)).ty
+private theorem left_memOK : Source.MemOK E0 SH yl := by
+  have hm : Source.MemOK E0 SH y0 :=
+    ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
+  have h := source_bool_alloc_memOK (E := E0) (Γ := []) SH [true,false,false] y0 hm
+  have he : (Source.allocRef (E := E0) (Γ := []) (sourceBoolMemory [true,false,false])).run y0=(.ok (.memRef rfl 0),yl) := rfl
+  rw [he] at h;exact h.1
+private theorem right_memOK : Source.MemOK E0 SH yr := by
+  have h := source_bool_alloc_memOK (E := E0) (Γ := []) SH [false,true,false] yl left_memOK
+  have he : (Source.allocRef (E := E0) (Γ := []) (sourceBoolMemory [false,true,false])).run yl=(.ok (.memRef rfl 1),yr) := rfl
+  rw [he] at h;exact h.1
+private theorem alloc_parent_keep (y : Source.EMState E0 []) (rs : List (HRef H B))
+    (hm : Source.MemOK E0 SH y) (h0 : y.2.heap.ty 0=some SB) (h1 : y.2.heap.ty 1=some SB) :
+    Source.MemOK E0 SH ((Source.allocRef (pdata rs)).run y).2 := by
+  have hd : Source.DataOK E0 y.2.heap.ty (pdata rs) := by
+    apply Source.DataOK.array
+    intro j
+    apply Source.DataOK.val
+    obtain ⟨_,hq|hq⟩ := prim_refs rs[j]
+    · have he : rs[j]=left := eq_of_heq hq
+      rw [he]
+      exact ⟨SB,h0,rfl⟩
+    · have he : rs[j]=right := eq_of_heq hq
+      rw [he]
+      exact ⟨SB,h1,rfl⟩
+  have h := Source.allocRef_mem' (E := E0) (Γ := []) (H := SH) (pdata rs) (by trivial)
+    (by intro j;exact ⟨.memRef rfl (addresses rs[j].id),rfl⟩) y ⟨hm,hd⟩
+  have he : (Source.allocRef (E := E0) (Γ := []) (pdata rs)).run y=
+      (.ok (.memRef rfl y.2.heap.next),(y.1,{y.2 with heap := (y.2.heap.alloc ⟨SR,pdata rs⟩).1})) := rfl
+  rw [he] at h
+  exact h.1
+private theorem old_memOK : Source.MemOK E0 SH yo := alloc_parent_keep yr [left] right_memOK rfl rfl
+private theorem new_memOK : Source.MemOK E0 SH yn := alloc_parent_keep yo [left,right,left] old_memOK rfl rfl
+private theorem empty_memOK : Source.MemOK E0 SH ye := alloc_parent_keep yn [] new_memOK rfl rfl
+private theorem source_memOK : Source.MemOK E0 SH sy := by
+  refine ⟨⟨empty_memOK.1.1,?_⟩,empty_memOK.2⟩
+  exact ⟨trivial,⟨trivial,⟨⟨SR,rfl,rfl⟩,⟨⟨SR,rfl,rfl⟩,⟨⟨SR,rfl,rfl⟩,trivial⟩⟩⟩⟩⟩
+private theorem left_at : SourceBoolMemoryAt sy 0 hp left .dyn := by
+  unfold SourceBoolMemoryAt
+  simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn]
+  rfl
+private theorem right_at : SourceBoolMemoryAt sy 1 hp right .dyn := by
+  unfold SourceBoolMemoryAt
+  simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn]
+  rfl
+private theorem old_at : SourceBoolRefsAt sy 2 hp old addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,old,MObj.elems_dyn,List.mem_cons,List.not_mem_nil,or_false] at hq
+    subst q;exact left_at
+private theorem fresh_at : SourceBoolRefsAt sy 3 hp fresh addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.mem_cons,List.not_mem_nil,or_false] at hq
+    rcases hq with hq|hq|hq <;> subst q
+    · exact left_at
+    · exact right_at
+    · exact left_at
+private theorem empty_at : SourceBoolRefsAt sy 4 hp empty addresses := by
+  refine ⟨?_,?_⟩
+  · simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn];rfl
+  · intro q hq
+    simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn,List.not_mem_nil] at hq
+
+
+private def ssrc : Source.Idx SΓ SR := .there (.there .here)
+private def sdst : Source.Idx SΓ SR := .there (.there (.there .here))
+private def backup : Source.Idx SΓ SR := .there (.there (.there (.there .here)))
+private def si : Source.Idx SΓ (.int .u256) := .there .here
+private def sj : Source.Idx SΓ (.int .u256) := .here
+private def tsrc : Idx Γ (.mem R) := .there (.there .here)
+private def tdst : Idx Γ (.mem R) := .there (.there (.there .here))
+
+private theorem nallocator0 : StructAllocatorRepr σ0.heap base 8 ⟨48,by decide⟩ machine0 := by
+  apply AllocatorRepr.withoutStructs _ (fun q => no_struct q)
+  refine ⟨initial_state0.heap,?_,?_⟩
+  · refine ⟨by decide,by decide,rfl,?_⟩
+    intro addr ha
+    change 48≤addr at ha
+    change (if addr=0 then w[48] else if addr=1 then w[32] else if addr=2 then w[32] else if addr=3 then w[36] else if addr=7 then w[99]
+      else if addr=16 then w[3] else if addr=17 then w[1] else if addr=24 then w[3] else if addr=26 then w[1]
+      else if addr=32 then w[1] else if addr=33 then w[16] else if addr=36 then w[3] else if addr=37 then w[16]
+      else if addr=38 then w[24] else if addr=39 then w[16] else w[0])=w[0]
+    rw [if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),
+      if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega),if_neg (by omega)]
+  · intro p q
+    obtain ⟨rfl,hq|hq⟩ := prim_refs q <;> cases hq
+    all_goals simp only [σ0,Heap.len,Heap.get,Objs.get,hp,left,right,base,MObj.elems_dyn] <;> decide
+private theorem allocator : StructAllocatorRepr σ.heap base 8 ⟨48,by decide⟩ machine :=
+  (nallocator0.localWrite 4 (by decide) (by decide) w[1]).localWrite 5 (by decide) (by decide) w[0]
+
+private def dref (self : Bool) := if self then fresh else old
+private def daddr (self : Bool) := if self then 3 else 2
+private def ds (self : Bool) : Source.Idx SΓ SR := if self then ssrc else sdst
+private def dt (self : Bool) : Idx Γ (.mem R) := if self then tsrc else tdst
+private def ti : Idx Γ (.val .uint) := .here
+private def tj : Idx Γ (.val .uint) := .there .here
+private def postHeap (self : Bool) := hp.set (dref self) (MObj.setElem .dyn (hp.get (dref self)) 0 right)
+private def postWord (self : Bool) := writeMachine machine ((base (dref self).id).val+1) (.val (base right.id))
+private theorem dat (self : Bool) : SourceBoolRefsAt sy (daddr self) hp (dref self) addresses := by
+  cases self
+  · exact old_at
+  · exact fresh_at
+private theorem dhi (self : Bool) : 0<hp.len (dref self) .dyn := by
+  cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn] <;> decide
+
+/-- The RHS has no child-reference local. Actual INITIAL fresh-parent[1]
+selects RIGHT, changes the old-parent slot (or the same parent), and retains
+both old child contents, locals, allocation cursor and all external frames. -/
+theorem computed_reference_client (p : Roadmap.Pipeline) (fuel nps : Nat) (self : Bool) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign (ds self) ssrc sj si)).run sy=
+        (.ok (.val (.memRef rfl 1)),z) ∧
+      (Source.execS (G0 p) F0 (fuel+5) nps none (.expr (sourceReferenceReadAssign (ds self) ssrc sj si) :
+        Source.RStmt E0 [] false .body SΓ SΓ) sy.1).run (.nil,sy.2)=(.ok (.normal sy.1),(.nil,z.2)) ∧
+      Stmt.run σ (.assignMem (.index .dyn (.var (dt self) rfl) (.simple (.local ti)))
+        (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))))=
+          .ok ⟨σ.withHeap (postHeap self),List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj) machine=.ok (postWord self) 0 ∧
+      SourceBoolRefsAt z (daddr self) (postHeap self) (dref self) addresses ∧ Source.MemOK E0 SH z ∧
+      RefArrayStateRepr 1 1 8 frag (σ.withHeap (postHeap self)) base (postWord self) ∧
+      SourceBoolMemoryAt z 0 (postHeap self) left .dyn ∧ SourceBoolMemoryAt z 1 (postHeap self) right .dyn ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧
+      (∀ q : HRef H B,(postHeap self).get q=hp.get q) ∧
+      (∀ {Q : RefTy} (q : HRef H Q),(dref self).id≠q.id → (postHeap self).get q=hp.get q) ∧
+      (∀ a,a≠daddr self → z.2.heap.get a=sy.2.heap.get a) ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap self) base 8 ⟨48,by decide⟩ (postWord self) ∧
+      (postWord self).stack=[w[42]] := by
+  have result := (dat self).computed_reference_assign_word (G0 p) F0 fuel nps sy σ (dref self) fresh
+    (daddr self) 3 addresses fresh_at (ds self) ssrc sj si (dt self) tsrc ti tj ⟨0,by decide⟩ ⟨1,by decide⟩
+    (by cases self <;> rfl) rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl
+    (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide) SH source_memOK initial_repr
+  obtain ⟨out,z,hit,child,hw,read,expr,stmt,native,word,hr,mok,represented,locals,elems,children,sourceChildren,other,addrs,next,effects,alloc⟩ := result
+  have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+  simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at hw expr word represented alloc
+  have known : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+    rfl
+  have outEq : out=postHeap self := Option.some.inj (hw.symm.trans known)
+  subst out
+  refine ⟨z,expr,stmt,native,word,hr,mok,represented,sourceChildren left left_at,sourceChildren right right_at,locals,next,children,other,addrs,effects,?_,rfl⟩
+  apply alloc ⟨48,by decide⟩ allocator
+  cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn,base] <;> decide
+
+private def cells : List Nat := [0,1,2,3,4,5,6,7,16,17,18,19,24,25,26,27,32,33,36,37,38,39,44,45]
+private def words (m : Machine) := cells.map m.mem
+private def views (h : Heap H) := (MObj.elems .dyn (h.get left),MObj.elems .dyn (h.get right),
+  (MObj.elems .dyn (h.get old)).map HRef.id,(MObj.elems .dyn (h.get fresh)).map HRef.id,(MObj.elems .dyn (h.get empty)).map HRef.id)
+private def sourceViews (y : Source.EMState E0 SΓ) := [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def expectedSource (self : Bool) : List (Option (Σ τ : Source.STy, Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+   some ⟨SR,pdata (if self then [left] else [right])⟩,
+   some ⟨SR,pdata (if self then [right,right,left] else [left,right,left])⟩,some ⟨SR,pdata []⟩]
+private theorem post_elems (self : Bool) :
+    MObj.elems .dyn ((postHeap self).get (dref self))=(if self then [left,right,left] else [left]).set 0 right := by
+  unfold postHeap
+  rw [Heap.get_set_same,MObj.elems_setElem]
+  cases self <;> rw [MObj.elems_dyn] <;> rfl
+
+/-- All five native objects and every represented word are ordered observations,
+including source sharing, empty parent, untouched children, guard/free-pointer,
+and retained root-alias cells. -/
+theorem complete_reference_vectors (self : Bool) :
+    words machine=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (postWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    sourceViews sy=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    (postWord self).mem 0=w[48] ∧ (postWord self).stack=[w[42]] := by
+  cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+  all_goals
+    refine ⟨rfl,rfl,?_,?_,rfl,rfl,rfl⟩
+    · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+    · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil]
+      rfl
+
+private theorem source_tables (self : Bool) (z : Source.EMState E0 SΓ)
+    (hr : SourceBoolRefsAt z (daddr self) (postHeap self) (dref self) addresses)
+    (other : ∀ a,a≠daddr self → z.2.heap.get a=sy.2.heap.get a) : sourceViews z=expectedSource self := by
+  have hp := hr.parent
+  rw [post_elems] at hp
+  cases self
+  · change z.2.heap.get 2=some ⟨SR,pdata [right]⟩ at hp
+    unfold sourceViews expectedSource
+    rw [hp,other 0 (by decide),other 1 (by decide),other 3 (by decide),other 4 (by decide)]
+    rfl
+  · change z.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at hp
+    unfold sourceViews expectedSource
+    rw [hp,other 0 (by decide),other 1 (by decide),other 2 (by decide),other 4 (by decide)]
+    rfl
+
+/-- The SAME executed assignment reaches RIGHT's false inner value; the retained
+LEFT object still reads true. Complete Source tables and no fresh address5
+show existing identity replacement rather than payload copy/allocation. -/
+theorem computed_reference_observations (p : Roadmap.Pipeline) (fuel nps : Nat) (self : Bool) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign (ds self) ssrc sj si)).run sy=
+        (.ok (.val (.memRef rfl 1)),z) ∧ sourceViews z=expectedSource self ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (.indexArray (.indexArray (.local (ds self)) (.local sj) rfl) (.local sj) rfl)).run z=
+        (.ok (.val (.bool false)),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool true),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 1 0)).run z=(.ok (.bool false),z) ∧
+      (postHeap self).index (dref self) .dyn (uintOfNat 0)=some right ∧
+      (postHeap self).index right .dyn (uintOfNat 0)=some false ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  obtain ⟨z,expr,stmt,native,word,hr,mok,represented,hl,hright,locals,next,children,other,addrs,effects,alloc,stack⟩ :=
+    computed_reference_client p fuel nps self
+  have leftRead : (postHeap self).index left .dyn (uintOfNat 0)=some true := by
+    simp only [Heap.index,children left,MObj.elems_dyn]
+    rfl
+  have rightRead : (postHeap self).index right .dyn (uintOfNat 0)=some false := by
+    simp only [Heap.index,children right,MObj.elems_dyn]
+    rfl
+  have selected : (postHeap self).index (dref self) .dyn (uintOfNat 0)=some right := by
+    change (MObj.elems .dyn ((postHeap self).get (dref self)))[(uintOfNat 0).val.toNat]?=some right
+    rw [post_elems]
+    cases self <;> rfl
+  have nested := hr.eval_nested_read (G0 p) F0 fuel (ds self) sj sj (uintOfNat 0) (uintOfNat 0) right false
+    (by rw [locals];cases self <;> rfl) (by rw [locals];rfl) (by rw [locals];rfl) selected rightRead
+  have lr := (hl.read_iff F0 (uintOfNat 0) true).mpr leftRead
+  have rr := (hright.read_iff F0 (uintOfNat 0) false).mpr rightRead
+  refine ⟨z,expr,source_tables self z hr addrs,nested,lr,rr,selected,rightRead,locals,next,?_,effects⟩
+  rw [addrs 5 (by cases self <;> decide)]
+  rfl
+
+/-- Actual initial RHS reads distinguish the supported selected index/parent
+from stale-parent or wrong-index selection. Whole output word vectors differ
+from an omitted redirect, although both child payloads are unchanged. -/
+theorem wrong_reference_negative (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local ssrc) (.local si) rfl)).run sy=
+      (.ok (.val (.memRef rfl 1)),sy) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local ssrc) (.local sj) rfl)).run sy=
+      (.ok (.val (.memRef rfl 0)),sy) ∧
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local sdst) (.local sj) rfl)).run sy=
+      (.ok (.val (.memRef rfl 0)),sy) ∧
+    words (postWord false)≠words machine ∧ words (postWord true)≠words machine := by
+  have f1 : hp.index fresh .dyn (uintOfNat 1)=some right := by rw [Heap.index,MObj.elems_dyn];rfl
+  have f0 : hp.index fresh .dyn (uintOfNat 0)=some left := by rw [Heap.index,MObj.elems_dyn];rfl
+  have o0 : hp.index old .dyn (uintOfNat 0)=some left := by rw [Heap.index,MObj.elems_dyn];rfl
+  refine ⟨fresh_at.eval_parent_read (G0 p) F0 fuel ssrc si (uintOfNat 1) right rfl rfl f1,
+    fresh_at.eval_parent_read (G0 p) F0 fuel ssrc sj (uintOfNat 0) left rfl rfl f0,
+    old_at.eval_parent_read (G0 p) F0 fuel sdst sj (uintOfNat 0) left rfl rfl o0,?_,?_⟩
+  · intro h
+    have x := congrArg (fun v => v[17]?) h
+    change some w[24]=some w[16] at x
+    cases x
+  · intro h
+    have x := congrArg (fun v => v[19]?) h
+    change some w[24]=some w[16] at x
+    cases x
+
+private def emptySource : Source.EMState E0 SΓ := (sy.1.set ssrc (.memRef rfl 4),sy.2)
+private def emptyState := σ.setLocal tsrc (some empty)
+private def emptyWord := writeMachine machine (cellOf 1 tsrc) (.val (base empty.id))
+private theorem emptySourceOK : Source.MemOK E0 SH emptySource := by
+  have h := Source.writeLoc_memOK (E := E0) (Γ := SΓ) (H := SH) F0 0 (.local ssrc)
+    (.memRef rfl 4) sy ⟨source_memOK,⟨SR,rfl,rfl⟩⟩
+  exact h
+
+/-- A genuinely represented literal empty parent rejects index0 before LHS
+execution. Source panic/state and erased native/word failure outcomes stay
+separate; no successful suffix, post-revert machine or rollback is invented. -/
+theorem empty_reference_rejection (p : Roadmap.Pipeline) (fuel : Nat) :
+    Source.MemOK E0 SH emptySource ∧
+    RefArrayStateRepr 1 1 8 frag emptyState base emptyWord ∧
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc sj sj)).run emptySource=
+      (.error (.revert (Source.panicData .index)),emptySource) ∧
+    Stmt.run emptyState (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))))=.error .revert ∧
+    run (referenceReadWriteCode (C := C) 1 tdst tsrc ti ti) emptyWord=.revert := by
+  have hr : SourceBoolRefsAt emptySource 4 hp empty addresses := ⟨empty_at.parent,empty_at.children⟩
+  have source := hr.computed_reference_rhs_bounds (G0 p) F0 (fuel+1) sdst ssrc sj sj (uintOfNat 0) rfl rfl
+    (by simp only [Heap.len,MObj.elems_dyn];decide)
+  have represented : RefArrayStateRepr 1 1 8 frag emptyState base emptyWord := initial_repr.setMem tsrc empty
+  have badPath : (MPath.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))) : MPath C Γ (.ref B)).mvalT emptyState=.error .revert := by
+    simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,
+      show TEnv.get tsrc emptyState.env=some empty from rfl,
+      show TEnv.get ti emptyState.env=uintOfNat 0 from rfl,Heap.readAddr,Heap.index,MObj.elems_dyn,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    rfl
+  have native : TRun.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))) emptyState=.error .revert := by
+    simp only [TRun.assignMem,MSrc.mvalT]
+    rw [badPath]
+    rfl
+  have rhs : RefPtrFrag (C := C) 1 frag (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))
+      ([.mload (cellOf 1 tsrc)] ++ compileVal 1 (.simple (.local ti) : Val C Γ .uint) ++ readArrayStackCode) :=
+    .index (.var tsrc rfl) _ (.local tsrc rfl) _ rfl
+  have whole := RefPtrFrag.writeReference represented (RefPtrFrag.local tdst rfl) rhs (.simple (.local ti)) rfl
+  rw [native] at whole
+  refine ⟨emptySourceOK,represented,source,native,?_⟩
+  rcases whole with ⟨o,t,impossible,_⟩ | ⟨_,run⟩
+  · cases impossible
+  · exact run
+
+/-- True destination endpoint1 is independently invalid while RHS fresh[1]
+successfully reads the existing right child. The source state is unchanged. -/
+theorem destination_reference_rejection (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc si si)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) ∧
+    Stmt.run σ (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local tj)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))))=.error .revert ∧
+    run (referenceReadWriteCode (C := C) 1 tdst tsrc tj tj) machine=.revert := by
+  have hq : hp.index fresh .dyn (uintOfNat 1)=some right := by rw [Heap.index,MObj.elems_dyn];rfl
+  have loc : (Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local sdst) (by decide) (.local si) rfl)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) := by
+    rw [Source.evalLoc,Source.Hoare.run_bind,source_local_value_run (G0 p) F0 (fuel+1) sy sdst (.memRef rfl 2) rfl]
+    change ((Source.evalE (G0 p) F0 (fuel+2) (.local si)) >>= fun v => Source.indexNat v >>= fun k =>
+      Source.indexLoc F0 (.memRef rfl 2 : Source.Val E0.layout SR) k).run sy=_
+    rw [Source.Hoare.run_bind,source_local_value_run (G0 p) F0 (fuel+1) sy si _ rfl]
+    change (Source.indexLoc F0 (.memRef rfl 2 : Source.Val E0.layout SR) (uintOfNat 1).val.toNat).run sy=_
+    exact old_at.indexLoc_bounds F0 _ (by simp only [Heap.len,MObj.elems_dyn];decide)
+  have source : (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc si si)).run sy=
+      (.error (.revert (Source.panicData .index)),sy) := by
+    rw [sourceReferenceReadAssign,Source.evalE,Source.Hoare.run_bind,
+      fresh_at.eval_parent_read (G0 p) F0 (fuel+1) ssrc si (uintOfNat 1) right rfl rfl hq]
+    change ((Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local sdst) (by decide) (.local si) rfl)) >>=
+      fun l => Source.writeLoc F0 (fuel+3) l (.memRef rfl 1) >>= fun _ => pure (Source.RVal.val (.memRef rfl 1))).run sy=_
+    rw [Source.Hoare.run_bind,loc]
+  have hqState : σ.heap.index fresh .dyn (uintOfNat 1)=some right := hq
+  have path : (MPath.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))) : MPath C Γ (.ref B)).mvalT σ=.ok right := by
+    simp only [MPath.mvalT,MLoc.addrT,Val.evalT,Simple.evalT,
+      show TEnv.get tsrc σ.env=some fresh from rfl,show TEnv.get tj σ.env=uintOfNat 1 from rfl,
+      Heap.readAddr,hqState,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have fail : σ.heap.writeAddr (.index old .dyn (uintOfNat 1)) right=none := by
+    change hp.setIndex old .dyn (uintOfNat 1) right=none
+    unfold Heap.setIndex
+    rw [MObj.elems_dyn]
+    exact if_neg (by decide)
+  have native : TRun.assignMem (.index .dyn (.var tdst rfl) (.simple (.local tj)))
+      (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))) σ=.error .revert := by
+    simp only [TRun.assignMem,MSrc.mvalT]
+    rw [path]
+    simp only [MLoc.addrT,MPath.mvalT,Val.evalT,Simple.evalT,
+      show TEnv.get tdst σ.env=some old from rfl,show TEnv.get tj σ.env=uintOfNat 1 from rfl,
+      fail,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+  have rhs : RefPtrFrag (C := C) 1 frag (.loc (.index .dyn (.var tsrc rfl) (.simple (.local tj))))
+      ([.mload (cellOf 1 tsrc)] ++ compileVal 1 (.simple (.local tj) : Val C Γ .uint) ++ readArrayStackCode) :=
+    .index (.var tsrc rfl) _ (.local tsrc rfl) _ rfl
+  have whole := RefPtrFrag.writeReference initial_repr (RefPtrFrag.local tdst rfl) rhs (.simple (.local tj)) rfl
+  rw [native] at whole
+  refine ⟨source,native,?_⟩
+  rcases whole with ⟨o,t,impossible,_⟩ | ⟨_,run⟩
+  · cases impossible
+  · exact run
+
+/-- Insufficient expression horizon times out before the pointer read/write.
+This is an evaluator observation, not a target halt or rollback theorem. -/
+theorem reference_read_timeout (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) F0 2 (sourceReferenceReadAssign sdst ssrc sj si)).run sy=(.error .timeout,sy) := by
+  cases p <;> rfl
+
+/-- Selecting the already stored LEFT from fresh[0] is an executed same-pointer
+no-op on every object table and represented word, not a deep-copy operation. -/
+theorem same_pointer_noop (p : Roadmap.Pipeline) (fuel nps : Nat) :
+    ∃ z : Source.EMState E0 SΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceReferenceReadAssign sdst ssrc sj sj)).run sy=(.ok (.val (.memRef rfl 0)),z) ∧
+      Stmt.run σ (.assignMem (.index .dyn (.var tdst rfl) (.simple (.local ti)))
+        (.ref (.loc (.index .dyn (.var tsrc rfl) (.simple (.local ti))))))=.ok ⟨σ.withHeap hp,List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 tdst tsrc ti ti) machine=.ok (writeMachine machine 33 w[16]) 0 ∧
+      sourceViews z=sourceViews sy ∧ words (writeMachine machine 33 w[16])=words machine ∧
+      z.1=sy.1 ∧ z.2.heap.next=5 ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  have result := old_at.computed_reference_assign_word (G0 p) F0 fuel nps sy σ old fresh 2 3 addresses fresh_at
+    sdst ssrc sj sj tdst tsrc ti ti ⟨0,by decide⟩ ⟨0,by decide⟩
+    rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide)
+    (by simp only [Heap.len,MObj.elems_dyn];decide) SH source_memOK initial_repr
+  obtain ⟨out,z,hit,child,hw,read,expr,stmt,native,word,hr,mok,represented,locals,elems,children,sourceChildren,other,addrs,next,effects,alloc⟩ := result
+  have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+  simp only [srcElems,List.getElem_cons_zero] at hw expr word
+  have known : hp.writeAddr (.index old .dyn (indexValue ⟨0,by decide⟩)) left=some hp := by
+    simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,Heap.get,Objs.get,hp,old,MObj.elems_dyn,MObj.setElem_dyn,Heap.set,Objs.set]
+    simp only [show 0<[left].length from by decide,↓reduceIte,List.set]
+  have equal : out=hp := Option.some.inj (hw.symm.trans known)
+  subst out
+  refine ⟨z,expr,native,word,?_,rfl,locals,next,effects⟩
+  have parent : z.2.heap.get 2=sy.2.heap.get 2 := hr.parent.trans old_at.parent.symm
+  unfold sourceViews
+  rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.same_pointer_noop' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms same_pointer_noop
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.empty_reference_rejection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_reference_rejection
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.destination_reference_rejection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms destination_reference_rejection
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_read_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_read_timeout
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_observations
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.wrong_reference_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_reference_negative
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_client
+
+private def deletedHeap (self : Bool) := (postHeap self).set right (MObj.setElem .dyn ((postHeap self).get right) 1 false)
+private def deletedWord (self : Bool) := writeMachine (postWord self) 26 (w[0])
+private def deletedSource (self : Bool) : List (Option (Σ τ : Source.STy, Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,false,false]⟩,
+   some ⟨SR,pdata (if self then [left] else [right])⟩,
+   some ⟨SR,pdata (if self then [right,right,left] else [left,right,left])⟩,some ⟨SR,pdata []⟩]
+
+/-- The SAME computed-pointer execution is followed by an actual reached
+nested delete. Both parent-alias cases and both declared pipelines are inhabited.
+RIGHT changes T to F; old LEFT and every parent/reference identity are retained. -/
+theorem computed_reference_delete_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (ym z : Source.EMState E0 SΓ),
+      (Source.execS (G0 p) F0 (fuel+6) SΓ.length none
+        (.expr (sourceReferenceReadAssign (ds self) ssrc sj si) : Source.RStmt E0 [] false .body SΓ SΓ)
+        sy.1).run (.nil,sy.2)=(.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) SΓ.length none
+        (.expr (sourceNestedDelete (ds self) sj si) : Source.RStmt E0 [] false .body SΓ SΓ)
+        ym.1).run (.nil,ym.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) SΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (ds self) ssrc sj si))
+          (.stmt (.expr (sourceNestedDelete (ds self) sj si)) .nil) : Source.RItems E0 [] false .body SΓ SΓ)
+        sy.1).run (.nil,sy.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run σ (.cons (referenceReadStmt (dt self) tsrc ti tj) (.cons (nestedDeleteStmt (dt self) ti tj) .nil))=
+        .ok ⟨σ.withHeap (deletedHeap self),List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj) machine=.ok (postWord self) 0 ∧
+      run (nestedDeleteCode (C := C) 1 (dt self) ti tj) (postWord self)=.ok (deletedWord self) 0 ∧
+      run (referenceReadWriteCode (C := C) 1 (dt self) tsrc ti tj ++ nestedDeleteCode (C := C) 1 (dt self) ti tj)
+        machine=.ok (deletedWord self) 0 ∧
+      sourceViews sy=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+        some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+      sourceViews ym=expectedSource self ∧ sourceViews z=deletedSource self ∧
+      SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn ∧
+      SourceBoolMemoryAt z 1 (deletedHeap self) right .dyn ∧ Source.MemOK E0 SH z ∧
+      RefArrayStateRepr 1 1 8 frag (σ.withHeap (deletedHeap self)) base (deletedWord self) ∧
+      ym.1=sy.1 ∧ z.1=sy.1 ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) ∧
+      StructAllocatorRepr (deletedHeap self) base 8 ⟨48,by decide⟩ (deletedWord self) ∧
+      (deletedWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have srcElems : MObj.elems .dyn (σ.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+    have result := (dat self).computed_reference_delete_sequence (G0 p) F0 fuel sy σ (dref self) fresh
+      (daddr self) 3 addresses fresh_at (ds self) ssrc sj si si (dt self) tsrc ti tj tj
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨1,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.getElem_cons_succ,List.getElem_cons_zero];decide)
+      (by intro t ht hn;exact hn)
+      SH source_memOK initial_repr
+    simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at result
+    obtain ⟨mid,out,ym,z,mm,target,hw₁,selected,hw₂,stmt₁,stmt₂,items,native,word₁,word₂,word,hr₁,hr₂,mok₁,mok₂,repr₁,repr₂,locals₁,locals₂,parent,child,other,write,addrs,next,effects,stack,alloc,mmEq,targetEq,midAddrs⟩ := result
+    have known₁ : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : (postHeap self).writeAddr (.index right .dyn (indexValue ⟨1,by decide⟩)) false=some (deletedHeap self) := by
+      cases self <;> simp only [Heap.writeAddr,Heap.setIndex,postHeap,dref,Bool.false_eq_true,if_false,if_true,indexValue,Int.toNat_natCast,
+        Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,deletedHeap] <;> rfl
+    have outEq : out=deletedHeap self := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    subst mm
+    subst target
+    have midTables := source_tables self ym hr₁ midAddrs
+    have leftTable : z.2.heap.get 0=sy.2.heap.get 0 := addrs 0 (by cases self <;> decide) (by decide)
+    have rightMember : right∈MObj.elems .dyn ((deletedHeap self).get (dref self)) := by
+      rw [parent]
+      exact List.mem_set (dhi self) right
+    have rightAt := hr₂.children right rightMember
+    have leftAt : SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn := by
+      change z.2.heap.get 0=some ⟨SB,sourceBoolMemory _⟩
+      rw [leftTable]
+      cases self <;> simp only [deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,left,MObj.elems_dyn,MObj.setElem_dyn] <;> simpa only [SourceBoolMemoryAt,MObj.elems_dyn] using left_at
+    have finalTables : sourceViews z=deletedSource self := by
+      have hparent := hr₂.parent
+      have hr := rightAt
+      unfold SourceBoolMemoryAt at hr
+      cases self
+      all_goals
+        simp only [deletedHeap,postHeap,dref,daddr,addresses,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,List.set_cons_zero,List.set_cons_succ] at hparent hr
+        unfold sourceViews deletedSource
+        simp only [Bool.false_eq_true,if_false,if_true]
+        rw [leftTable,hparent,hr,addrs 4 (by decide) (by decide)]
+      · rw [addrs 3 (by decide) (by decide)];rfl
+      · rw [addrs 2 (by decide) (by decide)];rfl
+    refine ⟨ym,z,stmt₁,stmt₂,items,native,word₁,word₂,word,rfl,midTables,finalTables,hr₂,leftAt,rightAt,mok₂,repr₂,locals₁,locals₂,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide) (by decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) allocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,Heap.get,Objs.get,hp,old,fresh,MObj.elems_dyn,base] <;> decide
+
+/-- Complete INITIAL, pointer-replaced, and child-cleared word/native tables;
+free pointer, all root/scalar locals, guard, headers, payloads and empty parent
+are retained. Deleting without rebinding or omitting deletion is discriminated. -/
+theorem complete_reference_delete_vectors (self : Bool) :
+    words machine=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (postWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (deletedWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[0],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    views (deletedHeap self)=([true,false,false],[false,false,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    (deletedWord self).mem 0=w[48] ∧ (deletedWord self).stack=[w[42]] ∧
+    words (deletedWord self)≠words (postWord self) ∧
+    words (deletedWord self)≠words (writeMachine machine 18 (w[0])) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,?_,?_,?_,rfl,rfl,by decide,by decide⟩
+      · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+      · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+      · simp only [views,deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.set,Objs.set,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_delete_vectors' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_delete_vectors
+
+private abbrev BoundΓ : Ctx := .val .uint :: Γ
+private abbrev BoundSΓ : Source.RCtx := .int .u256 :: SΓ
+private def boundState : State C BoundΓ := σ.push (t := .val .uint) (uintOfNat 3)
+private def boundSource : Source.EMState E0 BoundSΓ := (.cons (sourceUint (uintOfNat 3)) sy.1,sy.2)
+private def boundWord := writeMachine machine 6 w[3]
+private def boundFrag := frag.push (.val .uint) .ok
+private def boundPostWord := writeMachine boundWord 33 w[24]
+private def boundSourceViews (y : Source.EMState E0 BoundSΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def boundarySource (inner : Bool) : Source.Idx BoundSΓ (.int .u256) :=
+  if inner then .there sj else .there si
+private def boundaryNative (inner : Bool) : Idx BoundΓ (.val .uint) :=
+  if inner then .there ti else .there tj
+private theorem boundSourceOK : Source.MemOK E0 SH boundSource :=
+  ⟨⟨source_memOK.1.1,⟨trivial,source_memOK.1.2⟩⟩,source_memOK.2⟩
+private theorem boundOld : SourceBoolRefsAt boundSource 2 hp old addresses :=
+  ⟨old_at.parent,old_at.children⟩
+private theorem boundFresh : SourceBoolRefsAt boundSource 3 hp fresh addresses :=
+  ⟨fresh_at.parent,fresh_at.children⟩
+private theorem boundRepr : RefArrayStateRepr 1 1 8 boundFrag boundState base boundWord :=
+  ⟨initial_repr.state.consVal (uintOfNat 3) w[3] (ReprV.uint_of rfl) (by decide),
+    initial_repr.arrays.localWrite 6 (by decide) w[3]⟩
+private theorem boundAllocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ boundWord :=
+  allocator.localWrite 6 (by decide) (by decide) w[3]
+
+/-- Both declared pipelines execute a materially changed replacement, THEN
+reject either parent endpoint1 or reached RIGHT-child endpoint3. The new scalar
+local is independently represented, not a declaration-execution claim. No target
+post-revert machine/heap or transaction rollback is asserted. -/
+theorem computed_reference_reject_client (p : Roadmap.Pipeline) (fuel : Nat) (inner : Bool) :
+    ∃ ym : Source.EMState E0 BoundSΓ,
+      (Source.execS (G0 p) F0 (fuel+6) BoundSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there sdst) (.there ssrc) (.there sj) (.there si)) :
+          Source.RStmt E0 [] false .body BoundSΓ BoundSΓ) boundSource.1).run (.nil,boundSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.evalE (G0 p) F0 (fuel+4)
+        (sourceNestedDelete (.there sdst) (boundarySource inner) .here)).run ym=
+          (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) BoundSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there sdst) (.there ssrc) (.there sj) (.there si)))
+          (.stmt (.expr (sourceNestedDelete (.there sdst) (boundarySource inner) .here)) .nil) :
+            Source.RItems E0 [] false .body BoundSΓ BoundSΓ) boundSource.1).run (.nil,boundSource.2)=
+              (.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Stmt.run boundState (referenceReadStmt (.there tdst) (.there tsrc) (.there ti) (.there tj))=
+        .ok ⟨boundState.withHeap (postHeap false),List.prefix_refl _⟩ ∧
+      Stmt.run (boundState.withHeap (postHeap false))
+        (nestedDeleteStmt (.there tdst) (boundaryNative inner) .here)=.error .revert ∧
+      Prog.run boundState (.cons (referenceReadStmt (.there tdst) (.there tsrc) (.there ti) (.there tj))
+        (.cons (nestedDeleteStmt (.there tdst) (boundaryNative inner) .here) .nil))=.error .revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := BoundΓ) 1 (.there tdst) (.there tsrc) (.there ti) (.there tj)) boundWord=
+        .ok boundPostWord 0 ∧
+      run (nestedDeleteCode (C := C) (Γ := BoundΓ) 1 (.there tdst) (boundaryNative inner) .here) boundPostWord=.revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := BoundΓ) 1 (.there tdst) (.there tsrc) (.there ti) (.there tj) ++
+        nestedDeleteCode (C := C) (Γ := BoundΓ) 1 (.there tdst) (boundaryNative inner) .here) boundWord=.revert ∧
+      boundSourceViews ym=expectedSource false ∧
+      SourceBoolRefsAt ym 2 (postHeap false) old addresses ∧
+      SourceBoolMemoryAt ym 0 (postHeap false) left .dyn ∧
+      SourceBoolMemoryAt ym 1 (postHeap false) right .dyn ∧ Source.MemOK E0 SH ym ∧
+      RefArrayStateRepr 1 1 8 boundFrag (boundState.withHeap (postHeap false)) base boundPostWord ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.there sdst)) (.local (.there sj)) rfl)).run boundSource=
+        (.ok (.val (.memRef rfl 0)),boundSource) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.there sdst)) (.local (.there sj)) rfl)).run ym=
+        (.ok (.val (.memRef rfl 1)),ym) ∧
+      (Source.readLoc (E := E0) (Γ := BoundSΓ) F0 (τ := .bool) (.mem 0 0)).run ym=(.ok (.bool true),ym) ∧
+      ym.1=boundSource.1 ∧ ym.2.heap.next=5 ∧ ym.2.heap.get 5=none ∧
+      (ym.2.ex=boundSource.2.ex ∧ ym.2.events=boundSource.2.events ∧
+        ym.2.logs=boundSource.2.logs ∧ ym.2.fnLocals=boundSource.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap false) base 8 ⟨48,by decide⟩ boundPostWord ∧
+      boundPostWord.stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := boundOld.computed_reference_delete_reject (G0 p) F0 fuel boundSource boundState old fresh 2 3 addresses boundFresh
+      (.there sdst) (.there ssrc) (.there sj) (.there si) (boundarySource inner) .here
+      (.there tdst) (.there tsrc) (.there ti) (.there tj) (boundaryNative inner) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ (if inner then ⟨0,by decide⟩ else ⟨1,by decide⟩) ⟨3,by decide⟩
+      rfl rfl rfl rfl (by cases inner <;> rfl) rfl rfl rfl rfl rfl (by cases inner <;> rfl) rfl
+      (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by cases inner
+          · exact Or.inl (by simp only [Heap.len,MObj.elems_dyn];decide)
+          · exact Or.inr ⟨rfl,by simp only [Heap.len,MObj.elems_dyn];decide⟩)
+      SH boundSourceOK boundRepr
+    have srcElems : MObj.elems .dyn (boundState.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+    simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at result
+    obtain ⟨mid,ym,mm,hw,selected,stmt,failed,failedStmt,items,native,badNative,badProg,word,badWord,badAppend,
+      hr,child,mok,represented,locals,elems,children,addrs,next,effects,stack,alloc,mmEq⟩ := result
+    have known : hp.writeAddr (.index old .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap false) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get old)).length from dhi false,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap false := Option.some.inj (hw.symm.trans known)
+    subst mid
+    subst mm
+    have tables : boundSourceViews ym=expectedSource false := by
+      have parent := hr.parent
+      have pe := post_elems false
+      change MObj.elems .dyn ((postHeap false).get old)=[right] at pe
+      rw [pe] at parent
+      change ym.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+      unfold boundSourceViews expectedSource
+      simp only [Bool.false_eq_true,if_false]
+      rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)]
+      rfl
+    have leftAt : SourceBoolMemoryAt ym 0 (postHeap false) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by decide),children left]
+      exact left_at
+    have initialRead := boundOld.eval_parent_read (G0 p) F0 fuel (.there sdst) (.there sj) (uintOfNat 0) left rfl rfl
+      (by simp only [Heap.index,MObj.elems_dyn];rfl)
+    have reachedRead := hr.eval_parent_read (G0 p) F0 fuel (.there sdst) (.there sj) (uintOfNat 0) right
+      (by rw [locals];rfl) (by rw [locals];rfl) selected
+    have leftRead := source_bool_read ym 0 _ leftAt 0 (by rw [children left];simp only [MObj.elems_dyn];decide)
+    refine ⟨ym,stmt,failed,items,native,badNative,badProg,word,badWord,badAppend,tables,hr,leftAt,child,mok,represented,
+      initialRead,reachedRead,?_,locals,next,?_,effects,?_,rfl⟩
+    · simpa only [children left,MObj.elems_dyn] using leftRead
+    · rw [addrs 5 (by decide)];rfl
+    · exact alloc ⟨48,by decide⟩ boundAllocator (by simp only [Heap.len,MObj.elems_dyn];decide)
+
+/-- ALL INITIAL and retained-prefix objects/words, including new scalar cell6,
+all root aliases, headers/children, empty object, free pointer and saved stack.
+These are prefix observations, never a returned post-revert machine. -/
+theorem complete_reference_rejection_vectors :
+    boundSourceViews boundSource=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,
+      some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SR,pdata [left]⟩,
+      some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    words boundWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words boundPostWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[24],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap false)=([true,false,false],[false,true,false],[1],[0,1,0],[]) ∧
+    boundPostWord.mem 0=w[48] ∧ boundPostWord.stack=[w[42]] ∧
+    words boundPostWord≠words boundWord := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,by decide⟩
+    · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+    · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_rejection_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_rejection_vectors
+
+private abbrev AliasΓ : Ctx := .mem B :: Γ
+private abbrev AliasSΓ : Source.RCtx := SB :: SΓ
+private def aliasState : State C AliasΓ := σ.push (t := .mem B) (some left)
+private def aliasSource : Source.EMState E0 AliasSΓ := (.cons (.memRef rfl 0) sy.1,sy.2)
+private def aliasWord := writeMachine machine 6 w[16]
+private def aliasFrag := frag.push (.mem B) .ok
+private def aliasMidWord (self : Bool) := writeMachine aliasWord ((base (dref self).id).val+1) w[24]
+private def aliasFinalWord (self : Bool) := writeMachine (aliasMidWord self) 6 w[24]
+private def aliasFinalState (self : Bool) := (aliasState.withHeap (postHeap self)).setLocal (.here : Idx AliasΓ (.mem B)) (some right)
+private def aliasViews (y : Source.EMState E0 AliasSΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private theorem aliasSourceOK : Source.MemOK E0 SH aliasSource :=
+  ⟨⟨source_memOK.1.1,⟨⟨SB,rfl,rfl⟩,source_memOK.1.2⟩⟩,source_memOK.2⟩
+private theorem aliasAt (self : Bool) : SourceBoolRefsAt aliasSource (daddr self) hp (dref self) addresses :=
+  ⟨(dat self).parent,(dat self).children⟩
+private theorem aliasFresh : SourceBoolRefsAt aliasSource 3 hp fresh addresses :=
+  ⟨fresh_at.parent,fresh_at.children⟩
+private theorem aliasRepr : RefArrayStateRepr 1 1 8 aliasFrag aliasState base aliasWord :=
+  ⟨initial_repr.state.consMem left (by decide),initial_repr.arrays.localWrite 6 (by decide) w[16]⟩
+private theorem aliasAllocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ aliasWord :=
+  allocator.localWrite 6 (by decide) (by decide) w[16]
+
+/-- Application of the EXISTING Source read/index operations to a primitive
+local. The value premise is an actual typed heap lookup, not a source-run or
+preservation premise; this private helper is used on independently inhabited
+initial and genuinely reached child observers below. -/
+private theorem alias_bool_read {Γ : Source.RCtx} (y : Source.EMState E0 Γ)
+    (hp : Heap H) (q : HRef H B) (a : Nat) (hr : SourceBoolMemoryAt y a hp q .dyn)
+    (p : Roadmap.Pipeline) (fuel : Nat) (root : Source.Idx Γ SB) (idx : Source.Idx Γ (.int .u256))
+    (hroot : y.1.get root=.memRef rfl a) (hindex : y.1.get idx=sourceUint (uintOfNat 0))
+    (v : Bool) (hv : hp.index q .dyn (uintOfNat 0)=some v) :
+    (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local root) (.local idx) rfl)).run y=(.ok (.val (.bool v)),y) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have hk : 0<hp.len q .dyn := (List.getElem?_eq_some_iff.mp hv).1
+    have read := (hr.read_iff F0 (uintOfNat 0) v).mpr hv
+    have zero : (uintOfNat 0).val.toNat=0 := by rw [uintOfNat_val (by decide : 0<2^256)];rfl
+    simp only [zero] at read
+    rw [Source.evalE,Source.Hoare.run_bind,source_local_value_run (G0 p) F0 fuel y root _ hroot]
+    change ((Source.evalE (G0 p) F0 (fuel+1) (.local idx)) >>= fun val => Source.indexNat val >>= fun k =>
+      Source.indexLoc F0 (.memRef rfl a : Source.Val E0.layout SB) k >>= fun loc =>
+        Source.readLoc F0 loc >>= fun val => pure (Source.RVal.val val)).run y=_
+    rw [Source.Hoare.run_bind,source_local_value_run (G0 p) F0 fuel y idx _ hindex]
+    change (Source.indexLoc F0 (.memRef rfl a : Source.Val E0.layout SB) 0 >>= fun loc =>
+      Source.readLoc F0 loc >>= fun val => pure (Source.RVal.val val)).run y=_
+    rw [Source.Hoare.run_bind,hr.indexLoc_run F0 0 hk]
+    change (Source.readLoc F0 (τ := .bool) (.mem a 0) >>= fun val => pure (Source.RVal.val val)).run y=_
+    rw [Source.Hoare.run_bind,read]
+    rfl
+
+/-- Computed RHS installs RIGHT; selecting the reached slot rebinds an actual
+LEFT local to RIGHT. Both pipelines and distinct/same parent cases execute one
+Source Items/native Prog/whole word append. Actual read expressions distinguish
+old LEFT true from new RIGHT false; the extra target read pushes its value. -/
+theorem computed_reference_alias_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (ym z : Source.EMState E0 AliasSΓ),
+      (Source.execS (G0 p) F0 (fuel+5) AliasSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+6) AliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si))) .nil :
+          Source.RItems E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+4) AliasSΓ.length none
+        (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) ym.1).run (.nil,ym.2)=
+            (.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+6) AliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)))
+          (.stmt (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj))) .nil) :
+            Source.RItems E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+              (.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run aliasState (.cons (referenceReadStmt (.there (dt self)) (.there tsrc) (.there ti) (.there tj))
+        (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (dt self)) rfl) (.simple (.local (.there ti))))))) .nil))=
+          .ok ⟨aliasFinalState self,List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj)) aliasWord=
+        .ok (aliasMidWord self) 0 ∧
+      run (selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) (aliasMidWord self)=
+        .ok (aliasFinalWord self) 0 ∧
+      run (referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj) ++
+        selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) aliasWord=.ok (aliasFinalWord self) 0 ∧
+      aliasViews ym=expectedSource self ∧ aliasViews z=expectedSource self ∧
+      SourceBoolRefsAt z (daddr self) (postHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt z 0 (postHeap self) left .dyn ∧ SourceBoolMemoryAt z 1 (postHeap self) right .dyn ∧
+      Source.MemOK E0 SH z ∧ RefArrayStateRepr 1 1 8 aliasFrag (aliasFinalState self) base (aliasFinalWord self) ∧
+      ym.1=aliasSource.1 ∧ z.1=aliasSource.1.set .here (.memRef rfl 1) ∧ z.2=ym.2 ∧
+      z.1.get .here=.memRef rfl 1 ∧ TEnv.get (.here : Idx AliasΓ (.mem B)) (aliasFinalState self).env=some right ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there sj)) rfl)).run aliasSource=
+        (.ok (.val (.bool true)),aliasSource) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there sj)) rfl)).run ym=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there sj)) rfl)).run z=
+        (.ok (.val (.bool false)),z) ∧
+      (Source.readLoc (E := E0) (Γ := AliasSΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool true),z) ∧
+      (Val.readMem (.index .dyn (.var (.here : Idx AliasΓ (.mem B)) rfl)
+        (.simple (.local (.there ti)))) : Val C AliasΓ .bool).evalT (aliasFinalState self)=.ok false ∧
+      run (readLocalCode (C := C) 1 (.here : Idx AliasΓ (.mem B)) (.simple (.local (.there ti)))) (aliasFinalWord self)=
+        .ok ((aliasFinalWord self).push w[0]) 0 ∧
+      z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=aliasSource.2.ex ∧ z.2.events=aliasSource.2.events ∧ z.2.logs=aliasSource.2.logs ∧ z.2.fnLocals=aliasSource.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap self) base 8 ⟨48,by decide⟩ (aliasFinalWord self) ∧
+      (aliasFinalWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (aliasAt self).computed_reference_alias_sequence (G0 p) F0 fuel aliasSource aliasState (dref self) fresh
+      (daddr self) 3 addresses aliasFresh (.there (ds self)) (.there ssrc) (.there sj) (.there si) .here
+      (.there (dt self)) (.there tsrc) (.there ti) (.there tj) .here ⟨0,by decide⟩ ⟨1,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl (dhi self)
+      (by simp only [Heap.len,MObj.elems_dyn];decide) SH aliasSourceOK aliasRepr
+    have srcElems : MObj.elems .dyn (aliasState.heap.get fresh)=[left,right,left] := by rw [MObj.elems_dyn];rfl
+    simp only [srcElems,List.getElem_cons_succ,List.getElem_cons_zero] at result
+    obtain ⟨mid,ym,outputs⟩ := result
+    obtain ⟨hw,selected,stmt₁,expr₂,stmt₂,items,native₁,native₂,native,word₁,word₂,word,hr₁,hr₂,child,
+      mok₁,mok₂,repr₁,repr₂,locals₁,locals₂,sourceAlias,nativeAlias,heap,globals,elems,children,sourceChildren,
+      addrs,next,effects,stack,alloc⟩ := outputs
+    have known : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw.symm.trans known)
+    subst mid
+    simp only [MObj.elems_dyn] at nativeAlias native native₂ repr₂ expr₂ stmt₂ items word₂ word locals₂ sourceAlias child
+    let z : Source.EMState E0 AliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2)
+    change ∀ q : HRef H B,(postHeap self).get q=hp.get q at children
+    change TEnv.get (.here : Idx AliasΓ (.mem B)) (aliasFinalState self).env=some right at nativeAlias
+    change z.1=aliasSource.1.set .here (.memRef rfl 1) at locals₂
+    change SourceBoolMemoryAt z 1 (postHeap self) right .dyn at child
+    have finalRepr : RefArrayStateRepr 1 1 8 aliasFrag (aliasFinalState self) base (aliasFinalWord self) := repr₂
+    have tables : aliasViews ym=expectedSource self := by
+      have parent := hr₁.parent
+      rw [post_elems] at parent
+      cases self
+      · change ym.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+      · change ym.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 2 (by decide),addrs 4 (by decide)];rfl
+    have leftAt : SourceBoolMemoryAt z 0 (postHeap self) left .dyn := sourceChildren left left_at
+    have initialRead := alias_bool_read aliasSource hp left 0 left_at p fuel .here (.there sj) rfl rfl true
+      (by simp only [Heap.index,MObj.elems_dyn];rfl)
+    have rightRead : (postHeap self).index right .dyn (uintOfNat 0)=some false := by
+      simp only [Heap.index,children right,MObj.elems_dyn];rfl
+    have midRead := alias_bool_read ym (postHeap self) left 0 leftAt p fuel .here (.there sj)
+      (by rw [locals₁];rfl) (by rw [locals₁];rfl) true
+      (by simp only [Heap.index,children left,MObj.elems_dyn];rfl)
+    have omittedItems := source_items_cons_run (G0 p) F0 (fuel+5) AliasSΓ.length
+      (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si))) .nil
+      aliasSource ym ym stmt₁ (by rfl)
+    have finalRead := alias_bool_read z (postHeap self) right 1 child p fuel .here (.there sj) sourceAlias
+      (by rw [locals₂];rfl) false rightRead
+    have leftRead := (leftAt.read_iff F0 (uintOfNat 0) true).mpr (by simp only [Heap.index,children left,MObj.elems_dyn];rfl)
+    have finalLookup : (aliasFinalState self).heap.index right .dyn (uintOfNat 0)=some false := rightRead
+    have nativeRead : (Val.readMem (.index .dyn (.var (.here : Idx AliasΓ (.mem B)) rfl)
+        (.simple (.local (.there ti)))) : Val C AliasΓ .bool).evalT (aliasFinalState self)=.ok false := by
+      simp only [Val.evalT,MLoc.addrT,MPath.mvalT,Simple.evalT,nativeAlias,
+        show TEnv.get (.there ti) (aliasFinalState self).env=uintOfNat 0 from rfl,
+        Heap.readAddr,finalLookup,TRes.ofOpt,bind,Except.bind,pure,Except.pure]
+    have readCode : ValOutT .bool
+        ((Val.readMem (.index .dyn (.var (.here : Idx AliasΓ (.mem B)) rfl)
+          (.simple (.local (.there ti)))) : Val C AliasΓ .bool).evalT (aliasFinalState self))
+        (run (readLocalCode (C := C) 1 (.here : Idx AliasΓ (.mem B)) (.simple (.local (.there ti)))) (aliasFinalWord self))
+        (aliasFinalWord self) :=
+      readLocal_correct finalRepr.state (.here : Idx AliasΓ (.mem B)) (.simple (.local (.there ti))) rfl
+    rw [nativeRead] at readCode
+    have actualRead : run (readLocalCode (C := C) 1 (.here : Idx AliasΓ (.mem B)) (.simple (.local (.there ti))))
+        (aliasFinalWord self)=.ok ((aliasFinalWord self).push w[0]) 0 := by
+      rcases readCode with ⟨v,w,eq,rep,run⟩|⟨bad,_⟩
+      · cases Except.ok.inj eq
+        rw [rep.bool_inv] at run
+        exact run
+      · cases bad
+    refine ⟨ym,z,stmt₁,omittedItems,stmt₂,items,native,word₁,word₂,word,tables,tables,hr₂,leftAt,child,mok₂,repr₂,
+      locals₁,locals₂,rfl,sourceAlias,nativeAlias,initialRead,midRead,finalRead,leftRead,nativeRead,actualRead,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) aliasAllocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,MObj.elems_dyn,base] <;> decide
+
+/-- Complete INITIAL, replaced-parent and rebound-local vectors. The old
+selected object and all shared/repeated references are retained; only the
+parent's selected slot and alias local change. Negatives distinguish omitted
+selection and selection before replacement at the word-vector scope. -/
+theorem complete_reference_alias_vectors (self : Bool) :
+    aliasViews aliasSource=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    words aliasWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (aliasMidWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (aliasFinalWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[24],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    (aliasFinalState self).heap=postHeap self ∧ (aliasFinalWord self).stack=[w[42]] ∧
+    words (aliasFinalWord self)≠words (aliasMidWord self) ∧ words (aliasFinalWord self)≠words aliasWord := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,?_,?_,rfl,rfl,by decide,by decide⟩
+      · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+      · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_reference_alias_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_reference_alias_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_reference_alias_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_reference_alias_vectors
+
+private def aliasDeletedState (self : Bool) := (aliasFinalState self).withHeap (deletedHeap self)
+private def aliasDeletedWord (self : Bool) := writeMachine (aliasFinalWord self) 26 w[0]
+
+/-- THREE actual Source/native statements and whole target append. The computed
+RIGHT pointer passes through a local before deletion; RIGHT[1] changes true to
+false while old LEFT and shared parent references remain. Both pipeline orders
+and both distinct/same parent cases are inhabited. Reads following the program
+are separate expressions, not a fourth compiled statement. -/
+theorem computed_alias_delete_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ (ym z : Source.EMState E0 AliasSΓ),
+    let ya : Source.EMState E0 AliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2);
+      (Source.execS (G0 p) F0 (fuel+6) AliasSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) AliasSΓ.length none
+        (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj)) :
+          Source.RStmt E0 [] false .body AliasSΓ AliasSΓ) ym.1).run (.nil,ym.2)=(.ok (.normal ya.1),(.nil,ya.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+4) AliasSΓ.length none
+        (.expr (sourceIndexedDelete .here (.there si)) : Source.RStmt E0 [] false .body AliasSΓ AliasSΓ)
+        ya.1).run (.nil,ya.2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) AliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (ds self)) (.there ssrc) (.there sj) (.there si)))
+          (.stmt (.expr (sourceSelectedAlias .here (.there (ds self)) (.there sj)))
+            (.stmt (.expr (sourceIndexedDelete .here (.there si))) .nil)) :
+              Source.RItems E0 [] false .body AliasSΓ AliasSΓ) aliasSource.1).run (.nil,aliasSource.2)=
+                (.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run aliasState (.cons (referenceReadStmt (.there (dt self)) (.there tsrc) (.there ti) (.there tj))
+        (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (dt self)) rfl) (.simple (.local (.there ti)))))))
+          (.cons (.deleteMem (.loc (.index .dyn (.var .here rfl) (.simple (.local (.there tj))))) rfl) .nil)))=
+            .ok ⟨aliasDeletedState self,List.prefix_refl _⟩ ∧
+      run (referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj)) aliasWord=
+        .ok (aliasMidWord self) 0 ∧
+      run (selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) (aliasMidWord self)=.ok (aliasFinalWord self) 0 ∧
+      run (deleteLocalCode 1 (.here : Idx AliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there tj)) : Val C AliasΓ .uint)))
+        (aliasFinalWord self)=.ok (aliasDeletedWord self) 0 ∧
+      run ((referenceReadWriteCode (C := C) (Δ := AliasΓ) 1 (.there (dt self)) (.there tsrc) (.there ti) (.there tj) ++
+        selectedAliasCode (C := C) (Γ := AliasΓ) 1 .here (.there (dt self)) (.there ti)) ++
+          deleteLocalCode 1 (.here : Idx AliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there tj)) : Val C AliasΓ .uint)))
+        aliasWord=.ok (aliasDeletedWord self) 0 ∧
+      aliasViews ym=expectedSource self ∧ aliasViews ya=expectedSource self ∧ aliasViews z=deletedSource self ∧
+      SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn ∧ SourceBoolMemoryAt z 1 (deletedHeap self) right .dyn ∧
+      Source.MemOK E0 SH z ∧ RefArrayStateRepr 1 1 8 aliasFrag (aliasDeletedState self) base (aliasDeletedWord self) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there si)) rfl)).run ya=
+        (.ok (.val (.bool true)),ya) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx AliasSΓ SB)) (.local (.there si)) rfl)).run z=
+        (.ok (.val (.bool false)),z) ∧
+      (Source.readLoc (E := E0) (Γ := AliasSΓ) F0 (τ := .bool) (.mem 0 0)).run z=(.ok (.bool true),z) ∧
+      z.1=aliasSource.1.set .here (.memRef rfl 1) ∧ z.2.heap.next=5 ∧ z.2.heap.get 5=none ∧
+      (z.2.ex=aliasSource.2.ex ∧ z.2.events=aliasSource.2.events ∧ z.2.logs=aliasSource.2.logs ∧ z.2.fnLocals=aliasSource.2.fnLocals) ∧
+      StructAllocatorRepr (deletedHeap self) base 8 ⟨48,by decide⟩ (aliasDeletedWord self) ∧
+      (aliasDeletedWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (aliasAt self).computed_alias_delete_program (G0 p) F0 fuel aliasSource aliasState (dref self) fresh
+      (daddr self) 3 addresses aliasFresh (.there (ds self)) (.there ssrc) (.there sj) (.there si) (.there si) .here
+      (.there (dt self)) (.there tsrc) (.there ti) (.there tj) (.there tj) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨1,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      (by simp only [Heap.len,MObj.elems_dyn];decide) (by intro t ht hn;exact hn)
+      SH aliasSourceOK aliasRepr
+    obtain ⟨mid,out,ym,z,hw₁,selected,hw₃,stmt₁,stmt₂,stmt₃,items,native,word₁,word₂,word₃,word,hr₂,hr₃,child₂,
+      mok₂,mok₃,repr₂,repr₃,locals₁,locals₃,nativeAlias,parentElems,childElems,others,addrs,next,effects,stack,alloc,
+      repr₁,children,midAddrs,write₃⟩ := result
+    simp only [MObj.elems_dyn] at hw₁ hw₃ nativeAlias
+    have known₁ : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₃ : (postHeap self).writeAddr (.index right .dyn (indexValue ⟨1,by decide⟩)) false=some (deletedHeap self) := by
+      cases self <;> simp only [Heap.writeAddr,Heap.setIndex,postHeap,dref,Bool.false_eq_true,if_false,if_true,indexValue,
+        Int.toNat_natCast,Heap.get,Objs.get,Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,deletedHeap] <;> rfl
+    have outEq : out=deletedHeap self := Option.some.inj (hw₃.symm.trans known₃)
+    subst out
+    simp only [MObj.elems_dyn] at stmt₂ stmt₃ items native word₁ word₂ word₃ word hr₂ hr₃ repr₂ repr₃ child₂ locals₃ nativeAlias parentElems childElems others addrs midAddrs write₃ alloc
+    let ya : Source.EMState E0 AliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2)
+    change SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses at hr₂
+    change SourceBoolRefsAt z (daddr self) (deletedHeap self) (dref self) addresses at hr₃
+    change SourceBoolMemoryAt ya 1 (postHeap self) right .dyn at child₂
+    change ∀ q : HRef H B,(postHeap self).get q=hp.get q at children
+    change ∀ q : HRef H B,q.id≠right.id → (deletedHeap self).get q=hp.get q at others
+    change z.1=aliasSource.1.set .here (.memRef rfl 1) at locals₃
+    have tables : aliasViews ym=expectedSource self := by
+      have parent := hr₂.parent
+      rw [post_elems] at parent
+      cases self
+      · change ym.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,midAddrs 0 (by decide),midAddrs 1 (by decide),midAddrs 3 (by decide),midAddrs 4 (by decide)];rfl
+      · change ym.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at parent
+        unfold aliasViews expectedSource
+        rw [parent,midAddrs 0 (by decide),midAddrs 1 (by decide),midAddrs 2 (by decide),midAddrs 4 (by decide)];rfl
+    change ((deletedHeap self).get (dref self)).val=(hp.get (dref self)).val.set 0 right at parentElems
+    change ((deletedHeap self).get right).val=(hp.get right).val.set 1 false at childElems
+    have member : right∈MObj.elems .dyn ((deletedHeap self).get (dref self)) := by
+      rw [MObj.elems_dyn,parentElems]
+      simpa only [MObj.elems_dyn] using List.mem_set (dhi self) right
+    have child₃ := hr₃.children right member
+    have leftAt : SourceBoolMemoryAt z 0 (deletedHeap self) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by cases self <;> decide) (by decide),others left (by decide)]
+      exact left_at
+    have finalTables : aliasViews z=deletedSource self := by
+      have parent := hr₃.parent
+      have leaf := child₃
+      unfold SourceBoolMemoryAt at leaf
+      cases self
+      all_goals
+        simp only [deletedHeap,postHeap,dref,daddr,addresses,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,
+          Heap.set,Objs.set,hp,old,fresh,right,MObj.elems_dyn,MObj.setElem_dyn,List.set_cons_zero,List.set_cons_succ] at parent leaf
+        unfold aliasViews deletedSource
+        simp only [Bool.false_eq_true,if_false,if_true]
+        rw [parent,leaf,addrs 0 (by decide) (by decide),addrs 4 (by decide) (by decide)]
+      · rw [addrs 3 (by decide) (by decide)];rfl
+      · rw [addrs 2 (by decide) (by decide)];rfl
+    have before : (postHeap self).index right .dyn (uintOfNat 1)=some true := by
+      simp only [Heap.index,children right,MObj.elems_dyn];rfl
+    have after : (deletedHeap self).index right .dyn (uintOfNat 1)=some false := by
+      change (MObj.elems .dyn ((deletedHeap self).get right))[1]?=some false
+      rw [MObj.elems_dyn,childElems];rfl
+    have beforeRead := child₂.eval_local_read (G0 p) F0 fuel .here (.there si) (uintOfNat 1) true
+      (source_locals_get_set _ _ _) (by rw [source_bool_alias_uint_frame,locals₁];rfl) before
+    have afterRead := child₃.eval_local_read (G0 p) F0 fuel .here (.there si) (uintOfNat 1) false
+      (by rw [locals₃];rfl) (by rw [locals₃];rfl) after
+    have leftRead := (leftAt.read_iff F0 (uintOfNat 0) true).mpr
+      (by simp only [Heap.index,others left (by decide),MObj.elems_dyn];rfl)
+    refine ⟨ym,z,stmt₁,stmt₂,stmt₃,items,native,word₁,word₂,word₃,word,tables,tables,finalTables,hr₃,leftAt,child₃,
+      mok₃,repr₃,beforeRead,afterRead,leftRead,locals₃,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide) (by decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) aliasAllocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,MObj.elems_dyn,base] <;> decide
+
+/-- ALL ordered machine/native observations across replacement, rebinding and
+clear. Prior vectors are reused verbatim; the final clear changes only RIGHT's
+payload cell26. Skipping clear or selecting the stale LEFT object differs. -/
+theorem complete_alias_delete_vectors (self : Bool) :
+    words aliasWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (aliasMidWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (aliasFinalWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[24],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (aliasDeletedWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[24],w[99],w[3],w[1],w[0],w[0],w[3],w[0],w[0],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views hp=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (postHeap self)=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    views (aliasFinalState self).heap=views (postHeap self) ∧
+    views (deletedHeap self)=([true,false,false],[false,false,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    TEnv.get (.here : Idx AliasΓ (.mem B)) (aliasDeletedState self).env=some right ∧
+    (aliasDeletedWord self).mem 0=w[48] ∧ (aliasDeletedWord self).stack=[w[42]] ∧
+    words (aliasDeletedWord self)≠words (aliasFinalWord self) ∧
+    words (aliasDeletedWord self)≠words (writeMachine (aliasFinalWord self) 18 w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,?_,?_,rfl,?_,rfl,rfl,rfl,by decide,by decide⟩
+      · simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+      · simp only [views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+      · simp only [views,deletedHeap,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_alias_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_alias_delete_vectors
+
+
+private abbrev RejectAliasΓ : Ctx := .mem B :: BoundΓ
+private abbrev RejectAliasSΓ : Source.RCtx := SB :: BoundSΓ
+private def rejectAliasState : State C RejectAliasΓ := boundState.push (t := .mem B) (some left)
+private def rejectAliasSource : Source.EMState E0 RejectAliasSΓ := (.cons (.memRef rfl 0) boundSource.1,boundSource.2)
+private def rejectAliasWord := writeMachine boundWord 7 w[16]
+private def rejectAliasFrag := boundFrag.push (.mem B) .ok
+private def rejectAliasMidWord (self : Bool) := writeMachine rejectAliasWord ((base (dref self).id).val+1) w[24]
+private def rejectAliasFinalWord (self : Bool) := writeMachine (rejectAliasMidWord self) 7 w[24]
+private def rejectAliasFinalState (self : Bool) := (rejectAliasState.withHeap (postHeap self)).setLocal (.here : Idx RejectAliasΓ (.mem B)) (some right)
+private def rejectAliasViews (y : Source.EMState E0 RejectAliasSΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private theorem rejectAliasOK : Source.MemOK E0 SH rejectAliasSource :=
+  ⟨⟨boundSourceOK.1.1,⟨⟨SB,rfl,rfl⟩,boundSourceOK.1.2⟩⟩,boundSourceOK.2⟩
+private theorem rejectAliasAt (self : Bool) : SourceBoolRefsAt rejectAliasSource (daddr self) hp (dref self) addresses :=
+  ⟨(dat self).parent,(dat self).children⟩
+private theorem rejectAliasFresh : SourceBoolRefsAt rejectAliasSource 3 hp fresh addresses :=
+  ⟨fresh_at.parent,fresh_at.children⟩
+private theorem rejectAliasRepr : RefArrayStateRepr 1 1 8 rejectAliasFrag rejectAliasState base rejectAliasWord :=
+  ⟨boundRepr.state.consMem left (by decide),boundRepr.arrays.localWrite 7 (by decide) w[16]⟩
+private theorem rejectAliasAllocator : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ rejectAliasWord :=
+  boundAllocator.localWrite 7 (by decide) (by decide) w[16]
+
+/-- Both pipelines, same/distinct parent: actual two changed prefixes, then
+RIGHT endpoint3 rejects. Source exposes retained reached globals; intrinsic and
+word failure outcomes expose no final machine. The seven locals are independently
+represented (the added scalar/reference are not declaration executions). -/
+theorem computed_alias_reject_client (p : Roadmap.Pipeline) (fuel : Nat) (self : Bool) :
+    ∃ ym : Source.EMState E0 RejectAliasSΓ,
+    let ya : Source.EMState E0 RejectAliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2);
+      (Source.execS (G0 p) F0 (fuel+6) RejectAliasSΓ.length none
+        (.expr (sourceReferenceReadAssign (.there (.there (ds self))) (.there (.there ssrc)) (.there (.there sj)) (.there (.there si))) :
+          Source.RStmt E0 [] false .body RejectAliasSΓ RejectAliasSΓ) rejectAliasSource.1).run (.nil,rejectAliasSource.2)=
+            (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RejectAliasSΓ.length none
+        (.expr (sourceSelectedAlias .here (.there (.there (ds self))) (.there (.there sj))) :
+          Source.RStmt E0 [] false .body RejectAliasSΓ RejectAliasSΓ) ym.1).run (.nil,ym.2)=
+            (.ok (.normal ya.1),(.nil,ya.2)) ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))).run ya=
+        (.error (.revert (Source.panicData .index)),ya) ∧
+      (Source.execItems (G0 p) F0 (fuel+7) RejectAliasSΓ.length none
+        (.stmt (.expr (sourceReferenceReadAssign (.there (.there (ds self))) (.there (.there ssrc)) (.there (.there sj)) (.there (.there si))))
+          (.stmt (.expr (sourceSelectedAlias .here (.there (.there (ds self))) (.there (.there sj))))
+            (.stmt (.expr (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))) .nil)) :
+              Source.RItems E0 [] false .body RejectAliasSΓ RejectAliasSΓ) rejectAliasSource.1).run (.nil,rejectAliasSource.2)=
+                (.error (.revert (Source.panicData .index)),(.nil,ya.2)) ∧
+      Prog.run rejectAliasState
+        (.cons (referenceReadStmt (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)))
+          (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (.there (dt self))) rfl) (.simple (.local (.there (.there ti)))))))) .nil))=
+            .ok ⟨rejectAliasFinalState self,List.prefix_refl _⟩ ∧
+      Stmt.run (rejectAliasFinalState self) (.deleteMem (.loc (.index .dyn (.var (.here : Idx RejectAliasΓ (.mem B)) rfl)
+        (.simple (.local (.there .here))))) rfl)=.error .revert ∧
+      Prog.run rejectAliasState
+        (.cons (referenceReadStmt (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)))
+          (.cons (.rebindMem .here (.alias (.loc (.index .dyn (.var (.there (.there (dt self))) rfl) (.simple (.local (.there (.there ti))))))))
+            (.cons (.deleteMem (.loc (.index .dyn (.var (.here : Idx RejectAliasΓ (.mem B)) rfl) (.simple (.local (.there .here))))) rfl) .nil)))=.error .revert ∧
+      run (referenceReadWriteCode (C := C) (Δ := RejectAliasΓ) 1 (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj))) rejectAliasWord=
+        .ok (rejectAliasMidWord self) 0 ∧
+      run (selectedAliasCode (C := C) (Γ := RejectAliasΓ) 1 .here (.there (.there (dt self))) (.there (.there ti))) (rejectAliasMidWord self)=
+        .ok (rejectAliasFinalWord self) 0 ∧
+      run (deleteLocalCode 1 (.here : Idx RejectAliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there .here)) : Val C RejectAliasΓ .uint))) (rejectAliasFinalWord self)=.revert ∧
+      run ((referenceReadWriteCode (C := C) (Δ := RejectAliasΓ) 1 (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)) ++
+        selectedAliasCode (C := C) (Γ := RejectAliasΓ) 1 .here (.there (.there (dt self))) (.there (.there ti))) ++
+        deleteLocalCode 1 (.here : Idx RejectAliasΓ (.mem B)) (compileVal 1 (.simple (.local (.there .here)) : Val C RejectAliasΓ .uint))) rejectAliasWord=.revert ∧
+      rejectAliasViews ym=expectedSource self ∧ rejectAliasViews ya=expectedSource self ∧
+      SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses ∧
+      SourceBoolMemoryAt ya 0 (postHeap self) left .dyn ∧ SourceBoolMemoryAt ya 1 (postHeap self) right .dyn ∧
+      Source.MemOK E0 SH ya ∧ RefArrayStateRepr 1 1 8 rejectAliasFrag (rejectAliasFinalState self) base (rejectAliasFinalWord self) ∧
+      (Source.readLoc (E := E0) (Γ := RejectAliasSΓ) F0 (τ := .bool) (.mem 0 0)).run ya=(.ok (.bool true),ya) ∧
+      (Source.readLoc (E := E0) (Γ := RejectAliasSΓ) F0 (τ := .bool) (.mem 1 1)).run ya=(.ok (.bool true),ya) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx RejectAliasSΓ SB)) (.local (.there (.there sj))) rfl)).run rejectAliasSource=
+        (.ok (.val (.bool true)),rejectAliasSource) ∧
+      (Source.evalE (G0 p) F0 (fuel+2) (.indexArray (.local (.here : Source.Idx RejectAliasSΓ SB)) (.local (.there (.there sj))) rfl)).run ya=
+        (.ok (.val (.bool false)),ya) ∧
+      (Source.evalE (G0 p) F0 2 (sourceIndexedDelete (.here : Source.Idx RejectAliasSΓ SB) (.there .here))).run ya=(.error .timeout,ya) ∧
+      ym.1=rejectAliasSource.1 ∧ ya.1=rejectAliasSource.1.set .here (.memRef rfl 1) ∧
+      ya.2.heap.next=5 ∧ ya.2.heap.get 5=none ∧
+      (ya.2.ex=rejectAliasSource.2.ex ∧ ya.2.events=rejectAliasSource.2.events ∧ ya.2.logs=rejectAliasSource.2.logs ∧ ya.2.fnLocals=rejectAliasSource.2.fnLocals) ∧
+      StructAllocatorRepr (postHeap self) base 8 ⟨48,by decide⟩ (rejectAliasFinalWord self) ∧
+      (rejectAliasFinalWord self).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have result := (rejectAliasAt self).computed_alias_delete_reject (G0 p) F0 fuel rejectAliasSource rejectAliasState (dref self) fresh
+      (daddr self) 3 addresses rejectAliasFresh (.there (.there (ds self))) (.there (.there ssrc))
+      (.there (.there sj)) (.there (.there si)) (.there .here) .here
+      (.there (.there (dt self))) (.there (.there tsrc)) (.there (.there ti)) (.there (.there tj)) (.there .here) .here
+      ⟨0,by decide⟩ ⟨1,by decide⟩ ⟨3,by decide⟩
+      (by cases self <;> rfl) rfl rfl rfl rfl (by cases self <;> rfl) rfl rfl rfl rfl
+      (dhi self) (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+      SH rejectAliasOK rejectAliasRepr
+    obtain ⟨mid,ym,hw,selected,stmt₁,stmt₂,expr₃,stmt₃,items,nativePrefix,native₃,native,word₁,word₂,word₃,word,hr,child,
+      mok,repr,locals₁,locals₂,sourceAlias,nativeAlias,parent,children,addrs,next,effects,stack,alloc⟩ := result
+    simp only [MObj.elems_dyn] at hw
+    have known : hp.writeAddr (.index (dref self) .dyn (indexValue ⟨0,by decide⟩)) right=some (postHeap self) := by
+      simp only [Heap.writeAddr,Heap.setIndex,indexValue,Int.toNat_natCast,show 0<(MObj.elems .dyn (hp.get (dref self))).length from dhi self,↓reduceIte]
+      rfl
+    have midEq : mid=postHeap self := Option.some.inj (hw.symm.trans known)
+    subst mid
+    simp only [MObj.elems_dyn] at stmt₂ expr₃ stmt₃ items nativePrefix native₃ native word₁ word₂ word₃ word hr child mok repr locals₂ sourceAlias nativeAlias parent children addrs next effects stack alloc
+    let ya : Source.EMState E0 RejectAliasSΓ := (ym.1.set .here (.memRef rfl 1),ym.2)
+    change SourceBoolRefsAt ya (daddr self) (postHeap self) (dref self) addresses at hr
+    change SourceBoolMemoryAt ya 1 (postHeap self) right .dyn at child
+    change ∀ q : HRef H B,(postHeap self).get q=hp.get q at children
+    have tables : rejectAliasViews ya=expectedSource self := by
+      have parent := hr.parent
+      rw [post_elems] at parent
+      cases self
+      · change ya.2.heap.get 2=some ⟨SR,pdata [right]⟩ at parent
+        unfold rejectAliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+      · change ya.2.heap.get 3=some ⟨SR,pdata [right,right,left]⟩ at parent
+        unfold rejectAliasViews expectedSource
+        rw [parent,addrs 0 (by decide),addrs 1 (by decide),addrs 2 (by decide),addrs 4 (by decide)];rfl
+    have leftAt : SourceBoolMemoryAt ya 0 (postHeap self) left .dyn := by
+      unfold SourceBoolMemoryAt
+      rw [addrs 0 (by cases self <;> decide),children left]
+      exact left_at
+    have leftRead := (leftAt.read_iff F0 (uintOfNat 0) true).mpr (by simp only [Heap.index,children left,MObj.elems_dyn];rfl)
+    have rightRead := (child.read_iff F0 (uintOfNat 1) true).mpr (by simp only [Heap.index,children right,MObj.elems_dyn];rfl)
+    have initialLeft : SourceBoolMemoryAt rejectAliasSource 0 hp left .dyn := left_at
+    have oldRead := initialLeft.eval_local_read (G0 p) F0 fuel .here (.there (.there sj)) (uintOfNat 0) true rfl rfl
+      (by simp only [Heap.index,MObj.elems_dyn];rfl)
+    have newRead := child.eval_local_read (G0 p) F0 fuel .here (.there (.there sj)) (uintOfNat 0) false sourceAlias
+      (by change (ym.1.set (.here : Source.Idx RejectAliasSΓ SB) (.memRef rfl 1)).get (.there (.there sj))=_;rw [source_bool_alias_uint_frame,locals₁];rfl) (by simp only [Heap.index,children right,MObj.elems_dyn];rfl)
+    have timeout := source_indexed_delete_horizon_two (G0 p) F0 ya (.here : Source.Idx RejectAliasSΓ SB) (.there .here)
+    refine ⟨ym,stmt₁,stmt₂,expr₃,items,nativePrefix,native₃,native,word₁,word₂,word₃,word,tables,tables,hr,leftAt,child,mok,repr,
+      leftRead,rightRead,oldRead,newRead,timeout,locals₁,locals₂,next,?_,effects,?_,rfl⟩
+    · rw [addrs 5 (by cases self <;> decide)];rfl
+    · apply alloc ⟨48,by decide⟩ (by decide) rejectAliasAllocator
+      cases self <;> simp only [dref,Bool.false_eq_true,if_false,if_true,Heap.len,MObj.elems_dyn,base] <;> decide
+
+/-- Full INITIAL/replacement/rebound target vectors; failure supplies no new
+machine, and both referenced child contents remain the original contents. -/
+theorem complete_alias_reject_vectors (self : Bool) :
+    rejectAliasViews rejectAliasSource=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    words rejectAliasWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[16],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rejectAliasMidWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[16],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    words (rejectAliasFinalWord self)=[w[48],w[32],w[32],w[36],w[1],w[0],w[3],w[24],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],(if self then w[16] else w[24]),w[3],(if self then w[24] else w[16]),w[24],w[16],w[0],w[0]] ∧
+    views rejectAliasState.heap=views hp ∧
+    views (rejectAliasFinalState self).heap=([true,false,false],[false,true,false],(if self then [0] else [1]),(if self then [1,1,0] else [0,1,0]),[]) ∧
+    TEnv.get (.here : Idx RejectAliasΓ (.mem B)) rejectAliasState.env=some left ∧
+    TEnv.get (.here : Idx RejectAliasΓ (.mem B)) (rejectAliasFinalState self).env=some right ∧
+    (rejectAliasFinalWord self).mem 0=w[48] ∧ (rejectAliasFinalWord self).stack=[w[42]] ∧
+    words (rejectAliasFinalWord self)≠words (rejectAliasMidWord self) ∧
+    words (rejectAliasFinalWord self)≠words (writeMachine (rejectAliasFinalWord self) 26 w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases self <;> simp only [Bool.false_eq_true,if_false,if_true]
+    all_goals
+      refine ⟨rfl,rfl,rfl,rfl,rfl,?_,rfl,rfl,rfl,rfl,by decide,by decide⟩
+      simp only [rejectAliasFinalState,State.setLocal,State.withHeap,views,postHeap,dref,Bool.false_eq_true,if_false,if_true,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.computed_alias_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms computed_alias_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_alias_reject_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_alias_reject_vectors
+
+
+private abbrev RhsΓ : Ctx := .val .bool :: AliasΓ
+private abbrev RhsSΓ : Source.RCtx := .bool :: AliasSΓ
+private def rhsNumber (bad : Bool) := if bad then 3 else 0
+private def rhsBase := aliasState.push (t := .val .bool) true
+private def rhsState (bad : Bool) := rhsBase.setLocal (.there (.there ti)) (uintOfNat (rhsNumber bad))
+private def rhsSourceBase : Source.EMState E0 RhsSΓ := (.cons (.bool true) aliasSource.1,aliasSource.2)
+private def rhsSource (bad : Bool) : Source.EMState E0 RhsSΓ :=
+  (rhsSourceBase.1.set (.there (.there sj)) (sourceUint (uintOfNat (rhsNumber bad))),rhsSourceBase.2)
+private def rhsWord (bad : Bool) := writeMachine (writeMachine aliasWord 7 w[1]) 5 (.val (wmod (rhsNumber bad)))
+private def rhsFrag := aliasFrag.push (.val .bool) .ok
+private def rhsHeap := hp.set left (MObj.setElem .dyn (hp.get left) 1 true)
+private def rhsMidWord (bad : Bool) := writeMachine (rhsWord bad) 18 w[1]
+private def rhsViews (y : Source.EMState E0 RhsSΓ) := [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4]
+private def rhsTables : List (Option (Σ τ : Source.STy,Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+    some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩]
+private theorem rhsAt (bad : Bool) : SourceBoolMemoryAt (rhsSource bad) 0 hp left .dyn := left_at
+private theorem rhsOK (bad : Bool) : Source.MemOK E0 SH (rhsSource bad) := by
+  have hb : Source.MemOK E0 SH rhsSourceBase :=
+    ⟨⟨aliasSourceOK.1.1,⟨trivial,aliasSourceOK.1.2⟩⟩,aliasSourceOK.2⟩
+  exact ⟨⟨hb.1.1,Source.LocalsOK.set rhsSourceBase.1 (.there (.there sj)) hb.1.2 trivial⟩,hb.2⟩
+private theorem rhsRepr (bad : Bool) : StateRepr 1 1 8 rhsFrag (rhsState bad) base (rhsWord bad) := by
+  have hb := aliasRepr.state.consVal (p := .bool) true w[1] rfl (by decide)
+  exact hb.setVal (.there (.there ti)) (uintOfNat (rhsNumber bad)) (.val (wmod (rhsNumber bad)))
+    (by cases bad <;> exact ReprV.uint_of rfl)
+private theorem rhsAllocator (bad : Bool) : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ (rhsWord bad) :=
+  (aliasAllocator.localWrite 7 (by decide) (by decide) w[1]).localWrite 5 (by decide) (by decide) _
+private def rhsNative (i : Idx RhsΓ (.val .uint)) : Stmt C RhsΓ RhsΓ :=
+  .assignMem (.index .dyn (.var (.there .here : Idx RhsΓ (.mem B)) rfl) (.simple (.local i))) (.val (.simple (.local .here)))
+private def rhsCode (i : Idx RhsΓ (.val .uint)) :=
+  writeLocalCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.simple (.local i)) (.simple (.local .here))
+private theorem rhs_first_word (bad : Bool) :
+    run (rhsCode (.there (.there tj))) (rhsWord bad)=.ok (rhsMidWord bad) 0 := by
+  have codes : rhsCode (.there (.there tj))=[.mload 7,.mload 6,.mload 4] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 4] (rhsWord bad)=
+      .ok ((((rhsWord bad).push w[1]).push w[16]).push w[1]) 0 := by cases bad <;> rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((rhsWord bad).push w[1])
+    (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) (by cases bad <;> rfl) [.mstoreAt]]
+  have addr := arrayAddr_run ((rhsWord bad).push w[1]) (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3
+    (by decide) (by cases bad <;> rfl)
+  simp only [show (1 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- BOTH actual pipelines: RHS LEFT[1]=true materially changes the cell BEFORE
+outer endpoint3 is resolved. The nested expression/statement fail with that real
+RHS state; a separately executed initial LHS lookup fails without it. No target
+post-revert machine or outer transaction rollback is inferred. -/
+theorem rhs_late_effect_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RhsSΓ.length none
+        (.expr (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here) : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ)
+        (rhsSource true).1).run (.nil,(rhsSource true).2)=(.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      (Source.evalLoc (G0 p) F0 (fuel+3) (.indexArray (.local (.there .here : Source.Idx RhsSΓ SB)) (by decide) (.local (.there (.there sj))) rfl)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),rhsSource true) ∧
+      Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run (rhsCode (.there (.there ti))) (rhsMidWord true)=.revert ∧
+      run (rhsCode (.there (.there tj)) ++ rhsCode (.there (.there ti))) (rhsWord true)=.revert ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,hw,inner,expr,stmt,native₁,native₂,native,word₁,word₂,word,hr,mok,repr,locals,elems,other,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_late_bounds_word (G0 p) F0 fuel (rhsState true) left (rhsAt true) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 3) (uintOfNat 1) true
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        (rhsRepr true) SH (rhsOK true)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he : mid=rhsHeap := Option.some.inj (hw.symm.trans known)
+    subst mid
+    have hm : mm=rhsMidWord true := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word true))).1
+    subst mm
+    have initialLeft := (rhsAt true).eval_index_bounds (G0 p) F0 (fuel+1) (.there .here) (.there (.there sj)) (uintOfNat 3) rfl rfl
+      (by simp only [Heap.len,MObj.elems_dyn];decide)
+    have leaf := hr
+    unfold SourceBoolMemoryAt at leaf
+    rw [elems] at leaf
+    simp only [MObj.elems_dyn] at leaf
+    change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ at leaf
+    have tables : rhsViews ym=rhsTables := by
+      unfold rhsViews rhsTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    refine ⟨ym,inner,expr,stmt,initialLeft,native,word₁,word₂,word,tables,hr,mok,repr,locals,?_,addrs,next,effects,alloc _ (by decide) (rhsAllocator true),rfl⟩
+    intro he
+    have oldAt : SourceBoolMemoryAt ym 0 hp left .dyn := by
+      change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (hp.get left))⟩
+      rw [he];exact rhsAt true
+    have nowIndex : rhsHeap.index left .dyn (uintOfNat 1)=some true := by
+      change (MObj.elems .dyn (rhsHeap.get left))[(uintOfNat 1).val.toNat]?=some true
+      rw [elems];simp only [MObj.elems_dyn];rfl
+    have oldIndex : hp.index left .dyn (uintOfNat 1)=some false := by simp only [Heap.index,MObj.elems_dyn];rfl
+    have nowRead := (hr.read_iff F0 (uintOfNat 1) true).mpr nowIndex
+    have oldRead := (oldAt.read_iff F0 (uintOfNat 1) false).mpr oldIndex
+    cases congrArg Prod.fst (nowRead.symm.trans oldRead)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_late_effect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_late_effect_client
+
+private def rhsFinalHeap := rhsHeap.set left (MObj.setElem .dyn (rhsHeap.get left) 0 true)
+private def rhsFinalWord := writeMachine (rhsMidWord false) 17 w[1]
+private theorem rhs_second_word : run (rhsCode (.there (.there ti))) (rhsMidWord false)=.ok rhsFinalWord 0 := by
+  have codes : rhsCode (.there (.there ti))=[.mload 7,.mload 6,.mload 5] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 5] (rhsMidWord false)=
+      .ok ((((rhsMidWord false).push w[1]).push w[16]).push w[0]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((rhsMidWord false).push w[1])
+    (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((rhsMidWord false).push w[1]) (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (0 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- Successful ONE nested expression/statement, matched by reached nativeProg2
+and complete word append. The second same-value write is actually executed,
+not claimed materially different or needed to distinguish final-only ordering. -/
+theorem rhs_success_effect_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.execS (G0 p) F0 (fuel+5) RhsSΓ.length none
+        (.expr (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here) : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ)
+        (rhsSource false).1).run (.nil,(rhsSource false).2)=(.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run (rhsState false) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))=
+        .ok ⟨(rhsState false).withHeap rhsFinalHeap,List.prefix_refl _⟩ ∧
+      run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 ∧
+      run (rhsCode (.there (.there ti))) (rhsMidWord false)=.ok rhsFinalWord 0 ∧
+      run (rhsCode (.there (.there tj)) ++ rhsCode (.there (.there ti))) (rhsWord false)=.ok rhsFinalWord 0 ∧
+      rhsViews ym=rhsTables ∧ rhsViews z=rhsTables ∧
+      SourceBoolMemoryAt z 0 rhsFinalHeap left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState false).withHeap rhsFinalHeap) base rhsFinalWord ∧
+      z.1=(rhsSource false).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(rhsSource false).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(rhsSource false).2.ex ∧ z.2.events=(rhsSource false).2.events ∧ z.2.logs=(rhsSource false).2.logs ∧ z.2.fnLocals=(rhsSource false).2.fnLocals) ∧
+      StructAllocatorRepr rhsFinalHeap base 8 ⟨48,by decide⟩ rhsFinalWord ∧ rhsFinalWord.stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,hw₁,hw₂,inner,expr,stmt,native,word₁,word₂,word,hr₁,hr₂,mok₁,mok₂,hm₁,hm₂,
+      locals₁,locals₂,elems,other,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_success_word (G0 p) F0 fuel (rhsState false) left (rhsAt false) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 0) (uintOfNat 1) true
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        (rhsRepr false) SH (rhsOK false)
+    have known₁ : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he₁ : mid=rhsHeap := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : rhsHeap.writeAddr (.index left .dyn (uintOfNat 0)) true=some rhsFinalHeap := by
+      have pos : 0<(rhsHeap.get left).val.length := by
+        simp only [rhsHeap,Heap.get_set_same,MObj.setElem_dyn,Heap.get,Objs.get,hp,left];decide
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 0<2^256),Int.toNat_natCast,MObj.elems_dyn,if_pos pos]
+      rfl
+    have he₂ : out=rhsFinalHeap := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    have hm : mm=rhsMidWord false := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word false))).1
+    subst mm
+    have ht : target=rhsFinalWord := (Evm.Out.ok.inj (word₂.symm.trans rhs_second_word)).1
+    subst target
+    have middleOther : ∀ a,a≠0 → ym.2.heap.get a=(rhsSource false).2.heap.get a := by
+      obtain ⟨h,he⟩ := (rhsAt false).assign_state (G0 p) F0 fuel (.there .here) (.there (.there si)) .here (uintOfNat 1) true rfl rfl rfl
+        (by simp only [Heap.len,MObj.elems_dyn];decide) inner
+      intro a hn;rw [he];exact Source.Heap.write_other _ hn _ h
+    have tables₁ : rhsViews ym=rhsTables := by
+      have leaf := hr₁
+      unfold SourceBoolMemoryAt at leaf
+      simp only [rhsHeap,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn] at leaf
+      unfold rhsViews rhsTables
+      rw [leaf,middleOther 1 (by decide),middleOther 2 (by decide),middleOther 3 (by decide),middleOther 4 (by decide)];rfl
+    have tables₂ : rhsViews z=rhsTables := by
+      have leaf := hr₂
+      unfold SourceBoolMemoryAt at leaf
+      rw [elems] at leaf
+      simp only [MObj.elems_dyn] at leaf
+      unfold rhsViews rhsTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    exact ⟨ym,z,inner,expr,stmt,native,word₁,word₂,word,tables₁,tables₂,hr₂,mok₂,hm₂,locals₂,addrs,next,effects,
+      alloc _ (by decide) (rhsAllocator false),rfl⟩
+
+/-- Every ordered Source/native object and all24 INITIAL/reached/final words.
+Failure has only the real reached PREFIX vector, not a returned target machine.
+Native and Source aliases/parents retain LEFT identity while its contents change. -/
+theorem complete_rhs_effect_vectors (bad : Bool) :
+    rhsViews (rhsSource bad)=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    views (rhsState bad).heap=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views rhsHeap=([true,true,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views rhsFinalHeap=([true,true,false],[false,true,false],[0],[0,1,0],[]) ∧
+    words (rhsWord bad)=[w[48],w[32],w[32],w[36],w[1],(if bad then w[3] else w[0]),w[16],w[1],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rhsMidWord bad)=[w[48],w[32],w[32],w[36],w[1],(if bad then w[3] else w[0]),w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words rhsFinalWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (rhsMidWord bad)≠words (rhsWord bad) ∧
+    (rhsWord bad).mem 0=w[48] ∧ (rhsMidWord bad).mem 0=w[48] ∧ rhsFinalWord.mem 0=w[48] ∧
+    TEnv.get (.there .here : Idx RhsΓ (.mem B)) (rhsState bad).env=some left := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases bad
+    all_goals
+      refine ⟨rfl,?_,?_,?_,rfl,rfl,rfl,by decide,rfl,rfl,rfl,rfl⟩
+      all_goals first | change views hp = _ | skip
+      all_goals simp only [views,rhsHeap,rhsFinalHeap,Heap.get_set_same,Heap.get_set_ne,Heap.get,Objs.get,
+        Heap.set,Objs.set,hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil] <;> rfl
+
+/-- Low horizon prevents the inner write itself; this is not the late bounds
+case and is not an admission cap or minimal-fuel claim. -/
+theorem rhs_effect_low_horizon (p : Roadmap.Pipeline) (bad : Bool) :
+    (Source.evalE (G0 p) F0 2 (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource bad)=
+      (.error .timeout,rhsSource bad) := by rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_success_effect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_success_effect_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_effect_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_rhs_effect_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_effect_low_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_effect_low_horizon
+
+
+private def valueSource (v : Bool) : Source.EMState E0 RhsSΓ := ((rhsSource false).1.set .here (.bool v),(rhsSource false).2)
+private def valueState (v : Bool) := (rhsState false).setLocal (.here : Idx RhsΓ (.val .bool)) v
+private def valueWord (v : Bool) := writeMachine (rhsWord false) 7 (.val (bword v))
+private def valueMidHeap (v : Bool) := hp.set left (MObj.setElem .dyn (hp.get left) 1 v)
+private def valueFinalHeap (v : Bool) := (valueMidHeap v).set left (MObj.setElem .dyn ((valueMidHeap v).get left) 0 v)
+private def valueMidWord (v : Bool) := writeMachine (valueWord v) 18 (.val (bword v))
+private def valueFinalWord (v : Bool) := writeMachine (valueMidWord v) 17 (.val (bword v))
+private def valueTables (v : Bool) (final : Bool) : List (Option (Σ τ : Source.STy,Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [(if final then v else true),v,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+    some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩]
+private theorem valueAt (v : Bool) : SourceBoolMemoryAt (valueSource v) 0 hp left .dyn := left_at
+private theorem valueOK (v : Bool) : Source.MemOK E0 SH (valueSource v) :=
+  ⟨⟨(rhsOK false).1.1,Source.LocalsOK.set (rhsSource false).1 .here (rhsOK false).1.2 trivial⟩,(rhsOK false).2⟩
+private theorem valueRepr (v : Bool) : StateRepr 1 1 8 rhsFrag (valueState v) base (valueWord v) :=
+  (rhsRepr false).setVal .here v (.val (bword v)) rfl
+private theorem valueAllocator (v : Bool) : StructAllocatorRepr hp base 8 ⟨48,by decide⟩ (valueWord v) :=
+  (rhsAllocator false).localWrite 7 (by decide) (by decide) _
+
+private theorem value_first_word (v : Bool) : run (rhsCode (.there (.there tj))) (valueWord v)=.ok (valueMidWord v) 0 := by
+  have codes : rhsCode (.there (.there tj))=[.mload 7,.mload 6,.mload 4] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 4] (valueWord v)=
+      .ok ((((valueWord v).push (.val (bword v))).push w[16]).push w[1]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((valueWord v).push (.val (bword v)))
+    (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((valueWord v).push (.val (bword v))) (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (1 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+private theorem value_second_word (v : Bool) : run (rhsCode (.there (.there ti))) (valueMidWord v)=.ok (valueFinalWord v) 0 := by
+  have codes : rhsCode (.there (.there ti))=[.mload 7,.mload 6,.mload 5] ++ writeArrayStackCode := by rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 5] (valueMidWord v)=
+      .ok ((((valueMidWord v).push (.val (bword v))).push w[16]).push w[0]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((valueMidWord v).push (.val (bword v)))
+    (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((valueMidWord v).push (.val (bword v))) (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (0 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- BOTH pipelines and actual true/false Source results. The returned target
+word is derived from the actual post-write local, with caller tail42 retained;
+initial RHS-cell contents or a discarded statement cannot supply this result. -/
+theorem rhs_expression_value_client (p : Roadmap.Pipeline) (fuel : Nat) (v : Bool) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (valueSource v)=
+        (.ok (.val (.bool v)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (valueSource v)=
+        (.ok (.val (.bool v)),z) ∧
+      Prog.run (valueState v) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))=
+        .ok ⟨(valueState v).withHeap (valueFinalHeap v),List.prefix_refl _⟩ ∧
+      run (rhsCode (.there (.there tj))) (valueWord v)=.ok (valueMidWord v) 0 ∧
+      run (rhsCode (.there (.there ti))) (valueMidWord v)=.ok (valueFinalWord v) 0 ∧
+      run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool)) (valueFinalWord v)=
+        .ok ((valueFinalWord v).push (.val (bword v))) 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (valueWord v)=
+        .ok ((valueFinalWord v).push (.val (bword v))) 0 ∧
+      rhsViews ym=valueTables v false ∧ rhsViews z=valueTables v true ∧
+      SourceBoolMemoryAt z 0 (valueFinalHeap v) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState v).withHeap (valueFinalHeap v)) base ((valueFinalWord v).push (.val (bword v))) ∧
+      z.1=(valueSource v).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource v).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource v).2.ex ∧ z.2.events=(valueSource v).2.events ∧ z.2.logs=(valueSource v).2.logs ∧ z.2.fnLocals=(valueSource v).2.fnLocals) ∧
+      ((valueFinalWord v).push (.val (bword v))).stack=[.val (bword v),w[42]] ∧
+      StructAllocatorRepr (valueFinalHeap v) base 8 ⟨48,by decide⟩ ((valueFinalWord v).push (.val (bword v))) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,hw₁,hw₂,inner,expr,native,nval,word₁,word₂,reload,word,hr₁,hr₂,mok,repr,
+      locals,elems,other,addrs,next,effects,stack,mem,resultRep,alloc⟩ :=
+      rhs_assign_value_word (G0 p) F0 fuel (valueState v) left (valueAt v) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 0) (uintOfNat 1) v
+        rfl rfl rfl rfl rfl rfl rfl rfl (by change (uintOfNat 1).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide) (by change (uintOfNat 0).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide)
+        (valueRepr v) SH (valueOK v)
+    have known₁ : hp.writeAddr (.index left .dyn (uintOfNat 1)) v=some (valueMidHeap v) := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he₁ : mid=valueMidHeap v := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : (valueMidHeap v).writeAddr (.index left .dyn (uintOfNat 0)) v=some (valueFinalHeap v) := by
+      have pos : 0<((valueMidHeap v).get left).val.length := by
+        simp only [valueMidHeap,Heap.get_set_same,MObj.setElem_dyn,List.length_set];decide
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 0<2^256),Int.toNat_natCast,MObj.elems_dyn,if_pos pos];rfl
+    have he₂ : out=valueFinalHeap v := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    have hm : mm=valueMidWord v := (Evm.Out.ok.inj (word₁.symm.trans (value_first_word v))).1
+    subst mm
+    have ht : target=valueFinalWord v := (Evm.Out.ok.inj (word₂.symm.trans (value_second_word v))).1
+    subst target
+    have middleOther : ∀ a,a≠0 → ym.2.heap.get a=(valueSource v).2.heap.get a := by
+      obtain ⟨h,he⟩ := (valueAt v).assign_state (G0 p) F0 fuel (.there .here) (.there (.there si)) .here (uintOfNat 1) v rfl rfl rfl
+        (by simp only [Heap.len,MObj.elems_dyn];decide) inner
+      intro a hn;rw [he];exact Source.Heap.write_other _ hn _ h
+    have tables₁ : rhsViews ym=valueTables v false := by
+      have leaf := hr₁
+      unfold SourceBoolMemoryAt at leaf
+      simp only [valueMidHeap,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,middleOther 1 (by decide),middleOther 2 (by decide),middleOther 3 (by decide),middleOther 4 (by decide)];rfl
+    have tables₂ : rhsViews z=valueTables v true := by
+      have leaf := hr₂
+      unfold SourceBoolMemoryAt at leaf
+      rw [elems] at leaf
+      simp only [MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    exact ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr₂,mok,repr,locals,addrs,next,effects,stack,
+      alloc _ (by decide) (valueAllocator v)⟩
+
+/-- The late bounds case rejects BEFORE the new value reload or any suffix.
+Existing full Source-prefix observations remain supplied by rhs_late_effect_client. -/
+theorem rhs_expression_value_reject (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (rhsWord true)=.revert ∧
+      (∀ suffix,run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here ++ suffix) (rhsWord true)=.revert) ∧
+      SourceBoolMemoryAt ym 0 rhsHeap left .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,hw,inner,expr,word₁,word₂,word,suffix,hr,mok,repr,locals,elems,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_value_bounds_word (G0 p) F0 fuel (rhsState true) left (rhsAt true) (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 3) (uintOfNat 1) true
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        (rhsRepr true) SH (rhsOK true)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he : mid=rhsHeap := Option.some.inj (hw.symm.trans known)
+    subst mid
+    have hm : mm=rhsMidWord true := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word true))).1
+    subst mm
+    exact ⟨ym,inner,expr,word₁,word,suffix,hr⟩
+
+/-- Complete word stages, full native objects and actual value/tail. Dropping
+the reload yields the wrong stack; returning the old RHS cell is wrong for true. -/
+theorem complete_rhs_value_vectors (v : Bool) :
+    rhsViews (valueSource v)=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+      some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    views (valueState v).heap=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (valueMidHeap v)=([true,v,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (valueFinalHeap v)=([v,v,false],[false,true,false],[0],[0,1,0],[]) ∧
+    words (valueWord v)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],.val (bword v),w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (valueMidWord v)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],.val (bword v),w[3],w[1],.val (bword v),w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (valueFinalWord v)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],.val (bword v),w[3],.val (bword v),.val (bword v),w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words ((valueFinalWord v).push (.val (bword v)))=words (valueFinalWord v) ∧
+    ((valueFinalWord v).push (.val (bword v))).stack=[.val (bword v),w[42]] ∧
+    ((valueFinalWord v).push (.val (bword v))).stack≠(valueFinalWord v).stack ∧
+    ((valueFinalWord true).push w[1]).stack≠[w[0],w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,?_,?_,?_,rfl,rfl,rfl,rfl,rfl,?_,?_⟩
+    · change views hp=_
+      simp only [views,Heap.get,Objs.get,hp,left,right,old,fresh,empty,MObj.elems_dyn,List.map_cons,List.map_nil]
+    · simp only [views,valueMidHeap,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,
+        MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+    · simp only [views,valueFinalHeap,valueMidHeap,Heap.get,Objs.get,Heap.set,Objs.set,hp,left,right,old,fresh,empty,
+        MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil];rfl
+    · intro he
+      exact (by decide : (2 : Nat)≠1) (congrArg List.length he)
+    · decide
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_expression_value_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_expression_value_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.rhs_expression_value_reject' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms rhs_expression_value_reject
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_rhs_value_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_rhs_value_vectors
+
+
+private def guardedBody : Source.RExpr E0 RhsSΓ .bool :=
+  sourceRhsAssign (.there .here) (.there (.there sj)) (.there (.there si)) .here
+private def guardedCode : List Instr :=
+  binaryCode .bool .and (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+    (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here)
+private def guardedNative : Stmt C RhsΓ RhsΓ :=
+  .ite (.simple (.local .here)) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil)) .nil
+
+/-- The false guard skips an actually mutating body in BOTH pipelines. The
+separate real unguarded run clears LEFT[0]; the guarded run retains all objects,
+locals, world and caller memory exactly. This is not a final-vector order test. -/
+theorem short_circuit_skip_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+4) guardedBody).run (valueSource false)=(.ok (.val (.bool false)),z) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+        (.ok (.val (.bool false)),valueSource false) ∧
+      Stmt.run (valueState false) guardedNative=.ok ⟨valueState false,List.prefix_refl _⟩ ∧
+      run guardedCode (valueWord false)=.ok ((valueWord false).push w[0]) 0 ∧
+      rhsViews z=valueTables false true ∧ rhsViews z≠rhsViews (valueSource false) ∧
+      SourceBoolMemoryAt (valueSource false) 0 hp left .dyn ∧ Source.MemOK E0 SH (valueSource false) ∧
+      StateRepr 1 1 8 rhsFrag (valueState false) base ((valueWord false).push w[0]) ∧
+      StructAllocatorRepr hp base 8 ⟨48,by decide⟩ ((valueWord false).push w[0]) ∧
+      words ((valueWord false).push w[0])=words (valueWord false) ∧
+      ((valueWord false).push w[0]).stack=[w[0],w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      rhs_expression_value_client p fuel false
+    have skipped := source_and_skip (G0 p) F0 (fuel+3) (valueSource false) .here guardedBody rfl
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (valueWord false)=.ok ((valueWord false).push (.val (bword false))) 0 := rfl
+    refine ⟨z,expr,skipped,?_,word_and_skip _ _ _ loaded,tables₂,?_,valueAt false,valueOK false,
+      (valueRepr false).push _,(valueAllocator false).stack _,rfl,rfl⟩
+    · rfl
+    · rw [tables₂]
+      intro he
+      have atZero := congrArg (fun xs : List (Option (Σ τ,Source.Data E0.layout τ)) => xs[0]?) he
+      have dataEq : (sourceBoolMemory [false,false,false] : Source.Data E0.layout SB)=sourceBoolMemory [true,false,false] :=
+        by
+          have same := Option.some.inj (Option.some.inj atZero)
+          injection same with ht hd
+      have observed := congrArg (fun d : Source.Data E0.layout SB => match d with
+        | .array n _ elems => if h : 0<n then (elems ⟨0,h⟩).asVal else .error (.stuck "empty")
+        | .val _ => .error (.stuck "pointer")) dataEq
+      change (Except.ok (Source.Val.bool false) : Source.R (Source.Val E0.layout .bool))=.ok (.bool true) at observed
+      cases observed
+
+/-- True enters the existing effectful body in BOTH pipelines. All derived
+Source frames and target allocator/stack facts come from that actual run. -/
+theorem short_circuit_enter_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (valueSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (valueSource true)=
+        (.ok (.val (.bool true)),z) ∧
+      Stmt.run (valueState true) guardedNative=.ok ⟨(valueState true).withHeap (valueFinalHeap true),List.prefix_refl _⟩ ∧
+      run guardedCode (valueWord true)=.ok ((valueFinalWord true).push w[1]) 0 ∧
+      rhsViews ym=valueTables true false ∧ rhsViews z=valueTables true true ∧
+      SourceBoolMemoryAt z 0 (valueFinalHeap true) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState true).withHeap (valueFinalHeap true)) base ((valueFinalWord true).push w[1]) ∧
+      z.1=(valueSource true).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource true).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource true).2.ex ∧ z.2.events=(valueSource true).2.events ∧ z.2.logs=(valueSource true).2.logs ∧ z.2.fnLocals=(valueSource true).2.fnLocals) ∧
+      ((valueFinalWord true).push w[1]).stack=[w[1],w[42]] ∧
+      StructAllocatorRepr (valueFinalHeap true) base 8 ⟨48,by decide⟩ ((valueFinalWord true).push w[1]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      rhs_expression_value_client p fuel true
+    have entered := source_and_enter (G0 p) F0 (fuel+3) (valueSource true) z .here guardedBody true rfl expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (valueWord true)=.ok ((valueWord true).push (.val (bword true))) 0 := rfl
+    refine ⟨ym,z,inner,entered,?_,(word_and_enter _ _ _ loaded).trans word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+    change ((Prog.run (valueState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+/-- True reaches the real changed RHS prefix and then the outer bounds error.
+The Source failure state retains the changed cell; symbolic word revert has no
+returned machine and no asserted panic bytes or transaction rollback. -/
+theorem short_circuit_reject_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      Stmt.run (rhsState true) guardedNative=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run guardedCode (rhsWord true)=.revert ∧
+      (∀ suffix,run (guardedCode ++ suffix) (rhsWord true)=.revert) ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,inner,expr,stmt,initialLoc,native,word₁,word₂,word,tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩ :=
+      rhs_late_effect_client p fuel
+    have entered := source_and_error (G0 p) F0 (fuel+3) (rhsSource true) ym .here guardedBody _ rfl expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (rhsWord true)=.ok ((rhsWord true).push (.val (bword true))) 0 := rfl
+    have bodyError : run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (rhsWord true)=.revert :=
+      Evm.run_append_revert word
+    have rejected : run guardedCode (rhsWord true)=.revert := (word_and_enter _ _ _ loaded).trans bodyError
+    refine ⟨ym,inner,entered,?_,word₁,rejected,(fun _ => Evm.run_append_revert rejected),tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩
+    change ((Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+/-- Horizon one cannot even read the guard. Horizon two can skip an arbitrary
+body on false but a true guard reaches the body's horizon-one timeout. -/
+theorem short_circuit_horizons (p : Roadmap.Pipeline) :
+    (Source.evalE (G0 p) F0 1 (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+      (.error .timeout,valueSource false) ∧
+    (Source.evalE (G0 p) F0 2 (.binary .and (.local .here) guardedBody)).run (valueSource false)=
+      (.ok (.val (.bool false)),valueSource false) ∧
+    (Source.evalE (G0 p) F0 2 (.binary .and (.local .here) guardedBody)).run (valueSource true)=
+      (.error .timeout,valueSource true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl⟩
+
+
+private def skippedBadSource : Source.EMState E0 RhsSΓ := ((rhsSource true).1.set .here (.bool false),(rhsSource true).2)
+private def skippedBadState := (rhsState true).setLocal (.here : Idx RhsΓ (.val .bool)) false
+private def skippedBadWord := writeMachine (rhsWord true) 7 w[0]
+private theorem skippedBadRepr : StateRepr 1 1 8 rhsFrag skippedBadState base skippedBadWord :=
+  (rhsRepr true).setVal .here false w[0] rfl
+private theorem skippedBadOK : Source.MemOK E0 SH skippedBadSource :=
+  ⟨⟨(rhsOK true).1.1,Source.LocalsOK.set (rhsSource true).1 .here (rhsOK true).1.2 trivial⟩,(rhsOK true).2⟩
+
+/-- An actually invalid outer index is skipped on false. The SAME initial
+source/native/word state has a separately derived real body rejection; it is
+not merely a known failing scalar substituted for a memory operation. -/
+theorem short_circuit_skip_invalid (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 RhsSΓ) (mm : Machine),
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run skippedBadSource=
+        (.ok (.val (.bool false)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) guardedBody).run skippedBadSource=(.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.binary .and (.local .here) guardedBody)).run skippedBadSource=
+        (.ok (.val (.bool false)),skippedBadSource) ∧
+      run (rhsCode (.there (.there tj))) skippedBadWord=.ok mm 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) skippedBadWord=.revert ∧
+      run guardedCode skippedBadWord=.ok (skippedBadWord.push w[0]) 0 ∧
+      SourceBoolMemoryAt ym 0 mid left .dyn ∧ Source.MemOK E0 SH ym ∧
+      rhsViews skippedBadSource=rhsViews (rhsSource true) ∧
+      words (skippedBadWord.push w[0])=[w[48],w[32],w[32],w[36],w[1],w[3],w[16],w[0],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+      (skippedBadWord.push w[0]).stack=[w[0],w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,hw,inner,expr,word₁,word₂,word,suffix,hr,mok,repr,locals,elems,addrs,next,effects,stack,alloc⟩ :=
+      rhs_assign_value_bounds_word (G0 p) F0 fuel skippedBadState left (show SourceBoolMemoryAt skippedBadSource 0 hp left .dyn from left_at)
+        (.there .here) (.there (.there sj)) (.there (.there si)) .here
+        (.there .here) (.there (.there ti)) (.there (.there tj)) .here (uintOfNat 3) (uintOfNat 1) false
+        rfl rfl rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (by simp only [Heap.len,MObj.elems_dyn];decide)
+        skippedBadRepr SH skippedBadOK
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        skippedBadWord=.ok (skippedBadWord.push (.val (bword false))) 0 := rfl
+    exact ⟨mid,ym,mm,inner,expr,source_and_skip (G0 p) F0 (fuel+3) skippedBadSource .here guardedBody rfl,
+      word₁,word,word_and_skip _ _ _ loaded,hr,mok,rfl,rfl,rfl⟩
+
+/-- Full24-word guard outputs and all typed objects, tied to the named states
+in the actual clients above. Earlier complete source/prefix/final vectors are
+retained verbatim, including the true-error prefix with no final machine. -/
+theorem complete_short_circuit_vectors :
+    words ((valueWord false).push w[0])=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[1],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words ((valueFinalWord true).push w[1])=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words ((valueFinalWord true).push w[1])≠words ((valueWord false).push w[0]) ∧
+    views (valueState false).heap=([true,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views (valueFinalHeap true)=([true,true,false],[false,true,false],[0],[0,1,0],[]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,by decide,(complete_rhs_value_vectors false).2.1,(complete_rhs_value_vectors true).2.2.2.1⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_invalid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_skip_invalid
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_short_circuit_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_short_circuit_vectors
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_skip_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_skip_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_enter_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_enter_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.short_circuit_horizons' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms short_circuit_horizons
+
+
+private def choiceFalseMidHeap := hp.set left (MObj.setElem .dyn (hp.get left) 0 false)
+private def choiceFalseHeap := choiceFalseMidHeap.set left (MObj.setElem .dyn (choiceFalseMidHeap.get left) 1 false)
+private def choiceFalseMidWord := writeMachine (valueWord false) 17 w[0]
+private def choiceFalseWord := writeMachine choiceFalseMidWord 18 w[0]
+private theorem choiceFalseFirst : run (rhsCode (.there (.there ti))) (valueWord false)=.ok choiceFalseMidWord 0 := by
+  have codes : rhsCode (.there (.there ti))=[.mload 7,.mload 6,.mload 5] ++ writeArrayStackCode := rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 5] (valueWord false)=
+      .ok ((((valueWord false).push w[0]).push w[16]).push w[0]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq ((valueWord false).push w[0])
+    (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run ((valueWord false).push w[0]) (⟨16,by decide⟩ : Fin W) (⟨0,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (0 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+private theorem choiceFalseSecond : run (rhsCode (.there (.there tj))) choiceFalseMidWord=.ok choiceFalseWord 0 := by
+  have codes : rhsCode (.there (.there tj))=[.mload 7,.mload 6,.mload 4] ++ writeArrayStackCode := rfl
+  rw [codes]
+  have load : run [.mload 7,.mload 6,.mload 4] choiceFalseMidWord=
+      .ok (((choiceFalseMidWord.push w[0]).push w[16]).push w[1]) 0 := rfl
+  rw [Evm.run_append_ok load,writeArrayStackCode,arrayStack_append_eq (choiceFalseMidWord.push w[0])
+    (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl [.mstoreAt]]
+  have addr := arrayAddr_run (choiceFalseMidWord.push w[0]) (⟨16,by decide⟩ : Fin W) (⟨1,by decide⟩ : Fin W) 3 (by decide) rfl
+  simp only [show (1 : Nat)<3 from by decide,if_pos] at addr
+  rw [Evm.run_append_ok addr]
+  rfl
+
+/-- Real false branch: reversed reached write order (LEFT0 then LEFT1), not
+an independently assumed final state. The FIRST write materially clears LEFT0. -/
+theorem conditional_false_body_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+4) (sourceRhsAssign (.there .here) (.there (.there si)) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),z) ∧
+      Prog.run (valueState false) (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))=
+        .ok ⟨(valueState false).withHeap (choiceFalseHeap),List.prefix_refl _⟩ ∧
+      run (rhsCode (.there (.there ti))) (valueWord false)=.ok (choiceFalseMidWord) 0 ∧
+      run (rhsCode (.there (.there tj))) (choiceFalseMidWord)=.ok (choiceFalseWord) 0 ∧
+      run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool)) (choiceFalseWord)=
+        .ok ((choiceFalseWord).push (.val (bword false))) 0 ∧
+      run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there tj)) (.there (.there ti)) .here) (valueWord false)=
+        .ok ((choiceFalseWord).push (.val (bword false))) 0 ∧
+      rhsViews ym=valueTables false true ∧ rhsViews z=valueTables false true ∧
+      SourceBoolMemoryAt z 0 (choiceFalseHeap) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState false).withHeap (choiceFalseHeap)) base ((choiceFalseWord).push (.val (bword false))) ∧
+      z.1=(valueSource false).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource false).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource false).2.ex ∧ z.2.events=(valueSource false).2.events ∧ z.2.logs=(valueSource false).2.logs ∧ z.2.fnLocals=(valueSource false).2.fnLocals) ∧
+      ((choiceFalseWord).push (.val (bword false))).stack=[.val (bword false),w[42]] ∧
+      StructAllocatorRepr (choiceFalseHeap) base 8 ⟨48,by decide⟩ ((choiceFalseWord).push (.val (bword false))) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,hw₁,hw₂,inner,expr,native,nval,word₁,word₂,reload,word,hr₁,hr₂,mok,repr,
+      locals,elems,other,addrs,next,effects,stack,mem,resultRep,alloc⟩ :=
+      rhs_assign_value_word (G0 p) F0 fuel (valueState false) left (valueAt false) (.there .here) (.there (.there si)) (.there (.there sj)) .here
+        (.there .here) (.there (.there tj)) (.there (.there ti)) .here (uintOfNat 1) (uintOfNat 0) false
+        rfl rfl rfl rfl rfl rfl rfl rfl (by change (uintOfNat 0).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide) (by change (uintOfNat 1).val.toNat<hp.len left .dyn;simp only [Heap.len,MObj.elems_dyn];decide)
+        (valueRepr false) SH (valueOK false)
+    have known₁ : hp.writeAddr (.index left .dyn (uintOfNat 0)) false=some (choiceFalseMidHeap) := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 0<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have he₁ : mid=choiceFalseMidHeap := Option.some.inj (hw₁.symm.trans known₁)
+    subst mid
+    have known₂ : (choiceFalseMidHeap).writeAddr (.index left .dyn (uintOfNat 1)) false=some (choiceFalseHeap) := by
+      have pos : 1<((choiceFalseMidHeap).get left).val.length := by
+        simp only [choiceFalseMidHeap,Heap.get_set_same,MObj.setElem_dyn,List.length_set];decide
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,MObj.elems_dyn,if_pos pos];rfl
+    have he₂ : out=choiceFalseHeap := Option.some.inj (hw₂.symm.trans known₂)
+    subst out
+    have hm : mm=choiceFalseMidWord := (Evm.Out.ok.inj (word₁.symm.trans (choiceFalseFirst))).1
+    subst mm
+    have ht : target=choiceFalseWord := (Evm.Out.ok.inj (word₂.symm.trans (choiceFalseSecond))).1
+    subst target
+    have middleOther : ∀ a,a≠0 → ym.2.heap.get a=(valueSource false).2.heap.get a := by
+      obtain ⟨h,he⟩ := (valueAt false).assign_state (G0 p) F0 fuel (.there .here) (.there (.there sj)) .here (uintOfNat 0) false rfl rfl rfl
+        (by simp only [Heap.len,MObj.elems_dyn];decide) inner
+      intro a hn;rw [he];exact Source.Heap.write_other _ hn _ h
+    have tables₁ : rhsViews ym=valueTables false true := by
+      have leaf := hr₁
+      unfold SourceBoolMemoryAt at leaf
+      simp only [choiceFalseMidHeap,Heap.get_set_same,MObj.elems_setElem,MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,middleOther 1 (by decide),middleOther 2 (by decide),middleOther 3 (by decide),middleOther 4 (by decide)];rfl
+    have tables₂ : rhsViews z=valueTables false true := by
+      have leaf := hr₂
+      unfold SourceBoolMemoryAt at leaf
+      rw [elems] at leaf
+      simp only [MObj.elems_dyn] at leaf
+      unfold rhsViews valueTables
+      rw [leaf,addrs 1 (by decide),addrs 2 (by decide),addrs 3 (by decide),addrs 4 (by decide)];rfl
+    exact ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr₂,mok,repr,locals,addrs,next,effects,stack,
+      alloc _ (by decide) (valueAllocator false)⟩
+
+
+private def choiceNo : Source.RExpr E0 RhsSΓ .bool := sourceRhsAssign (.there .here) (.there (.there si)) (.there (.there sj)) .here
+private def choiceYesCode := rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here
+private def choiceNoCode := rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there tj)) (.there (.there ti)) .here
+private def choiceRead := compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool)
+private def choiceCode := conditionalCode choiceRead choiceYesCode choiceNoCode
+private def choiceHeap (v : Bool) := if v then valueFinalHeap true else choiceFalseHeap
+private def choiceWord (v : Bool) := if v then valueFinalWord true else choiceFalseWord
+private def choiceNative : Stmt C RhsΓ RhsΓ :=
+  .ite (.simple (.local .here)) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))
+    (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))
+
+/-- BOTH actual pipelines select different effectful branches, retaining every
+represented object's observations and the actual selected prefix. -/
+theorem conditional_memory_client (p : Roadmap.Pipeline) (fuel : Nat) (v : Bool) :
+    ∃ ym z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (if v then sourceIndexedAssign (.there .here) (.there (.there si)) .here
+        else sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource v)=(.ok (.val (.bool v)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=(.ok (.val (.bool v)),z) ∧
+      Stmt.run (valueState v) choiceNative=.ok ⟨(valueState v).withHeap (choiceHeap v),List.prefix_refl _⟩ ∧
+      run choiceCode (valueWord v)=.ok ((choiceWord v).push (.val (bword v))) 0 ∧
+      rhsViews ym=(if v then valueTables true false else valueTables false true) ∧ rhsViews z=valueTables v true ∧
+      SourceBoolMemoryAt z 0 (choiceHeap v) left .dyn ∧ Source.MemOK E0 SH z ∧
+      StateRepr 1 1 8 rhsFrag ((valueState v).withHeap (choiceHeap v)) base ((choiceWord v).push (.val (bword v))) ∧
+      z.1=(valueSource v).1 ∧ (∀ a,a≠0 → z.2.heap.get a=(valueSource v).2.heap.get a) ∧ z.2.heap.next=5 ∧
+      (z.2.ex=(valueSource v).2.ex ∧ z.2.events=(valueSource v).2.events ∧ z.2.logs=(valueSource v).2.logs ∧ z.2.fnLocals=(valueSource v).2.fnLocals) ∧
+      ((choiceWord v).push (.val (bword v))).stack=[.val (bword v),w[42]] ∧
+      StructAllocatorRepr (choiceHeap v) base 8 ⟨48,by decide⟩ ((choiceWord v).push (.val (bword v))) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases v
+    · obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+        conditional_false_body_client p fuel
+      have select := source_cond_select (G0 p) F0 (fuel+3) (valueSource false) .here guardedBody choiceNo false rfl
+      have loaded : run choiceRead (valueWord false)=.ok ((valueWord false).push (.val (bword false))) 0 := rfl
+      refine ⟨ym,z,inner,select.trans expr,?_,(word_cond_false _ _ _ _ loaded).trans word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+      change ((Prog.run (valueState false) (.cons (rhsNative (.there (.there ti))) (.cons (rhsNative (.there (.there tj))) .nil))).map
+        (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+      rw [native]
+      rfl
+    · obtain ⟨ym,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+        rhs_expression_value_client p fuel true
+      have select := source_cond_select (G0 p) F0 (fuel+3) (valueSource true) .here guardedBody choiceNo true rfl
+      have loaded : run choiceRead (valueWord true)=.ok ((valueWord true).push (.val (bword true))) 0 := rfl
+      refine ⟨ym,z,inner,select.trans expr,?_,word_cond_true _ _ _ _ _ loaded word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩
+      change ((Prog.run (valueState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+        (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+      rw [native]
+      rfl
+
+/-- Actual selected rejection with a real changed prefix. The unselected
+local-value branch is not executed as an error handler or fallback. -/
+theorem conditional_memory_reject (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource true)=
+        (.ok (.val (.bool true)),ym) ∧
+      (Source.evalE (G0 p) F0 (fuel+5) (.cond (.local .here) guardedBody (.local .here))).run (rhsSource true)=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      Stmt.run (rhsState true) guardedNative=.error .revert ∧
+      run (rhsCode (.there (.there tj))) (rhsWord true)=.ok (rhsMidWord true) 0 ∧
+      run (conditionalCode choiceRead choiceYesCode choiceRead) (rhsWord true)=.revert ∧
+      (∀ suffix,run ((conditionalCode choiceRead choiceYesCode choiceRead) ++ suffix) (rhsWord true)=.revert) ∧
+      rhsViews ym=rhsTables ∧ SourceBoolMemoryAt ym 0 rhsHeap left .dyn ∧ Source.MemOK E0 SH ym ∧
+      StateRepr 1 1 8 rhsFrag ((rhsState true).withHeap rhsHeap) base (rhsMidWord true) ∧
+      ym.1=(rhsSource true).1 ∧ ym.2.heap.get 0≠(rhsSource true).2.heap.get 0 ∧
+      (∀ a,a≠0 → ym.2.heap.get a=(rhsSource true).2.heap.get a) ∧ ym.2.heap.next=5 ∧
+      (ym.2.ex=(rhsSource true).2.ex ∧ ym.2.events=(rhsSource true).2.events ∧ ym.2.logs=(rhsSource true).2.logs ∧ ym.2.fnLocals=(rhsSource true).2.fnLocals) ∧
+      StructAllocatorRepr rhsHeap base 8 ⟨48,by decide⟩ (rhsMidWord true) ∧ (rhsMidWord true).stack=[w[42]] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨ym,inner,expr,stmt,initialLoc,native,word₁,word₂,word,tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩ :=
+      rhs_late_effect_client p fuel
+    have entered := (source_cond_select (G0 p) F0 (fuel+3) (rhsSource true) .here guardedBody (.local .here) true rfl).trans expr
+    have loaded : run (compileVal 1 (.simple (.local (.here : Idx RhsΓ (.val .bool))) : Val C RhsΓ .bool))
+        (rhsWord true)=.ok ((rhsWord true).push (.val (bword true))) 0 := rfl
+    have bodyError : run (rhsAssignValueCode (C := C) 1 (.there .here : Idx RhsΓ (.mem B)) (.there (.there ti)) (.there (.there tj)) .here) (rhsWord true)=.revert :=
+      Evm.run_append_revert word
+    have rejected : run (conditionalCode choiceRead choiceYesCode choiceRead) (rhsWord true)=.revert := word_cond_true_error _ _ _ _ loaded bodyError
+    refine ⟨ym,inner,entered,?_,word₁,rejected,(fun _ => Evm.run_append_revert rejected),tables,hr,mok,repr,locals,changed,addrs,next,effects,alloc,stack⟩
+    change ((Prog.run (rhsState true) (.cons (rhsNative (.there (.there tj))) (.cons (rhsNative (.there (.there ti))) .nil))).map
+      (fun o : Out C H RhsΓ => (⟨o.st.drop .refl,o.ext⟩ : Out C H RhsΓ)))=_
+    rw [native]
+    rfl
+
+
+/-- SAME false initial state, actual alternate prefix executions: final
+commutation cannot establish branch/order correctness. Both complete Source
+prefix tables and every word distinguish the selected order. -/
+theorem conditional_wrong_order_prefix (p : Roadmap.Pipeline) (fuel : Nat) :
+    ∃ selected other : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there sj)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),selected) ∧
+      (Source.evalE (G0 p) F0 (fuel+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (valueSource false)=
+        (.ok (.val (.bool false)),other) ∧
+      rhsViews selected=valueTables false true ∧ rhsViews other=valueTables false false ∧
+      rhsViews selected≠rhsViews other ∧
+      run (rhsCode (.there (.there ti))) (valueWord false)=.ok choiceFalseMidWord 0 ∧
+      run (rhsCode (.there (.there tj))) (valueWord false)=.ok (valueMidWord false) 0 ∧
+      words choiceFalseMidWord≠words (valueMidWord false) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨selected,z,inner,expr,native,word₁,word₂,reload,word,tables₁,tables₂,hr,mok,repr,locals,addrs,next,effects,stack,alloc⟩ :=
+      conditional_false_body_client p fuel
+    obtain ⟨other,zw,otherInner,otherExpr,otherNative,otherWord₁,otherWord₂,otherReload,otherWord,otherTables,rest⟩ :=
+      rhs_expression_value_client p fuel false
+    obtain ⟨oldFinal,oldRun,skipped,skipNative,skipWord,oldTable,oldDifferent,oldRest⟩ := short_circuit_skip_client p fuel
+    refine ⟨selected,other,inner,otherInner,tables₁,otherTables,?_,choiceFalseFirst,value_first_word false,by decide⟩
+    intro he
+    apply oldDifferent
+    calc rhsViews oldFinal=valueTables false true := oldTable
+         _=rhsViews selected := tables₁.symm
+         _=rhsViews other := he
+         _=valueTables false false := otherTables
+         _=rhsViews (valueSource false) := rfl
+
+/-- Complete additional false-branch target stages and typed objects. Source
+stages are the full five-object tables linked by conditional_memory_client;
+all earlier vectors, including the true branch, stay byte-preserved. -/
+theorem complete_conditional_vectors :
+    words choiceFalseMidWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[0],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words choiceFalseWord=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[0],w[3],w[0],w[0],w[0],w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words (choiceFalseWord.push w[0])=words choiceFalseWord ∧
+    views choiceFalseMidHeap=([false,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    views choiceFalseHeap=([false,false,false],[false,true,false],[0],[0,1,0],[]) ∧
+    (choiceFalseWord.push w[0]).stack=[w[0],w[42]] ∧ choiceFalseWord.mem 0=w[48] ∧
+    ((valueFinalWord true).push w[1]).stack≠(choiceFalseWord.push w[0]).stack := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,?_,?_,rfl,rfl,by decide⟩
+    all_goals simp only [views,choiceFalseMidHeap,choiceFalseHeap,Heap.get,Objs.get,Heap.set,Objs.set,
+      hp,left,right,old,fresh,empty,MObj.elems_dyn,MObj.setElem_dyn,List.map_cons,List.map_nil] <;> rfl
+
+/-- Low horizon times out before either selected body can write. This is a
+family-of-horizons observation, not minimal fuel or a source admission cap. -/
+theorem conditional_low_horizon (p : Roadmap.Pipeline) (v : Bool) :
+    (Source.evalE (G0 p) F0 1 (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=
+      (.error .timeout,valueSource v) ∧
+    (Source.evalE (G0 p) F0 2 (.cond (.local .here) guardedBody choiceNo)).run (valueSource v)=
+      (.error .timeout,valueSource v) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | cases v <;> exact ⟨rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_reject' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_memory_reject
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_wrong_order_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_wrong_order_prefix
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.complete_conditional_vectors' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms complete_conditional_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_low_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_low_horizon
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_false_body_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_false_body_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.conditional_memory_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms conditional_memory_client
+
+
+private def localDeleteSource : Source.EMState E0 AliasSΓ :=
+  (aliasSource.1.set .here (.memRef rfl 5),
+   {aliasSource.2 with heap := (aliasSource.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def localDeleteWord := writeMachine (allocateMachine aliasWord ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+
+/-- Both pipelines execute the actual reference delete and the existing whole
+allocation/rebind program. Parent-held aliases still point to the old object. -/
+theorem local_reference_delete_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    (Source.evalE (G0 p) F0 (fuel+3) (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.ok Source.RVal.unit,localDeleteSource) ∧
+    Evm.run (rebindNewCode 1 (.here : Idx AliasΓ (.mem B)) (.lit 0 rfl : Simple C AliasΓ .uint)) aliasWord=
+      .ok localDeleteWord 0 ∧
+    Source.MemOK E0 SH localDeleteSource ∧
+    SourceBoolMemoryAt localDeleteSource 0
+      (aliasState.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.heap (left.wk (List.prefix_append H [B])) .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_rebind_word (G0 p) F0 fuel aliasSource .here aliasState .here left 0
+      (show SourceBoolMemoryAt aliasSource 0 hp left .dyn from left_at) rfl rfl SH aliasSourceOK
+      aliasRepr.state aliasAllocator (by decide) (by decide)
+    exact ⟨h.1,h.2.2.2.1,h.2.2.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.2.2.1⟩
+
+/-- The inhabited native execution and its reached legacy representation,
+allocator, fresh identity and empty contents are explicit client observations. -/
+theorem local_reference_delete_native_client (p : Roadmap.Pipeline) (fuel : Nat) :
+    let pair := aliasState.alloc (defaultArray .bool ⟨0,W_pos⟩)
+    let state := pair.1.setLocal (.here : Idx AliasΓ (.mem B)) (some pair.2)
+    Stmt.run aliasState (.rebindMem (.here : Idx AliasΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))=
+      .ok ⟨state,List.prefix_append H [B]⟩ ∧
+    StateRepr 1 1 8 aliasFrag state (upd base 5 ⟨48,by decide⟩) localDeleteWord ∧
+    StructAllocatorRepr state.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ localDeleteWord ∧
+    SourceBoolMemoryAt localDeleteSource 5 state.heap pair.2 .dyn ∧
+    pair.2.id=5 ∧ pair.2.id≠(left.wk (List.prefix_append H [B])).id ∧
+    TEnv.get (.here : Idx AliasΓ (.mem B)) state.env=some pair.2 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_rebind_word (G0 p) F0 fuel aliasSource .here aliasState .here left 0
+      (show SourceBoolMemoryAt aliasSource 0 hp left .dyn from left_at) rfl rfl SH aliasSourceOK
+      aliasRepr.state aliasAllocator (by decide) (by decide)
+    exact ⟨h.2.2.1,h.2.2.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.1,
+      h.2.2.2.2.2.2.2.2.2.2.2.1,h.2.2.2.2.2.2.2.2.2.2.2.2.1,rfl⟩
+
+theorem local_reference_delete_native_vectors :
+    let pair := hp.alloc (defaultArray .bool ⟨0,W_pos⟩)
+    (left.id,right.id,old.id,fresh.id,empty.id,pair.2.id)=(0,1,2,3,4,5) ∧
+    MObj.elems .dyn (pair.1.get pair.2)=[] ∧
+    MObj.elems .dyn (pair.1.get (left.wk (List.prefix_append H [B])))=[true,false,false] ∧
+    MObj.elems .dyn (pair.1.get (right.wk (List.prefix_append H [B])))=[false,true,false] ∧
+    (MObj.elems .dyn (pair.1.get (old.wk (List.prefix_append H [B])))).map HRef.id=[0] ∧
+    (MObj.elems .dyn (pair.1.get (fresh.wk (List.prefix_append H [B])))).map HRef.id=[0,1,0] ∧
+    (MObj.elems .dyn (pair.1.get (empty.wk (List.prefix_append H [B])))).map HRef.id=[] ∧
+    aliasSource.2.heap.get 5=none ∧ aliasSource.1.get (.here : Source.Idx AliasSΓ SB)=.memRef rfl 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | dsimp only
+    have keep : Heap.Keeps (List.prefix_append H [B]) hp (hp.alloc (defaultArray .bool ⟨0,W_pos⟩)).1 :=
+      Heap.keeps_alloc hp (defaultArray .bool ⟨0,W_pos⟩)
+    refine ⟨rfl,?_,?_,?_,?_,?_,?_,rfl,rfl⟩
+    · rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    · rw [keep left,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep right,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep old,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,old,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep fresh,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,fresh,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keep empty,MObj.elems_wk];simp only [Heap.get,Objs.get,hp,left,right,empty,MObj.elems_dyn,List.map_nil]
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_native_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_native_vectors
+
+/-- Complete old object table plus the allocated object and all existing word
+observations plus its header and next cell. The old parent aliases are retained. -/
+theorem local_reference_delete_vectors :
+    aliasViews localDeleteSource=aliasViews aliasSource ∧
+    localDeleteSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    localDeleteSource.1.get (.here : Source.Idx AliasSΓ SB)=.memRef rfl 5 ∧
+    cells.map localDeleteWord.mem ++ [localDeleteWord.mem 48,localDeleteWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[99],w[3],w[1],w[0],w[0],
+       w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    localDeleteWord.stack=[w[42]] ∧ localDeleteSource.2.heap.next=6 ∧
+    localDeleteSource.2.heap.get 0≠localDeleteSource.2.heap.get 5 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨rfl,rfl,rfl,rfl,rfl,rfl,?_⟩
+    intro h
+    have hlen := congrArg (fun q => q.map (fun v => match v with
+      | ⟨.array _ _ _,.array n _ _⟩ => n
+      | _ => 0)) h
+    contradiction
+
+/-- The reached fresh root rejects index zero while the retained old object
+still returns true. Low horizons return the real unchanged Source state. -/
+theorem local_reference_delete_boundaries (p : Roadmap.Pipeline) :
+    (Source.memElem (E := E0) (Γ := AliasSΓ) 5 0 .bool).run localDeleteSource=
+      (.error (.revert (Source.panicData .index)),localDeleteSource) ∧
+    (Source.memElem (E := E0) (Γ := AliasSΓ) 0 0 .bool).run localDeleteSource=
+      (.ok (.bool true),localDeleteSource) ∧
+    (Source.evalE (G0 p) F0 1 (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.error .timeout,aliasSource) ∧
+    (Source.evalE (G0 p) F0 2 (.delete (.local (.here : Source.Idx AliasSΓ SB)))).run aliasSource=
+      (.error .timeout,aliasSource) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_boundaries' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_boundaries
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_delete_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_delete_vectors
+
+
+private def rejectLocalSource : Source.EMState E0 RhsSΓ :=
+  ((rhsSource false).1.set (.there .here) (.memRef rfl 5),
+   {(rhsSource false).2 with heap := ((rhsSource false).2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def rejectLocalWord := writeMachine (allocateMachine (rhsWord false) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def rejectLocalDelete : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ :=
+  .expr (.delete (.local (.there .here : Source.Idx RhsSΓ SB)))
+private def rejectLocalAssign : Source.RStmt E0 [] false .body RhsSΓ RhsSΓ :=
+  .expr (sourceIndexedAssign (.there .here) (.there (.there si)) .here)
+private def rejectLocalItems : Source.RItems E0 [] false .body RhsSΓ RhsSΓ :=
+  .stmt rejectLocalDelete (.stmt rejectLocalAssign .nil)
+
+/-- Same INITIAL populated state under both pipelines: the first program step
+really changes identity, and the second rejects through that reached identity. -/
+theorem local_reference_late_reject_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    let pair := (rhsState false).alloc (defaultArray .bool ⟨0,W_pos⟩)
+    let state := pair.1.setLocal (.there .here : Idx RhsΓ (.mem B)) (some pair.2)
+    (Source.execS (G0 p) F0 (horizon+5) RhsSΓ.length none rejectLocalDelete (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal rejectLocalSource.1),(.nil,rejectLocalSource.2)) ∧
+    Stmt.run (rhsState false) (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))=
+      .ok ⟨state,List.prefix_append H [B]⟩ ∧
+    Evm.run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord false)=
+      .ok rejectLocalWord 0 ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run rejectLocalSource=
+      (.error (.revert (Source.panicData .index)),rejectLocalSource) ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,rejectLocalSource.2)) ∧
+    Prog.run (rhsState false) (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl))
+      (.cons (rhsNative (.there (.there tj))) .nil))=.error .revert ∧
+    Evm.run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint) ++
+      rhsCode (.there (.there tj))) (rhsWord false)=.revert ∧
+    Source.MemOK E0 SH rejectLocalSource ∧
+    SourceBoolMemoryAt rejectLocalSource 0 state.heap (left.wk (List.prefix_append H [B])) .dyn ∧
+    StateRepr 1 1 8 rhsFrag state (upd base 5 ⟨48,by decide⟩) rejectLocalWord ∧
+    StructAllocatorRepr state.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ rejectLocalWord ∧
+    Heap.Keeps (List.prefix_append H [B]) hp state.heap ∧
+    state.heap=(hp.alloc (defaultArray .bool ⟨0,W_pos⟩)).1 ∧ state.heap.len pair.2 .dyn=0 ∧ pair.2.id=5 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_local_delete_reject_program (G0 p) F0 horizon (rhsSource false)
+      (.there .here) (.there (.there si)) .here (rhsState false) (.there .here) (.there (.there tj)) .here left 0
+      (uintOfNat 1) true (rhsAt false) rfl rfl rfl rfl rfl rfl SH (rhsOK false)
+      (rhsRepr false) (rhsAllocator false) (by decide) (by decide)
+    rcases h with ⟨stmt,native,word,expr,items,_,program,_,append,keep,mok,_,oldAt,repr,alloc,length,id,_⟩
+    exact ⟨stmt,native,word,expr,items,program,append,mok,oldAt,repr,alloc,keep,rfl,length,id⟩
+
+/-- Skipping the deletion is a real successful write to old LEFT[1], not the
+same outcome as the combined program. Retained old reads stay on LEFT. -/
+theorem local_reference_reject_skipped_delete (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ z : Source.EMState E0 RhsSΓ,
+      (Source.evalE (G0 p) F0 (horizon+3) (sourceIndexedAssign (.there .here) (.there (.there si)) .here)).run (rhsSource false)=
+        (.ok (.val (.bool true)),z) ∧
+      SourceBoolMemoryAt z 0 rhsHeap left .dyn ∧
+      run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨out,z,target,write,expr,_,_,_,observer,_⟩ := resolved_assign_word (G0 p) F0 horizon (rhsState false) left
+      (rhsAt false) (.there .here) (.there (.there si)) .here (.there .here) (.there (.there tj)) .here
+      (uintOfNat 1) true rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr false) SH (rhsOK false)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have same : out=rhsHeap := Option.some.inj (write.symm.trans known)
+    subst out
+    exact ⟨z,expr,observer,rhs_first_word false⟩
+
+theorem local_reference_late_reject_vectors :
+    rhsViews rejectLocalSource=rhsViews (rhsSource false) ∧
+    rejectLocalSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    (rhsSource false).2.heap.get 5=none ∧ rejectLocalSource.2.heap.next=6 ∧
+    rejectLocalSource.1=.cons (.bool true) (.cons (.memRef rfl 5) sy.1) ∧
+    words (rhsWord false)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words rejectLocalWord ++ [rejectLocalWord.mem 48,rejectLocalWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    rejectLocalWord.stack=[w[42]] ∧ words rejectLocalWord≠words (rhsWord false) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,by decide⟩
+
+/-- Horizon five reaches the real allocation/rebinding prefix before the
+assignment's timeout. The failed Items outcome exposes globals, not locals. -/
+theorem local_reference_reject_late_timeout (p : Roadmap.Pipeline) :
+    (Source.execItems (G0 p) F0 5 RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error .timeout,(.nil,rejectLocalSource.2)) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 0 1 .bool).run rejectLocalSource=
+      (.ok (.bool false),rejectLocalSource) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 5 1 .bool).run rejectLocalSource=
+      (.error (.revert (Source.panicData .index)),rejectLocalSource) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have reached := (source_bool_local_delete_rebind_word (G0 p) F0 0 (rhsSource false) (.there .here)
+      (rhsState false) (.there .here) left 0 (rhsAt false) rfl rfl SH (rhsOK false)
+      (rhsRepr false) (rhsAllocator false) (by decide) (by decide)).2.1
+    refine ⟨?_,rfl,rfl⟩
+    change (Source.execItems (G0 p) F0 5 RhsSΓ.length none (.stmt rejectLocalDelete (.stmt rejectLocalAssign .nil))
+      (rhsSource false).1).run (.nil,(rhsSource false).2)=_
+    unfold rejectLocalDelete
+    rw [Source.execItems,Source.Hoare.run_bind,reached]
+    rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_late_reject_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_skipped_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_reject_skipped_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_late_reject_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_late_reject_vectors
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_reject_late_timeout' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_reject_late_timeout
+
+
+private theorem order_left_elems : MObj.elems .dyn (rhsHeap.get left)=[true,true,false] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | change MObj.elems .dyn ((hp.set left (MObj.setElem .dyn (hp.get left) 1 true)).get left)=_
+    rw [Heap.get_set_same,MObj.elems_setElem]
+    simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn]
+    rfl
+
+private def orderLocalState := (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).1.setLocal
+  (.there .here : Idx RhsΓ (.mem B)) (some (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2)
+private def orderLocalWord := writeMachine (allocateMachine (rhsMidWord false) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def orderLocalItems : Source.RItems E0 [] false .body RhsSΓ RhsSΓ :=
+  .stmt rejectLocalAssign (.stmt rejectLocalDelete .nil)
+
+/-- Both pipelines: write-then-delete succeeds while delete-then-write rejects.
+The old parent-held alias keeps the materially changed LEFT[1]=true. -/
+theorem local_reference_order_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ ym : Source.EMState E0 RhsSΓ,
+    let z : Source.EMState E0 RhsSΓ := (ym.1.set (.there .here) (.memRef rfl ym.2.heap.next),
+      {ym.2 with heap := (ym.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+    (Source.execS (G0 p) F0 (horizon+5) RhsSΓ.length none rejectLocalAssign (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal ym.1),(.nil,ym.2)) ∧
+    [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2,ym.2.heap.get 3,ym.2.heap.get 4,ym.2.heap.get 5]=
+      [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,none] ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none orderLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.ok (.normal z.1),(.nil,z.2)) ∧
+    Prog.run (rhsState false) (.cons (rhsNative (.there (.there tj)))
+      (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl)) .nil))=
+      .ok ⟨orderLocalState,List.prefix_append H [B]⟩ ∧
+    run (rhsCode (.there (.there tj))) (rhsWord false)=.ok (rhsMidWord false) 0 ∧
+    run (rhsCode (.there (.there tj)) ++ rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B))
+      (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord false)=.ok orderLocalWord 0 ∧
+    (Source.execItems (G0 p) F0 (horizon+6) RhsSΓ.length none rejectLocalItems (rhsSource false).1).run (.nil,(rhsSource false).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,rejectLocalSource.2)) ∧
+    [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+      [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory []⟩] ∧
+    z.1=(rhsSource false).1.set (.there .here) (.memRef rfl 5) ∧ z.2.heap.next=6 ∧
+    SourceBoolMemoryAt z 0 orderLocalState.heap (left.wk (List.prefix_append H [B])) .dyn ∧
+    Source.MemOK E0 SH z ∧ StateRepr 1 1 8 rhsFrag orderLocalState (upd base 5 ⟨48,by decide⟩) orderLocalWord ∧
+    StructAllocatorRepr orderLocalState.heap (upd base 5 ⟨48,by decide⟩) 8 ⟨49,by decide⟩ orderLocalWord ∧
+    Heap.Keeps (List.prefix_append H [B]) rhsHeap orderLocalState.heap ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 0 1 .bool).run z=(.ok (.bool true),z) ∧
+    (Source.memElem (E := E0) (Γ := RhsSΓ) 5 1 .bool).run z=(.error (.revert (Source.panicData .index)),z) ∧
+    (z.2.ex=(rhsSource false).2.ex ∧ z.2.events=(rhsSource false).2.events ∧
+      z.2.logs=(rhsSource false).2.logs ∧ z.2.fnLocals=(rhsSource false).2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,ym,mm,write,oldMid,midOthers,firstStmt,_,items,_,_,native,word₁,_,word,oldAt,fresh,mok,repr,alloc,keep,elems,_,others,locals,next₁,next₂,ex,events,logs,fnLocals,_,_,_⟩ :=
+      source_bool_write_local_delete_program (G0 p) F0 horizon (rhsSource false) (.there .here) (.there (.there si)) .here
+        (rhsState false) (.there .here) (.there (.there tj)) .here left 0 (uintOfNat 1) true (rhsAt false)
+        rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) SH (rhsOK false)
+        (rhsRepr false) (rhsAllocator false) (by decide) (by decide)
+    have known : hp.writeAddr (.index left .dyn (uintOfNat 1)) true=some rhsHeap := by
+      simp only [Heap.writeAddr,Heap.setIndex,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have equalHeap : mid=rhsHeap := Option.some.inj (write.symm.trans known)
+    subst mid
+    have equalWord : mm=rhsMidWord false := (Evm.Out.ok.inj (word₁.symm.trans (rhs_first_word false))).1
+    subst mm
+    let z : Source.EMState E0 RhsSΓ := (ym.1.set (.there .here) (.memRef rfl ym.2.heap.next),
+      {ym.2 with heap := (ym.2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+    have midLeaf : ym.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ := by
+      change ym.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (rhsHeap.get left))⟩ at oldMid
+      rw [order_left_elems] at oldMid
+      exact oldMid
+    have midEmpty : ym.2.heap.get 5=none := by
+      have noEntry := ym.2.heap.alloc_fresh ⟨SB,sourceBoolMemory []⟩
+      change ym.2.heap.get ym.2.heap.next=none at noEntry
+      rw [next₁] at noEntry;exact noEntry
+    have midTables : [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2,ym.2.heap.get 3,ym.2.heap.get 4,ym.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,none] := by
+      rw [midLeaf,midOthers 1 _ (by decide) (by rfl),midOthers 2 _ (by decide) (by rfl),
+        midOthers 3 _ (by decide) (by rfl),midOthers 4 _ (by decide) (by rfl),midEmpty]
+    have selected : MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B])))=[true,true,false] := by
+      change MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B])))=
+        (MObj.elems .dyn (hp.get left)).set (uintOfNat 1).1.toNat true at elems
+      rw [elems]
+      simp only [Heap.get,Objs.get,hp,left,MObj.elems_dyn,uintOfNat_val (by decide : 1<2^256),Int.toNat_natCast]
+      rfl
+    have leaf : z.2.heap.get 0=some ⟨SB,sourceBoolMemory [true,true,false]⟩ := by
+      change z.2.heap.get 0=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (orderLocalState.heap.get (left.wk (List.prefix_append H [B]))))⟩ at oldAt
+      rw [selected] at oldAt;exact oldAt
+    have emptyElems : MObj.elems .dyn (orderLocalState.heap.get
+        (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[] := by
+      change MObj.elems .dyn ((rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.get (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[]
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    have newObject : z.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ := by
+      change z.2.heap.get ym.2.heap.next=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (orderLocalState.heap.get
+        (((rhsState false).withHeap rhsHeap).alloc (defaultArray .bool ⟨0,W_pos⟩)).2))⟩ at fresh
+      rw [emptyElems,next₁] at fresh;exact fresh
+    have tables : [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,true,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory []⟩] := by
+      rw [leaf,others 1 _ (by decide) (by rfl),others 2 _ (by decide) (by rfl),
+        others 3 _ (by decide) (by rfl),others 4 _ (by decide) (by rfl),newObject]
+    refine ⟨ym,firstStmt,midTables,items,native,word₁,word,(local_reference_late_reject_client p horizon).2.2.2.2.1,tables,?_,next₂,oldAt,mok,repr,alloc,keep,?_,?_,ex,events,logs,fnLocals⟩
+    · change ym.1.set (.there .here) (.memRef rfl ym.2.heap.next)=_
+      rw [locals,next₁]
+      rfl
+    · exact source_bool_read z 0 [true,true,false] leaf 1 (by decide)
+    · exact source_bool_bounds z 5 [] newObject 1 (by decide)
+
+/-- Complete word prefix/final observations discriminate the orders even though
+both prefix allocators rebind to the same new empty object. -/
+theorem local_reference_order_vectors :
+    words (rhsMidWord false)=[w[48],w[32],w[32],w[36],w[1],w[0],w[16],w[1],w[3],w[1],w[1],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words orderLocalWord ++ [orderLocalWord.mem 48,orderLocalWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[0],w[48],w[1],w[3],w[1],w[1],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    words orderLocalWord≠words rejectLocalWord ∧ orderLocalWord.stack=[w[42]] ∧
+    (orderLocalWord.mem 0,orderLocalWord.mem 6,orderLocalWord.mem 18)=(w[49],w[48],w[1]) ∧
+    (rejectLocalWord.mem 0,rejectLocalWord.mem 6,rejectLocalWord.mem 18)=(w[49],w[48],w[0]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,by decide,rfl,rfl,rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_vectors' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_vectors
+
+
+/-- Direct native tables of the reached final heap, including all shared
+reference parents and both the old empty object and fresh empty object. -/
+theorem local_reference_order_native_vectors :
+    let e := List.prefix_append H [B]
+    let q := (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2
+    q.id=5 ∧ MObj.elems .dyn (orderLocalState.heap.get q)=[] ∧
+    MObj.elems .dyn (orderLocalState.heap.get (left.wk e))=[true,true,false] ∧
+    MObj.elems .dyn (orderLocalState.heap.get (right.wk e))=[false,true,false] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (old.wk e))).map HRef.id=[0] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (fresh.wk e))).map HRef.id=[0,1,0] ∧
+    (MObj.elems .dyn (orderLocalState.heap.get (empty.wk e))).map HRef.id=[] := by
+  first
+  | solve | rfl | simp only [] | omega
+  | dsimp only
+    have keep : Heap.Keeps (List.prefix_append H [B]) rhsHeap orderLocalState.heap :=
+      Heap.keeps_alloc rhsHeap (defaultArray .bool ⟨0,W_pos⟩)
+    have other {Q : RefTy} (r : HRef H Q) (ne : left.id≠r.id) : rhsHeap.get r=hp.get r :=
+      Heap.get_set_ne hp left r ne _
+    refine ⟨rfl,?_,?_,?_,?_,?_,?_⟩
+    · change MObj.elems .dyn ((rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).1.get (rhsHeap.alloc (defaultArray .bool ⟨0,W_pos⟩)).2)=[]
+      rw [Heap.get_alloc,MObj.elems_wk,MObj.elems_dyn];rfl
+    · rw [keep left,MObj.elems_wk]
+      rw [order_left_elems]
+      simp only [List.map_cons,List.map_nil] <;> rfl
+    · rw [keep right,MObj.elems_wk,other right (by decide)]
+      simp only [Heap.get,Objs.get,hp,right,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep old,MObj.elems_wk,other old (by decide)]
+      simp only [Heap.get,Objs.get,hp,old,left,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep fresh,MObj.elems_wk,other fresh (by decide)]
+      simp only [Heap.get,Objs.get,hp,fresh,left,right,MObj.elems_dyn,List.map_cons,List.map_nil] <;> rfl
+    · rw [keep empty,MObj.elems_wk,other empty (by decide)]
+      simp only [Heap.get,Objs.get,hp,empty,MObj.elems_dyn,List.map_nil] <;> rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.local_reference_order_native_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms local_reference_order_native_vectors
+
+
+private def skipDeleteSource : Source.EMState E0 RhsSΓ :=
+  ((rhsSource true).1.set (.there .here) (.memRef rfl 5),
+   {(rhsSource true).2 with heap := ((rhsSource true).2.heap.alloc ⟨SB,sourceBoolMemory []⟩).1})
+private def skipDeleteWord := writeMachine (allocateMachine (rhsWord true) ⟨48,by decide⟩ ⟨0,W_pos⟩) 6 w[48]
+private def firstBadAssign : Source.RExpr E0 RhsSΓ .bool := sourceIndexedAssign (.there .here : Source.Idx RhsSΓ SB) (.there (.there sj)) .here
+
+/-- The exact endpoint3 rejects before the tail can allocate/rebind. The
+separate tail-alone execution is a real counterfactual, not a suffix state. -/
+theorem memory_failure_skips_delete (p : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.evalE (G0 p) F0 (horizon+3) firstBadAssign).run (rhsSource true)=
+      (.error (.revert (Source.panicData .index)),rhsSource true) ∧
+    (Source.execItems (G0 p) F0 (horizon+5) RhsSΓ.length none
+      (.stmt (.expr firstBadAssign) (.stmt rejectLocalDelete .nil) : Source.RItems E0 [] false .body RhsSΓ RhsSΓ)
+      (rhsSource true).1).run (.nil,(rhsSource true).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(rhsSource true).2)) ∧
+    Prog.run (rhsState true) (.cons (rhsNative (.there (.there ti)))
+      (.cons (.rebindMem (.there .here : Idx RhsΓ (.mem B)) (.newArr (.lit 0 rfl) rfl)) .nil))=.error .revert ∧
+    run (rhsCode (.there (.there ti)) ++ rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B))
+      (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=.revert ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (.delete (.local (.there .here : Source.Idx RhsSΓ SB)))).run (rhsSource true)=
+      (.ok Source.RVal.unit,skipDeleteSource) ∧
+    run (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=
+      .ok skipDeleteWord 0 := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_write_bounds_short_circuit (G0 p) F0 horizon (rhsSource true) (rhsState true) left 0 (rhsAt true)
+      (.there .here) (.there (.there sj)) .here (.there .here) (.there (.there ti)) .here (uintOfNat 3) true
+      rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr true)
+      (.stmt rejectLocalDelete .nil) (.cons (.rebindMem (.there .here) (.newArr (.lit 0 rfl) rfl)) .nil)
+      (rebindNewCode 1 (.there .here : Idx RhsΓ (.mem B)) (.lit 0 rfl : Simple C RhsΓ .uint))
+    have alone := source_bool_local_delete_rebind_word (G0 p) F0 horizon (rhsSource true) (.there .here) (rhsState true)
+      (.there .here) left 0 (rhsAt true) rfl rfl SH (rhsOK true) (rhsRepr true) (rhsAllocator true) (by decide) (by decide)
+    exact ⟨h.1,h.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2,alone.1,alone.2.2.2.1⟩
+
+/-- Context-changing Source/native declarations and existing declaration code
+are also skipped. No frame-capacity or allocator premise for the tail is used. -/
+theorem memory_failure_skips_declaration (p : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.execItems (G0 p) F0 (horizon+5) RhsSΓ.length none
+      (.stmt (.expr firstBadAssign) (.stmt (.declVar SB) .nil) : Source.RItems E0 [] false .body RhsSΓ (SB::RhsSΓ))
+      (rhsSource true).1).run (.nil,(rhsSource true).2)=
+      (.error (.revert (Source.panicData .index)),(.nil,(rhsSource true).2)) ∧
+    Prog.run (rhsState true) (.cons (rhsNative (.there (.there ti)))
+      (.cons (.declMem B (.user "unreached") none rfl rfl) .nil))=.error .revert ∧
+    run (rhsCode (.there (.there ti)) ++ declareNewCode 1 (.lit 0 rfl : Simple C RhsΓ .uint)) (rhsWord true)=.revert ∧
+    ¬(1+(RhsΓ.length+1)≤8) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := source_bool_write_bounds_short_circuit (G0 p) F0 horizon (rhsSource true) (rhsState true) left 0 (rhsAt true)
+      (.there .here) (.there (.there sj)) .here (.there .here) (.there (.there ti)) .here (uintOfNat 3) true
+      rfl rfl rfl rfl rfl rfl (by simp only [Heap.len,MObj.elems_dyn];decide) (rhsRepr true)
+      (.stmt (.declVar SB) .nil) (.cons (.declMem B (.user "unreached") none rfl rfl) .nil)
+      (declareNewCode 1 (.lit 0 rfl : Simple C RhsΓ .uint))
+    exact ⟨h.2.2.1,h.2.2.2.2.2.1,h.2.2.2.2.2.2.2,by decide⟩
+
+/-- Complete pre-error and separately executed tail-alone observations. No
+native/word machine returned after the rejecting combined run is asserted. -/
+theorem memory_failure_skip_vectors :
+    rhsViews (rhsSource true)=[some ⟨SB,sourceBoolMemory [true,false,false]⟩,
+      some ⟨SB,sourceBoolMemory [false,true,false]⟩,some ⟨SR,pdata [left]⟩,
+      some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩] ∧
+    (rhsSource true).2.heap.get 5=none ∧ (rhsSource true).2.heap.next=5 ∧
+    (rhsSource true).1.get (.there .here : Source.Idx RhsSΓ SB)=.memRef rfl 0 ∧
+    rhsViews skipDeleteSource=rhsViews (rhsSource true) ∧ skipDeleteSource.2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ ∧
+    skipDeleteSource.2.heap.next=6 ∧ skipDeleteSource.1=(rhsSource true).1.set (.there .here) (.memRef rfl 5) ∧
+    words (rhsWord true)=[w[48],w[32],w[32],w[36],w[1],w[3],w[16],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0]] ∧
+    words skipDeleteWord ++ [skipDeleteWord.mem 48,skipDeleteWord.mem 49]=
+      [w[49],w[32],w[32],w[36],w[1],w[3],w[48],w[1],w[3],w[1],w[0],w[0],
+      w[3],w[0],w[1],w[0],w[1],w[16],w[3],w[16],w[24],w[16],w[0],w[0],w[0],w[0]] ∧
+    skipDeleteWord.stack=[w[42]] ∧ words skipDeleteWord≠words (rhsWord true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,by decide⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skips_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skips_declaration' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skips_declaration
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.memory_failure_skip_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms memory_failure_skip_vectors
+
+
+private def graphOldMap (i : Nat) := if i=5 then 0 else addresses i
+private theorem graphOldAgreement (i : Nat) (hi : i<H.length) : graphOldMap i=addresses i := by
+  have ne : i≠5 := by change i<5 at hi;omega
+  unfold graphOldMap
+  rw [if_neg ne]
+private theorem graphInitial : SourceBoolRefsAt sy 3 hp fresh graphOldMap := by
+  have h := fresh_at.transport (Heap.Keeps.refl hp) (fun _ _ h => h) graphOldAgreement
+  exact h
+private theorem graphEmptyInitial : SourceBoolRefsAt sy 4 hp empty graphOldMap := by
+  have h := empty_at.transport (Heap.Keeps.refl hp) (fun _ _ h => h) graphOldAgreement
+  exact h
+private def graphObject (blank : Bool) : MObj H B := ⟨if blank then [] else [false,true],by cases blank <;> decide⟩
+private def graphPair (blank : Bool) := hp.alloc (graphObject blank)
+private def graphSource (blank : Bool) : Source.EMState E0 SΓ :=
+  (sy.1,{sy.2 with heap := (sy.2.heap.alloc ⟨SB,sourceBoolMemory (MObj.elems .dyn (graphObject blank))⟩).1})
+private def graphNewMap := allocatedSourceAddress graphOldMap 5 5
+
+/-- Actual paired allocations retain shared children and the literal empty
+parent, with a real update of the previously unused fresh map entry. -/
+theorem reference_growth_client (blank : Bool) :
+    (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject blank)))).run sy=
+      (.ok (.memRef rfl 5),graphSource blank) ∧
+    Heap.Keeps (List.prefix_append H [B]) hp (graphPair blank).1 ∧
+    SourceBoolRefsAt (graphSource blank) 3 (graphPair blank).1 (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+    SourceBoolRefsAt (graphSource blank) 4 (graphPair blank).1 (empty.wk (List.prefix_append H [B])) graphNewMap ∧
+    SourceBoolMemoryAt (graphSource blank) 5 (graphPair blank).1 (graphPair blank).2 .dyn ∧
+    Source.MemOK E0 SH (graphSource blank) ∧
+    (∀ i,i<H.length → graphNewMap i=graphOldMap i) ∧ graphOldMap 5=0 ∧ graphNewMap 5=5 ∧
+    (graphPair blank).2.id=5 ∧ (∀ Q (q : HRef H Q),(q.wk (List.prefix_append H [B])).id≠(graphPair blank).2.id) ∧
+    (graphSource blank).1=sy.1 ∧ (graphSource blank).2.heap.next=6 ∧
+    ((graphSource blank).2.ex=sy.2.ex ∧ (graphSource blank).2.events=sy.2.events ∧
+      (graphSource blank).2.logs=sy.2.logs ∧ (graphSource blank).2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := graphInitial.alloc_bool (graphObject blank) SH source_memOK F0
+    rcases h with ⟨run,keep,parent,new,mok,id,map,agree,distinct,_,_,cells,_,locals,next,ex,events,logs,fnLocals⟩
+    refine ⟨run,keep,parent,graphEmptyInitial.transport keep cells agree,new,mok,agree,rfl,rfl,id,distinct,locals,next,ex,events,logs,fnLocals⟩
+
+/-- Both real pipelines read the SAME old children after allocation. The second
+parent entry differs materially, while entries0/2 share one identity. -/
+theorem reference_growth_reads (p : Roadmap.Pipeline) (horizon : Nat) (blank : Bool) :
+    (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run (graphSource blank)=
+      (.ok (.val (.bool false)),graphSource blank) ∧
+    (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local si) rfl) (.local si) rfl)).run (graphSource blank)=
+      (.ok (.val (.bool true)),graphSource blank) ∧
+    ((graphPair blank).1.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)).map HRef.id=some 0 ∧
+    ((graphPair blank).1.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 2)).map HRef.id=some 0 ∧
+    (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 4 0)).run (graphSource blank)=
+      (.error (.revert (Source.panicData .index)),graphSource blank) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have h := graphInitial.alloc_bool (graphObject blank) SH source_memOK F0
+    have parent := h.2.2.1
+    have reads := h.2.2.2.2.2.2.2.2.2.2.2.2.1
+    have initial0 : hp.index fresh .dyn (uintOfNat 0)=some left := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have initial1 : hp.index fresh .dyn (uintOfNat 1)=some right := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have initial2 : hp.index fresh .dyn (uintOfNat 2)=some left := by simp only [Heap.index,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];rfl
+    have lv : hp.index left .dyn (uintOfNat 1)=some false := by simp only [Heap.index,Heap.get,Objs.get,hp,left,MObj.elems_dyn];rfl
+    have rv : hp.index right .dyn (uintOfNat 1)=some true := by simp only [Heap.index,Heap.get,Objs.get,hp,right,MObj.elems_dyn];rfl
+    have a := reads (uintOfNat 0) (uintOfNat 1) left false initial0 lv
+    have b := reads (uintOfNat 1) (uintOfNat 1) right true initial1 rv
+    have c := reads (uintOfNat 2) (uintOfNat 1) left false initial2 lv
+    refine ⟨parent.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) _ false rfl rfl rfl a.1 a.2.2.1,
+      parent.eval_nested_read (G0 p) F0 horizon ssrc si si (uintOfNat 1) (uintOfNat 1) _ true rfl rfl rfl b.1 b.2.2.1,
+      congrArg (Option.map HRef.id) a.1,congrArg (Option.map HRef.id) c.1,?_⟩
+    exact ((reference_growth_client blank).2.2.2.1.parent_bounds F0 (uintOfNat 0)
+      (by change (hp.alloc (graphObject blank)).1.len (empty.wk (List.prefix_append H [B])) .dyn ≤ (uintOfNat 0).1.toNat
+          rw [Heap.Keeps.len h.2.1 empty .dyn];simp only [Heap.len,Heap.get,Objs.get,hp,empty,MObj.elems_dyn];decide)).1
+
+/-- Full old and fresh Source object tables, old-map agreement and fresh
+identity/length/payload. No target code or post-allocation word image is claimed. -/
+theorem reference_growth_vectors (blank : Bool) :
+    [((graphSource blank).2.heap.get 0),((graphSource blank).2.heap.get 1),((graphSource blank).2.heap.get 2),
+      ((graphSource blank).2.heap.get 3),((graphSource blank).2.heap.get 4),((graphSource blank).2.heap.get 5)]=
+      [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+       some ⟨SR,pdata [left]⟩,some ⟨SR,pdata [left,right,left]⟩,some ⟨SR,pdata []⟩,
+       some ⟨SB,sourceBoolMemory (if blank then [] else [false,true])⟩] ∧
+    (graphSource blank).1=sy.1 ∧ sy.2.heap.get 5=none ∧ (graphSource blank).2.heap.next=6 ∧
+    ((graphPair blank).2.id,graphOldMap 5,graphNewMap 5)=(5,0,5) ∧
+    (∀ i,i<5 → graphNewMap i=graphOldMap i) ∧
+    MObj.elems .dyn ((graphPair blank).1.get (graphPair blank).2)=(if blank then [] else [false,true]) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | refine ⟨?_,rfl,rfl,rfl,rfl,?_,?_⟩
+    · cases blank <;> simp only [graphSource, graphObject, MObj.elems_dyn] <;> rfl
+    · exact (reference_growth_client blank).2.2.2.2.2.2.1
+    · change MObj.elems .dyn ((hp.alloc (graphObject blank)).1.get (hp.alloc (graphObject blank)).2)=_
+      rw [Heap.get_alloc,MObj.elems_wk,List.map_id'' (f := MVal.wk (List.prefix_append H [B]) (.prim .bool)) (fun _ => rfl)]
+      simp only [graphObject, MObj.elems_dyn]
+
+/-- Keeping the unused old map entry would incorrectly identify the fresh
+object with LEFT; the actual read distinguishes them for both fresh lengths. -/
+theorem reference_growth_wrong_map (blank : Bool) :
+    ¬ SourceBoolMemoryAt (graphSource blank) (graphOldMap (graphPair blank).2.id)
+      (graphPair blank).1 (graphPair blank).2 .dyn := by
+  first
+  | solve | rfl | simp only [] | omega
+  | intro bad
+    change SourceBoolMemoryAt (graphSource blank) 0 (graphPair blank).1 (graphPair blank).2 .dyn at bad
+    have old : (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := .bool) (.mem 0 0)).run (graphSource blank)=
+        (.ok (.bool true),graphSource blank) := by
+      apply source_bool_read (graphSource blank) 0 [true,false,false] _ 0 (by decide)
+      cases blank <;> simp only [graphSource,graphObject,MObj.elems_dyn] <;> rfl
+    have impossible := (bad.read_iff F0 (uintOfNat 0) true).mp old
+    change (MObj.elems .dyn ((graphPair blank).1.get (graphPair blank).2))[0]?=some true at impossible
+    rw [(reference_growth_vectors blank).2.2.2.2.2.2] at impossible
+    cases blank <;> cases impossible
+
+/-- Fresh contents and endpoint failures are actual Source observations, not
+reads of the retained old child. -/
+theorem reference_growth_fresh_reads :
+    (Source.memElem (E := E0) (Γ := SΓ) 5 1 .bool).run (graphSource false)=
+      (.ok (.bool true),graphSource false) ∧
+    (Source.memElem (E := E0) (Γ := SΓ) 5 2 .bool).run (graphSource false)=
+      (.error (.revert (Source.panicData .index)),graphSource false) ∧
+    (Source.memElem (E := E0) (Γ := SΓ) 5 0 .bool).run (graphSource true)=
+      (.error (.revert (Source.panicData .index)),graphSource true) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | have nonempty : (graphSource false).2.heap.get 5=some ⟨SB,sourceBoolMemory [false,true]⟩ := by
+      simp only [graphSource,graphObject,MObj.elems_dyn];rfl
+    have vacant : (graphSource true).2.heap.get 5=some ⟨SB,sourceBoolMemory []⟩ := by
+      simp only [graphSource,graphObject,MObj.elems_dyn];rfl
+    exact ⟨source_bool_read _ 5 _ nonempty 1 (by decide),
+      source_bool_bounds _ 5 _ nonempty 2 (by decide),source_bool_bounds _ 5 _ vacant 0 (by decide)⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_wrong_map' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_wrong_map
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_fresh_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_fresh_reads
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_client
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_reads' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_reads
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_vectors' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_vectors
+
+/-- The actual newly allocated child, rather than LEFT, is installed in entry0;
+entry2 retains LEFT. Both pipelines execute the reached nested read. -/
+theorem reference_growth_redirect_client (p : Roadmap.Pipeline) (horizon : Nat) (blank : Bool) :
+    ∃ (out : Heap (H++[B])) (z : Source.EMState E0 SΓ),
+      (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject blank)))).run sy=
+        (.ok (.memRef rfl 5),graphSource blank) ∧
+      (graphPair blank).1.writeAddr (.index (fresh.wk (List.prefix_append H [B])) .dyn (indexValue ⟨0,by decide⟩))
+        (graphPair blank).2=some out ∧
+      (Source.writeLoc (E := E0) (Γ := SΓ) F0 horizon (.mem (τ := SB) 3 0) (.memRef rfl 5)).run (graphSource blank)=(.ok (),z) ∧
+      SourceBoolRefsAt z 3 out (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+      Source.MemOK E0 SH z ∧ z.1=sy.1 ∧ z.2.heap.next=6 ∧
+      MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))=
+        [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])] ∧
+      (MObj.elems .dyn (out.get (left.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (right.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (graphPair blank).2))=([true,false,false],[false,true,false],if blank then [] else [false,true]) ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4,z.2.heap.get 5]=
+        [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+         some ⟨SR,pdata [left]⟩,some ⟨SR,sourceBoolRefMemory graphNewMap
+          [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])]⟩,
+         some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory (if blank then [] else [false,true])⟩] ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 0)).run z=(.ok (.memRef rfl 5),z) ∧
+      (Source.readLoc (E := E0) (Γ := SΓ) F0 (τ := SB) (.mem 3 2)).run z=(.ok (.memRef rfl 0),z) ∧
+      (Source.memElem (E := E0) (Γ := SΓ) 0 0 .bool).run z=(.ok (.bool true),z) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local sj) rfl)).run z=
+        ((if blank then .error (.revert (Source.panicData .index)) else .ok (.val (.bool false))),z) ∧
+      (z.2.ex=sy.2.ex ∧ z.2.events=sy.2.events ∧ z.2.logs=sy.2.logs ∧ z.2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨out,z,ha,hw,hs,mid,parent,fr,mm,mz,lz,rs,new,old,aliases,hid,haddr,distinct,world,cells,next⟩ :=
+      graphInitial.alloc_redirect (graphObject blank) SH source_memOK F0 horizon ⟨0,by decide⟩
+        (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+    have table : MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))=
+        [(graphPair blank).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])] := by
+      rw [rs]
+      simp only [Heap.get,Objs.get,hp,fresh,MObj.elems_dyn,List.map_cons,List.map_nil,List.set_cons_zero]
+      rfl
+    have freshElems : MObj.elems .dyn (out.get (graphPair blank).2)=(if blank then [] else [false,true]) := by
+      change MObj.elems .dyn (out.get (hp.alloc (graphObject blank)).2)=_
+      rw [new]
+      exact (reference_growth_vectors blank).2.2.2.2.2.2
+    have sourceParent := parent.parent
+    rw [table] at sourceParent
+    have get0 := cells 0 (by decide)
+    have get1 := cells 1 (by decide)
+    have get2 := cells 2 (by decide)
+    have get4 := cells 4 (by decide)
+    have get5 := cells 5 (by decide)
+    have hq : out.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)=some (graphPair blank).2 := by
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[0]?=_
+      rw [table];rfl
+    refine ⟨out,z,ha,hw,hs,parent,mz,lz,next,table,?_,?_,?_,?_,?_,?_,world⟩
+    · rw [old left,old right,freshElems]
+      simp only [MObj.elems_wk,Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil]
+      rfl
+    · rw [get0,get1,get2,sourceParent,get4,get5]
+      cases blank <;> simp only [graphObject,MObj.elems_dyn] <;> rfl
+    · exact parent.parent_read F0 0 _ hq
+    · apply parent.parent_read F0 2 (left.wk (List.prefix_append H [B]))
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[2]?=_
+      rw [table];rfl
+    · apply source_bool_read z 0 [true,false,false] _ 0 (by decide)
+      rw [get0];cases blank <;> simp only [graphObject,MObj.elems_dyn] <;> rfl
+    · cases blank
+      · apply parent.eval_nested_read (G0 p) F0 horizon ssrc sj sj (uintOfNat 0) (uintOfNat 0) _ false
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · exact hq
+        · change (MObj.elems .dyn (out.get (graphPair false).2))[0]?=some false
+          rw [freshElems];rfl
+      · apply parent.eval_nested_child_bounds (G0 p) F0 horizon ssrc sj sj (uintOfNat 0) (uintOfNat 0) (graphPair true).2
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · rw [lz];rfl
+        · exact hq
+        · change (MObj.elems .dyn (out.get (graphPair true).2)).length≤0
+          rw [freshElems];decide
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_redirect_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_redirect_client
+
+private def graphSourceViews (y : Source.EMState E0 SΓ) :=
+  [y.2.heap.get 0,y.2.heap.get 1,y.2.heap.get 2,y.2.heap.get 3,y.2.heap.get 4,y.2.heap.get 5]
+private def graphRedirectTable (xs : List Bool) : List (Option (Σ τ,Source.Data E0.layout τ)) :=
+  [some ⟨SB,sourceBoolMemory [true,false,false]⟩,some ⟨SB,sourceBoolMemory [false,true,false]⟩,
+   some ⟨SR,pdata [left]⟩,some ⟨SR,sourceBoolRefMemory graphNewMap
+    [(graphPair false).2,right.wk (List.prefix_append H [B]),left.wk (List.prefix_append H [B])]⟩,
+   some ⟨SR,pdata []⟩,some ⟨SB,sourceBoolMemory xs⟩]
+
+/-- Allocate [false,true], redirect entry0, then actually delete fresh index1.
+The prior client is linked to the SAME prefix by execution determinism.
+The old LEFT alias and the other repeated entry remain untouched. -/
+theorem reference_growth_delete_client (p : Roadmap.Pipeline) (horizon : Nat) :
+    ∃ (mid out : Heap (H++[B])) (z w : Source.EMState E0 SΓ),
+      (Source.allocRef (E := E0) (Γ := SΓ) (sourceBoolMemory (MObj.elems .dyn (graphObject false)))).run sy=
+        (.ok (.memRef rfl 5),graphSource false) ∧
+      (graphPair false).1.writeAddr (.index (fresh.wk (List.prefix_append H [B])) .dyn (indexValue ⟨0,by decide⟩))
+        (graphPair false).2=some mid ∧
+      (Source.writeLoc (E := E0) (Γ := SΓ) F0 (horizon+4) (.mem (τ := SB) 3 0) (.memRef rfl 5)).run (graphSource false)=(.ok (),z) ∧
+      mid.writeAddr (.index (graphPair false).2 .dyn (uintOfNat 1)) false=some out ∧
+      (Source.evalE (G0 p) F0 (horizon+4) (sourceNestedDelete ssrc sj si)).run z=(.ok Source.RVal.unit,w) ∧
+      SourceBoolRefsAt w 3 out (fresh.wk (List.prefix_append H [B])) graphNewMap ∧
+      Source.MemOK E0 SH w ∧ z.1=sy.1 ∧ w.1=sy.1 ∧ w.2.heap.next=6 ∧
+      (Source.evalE (G0 p) F0 1 (sourceNestedDelete ssrc sj si)).run z=(.error .timeout,z) ∧
+      graphSourceViews z=graphRedirectTable [false,true] ∧ graphSourceViews w=graphRedirectTable [false,false] ∧
+      (MObj.elems .dyn (out.get (left.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (right.wk (List.prefix_append H [B]))),
+       MObj.elems .dyn (out.get (graphPair false).2))=([true,false,false],[false,true,false],[false,false]) ∧
+      (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B])))).map HRef.id=[5,1,0] ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run z=
+        (.ok (.val (.bool true)),z) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run w=
+        (.ok (.val (.bool false)),w) ∧
+      (Source.evalE (G0 p) F0 (horizon+3) (.indexArray (.indexArray (.local ssrc) (.local sj) rfl) (.local si) rfl)).run (graphSource false)=
+        (.ok (.val (.bool false)),graphSource false) ∧
+      (w.2.ex=sy.2.ex ∧ w.2.events=sy.2.events ∧ w.2.logs=sy.2.logs ∧ w.2.fnLocals=sy.2.fnLocals) := by
+  first
+  | solve | rfl | simp only [] | omega
+  | obtain ⟨mid,out,z,w,ha,hw,hs,selected,hwrite,sw,run,parent,post,mz,mw,lz,lw,keepParent,elems,sep,old,new,cells,next,world⟩ :=
+      graphInitial.alloc_redirect_delete (graphObject false) SH source_memOK (G0 p) F0 horizon ssrc sj si
+        ⟨0,by decide⟩ (uintOfNat 1) rfl rfl rfl
+        (by simp only [Heap.len,Heap.get,Objs.get,hp,fresh,MObj.elems_dyn];decide)
+        (by simp only [graphObject,MObj.elems_dyn];decide)
+    obtain ⟨pm,pz,pha,phw,phs,pparent,pmem,plocal,pnext,ptable,ppayload,pvectors,prest⟩ :=
+      reference_growth_redirect_client p (horizon+4) false
+    have midEq : pm=mid := Option.some.inj (phw.symm.trans hw)
+    have zEq : pz=z := congrArg Prod.snd (phs.symm.trans hs)
+    subst pm
+    subst pz
+    have midVectors : graphSourceViews z=graphRedirectTable [false,true] := pvectors
+    have freshPayload : MObj.elems .dyn (out.get (graphPair false).2)=[false,false] := by
+      change MObj.elems .dyn (out.get (hp.alloc (graphObject false)).2)=[false,false]
+      rw [new]
+      simp only [graphObject,MObj.elems_dyn];rfl
+    have selectedFinal : out.index (fresh.wk (List.prefix_append H [B])) .dyn (uintOfNat 0)=some (graphPair false).2 := by
+      change (MObj.elems .dyn (out.get (fresh.wk (List.prefix_append H [B]))))[0]?=_
+      rw [keepParent,ptable];rfl
+    have freshSource := post.children (graphPair false).2 (List.mem_of_getElem? selectedFinal)
+    change w.2.heap.get 5=some ⟨SB,sourceBoolMemory (MObj.elems .dyn (out.get (graphPair false).2))⟩ at freshSource
+    rw [freshPayload] at freshSource
+    refine ⟨mid,out,z,w,ha,hw,hs,hwrite,run,post,mw,lz,lw,next.trans pnext,rfl,midVectors,?_,?_,?_,?_,?_,
+      (reference_growth_reads p horizon false).1,world⟩
+    · simp only [graphSourceViews]
+      rw [cells 0 (by decide),cells 1 (by decide),cells 2 (by decide),cells 3 (by decide),cells 4 (by decide),freshSource]
+      have firstFive := congrArg (fun xs => xs.take 5) midVectors
+      change [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4]=_ at firstFive
+      change [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2,z.2.heap.get 3,z.2.heap.get 4]++[some ⟨SB,sourceBoolMemory [false,false]⟩]=_
+      rw [firstFive];rfl
+    · rw [old left,old right,freshPayload]
+      simp only [MObj.elems_wk,Heap.get,Objs.get,hp,left,right,MObj.elems_dyn,List.map_cons,List.map_nil];rfl
+    · rw [keepParent,ptable];rfl
+    · apply parent.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) (graphPair false).2 true
+      · rw [lz];rfl
+      · rw [lz];rfl
+      · rw [lz];rfl
+      · exact selected
+      · change (MObj.elems .dyn (mid.get (hp.alloc (graphObject false)).2))[1]?=some true
+        rw [elems];simp only [graphObject,MObj.elems_dyn];rfl
+    · apply post.eval_nested_read (G0 p) F0 horizon ssrc sj si (uintOfNat 0) (uintOfNat 1) (graphPair false).2 false
+      · rw [lw];rfl
+      · rw [lw];rfl
+      · rw [lw];rfl
+      · exact selectedFinal
+      · change (MObj.elems .dyn (out.get (graphPair false).2))[1]?=some false
+        rw [freshPayload];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceReferenceReadControls.reference_growth_delete_client' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms reference_growth_delete_client
+
+end Solidity.Backend.MemoryOps.SourceReferenceReadControls

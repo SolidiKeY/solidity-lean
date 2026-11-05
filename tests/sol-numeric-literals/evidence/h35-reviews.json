@@ -1,0 +1,32 @@
+{
+  "finder": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "source_sha256": {
+      "tests/sol-numeric-literals/h35/expected.json": "364a42951037520c71f2039e6d359552ec56e796a4f330a0095ca334314b542f",
+      "tests/sol-numeric-literals/h35/PrintAllAxioms.lean": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec",
+      "tests/sol-numeric-literals/h35/validate-axioms.py": "7122a57cc2454d426ee08609b3a8c7e438f82c1bc1a0d569e5473cf4a59585db",
+      "tests/sol-numeric-literals/h35/questions.json": "5e52d5fedf4196fe9e8a04bb6a949071105e43f13caef697633b3b3c1606d5e4",
+      "tests/sol-numeric-literals/h35/PrintAxioms.lean": "cd06f8dcadb53a715b5c9260306ed0090f09989adb5f208b30dbc1e8dc3d1139",
+      "tests/sol-numeric-literals/h35/prepare-owned-cache.py": "b5a3f208f29d7697626b5a4780fbb9994128cafed82fb0c3b615cc81561d7904"
+    },
+    "summary": "All627direct authored prints and all808 theorem-constant prints complete/unique and match pinned axiom sets; full991inventory/42unchangedproofsources checked. VM build/controls pass approvedlimits. Archive hash,size,all128members including126artifacts and42mappings independentlyverified. Required cache preflight fails; no deliveryreceipt; no H35checkpointdone claim. No concrete findings. Final actual H35 completion enforcement also PASS: source/resource stamps, real non-dry required tool, fresh current-head and uniformly ok receipts; implementation mode cannot satisfy completion. No concrete findings.",
+    "checker_sha256": "08977abf6905b323169d61b0f8040f9b1b6ae8f5119b5eb58dae7f619922b126"
+  },
+  "skeptic": {
+    "verdict": "pass",
+    "read_only": true,
+    "lean_server_used": false,
+    "source_sha256": {
+      "tests/sol-numeric-literals/h35/expected.json": "364a42951037520c71f2039e6d359552ec56e796a4f330a0095ca334314b542f",
+      "tests/sol-numeric-literals/h35/PrintAllAxioms.lean": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec",
+      "tests/sol-numeric-literals/h35/validate-axioms.py": "7122a57cc2454d426ee08609b3a8c7e438f82c1bc1a0d569e5473cf4a59585db",
+      "tests/sol-numeric-literals/h35/questions.json": "5e52d5fedf4196fe9e8a04bb6a949071105e43f13caef697633b3b3c1606d5e4",
+      "tests/sol-numeric-literals/h35/PrintAxioms.lean": "cd06f8dcadb53a715b5c9260306ed0090f09989adb5f208b30dbc1e8dc3d1139",
+      "tests/sol-numeric-literals/h35/prepare-owned-cache.py": "b5a3f208f29d7697626b5a4780fbb9994128cafed82fb0c3b615cc81561d7904"
+    },
+    "summary": "All627direct authored prints and all808 theorem-constant prints complete/unique and match pinned axiom sets; full991inventory/42unchangedproofsources checked. VM build/controls pass approvedlimits. Archive hash,size,all128members including126artifacts and42mappings independentlyverified. Required cache preflight fails; no deliveryreceipt; no H35checkpointdone claim. No concrete findings. Final actual H35 completion enforcement also PASS: source/resource stamps, real non-dry required tool, fresh current-head and uniformly ok receipts; implementation mode cannot satisfy completion. No concrete findings.",
+    "checker_sha256": "08977abf6905b323169d61b0f8040f9b1b6ae8f5119b5eb58dae7f619922b126"
+  }
+}

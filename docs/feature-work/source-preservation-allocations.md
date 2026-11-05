@@ -75,7 +75,230 @@ the empty heap typing over that nonempty heap, obtaining post-state MemOK and va
 allocated bytes reference in both pipelines. The signature digest stays
 parameterized by Fixed.
 
-Not covered: reference arguments and returns in the expression fragment,
-allocating expressions inside the fragment, termination,
-compiler/EVM refinement, `SourceSpec` and rollback. All printed axioms are
+`Preservation.eval_new_fragment_mem` in `NewArrayFragment.lean` consumes the published V16
+`eval_new_mem` rule and discharges its child-memory premise with the existing
+checked call-fragment theorem. It covers a standalone new-array parent whose
+indexable length belongs to that fragment; it does not add allocating nodes
+to `ValFragC`. `NewArrayFragmentControls` computes the length as two plus two,
+allocates object 1 while preserving the live caller reference to object 0, and
+checks the allocation panic for an oversized computed length in both pipelines.
+The compound expression times out at source horizon 3 and succeeds at horizon 4;
+both observations are retained. Independent finder and skeptic reviews found
+no confirmed defect in this consumer or its controls.
+
+## Additive memory-expression and reference-return subset
+
+`AllocatingFragment.lean` defines `AllocatingExpr` over the existing intrinsic
+`RExpr`. It includes the original value fragment with its operations check,
+reference locals, same-type conversions, conditional reference results and
+`newArray` with an admitted length. `eval_allocating_mem` proves `MemOK` and
+result validity at every horizon, including every halt. This is a separate
+syntactic admission; it does not change `ValFragC` or its statement checker.
+
+`ReferenceArguments.lean` admits exact-type converted argument lists. Its
+`eval_exact_args_mem` preserves an earlier argument's reference witness when a
+later argument allocates. Cross-type conversions are outside this admission.
+`AllocatingControls` exercises alias and fresh-reference branches, allocation
+panic, timeout, a retained caller prefix and a later-argument allocation in
+both source pipelines. Raw string literals remain outside `AllocatingExpr`.
+
+`ReferenceReturns.lean` derives body preservation for `returningBody`: a
+modifier-free body containing one `retTuple` of exact-type admitted expressions.
+`call_returning_mem` consumes the actual selected-body equality and handles
+argument packing, default return-slot allocations and actual return-slot writes.
+`sub_returning_mem` restores arbitrary valid caller locals across success and
+all halts. `eval_call_returning_mem` lifts this through the actual `RExpr.call`,
+with its original `fnSig` equation and exact-type argument admission. Calls
+inside these expressions still use the original `CallsOK` value catalogue;
+there is no assumption that arbitrary reference-callee bodies preserve memory.
+
+`ReferenceReturnControls` supplies a hand-built intrinsic runtime program with
+a matching direct-call signature, not an elaborated-program certificate. The
+parameter aliases object 0, default result slots allocate objects 1 and 2, and
+the body returns alias 0 plus fresh object 3. The controls consume the call and
+expression preservation theorems, check restored caller locals and escaping
+reference validity, and retain the exact low-horizon timeout. An oversized
+allocation panics after the two default allocations; `panic_preserved` applies
+the same call theorem to that halt with heap-next 3. Independent
+finder and skeptic reviews found no confirmed defect in this additive subset.
+
+## Memory statements and internal bodies
+
+`MemoryExpressions.lean` extends this admission with same-type local rebinding
+and primitive memory-array writes. Array base, index and right-hand side must
+belong to `AllocatingExpr`; writes retain the evaluator's bounds and location
+checks. Rebinding a pointer changes that local, while writes through an alias
+change the shared object. Reference-element writes are outside this admission.
+
+`MemoryBodies.lean` defines syntactic `MemoryStmt` and `MemoryItems`
+certificates, including ordinary same-type single-value returns. A joint horizon induction derives `MemOK` and outcome-local
+validity for declarations, admitted expression statements, exact-type returns,
+blocks, conditionals, sequences and unchecked blocks. Conditional evaluation
+uses `BodyExpr`, retaining condition updates and heap effects before executing
+the selected branch; branch scope is then closed. Existing value-fragment statements
+retain their original operations and call premises. The proof covers every
+success and halt; declaration admission does not assert allocation success.
+
+`MemoryBodyCalls.lean` derives modifier-free body preservation from these
+certificates. `call_memory_body_mem` handles actual argument packing, default
+return slots and result extraction; `sub_memory_body_mem` transports valid
+caller references across heap growth. `eval_memory_call_mem` consumes the
+actual selected-body equality, signature, parameter/result types and initial
+frame-layout equation. No callee memory-preservation oracle is assumed. Calls
+inside admitted expressions still use the original value `CallsOK` catalogue;
+this does not recursively admit memory-body calls.
+
+`MemoryBodyControls` uses a hand-built intrinsic runtime program with a matching
+signature, in both source pipelines. Two parameters alias object 0; a write is
+visible through the other alias, rebinding one parameter allocates a distinct
+object, and the returned alias remains valid after caller restoration. A
+bounds failure retains the already allocated default return slot and restores
+the caller. A separate block allocates a default bytes object and an initialized
+array, then restores its incoming local frame. Preservation theorems consume
+these actual evaluator equalities over inhabited, nonempty memory. Timeout is
+also retained. Independent read-only finder and skeptic reviews found no
+confirmed soundness defect.
+
+`MemoryBranchControls` checks both branches of an actual conditional: one
+allocates block locals and restores its frame, while the other persistently
+rebinds a reference parameter. An effectful Boolean condition updates the local
+seen by the selected allocating branch. The same bounds-failing write is skipped
+on a false condition and panics on a true condition. All preservation conclusions
+consume the corresponding exact evaluator runs on inhabited memory, in both
+pipelines. Finder and skeptic reviews found no confirmed soundness issue in the
+conditional induction; these controls do not imply frontend or compiler admission.
+
+## Allocation parents in memory bodies
+
+`BodyExpr` also admits struct construction and inline-array literals with
+`ExactArgs`, and every existing ABI encoding kind with `EncodingArgs` and its
+original `argsOK` check. `EncodingArguments.lean` derives argument preservation
+from `AllocatingExpr` children and raw string literals, in the actual evaluator's
+left-to-right order. The struct and inline-array parents derive their child
+triples from exact-type argument admission. Field packing, one-word elements,
+ABI eligibility, horizon and allocation halts remain unchanged. Encoding
+preservation does not assert successful encoding or general ABI correctness.
+
+These parents can occur in admitted expression statements, initialized
+declarations and conditional conditions where types permit. Their children
+remain the narrower `AllocatingExpr`/`ExactArgs` admissions; the change does not
+allow every `BodyExpr` constructor recursively in arbitrary argument, rebinding
+or return positions. Returning a previously bound reference retains the
+existing exact-local admission.
+
+`AllocationBodyControls` composes actual typed struct, inline-array and packed
+encoding nodes in a statement block over a nonempty memory prefix. It consumes
+`memory_body_at` and observes the exact three new objects and restored frame.
+Selector and signature controls consume the new parent rule and existing exact
+runs. A packed encoder evaluates an allocating child before allocating its own
+output; a second child that panics leaves the first child's allocation in place.
+Missing-head eligibility remains false and the existing named `abi arguments`
+halt is retained. All observations run in both source pipelines and the
+preservation consumers have inhabited inputs. Independent finder and skeptic
+reviews found no confirmed defect; neither inferred frontend, progress or
+compiler coverage from these source controls.
+
+## Admission from elaborated programs
+
+`MemoryProgram.lean` ties a finite `MemoryCatalogue` to actual selected source
+bodies. Each member supplies syntactic `MemoryItems` and signature/dispatch
+membership. `memory_catalogue_sound` derives parameter, return and local-frame
+coherence from `Elaborated`; it does not accept caller-provided frame equations.
+The separate value-callee graph is checked by P9, which derives its original
+`CallsOK`. Memory-body preservation is derived by the joint induction, not
+stored as a semantic premise.
+
+`memory_from_elaborate` consumes actual successful elaboration.
+`checked_memory_call` additionally requires coverage of every source function,
+so an omitted function cannot silently escape admission. The expression bridge
+`memory_expr_from_elaborate` handles exact-type arguments, arbitrary valid caller
+locals, escaping reference validity and every halt using the same catalogue.
+This is a proof certificate for the admitted memory subset, not an executable
+memory-body recognizer. Calls within these bodies still use the separate
+value-fragment catalogue; arbitrary nesting or recursion of memory-body calls
+is not admitted.
+
+`MemoryProgramControls` elaborates a source function with a `uint256[] memory`
+parameter and ordinary `return a`. A complete one-function catalogue proves
+preservation for the actual internal call and call expression over nonempty
+memory in both evaluator pipelines. The caller keeps reference 0; the result
+also aliases 0 and the default return-slot allocation at object 1 persists.
+The resolution uses the legacy elaborator; both evaluator pipelines execute
+that elaborated body. Omitting the function fails the coverage check, and the
+old value-only function checker still refuses the memory-returning function.
+The exact zero-horizon timeout is retained. Finder and skeptic reviews found
+no confirmed soundness issue; none of these statements asserts general source
+progress or compiler refinement.
+
+Not covered: arbitrary reference-call bodies, automatic recognition of this
+memory subset, unrestricted allocation nesting or cross-type argument conversion, general memory-body progress or termination,
+compiler/EVM refinement, `SourceSpec` and rollback. The existing standalone
+allocation-arm rules above retain their stated premises. All printed axioms are
 `propext`, `Classical.choice` and `Quot.sound`.
+
+The standalone dynamic-new parent also has a progress adapter under explicit
+ready-type and checked length-fragment conditions; see
+[source-progress-checked.md](source-progress-checked.md#dynamic-allocation-with-a-checked-length).
+This does not extend the memory-body certificate to general progress.
+
+A one-statement ordinary return body now also has a checked progress companion
+when its expression and return-slot default have explicit readiness certificates;
+see [ready single-return calls](source-progress-checked.md#ready-single-return-memory-calls).
+This does not prove progress for arbitrary `MemoryItems` bodies.
+
+
+Inline-array allocation parents now also have standalone progress and joint
+preservation adapters under syntactic `ReadyArgs`, including an actual
+expression-statement consumer; see
+[source-progress-checked.md](source-progress-checked.md#ready-inline-array-allocation-parents).
+The existing memory-body and readiness certificates are unchanged, so this does
+not admit unrestricted allocation nesting or general memory-body progress.
+
+
+Struct-constructor parents with syntactic `ReadyArgs` also have standalone
+progress and joint expression/statement preservation consumers. Member-layout
+agreement is derived from the intrinsic constructor proof, including for
+reference fields and allocating children; see
+[source-progress-checked.md](source-progress-checked.md#ready-struct-constructor-allocation-parents).
+This does not extend the existing readiness certificate or establish general
+memory-body, compiler or physical-layout coverage.
+
+Finite inline-array and struct-constructor expression prefixes now compose
+with ready suffixes in modifier-free ordinary internal bodies, with actual
+call and caller-expression progress jointly consuming the existing memory
+proofs; see
+[source-progress-checked.md](source-progress-checked.md#allocation-parent-prefixes-in-ordinary-internal-bodies).
+Body selection, layout, defaults, argument readiness and input-reference
+validity retain their explicit premises. This is not general memory-call
+graph or compiler coverage.
+
+Finite aggregate default certificates now give actual default progress jointly
+with the existing zeroing preservation theorem. Returning inline-array/struct
+parents can use them through the existing single-return body/call frames;
+[source-progress-checked.md](source-progress-checked.md#finite-aggregate-defaults-and-returned-allocation-parents)
+states the explicit admission premises and inhabited fixed-array return control.
+This is Source-only preservation/progress, not a general call graph or compiler
+result, and leaves the existing default/readiness certificates unchanged.
+
+Ready expressions and allocating inline-array/struct parents may now be exact
+arguments to an explicitly selected ordinary ready-body call. Argument
+evaluation preserves earlier references through later allocations, including
+an actual later-child panic with retained earlier memory; see
+[source-progress-checked.md](source-progress-checked.md#allocating-parents-as-direct-call-arguments).
+This leaves old argument certificates and general memory-call graph admission
+unchanged and makes no function-value frontend or compiler correspondence claim.
+
+Allocation parents may also initialize a finite prefix of new locals before
+a ready suffix. Their memory admission is derived, and the actual declaration,
+frame extension, scope exit, call and post-initializer panic are covered; see
+[source-progress-checked.md](source-progress-checked.md#allocation-parents-bound-to-local-variables).
+The old readiness/default certificates and general memory-call graph boundaries
+remain unchanged.
+
+Bound-parent body catalogues now derive parameter, return and local-frame
+equations from actual elaboration. Existing complete-coverage and memory-call
+contracts are reused, including inhabited success, post-initializer panic and
+allocating-parent argument consumers; see
+[source-progress-checked.md](source-progress-checked.md#bound-body-catalogues-with-elaboration-derived-frames).
+Syntactic body/default admission and actual selected-body identity remain
+explicit; no semantic execution premise or universal/compiler claim is added.

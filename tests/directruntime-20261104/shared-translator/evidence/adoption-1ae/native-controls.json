@@ -1,0 +1,153 @@
+{
+  "status": "native-functional-parity-pass; exhaustive binary closure not established",
+  "binary": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check",
+  "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
+  "binaryBytes": 20962960,
+  "buildManifest": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/build.json",
+  "buildManifestSha256": "014a01233846ecba76d69b4aeeeebf6b86ed38f0ce2b7837319e1b0f1c8379c9",
+  "pinnedLeanSourceClean": true,
+  "fixtureComparisons": 18,
+  "failClosedRequests": 2,
+  "anchors": [
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "memoryAlias",
+      "sourceId": 65
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "storageCopy",
+      "sourceId": 111
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "tupleOrder",
+      "sourceId": 174
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "executeFirst",
+      "sourceId": 197
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "falseControl",
+      "sourceId": 247
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "wrongTupleOrder",
+      "sourceId": 218
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "discardedFailure",
+      "sourceId": 267
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "discardedReadFailure",
+      "sourceId": 374
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "unsupportedCallTuple",
+      "sourceId": 290
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "unsupportedReference",
+      "sourceId": 304
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "unsupportedInlineArray",
+      "sourceId": 321
+    },
+    {
+      "fixture": "ComposedReaders.ast.json",
+      "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+      "function": "unsupportedDiscardRead",
+      "sourceId": 347
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "normalBox",
+      "sourceId": 10
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "normalDiamond",
+      "sourceId": 18
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "revertBox",
+      "sourceId": 27
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "revertDiamond",
+      "sourceId": 35
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "panicBox",
+      "sourceId": 44
+    },
+    {
+      "fixture": "ModalityControls.ast.json",
+      "fixtureSha256": "bc9bc12b91b15329a4bb71b627f71478570b5e5e3ddc836af96cce5d309b7a24",
+      "function": "panicDiamond",
+      "sourceId": 52
+    }
+  ],
+  "runtimeExit": 0,
+  "runtimeWallSeconds": 0.11522722199151758,
+  "controlWallSeconds": 0.24330917200131807,
+  "runtimeCwd": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/empty-runtime-cwd",
+  "serializedEnvironmentAccessObserved": false,
+  "externalExecs": [
+    "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/direct-check"
+  ],
+  "networkSyscallsObserved": false,
+  "dynamicLeanFrontendLibraryObserved": false,
+  "frontendOriginSymbolCandidates": [
+    "0000000000141980 0000000000000039 t initialize_Lean_Elab_PreDefinition_Main",
+    "00000000001408f0 0000000000000039 t initialize_Lean_Meta_Hint",
+    "0000000000141700 0000000000000039 t initialize_Lean_Meta_Tactic_Grind_EMatchTheorem",
+    "000000000013fd50 0000000000000039 t initialize_Lean_Parser_Types",
+    "00000000001411b0 0000000000000039 t initialize_Lean_Server_Utils",
+    "0000000000141480 0000000000000039 t initialize_Lean_Widget_UserWidget",
+    "0000000000141410 0000000000000069 t l_Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1",
+    "00000000001411f0 000000000000000f t l_Lean_Json_getObjValAs_x3f___at___Lean_Widget_instFromJsonWidgetSource_fromJson_spec__0",
+    "000000000013f960 00000000000003ea t l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0",
+    "00000000001414c0 0000000000000235 t l_List_elem___at_____private_Lean_Meta_Tactic_Grind_EMatchTheorem_0__Lean_Meta_Grind_ppParamsAt_spec__0",
+    "0000000000140ec0 00000000000002e7 t l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0",
+    "0000000000141740 000000000000023b t l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18",
+    "0000000000140810 00000000000000d3 t l_String_anyAux___at_____private_Lean_Meta_Hint_0__Lean_Meta_Hint_readableDiff_mkWhitespaceDiff_spec__0",
+    "0000000000141200 0000000000000203 t l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1_spec__1"
+  ],
+  "frontendOriginReview": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/inventory.json",
+  "trace": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-3ad/runtime.strace",
+  "traceSha256": "c74c83763cae77332e3a63db82f8f697db71d954a91818d9cb0cbe616905b513",
+  "stdoutSha256": "b8ee9a53969320e2598869f165df2e9847d64283a4423a90bff36d07fd3ee43d",
+  "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "boundary": "18 exact native-vs-saved-Lean-harness observations plus 2 fail-closed requests. Runtime trace shows no serialized Lean environment access or external frontend executable/library in these runs. The 14 frontend-origin candidates were independently classified as generic helpers/empty initializers; this does not establish exhaustive binary closure. No WASM,source preservation,universal backend adequacy or full migration claim."
+}

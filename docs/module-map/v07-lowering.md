@@ -63,3 +63,79 @@
 | `Lowering/V07/P12AssignedConditionControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/P12ContextExtension.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/P12ContextExtensionControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/SignedSubtractionControls.lean` | Signed subtraction clients, boundaries, capture/sign negatives and mixed frames |
+
+| `Lowering/V07/HeadlineAxioms.lean` | Registered exact axiom guards for selected scalar, effect, reference and structural graph headlines |
+
+| `Lowering/V07/SignedWordAddition.lean` | Actual full-range unchecked int256 addition and initial-family effect transport |
+| `Lowering/V07/SignedWordMultiplication.lean` | Actual full-range unchecked int256 multiplication and initial-family effect transport |
+| `Lowering/V07/SignedArithmeticControls.lean` | Inhabited signed add/multiply clients, boundaries, captures, frames and wrong-program controls |
+
+| `Lowering/V07/UnsignedCastControls.lean` | All unsigned widths, capture order, caller identity and live-reference frames |
+
+| `Lowering/V07/UnsignedWidthCastControls.lean` | All unsigned width pairs, cast order and caller frame controls |
+| `Lowering/V07/SignedWidthCastControls.lean` | Signed thresholds, all width pairs, negative extension and caller frame controls |
+| `Lowering/V07/SignedNarrowAddition.lean` | Unchecked signed addition at every approved width, with initial-family effect transport |
+| `Lowering/V07/SignedNarrowSubtraction.lean` | Unchecked signed subtraction at every approved width, preserving operand positions |
+| `Lowering/V07/SignedNarrowMultiplication.lean` | Unchecked signed multiplication at every approved width, including wide intermediate overflow |
+| `Lowering/V07/SignedNarrowArithmeticControls.lean` | Inhabited all-width arithmetic clients, captures, checked-classification and wrong-program controls |
+| `Lowering/V07/SignedNegation.lean` | Actual unchecked signed negation at all widths, local/reached-state laws and minimum-value controls |
+| `Lowering/V07/SignedNegationEffects.lean` | Actual unchecked negation of local assignment, fresh result capture and initial alias-family transport. |
+| `Lowering/V07/SignedNegationEffectControls.lean` | Inhabited alias/context/mixed-reference clients, ordered observations and incorrect capture/store/narrowing controls. |
+| `Lowering/V07/SignedComplement.lean` | All-width signed bitwise complement through actual Source unary evaluation and typed subtraction; initial-family local transport. |
+| `Lowering/V07/SignedComplementControls.lean` | Both checkedness modes/pipelines, all signed widths, live-context clients and missing-minus-one/reversed-operand controls. |
+| `Lowering/V07/SignedLocalUpdate.lean` | Actual unchecked local signed prefix/postfix increment/decrement with fresh old/result captures and derived alias-family updates. |
+| `Lowering/V07/SignedLocalUpdateControls.lean` | All signed widths, MAX/MIN wrap and missing-narrowing controls, mixed caller/context clients and actual pipeline observations. |
+| `Lowering/V07/UnsignedQuotRem.lean` | Actual unsigned division/remainder, derived result bounds and initial-family local transport; distinct Source/native zero observations. |
+| `Lowering/V07/UnsignedQuotRemControls.lean` | All widths/modes/pipelines, zero and reversed-operand controls, inhabited alias/context/live-reference clients and payload mismatch witness. |
+| `Lowering/V07/UnsignedQuotRemGuard.lean` | Published division panic guards, exact Source panic payloads, fresh result capture and initial-family success/failure local transport. |
+| `Lowering/V07/UnsignedQuotRemGuardControls.lean` | Guard metadata, all-width/mode/pipeline cases, live caller/context clients and exact wrong-code/plain-revert/drop controls. |
+| `Lowering/V07/UnsignedQuotRemEffects.lean` | Effectful assignment/read quotient and remainder transport with actual pipeline captures and panic payloads. |
+| `Lowering/V07/UnsignedQuotRemEffectsControls.lean` | Inhabited ordered alias, zero-divisor, context and mixed-reference controls. |
+| `Lowering/V07/UnsignedQuotRemPass.lean` | Exact published panic insertion for pure and effectful quotient/remainder clauses, with independent Source transport. |
+| `Lowering/V07/UnsignedQuotRemPassControls.lean` | Inhabited pass clients, alias/context controls and ordered payload negatives. |
+| `Lowering/V07/LessThan.lean` | Signed/unsigned less-than and actual assignment/read Source transport with fresh captures. |
+| `Lowering/V07/LessThanControls.lean` | Inhabited boundaries, alias/context/frame and operand-order controls. |
+| `Lowering/V07/NumericComparisons.lean` | All six numeric comparison clauses with actual Source transport, ordered captures and panic-pass identity. |
+| `Lowering/V07/NumericComparisonControls.lean` | Inhabited operators, signed/width boundaries, alias/context and ordered observation controls. |
+| `Lowering/V07/BooleanComparisons.lean` | Boolean equality/inequality transport with heterogeneous caller and capture-context frames. |
+| `Lowering/V07/BooleanComparisonControls.lean` | Inhabited mixed-reference, alias/context, effect-order and wrong-binding controls. |
+| `Lowering/V07/AddressConversions.lean` | Existing-carrier address/uint160 value and actual expression/local/assignment conversion certificates. |
+| `Lowering/V07/AddressConversionControls.lean` | Inhabited mixed-reference conversion, admission-refusal, alias and capture-lifetime controls. |
+| `Lowering/V07/AddressComparisons.lean` | Six address comparison clauses over independent Source execution and existing native captures; initial canonical context alignment. |
+| `Lowering/V07/AddressComparisonControls.lean` | Inhabited address comparison, context-extension and ordered negative controls with exact axiom guards. |
+| `Lowering/V07/AddressQualifiers.lean` | Actual payable/explicit-erasure assignment transport from canonical initial context alignment. |
+| `Lowering/V07/AddressQualifierControls.lean` | Inhabited both-qualifier, mixed-reference, composition and capture controls. |
+| `Lowering/V07/EnumConversions.lean` | Existing enum/uint256 successful assignment transport and exact Source-only invalid-cast observations, with explicit representation obligations. |
+| `Lowering/V07/EnumConversionControls.lean` | Real enum-declaration, mixed-reference, alias, full-panic and oversized-layout countercontrols. |
+| `Lowering/V07/EnumGuard.lean` | Native enum range guard and actual assignment/capture success/panic transport, including zero/full word capacities. |
+| `Lowering/V07/EnumGuardControls.lean` | Inhabited guarded enum, reached-state order, prefix and zero/full-capacity controls with exact pins. |
+| `Lowering/V07/UnsignedEnumGuard.lean` | Approved unsigned-width Source enum conversions reuse the existing native guard, with initial-derived success/failure transport. |
+| `Lowering/V07/UnsignedEnumGuardControls.lean` | Inhabited narrow-width alias, context and maximum-bound controls across all 32 widths. |
+| `Lowering/V07/EnumUnsignedCasts.lean` | Enum-to-approved-unsigned assignment transport; only the result narrows, with full caller-context alignment. |
+| `Lowering/V07/EnumUnsignedCastControls.lean` | Inhabited mixed-reference, all-width, capture-extension and incorrect caller-narrowing controls with exact axiom guards. |
+| `Lowering/V07/EnumSignedWord.lean` | Actual enum-to-int256 assignment/sign-result transport, deriving full caller-context alignment from initial relations. |
+| `Lowering/V07/EnumSignedWordControls.lean` | Inhabited mixed-reference, sign-boundary, capture-extension and stale/truncation controls with exact axiom guards. |
+| `Lowering/V07/EnumSignedCasts.lean` | Enum assignment-to-signed-width transport through existing sign and narrowing laws; original caller ordinal preserved. |
+| `Lowering/V07/EnumSignedCastControls.lean` | Proved256-member Source enum witness, negative int8 assignments, all-width/mathematical boundaries and exact axiom guards. |
+| `Lowering/V07/SignedEnumGuard.lean` | Actual signed assignment, nonnegative panic check, UInt capture and existing enum membership guard, including zero/full capacity. |
+| `Lowering/V07/SignedEnumTransport.lean` | Source-to-native signed-input enum conversion success/panic at all approved widths, with initial-derived caller-family transport. |
+| `Lowering/V07/SignedEnumControls.lean` | Inhabited mixed-reference, all-width panic/order/sign/capacity controls and exact axiom guards. |
+| `Lowering/V07/UdvtAssignment.lean` | Integer-underlying UDVT local assignment and same-tag identity conversion, nominal-refusal boundaries and initial-derived context transport. |
+| `Lowering/V07/UdvtAssignmentControls.lean` | Real two-tag UDVT metadata, mixed-reference and all64 integer-type controls with nominal-erasure/stale-read negatives and exact guards. |
+| `Lowering/V07/UdvtBoolAssignment.lean` | Boolean-underlying UDVT same-tag assignment and initial-derived full mapped caller transport. |
+| `Lowering/V07/UdvtBoolAssignmentControls.lean` | Inhabited mixed-reference Boolean matrix, self/capture extension, stale-read and nominal-refusal controls with exact guards. |
+| `Lowering/V07/UdvtAddressAssignment.lean` | Address-underlying UDVT same-tag assignment with canonical UInt capture and initial-derived caller-context transport. |
+| `Lowering/V07/UdvtAddressAssignmentControls.lean` | Both payable flags, 160-bit boundaries, mixed references and executed wrong-narrowing/stale/nominal controls with exact guards. |
+| `Lowering/V07/UdvtFixedBytesAssignment.lean` | Fixed-byte-underlying UDVT same-tag assignment, canonical UInt capture and exact width-indexed content observation. |
+| `Lowering/V07/UdvtFixedBytesAssignmentControls.lean` | Real nominal metadata, all32 byte widths, mixed references and stale/truncation/nominal-refusal controls with exact guards. |
+| `Lowering/V07/FixedBytesComparisons.lean` | All six fixed-byte comparison clauses with actual assignment/read pipeline order and initial-derived caller transport. |
+| `Lowering/V07/FixedBytesComparisonControls.lean` | All-width/operator ordered observations, live-reference framing and executed uncaptured/reversed-capture negative programs. |
+| `Lowering/V07/IntegralRationalConstants.lean` | Arbitrary integral rational meaning, Source conversion/assignment and native capture transport with existing range typing. |
+| `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
+| `Lowering/V07/P12NegatedCondition.lean` | Published condition-contract negation preserving exact operand code, effects, state and error payloads; double-negation run identity. |
+| `Lowering/V07/P12NegatedConditionControls.lean` | Effectful producer composition, source horizons, actual failure bytes and discriminating duplicated-prefix/wrong-write controls. |
+| `Lowering/V07/P12AtomicConditions.lean` | Actual Source Boolean literal and local-read producers of the published condition contract |
+| `Lowering/V07/P12AtomicConditionControls.lean` | Mixed caller framing, actual negated Source composition and discriminating wrong atomic clauses |
+| `Lowering/V07/P12StorageCaptureControls.lean` | Concrete full P12 storage-capture producer with derived initial alias reflection, exact caller frames and empty-alias negative |
+| `Lowering/V07/P12MemoryCaptureControls.lean` | Concrete full memory-capture record, derived heap-typed identity and equal-content fresh-allocation counterexample |

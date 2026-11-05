@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/solidity-lean/tests/h28-sol/non-vacuity/kernel.py", line 18, in <module>
+    assert os.environ.get('LEAN_PATH'),'invoke through lake env'
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+AssertionError: invoke through lake env
