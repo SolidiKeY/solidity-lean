@@ -3,3 +3,4 @@
 !/bulk-data.json
 !/registration.json
 /.scratch/
+__pycache__/
