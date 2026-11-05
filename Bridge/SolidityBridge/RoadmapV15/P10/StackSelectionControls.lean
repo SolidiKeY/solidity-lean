@@ -27,9 +27,9 @@ def observed (op : Backend.Op) (perm : Bool) (words output : Scalar.Stack) : EVM
 private theorem shape (op : Backend.Op) (perm : Bool) (words output : Scalar.Stack) :
     (Assembly.chargedPrepare (input op 12 perm words) 3).replaceStackAndIncrPC
       (output.map (fun w=>UInt256.mk w.toFin)) = observed op perm words output := by
-  first | rfl | simp only [input,observed,site,modularSite,Site.state,
+  first | rfl | (simp only [input,observed,site,modularSite,Site.state,
     WordPushFixtures.seed,WordPushFixtures.u,Assembly.chargedPrepare,
-    EVM.State.replaceStackAndIncrPC,EVM.State.incrPC] <;> rfl
+    EVM.State.replaceStackAndIncrPC,EVM.State.incrPC]; rfl)
 
 theorem dup_client (n : Fin 16) (perm : Bool) :
     let words := leading n ++ 511::spill
