@@ -319,7 +319,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalByteStoreSequence.lean` | Actual prepared two-MSTORE Environment slice with initial-derived numeric/pointer intermediate and final frames, same-cell overwrite support and live REVERT observation. |
 
 | `Backend/MemoryOps/PhysicalByteOverwrite.lean` | Actual two-byte-store reached REVERT payload, arbitrary overlap, complete read updates, disjoint represented-word frame and short-stack prefix failure. |
-
 | `Evm/MemoryLoopHorizonControls.lean` | Populated aliased-memory interface witness at arbitrary horizons; zero/one-turn exit and pending-versus-divergence controls. |
 | `Evm/MemoryLoopHorizonAllocControls.lean` | Reached allocation and allocation-before-revert horizon witnesses using the existing owner allocator fixture. |
 | `Evm/MemoryLoopFiniteHorizonControls.lean` | Forever-allocating loop with real finite room but impossible all-prefix room; exact cursor/count, false-exit and full-cursor preparation controls. |

@@ -167,7 +167,6 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
-- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
-
-- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+- [V14 H10 aggregate helper](feature-work/v14-help-g18.md): published raw calldata byte parameter/frame consumer and remaining G18 obligations.
+- V14 typed constructor argument consumers: [executable consumers](feature-work/roadmap-v14-executable.md).
