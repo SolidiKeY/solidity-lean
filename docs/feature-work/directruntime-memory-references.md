@@ -356,3 +356,12 @@ cache utility without a Lean server. The skeptic requested equality between
 trace outputs and mapping outputs before packing; this check is now mandatory.
 Fixture filenames choose the mode only inside this development harness;
 ordinary source metadata-to-modality selection still awaits runtime acceptance.
+
+The H41 pickup pack for code head `aaeca878738f29b4499f0f14017d561574767243` was created and
+fully read back successfully: 1644 artifacts, 552 mappings,
+571458939 compressed bytes; packing exit0,35.836 s,60980 KiB peak
+aggregate RSS. All five Reader/Shared.Intrinsic/Admission/KernelControls/
+KernelMatrix trace mappings and outputs are included. Delivery is
+coordinator-pending. Absolute archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/published-f77/cache-aaeca878/cache.tar.zst`.
+SHA256: `c739666161edd563c7156758216fd035855202577039ddf729364cc9101ad2ad`. Manifest, receipt, readback command and
+source binding are retained under evidence/published-f77.
