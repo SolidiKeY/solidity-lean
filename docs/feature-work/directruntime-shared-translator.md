@@ -513,7 +513,7 @@ no RUNTIME_GATE_PASS or goal completion is asserted.
 
 
 Fresh KeySort and SolKey377/131/131 annotations checks passed under actual cgroup
-memory.max12884901888,swap.max0,cpu.max100000/100000. Actual toolchain remains
+memory.max12884901888,swap.max0,cpu.max=100000 100000. Actual toolchain remains
 Lean4.24.0/Lake5.0.0-src+797c613. KeySort/cache run6.353s,RSS251580KiB,minimum outer
 available6049267712bytes. New refreshed pack differs from the received prior pack:
 /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/14d0d88411fa/owned-delta.tar.zst
@@ -557,7 +557,7 @@ runtime and final full gates remain open. H41 remains in force.
 
 
 Fresh8bf KeySort and SolKey377/131/131 annotations checks passed;actual cgroup
-memory.max12884901888,swap.max0,cpu.max100000/100000. KeySort/cache8.535s,
+memory.max12884901888,swap.max0,cpu.max=100000 100000. KeySort/cache8.535s,
 RSS252580KiB,minimum outer available6055948288bytes. Six-module cache regenerated
 and verified against fresh successful build traces/mappings;18artifacts/6mappings,
 964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519,
@@ -644,3 +644,14 @@ restored historical blobs,successful final gates and honest packet limits. Sourc
 exhaustive closure/WASM/migration obligations remain pending. An initial attempt to
 pipe a packager via noninteractive Docker stdin did no packaging;it is not counted
 as validation. The file-backed packager above performed the actual verified work.
+
+
+After required rebase/native checkpoint commit,fresh KeySort and SolKey377/131/131
+annotations checks passed. Actual Lean4.24.0/Lake5.0.0-src+797c613,scope memory.max
+12884901888/swap.max0/cpu.max=100000 100000 remain verified. KeySort/cache4.669s,
+RSS252528KiB,min6243352576bytes. Fresh6module18artifact/6mapping cache verified:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/28b285ccf48a/owned-delta.tar.zst
+964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519.
+Byte-identical to prior pendingeb91pack;delivery still coordinator-pending. No
+ship-cache.sh invocation. Fresh source/compiled fingerprint receipt and gate/cache
+logs are in adoption-3ad. RUNTIME_GATE_PASS and whole-lane completion remain pending.
