@@ -135,8 +135,7 @@
 | `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
 | `Lowering/V07/P12NegatedCondition.lean` | Published condition-contract negation preserving exact operand code, effects, state and error payloads; double-negation run identity. |
 | `Lowering/V07/P12NegatedConditionControls.lean` | Effectful producer composition, source horizons, actual failure bytes and discriminating duplicated-prefix/wrong-write controls. |
-| `Lowering/V07/P12ContextExtension.lean` | Whole P12 condition transport across arbitrary native thinnings with heap-growing background frames |
-| `Lowering/V07/P12ContextExtensionControls.lean` | Inhabited mixed-reference extension/composition, complete caller frames and stale-index negatives |
 | `Lowering/V07/P12AtomicConditions.lean` | Actual Source Boolean literal and local-read producers of the published condition contract |
 | `Lowering/V07/P12AtomicConditionControls.lean` | Mixed caller framing, actual negated Source composition and discriminating wrong atomic clauses |
 | `Lowering/V07/P12StorageCaptureControls.lean` | Concrete full P12 storage-capture producer with derived initial alias reflection, exact caller frames and empty-alias negative |
+| `Lowering/V07/P12MemoryCaptureControls.lean` | Concrete full memory-capture record, derived heap-typed identity and equal-content fresh-allocation counterexample |
