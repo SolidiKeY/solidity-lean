@@ -572,6 +572,8 @@ import Solidity.Backend.Passes.MemoryCallReuseApplication
 import Solidity.Backend.Passes.MemoryCallReuseFailure
 import Solidity.Backend.Passes.MemoryCallReuseObservations
 import Solidity.Backend.Passes.MemoryCallReusePins
+import Solidity.Backend.Passes.MemoryCallScopeBoundary
+import Solidity.Backend.Passes.MemoryCallScopeControls
 import Solidity.Backend.Passes.MemoryCompilerSequence
 import Solidity.Backend.Passes.MemoryScopeAllocation
 import Solidity.Backend.Passes.MemoryScopeBoundary
