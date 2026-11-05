@@ -1947,3 +1947,41 @@ The SDIV certificate now composes with the charged fetched reference theorem, re
 ### Selected signed remainder
 
 The SMOD certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Sign-combination, zero-divisor and minimum-word boundary controls preserve the dividend's remainder sign, populated separate frames and gas-before-arity/fuel priority; wrong Euclidean results and permuted tails are rejected. These are raw primitive facts, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Signed division and remainder refusals
+
+General SDIV/SMOD short-stack consumers derive certificate refusal and actual fetched/native stack-underflow from explicit numeric representation, short-stack and adequate-gas premises. Populated singleton controls check gas-before-underflow and distinguish the driver's fuel policy from native gate refusal at one fuel. The exceptional result carries no final state, so no rollback, account-world or source-failure correspondence follows.
+
+### Unsigned division and remainder refusals
+
+DIV/MOD short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked signed cases by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. An exceptional result supplies no final state, rollback or account-world conclusion.
+
+### Unary numeric refusals
+
+NOT/ISZERO empty-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Populated surrounding states witness the empty-operand case. Controls retain gas-before-underflow and distinguish native and driver fuel policy; exceptions supply no final-state, rollback or account-world conclusion.
+
+### Logical-shift refusals
+
+SHL/SHR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Binary bitwise refusals
+
+AND/OR/XOR short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twelve priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Comparison refusals
+
+LT/GT/EQ/SLT/SGT short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls and twenty priority observations retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Subtraction refusal
+
+The SUB short-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### POP refusal
+
+The POP empty-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Its gate proof uses the actual two-gas cost and one-operand arity. Populated surrounding states witness the empty-operand case; controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Indexed DUP refusals
+
+DUP1 through DUP16 short-stack consumers connect the actual indexed certificates with the charged gate, fetched driver and native execution under explicit representation, depth and adequate-gas premises. Existing opcode facts are reused read-only. Populated boundary controls show DUP16 refusing fifteen words while DUP15 succeeds on the same input; all-depth controls retain gas-before-underflow and native/driver fuel distinctions. A uniform opcode-fact proof replaces finite case expansion without changing the claims. Exceptions supply no final-state, rollback or account-world conclusion.
+
+Not yet produced: `IndexedRefusalInterfaceV1` (`DupClaim`, `SwapClaim`, `Producer`) has no inhabitant; the DUP theorems are not yet connected to `DupClaim`, and no SWAP refusal theorem exists.
