@@ -1059,3 +1059,98 @@ Adopted public `3ad22f66d8fc6431378c22e71823436c79dede7f`, reusing the context-e
 Actual Source local execution and success inversion, the published alias-capture operation, extended context relation, head resolution and world frame supply every field. Exact capture/drop and repeated native capture witnesses retain the whole caller. Fifteen exports have exact inline pins; the index theorem is axiom-free. An eighty-case, twelve-observation matrix covers both pipelines, checked flags, caller Booleans and horizons zero through four. An actually wrong fresh allocation has the same two zero elements as the original but a different identity and a larger heap. Published allocation laws plus kernel reduction prove the equal contents and distinct IDs; equal length alone is not the evidence.
 
 This is a nonallocating correct producer with one old memory binding; allocation occurs only in the negative program. It is not general reference selection, Source declaration execution, accepted-source/graph admission, recursive copying, delete/lifetime or physical-memory correctness. Source horizon zero times out while native capture executes; resource correspondence stays open. Source-contract constructor coverage remains zero; no external compiler/EVM adequacy is claimed. G16/G17/P12, G18.01 and both backfills remain partial; G18.06 needs concrete P8 and ordered V16/V14 producers, and G19 remains V17-owned. Separate independent read-only finder and skeptic source reviews passed; final gates and artifact review are recorded in the handoff.
+
+### CP74: H46 move to Claude VM
+
+Started from `origin/cloud/v07-move` (`9af754b1`) merged with master. All V07
+Lean sources were already byte-identical on master; the rescue commit only
+added untracked lane files. Kept: the substantive `tests/v07/*Checks.lean`,
+`EffectFixtures.lean` and its ordered-observation checker. Dropped as
+Codex-VM tooling: alternate lakefiles, docker/flock wrappers and the
+generators that hand-edited `Solidity.lean` (H21). The generated
+1598-guard `Axioms.lean`, its registry and checker stay off the tip (H44),
+restorable from `9af754b1` and verified by `tests/v07/BULK.sha256`; see
+`tests/v07/README.md`. Tracking `Axioms.lean` would add 1598 duplicate
+entries to the global axiom-pin gate, which already fails on master
+(unrecorded changes) independently of this lane.
+
+### CP75: H15 Source refusal and H24 admission assembly
+
+`SourceRefusal.refuses_iff` characterizes the gap exactly on the current
+Source typing: `SourceRefusesNonAdmissible E` holds iff every struct a type
+path names (in any scope) is mapping-free
+(`NameableStructsMappingFree`). The reverse direction is a structural
+induction on type names (`tys_maps_free`): `Syn.tys` refuses `mapping`
+outside storage at every depth, so a mapping reaches a non-storage local only
+through a named struct, which the environment-free `Source.locOK` cannot
+inspect. The forward direction builds the actual `StmtD.declVar` derivation
+(`not_refuses_of_mapping_struct`). `DeclsMappingFree` is a decidable
+sufficient condition (`refuses_of_decls`); `decl_inversion` shows a local
+declaration's derivation carries `locOK` of its type.
+
+**Repair (VY5-owned, H16; not applied).** `envLocOK E τ l init` is
+`locOK τ l init` plus the H15 policy for an explicit location.
+`envLocOK_sound` (it implies `AdmissibleLocation`), `envLocOK_conservative`
+(equal to `locOK` wherever the location is admissible, so no
+solc-admissible program is removed) and `envLocOK_refuses`. Integration
+patch for the Source owner: add to `Source/Typing.lean`
+
+    def Ctx.locOK (C : Ctx) (τ : STy) (l : Option DataLoc) (init : Bool) : Bool :=
+      locOK τ l init && (l.isNone || l == some .storage ||
+        !C.env.hasMapping (C.env.structCount + 1) τ)
+
+and use `C.locOK` in place of `locOK` in `StmtD.declVar`, `StmtD.declInit`,
+`Ctx.declSlot` (tuple declarations, which leak the same way but lie outside
+the interface's `declVar` scope), `Source/Infer.lean` (two sites) and
+`Frontend/Static/InferStmt.lean` (two sites). After it, refusal for every
+environment is `decl_inversion` (with `C.locOK`) followed by
+`envLocOK_sound`.
+
+`GraphAdmissionAssembly` reduces the H24 field to per-environment premises:
+`graph_of_premises` (the computed producer certificate from the structural
+inputs of `producer_success`), `EnvAdmission` (certificates at every location
+plus refusal), `env_admission_iff` (on current Source: certificates plus
+`NameableStructsMappingFree`), and `admission`/`declarationGraphProducer`
+(the `Admission` field and the additive `P8.DeclarationGraphAdmission.Producer`
+record). Existing P8 statements, premises and exclusions are unchanged.
+Controls: the mapping-free three-struct chain is admitted at all three
+locations (`chain_admitted`); the same chain beside the mapping struct `Loop`
+has certificates at every location (`mixed_graphs`; memory selects 3
+structs, storage 4) but is not admitted, on refusal alone
+(`mixed_not_admitted`).
+
+Still open for G18.01: an inhabited `P8a.Producer` (P8-SPEC-LAW1, so every
+`Producer`-indexed result here is vacuous); deriving `GraphPremises` from
+accepted Source (Source admits inline-recursive structs that solc rejects,
+`GraphAdmissionBoundary`, so a rank cannot be derived from current Source
+either); the refusal repair above; parameters, returns and state variables.
+
+### CP76: generic P12 local reference captures
+
+`P12LocalCaptures.storageLocal`/`memoryLocal` construct the published
+`StorageCapture`/`MemoryCapture` records (unchanged signatures) for ANY
+context map, Source local `i` and native slot `j` with
+`m.slot i = ⟨.alias R, j⟩` (resp. `⟨.mem R, j⟩`), and any value/world
+relations satisfying, at `worlds`-related states only:
+`StorageNonnull`/`MemoryNonnull` (a related reference binding is `some`) and
+`StorageFaithful`/`MemoryFaithful` (two related references are equal, by
+`HRef.id` across native reference types for memory, iff their Source paths
+or addresses are). These are relation properties, with no run, postrelation
+or desired-result premise. Source local execution is inverted at every
+horizon (`local_success`; horizon zero times out, outside the contract; a
+local read never reverts, `local_not_revert`); the code is the published
+`storageCapture`/`memoryCapture`; alias reflection follows from faithfulness
+at the reached caller.
+
+`P12LocalCaptureControls` proves the four premises for the existing mixed
+fixture (`storage_faithful`, `memory_faithful`, …; memory uses the world
+relation's heap anchoring), instantiates both producers, shows they emit the
+fixture producers' exact code (`same_code`), exercises their success fields
+through actual Source execution for both pipelines and checked flags
+(`storage_success_client`, `memory_success_client`), and refutes
+faithfulness for a collapsing relation that maps two distinct paths to one
+reference (`collapse_not_faithful`). This replaces fixture-only CP72/CP73
+evidence by a producer V17/V16/V14 can instantiate at their own relations;
+selecting the local from admitted syntax, effectful reference paths
+(index/member), allocation, copies, delete, lifetimes and physical
+correspondence remain open.

@@ -2865,6 +2865,7 @@ import Solidity.Lowering.V07.FixedBytesAssignment
 import Solidity.Lowering.V07.FixedBytesAssignmentControls
 import Solidity.Lowering.V07.FixedBytesComparisonControls
 import Solidity.Lowering.V07.FixedBytesComparisons
+import Solidity.Lowering.V07.GraphAdmissionAssembly
 import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
@@ -2901,6 +2902,8 @@ import Solidity.Lowering.V07.P12AtomicConditions
 import Solidity.Lowering.V07.P12ContextExtension
 import Solidity.Lowering.V07.P12ContextExtensionControls
 import Solidity.Lowering.V07.P12Controls
+import Solidity.Lowering.V07.P12LocalCaptureControls
+import Solidity.Lowering.V07.P12LocalCaptures
 import Solidity.Lowering.V07.P12MemoryCaptureControls
 import Solidity.Lowering.V07.P12NegatedCondition
 import Solidity.Lowering.V07.P12NegatedConditionControls
@@ -2946,6 +2949,7 @@ import Solidity.Lowering.V07.SignedWordAddition
 import Solidity.Lowering.V07.SignedWordMultiplication
 import Solidity.Lowering.V07.SignedWordSubtraction
 import Solidity.Lowering.V07.SourceReads
+import Solidity.Lowering.V07.SourceRefusal
 import Solidity.Lowering.V07.UdvtAddressAssignment
 import Solidity.Lowering.V07.UdvtAddressAssignmentControls
 import Solidity.Lowering.V07.UdvtAssignment
