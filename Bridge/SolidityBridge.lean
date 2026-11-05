@@ -111,6 +111,7 @@ import SolidityBridge.ExternalEvm.StorageSlots
 import SolidityBridge.ExternalEvm.TryMemory
 import SolidityBridge.ExternalEvm.TryMemoryCode
 import SolidityBridge.ExternalEvm.TryMemoryDriver
+import SolidityBridge.ExternalEvm.TryPanicOperational
 import SolidityBridge.ExternalEvm.TryPanicRelative
 import SolidityBridge.ExternalEvm.TryPanicSourcePadding
 import SolidityBridge.ExternalEvm.TryPanicSourceScanner
