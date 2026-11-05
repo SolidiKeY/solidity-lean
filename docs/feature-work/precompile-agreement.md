@@ -1,29 +1,130 @@
 # SOL-PC: optional B16 precompile agreement
 
-Status: **blocked at cache setup; source inventory checkpoint only**. No B16,
-G51, G47 or RUNTIME_GATE_PASS claim. Base
+Status: **bounded proofs and local acceptance implemented; central registration
+and full repository validation pending**. No full B16, G51, G47 or
+RUNTIME_GATE_PASS claim. Original base
 `b6ba0696102a7a038afe2ed333c09dff397cc5b2`; assigned branch
-`codex/solidity-sol-20261103/precompile-agreement` in
-`/workspace/solidity-lean`. The initial checkout was clean at the base, which
-is an ancestor of the local published `origin/master` at `82e75b10`.
+`codex/solidity-sol-20261103/precompile-agreement`, repository
+`/workspace/solidity-lean`. Published dependency `8495f1deb0a95dd6b9301822d8649ab76b217681`
+was adopted in `095dfb1fdb69ec5dbff4adcee18aac7438b48232`. The newly announced
+`f77cf60d3cea8f7f1db8db29cc027532b0cd3fce` will be inspected/adopted after
+saving this checkpoint; its adoption receipt will be appended below.
 
-## Queue and coverage
+## Current queue and acceptance
 
-| Work item | Status | Evidence / remaining work |
+| Work item | Current result | Evidence / remaining work |
 |---|---|---|
-| 18-address source inventory | Reviewed source inventory recorded | `Bridge/tests/precompile-agreement/inventory.json`: address, core gas, length/framing, malformed behavior, actual vendor definition, external boundary, planned controls, explicit empty proof mapping. |
-| Arbitrary-length IDENTITY output and charged gas | Pending, cache blocked | Must import actual `Ξ_ID`, bridge List UInt8/ByteArray exactly, prove success and insufficient-gas branches including account/substate frame and gas arithmetic without extra equality premises. |
-| All common algebraic rows | Pending, cache blocked | Candidates: 1–4, 6–8, 10; row 9 header formula only where four bytes are present. Prove actual branch formulas, rounding, inhabited controls and malformed/insufficient-gas cases. |
-| Scope-complete acceptance, kernel/trust/axiom gates | Pending | Default checker intentionally exits 1. No theorem acceptance gate implemented yet. |
-| Authorized backfill | Source mismatch evidence recorded | MODEXP fork schedule/bounds, BLAKE2F short header and subprocess/opaque boundaries. No producer changes requested or made. |
-| Final full validation and committed handoff | Pending | This is a blocked checkpoint, not completion of the work queue. |
+| All 18 address/gas/length/malformed rows | Complete pinned scope inventory | `inventory.json`: actual address/dispatcher checks, 75 unchanged input hashes, theorem and fixture map. |
+| Arbitrary-length IDENTITY output and charge | Kernel proofs pass | `Identity.lean`: complete success/failure tuples, preserved successful account map/substate, exact gas, exact/one-short and unrepresentable-cost boundaries; no length-zero restriction. |
+| All common algebraic rows | Kernel proofs pass | Addresses 1–4, 6–8, 10; BLAKE2F at size ≥4 or zero header. All word-rounding classes, general big-endian header/padding law, actual vendor error flags and full-consumption controls. |
+| Fork/representation backfill | Exact counterexamples recorded | MODEXP empty minimum and 1025-byte bound mismatch; 33-byte input conversion truncation. BLAKE2F short-header mismatch. No producer/vendor changes or crypto premise. |
+| Boundary tests, trust, scope checker | Local gates pass | 69 public theorems, 82 explicit public declaration axiom pins, 204-declaration audit, 143 mapped pinned core `#guard`s and 27 additional computed boundary `#guard`s; 32 Python mutation tests. |
+| Final repository gates / integration seal | Pending central integration | Five generated-root imports, five area rows and 82 central axiom inventory entries are intentionally proposed, not written. `run-lean.sh --bridge` stops at stale roots; central axiom gate reports 0 errors / 82 unrecorded pins. |
 
-Every row has `proof_status=pending` and `proofs=[]`. Control lists are **planned
-classes**, not executed EVM fixtures. The Python mutation tests only test the
-source inventory checker. It verifies coverage against `Precompile.address`,
-vendor dispatcher addresses and definition names, and exact source hashes.
-It does not prove formula text or behavioral descriptions. Those are reading-based
-observations awaiting the required kernel proofs and independent review.
+`Bridge/tests/precompile-agreement/required-coverage.json` is the reviewed
+address/theorem/fixture map. `Acceptance.lean` imports/checks every public
+name. `Axioms.lean` pins the actual reported sets; all are subsets of
+`propext`, `Classical.choice`, `Quot.sound`. `AllDeclarations.lean` also audits
+private/generated declarations. Nothing assumes crypto implementation equality.
+
+Run the local acceptance gate after the pinned inputs are available:
+
+```sh
+source /workspace/.setup/activate.sh
+export LEAN_NUM_THREADS=1
+python3 Bridge/tests/precompile-agreement/verify.py
+python3 Bridge/tests/precompile-agreement/test_inventory.py
+python3 scripts/check-precompile-agreement.py
+```
+
+`verify.py` holds the checkout writer lock, runs one Lean process at a time
+with `-j1 -M11264 --tstack=131072`, and enforces ≤12 GiB RSS, zero process
+swap and ≥4 GiB available reserve through `run-file.py`. The receipt binds
+all proof/acceptance sources, input pins, exact commands, working directories,
+resource outcomes and logs. The Python checker validates that saved evidence;
+it is not itself a kernel or external EVM test. The exact 45-source logical
+input closure and one success per command are mandatory. Duplicate/omitted
+inputs, swapped logs, wrong working directories, late failure footers, missing
+proofs, unsupported promotion and success-only malformed gas claims reject.
+
+The initial mutation run exposed an unknown-address `KeyError`; it is fixed,
+and its raw failure is retained in `evidence/mutations-first-failure.log`.
+The final 32 tests pass (`evidence/mutations-final.log`). Independent finder
+and skeptic reviews also found/fixed exact-build-record, log-source, footer
+and working-directory evidence gaps; their final re-reviews report no remaining
+confirmed findings (`evidence/proof-reviews.md`).
+
+## Proof and computed-test boundaries
+
+The agreement proofs import the actual pinned vendor precompile module.
+IDENTITY's output/frame/gas result is general over arbitrary byte arrays,
+account maps, substates and supplied gas. Other crypto rows prove numeric
+charging against the actual vendor success flag; they do not infer successful
+native verification from core validity. SHA/RIPEMD/ECREC affordability laws
+cover all inputs, including their vendor successful-empty-output behavior.
+
+BLAKE2F's all-length `blake_padding` states the actual relation between
+right-padded core headers and unpadded vendor headers; `blake_gas` and
+`blake_zero_gas` cover every price-common domain. The generic malformed-size law and
+flag-2 error law consume all supplied gas. Controls include all
+0/1/2/3/4/212/213/214 lengths, final flags 0/1/2, endian-sensitive headers,
+rounds−1/rounds/rounds+1, nonzero bytes and word/pairing boundaries.
+
+Core cryptographic valid/invalid vectors are computed tests, not new kernel
+crypto equality proofs. In particular valid point-evaluation vectors and
+bad-proof/versioned-hash controls are the exact pinned `PointEval.lean`
+`#guard`s mapped by line/hash and freshly executed in the 45-input build.
+Additional computed vectors cover unsupported address length classes, field
+bounds, invalid G1/G2 subgroups, MSM discount 1/128/129 boundaries, and P256
+r/s bounds. Unsupported addresses 11–17 and 256 remain open against the vendor.
+
+The vendor subprocesses have logical default bodies and separate native
+implementations; `ffi_logical_mismatch` records why logical stub success is
+not native curve validity. No subprocess or opaque compression/hash output
+is equated to core crypto. A supplementary native MODEXP output attempt failed
+on missing external `ffi.ByteArray.zeroes` / `memset_zero` symbols. Both the
+original `BoundaryVectors.lean` attempt (despite its subsequent printed marker,
+`EXIT=1`) and the isolated `NativeModexpProbe.lean` attempt are preserved.
+The passing suite excludes that open native probe. The kernel-proved
+`modexp_base_truncation` states exactly the input conversion counterexample
+and core output, not a vendor native output theorem. Failed direct-output
+proof attempts remain in the diagnostic logs; no budget was raised.
+
+## Cache setup now cleared
+
+The historical missing `Mathlib.Data.Nat.Log` blocker below is resolved.
+Received pinned archives were extracted serially using existing `leantar`,
+without rebuilding Mathlib or changing any revision. Evidence includes the
+898-key requested cache manifest and the 168-key Batteries supplement (with
+possible overlap), archive SHA-256 manifests, extraction commands/outcomes,
+and `pinned-input-build.log`. All 45 actual core/vendor inputs compiled
+successfully, executing their existing core vectors. The largest recorded
+input-build RSS is below 1.3 GiB; proof checks remain below 0.4 GiB.
+
+Actual toolchain: Lean 4.24.0, commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake `5.0.0-src+797c613`.
+`Solidity/KeySort.lean` passes fresh `lean -j1 -M11264 --tstack=131072`
+with `EXIT=0` (`evidence/KeySort-kernel.log`). This does not turn the held
+full repository gate into RUNTIME_GATE_PASS. No goal was created/reset or
+marked complete. `get_goal` is unavailable in this tool catalog.
+
+## Pending central registrations
+
+`Bridge/tests/precompile-agreement/registration-proposal.json` contains
+five imports for the generated Bridge root, one area row per new module
+(proposed `docs/module-map/precompiles.md`), all 82 exact central axiom entries,
+and importing-consumer test commands. The task's exclusive-write/H21 hold
+forbids lane edits to generated roots, area maps and shared axiom registries;
+central integration must apply them and rerun the full repository/Bridge gates.
+No core dependency on Bridge is introduced. H16 Source and frozen Core ExtCall
+remain untouched. SignedMod helper `584d34226053a12ae8e7cf82f58da44c177b54c5`
+and its separate worktree/evidence remain preserved; its three modules already
+landed and are not duplicated here.
+
+## Historical records
+
+The sections below preserve earlier source-only/cache-blocked observations;
+they are not the current acceptance status.
 
 ## Exact reference and boundaries
 
@@ -58,7 +159,7 @@ The actual precompile definitions are in
   consume all gas after a sufficient-gas check. A common gas formula alone
   does not assert that every malformed call deducts only that formula.
 
-## Setup blocker and exact cache request
+## Historical setup blocker and exact cache request
 
 Actual tools: Lean 4.24.0 commit
 `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`; Lake

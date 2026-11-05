@@ -1,0 +1,3 @@
+CWD: /workspace/solidity-lean/Bridge
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 -o .lake/build/lib/lean/SolidityBridge/PrecompileAgreement/Identity.olean SolidityBridge/PrecompileAgreement/Identity.lean
+EXIT=0 SECONDS=2.015 PEAK_RSS=391372800 MIN_AVAILABLE=16842162176 RESOURCE_STOP=False
