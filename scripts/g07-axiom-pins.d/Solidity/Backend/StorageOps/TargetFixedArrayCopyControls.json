@@ -1,0 +1,72 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.defaulted_fixed_children": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.first_child_snapshot_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.later_child_snapshot_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.lower_whole_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.lower_whole_snapshot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.older_shadow_generated_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.overlapping_current_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.overlapping_current_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.overlapping_prefix_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.overlapping_source_separation_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.processed_child_snapshot_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.self_alias_current_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.self_future_snapshot_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedArrayCopyControls.lean:Solidity.Backend.StorageOps.TargetFixedArrayCopyControls.upper_whole_snapshot_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

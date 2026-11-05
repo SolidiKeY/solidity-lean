@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.arbitrary_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.context_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.default_failure_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.logical_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.symbolic_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.target_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultRootControls.lean:Solidity.Backend.StorageOps.FreshDefaultRoot.Controls.wrong_stride": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

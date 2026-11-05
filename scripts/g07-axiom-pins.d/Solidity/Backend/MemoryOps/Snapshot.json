@@ -1,0 +1,24 @@
+{
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.checkedSnapshotCopy_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.checkedSnapshotCopy_none_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.overlap_controls": [],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.replaceSlice_after": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.snapshotCopy_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/Snapshot.lean:Solidity.Backend.MemoryOps.snapshotCopy_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}

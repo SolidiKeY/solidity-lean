@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/Scalar/Casts.lean:Solidity.Backend.Scalar.cast_code_chain": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Casts.lean:Solidity.Backend.Scalar.toInt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Casts.lean:Solidity.Backend.Scalar.toUint": [
+  "Quot.sound",
+  "propext"
+ ]
+}

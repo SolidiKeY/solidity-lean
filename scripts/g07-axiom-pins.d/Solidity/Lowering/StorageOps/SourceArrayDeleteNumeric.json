@@ -1,0 +1,52 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.collision_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.failed_query_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.numeric_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.ordered_repeated_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.physical_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.repeated_delete_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.source_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceArrayDeleteNumeric.Controls.wrong_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

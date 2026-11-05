@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/CorrectCallback.lean:Solidity.Spec.satC_iff_holdsC": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

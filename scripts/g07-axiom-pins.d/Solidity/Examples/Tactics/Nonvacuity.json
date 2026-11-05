@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/Tactics/Nonvacuity.lean:Solidity.Examples.Tactics.Nonvacuity.bad_unprovable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Nonvacuity.lean:Solidity.Examples.Tactics.Nonvacuity.good_provable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

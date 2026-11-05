@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.captured_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.edit_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.failure_iff_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.immediate_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.value_shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

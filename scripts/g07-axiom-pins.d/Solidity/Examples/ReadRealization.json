@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/ReadRealization.lean:Solidity.ReadRealization.Assignment.realizable_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

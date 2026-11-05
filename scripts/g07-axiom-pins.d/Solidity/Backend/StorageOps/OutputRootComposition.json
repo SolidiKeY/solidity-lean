@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/OutputRootComposition.lean:Solidity.Backend.StorageOps.OutputRootComposition.root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

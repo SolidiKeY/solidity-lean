@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.Controls.actual_copies": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.Controls.captured_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.Controls.ordered": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.Controls.reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedSnapshotControls.lean:Solidity.Backend.StorageOps.TargetFixedSnapshot.Controls.wrong_interleaving": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

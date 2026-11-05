@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.source_struct_child_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.assign_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_child_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_child_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.parent_ne_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructChild.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.write_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

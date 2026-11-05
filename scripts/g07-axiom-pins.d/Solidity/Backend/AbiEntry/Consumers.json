@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.orderedEntry": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Consumers.lean:Solidity.Backend.AbiEntry.Consumers.rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

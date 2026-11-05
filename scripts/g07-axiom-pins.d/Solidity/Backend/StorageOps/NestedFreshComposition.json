@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/StorageOps/NestedFreshComposition.lean:Solidity.Backend.StorageOps.NestedFreshComposition.child_of_missing": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedFreshComposition.lean:Solidity.Backend.StorageOps.NestedFreshComposition.fresh_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

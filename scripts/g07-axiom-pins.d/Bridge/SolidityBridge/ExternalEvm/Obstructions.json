@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Obstructions.lean:Solidity.Evm.External.call_arity_mismatch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/Obstructions.lean:Solidity.Evm.External.no_injective_slot_encoding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

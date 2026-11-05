@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/v10-storage.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V10 storage operations
 
 | Modules | Purpose |

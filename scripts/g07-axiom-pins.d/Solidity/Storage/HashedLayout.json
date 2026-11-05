@@ -1,0 +1,21 @@
+{
+ "Solidity/Storage/HashedLayout.lean:Solidity.Storage.Loc.nodup_map_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedLayout.lean:Solidity.Storage.Loc.word_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedLayout.lean:Solidity.Storage.located_word_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/HashedLayout.lean:Solidity.Storage.STy.locate_bounded": [
+  "Quot.sound",
+  "propext"
+ ]
+}

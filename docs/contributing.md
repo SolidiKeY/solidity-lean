@@ -17,6 +17,7 @@ each proof iteration. Documentation-only edits need path and link checks.
 |---|---|
 | `./run-lean.sh` | Layer check, then the default targets and `SolkeyTestSuite` in one Lake invocation, then the SolKey sort check; see the checkout caveat below |
 | `bash scripts/coord-tools/register.sh --check` | The generated library roots match the file tree (`register.sh` rewrites them); no Lean |
+| `bash scripts/coord-tools/fragments.sh --check` | The module map, `docs/README.md`, `TERRA-TODO.md` and `scripts/g07-axiom-pins.json` match their fragment directories (`fragments.sh` rewrites them); no Lean |
 | `lake build Solidity` | The library without the examples: a lane checkpoint (`scripts/coord-tools/gate.sh checkpoint`) |
 | `lake build SolidityExamples SolkeyTestSuite` | The examples and the TestSuite: a checkpoint touching `Syntax`, `Semantics` or `Calculus` adds them |
 | `node scripts/check-orphans.mjs` | Every module reachable from a library root |

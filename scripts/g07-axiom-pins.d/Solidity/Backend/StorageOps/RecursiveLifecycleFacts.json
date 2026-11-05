@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.deleteAt_invalidates_live": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.deleteAt_mapping_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.deleteAt_readback": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.deleteAt_saved": [],
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.popAt_operational_readback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveLifecycleFacts.lean:Solidity.Backend.StorageOps.popAt_other_path": [
+  "Quot.sound",
+  "propext"
+ ]
+}

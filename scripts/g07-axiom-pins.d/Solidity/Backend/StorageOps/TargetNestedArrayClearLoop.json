@@ -1,0 +1,67 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.body_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.condition_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.finalIndex": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.iterationMachine": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.iterations_finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.iterations_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.outside_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.prefix_before": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.prefix_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.prefixMachine": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.run_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.run_loop_from": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.run_loop_immediate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.touched": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayClearLoop.lean:Solidity.Backend.StorageOps.TargetNestedArrayClearLoop.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

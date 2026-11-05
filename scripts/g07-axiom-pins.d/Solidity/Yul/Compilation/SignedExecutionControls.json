@@ -1,0 +1,87 @@
+{
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.actual_emission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.actual_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.actual_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.boundary_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.dirty_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.model_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.negative_divisor_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.negative_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.negative_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.overflow_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.shifted_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.statement_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.statement_update": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.zero_divisor_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SignedExecutionControls.lean:Solidity.Yul.Compilation.SignedExecution.Controls.zero_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
