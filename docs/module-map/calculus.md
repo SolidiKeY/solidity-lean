@@ -236,3 +236,4 @@
 | `Calculus/DecisionUIntConstant.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Calculus/DecisionUIntSyntax.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Calculus/SolkeyAgreementH28/Freshness.lean` | Bounded solkey-ports checkpoint; typed scope and retained obligations are stated in the module. |
+| `Calculus/StorageOnlyHavoc.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |

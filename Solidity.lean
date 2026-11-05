@@ -1304,6 +1304,7 @@ import Solidity.Calculus.StaticLinear
 import Solidity.Calculus.Step
 import Solidity.Calculus.StepFragment
 import Solidity.Calculus.StmtSound
+import Solidity.Calculus.StorageOnlyHavoc
 import Solidity.Calculus.Surface
 import Solidity.Calculus.SurfaceNotation
 import Solidity.Calculus.SurfaceRevert
