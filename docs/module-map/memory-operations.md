@@ -371,3 +371,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedStorageParentInterface.lean` | Checked count-operand reservation/traversal/adoption contract for the actual nested storage value and fresh parent. |
 | `Backend/MemoryCopies/NestedStorageParent.lean` | Actual checked parent reservation, child traversal, typed adoption and complete nested-copy ownership/content guarantees. |
 | `Backend/MemoryCopies/NestedStorageParentControls.lean` | Adopted root/header/identity, mixed retained payloads, old aliases, empty/long/repeated parents and allocation-refusal boundaries. |
+| `Backend/MemoryCopies/NestedStorageHeaderInterface.lean` | One represented outer-slot input derives runtime count/data base; full nested-copy result with arbitrary outer shadows. |

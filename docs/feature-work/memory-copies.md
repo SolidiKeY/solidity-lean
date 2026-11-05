@@ -1198,3 +1198,16 @@ module map: published rows were retained verbatim and unique owned rows appended
 roots were regenerated. Fresh exact-candidate gates, reviews and seal are
 required for this adoption; upstream combined passes do not establish a local
 pass. Original Source/physical/producer obligations and full G33/G35 remain open.
+
+## Outer nested storage header
+
+`NestedStorageHeaderInterface` adds actual header loading and symbolic
+`keccakArr` data-base selection before the existing parent copier. One outer
+`ReprAt` supplies the runtime count and every child representation; neither is
+an external operand premise. Arbitrary outer shadows are accepted, with an
+explicit equality tying their copy to the live canonical nested value. Full
+allocator/root/content/framing guarantees and total capacity refusal remain.
+Design finder/skeptic reviews confirmed stack order, header/child derivation
+and the distinction between malformed representation and runtime refusal.
+Numeric hashing, Source evaluation/authority, gas and general recursive graph
+selection remain open; no producer premise is silently discharged.
