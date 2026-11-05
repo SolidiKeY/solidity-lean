@@ -1,5 +1,4 @@
 import Solidity.Source.Types
-import Solidity.Source.CalldataLayout
 import Solidity.Source.Resolve
 
 /-!
@@ -712,6 +711,12 @@ def STy.decodeSrc : STy → Bool
   | .bytes .memory | .bytes .storage | .bytes .calldata | .stringLit _ => true
   | _ => false
 
+/-- A one-word value type (an ABI head word): `STy.isValue` without
+function types. -/
+def STy.oneWord : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
 /-- solc's `Type::commonType` of two element types of an inline array:
 `a`'s mobile type if `b` converts to it, else `b`'s if `a`'s mobile type
 converts to it (lane FU2-B; solc's fold starts at the first element's
@@ -735,12 +740,12 @@ def STy.newable : STy → Bool
   | .array .memory σ none => σ.oneWord
   | _ => false
 
-/-- **A sliceable type** (`a[s:e]`): bytes/string calldata or a dynamic
-calldata array with a represented statically encoded element. Dynamically
-encoded base elements remain refused (solc2148); struct layouts remain open. -/
+/-- **A sliceable type** (`a[s:e]`, lane FU2-B): `bytes` or a dynamic array
+of one-word values in `calldata` (solc: index range access only for
+dynamic calldata arrays). -/
 def STy.sliceable : STy → Bool
-  | .bytes .calldata | .string .calldata => true
-  | .array .calldata σ none => 0 < σ.cdStaticWords
+  | .bytes .calldata => true
+  | .array .calldata σ none => σ.oneWord
   | _ => false
 
 /-- A one-word ABI value the decoder reads (`decodeElemWord`), other than

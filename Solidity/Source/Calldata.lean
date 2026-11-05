@@ -33,12 +33,10 @@ call data is read only, and reads past its end return zeros (as
 `calldataload`); no invariant ties a reference's offset and length to
 `Fr.cd`, which entry decoding respects but the theorems do not need.
 
-The owned `CalldataAggregates.lean` extension covers nested dynamic reads,
-strings and represented inline static-array elements; its layout predicates
-also admit string slices and statically encoded reference-element slices.
-Direct static-array entry parameters, structs and unrepresented fixed shapes
-remain open. Constructor calldata and slices of dynamically encoded base
-elements remain refused. Memory-copy generalisation is separate G18.05 work.
+Not modelled (named, `stuck` or refused): `calldata` structs, static
+arrays and nested arrays (dispatch refuses them as before), a `calldata`
+argument of a constructor (solc refuses one), `string` slices (solc
+refuses them).
 -/
 
 namespace Solidity.Source
@@ -69,7 +67,7 @@ theorem cdArg_ok (D : Layout) (data : Bytes) (i stride : Nat) {τ : STy} (h : τ
 /-- A `calldata` parameter type dispatch keeps as a reference. -/
 def STy.calldataArg : STy → Bool
   | .bytes .calldata | .string .calldata => true
-  | .array .calldata σ none => σ.cdElement
+  | .array .calldata σ none => σ.isValueTy
   | _ => false
 
 /-- **The types dispatch decodes without `stuck`**: the decoder's
@@ -104,7 +102,7 @@ theorem decodeArg_cd_ok {P : EMState E Γ → Prop} (data : Bytes) (i : Nat) {τ
   case array l σ k =>
     cases l <;> cases k <;> simp only [STy.calldataArg, reduceCtorEq] at hτ
     simp only [decodeArg, if_pos hτ]
-    exact hl rfl σ.cdHeadBytes
+    exact hl rfl 32
   all_goals simp only [STy.calldataArg, reduceCtorEq] at hτ
 
 /-- **Every type dispatch decodes**: `MemOK` is kept, the value agrees, no
@@ -231,7 +229,7 @@ theorem evalE_cdIndex_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy}
     | int v hv =>
       simp only [indexNat, RVal.amount]
       rw [show (lift (pure v.toNat) : EM E Γ Nat) = pure v.toNat from rfl, pure_bind]
-      simp only [indexLoc, lengthOf, pure_bind, if_pos (STy.decodableElem_isValueTy hσ)]
+      simp only [indexLoc, lengthOf, pure_bind]
       refine Hoare.bind (R := fun loc y => MemOK E H y ∧ ∃ o, loc = Loc.cd o) ?_ fun loc => ?_
       · exact Hoare.ite' (fun _ => Hoare.pure' fun _ hy => ⟨hy, _, rfl⟩)
           (fun _ => Hoare.lift' fun _ hy => show MemOK E H _ ∧ NotStuck _ from ⟨hy, trivial⟩)
@@ -245,7 +243,6 @@ theorem evalE_cdIndex_ok (G : Glob E) (F : Fr) (n : Nat) {H : HeapTy} {σ : STy}
 theorem STy.sliceable_loc {τ : STy} (h : τ.sliceable = true) : τ.loc? = some .calldata := by
   cases τ <;> simp only [STy.sliceable, reduceCtorEq] at h
   case bytes l => cases l <;> simp only [reduceCtorEq] at h; rfl
-  case string l => cases l <;> simp only [reduceCtorEq] at h; rfl
   case array l σ k => cases l <;> cases k <;> simp only [reduceCtorEq] at h; rfl
 
 /-- An index local's value as a number. -/
