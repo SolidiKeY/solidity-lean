@@ -1,0 +1,8 @@
+945b257b3f2d48fc68155e3e8537dde2b4c1615aa7c17de124a710f354169005  /workspace/solidity-lean/Solidity/SolcValidation/Dialect.lean
+a9df330c7e5d0565953730c40256ff7422d8b8df07c2c3419435fb514c5f26c9  /workspace/solidity-lean/docs/feature-work/fullscope-vt1.md
+329f1ea600502fefdb1f9ce7e204fd28df0a697309ceb77dcdad4e89a5b720c8  /workspace/solidity-lean/tests/fullscope-20261104/vt1/DialectChecks.lean
+e1d6aab099d0d8eed9f0a62e877f35ccd92025757134a8a2a7d9753717db7f0f  /workspace/solidity-lean/tests/fullscope-20261104/vt1/check-dialect.sh
+b50752aa470e6e98658f58632a0b1a3e80120a38895f9e098e4366c19ec36625  /workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/interface/check.json
+3e5e8d9dcd0d45c3a7a6f368c2161ab1cbd6cc1271dc5c7eed2c59c455809b94  /workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/interface/check.log
+03023a0d0d4f0da23e4865af48d6b7a9683ab5805f5876eb6054383dfc1a2bc5  /workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/setup/commands.json
+0f116fd99cd9884cbf7cedef63d41940197a848f962000173e77d85a492e44c2  /workspace/solidity-lean/tests/fullscope-20261104/vt1/evidence/setup/docker-probe.json
