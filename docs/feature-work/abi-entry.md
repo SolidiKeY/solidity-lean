@@ -996,3 +996,7 @@ signature pipeline composition, Source-body correspondence and complete G40
 remain open. G46.02 and the physical writer counterexample are unchanged. The
 shared doc-path and central axiom-inventory failures remain outside lane
 ownership, and the full assignment gates and fixture replay remain pending.
+
+`UIntBindingBodyInterface.lean` specifies one public compilation of validation,
+uint binding and an existing core-admitted typed body, with exact ordered
+execution. Body failures remain distinct from decoder rejection obligations.
