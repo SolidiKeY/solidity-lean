@@ -1062,3 +1062,7 @@ realization, general Source/profile/body association, full dispatch/entry
 composition and physical failure bytes remain open. G46.02, its physical writer
 counterexample, fixture replay and full assignment gates are unchanged. The
 existing shared metadata gate failures remain outside this lane.
+
+`BoolBindingBodyInterface.lean` specifies one public compilation of Boolean
+validation, typed binding and a core-admitted body, preserving ordered failures
+and the actual body outcome. Native/Source adequacy remains separate.
