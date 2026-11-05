@@ -3245,7 +3245,49 @@ commit:
 
 `cloud/v14-cdstride` carries these files unchanged, apart from the Horizon
 help-branch edit, so the commit is not library-clean there either. 339b425a
-reverts the import, and the tree is again identical to the one that passed the
-checkpoint at d83228da. Repairing the six modules needs proof work in modules
-outside this lane, and the semantic change belongs to v14. It is left to v14 or
-to an explicit assignment.
+reverted the import.
+
+### v14 `STy.cdStride` import and repair (2026-11-05)
+
+The user decided that VY5 does the repair. 3a49fd79 re-applies the Source
+part of 781938cf, and 3e1a17f4 and 3449b61d repair the downstream modules:
+
+- **New match cases.** `Source/Preservation/Combinators` (`readLoc'`),
+  `Source/Preservation/Reads` (`readLoc_keep`) and `Yul/Views/RetainedLocationRun`
+  (calldata locations carry no storage paths; the `Loc.rec` arguments follow the
+  constructor order) gain the four calldata cases. So do
+  `Lowering/Readonly/LocationEffects`: reads are a `lift` then a `pure`
+  (`cdFixedArray` is `pure`), writes halt, and `indexLoc_effect` splits the
+  element-type match. `Source/Horizon` `indexLoc_grow` and `indexLoc_const`
+  close the same element-type match by cases.
+- **Slice stride.** `sliceR` now steps by `STy.cdStride`.
+  `Lowering/V08/SliceFailureLowering` `accepted` and `accepted_toEnd` state the
+  stride as `τ.cdStride`. It equals the old `1`/`32` literal on every type the
+  old `sliceable` admitted, and on `string` (1). The literal would be false for
+  the newly sliceable static-reference arrays. `Yul/Adapters/SourceSliceFrame`
+  only unfolds `cdStride` in a proof.
+
+No hypothesis was added and no conclusion weakened. There is no `sorry`, no
+new axiom, and no heartbeat change.
+
+Reviews (read-only, without the Lean server):
+
+- **Finder.** It found `Preservation/Reads` unrepaired; the first gate had stopped
+  at `Combinators` before reaching it, and 3449b61d fixes it. It flagged
+  `Yul/Views/AbiUintArrayRun` and `AbiUintArrayBoundaryControls` as possibly
+  fragile; both check clean with no change. It also found the
+  `docs/feature-work/source-soundness.md` slice paragraph stale, and that is
+  fixed. Not in scope: `cdToMem` still copies one-word elements with a 32-byte
+  stride, which stays consistent while memory copies are limited to one-word
+  elements (G18.05).
+- **Skeptic.** No confirmed problems. It found each new case consistent with
+  `readLoc`, `writeLoc` and `indexLoc`, judged the stride change a faithful
+  port, and saw no check-speed risk in Horizon (about 30 trivial goals per
+  proof). It also questioned `string calldata` slices. solc 0.8.38 accepts them
+  (`semanticTests/viaYul/conversion/explicit_string_bytes_calldata_cast.sol`
+  slices `data[:3]` on a `string calldata`), so admitting them is no
+  deviation.
+
+`gate.sh checkpoint` at 3449b61d passed: build-touched, library, trust,
+orphans, layers, roots, doc-paths and axiom-pins all PASS. The full gate was
+not rerun.
