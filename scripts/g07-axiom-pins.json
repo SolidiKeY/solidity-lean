@@ -28196,6 +28196,56 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.copy_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayload.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayload.store_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.empty_destination_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.short_destination_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.three_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPayloadControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls.two_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/StorageOps/SourceStorageCopyPrefix.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefix.prepared": [
   "Classical.choice",
   "Quot.sound",
