@@ -1,6 +1,8 @@
 {
   "packet_checks": "pass",
-  "assignment_completion": "blocked_pending_QREG_full_root_gate",
+  "assignment_completion": "pending_coordinator_merge_validation",
+  "delivery_status": "coordinator-pending",
+  "decision_receipt": "h41/coordinator-receipt.json",
   "theorem_count": 28,
   "modules": [
     {
@@ -314,5 +316,5 @@
     "boundaries": "boundary_zero,boundary_max,boundary_seven,nondefault_actual,nondefault_capture"
   },
   "external_boundary": "Pinned solc compilation and slots only. No EVM execution, compiler-correctness theorem, automatic Source default initialization or general new/try-new claim.",
-  "full_gate": "final-gates/full-gate.log: required root-registration gate fails on exactly four owned modules; shared roots are read-only."
+  "full_gate": "Historical worker run-lean attempt failed at four unregistered helper imports; H41/QREG decision assigns full validation to coordinator merge, pending and not passed. Shared roots remain read-only."
 }

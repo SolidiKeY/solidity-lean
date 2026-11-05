@@ -27,7 +27,9 @@ allowed=('Solidity/Lowering/V08/HelperPackets/ConstructorTransport/', 'tests/hel
 changed = set(subprocess.check_output(['git','diff','--name-only','6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'],text=True,cwd=root).splitlines())
 changed.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True,cwd=root).splitlines())
 assert all(x.startswith(allowed) for x in changed), changed
-result={'packet_checks':'pass','assignment_completion':'blocked_pending_QREG_full_root_gate',
+result={'packet_checks':'pass','assignment_completion':'pending_coordinator_merge_validation',
+ 'delivery_status':'coordinator-pending',
+ 'decision_receipt':'h41/coordinator-receipt.json',
  'theorem_count':len(theorems),'modules':modules,'axiom_pins':'AxiomPins.lean',
  'coverage': {'positive':'source_actual,target_body_actual,creation_actual,complete_transport; arbitrary admitted uint256 and bytes, both pipelines',
  'producer':'concrete_ssNew_body arbitrary after; creation_from_inputs conditional on unchanged published external inputs',
@@ -35,6 +37,6 @@ result={'packet_checks':'pass','assignment_completion':'blocked_pending_QREG_ful
  'wrong_order':'wrong_order_actual both pipelines + wrong_order_counterexample n!=7; boundary_seven equality',
  'boundaries':'boundary_zero,boundary_max,boundary_seven,nondefault_actual,nondefault_capture'},
  'external_boundary':'Pinned solc compilation and slots only. No EVM execution, compiler-correctness theorem, automatic Source default initialization or general new/try-new claim.',
- 'full_gate':'final-gates/full-gate.log: required root-registration gate fails on exactly four owned modules; shared roots are read-only.'}
+ 'full_gate':'Historical worker run-lean attempt failed at four unregistered helper imports; H41/QREG decision assigns full validation to coordinator merge, pending and not passed. Shared roots remain read-only.'}
 (owned/'acceptance.json').write_text(json.dumps(result,indent=2)+'\n')
-print('PACKET_ACCEPTANCE_PASS: 4 modules, 28 theorems, exact axiom pins, all declarations inventoried; assignment full gate BLOCKED QREG')
+print('PACKET_ACCEPTANCE_PASS: 4 modules, 28 theorems, exact axiom pins, all declarations inventoried; full validation pending coordinator merge per H41/QREG; delivery coordinator-pending')

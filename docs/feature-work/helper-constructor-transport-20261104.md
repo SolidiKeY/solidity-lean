@@ -1,5 +1,7 @@
 # H26 constructor initialization/capture packet
 
+Current status (H41, 2026-11-05): worker components and VM gates are ready; delivery is **coordinator-pending**. The coordinator reports receipt/hash verification of the retained cache pack. QREG/H35CACHE are resolved; full validation is **pending coordinator merge**. Historical blocked statuses below describe earlier attempts and are superseded by h41/coordinator-receipt.json and HANDOFF-CURRENT.md. Shared roots remain read-only; never run ship-cache.sh on this VM again. No full validation pass is claimed.
+
 ## Identity and scope
 
 Repository: `/workspace/solidity-lean`. Branch: `codex/solidity-helpers-20261104/constructor-transport`. Exact base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. The checkout was clean at that base on branch work; the assigned branch was created there. No push, merge, PR, goal creation/reset, existing producer/Source/H16/H19/H21/frozen H22 edit, or G25-SHIFT work occurred. No get_goal tool is exposed; stop_goal is available. Commit identity and artifact hashes are recorded with the handoff packet.
@@ -112,3 +114,13 @@ H35 shipping is BLOCKED, so no H35 checkpoint is reported done. The actual ship-
 A read-back-verified295KB cache handoff for the four owned modules (12 artifact files, mappings and traces) is prepared at /workspace/solidity-lean/tests/helpers-20261104/constructor-transport/h35/cache-handoff/owned-cache.tar.gz. H35CACHE offers two paths: coordinator retrieval followed by a real import receipt, or a configured worker-to-coordinator cache command/destination. This prepared artifact is not delivery evidence and makes no dependency-closure transfer claim. Existing QREG/full-lane validation remains blocked. Original sealed packet/checksums and all proof/control/backfill evidence are preserved.
 
 H35 separate read-only finder and skeptic accept the gate/cache evidence, including independent archive/source-cache byte checks; see h35/reviews.md. The reproduction script omission for explicit inventory is fixed. Fresh h35/root-registration.log still rejects exactly four helper root imports. The H35 supplement is checksum-bound under h35/SHA256SUMS and does not replace the original proof packet. No successful shipment/import receipt or H35 checkpoint completion is claimed.
+
+## H41 receipt and QREG decision
+
+The coordinator reports pulling the retained H35 archive and verifying SHA256083d6bf7f5702b4dad1ac8b250452f9b7f7913d4a7278e695bc317741916258a. Receipt: /home/guilherme/.local/state/cloudvm-coord/receipts/constructor-transport-cache-received-20261105T020250Z.json. This VM reverified the same archive hash; no coordinator-filesystem read or cache-import claim is made.
+
+H41 amendment, verbatim: "Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue."
+
+QREG/Q2 answer, verbatim: "Per H21(2)/H35: do not edit shared roots; record full validation as pending coordinator merge, and continue."
+
+Both questions are resolved; no disposable validation copy or worker transport setup is requested. Delivery is coordinator-pending and full validation is pending coordinator merge. Original failure logs remain intact as historical evidence and are not recast as passing gates. All assigned worker proof/control/backfill/gate/review work is complete as components; no whole-lane or full-assignment validation completion is claimed. No Lean code/import changed, so receipt/status-only checks require no repeated Lean compilation. Current receipt, handoff, acceptance result and final snapshot are recorded in the H41 supplement.
