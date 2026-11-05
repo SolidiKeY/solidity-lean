@@ -1414,3 +1414,9 @@ Independent read-only finder and skeptic reviews found no semantic issues.
 Both confirmed actual whole/body selection, heterogeneous target transport,
 terminal first-match behavior and unchanged input/resource premises. Final
 guarded diagnostics report zero errors; exact gates accompany the handoff.
+
+`CoreSpecialInterface.lean` specifies actual typed receive/fallback body choice,
+including value guards and absent-endpoint rejection. Empty input prefers
+receive with fallback when absent; nonempty input uses fallback. The interface
+anchors endpoint code to the existing guard/compiler, not supplied body runs.
+Source declaration/payability authority and native parameter binding remain open.

@@ -25,6 +25,7 @@ import Solidity.Backend.AbiEntry.CoreDispatchInterface
 import Solidity.Backend.AbiEntry.CoreJoin
 import Solidity.Backend.AbiEntry.CoreJoinControls
 import Solidity.Backend.AbiEntry.CoreJoinInterface
+import Solidity.Backend.AbiEntry.CoreSpecialInterface
 import Solidity.Backend.AbiEntry.DispatchRefusal
 import Solidity.Backend.AbiEntry.DispatchRefusalControls
 import Solidity.Backend.AbiEntry.DispatchRefusalInterface

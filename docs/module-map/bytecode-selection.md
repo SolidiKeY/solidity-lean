@@ -226,3 +226,4 @@
 | `Backend/AbiEntry/CoreDispatchInterface.lean` | Finite typed-body dispatch contract with actual classifier witnesses and first-match outcome agreement. |
 | `Backend/AbiEntry/CoreDispatch.lean` | Finite first-match dispatch to actual typed core bodies using represented join removal. |
 | `Backend/AbiEntry/CoreDispatchControls.lean` | Heterogeneous body outputs, first/later/default dispatch, terminal collisions and saved-state controls. |
+| `Backend/AbiEntry/CoreSpecialInterface.lean` | Actual typed receive/fallback body choice and value-guard compiler contract. |
