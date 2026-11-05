@@ -316,3 +316,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SingletonCopyInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 
 | `Solidity/Backend/MemoryOps/PhysicalByteStoreSequence.lean` | Actual prepared two-MSTORE Environment slice with initial-derived numeric/pointer intermediate and final frames, same-cell overwrite support and live REVERT observation. |
+
+| `Backend/MemoryOps/PhysicalByteOverwrite.lean` | Actual two-byte-store reached REVERT payload, arbitrary overlap, complete read updates, disjoint represented-word frame and short-stack prefix failure. |
