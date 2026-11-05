@@ -820,9 +820,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
-
-| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
-
 <!-- Retained V17 lane modules not yet present in the published map. -->
 | `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Compile the existing V07-related conditional statement, preserving its actual Source run and reached map as well as the intrinsic compiler contract. |
 | `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
@@ -887,3 +884,4 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/StructuredFlow/ForContinueCompiler.lean`, `Backend/StructuredFlow/ForContinueCompilerControls.lean` | Actual mapped for/continue/post to existing loop-compiler join with physical observations and negative controls ([scope](../feature-work/roadmap-g36-for-continue-compiler.md)). |
 | `Backend/StructuredFlow/ForReturnCompiler.lean`, `Backend/StructuredFlow/ForReturnCompilerControls.lean` | Actual for-loop Source outcome/captured-flag compiler connection, full physical snapshots and capture/base/outcome negatives ([scope](../feature-work/roadmap-g36-for-return-compiler.md)). |
 | `Backend/StructuredFlow/ForBreakCompiler.lean`, `Backend/StructuredFlow/ForBreakCompilerControls.lean` | Actual mapped for-initializer/break to scoped-prefix compilation, exact exit fragment, full snapshots and initializer/base/post negatives ([scope](../feature-work/roadmap-g36-for-break-compiler.md)). |
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
