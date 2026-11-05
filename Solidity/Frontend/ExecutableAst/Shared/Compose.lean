@@ -5,7 +5,7 @@ import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
 packets. Dispatch depends on compiler node shape; recursive children always use
 these same callbacks and errors propagate directly. Existing primitive paths and
 state-root parsing retain Shared behavior. Raw callbacks are decoding inputs;
-public Shared.function/contract perform the final metadata/root validation. -/
+public Shared.function/contract perform the selected function checks and root well-formedness/uniqueness validation. -/
 namespace Solidity.Frontend.ExecutableAst.Shared
 open Lean Solidity.Frontend
 
