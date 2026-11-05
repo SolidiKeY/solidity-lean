@@ -2293,6 +2293,8 @@ import Solidity.Lowering.V08.CryptoObservations
 import Solidity.Lowering.V08.DeclarationRoles
 import Solidity.Lowering.V08.EmitControls
 import Solidity.Lowering.V08.EnvironmentProjection
+import Solidity.Lowering.V08.FixedBytesCallableArgument
+import Solidity.Lowering.V08.FixedBytesCallableArgumentControls
 import Solidity.Lowering.V08.H1Audit
 import Solidity.Lowering.V08.HandlerControls
 import Solidity.Lowering.V08.InheritedControls
