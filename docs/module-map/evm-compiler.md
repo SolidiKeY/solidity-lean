@@ -136,3 +136,5 @@
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Bitwise/Selected.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
