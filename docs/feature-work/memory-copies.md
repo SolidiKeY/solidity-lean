@@ -1437,3 +1437,16 @@ recursive graph/compiler closure and Source/physical adequacy remain open.
 The proof will reuse type-rank fuel independence, `primitiveArray_snapshot`,
 `nestedStorageValues`, `memory_rows_length` and existing intrinsic snapshot
 semantics; no second traversal or snapshot implementation is introduced.
+
+The bridge is now proved without changes to the existing snapshot semantics or
+rank/fuel budgets. Complete storage-to-memory copy results agree by congruence,
+including their typed heap extensions. Positive controls construct actual
+mixed 2/0/64 source children, arbitrary primitive aliases and an empty source
+parent. Existing `valueCopy_words` gives exact symbolic growth of 73 words for
+the mixed snapshot; repeated pair aliases require nine words and an empty
+parent requires one. Negative controls reject erased live payloads and alias
+collapse. These observations do not assert compiled parent execution, allocation
+panic or gas behavior. Independent finder and skeptic reviews passed without
+findings. Final exact-head diagnostics, serial checkpoint gates, scoped axiom
+audits, patch reconstruction, handoff and sealing remain required. All prior
+231 owned modules and prior sealed evidence are preserved unchanged.
