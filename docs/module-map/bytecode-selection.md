@@ -217,3 +217,4 @@
 | `Backend/AbiEntry/SelectorGateBodyInterface.lean` | Actual compiler contract for an arbitrary typed selector-local guard and continuation body. |
 | `Backend/AbiEntry/SelectorGateBody.lean` | Actual typed selector-local guard, exact continuation execution and Source selector-predicate adapter. |
 | `Backend/AbiEntry/SelectorGateBodyControls.lean` | Distinct selector/argument/length locals using existing weakening, actual entry/body execution and raw match/miss controls. |
+| `Backend/AbiEntry/SelectorBranchesInterface.lean` | Actual selector branch compilation contract retaining exact compiler join behavior. |

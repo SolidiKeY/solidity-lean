@@ -1301,3 +1301,9 @@ Independent read-only finder and skeptic reviews found no semantic issues.
 Both retain the validation-process incident and require the final checkpoint
 after verified diagnostic shutdown; its exact commands and outcomes are sealed.
 Final guarded per-file diagnostics report zero errors.
+
+`SelectorBranchesInterface.lean` specifies actual public compiler selection of
+both typed branches and exact selector dispatch including the compiler join.
+The matched branch retains its trailing jump over the miss branch; no normal
+return, desired body execution or poststate is assumed. Generic join removal,
+Source association, short special routing and native loading remain separate.
