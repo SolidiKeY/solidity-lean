@@ -1918,6 +1918,7 @@ import Solidity.Evm.MemoryLoopHorizonObjectCost
 import Solidity.Evm.MemoryLoopHorizonObjectCoverage
 import Solidity.Evm.MemoryLoopHorizonObjectFinite
 import Solidity.Evm.MemoryLoopHorizonObjectFiniteControls
+import Solidity.Evm.MemoryLoopHorizonObjectObservedRoom
 import Solidity.Evm.MemoryLoopHorizonObjectOutcomes
 import Solidity.Evm.MemoryLoopHorizonObjectPendingAllocator
 import Solidity.Evm.MemoryLoopHorizonObjectPrefix
