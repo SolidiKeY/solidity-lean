@@ -137,7 +137,7 @@ def run(root,name,command):
     token=secrets.token_hex(16)
     terminalLoop=("printf '%s %s %s %s\\n' "+'"$1" "$2" "$BASHPID" "$PPID" > '+shlex.quote(str(doneTemp))+'; '
         'mv '+shlex.quote(str(doneTemp))+' '+shlex.quote(str(donePath))+'; '
-        'until test -e '+shlex.quote(str(ackPath))+'; do sleep 0.05; done')
+        'until test -e '+shlex.quote(str(ackPath))+'; do :; done')
     # The result marker is written INSIDE the new timeout/bash fence. Its actual
     # namespace PIDs are checked against exact-container host PID/PPID snapshots.
     containerCommand=(barrier+' && ('+command+'); result=$?; echo V15_MEMORY_BYTES; '
