@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: published `f77cf60d3cea8f7f1db8db29cc027532b0cd3fce`, adopted by preservation merge `620772e25d14c81e6a5f1670ec55800a274fa34e`; this includes the previous `8495f1de` publication. Original assigned base remains recorded unchanged. H38 approval is still pending; publication does not imply producer completion or cache freshness.
+Current integrated prerequisite: published `9584f9e7df09f638d9e0cb8930501d1660aa4b2f`, adopted by preservation merge `0c8b011f4c00b4cef15abc1e10ae8ab7a61bc4f4`; includes f77cf60d and earlier publications. Original assigned base unchanged. H38 producer review remains pending; no full readiness/cache freshness inferred.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -632,3 +632,51 @@ compiler and production controls, and final integrated gates remain open. The
 completed census and schema controls remain scoped evidence only. Producer
 review/adapter requests are retained until receipt; no new scope question is
 introduced. No push, PR, goal creation/reset or VM replacement occurred.
+
+## Checkpoint 06: scheduled 0840Z publication adoption
+
+Adopted exact published 9584f9e7df09f638d9e0cb8930501d1660aa4b2f into the
+owned branch from 1d78fc8381f96a76a57705b8caf9598ecf97d169 by preservation
+merge 0c8b011f4c00b4cef15abc1e10ae8ab7a61bc4f4. Both parents and original
+assigned base remain ancestors. Parent deltas are disjoint; all ten existing
+VX1 files, protected Source/Scoped, Contracts direct imports/toolchain and
+catalog generator are unchanged. No unexpected local work was discarded.
+
+The publication records 35 bounded increments/83 Lean modules, not full lanes.
+Its repaired statement-grammar fixtures are now published; the former G0 hold
+is historical. VA1 checks facade and C3 additive Controls are integrated.
+Standalone CallResume does not change opaque callback execution. Physical-byte,
+precompile and arithmetic results do not establish whole Source/Osaka adequacy.
+See integration-20261105T0840Z.md for producer hashes and exact scope.
+
+No H38 producer review/approval, RunIndexed adapter or generator change arrived.
+The proposal at Contracts.lean@06f5ae081ca5e01a976b3ae3cb9b43a3d369d033 remains
+unfrozen; coordinator relay to VY5 Source and EVM/resource owners is retained.
+VY5 Monetary.wide remains producer-owned. No source substitute was introduced.
+
+Actual VM checks at this merge: Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613,
+allowed KeySort PASS, owned Contracts/control kernel check and 39 inventories
+PASS (standard propext/Quot.sound or none). This supplies scoped runtime evidence,
+not whole-lane RUNTIME_GATE_PASS. Static trust: 4010 sources, 287 inventoried
+sites, zero findings; layers: 641 core modules with no elaborator/parser reach;
+roots current; baseline catalog 212 features/783 symbols still has 30 exclusions.
+G07 FAIL: 4601 modules scanned, 20 producer-owned Source closure violations.
+No gate, premise, whitelist or budget was weakened. No full imported closure
+build or imported cache freshness is claimed. All checks serial with explicit
+-j1, LEAN_NUM_THREADS=1, verified memory.max=12884901888/memory.swap.max=0,
+continuous parent 4GiB reserve. Commands, wall/RSS and decisive output retained
+in /workspace/vx1-evidence/checkpoint-06-publication/ (metrics.json and logs).
+
+Separate read-only finder and skeptic found no adoption/preservation defect;
+both verified exact ancestry/union, owned/protected preservation and retained
+producer holds. Neither used Lean/server. Their results are reviews-final.txt.
+
+Queue: X01 full D1-D6/public freeze and all-30 rescope remain open; X02 production
+source/admission/lowering/compiler remains blocked on that contract/owner work.
+Existing census, witnesses and negative schema controls are scoped backfill,
+not production semantics. Full H35 build/axiom/semantic gates remain pending.
+H41 requires preserving a verified source/toolchain-bound partial owned cache
+packet for coordinator pull; no on-VM ship-cache, freshness or delivery claim.
+Prior received packet/receipt remains preserved. No push/PR/VM or goal reset.
+The manual stop_goal(blocked) call was rejected for missing trusted CCA context;
+no goal transition is claimed and get_goal is unavailable in active tools.
