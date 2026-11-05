@@ -76,5 +76,5 @@
 | `Backend/StructuredFlow/ConditionalSequenceCompiler.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/StructuredFlow/ConditionalSequenceCompilerControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/G19/AssignmentReturnFlagControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
-| `Lowering/G19/AssignmentWhileBreak.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/G19/AssignmentWhileBreak.lean` | Fixed hand-written target for `while` with immediate break, checked against Source; not produced by a lowering function. |
 | `Lowering/G19/AssignmentWhileBreakControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
