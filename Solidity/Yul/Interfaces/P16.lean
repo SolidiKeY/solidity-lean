@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedInitializedForPost
 import Solidity.Yul.RawCheckedForPost
 import Solidity.Yul.RawCheckedAdapterAbsent
 import Solidity.Yul.RawCheckedAdapterFor
@@ -78,3 +79,10 @@ frames and Source observations under checked/coherent premises. Initializer
 composition and context-growing initialization are separate obligations.
 Concrete normal/continue/post-timeout/break controls are in
 Solidity.Yul.Checks.RawCheckedForPost. -/
+
+/-! RawCheckedInitializedForPost.adapter composes actual same-context checked
+initializer/body producers with supported Boolean condition/post expressions.
+Its concrete Source.execS forLoop law preserves checked/coherent premises,
+initializer control/error frames and actual post-iteration observations.
+Context-growing declarations and general assembly admission remain separate.
+Combination/refusal witnesses are in Solidity.Yul.Checks.RawCheckedInitializedForPost. -/
