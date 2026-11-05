@@ -20,5 +20,19 @@
     ],
     "question": "Restore original executor preserving checkout and uncommitted work.",
     "status": "resolved: same executor reattached; branch/head and uncommitted Intrinsic verified"
+  },
+  {
+    "id": "DR-A-META",
+    "sources": [
+      "Memory.Reader strict typeIdentifier/tryCall requirements",
+      "scripts/solc-ast.mjs existing metadata trimming and builtin normalization",
+      "evidence/adoption-8495/composed-compilation.json"
+    ],
+    "question": "Which producer-owned input contract should CR and DR-D adopt for the canonical executableReader, given that existing normalized fixtures omit required typeIdentifier/tryCall fields? Both choices must retain existing builtin-ID normalization and loop annotations.",
+    "options": [
+      "Retain required compiler metadata with existing normalization: CR/D migrate their producer paths and compatibility fixtures to this explicit input contract.",
+      "Provide an owner-reviewed checked compatibility adapter: CR/D validate equivalent required metadata for normalized fixtures under an explicit adapter contract."
+    ],
+    "status": "pending; test-only retention is not producer authorization"
   }
 ]

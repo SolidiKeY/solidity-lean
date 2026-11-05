@@ -408,3 +408,20 @@ DR-A-META remains open: producer owners must select metadata retention or an
 explicit checked compatibility adapter. CR's existing Lean import migration,
 native/WASM closure, full parity/proof inventory and final gates remain pending.
 The prior received cache predates Scope/Compose and must not be claimed fresh.
+
+
+Published f77cf60d was adopted in15a78eb6 after byte-comparing its Intrinsic to
+c3bc7282; the newer scoped builder was retained. Post-adoption344-job build,
+axiom inventory and two focused controls passed in178.973s, childRSS1254608KiB,
+minimum outer reserve5934964736bytes. Actual Lean4.24.0/Lake5.0.0-src+797c613
+versions are in evidence/adoption-f77/gates.log. Source ownership audit passes
+against the explicitly authorized adopted master; original decoder/proof-search
+comparisons remain pinned to original source. No unowned producer path was edited.
+
+H41 local delta contains six owned modules/18artifacts/6mappings, verified against
+trace outputs, cache mappings and archive bytes. Path:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-f77/15a78eb6ba12/owned-delta.tar.zst
+SHA256047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167,
+965584bytes. It is coordinator-pending, requires matching dependency caches and
+is not standalone installation or native closure evidence. ship-cache.sh was not
+run. The earlier received600MB pack remains preserved separately.

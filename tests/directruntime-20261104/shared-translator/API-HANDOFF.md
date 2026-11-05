@@ -34,7 +34,7 @@ implement source diamond inputs. Arbitrary lowering/premise callbacks are not
 source-soundness certificates. No fabricated interface theorem is supplied.
 
 Shared.Translate source closure:17 local modules, no Import/Testing.
-Shared.Intrinsic source closure:104 local modules, no other Frontend module.
+Shared.Intrinsic source closure:105 local modules, including only Shared.Scope in Frontend.
 These are static import results, not generated-C runtime closure proofs. Focused
 MCP build/diagnostics and IntrinsicControls passed; source/C/olean manifests bind
 those checked files. Full DirectRuntime/native/WASM closure remains pending.
@@ -58,3 +58,26 @@ checkedExpression/checkedStatements. Raw Reader callbacks are not admission
 certificates. Constant-folded descendants are inspected; legacy errors retain
 priority; contract checks do not inspect sibling function bodies. Full CR operator
 alias support remains pending because the default metadata policy refuses aliases.
+
+
+## Composed runtime checkpoint after published master f77cf60d
+
+Shared.Compose.executableReader is now the canonical runtime reader. It recursively
+wires exact published B Memory.Reader and C ControlTuple.Adapter bytes; source
+identity receipts are in evidence/adoption-8495/merge-resolution.json. Shared
+function/contract validation still runs after decoding. Old default reader controls
+are deliberately retained; composed controls are separate observations.
+
+Shared.Scope reserves root/parameter/local/invariant names and proves numerical
+freshness bounds. The plain builder now runs the existing renameStmts before the
+BodyLoopLowerer callback, so that callback receives renamed syntax. Same-scope
+duplicates are checked on original declarations. No source-preservation theorem
+is claimed. Reference parameters/returns remain refused. Exact checked signatures
+and axiom inventory are in artifacts/composed-gates/2.log and3.log.
+
+DR-A-META: CR/D must choose required metadata retention alongside existing builtin
+normalization/loop annotations, or an owner-reviewed checked compatibility adapter.
+The composed fixture implements retention only in A's test scope. CR still owns
+actual existing Lean import migration; no independent optional wrapper suffices.
+Native/WASM ordinary closure is pending owner D evidence. New Scope/Compose roots
+remain local registration proposals; A does not edit generated registrations.

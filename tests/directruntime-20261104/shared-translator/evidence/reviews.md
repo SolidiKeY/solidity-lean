@@ -148,3 +148,11 @@ theorems; corrected to explicitly name the three numerical freshness proofs.
 Both confirmed gate evidence:344jobs,14per-file gates,two MCP diagnostics,exit0.
 Callback receives renamed syntax; bounds and finite samples are not source
 preservation. Producer migration/native-WASM closure/full parity remain open.
+
+## Post-f77 adoption, ledger and H41 cache delta
+
+Independent finder and skeptic reviewed the final owned packet read-only, without
+Lean/server execution. Neither found a material defect. Both checked the closure
+ledger limits,12composed cases,post-adoption exit0 evidence and six-module cache
+mapping/archive verification. Delivery remains coordinator-pending; dependencies,
+CR migration,native/WASM closure and full gates remain explicit open obligations.

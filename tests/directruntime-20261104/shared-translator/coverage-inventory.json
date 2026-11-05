@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "da86ace12ee87f0f9dc207ec2e7f7686e606ccfd",
+  "headAtGeneration": "15a78eb6ba129adc7888f6abed0886e5ff2ce393",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -8912,6 +8912,88 @@
       "sha256": "8b399406ddefd840a1e95114965a0376b5f98366cca73fed29e933c51d27fabc"
     }
   },
+  "localComposedImportClosure": {
+    "Solidity.Frontend.ExecutableAst.Shared.Compose": {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "0b90b4b5ce3fc3e42b77c3f43223496f9e11b78ff775e8fb271fcb6f7fcf188f"
+    },
+    "Solidity.Frontend.ExecutableAst.Memory.Reader": {
+      "path": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
+      "sha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350"
+    },
+    "Solidity.Frontend.ExecutableAst.Shared.Translate": {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594"
+    },
+    "Solidity.Frontend.ExecutableAst.Shared.Boundary": {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+      "sha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64"
+    },
+    "Solidity.Syntax": {
+      "path": "Solidity/Syntax.lean",
+      "sha256": "81e376192590dacc20ae1b3c1cb27e4cf144289d89be28beb40452d4fe7340e8"
+    },
+    "Solidity.Syntax.Raw": {
+      "path": "Solidity/Syntax/Raw.lean",
+      "sha256": "7c137f7e8e4c70f4868dc41a437687ab42e2d63e887cdde3ba3ccd1ea764b76f"
+    },
+    "Solidity.AST": {
+      "path": "Solidity/AST.lean",
+      "sha256": "d5463f24e3b12577a04099593cf2640b68a1ccb14cb3db513254d633c849c54b"
+    },
+    "Solidity.KeySort": {
+      "path": "Solidity/KeySort.lean",
+      "sha256": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0"
+    },
+    "Solidity.SpecSyntax": {
+      "path": "Solidity/SpecSyntax.lean",
+      "sha256": "0d93503bea09cc6e1174fa5bcf6150705f5db360dfffa0fc33885bad23b3e236"
+    },
+    "Solidity.Syntax.Grammar": {
+      "path": "Solidity/Syntax/Grammar.lean",
+      "sha256": "996c2b232f6e73f5610f71eb0d7fcc726fa2200c163a8742f300632f7976e5d8"
+    },
+    "Solidity.Syntax.Contract": {
+      "path": "Solidity/Syntax/Contract.lean",
+      "sha256": "25f04a46318dd766e6ac468972c2bf11bf75add95a069dde17a7171e85d5c70a"
+    },
+    "Solidity.Frontend.SolcJson.Contract": {
+      "path": "Solidity/Frontend/SolcJson/Contract.lean",
+      "sha256": "86dde91a3b909008a21b09eee6631afba64c4318110a7c01bf358d10b5b37617"
+    },
+    "Solidity.Frontend.SolcJson.Admission": {
+      "path": "Solidity/Frontend/SolcJson/Admission.lean",
+      "sha256": "59bd4ae2f9b91ef4023ed0164df9727a92d83fc55c6e202b166a1d0216e88d99"
+    },
+    "Solidity.Frontend.SolcJson.Body": {
+      "path": "Solidity/Frontend/SolcJson/Body.lean",
+      "sha256": "c4a0d8b40edb961c048db203ae4ffc16ce8b8187cdf167988a9289783ac8a884"
+    },
+    "Solidity.Frontend.Source": {
+      "path": "Solidity/Frontend/Source.lean",
+      "sha256": "9c98e997f4ffd75e9a3d300d52691ecf9ee6e6823b06b173fc924fe623a1baf2"
+    },
+    "Solidity.Language.Features": {
+      "path": "Solidity/Language/Features.lean",
+      "sha256": "cbdfc87ac6c1e2e094f1495feefd027a6df070d3f524794b63b31075d787d353"
+    },
+    "Solidity.Frontend.SourceUnits": {
+      "path": "Solidity/Frontend/SourceUnits.lean",
+      "sha256": "a80e58958f1f2320c18ee5ac64bb731166e0c11116b5f268f47b62a26a4f778f"
+    },
+    "Solidity.Frontend.SolcJson.Getters": {
+      "path": "Solidity/Frontend/SolcJson/Getters.lean",
+      "sha256": "50a500f33a0c94fe3e72be42205eea34edb22c9bcc4a8f43cae4892d74eca35b"
+    },
+    "Solidity.Keccak": {
+      "path": "Solidity/Keccak.lean",
+      "sha256": "1a57f17982dd2134b3d8ba1fc917b4ef3c07ceb8000047abb1f6f201d2c9604b"
+    },
+    "Solidity.Frontend.ExecutableAst.ControlTuple.Adapter": {
+      "path": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+      "sha256": "d2add700343022d94d89fa4b4769d70063084f768f6d6aaf86a671a31dcfbfaa"
+    }
+  },
   "sourceProvenance": {
     "Solidity/Frontend/SolcJson/Admission.lean": "59bd4ae2f9b91ef4023ed0164df9727a92d83fc55c6e202b166a1d0216e88d99",
     "Solidity/Frontend/SolcJson/Body.lean": "c4a0d8b40edb961c048db203ae4ffc16ce8b8187cdf167988a9289783ac8a884",
@@ -13128,5 +13210,87 @@
       ],
       "localEvidence": []
     }
-  ]
+  ],
+  "composedControls": {
+    "fixture": "tests/directruntime-20261104/shared-translator/ComposedReaders.ast.json",
+    "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+    "controls": "tests/directruntime-20261104/shared-translator/ComposedControls.lean",
+    "receipt": "tests/directruntime-20261104/shared-translator/evidence/adoption-8495/composed-compilation.json",
+    "gate": "tests/directruntime-20261104/shared-translator/artifacts/post-f77-gates/2.log",
+    "boundary": "Eight finite zero-parameter intrinsic samples/listings and four reader refusals. Not source preservation, proof closure, backend execution or full per-kind parity.",
+    "cases": [
+      {
+        "name": "memoryAlias",
+        "nodeId": 65,
+        "src": "110:245:0",
+        "expected": "normal"
+      },
+      {
+        "name": "storageCopy",
+        "nodeId": 111,
+        "src": "360:204:0",
+        "expected": "normal"
+      },
+      {
+        "name": "tupleOrder",
+        "nodeId": 174,
+        "src": "569:267:0",
+        "expected": "normal"
+      },
+      {
+        "name": "executeFirst",
+        "nodeId": 197,
+        "src": "841:164:0",
+        "expected": "normal"
+      },
+      {
+        "name": "wrongTupleOrder",
+        "nodeId": 218,
+        "src": "1010:98:0",
+        "expected": "panic"
+      },
+      {
+        "name": "falseControl",
+        "nodeId": 247,
+        "src": "1113:127:0",
+        "expected": "panic"
+      },
+      {
+        "name": "discardedFailure",
+        "nodeId": 267,
+        "src": "1245:115:0",
+        "expected": "revert"
+      },
+      {
+        "name": "unsupportedCallTuple",
+        "nodeId": 290,
+        "src": "1445:80:0",
+        "expected": "reader refusal"
+      },
+      {
+        "name": "unsupportedReference",
+        "nodeId": 304,
+        "src": "1530:96:0",
+        "expected": "reader refusal"
+      },
+      {
+        "name": "unsupportedInlineArray",
+        "nodeId": 321,
+        "src": "1631:88:0",
+        "expected": "reader refusal"
+      },
+      {
+        "name": "unsupportedDiscardRead",
+        "nodeId": 347,
+        "src": "1724:142:0",
+        "expected": "reader refusal"
+      },
+      {
+        "name": "discardedReadFailure",
+        "nodeId": 374,
+        "src": "1871:136:0",
+        "expected": "revert"
+      }
+    ]
+  }
 }

@@ -134,6 +134,10 @@ seen={}
 visit('Solidity.Frontend.ExecutableAst.Shared.Intrinsic')
 intrinsicClosure=dict(seen)
 assert all(n in {'Solidity.Frontend.ExecutableAst.Shared.Intrinsic', 'Solidity.Frontend.ExecutableAst.Shared.Scope'} or not n.startswith('Solidity.Frontend.') for n in seen)
+seen={}
+visit('Solidity.Frontend.ExecutableAst.Shared.Compose')
+composedClosure=dict(seen)
+assert 'Solidity.Frontend.Import' not in seen and 'Solidity.Frontend.Testing' not in seen
 seen=rawClosure
 assert 'Solidity.Frontend.Import' not in seen and 'Solidity.Frontend.Testing' not in seen
 result={'schemaVersion':1,'status':'initial census; full coverage gates pending','base':base,
@@ -144,8 +148,13 @@ result={'schemaVersion':1,'status':'initial census; full coverage gates pending'
  'direct':'refused','raw':'canonical memory-byte rethrow is separate; no general Yul-to-Raw admission',
  'proofClosure':'decoder/static/shape derivations are not whole-Solidity semantic equivalence',
  'backend':'whole-assembly execution/compiled closure not established'} for k in yul],
- 'rawConstructors':raw,'localSharedImportClosure':seen,'localIntrinsicImportClosure':intrinsicClosure,
+ 'rawConstructors':raw,'localSharedImportClosure':seen,'localIntrinsicImportClosure':intrinsicClosure,'localComposedImportClosure':composedClosure,
  'sourceProvenance':{p:sha(p) for p in [admissionPath,'Solidity/Frontend/SolcJson/Body.lean','Solidity/Frontend/SolcJson/Contract.lean',rawPath,'docs/solidity-features.json']},
  'featureCatalog':catalog['features']}
+fixture=json.loads((owned/'ComposedReaders.ast.json').read_text())
+contract=next(n for n in fixture['ast']['nodes'] if n.get('nodeType')=='ContractDefinition')
+expected={'memoryAlias':'normal','storageCopy':'normal','tupleOrder':'normal','executeFirst':'normal','falseControl':'panic','wrongTupleOrder':'panic','discardedFailure':'revert','discardedReadFailure':'revert',**{n:'reader refusal' for n in ['unsupportedCallTuple','unsupportedReference','unsupportedInlineArray','unsupportedDiscardRead']}}
+result['composedControls']={'fixture':'tests/directruntime-20261104/shared-translator/ComposedReaders.ast.json','fixtureSha256':sha('tests/directruntime-20261104/shared-translator/ComposedReaders.ast.json'),'controls':'tests/directruntime-20261104/shared-translator/ComposedControls.lean','receipt':'tests/directruntime-20261104/shared-translator/evidence/adoption-8495/composed-compilation.json','gate':'tests/directruntime-20261104/shared-translator/artifacts/post-f77-gates/2.log','boundary':'Eight finite zero-parameter intrinsic samples/listings and four reader refusals. Not source preservation, proof closure, backend execution or full per-kind parity.','cases':[{'name':n['name'],'nodeId':n['id'],'src':n['src'],'expected':expected[n['name']]} for n in contract['nodes'] if n.get('name') in expected]}
+assert len(result['composedControls']['cases'])==12
 (owned/'coverage-inventory.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({'counts':result['counts'],'rawConstructorCounts':{k:len(v) for k,v in raw.items()},'localSharedImportModules':len(seen),'localIntrinsicImportModules':len(intrinsicClosure),'status':result['status']},sort_keys=True))
