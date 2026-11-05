@@ -32,10 +32,15 @@ proof uses it, never derived from a machine model.
 
 ## Open
 
-- **Revert data in formulas.** No formula reads the data a run halts with:
-  a computed or rethrown reason is bound as any byte string (`Fml.allocAll`).
-  Reading it needs a third modality over revert outcomes, with no solkey
-  taclet to follow ("Revert data", "Left open").
+- **Revert data in formulas** — partly closed by VS1 S6.2: a modal formula
+  reads its run's revert data semantically, `dl!{ [ P ] φ ↯ ψ }`
+  (`Semantics/CtxEquiv/RevertFml.lean`, notation and printers in
+  `Calculus/SurfaceRevert.lean`, examples in
+  `Examples/Tactics/RevertFormulas.lean`); see "Revert data", *Read in
+  formulas*.  Still open: the calculus (no taclet produces or consumes the
+  modality, and a computed or rethrown reason is still bound as any bytes by
+  `Fml.allocAll`), the data the model drops outside a self-call frame
+  (string reasons, custom errors, panics), and logs (not modelled, X07).
 - **Callbacks.** A diamond over a loop whose body calls back never holds
   (`holdsC_diamond_loop`, `docs/options.md` O3): refused, not open. An
   `allocAll` goal whose rest calls back has no `ProvesC` rule; the callback
@@ -383,8 +388,8 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   custom error's selector or an ABI word of a value, by `revert`'s rules
   (`revertDataBox`, `revertDataDiamond`). The modalities read no data.
   `ExtResult.error`/`.other` carry another callee's reason and data.
-- *Where data is computed.* Since no modality reads a top-level revert's
-  data, literal and custom-error data are emitted only in the callee a
+- *Where data is computed.* Since no `Fml` modality reads a top-level
+  revert's data, literal and custom-error data are emitted only in the callee a
   self-call `try` runs (`selfFrame`) and its calls; elsewhere
   `require(c, "m")` is `require(c)`, so no other proof changes shape.
   A reason written as a byte literal (`hex"6d"`, and every string literal
@@ -392,7 +397,10 @@ and its code; `revert E(a, b)` with `E`'s selector and `abi.encode(a, b)`.
   `Error(string)`'s literal data in every frame, as a computed reason's
   memory bytes are, with nothing allocated (lane FU2-D; `requireReason` is
   `if (c) {} else { revert … }` there). The two readings of one source
-  differ only in data no modality reads outside a self-call's `catch`.
+  differ only in data no `Fml` modality reads outside a self-call's `catch`.
+  The revert-reading `RFml` layer (*Read in formulas*, below) does read it,
+  so there the lowering is a recorded deviation from solc
+  (`docs/solc-alignment.md`, "Revert data read in formulas").
   Computed memory operands keep their bytes everywhere (`RevPart.mem`,
   `Semantics/RevertMemory.lean`); the importer accepts the whole-buffer
   rethrow `assembly { revert(add(d, 32), mload(d)) }` and no other assembly.
@@ -433,12 +441,44 @@ one each (about 60 fold sites); `stmt_sim` stays within its pinned 11000
 heartbeats only because the statements outside the EVM fragment are ruled
 out by one lemma (`stmt_sim_outside`). Checking times did not move otherwise.
 
+*Read in formulas* (VS1 S6.2).  `RFml.revModal m P κ φ ψ`, written
+`dl!{ [ P ] φ ↯ ψ }` or `dl!{ ⟨ P ⟩ φ ↯ ψ }`, runs `P` with the typed run as
+`Fml.modal` does: a normal end must satisfy `φ`, a revert with data `d`
+(`THalt.revertData?`: `revert` is `[]`, `revertWith d` is `d`) the data
+predicate `ψ` (`DataPred`: `_`, `none`, exact bytes, `Error("m")`,
+`Error(_)`, `Panic(c)`, a selector, Boolean combinations), any other halt
+what the modality asks already (the box accepts divergence and exhaustion,
+the diamond exhaustion), never a panic.  So `⟨ P ⟩ false ↯ ψ` says that `P`
+reverts with data satisfying `ψ`, or exhausts.  It is a conservative
+extension: `[ P ] φ ↯ _` is `[ P ] φ` and `⟨ P ⟩ φ ↯ none` is `⟨ P ⟩ φ`
+(`revModal_box_any`, `revModal_diamond_none`).  It is a separate formula
+layer (`RFml`) over `Fml`, so no rule, closer or fold of `Fml` changes; the
+price is that the calculus has no taclet for it, and a goal is proved from
+the run (`revModal_of_revert`, `revModal_revertBytes`, `revModal_of_ok`).
+`↯` applies to a formula whose head is a modality; the notation refuses
+anything else.
+
+It reads the data the model computes, which outside a self-call frame
+(or `retainFailureData`) is less than solc's: `revert("m")`,
+`require(c, "m")` and `revert E(…)` revert with `[]`; a failed read, an
+out-of-bounds index, an empty `pop` and a checked overflow revert with `[]`
+where solc returns `Panic(0x32)` and the like (`docs/solc-alignment.md`);
+`assert` is a panic, which neither modality accepts, so
+`⟨ assert(false); ⟩ false ↯ Panic(1)` is false at top level.  A byte-literal
+reason (`revert(hex"…")`, the solc import's form) reads its `Error` data in
+every frame.  The controls pin each reading.  At the ABI boundary the data
+is what `Outcome.revert` would carry (`THalt.toOutcome?`); a panic has no
+outcome there, and no theorem yet relates a run's `RFml` to a session's
+outcomes in `Semantics/CtxEquiv/Basic.lean`.  Logs are not modelled as
+observations (X07); when they are, they join the event type of the
+contextual relations, not this modality.
+
 **Left open.**
 - A memory operand has no static pattern (`RevPart.pat?` is `none`), so
   `catchDataBox` binds arbitrary bytes; an exact link between the callee's
   computed data and the catch local needs a proved reading of revert
-  outcomes. A revert modality would add a fold case and a rule per statement
-  across the calculus; not added.
+  outcomes. The revert-reading modality above is a separate formula layer;
+  rules for it (a fold case and a rule per statement) are not added.
 - A fresh object's bytes read in a clause cost `sol_close` past its budget
   when premises read bytes too (`symbolicCustom` with `d[3] == 0x67`: about
   400k heartbeats against 200k). `sol_decide` would need an object-contents
