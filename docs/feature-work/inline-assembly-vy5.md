@@ -2261,7 +2261,7 @@ Existing producer bodies matched byte-for-byte; only missing imports were staged
 in the existing private tree. The producer's different Solidity.lean was NOT
 adopted. No Source owner bodies, other checkout or branch were modified.
 
-[ReturningPhysical](../../Solidity/Yul/Composition/ReturningPhysical.lean) adds19
+[ReturningPhysical](../../tests/yul-composition/held/ReturningPhysical.lean) adds19
 kernel laws. `call_decode` and `static_decode` execute the actual selected physical
 call via `GeneralReturning.call_actual`/`static_call`, then actual `Source.extReturn`
 for `[uint256]`. Full32byte data decodes to
@@ -2558,7 +2558,7 @@ Reviewed incremental patch/bundles/exact source/signatures/evidence/checksums:
 The immutable VY4 private checkpoint `5a4678a0733702d5b74abffce9c7c6a2c3e45c28`
 resolves the selected ordinary nonempty-revert producer request. Its actual
 GeneralFailure CALL/STATICCALL execution is now consumed by
-`Solidity/Yul/Composition/FailurePhysical.lean`: actual extReturn/attempt,
+`tests/yul-composition/held/FailurePhysical.lean` (held): actual extReturn/attempt,
 allocRef/full readback, typed alias declaration/block/rethrow and caller-local
 restoration. The 29 checked laws retain the entire 36-byte Denied(uint256)
 selector/payload, Source state, saved fnLocals, raw dirty companion and both
@@ -2947,7 +2947,7 @@ checkpoint contains only VY5 code, ledger/validator and documentation. Foreign
 producer modules and the `Solidity.lean` import registration remain in the
 provenance-bound private tree. No owner source body or master was changed.
 
-[IndexedWritePhysical.lean](../../Solidity/Yul/Composition/IndexedWritePhysical.lean)
+[IndexedWritePhysical.lean](../../tests/yul-composition/held/IndexedWritePhysical.lean)
 adds 31 kernel component facts. The actual representedSourceStep writes
 `0xab000002` into a newly typed singleton bool registry at owner48/slot7 in
 ScalarEmitPort.env. This registry is a represented fragment, not a complete
@@ -3042,3 +3042,54 @@ producer hashes, reviews, raw gates/resource receipts, previous-manifest checks
 and complete Work/Backfill handoff are under
 `/workspace/vy5-composition/indexed-write-20261102/final/`. This checkpoint is
 partial; the entire assignment remains blocked on the exact producer inputs.
+
+## Move to a Claude VM (2026-11-05, H37)
+
+The human moved this lane from the Codex VM to a Claude VM (H37), keeping H16
+Source ownership. This branch is `cloud/moved2-20261105/vy5-composition`. It
+continues from `cloud/vy5-move` (`5209dc728a5d230d31e1345d383bb87bb67120b3`),
+merged with `origin/master` `b86ae4568cef6d6226f4d170360bbb089debe3fb`.
+Five files conflicted (`docs/README.md`, `docs/feature-work/inline-assembly.md`,
+`docs/solc-alignment.md`, `docs/solidity-scope.md` and
+`scripts/check-layers.mjs`). In each one both sides are kept. Master's copy of
+the YQ1–YQ7 record replaces the lane's duplicate, and the lane's H1/H3
+subsections follow it. The library roots were regenerated with `register.sh`.
+
+**Gate failure relay (scheduled merge 2026-11-05 12:52).** Master does not
+define `Monetary.wide`. The moved branch also lacks it, and lacks
+the module `Solidity.Yul.Composition.MonetaryLifecycleControls` and the H16 Source
+immutables/funds edits. None of these is in any pushed ref: they existed only
+on the Codex VM. This checkpoint therefore uses the relay's alternative and
+leaves MonetaryLifecycleControls out. No `Monetary.wide` definition was
+written from memory, and no statement of the controls was changed or recreated.
+Restoring them requires the Codex VM's tree.
+
+**Held modules.** Three lane modules import VY4 producer modules that exist
+only in the Codex VM's private dependency tree (`/workspace/vy5-dependencies-20261101`):
+
+| Lane module | Missing producer |
+|---|---|
+| `FailurePhysical` | `Solidity.Yul.World.FailureFuel` |
+| `IndexedWritePhysical` | `Solidity.Yul.World.IndexedEmitHeap` (`ScalarEmitPort`, `PhysicalCompletion`) |
+| `ReturningPhysical` | `Solidity.Yul.World.GeneralReturningOutput` |
+
+The first touched gate failed only on these six modules (log retained: three
+`no such file` errors and three `bad import` errors). The three lane modules
+were moved unchanged to [tests/yul-composition/held/](../../tests/yul-composition/held/README.md).
+They import nothing else in the library, and no library module imports them.
+Their kernel facts (the indexed write/emit, selected returning-call and
+ordinary-failure checkpoints above) are therefore NOT in the checked tree. The
+sections above describe them as they were on the Codex VM.
+
+**Harness portability.** After `npm ci --ignore-scripts --prefix scripts/evm-reference`,
+`node --test --test-concurrency=1 scripts/yul-composition/*.test.mjs`
+reported 322 tests: 291 passed and 31 failed. Every failure opens a Codex-VM
+path (`/workspace/vy5-composition/...` reports, the private producer tree
+`/workspace/vy5-dependencies-20261101` or the `/workspace/.setup` toolchain),
+and none of them was moved. These tests are not part of any repository gate.
+They remain failures and are not relabelled as passes. Making them portable
+requires the original evidence.
+
+Queue status is unchanged. Work 1 and Work 3 remain blocked on actual
+V16/VY3/VY4 assembly correctness interfaces. Work 2 and Backfill A/B remain
+partial. Master now also lacks the three held producers listed above.
