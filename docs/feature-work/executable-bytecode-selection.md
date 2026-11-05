@@ -368,3 +368,32 @@ read-only here. There is no independently ready owned proof work remaining
 within the documented fragment; required full validation remains blocked.
 Independent finder and skeptic accept the final limitation and prospective
 launcher correction. Neither used builds, a Lean server or edits.
+
+
+## Published8495f1de adoption
+
+Published master8495f1deb0a95dd6b9301822d8649ab76b217681 is preserved in
+merge a07aae1437d5d1ae575e5ca03fdecd3305ddd82c with the existing owned
+history. All46 Selection sources are byte-identical to8f642fb1. Generated
+roots and the area module map are current. The integration accepts only
+ArithmeticSelection and BitwiseSelection from this lane, and VA1's
+DecisionHashFamilyCheck and DecisionHashFiveChain helpers; it does not
+publish the pending DecisionHashesChecks split.
+
+A guarded metadata-only check still computes8990275316855339899, and the
+exact no-build artifact query exits3. The target source SHA256 is unchanged;
+no failed-target compilation is retried and no different cache key is reused.
+H30/H33 red receipts remain intact. The pending VA1 reviewed split or exact
+artifact remains the full-validation dependency; cache shipment notice alone
+is not an artifact or lane pass.
+
+Fresh adoption checks pass all eight checkpoint gates. KeySort passes2jobs;
+the library passes3617jobs in246s. All483 scoped Selection axiom reports
+match their source file/line declarations and use only standard axioms.
+Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b and
+Lake5.0.0-src+797c613 were printed. These are checkpoint results, not
+RUNTIME_GATE_PASS. Both fresh launchers synchronously clear their readiness
+logs and check guard liveness; no resource stop occurred. Independent
+read-only finder/skeptic reviews pass the adoption; final gate evidence is
+recorded in the sealed handoff. No Source, Core ExtCall, proof budget,
+premise, exclusion or owned theorem changes are made by this adoption.
