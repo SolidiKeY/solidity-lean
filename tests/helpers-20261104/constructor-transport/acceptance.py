@@ -5,7 +5,15 @@ packet = root/'Solidity/Lowering/V08/HelperPackets/ConstructorTransport'
 ns = 'Solidity.Lowering.V08.HelperPackets.ConstructorTransport.'
 modules = []
 theorems = set()
-diags = {'Source':'source-mcp-attempt5.log','Target':'target-mcp-attempt2.log','Producer':'producer-mcp-attempt3.log','Controls':'final-gates/controls-mcp.log'}
+evidence = 'adoption-8495f1de'
+diags = {name:f'{evidence}/mcp-{name}.log' for name in ['Source','Target','Producer','Controls']}
+gates = [line.split('\t',2) for line in (owned/evidence/'gates.tsv').read_text().splitlines()]
+owned_gate = next(row for row in gates if row[0]=='owned-build')
+assert owned_gate[1]=='0'
+coordinator_gates = {'root-registration','global-axiom-registry'}
+required_worker_gates = {'runtime','owned-build','kernel-Source','kernel-Target','kernel-Producer','kernel-Controls','axiom-pins','axiom-inventory','compiler-controls','mcp-Source','mcp-Target','mcp-Producer','mcp-Controls'}
+assert required_worker_gates <= {row[0] for row in gates}
+assert all(row[1]=='0' for row in gates if row[0] not in coordinator_gates)
 for p in sorted(packet.glob('*.lean')):
  text = p.read_text()
  code = re.sub(r'/\-.*?\-/', '', text, flags=re.S)
@@ -14,22 +22,29 @@ for p in sorted(packet.glob('*.lean')):
  theorems.update(ns+x['name'] for x in declarations if x['kind']=='theorem')
  assert 'diag: 0 errors' in (owned/diags[p.stem]).read_text()
  modules.append({'module':str(p.relative_to(root)),'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
- 'declarations':declarations,'kernel_command':'lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls',
- 'kernel_log':'final-gates/packet-build.log','mcp_log':diags[p.stem], 'status':'pass'})
+ 'declarations':declarations,'kernel_command':owned_gate[2],
+ 'kernel_log':f'{evidence}/owned-build.log','mcp_log':diags[p.stem], 'status':'pass'})
 pins = set(re.findall(r'^#print axioms (\S+)', (owned/'AxiomPins.lean').read_text(), re.M))
 assert pins == theorems, (pins-theorems,theorems-pins)
 assert len(theorems)==28
-assert 'Build completed successfully' in (owned/'final-gates/packet-build.log').read_text()
-assert 'error:' not in (owned/'final-gates/axiom-pins.log').read_text()
-assert 'RUNTIME_GATE_PASS' in (owned/'final-gates/runtime.log').read_text()
-assert 'c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8' in (owned/'final-gates/compiler.log').read_text()
+assert 'Build completed successfully' in (owned/evidence/'owned-build.log').read_text()
+assert 'error:' not in (owned/evidence/'axiom-pins.log').read_text()
+assert 'KeySort_PASS' in (owned/evidence/'runtime.log').read_text()
+assert '12884901888\n0\n' in (owned/evidence/'runtime.log').read_text()
+assert 'error:' not in (owned/evidence/'axiom-inventory.log').read_text()
+assert 'c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8' in (owned/evidence/'compiler-controls.log').read_text()
 allowed=('Solidity/Lowering/V08/HelperPackets/ConstructorTransport/', 'tests/helpers-20261104/constructor-transport/', 'docs/feature-work/helper-constructor-transport-20261104.md')
-changed = set(subprocess.check_output(['git','diff','--name-only','6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'],text=True,cwd=root).splitlines())
+scope_base = '8495f1deb0a95dd6b9301822d8649ab76b217681'
+for ancestor in ['6f3eedf0788ee1f8a3bcf230558c712ecdca04d5', scope_base]:
+ subprocess.run(['git','merge-base','--is-ancestor',ancestor,'HEAD'],cwd=root,check=True)
+changed = set(subprocess.check_output(['git','diff','--name-only',scope_base],text=True,cwd=root).splitlines())
 changed.update(subprocess.check_output(['git','ls-files','--others','--exclude-standard'],text=True,cwd=root).splitlines())
 assert all(x.startswith(allowed) for x in changed), changed
 result={'packet_checks':'pass','assignment_completion':'pending_coordinator_merge_validation',
  'delivery_status':'coordinator-pending',
  'decision_receipt':'h41/coordinator-receipt.json',
+ 'coordinator_registration_checks':{row[0]:{'exit':int(row[1]),'command':row[2]} for row in gates if row[0] in coordinator_gates},
+ 'original_base':'6f3eedf0788ee1f8a3bcf230558c712ecdca04d5','adopted_master':scope_base,
  'theorem_count':len(theorems),'modules':modules,'axiom_pins':'AxiomPins.lean',
  'coverage': {'positive':'source_actual,target_body_actual,creation_actual,complete_transport; arbitrary admitted uint256 and bytes, both pipelines',
  'producer':'concrete_ssNew_body arbitrary after; creation_from_inputs conditional on unchanged published external inputs',
