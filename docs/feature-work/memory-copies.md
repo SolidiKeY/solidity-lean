@@ -1462,3 +1462,22 @@ unchanged failed gate or claim RUNTIME_GATE_PASS. Its original failed evidence
 is preserved. The copied-heap agreement map label was also clarified after
 finder review. Remaining unaffected checks require fresh receipts on the
 corrected documentation candidate; whole-checkpoint acceptance remains blocked.
+
+## Module-map integration repair
+
+The rejected snapshot head is preserved in a recovery ref and the earlier
+sealed packet. A topology-preserving rebase onto published `da50cec5` retains
+the older checkpoint history and replays the latest master-adoption merge and
+three snapshot commits. The map conflict keeps published master text and
+common descriptions, appending only missing owned rows. All 234 owned Lean
+files are byte-identical; each owned module has one row. Seven duplicate
+MemoryOps keys already present in master remain unchanged; this repair adds
+none. Generated roots were regenerated after the rebase.
+
+The requested touched gate must pass on the committed repair candidate.
+This integration repair changes no proof, theorem, heartbeat or trust policy.
+The four inputs of the previously failed qualified-units trust gate remain
+unchanged, so that gate is not rerun or treated as passing. The original full
+G33/G35 queue and validation obligations remain open. The repaired snapshot
+interface/proof commits are `1d1a2e56` / `d54911c0`; old committed heads and
+sealed evidence remain available for audit.
