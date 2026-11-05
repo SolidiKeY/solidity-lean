@@ -1,4 +1,5 @@
-Coordinator/V09 registration proposals only; do not modify shared roots/pins/maps in this packet.
+Published/registered on origin/master 8bf8321873befa3f35ca31e97e5339a1baee93e6.
+No remaining module registration is proposed; shared roots/pins/maps remain coordinator-owned.
 Solidity.Backend.PrimitivePackets.CheckedSub.Source
 Solidity.Backend.PrimitivePackets.CheckedSub.Selected
 Solidity.Backend.PrimitivePackets.CheckedSub.Target
