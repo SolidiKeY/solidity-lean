@@ -1,0 +1,27 @@
+{
+  "status": "blocked",
+  "head": "736e12aa8b71066e49b118f1c23c0815d7159afb",
+  "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "command": [
+    "bash",
+    "scripts/coord-tools/ship-cache.sh",
+    "--dry-run",
+    "/workspace/solidity-lean"
+  ],
+  "environment_overrides": {
+    "SHIP_ALLOW_HEAD": "1",
+    "LAKE_CACHE_DIR": "/root/.cache/lake",
+    "SHIP_STATE": "/workspace/scratch/h28-runtime/followon-broad-736e12aa/post-gate-shipment-state"
+  },
+  "exit": 1,
+  "seconds": 8.811973007002962,
+  "evidence": "/workspace/scratch/h28-runtime/followon-broad-736e12aa/ship-cache-preflight.log",
+  "delivery": "NOT shipped: missing coordinator poll-state/VMEXEC/catalog; notice49success/1skip/5fail does not establish this lane outcome or outbound import",
+  "archive": "/workspace/scratch/h28-h35-cache-e7cf5143/owned-lake-cache.tar.gz",
+  "sha256": "648c8b65de7bd50447961454f3dab47990afb75009ff00df4b0add15ccc98862",
+  "archive_verified": true,
+  "modules": 24,
+  "artifact_files": 72,
+  "mappings": 24,
+  "current_source_and_trace_hashes_match": true
+}

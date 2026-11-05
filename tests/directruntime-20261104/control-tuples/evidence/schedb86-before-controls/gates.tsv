@@ -1,0 +1,1 @@
+PASS	lean:tests/directruntime-20261104/control-tuples/ObligationControls.lean	4	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/schedb86-before-controls/1.log	lake env lean --tstack=131072 tests/directruntime-20261104/control-tuples/ObligationControls.lean

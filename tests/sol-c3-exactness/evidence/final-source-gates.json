@@ -1,0 +1,84 @@
+[
+  {
+    "command": [
+      "bash",
+      "scripts/check-trust.sh"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 14.959536966998712,
+    "log": "tests/sol-c3-exactness/evidence/final-source-1.log",
+    "log_sha256": "40958e55ae89ede34a8087a0c3c9266ffdc43db04479df2bcdbe3900f9a8eb2b"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-orphans.mjs"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.5141821639990667,
+    "log": "tests/sol-c3-exactness/evidence/final-source-2.log",
+    "log_sha256": "3520a48d0f493128fb29aacee7d1e42124c0637abafb3432bf048f39a73271f3"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-layers.mjs"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.5885945330082905,
+    "log": "tests/sol-c3-exactness/evidence/final-source-3.log",
+    "log_sha256": "45b8497f1525055532b0ad03dd6aca190aae447e834670a1f0a133f94056e799"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/coord-tools/register.sh",
+      "--check"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.13513884000713006,
+    "log": "tests/sol-c3-exactness/evidence/final-source-4.log",
+    "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-doc-paths.sh"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 8.845696385003976,
+    "log": "tests/sol-c3-exactness/evidence/final-source-5.log",
+    "log_sha256": "ed551fdab805b10d00731598031da69aad842f39f53cdb4a2d0638b4938e1c2d"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-axiom-pins.mjs"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 16.461614166997606,
+    "log": "tests/sol-c3-exactness/evidence/final-source-6.log",
+    "log_sha256": "6e25fef9f9366cbf5b0870f160c5a58e6b4fc742560124e3e1b27189ff39dcdc"
+  },
+  {
+    "command": [
+      "bash",
+      "scripts/check-testsuite.sh"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.4197818179964088,
+    "log": "tests/sol-c3-exactness/evidence/final-source-7.log",
+    "log_sha256": "32481e0de6928326e00e1c4595d5021d1e8b5cbd4e9dde6ca364eb195a0a8b95"
+  },
+  {
+    "command": [
+      "node",
+      "scripts/check-automatic.mjs",
+      "--strict"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.13116591099242214,
+    "log": "tests/sol-c3-exactness/evidence/final-source-8.log",
+    "log_sha256": "b2b841479106ada50111d792351a6dde92b28c5529fbbde0ab768d3bbd67d83f"
+  }
+]

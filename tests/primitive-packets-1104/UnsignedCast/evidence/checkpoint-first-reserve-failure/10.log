@@ -1,0 +1,9 @@
+solkey 473da8944c: 774 obligations: {
+  derived: 552,
+  refuted: 11,
+  excluded: 1,
+  skip: 2,
+  proved: 72,
+  unsupported: 35,
+  unported: 101
+}

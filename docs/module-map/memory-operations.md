@@ -176,3 +176,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
 | `Backend/MemoryCopies/CheckedDefault.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/CheckedReferenceInterface.lean` | memory-copies interface only: capacity guard and checked-reference certificate statement; the certificate is not inhabited here. |
+| `Backend/MemoryCopies/HeapContents.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/HeapContentsInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SingletonCopyInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
