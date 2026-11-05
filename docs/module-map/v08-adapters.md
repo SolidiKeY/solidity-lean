@@ -501,3 +501,123 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
 | `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
 | `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
+## Exact return-slot consumers
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureReturnSlots.lean` | Exact heterogeneous Source return-slot overwrite, older-parameter preservation, declaration-order extraction and tuple-statement composition. |
+| `Lowering/V08/LiteralFailureReturnSlotsControls.lean` | Actual mixed bytes/uint tuple return, extraction, encoding and local terminal transport; wrong-type order and stale-slot controls. |
+
+## Tuple-return argument failure
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureTupleAbort.lean` | Actual tuple argument failure, exact Halt and state transport through the Source statement boundary. |
+| `Lowering/V08/LiteralFailureTupleAbortControls.lean` | Effectful argument ordering, skipped writes, positive tuple return and timeout/Panic controls. |
+
+## Heterogeneous word and byte encoding
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedEncoding.lean` | Indexed field-evidence relation and actual arbitrary word/bytes Source encoder agreement with the existing typed ABI codec. |
+| `Lowering/V08/LiteralFailureMixedEncodingControls.lean` | Four-field tuple return/extraction, heap encoding, aliases, offsets and bounded local RETURN controls. |
+
+## Mixed ABI expression allocation
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedExpression.lean` | Actual local argument evaluation, mixed ABI expression allocation, input-field preservation and raw rethrow with phase-specific timeouts. |
+| `Lowering/V08/LiteralFailureMixedExpressionControls.lean` | Populated mixed input, fresh result, aliases, cursor, timeout and both Source pipeline observations. |
+
+## Mixed selector-prefixed ABI packets
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedSelector.lean` | Actual heterogeneous encodeWithSelector allocation, raw rethrow and post-allocation timeout. |
+| `Lowering/V08/LiteralFailureMixedSelectorControls.lean` | Mixed/empty-tail clients, body-relative offsets, supplied-selector decoder observations and full reached outputs. |
+
+## Mixed signature-prefixed ABI packets
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedSignature.lean` | Actual mixed-tail encodeWithSignature allocation, raw rethrow and post-allocation timeout from existing field/read/hash semantics. |
+| `Lowering/V08/LiteralFailureMixedSignatureControls.lean` | Signature/payload aliasing, existing Keccak pin, four-byte prefix, empty tail, timeouts and complete reached outputs. |
+
+## Declared mixed custom errors
+
+| Module | Content |
+|---|---|
+| `Lowering/V08/LiteralFailureMixedCustomError.lean` | Actual identity-converted local arguments and custom-error execution from generic mixed codec field facts. |
+| `Lowering/V08/LiteralFailureMixedCustomErrorControls.lean` | Member/type witnesses for mixed and empty errors, populated state, selector transport and exact stuck/timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringPrefix.lean` | Actual typed string-prefix encoding and declared error execution over a represented mixed tail; G38 encoding premise consumer. |
+| `Solidity/Lowering/V08/LiteralFailureStringPrefixControls.lean` | Populated typed string/custom-error controls, shared string/bytes reference, exact bytes and distinct stuck/timeout outcomes. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringInterleaving.lean` | Indexed memory-string/byte witness relation; actual encoder computation equality and Source error/expression consumers. |
+| `Solidity/Lowering/V08/LiteralFailureStringInterleavingControls.lean` | Populated multi-string typed controls, aliases, old-object preservation, allocation and late failure observations. |
+
+| `Solidity/Lowering/V08/LiteralFailureBoolPrefix.lean` | Actual bool-kind standard ABI encoding before a supported mixed memory tail; G38/error/expression consumers. |
+| `Solidity/Lowering/V08/LiteralFailureBoolPrefixControls.lean` | Boolean local, shared/distinct strings, allocation/failure controls and exact packed-width distinction. |
+
+| `Solidity/Lowering/V08/LiteralFailureTypedFields.lean` | Synchronized Source/ABI field evidence, constructive normalization, generic standard encoding and allocation preservation. |
+| `Solidity/Lowering/V08/LiteralFailureTypedFieldsControls.lean` | Seven-field, three-bool actual execution controls, typed kind corruption, aliases, allocation and late failures. |
+
+| `Solidity/Lowering/V08/LiteralFailureCalldataCopy.lean` | Actual calldata-to-memory argument conversion before typed custom-error encoding, with reached heap state. |
+| `Solidity/Lowering/V08/LiteralFailureCalldataCopyControls.lean` | Copied-object and full-packet observations, extraction boundaries, before/after-copy failures and retained-state controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureCalldataPrefix.lean` | Frame-indexed calldata bytes/string prefix over represented tail; actual no-copy encoding, layout and expression/G38 consumers. |
+| `Solidity/Lowering/V08/LiteralFailureCalldataPrefixControls.lean` | Populated no-copy calldata encoding, shared/short/past-end references, exact result allocation and order/frame corruption controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureSliceEncoding.lean` | Actual checked calldata slice argument composed with standard ABI encoding; invalid-head short-circuiting before arbitrary tails. |
+| `Solidity/Lowering/V08/LiteralFailureSliceEncodingControls.lean` | Populated slice/encode byte outputs, logical versus physical bounds, effectful-tail ordering and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureNestedSlice.lean` | Actual nested calldata slicing, relative offset/full-word bounds, ordered failures and standard encoding consumer. |
+| `Solidity/Lowering/V08/LiteralFailureNestedSliceControls.lean` | Populated nested-slice packet outputs, old-alias preservation, nonzero/incorrect bases, two-stage bounds and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureSliceChain.lean` | Arbitrary finite actual typed slice-chain evaluation, explicit fuel, standard encoding and invalid-extension consumers. |
+| `Solidity/Lowering/V08/LiteralFailureSliceChainControls.lean` | Populated mixed explicit/omitted-end chain, complete packets, failure extensions, skipped allocating tails and timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureLocatedFields.lean` | Arbitrary supported memory/scalar/calldata interleavings; actual encoder-part derivation, ABI layout and allocation-preserved evidence. |
+| `Solidity/Lowering/V08/LiteralFailureLocatedFieldsControls.lean` | Eight-field mixed-location execution, aliases, complete packets, typed-kind/wire distinction and failure/fuel controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureConvertedFields.lean` | Input-only converted-argument evidence; actual copied values, reached field evidence, exact allocation count and custom-error execution. |
+| `Solidity/Lowering/V08/LiteralFailureConvertedFieldsControls.lean` | Two interleaved calldata copies into an existing error signature, complete copied objects/packets, old aliases and zero/one/two-copy timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureStringConversion.lean` | Published allocation transport for typed fields/argument evidence; actual calldata-string copy before converted tails and custom errors. |
+| `Solidity/Lowering/V08/LiteralFailureStringConversionControls.lean` | StringMixed execution with real string/byte tags, old aliases, copied packets and zero/one/two-copy timeout controls. |
+
+| `Solidity/Lowering/V08/LiteralFailureCopySequence.lean` | Arbitrary supported local conversion sequences; actual identity/byte/string steps, reached values/fields, preservation and exact object counts. |
+| `Solidity/Lowering/V08/LiteralFailureCopySequenceControls.lean` | FieldMix7 with three interleaved copies, full error/copy outputs, old aliases and zero/one/two/three-copy timeout states. |
+
+| `Lowering/V08/LiteralFailureCopyEncoding.lean` | Actual standard ABI expression after typed local conversions; derived copy effects and packet allocation. |
+| `Lowering/V08/LiteralFailureCopyEncodingControls.lean` | Populated copy/packet/old-alias and partial-fuel controls with complete packets. |
+
+| `Lowering/V08/LiteralFailurePackedFields.lean` | Actual heterogeneous packed parts/encoding and converted-argument packet allocation. |
+| `Lowering/V08/LiteralFailurePackedFieldsControls.lean` | Populated packed fields, complete payloads, allocation and adjacent-boundary ambiguity controls. |
+
+| `Lowering/V08/LiteralFailureCopySelector.lean` | Actual selector-prefixed encoding after converted local arguments, with typed value injection and reached allocation. |
+| `Lowering/V08/LiteralFailureCopySelectorControls.lean` | Populated arbitrary-selector/copy/old-string/full-word controls and complete packets. |
+
+| `Lowering/V08/LiteralFailureCopySignature.lean` | Signature alias transport through actual copies and signature-prefixed encoder execution. |
+| `Lowering/V08/LiteralFailureCopySignatureControls.lean` | Actual aliased signature/read/copy packets, dangling-read and timeout-priority controls. |
+
+| `Lowering/V08/LiteralFailureCopyReturn.lean` | Derived converted tuple-return execution, slot extraction and actual return-data encoding. |
+| `Lowering/V08/LiteralFailureCopyReturnControls.lean` | Populated hidden return slots/caller parameters, exact extracted packets and copy-only allocation controls. |
+
+| `Lowering/V08/LiteralFailureCopiedReason.lean` | Actual eager calldata-string require conversion, exact success/failure state and Error readback. |
+| `Lowering/V08/LiteralFailureCopiedReasonControls.lean` | Populated copied-reason, static/local, full-word old-field and tight-fuel controls with complete packets. |
+
+| `Lowering/V08/LiteralFailureArithmeticReason.lean` | Actual division/modulo failure with effectful denominator and exact panic bytes. |
+| `Lowering/V08/LiteralFailureArithmeticReasonControls.lean` | Populated division/modulo panic, operand effects, distinct panic classes and insufficient-fuel controls. |
+| `Lowering/V08/LiteralFailureMemoryRevert.lean` | Actual direct Source revert with an assigned heap-backed string reason. |
+| `Lowering/V08/LiteralFailureMemoryRevertControls.lean` | Heap-backed reason aliasing, complete revert execution and insufficient-fuel controls. |
+| `Lowering/V08/LiteralFailureOverflowReason.lean` | Typed checked/unchecked addition at signed and unsigned range boundaries. |
+| `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Signed/unsigned overflow and wrapping, boundary success and distinct panic-class controls. |
+| `Lowering/V08/LiteralFailureReasonSequence.lean` | Actual Source sequencing and propagation of effectful memory-backed reason statements. |
+| `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | First failure, skipped continuation, changed/stale references and timeout sequencing controls. |
+| `Lowering/V08/LiteralFailureReferenceReturn.lean` | Actual single memory-byte return, hidden return-slot extraction and existing encoded-return transport. |
+| `Lowering/V08/LiteralFailureReferenceReturnControls.lean` | Populated byte-reference return, extraction, actual encoding and conditional target-slice controls. |
+| `Lowering/V08/LiteralFailureScalarOverflow.lean` | Source uint256 addition overflow consumed by the actual checked scalar test. |
+| `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Maximum-word overflow, retained scalar operands, raw wrapping and positive boundary controls. |
+| `Lowering/V08/LiteralFailureStatementReason.lean` | Actual Source statement endpoints for effectful heap-backed require/revert reasons. |
+| `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Populated require/revert success and failure states, static-frame variants and stale-pointer negatives. |
