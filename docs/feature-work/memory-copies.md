@@ -1100,3 +1100,14 @@ scoped axiom audit and sealed handoff are required before checkpoint acceptance.
 Outer traversal induction, typed parent adoption, generic recursive compiler
 closure and Source/physical adequacy remain open. This adds no producer
 premise and discharges none of the VY5/V11/V10/P1 producer obligations.
+
+Nested-turn handoff: interface `b63f26cc01ba90f41c2eee7800e865a23f4f2c8c`,
+proofs/controls `d5d79fa910477d179fe14e4fecd5ac442623a906`. At the proof
+candidate, all ten checkpoint gates, 208 per-file checks and 1,212 scoped
+standard-axiom reports passed; Lean 4.24.0 / Lake 5.0.0-src+797c613 and
+KeySort passed. Final tooling skeptic requested restoration of the sealing
+script's direct host-Elan/Nix refusal assertion (already enforced by its gate
+guard); it was restored without changing code, premises or policy. Final
+acceptance pins this handoff commit and requires fresh exact-head gates,
+clean diagnostics, prior hashes, patch-tree reconstruction and a verified seal.
+This checkpoint completes one child turn; the original G33/G35 queue remains open.
