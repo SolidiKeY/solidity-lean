@@ -2216,6 +2216,13 @@ import Solidity.Semantics.Lifetime
 import Solidity.Semantics.NativeDeferred
 import Solidity.Semantics.NativeDeferredCallback
 import Solidity.Semantics.NoPanic
+import Solidity.Semantics.Nondeterminism.Fork
+import Solidity.Semantics.Nondeterminism.ForkAgreement
+import Solidity.Semantics.Nondeterminism.ForkStipend
+import Solidity.Semantics.Nondeterminism.Pipelines
+import Solidity.Semantics.Nondeterminism.Source
+import Solidity.Semantics.Nondeterminism.SourceWitness
+import Solidity.Semantics.Nondeterminism.Split
 import Solidity.Semantics.NumericLowering
 import Solidity.Semantics.Ops
 import Solidity.Semantics.PaymentWorld

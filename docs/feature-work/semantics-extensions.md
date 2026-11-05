@@ -74,4 +74,216 @@ their owner as requests. Register new modules with
 
 ## Handoffs
 
-None yet.
+### VS4 — S5.1, S5.2, S6.1 (nondeterminism split, fork parameter)
+
+Branch `cloud/semantics-20261105/nondeterminism`. New modules under
+`Solidity/Semantics/Nondeterminism/` (rows in `docs/module-map/language.md`).
+X01 and X02 were not on master at the base commit, so the work follows the
+frozen D1–D6 text in [full-scope.md](full-scope.md).
+
+**Step 0, inventory.** What already exists, and what this lane reuses:
+
+| Concern | Where it is today | Reused as |
+|---|---|---|
+| Callers, transaction order, callbacks, balances, code existence | G01 `SessionEnv` (`Roadmap/Contracts.lean`: `requests` by history and index, `callee : Strategy`, `balance`, `hasCode`), universally quantified by `Lang.Allowed` and `PublicCorrectness.refines` | the environment of every split language |
+| Callbacks at the intrinsic level | `TransferSem`, `ValidT`/`ValidC` (`docs/options.md` O1, O3) | unchanged; an option of the theorem, as before |
+| Block fields | Source: `Glob.timestamp`, fixed to `0` by `SrcProg.glob`; Yul: `Yul/Views/Inputs.lean` (`Environment`, `EnvRead`, Osaka `blockhash`); the backend slice (`Backend/Environment/Observations.lean`) keeps six opcodes; `Language.BlockField` lists the excluded `block.*` members, `slotnum` included | `BlockEnv F` mirrors `EnvRead` and maps `BlockField` |
+| Evaluation order (O9) | `EvalOrder`, `Contract.evalOrder` (`Syntax/Raw.lean`); `Pipeline.order` (`Roadmap/TypedRun.lean`); in the source `Glob.pipeline` (`Source/Eval.lean`), `SrcProg.pipeline` | `CompilerChoice.pipeline` |
+| Artifact table (G00 Q5) | `Artifact`, `SourceSpec.meaning : … → Artifact → lang.Prog` | `CompilerChoice.artifact` |
+| Gas values (D1) | none: `gasleft` is refused (`Language/Features.lean`; `Lowering/Readonly/SourceReadBuiltinControls.lean`); `EvmSpec.gas` is a resource | `GasOracle` (new) |
+| Both pipelines | `pipelines`, `SourceSpec.AllPipelines`, `PublicCorrectness.bothPipelines` | `holdsBoth_iff_pipelines`, `holdsBoth_iff_settings` |
+| D1 non-circularity | the G07 gate (`roadmap-g01-interfaces.md`, "Non-circularity as a checkable gate"; `scripts/check-noncircular.mjs`), argued for the artifact table only | `Confined`, `SoundAtOracle` |
+| Osaka choices (D2) | `Evm.Fork` (one constructor), `Evm.osaka`, `Evm.pinned`, `allButOne64`, `Evm.Precompile`; `Stipend.osakaCold` and `pinned.stipend` (`Stipend/Rule.lean`) | `ForkSpec.osaka` agrees with each by `rfl` |
+
+Nothing in `Bridge/` or `Solidity/Tools/` defines these notions.
+
+**S5.1** (`Solidity/Semantics/Nondeterminism/Split.lean`, `Solidity/Semantics/Nondeterminism/Source.lean`). `CompilerChoice` is the
+pipeline, the artifact table and a `GasOracle`, which answers D1's
+`gasleft`, `gas`, `msize` and `pc` after a history. `SplitSpec` is G01's
+language family indexed by the choice. Each language declares which programs
+read a D1 value (`readsD1`).
+
+- `Holds c p Φ` quantifies the environment and the bound at a fixed choice.
+- `HoldsFor q art` quantifies every oracle.
+- `HoldsBoth` quantifies both pipelines, each at its artifact. In these
+  user-facing forms the choice is quantified universally too. The split has
+  content where the compiler fixes the choice: refinement at its output,
+  and the oracle its target run reports.
+
+`sourceSplit` is the source semantics with the choice's pipeline, and
+`sourceSplit_own` makes it `sourceLang` at the program's own pipeline. The
+source reads no D1 value yet, so it declares none and is confined
+(`sourceSplit_confined`). `Solidity/Semantics/Nondeterminism/SourceWitness.lean` runs `sourceSplit` itself
+at an allowed environment (`envA_allowed`). A constant hash makes the
+creation address computable (`createAddress_zero`). In the run, `g()`
+returns `++x + x` after `x = 1`: `3` under legacy and `4` via IR
+(`order_legacy`, `order_viaIR`). So "completes with 3 or not at all" holds
+for the legacy run but is not a `HoldsBoth` statement (`order_not_both`).
+The contract is deployed at address `0`, the creation address under the
+constant hash. The split source is non-vacuous at
+every choice (`sourceSplit_nonVacuous`), so no choice rescues an
+always-reverting target (`sourceSplit_refutes`).
+
+**S5.2** (`Solidity/Semantics/Nondeterminism/Pipelines.lean`). The statement form is `HoldsBoth`. It reduces
+to the two cases (`holdsBoth_iff_pair`). `holdsBoth_iff_settings` is only
+bookkeeping over `SourceSpec.setPipeline`. D1's non-circularity is checked
+against the parameter in two parts.
+
+1. `Confined` says the artifact and oracle change nothing for any program
+   the language declares D1-free.
+   - Under it a wrong compiler stays wrong at every choice
+     (`Confined.refutes`).
+   - Plain-choice witnesses for each pipeline lift to every choice
+     (`Confined.nonVacuous`).
+   - `NonVacuous.refutes` refutes an always-reverting target at every
+     choice.
+2. An `OracleTarget` carries the oracle its own runs report, and
+   `SoundAtOracle` states soundness at that oracle.
+   - For oracle-blind programs the oracle drops out
+     (`soundAtOracle_iff_fixed`).
+   - An oracle-reading language still refutes a wrong target at the
+     target's own oracle (`circular_refuted`).
+
+Negative controls:
+
+- `circular` reads the oracle for a program it declares D1-free, and is not
+  confined (`circular_not_confined`). Declaring the read passes vacuously
+  (`circularHonest_confined`).
+- A target that may come with any oracle makes both an always-success and
+  an always-revert target sound (`circular_rescues`). This is why the oracle
+  must be part of the target's definition.
+- `orderToy_not_both` shows `HoldsBoth` is strictly stronger than one
+  pipeline.
+- `envToy_each` and `envToy_no_choice` show the choice may not depend on the
+  environment.
+
+**S6.1** (`Solidity/Semantics/Nondeterminism/Fork.lean`, `Solidity/Semantics/Nondeterminism/ForkAgreement.lean`, `Solidity/Semantics/Nondeterminism/ForkStipend.lean`).
+`ForkSpec` carries:
+
+- the block fields (`has`), with two invariants: `number` and `timestamp`
+  exist, and the field `block.difficulty` reads exists;
+- the precompile table;
+- the code-size, gas-cap, block-gas, depth and stack limits;
+- the gas constants;
+- the `blockhash` window;
+- the stipend constants.
+
+Osaka is `ForkSpec.osaka`. It agrees with:
+
+- `Evm.osaka` (`osaka_pin`);
+- `Evm.pinned` after the four G01/G06 idealizations
+  (`osaka_idealized_pin`);
+- D2's reading, which keeps the code-size limits (`osaka_d2_pin`);
+- `allButOne64` and the precompile table;
+- the Yul views (`ofViews_field`, `osaka_blockhash`, `osaka_blobhash`);
+- `Stipend.rule` (`osaka_stipendRule`).
+
+`BlockEnv F` reads a field only with a proof that `F` has it, and gates
+`blobhash?` on `blobbasefee`. So `block.slotnum` has no reading under Osaka
+(`field?_slotnum_osaka`) and reads the environment under `osakaWithSlotnum`.
+`EnvChoice F` adds the block of each action to `SessionEnv`, indexed like
+`requests`, so the block cannot change inside a transaction. Its `Allowed`
+includes the chain premise `EnvChoice.Chain`: non-decreasing number and
+timestamp, and constant chain id. `SplitSpec.forked` and the controls
+adopt that premise, but `ForkedSplit.Allowed` is a field, so a language may
+state less. `ForkedSplit` takes the fork as a
+parameter, and `HoldsOn` quantifies a list of forks. Controls:
+
+- `slotnum_osaka` and `slotnum_withSlotnum_not` give one statement that
+  holds at Osaka and fails once the slotnum fork is in the list;
+- `difficulty_control` and `control_difficulty` are a pre-Paris-like fork;
+- `prague_differs`;
+- `noStipend_rejects_empty`.
+
+`Fork.lean` imports only `Split.lean` (G01 contracts and G06 interface), so
+G07 can whitelist it for source modules. The Yul and `Language` agreements
+are in `ForkAgreement.lean`.
+
+**Axioms.** Every new theorem is pinned with `#guard_msgs` on
+`#print axioms`. They use at most `propext`, `Classical.choice` and
+`Quot.sound`. There is no `sorry`, no new axiom and no `maxHeartbeats`
+change.
+
+**Reviews.** A read-only re-check after the fixes confirmed the first
+four items below and the docstring fixes. It found wording residue (fixed:
+the `prague` tag, the `order_not_both` reading, the address-`0` remark) and
+two notes now listed as limitations (the free oracle field, the
+timestamps). Before that, a read-only finder and a skeptic (no Lean server) reviewed the
+first push. Their confirmed findings were fixed as follows:
+
+- The read predicate of `Confined` was free, so the check could not fail.
+  It is now the language's declared `readsD1`.
+- The oracle in `SoundAtOracle` was a free argument. It is now part of an
+  `OracleTarget`, with a refutation control.
+- The source witness ran at a disallowed environment, outside
+  `sourceSplit`. It now runs `sourceSplit` itself at an allowed environment
+  (still at address `0`, which `sessionAt` computes there), with
+  `order_not_both` and non-vacuity.
+- `Fork.lean` imported Yul and `Lean` modules. It now imports neither, and
+  the agreements moved to `ForkAgreement.lean`.
+- Drafts and controls carried the `osaka` or `amsterdam` tag. They are now
+  tagged `custom`.
+- The difficulty reading was unconstrained. It is now an invariant, with a
+  real pre-Paris-like control.
+- `blobhash` was ungated. It is now gated on `blobbasefee`.
+- Blocks were keyed by history. They are now keyed per action, with the
+  chain premise.
+- D2's code-size reading was missing. `d2` and `osaka_d2_pin` add it.
+- Docstrings that claimed more than the theorems proved were corrected
+  (`holdsBoth_iff_settings`, `Confined.nonVacuous`, the quantifier claim,
+  the `prague` instance).
+
+Findings kept as limitations are listed below.
+
+**Interfaces needed from other lanes** (not edited here):
+
+- X01 (`Roadmap/Contracts.lean`): add the oracle beside `Artifact` in
+  `SourceSpec.meaning`, and a D1-read predicate with `Confined` as a
+  `SourceSpec` field. Identify `CompilerChoice.artifact` with
+  `SourceSpec.meaning`'s artifact, which is today a second, unrelated
+  parameter. Move the pipeline out of the program (`SrcProg.pipeline` is
+  overridden by `sourceSplit`). The G07 script
+  (`scripts/check-noncircular.mjs`) should whitelist `Solidity.Semantics.Nondeterminism.Split`
+  and `.Fork` for source modules.
+- X02: route `EnvChoice.block` into the source's `Glob`, where
+  `Glob.timestamp` is the constant `0` today, and into the lowering. Then
+  `sourceForked_blind` stops holding for programs that read block fields.
+- X03/X07: the D1 reads read `CompilerChoice.oracle` and `.artifact`,
+  `readsD1` becomes the syntactic predicate, and they owe `Confined` again.
+  They also owe a substitution lemma: the oracle affects a run only through
+  the values of the read expressions. On the EVM side, `EvmSpec` defines
+  the oracle of a run, as an `OracleTarget`. D2's schedule beyond the
+  recorded constants also belongs to X03: memory expansion, refunds, code
+  deposit, creation and intrinsic costs, precompile gas, and opcode
+  availability such as `CLZ`. X03 should also read the cold and warm costs
+  and the `SSTORE` sentry from `ForkSpec.gas`.
+- G06 (`Roadmap/Evm.lean`): `Evm.Fork` has only `osaka`, so `ForkSpec.pin?`
+  is `none` elsewhere. `Evm.pinned` idealizes the code-size limits that D2
+  keeps (`osaka_d2_pin`).
+
+**Limitations.**
+
+- `OracleTarget.oracle` is a field. Nothing ties it to the target's runs
+  until the EVM side defines it (X03), and `circular_rescues` shows what a
+  freely chosen oracle allows.
+- `EnvChoice.Chain` does not relate timestamps within one block number.
+  `EnvChoice.block`'s timestamp is not related to G01's
+  `Request.timestamp`; X02 chooses one.
+
+- The intrinsic layer is not split: `Contract.evalOrder` is chosen at
+  elaboration.
+- `Confined` says nothing about programs that read a D1 value. The
+  substitution lemma is X03's.
+- `SoundAtOracle` covers soundness only. Adequacy at a target-supplied
+  oracle needs X03's gas model.
+- `GasOracle` is unconstrained: `gasleft` need not decrease and `msize`
+  need not be a multiple of 32. `HoldsFor` therefore cannot prove facts
+  that depend on such properties.
+- The real source reads none of the artifact, the oracle or the fork. The
+  parameter is wired into the source only through the pipeline.
+- `prague` and `osakaWithSlotnum` are contrast instances only. Forks before
+  Prague have no instance. EIP-7843 and solc's Amsterdam gate for
+  `block.slotnum` are taken from `docs/solidity-scope.md` and
+  `Yul/ReservedNames.lean`, not from an external source in this repository.
+- The fork data is checked against the repository's own Osaka definitions,
+  not an external specification.
