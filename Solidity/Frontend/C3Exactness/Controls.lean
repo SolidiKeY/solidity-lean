@@ -1,4 +1,4 @@
-import Solidity.Frontend.C3Exactness.Trace
+import Solidity.Frontend.C3Exactness.OrderObstruction
 
 /-!
 # Kernel controls for exact C3 merge
@@ -118,5 +118,25 @@ theorem empty_trace : Trace ([] : List (List String)) [] := .done rfl
 
 /-- Closed immediate obstruction witness, distinct from delayed propagation. -/
 theorem cycle_stuck : Stuck [["a", "b"], ["b", "a"]] := .here (cycle_obstruction "a" "b")
+
+/-- Compatibility allows a noncanonical tie order. -/
+theorem alternative_common_order :
+    CommonOrder ([[0], [1]] : List (List Nat)) [1, 0] := by
+  unfold CommonOrder
+  decide
+
+/-- Deterministic C3 still chooses the first legal head. -/
+theorem alternative_not_trace :
+    ¬ Trace ([[0], [1]] : List (List Nat)) [1, 0] := by
+  intro ht
+  have hc : Trace ([[0], [1]] : List (List Nat)) [0, 1] :=
+    .step (by decide) (.step (by decide) (.done (by decide)))
+  have he : ([0, 1] : List Nat) = [1, 0] := hc.unique ht
+  exact (by decide : ([0, 1] : List Nat) ≠ [1, 0]) he
+
+/-- An arbitrary identity cycle has no duplicate-free common supersequence. -/
+theorem cycle_not_common_order (a b : α) :
+    ∀ out, ¬ CommonOrder [[a, b], [b, a]] out :=
+  (cycle_obstruction a b).not_common_order
 
 end Solidity.Frontend.C3Exactness.Controls
