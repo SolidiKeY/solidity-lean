@@ -97,9 +97,19 @@ def storageHeapContents {R : RefTy} (value : SVal (.ref R))
     exact mirror_contents (value.copyStToM hp memory).heap value _ H.length
       (SVal.mirrors_copyStToM hp value memory)
 
+/-- info: 'Solidity.Backend.MemoryCopies.mirror_contents' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms mirror_contents
+/-- info: 'Solidity.Backend.MemoryCopies.mirror_fields' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms mirror_fields
+/-- info: 'Solidity.Backend.MemoryCopies.mirror_elements' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms mirror_elements
+/-- info: 'Solidity.Backend.MemoryCopies.mirrorContents' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms mirrorContents
+/-- info: 'Solidity.Backend.MemoryCopies.storageHeapContents' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in
 #print axioms storageHeapContents
 end Solidity.Backend.MemoryCopies

@@ -1,0 +1,148 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Two distinct push-tail/update-order mutations: clear just-appended recycled reference slot, and genuinely swap compound-push updates. Real dirty/clean and successful staged controls; pilot only, not full constructor/operator or assignment coverage.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "push.reference-tail-cleared",
+      "kind": "mutant",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": ".app2 .pushSlot s q",
+      "new": ".app2 .delAt (.app2 .pushSlot s q) (.app1 .next q)",
+      "source_symbol": "Tms.STerm.pushSlot",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushTailBaseline.lean",
+      "oracle_sha256": "f8884d84ac056c19f493d1cc5f90dc345aa12bd1c2fb1534c35a5bb47be5349c",
+      "oracle_declarations": [
+        "H28.PushTailBaseline.source_link",
+        "H28.PushTailBaseline.input_inhabited",
+        "H28.PushTailBaseline.clean_run",
+        "H28.PushTailBaseline.dirty_run",
+        "H28.PushTailBaseline.actual_inner_length",
+        "H28.PushTailBaseline.clean_post",
+        "H28.PushTailBaseline.actual_rejects_post"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushTailClearKill.lean",
+      "witness_sha256": "b813788f044c3e7b7fb86b51d14884e44ca5ac12df8bd1ba7905fc3421f59395",
+      "witness_declarations": [
+        "H28.PushTailClearKill.source_link",
+        "H28.PushTailClearKill.input_inhabited",
+        "H28.PushTailClearKill.checked_kill",
+        "H28.PushTailClearKill.typed_landing",
+        "H28.PushTailClearKill.clean_update_returns"
+      ],
+      "constructor_id": "Tms.STerm.pushSlot",
+      "mutant_sha256": "7b8703a07ac93b202405b5d02e7aa9c04cf0be244353b66a578983cbf2560e84",
+      "oracle_signature_sha256": {
+        "H28.PushTailBaseline.source_link": "ce70f1d55705b24915dd3d44354e09bc2c6278c1112e78da7bdc4d1ec81fe497",
+        "H28.PushTailBaseline.input_inhabited": "26df5a4789a8a11299a659de688bb58d7ca9b6513b0e26632969d46b7cc3dc5e",
+        "H28.PushTailBaseline.clean_run": "634a6fd4376feb0035e007f657c925c97d31b24ebeb6f33bff88935ffe30cccb",
+        "H28.PushTailBaseline.dirty_run": "ccbad9590c5c05e35fa68a1aec544678e44dab90de0608476c603f74d6705551",
+        "H28.PushTailBaseline.actual_inner_length": "fb4df5dbabd3bc5b093dc2c6bf23ca4c17d41ae154b638d8161bbc1a3219bd6b",
+        "H28.PushTailBaseline.clean_post": "d73562a7059f49e1141439f8c77ff880b83791cedeaad8d986fa0ebb5f4e35b3",
+        "H28.PushTailBaseline.actual_rejects_post": "85dad0384770e46d87dec935b4adb3a859f65332a330e34939ec87e52b780baf"
+      },
+      "witness_signature_sha256": {
+        "H28.PushTailClearKill.source_link": "9f8185985a53f5eaffdea8b9872d61c1efd91e96e7b5c8bca406386876e42f06",
+        "H28.PushTailClearKill.input_inhabited": "7929fc19d8deb428b51f54e81250b55f0a1c0e1cf6e0c934143a27d0b706fa46",
+        "H28.PushTailClearKill.checked_kill": "2526e19339562cc38325230bfe49479808fa2583b8e57fbab73243d5cf5642ea",
+        "H28.PushTailClearKill.typed_landing": "2cf85691d68985f2da07a92e78030466ad6e130c5c52d4a2ad7452da41a9006b",
+        "H28.PushTailClearKill.clean_update_returns": "61199ff1109963b415550bb0ccb292500d0e2ba1406c4c306e3747fd8ca66c9e"
+      }
+    },
+    {
+      "id": "push.compound-updates-swapped",
+      "kind": "negative-control",
+      "family": "push-tail-length",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } \u27e8[ ]\u27e9 }",
+      "new": "  | storagePushAddAssign :\n      dl{ \u27e8[ sp.push() += se; ]\u27e9 \u21dd\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) }\n        { storage := save(storage, sp.length, sp.length + 1) } \u27e8[ ]\u27e9 }",
+      "source_symbol": "Taclet.storagePushAddAssign",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean",
+      "oracle_sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510",
+      "oracle_declarations": [
+        "H28.PushOrderBaseline.source_link",
+        "H28.PushOrderBaseline.input_inhabited",
+        "H28.PushOrderBaseline.empty_run",
+        "H28.PushOrderBaseline.populated_run"
+      ],
+      "witness": "tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.lean",
+      "witness_sha256": "ad4b4bf25e014c1ecef419a5bd85800b183689586b59546db709798e6420dff5",
+      "witness_declarations": [
+        "H28.PushOrderSwappedKill.source_link",
+        "H28.PushOrderSwappedKill.input_inhabited",
+        "H28.PushOrderSwappedKill.checked_kill",
+        "H28.PushOrderSwappedKill.typed_landing",
+        "H28.PushOrderSwappedKill.first_not_exhausted"
+      ],
+      "constructor_id": "Taclet.storagePushAddAssign",
+      "mutant_sha256": "5fa195f22d4d54edf93db23140370cedceb48972afc32709493ed71f95ff61d2",
+      "oracle_signature_sha256": {
+        "H28.PushOrderBaseline.source_link": "5a725af91fd2f366d9c0516816e6f1b345d5d46ab0ade45b1924094275c05a40",
+        "H28.PushOrderBaseline.input_inhabited": "403760c3c70d6c0516fd765feffcc06f11eca65edadbb6b024dd367eff4561bd",
+        "H28.PushOrderBaseline.empty_run": "b64c79681c305ba94b865c6372a4a576976ac86ca505178a56c09ddbe2b1d48b",
+        "H28.PushOrderBaseline.populated_run": "13e64885444f5274c329e1a42b6e45171c20466dec47a53bcdf8412ad7a689de"
+      },
+      "witness_signature_sha256": {
+        "H28.PushOrderSwappedKill.source_link": "c2172d333cc2d241af877c217d8d151eb01a6bec549d2ac21bae7b0d8b0aa864",
+        "H28.PushOrderSwappedKill.input_inhabited": "ceec62bcebfa13242cd2f3f44b951335d197a5a38005c4195056d481411ee7a6",
+        "H28.PushOrderSwappedKill.checked_kill": "feb04e853236a6a8e188e5698ac83a50c2a8995d2d8efef631a1c38a3c020e39",
+        "H28.PushOrderSwappedKill.typed_landing": "4091a7e8ff18b4d97ff6886d2b4279c773a6d7d16283633ad91f8b5a5f8a5692",
+        "H28.PushOrderSwappedKill.first_not_exhausted": "3c8a4ce2ada71e59bb598f9e686ef6fde670f48870227d05e27218b898f953d2"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}
