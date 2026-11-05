@@ -1,0 +1,3 @@
+# Literal grammar bounded checkpoint
+
+Producer `48f92c6515347d8f342670b53003719a784936a2`. Hex body grammar and constructive encoding only; complete literal parsing and source-to-EVM agreement remain open. Both separate read-only substance reviews passed. The initial candidate failed git whitespace checking because Hex ended with an extra blank line; only that EOF blank line was removed. All statement and proof tokens are unchanged. The repaired touched gate passed; exact-head full combined gates remain required. Original failure and both review reports are retained in the coordinator receipt.
