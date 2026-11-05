@@ -156,3 +156,8 @@ Lean/server execution. Neither found a material defect. Both checked the closure
 ledger limits,12composed cases,post-adoption exit0 evidence and six-module cache
 mapping/archive verification. Delivery remains coordinator-pending; dependencies,
 CR migration,native/WASM closure and full gates remain explicit open obligations.
+
+Final handoff finder/skeptic confirmed actual KeySort377/131/131 and partial
+blocker claims. Both identified checkpoint-accounting ambiguity: original queue2
+is partial until existing tooling migration/native adoption; concrete API publication
+is only a done subtask. Machine report corrected accordingly. No other finding.
