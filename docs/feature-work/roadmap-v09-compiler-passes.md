@@ -790,8 +790,8 @@ Gates (cold cache, one build at a time):
 - TF-gate: `test_cases.py` (15) and `test_targets.py` (8) pass in the merged
   tree; `accept_repaired.py --head 1b7b365f…` passes all 33 cases at its frozen
   head. `test_contract.py` is bound to that exact head and is not run elsewhere.
-- doc-paths: `tests/terra-20261103/gate/test_cases.py` cites the fixture names
-  `Solidity/A.lean` and `Solidity/MissingFixture.lean`. They come from the TF-gate
+- doc-paths: `tests/terra-20261103/gate/test_cases.py` cites two deliberately absent
+  fixture modules (A and MissingFixture under Solidity/). They come from the TF-gate
   head itself, where the check also fails; master passes. Both that file and
   `scripts/check-doc-paths.sh` are hash-frozen by the TF-gate snapshot, so this is
   left for a decision.
