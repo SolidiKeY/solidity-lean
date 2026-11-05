@@ -1890,3 +1890,67 @@ else and uniqueness beyond this fixed-atom fragment, remaining true parser
 coverage, full repository final gates and whole-scope acceptance/reviews remain
 open. SG-CEX-01/02 stay OPEN/REFUTED; SOL-EU remains excluded. Existing frozen
 persistent objective is neither reset nor completed by this checkpoint.
+
+
+## Checkpoint W: arbitrary-width conditional item decomposition
+
+Adopted remote-verified published `8bf8321873befa3f35ca31e97e5339a1baee93e6`
+at merge `c1419c5bc066d80630ca44f0393ae39980b4c6d4`. All owned files and seven
+pinned inputs are byte-identical across adoption. Receipt:
+`/workspace/h28-statement-grammar-evidence/adopt-8bf-locations.json`.
+
+ConditionalList introduces a two-constructor Prop relation BooleanItemList on
+existing `Syn (.list (.item k))` and per-statement token segments. Nil and cons
+are inhabited; cons carries an existing BooleanStatements witness. No untyped
+AST or computational indexed-family match is introduced. Both compared lists
+must inhabit this relation. It excludes unchecked items and statements outside
+the existing fixed-Boolean fragment; this result is not unrestricted item
+uniqueness and does not add an exclusion to any original target.
+
+Every represented statement's tokens are nonempty and cannot start with else.
+Thus the following represented item supplies the preceding open-if frame. The
+empty tail uses an explicit safe terminal state. Recursion on the intrinsic
+list witness applies V's proved prefix theorem to obtain head-tree and tail
+token equality, then actual yields recover all per-statement segments.
+Actual yields preserve arbitrary layout lists. The Derives theorem identifies
+the complete actual token stream and supports unconditional tree/segment
+uniqueness inside this inhabited fragment, without an expression-uniqueness or
+assumed-successful-parser premise.
+
+The existing universal syntax brace-balance theorem supplies balanced list
+contents. Combining balanced block splitting with list segmentation recovers
+intrinsic block contents, each statement's tokens and arbitrary token suffixes.
+This is actual printer/token decomposition, not a new block parser completeness
+or fuel theorem. Remaining parser-fuel obligations stay open; no existing
+coverage statement, premise, exclusion, interface or proof budget changed.
+
+ConditionalListControls covers both relation constructors and an arbitrary
+Nat-width family of consecutive open ifs in every intrinsic context, with all
+layout lists. It checks actual list and block yields, Derives uniqueness and
+block-prefix suffix recovery, plus a next-if frame control. Negative controls
+reject an else-only token list and an empty statement segment. No new external
+solc fixture is asserted; V's unchanged pinned45+6 external cases remain
+separate evidence, not universal kernel proofs or source-validity results.
+
+All eleven public source theorems and both constructors have exact signature
+and axiom audits; controls audit all nine theorems. Initial diagnostics are
+retained: run-1793894577422334155 (fixed-index induction alternative binders)
+and run-1793894617555948939 (stmtItem printer is an identity). Both were repaired
+without changing statements or budgets; failed checks stopped the same runtime
+and are not counted as passes. Final source diagnostics:
+run-1793894745172102998; controls: run-1793894793720235572.
+
+Separate read-only finder and skeptic source reviews passed without findings;
+neither used Lean, servers, builds, solc or writes. Final acceptance also needs
+committed-head gate/evidence review. Results and immutable commands, exits,
+timing/RSS, hashes, final reviews, H41 receipt and sealed handoff are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-w-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-w-locations.json`.
+Cache delivery remains coordinator-pending after local verification. Never run
+ship-cache.sh here. Shared generated roots/maps/trust registries are untouched.
+
+The original G11 goal remains partial: general compound/item framing and
+association/uniqueness beyond this fragment, remaining true structural-fuel
+parser coverage, full repository final gates and whole-scope acceptance/reviews
+remain open. SG-CEX-01/02 remain OPEN/REFUTED and SOL-EU remains excluded.
+This checkpoint neither resets nor completes the existing persistent objective.

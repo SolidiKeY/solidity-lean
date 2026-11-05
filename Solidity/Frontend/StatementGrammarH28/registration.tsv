@@ -87,3 +87,4 @@ Solidity.Frontend.StatementGrammarH28.LoopCoverage	Syntax-derived arbitrary-dept
 Solidity.Frontend.StatementGrammarH28.ConditionalPrefix	Exact Boolean if parser prefix and immutable closed-then contract equivalence
 Solidity.Frontend.StatementGrammarH28.ConditionalCoverage	Recursive Boolean conditional and loop structural fuel with exact open-if suffix framing
 Solidity.Frontend.StatementGrammarH28.ConditionalYield	Actual Boolean fragment yields, nearest else and framed prefix tree/suffix uniqueness
+Solidity.Frontend.StatementGrammarH28.ConditionalList	Arbitrary-width intrinsic Boolean item list tree/segment uniqueness and balanced block prefix splitting
