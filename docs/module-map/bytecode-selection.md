@@ -56,3 +56,5 @@
 | `Backend/Selection/StackSelection.lean` | Native stack-family selection and physical frame capacity. |
 | `Backend/AbiEntry/HeadCheck.lean` | Actual short-head predicate in the existing numeric bytecode slice. |
 | `Backend/AbiEntry/HeadCheckInterface.lean` | Ordinary indexed ABI entry's initial selector-inclusive head predicate. |
+| `Backend/Selection/FramedLowering.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/MixedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
