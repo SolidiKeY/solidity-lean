@@ -563,6 +563,111 @@
     "kind": "bounded gate"
   },
   {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/corpus-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-corpus-check.sh"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 1.914737357001286,
+    "sampledContainerProcessRssPeakBytes": 766926848,
+    "minimumOuterHeadroomBytes": 9142382592,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/corpus-retry-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-corpus-check.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "childStarted": null,
+    "wallSeconds": 232.41628593499627,
+    "sampledContainerProcessRssPeakBytes": 4872499200,
+    "minimumOuterHeadroomBytes": 4281106432,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/corpus-retry2-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-corpus-check.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "childStarted": null,
+    "wallSeconds": 147.48369757499313,
+    "sampledContainerProcessRssPeakBytes": 5110251520,
+    "minimumOuterHeadroomBytes": 4294193152,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/full-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-full-gates.sh"
+    ],
+    "status": "fail",
+    "exitCode": -9,
+    "resourceStop": true,
+    "childStarted": null,
+    "wallSeconds": 872.7657055689997,
+    "sampledContainerProcessRssPeakBytes": 4937404416,
+    "minimumOuterHeadroomBytes": 4293648384,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/mcp-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-mcp-checks.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 12.597090556002513,
+    "sampledContainerProcessRssPeakBytes": 1864925184,
+    "minimumOuterHeadroomBytes": 7403495424,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/policy-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-policy-checks.sh"
+    ],
+    "status": "fail",
+    "exitCode": 1,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 33.52449242700095,
+    "sampledContainerProcessRssPeakBytes": 707629056,
+    "minimumOuterHeadroomBytes": 9289441280,
+    "kind": "bounded gate"
+  },
+  {
+    "receipt": "docs/benchmarks/directruntime-2026-11-04/h40/testsuite-retry-gate.json",
+    "command": [
+      "bash",
+      "tests/directruntime-20261104/native-browser/h40-testsuite-check.sh"
+    ],
+    "status": "pass",
+    "exitCode": 0,
+    "resourceStop": false,
+    "childStarted": null,
+    "wallSeconds": 0.2032168890000321,
+    "sampledContainerProcessRssPeakBytes": 79454208,
+    "minimumOuterHeadroomBytes": 9264439296,
+    "kind": "bounded gate"
+  },
+  {
     "receipt": "docs/benchmarks/directruntime-2026-11-04/hardening/browser-build-gate.json",
     "command": [
       "bash",

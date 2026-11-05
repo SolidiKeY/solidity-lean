@@ -57,5 +57,10 @@
     "finder": "Verified serial target shim/config, empty committed+working/untracked worker Lean inventory, passing controls; found committed-only inventory coverage gap, corrected and supplementary gate passed. No new final finding.",
     "skeptic": "Verified VM gate scope and failed cache transport; local1673-artifact/559-mapping validation is not remote shipment. Three skipped traces preserved; checkpoints remain partial. No new final finding.",
     "method": "Independent read-only, no Lean server/build rerun by reviewers; main worker ran all recorded gates and pack verification."
+  },
+  "h40": {
+    "finder": "Reviewed private serial wrappers and actual bounded receipts. No new finding. Decisions assign owners, not completed repairs/transport; required controls/final gates remain outstanding.",
+    "skeptic": "Reviewed live container/PID evidence: no elan/Nix bypass, actual flock and explicit -j1. Confirmed MCP/policy/TestSuite passes separate from full/corpus resource stops; no budgets/source changes or completion claim.",
+    "method": "Independent read-only, no Lean server or builds."
   }
 }

@@ -8,7 +8,10 @@
         "Solidity/Tools/DirectRuntime.lean"
       ],
       "evidence": "before/browser-stack-handoff.json",
-      "request": "Owner supplies a committed, proof-preserving stack-safe resolution without changing budgets, excluding the control, or loading Lean on ordinary requests."
+      "request": "Owner supplies a committed, proof-preserving stack-safe resolution without changing budgets, excluding the control, or loading Lean on ordinary requests.",
+      "owner": "lane A",
+      "status": "awaiting committed repair",
+      "decision": "H40"
     },
     {
       "paths": [
@@ -30,54 +33,17 @@
         "scripts/coord-tools/ship-cache.sh"
       ],
       "evidence": "h35/cache-shipment-receipt.json",
-      "request": "Complete actual H35 cache transport with configured coordinator routing or coordinator retrieval and receipt. No shipped checkpoint completion claimed."
+      "request": "Complete actual H35 cache transport with configured coordinator routing or coordinator retrieval and receipt. No shipped checkpoint completion claimed.",
+      "owner": "coordinator",
+      "status": "coordinator-pending",
+      "decision": "H40"
     }
   ],
-  "questions": [
-    {
-      "id": "Q-PRODUCERS",
-      "sources": [
-        "queue 2-3",
-        "committed-output-only boundary"
-      ],
-      "question": "How should this VM retrieve A committed runtime migration and B/C controls, now that shared APIs are published but DirectRuntime remains unchanged?",
-      "options": [
-        "Supply committed SHAs with retrievable artifacts",
-        "Keep integration pending until coordinator handoff"
-      ]
-    },
-    {
-      "id": "Q-BROWSER-STACK",
-      "sources": [
-        "queue 3",
-        "before/browser-stack-handoff.json",
-        "immutable ownership"
-      ],
-      "question": "Which owner resolves the exact default-browser LFml.fitsM stack-overflow control without changing proof budgets or excluding the control?",
-      "options": [
-        "Runtime/translator owner supplies a committed fix; D integrates and retests",
-        "D fixes only owned compiler/bridge paths if evidence establishes that cause",
-        "Keep this gate blocked pending owner handoff while independent work continues"
-      ]
-    },
-    {
-      "id": "Q-H35-CACHE",
-      "sources": [
-        "H35",
-        "scripts/coord-tools/ship-cache.sh",
-        "h35/cache-shipment-receipt.json"
-      ],
-      "question": "How should H35 cache shipment be completed when the worker VM lacks coordinator poll-state/catalog/VMEXEC routing but has a verified prepared pack?",
-      "options": [
-        "Provide worker-accessible coordinator routing and VMEXEC: rerun the shipping script",
-        "Coordinator retrieves and verifies the prepared pack: return a real cache receipt"
-      ]
-    }
-  ],
+  "questions": [],
   "pendingOwnedWork": [
     "After A migration source-to-result native/browser matched performance and final gate suite",
     "Exact B Identity positive diamond twin and controls, C controls, both modalities",
-    "Successful DirectRuntime MCP/final policy gates",
+    "Final full-policy gates; DirectRuntime MCP now passed independently",
     "Further boundary audits required after producer changes"
   ],
   "completedOwnedWork": [
@@ -87,6 +53,61 @@
     "Ordinary WASM builder rejects DIRECT_RUNTIME_FULL=1",
     "WASM extraction isolated serially; successful fresh200-module build, exact baseline WASM",
     "Fresh native249+14, browser249+13/14, audit and repeated sort evidence",
-    "Complete empty-native-output200-object compile/link288.991666s, then249fresh requests+14controls; Lean dependencies warm, exact binary matches audited candidate."
+    "Complete empty-native-output200-object compile/link288.991666s, then249fresh requests+14controls; Lean dependencies warm, exact binary matches audited candidate.",
+    "H40 independent per-file MCP: KeySort and DirectRuntime zero errors, unchanged12GiB/no-swap/4GiB reserve"
+  ],
+  "resolvedQuestions": [
+    {
+      "question": {
+        "id": "Q-BROWSER-STACK",
+        "sources": [
+          "queue 3",
+          "before/browser-stack-handoff.json",
+          "immutable ownership"
+        ],
+        "question": "Which owner resolves the exact default-browser LFml.fitsM stack-overflow control without changing proof budgets or excluding the control?",
+        "options": [
+          "Runtime/translator owner supplies a committed fix; D integrates and retests",
+          "D fixes only owned compiler/bridge paths if evidence establishes that cause",
+          "Keep this gate blocked pending owner handoff while independent work continues"
+        ]
+      },
+      "decision": "H40",
+      "resolution": "Lane A repair with unchanged budgets"
+    },
+    {
+      "question": {
+        "id": "Q-H35-CACHE",
+        "sources": [
+          "H35",
+          "scripts/coord-tools/ship-cache.sh",
+          "h35/cache-shipment-receipt.json"
+        ],
+        "question": "How should H35 cache shipment be completed when the worker VM lacks coordinator poll-state/catalog/VMEXEC routing but has a verified prepared pack?",
+        "options": [
+          "Provide worker-accessible coordinator routing and VMEXEC: rerun the shipping script",
+          "Coordinator retrieves and verifies the prepared pack: return a real cache receipt"
+        ]
+      },
+      "decision": "H40",
+      "resolution": "Cache delivery coordinator-pending"
+    }
+  ],
+  "deferredQuestions": [
+    {
+      "question": {
+        "id": "Q-PRODUCERS",
+        "sources": [
+          "queue 2-3",
+          "committed-output-only boundary"
+        ],
+        "question": "How should this VM retrieve A committed runtime migration and B/C controls, now that shared APIs are published but DirectRuntime remains unchanged?",
+        "options": [
+          "Supply committed SHAs with retrievable artifacts",
+          "Keep integration pending until coordinator handoff"
+        ]
+      },
+      "reason": "Standing producer-delivery dependency; H40 instructs waiting for A repair. No new user decision requested this turn."
+    }
   ]
 }

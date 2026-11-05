@@ -1,0 +1,18 @@
+{
+  "remote": "1d14f57a3a048bb1c1969c4c2c958d010ab84cb5",
+  "comparedDelivery": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "paths": [
+    "Solidity/Calculus/ReadBounds.lean",
+    "Solidity/Tools/DirectRuntime.lean",
+    "Solidity/Frontend/ExecutableAst"
+  ],
+  "changed": [],
+  "runtimeRepairPublishedInComparedPaths": false,
+  "merged": false,
+  "boundary": "No changed runtime/read-bounds/shared translator paths in fresh published master. Unrelated updates not integrated; await A repair delivery.",
+  "lastRecheck": {
+    "remote": "1e367905c938186aac1680f25d1059721ddce333",
+    "changed": [],
+    "merged": false
+  }
+}

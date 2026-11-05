@@ -212,3 +212,46 @@ earlier completed implementation/build labels do not establish merge readiness.
 Q-H35-CACHE asks for either worker-accessible routing to rerun the script, or
 coordinator retrieval/verification and a real cache receipt. All previous
 producer, Identity, browser-stack and final-gate obligations remain unchanged.
+
+## H40: assigned repair and coordinator-pending cache
+
+The user's 2026-11-05 H40 decision assigns the browser traversal repair to
+runtime owner lane A. Budgets remain unchanged. This lane waits for the
+committed repair, then rebuilds and retests both backends; no bridge workaround,
+stack-size override, exclusion or catch-to-pass is authorized. Q-BROWSER-STACK
+is resolved as an ownership decision, not as a repaired backend.
+
+H35 delivery is now **coordinator-pending**. The verified prepared pack and its
+historical failed worker transport receipt remain intact. No remote cache
+receipt has arrived and delivery is not marked successful. Q-H35-CACHE is closed
+by that assignment; no additional routing decision is requested from the user.
+
+An independent per-file Lean MCP retry now passed: KeySort and DirectRuntime
+both reported zero errors. The same12GiB/no-swap scope and4GiB reserve remained
+active. The full policy attempt subsequently stopped at the unchanged reserve
+before run-lean completed (872.77s, sampled process RSS4.94GB). This is a failed
+resource gate, not a source theorem failure or a full PASS. Earlier failures
+remain preserved. Separate independent policy controls are recorded when run.
+
+First fresh origin/master was `1d14f57a3a048bb1c1969c4c2c958d010ab84cb5`;
+a final recheck reached `1e367905c938186aac1680f25d1059721ddce333`.
+ReadBounds, DirectRuntime and Shared have no changes from the delivered89373e34.
+No runtime repair was present there to retest. Unrelated remote changes were not
+merged. Evidence: h40/decision.json, remote-audit.json and cache-delivery.json.
+All original Identity/producer/backend and final acceptance obligations persist.
+
+H40 follow-through: independent trust/orphan/layer/root/doc-path/axiom-pin,
+strict-automatic and frozen sort checks passed. TestSuite parity passed using
+the existing tracked `tests/migration/solkey.pin.json` snapshot after the external
+setup path lacked its adjacent pin. No pin or source observation was changed.
+The corpus probe completed with the existing supported/unsupported mix, but its
+build hit the unchanged resource guard on both bounded attempts. Releasing only
+measured clean pages of the prepared private pack and public Node toolchain
+increased headroom; it did not establish a full/corpus PASS. All setup/resource
+failures remain in h40/ receipts and logs. No further retry or budget waiver is
+claimed. Worker Lean/theorem changes remain empty; this is validation/backfill.
+
+H40 resolves the two ownership/routing questions. The remaining producer-delivery
+question is retained as deferred history while waiting; there is no new scope
+question this turn. The required browser control, exact Identity twin and B/C
+controls remain unaccepted, and all post-repair gates must be rerun as applicable.
