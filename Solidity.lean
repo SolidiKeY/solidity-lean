@@ -2289,6 +2289,7 @@ import Solidity.Frontend.LiteralGrammarH28.Hex
 import Solidity.Frontend.LiteralGrammarH28.HexControls
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
 import Solidity.Frontend.LiteralGrammarH28.HexPins
+import Solidity.Frontend.LiteralGrammarH28.Lengths
 import Solidity.Frontend.LiteralGrammarH28.ModeGrammar
 import Solidity.Frontend.LiteralGrammarH28.ProofSafety
 import Solidity.Frontend.LiteralGrammarH28.Quoted
@@ -2296,6 +2297,7 @@ import Solidity.Frontend.LiteralGrammarH28.Roundtrips
 import Solidity.Frontend.LiteralGrammarH28.Scanner
 import Solidity.Frontend.LiteralGrammarH28.Split
 import Solidity.Frontend.LiteralGrammarH28.TaggedEncoding
+import Solidity.Frontend.LiteralGrammarH28.Utf8Shape
 import Solidity.Frontend.LiteralGrammarH28.WordTable
 import Solidity.Frontend.NumericLiteralProofs.Audit
 import Solidity.Frontend.NumericLiteralProofs.Backfill
