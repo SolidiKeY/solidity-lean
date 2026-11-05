@@ -143,3 +143,7 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/ExecutableAst/Shared/Scope.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExecutableAst/ControlTuple/IntrinsicControls.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
 | `SolcValidation/Dialect.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/NormalizationControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureHiding.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/SignatureNormalization.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/QualifiedUnits/TypePaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
