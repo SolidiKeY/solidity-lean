@@ -10,5 +10,6 @@
 | `Roadmap/V16/SSCP2/NewAllocation.lean` | Actual dynamic-new data validity and MemOK preservation, with a closed local-length consumer. |
 | `Roadmap/V16/SSCP2/NewAllocationControls.lean` | Live caller references, both pipelines, exact allocation-size/timeout/refusal phases and wrong-reference controls. |
 | `Roadmap/V16/SourceTransactionConsumer.lean` | Bounded actual Source transaction pairs, exact states, rollback and Hoare consumer; no compiler/session closure |
-| `Roadmap/V16/NativeParentConsumer.lean` | Actual P1 native-return and mutation-entry specification transports, complete frame observations and phase/failure controls; no full compiler/physical closure. |
-| `Solidity/Roadmap/V16/CreationReturnConsumer.lean` | Actual constructor-copy outcome and complete returned-byte postconditions with populated negative controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwise.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/CreationReturnConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
