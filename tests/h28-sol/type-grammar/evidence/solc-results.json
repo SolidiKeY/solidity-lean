@@ -38,7 +38,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 718.47176,
+      "elapsed_ms": 713.0366200000001,
       "node_count": 10581,
       "node_kinds": {
         "SourceUnit": 1,
@@ -59,7 +59,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 1042.25633,
+      "elapsed_ms": 950.6484929999999,
       "node_count": 21147,
       "node_kinds": {
         "SourceUnit": 1,
@@ -81,7 +81,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 2.9545200000002296,
+      "elapsed_ms": 2.6861549999998715,
       "node_count": 12,
       "node_kinds": {
         "SourceUnit": 1,
@@ -103,7 +103,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 15.991161999999804,
+      "elapsed_ms": 16.827555000000302,
       "node_count": 295,
       "node_kinds": {
         "SourceUnit": 1,
@@ -133,7 +133,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 894.8922120000002,
+      "elapsed_ms": 874.1178520000003,
       "node_count": 19587,
       "node_kinds": {
         "SourceUnit": 1,
@@ -156,7 +156,7 @@
       "accepted": true,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 8.284566000000268,
+      "elapsed_ms": 8.058843000000252,
       "node_count": 122,
       "node_kinds": {
         "SourceUnit": 1,
@@ -187,7 +187,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 3.506170000000111,
+      "elapsed_ms": 3.447801000000254,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -213,7 +213,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.45100900000034017,
+      "elapsed_ms": 0.5105779999998958,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -239,7 +239,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.41585600000007616,
+      "elapsed_ms": 0.7317210000001069,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -265,7 +265,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.36484999999993306,
+      "elapsed_ms": 0.53659800000014,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -291,7 +291,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3272229999997762,
+      "elapsed_ms": 0.438720000000103,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -317,7 +317,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3565969999999652,
+      "elapsed_ms": 0.4315000000001419,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -343,7 +343,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.35401299999966795,
+      "elapsed_ms": 0.494314999999915,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -369,7 +369,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.35732800000005227,
+      "elapsed_ms": 0.4642089999997552,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -395,7 +395,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.5420760000001792,
+      "elapsed_ms": 0.48509999999987485,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -421,7 +421,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3414339999999356,
+      "elapsed_ms": 0.44760400000041045,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -447,7 +447,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.37403299999959927,
+      "elapsed_ms": 0.49431400000003123,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -473,7 +473,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3989699999997356,
+      "elapsed_ms": 0.42370800000026065,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -499,7 +499,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3534620000000359,
+      "elapsed_ms": 0.45140900000023976,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -525,7 +525,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.41481500000008964,
+      "elapsed_ms": 0.5274440000002869,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -551,7 +551,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.6366880000000492,
+      "elapsed_ms": 0.7127129999998942,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -577,7 +577,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.40936699999974735,
+      "elapsed_ms": 0.5746549999998933,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -603,7 +603,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.32824399999981324,
+      "elapsed_ms": 0.43557600000031016,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -629,7 +629,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.37054799999987154,
+      "elapsed_ms": 0.5426269999998112,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -655,7 +655,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.36540000000013606,
+      "elapsed_ms": 0.6317010000002483,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -681,7 +681,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.2991199999996752,
+      "elapsed_ms": 0.41287199999987934,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -707,7 +707,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.3328910000000178,
+      "elapsed_ms": 0.42532100000016726,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -733,7 +733,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.32685300000002826,
+      "elapsed_ms": 0.45353300000033414,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
@@ -759,7 +759,7 @@
       "accepted": false,
       "passed": true,
       "phaseCorrect": true,
-      "elapsed_ms": 0.30382700000018303,
+      "elapsed_ms": 0.44761400000015783,
       "node_count": 0,
       "node_kinds": {},
       "errors": [
