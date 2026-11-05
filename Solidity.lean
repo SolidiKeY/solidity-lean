@@ -2302,6 +2302,7 @@ import Solidity.Semantics.AbiEntry
 import Solidity.Semantics.AbiEntryChecks
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.AllocBytes
+import Solidity.Semantics.CallResume
 import Solidity.Semantics.Callback
 import Solidity.Semantics.CallbackCapture
 import Solidity.Semantics.CallbackFrame
