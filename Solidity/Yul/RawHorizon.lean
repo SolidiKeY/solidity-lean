@@ -37,4 +37,31 @@ theorem firstDone_none_iff_word : ∀ (ctx : Solidity.Source.Ctx) (control : Sol
   · intro all fuel
     exact (run_none_iff ctx control code policy fuel state).mpr (all fuel)
 
+/-- Finite failed selection is exactly timeout at that bound, not unbounded divergence. -/
+theorem firstDone_none_iff_bound : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx) (bound : Nat),
+ Solidity.Source.firstDone (fun fuel => Solidity.Yul.Closed.sourceResult (Solidity.Yul.RawFrame.run code policy fuel state)) bound = none ↔
+ Solidity.Yul.RawFrame.run code policy bound state = none := by
+  intro ctx control code policy state bound
+  constructor
+  · intro absent
+    simp only [Solidity.Source.firstDone, List.findSome?_eq_none_iff, List.mem_range] at absent
+    have atBound := absent bound (Nat.lt_succ_self bound)
+    cases actual : run code policy bound state with
+    | none => rfl
+    | some result =>
+      rw [actual] at atBound
+      cases atBound
+  · intro exhausted
+    simp only [Solidity.Source.firstDone, List.findSome?_eq_none_iff, List.mem_range]
+    intro fuel within
+    cases actual : run code policy fuel state with
+    | none => rfl
+    | some result =>
+      have completed := run_stable ctx control code policy state fuel bound
+        (Nat.le_of_lt_succ within) result actual
+      rw [exhausted] at completed
+      cases completed
+
 end Solidity.Yul.RawFrame

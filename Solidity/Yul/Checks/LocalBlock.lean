@@ -191,4 +191,15 @@ def selectedSnapshot (bound : Nat) : Option (List Nat) :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.firstDone_none_iff_word
 
+
+/- Finite selector failure agrees with actual execution at the existing horizons. -/
+#guard ([0,1,2,4,8,16,32,64] : List Nat).all (fun fuel =>
+  (selectedRaw fuel).isNone == (rawRun fuel).isNone)
+#guard (selectedRaw 1).isNone
+#guard (rawRun 1).isNone
+#guard (selectedRaw 32).map Prod.fst = (selectedRaw 64).map Prod.fst
+/-- info: 'Solidity.Yul.RawFrame.firstDone_none_iff_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_none_iff_bound
+
 end Solidity.Yul.Checks.LocalBlock
