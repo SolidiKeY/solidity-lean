@@ -174,4 +174,36 @@ theorem step_sar : ∀ (machine : Solidity.Evm.Machine) (count value : Solidity.
     { machine with stack := .val (Solidity.Evm.sarWord count value) :: tail } 0 = _
   rw [eval_sar]
 
+/-- SAR faults exactly when the stack lacks two leading value words. Arbitrary
+remaining words, including slots, do not affect acceptance. -/
+theorem step_sar_fault_iff : ∀ (machine : Solidity.Evm.Machine),
+ Solidity.Evm.Instr.step .sar machine = .fault ↔
+ ¬ ∃ (count value : Solidity.Yul.Word) (tail : List Solidity.Evm.Word),
+ machine.stack = .val count :: .val value :: tail := by
+  intro machine
+  cases h : machine.stack with
+  | nil =>
+    simp only [Solidity.Evm.Instr.step, h, List.nil_eq, reduceCtorEq, exists_const,
+      not_false_eq_true]
+  | cons first rest =>
+    cases first with
+    | slot slot =>
+      simp only [Solidity.Evm.Instr.step, h, List.cons.injEq, reduceCtorEq, false_and,
+        exists_const, not_false_eq_true]
+    | val count =>
+      cases rest with
+      | nil =>
+        simp only [Solidity.Evm.Instr.step, h, List.cons.injEq, Solidity.Evm.Word.val.injEq,
+          List.nil_eq, reduceCtorEq, and_false, exists_const, not_false_eq_true]
+      | cons second tail =>
+        cases second with
+        | val value =>
+          simp only [Solidity.Evm.Instr.step, h, Solidity.Evm.Machine.next,
+            reduceCtorEq, List.cons.injEq, Solidity.Evm.Word.val.injEq, exists_and_left,
+            exists_eq', and_true, not_true_eq_false]
+        | slot slot =>
+          simp only [Solidity.Evm.Instr.step, h, List.cons.injEq,
+            Solidity.Evm.Word.val.injEq, reduceCtorEq, false_and, and_false, exists_const,
+            not_false_eq_true]
+
 end Solidity.Yul.EvmBitwise

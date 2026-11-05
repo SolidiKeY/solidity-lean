@@ -151,4 +151,8 @@ theorem sar_negative : Solidity.Evm.Instr.step .sar { Solidity.Yul.Checks.EvmAri
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.EvmBitwise.sar_negative
 
+/-- info: 'Solidity.Yul.EvmBitwise.step_sar_fault_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.EvmBitwise.step_sar_fault_iff
+
 end Solidity.Yul.Checks.EvmBitwise
