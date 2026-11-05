@@ -469,6 +469,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Scoped proofs and retained obligations for LiteralFailureOverflowReasonControls. |
 | `Backend/FailurePaths/LocalGuardSelection.lean` | Executable selection from actual indexed Source statements for a bare require of a Boolean local. |
 | `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Both pipelines consume the executable selector correctness theorem with inhabited memory and saved77. |
+| `Lowering/V08/LiteralFailureReasonSequence.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
