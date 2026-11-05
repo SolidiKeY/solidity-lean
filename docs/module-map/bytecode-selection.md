@@ -63,3 +63,13 @@
 | `Backend/AbiEntry/LengthCheckInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/IRBranchPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/IRLoopPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+
+
+## V15 selected stack consumers
+
+| Module | Role |
+|---|---|
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean` | Published one-based IR DUP/SWAP and POP certificates composed with charged fetched execution and separate complete frames. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean` | Every-depth DUP/SWAP and arbitrary-tail POP clients, populated whole-State expectations, ordered observations and index/resource negatives. |
+
+
