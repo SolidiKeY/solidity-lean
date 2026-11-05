@@ -21,11 +21,15 @@ Controls:
   the claim fails under `.reachable dirtyM` (`dirty_refutes`);
 * the mode is not vacuous: the deployment and a committed `add()` are
   reachable worlds with entry states (`entry_after_add`).
+
+`Counter` shows the persistent-invariant route: `x <= 10` proved once, a
+constructor box and one box per entry, gives `x != 11` under `.reachable`
+(`never11`), false under `.any` (`never11_not_any`).
 -/
 
-namespace Solidity.Reachable.Witness
+namespace Solidity.Examples.Tactics.Reachable
 
-open Solidity.Lifetime
+open Solidity.Lifetime Solidity.Reachable
 open scoped Scoped
 
 /-- `contract Bag { Token[] tokens; … }`. -/
@@ -112,10 +116,18 @@ def tx1 : TTx := { msgSender := PrimTy.ofLit .uint 1 rfl }
 /-- The world after deployment. -/
 def s0 : World Bag := World.ofState (State.deploy Bag tx0)
 
-theorem s0_init {D : Type} (M : System Bag Unit D) (hM : M.deploy () = .nil) : M.Init s0 :=
-  ⟨(), tx0, State.deploy Bag tx0, trivial, by rw [hM]; rfl, rfl⟩
+theorem s0_init {D : Type} (M : System Bag Unit D) (hA : M.allowDeploy () tx0)
+    (hM : M.deploy () = .nil) : M.Init s0 :=
+  ⟨(), tx0, State.deploy Bag tx0, hA, by rw [hM]; rfl, rfl⟩
 
-theorem s0_accepts : s0.accepts tx1 := by decide
+/-- `tx1` is accepted by a world at address `0` and time `0`. -/
+theorem accepts_tx1 {C : Contract} {s : World C} (ha : s.address = PrimTy.dflt .uint)
+    (ht : s.timestamp = PrimTy.dflt .uint) : s.accepts tx1 := by
+  refine ⟨ha.symm ▸ rfl, ?_, ?_⟩
+  · rw [ht]; exact Int.le_refl _
+  · rw [ha]; decide
+
+theorem s0_accepts : s0.accepts tx1 := accepts_tx1 rfl rfl
 
 /-- The world `dirty()` leaves: `dangling`, nothing else changed. -/
 def s1 : World Bag := { s0 with storage := dangling }
@@ -142,8 +154,8 @@ theorem dirty_run : dirtyM.run s0 none tx1 = .ok s1 :=
 def σ1 : State Bag [] := { s1.observe with tx := tx1 }
 
 theorem s1_entry : EntryState dirtyM σ1 :=
-  ⟨s1, tx1, .step (.init (s0_init dirtyM rfl)) (.commit s0_accepts trivial dirty_run),
-    by decide, World.enter_zero s1 tx1 rfl⟩
+  ⟨s1, tx1, .step (.init (s0_init dirtyM trivial rfl)) (.commit s0_accepts trivial dirty_run),
+    accepts_tx1 rfl rfl, World.enter_zero s1 tx1 rfl⟩
 
 /-- **The interface matters**: with `dirty()` admitted, the claim fails at a
 reachable entry state. -/
@@ -162,8 +174,8 @@ theorem add_run : safeM.run s0 .add tx1 = .ok s2 :=
 
 /-- **Not vacuous**: a transaction starts after a committed `add()`. -/
 theorem entry_after_add : EntryState safeM { s2.observe with tx := tx1 } :=
-  ⟨s2, tx1, .step (.init (s0_init safeM rfl)) (.commit s0_accepts trivial add_run),
-    by decide, World.enter_zero s2 tx1 rfl⟩
+  ⟨s2, tx1, .step (.init (s0_init safeM trivial rfl)) (.commit s0_accepts trivial add_run),
+    accepts_tx1 rfl rfl, World.enter_zero s2 tx1 rfl⟩
 
 /-- So the claim holds there. -/
 example : holds { s2.observe with tx := tx1 } pushRead := pushRead_reachable _ entry_after_add
@@ -179,9 +191,94 @@ An invariant under a caller model owes the absence of violations. -/
 theorem violating_refutes :
     ¬ ValidStartE (fun _ _ r => r = .violated) safeM pushRead := by
   intro h
-  refine Modality.afterRunTR_not_panic (h σ1 ⟨s1, tx1, ?_, by decide,
+  refine Modality.afterRunTR_not_panic (h σ1 ⟨s1, tx1, ?_, accepts_tx1 rfl rfl,
     World.enter_zero s1 tx1 rfl⟩) (by decide +kernel)
-  exact .step (.init (s0_init safeM rfl))
+  exact .step (.init (s0_init safeM trivial rfl))
     (.commit (a := .add) s0_accepts trivial (.violated rfl (World.enter_zero s0 tx1 rfl) rfl _))
 
-end Solidity.Reachable.Witness
+end Solidity.Examples.Tactics.Reachable
+
+namespace Solidity.Examples.Tactics.Reachable.Counter
+
+open Solidity.Lifetime Solidity.Reachable
+open scoped Scoped
+
+/-! ## A persistent invariant, by one box per entry
+
+`contract Counter { uint x; constructor() { x = 0; } function inc() { require(x < 10); x = x + 1; } function zero() { x = 0; } }`:
+`x <= 10` is proved once over the entry points (`PersistentFml.invariant`),
+and `x != 11` follows under `.reachable` (`ValidStart.of_persistent`). -/
+
+/-- The counter. -/
+def Counter : Contract := contract!{
+  uint x;
+  constructor() { x = 0; }
+  function inc() public { require(x < 10); x = x + 1; }
+  function zero() public { x = 0; }
+}
+
+/-- `inc()` or `zero()`. -/
+inductive Act where
+  | inc | zero
+
+/-- The interface: `constructor();`, then `inc();` or `zero();`. -/
+def counterM : System Counter Unit Act where
+  deploy := fun _ => sol[Counter]{ constructor(); }
+  call
+    | .inc => sol[Counter]{ inc(); }
+    | .zero => sol[Counter]{ zero(); }
+
+/-- `x <= 10`, a formula of the storage. -/
+def bound : PersistentFml Counter :=
+  .ofStorage dl[Counter]{ x <= 10 } rfl (fun _ => Iff.rfl)
+
+/-- `[ constructor(); ] x <= 10`. -/
+theorem bound_deploy : Fml.Valid (.modal .box (counterM.deploy ()) .nil bound.fml) := by
+  show ⊨ᶠ dl[Counter]{ [ constructor(); ] x <= 10 }
+  sol_prove
+
+/-- `x <= 10 → [ inc(); ] x <= 10` and the same for `zero();`. -/
+theorem bound_calls (a : Act) :
+    Fml.Valid (.imp bound.fml (.modal .box (counterM.call a) .nil bound.fml)) := by
+  cases a
+  · show ⊨ᶠ dl[Counter]{ x <= 10 → [ inc(); ] x <= 10 }
+    sol_prove
+  · show ⊨ᶠ dl[Counter]{ x <= 10 → [ zero(); ] x <= 10 }
+    sol_prove
+
+/-- **`x != 11` at every reachable starting state.** -/
+theorem never11 : ValidStart (.reachable counterM) dl[Counter]{ x != 11 } :=
+  .of_persistent bound (fun d _ _ => bound_deploy (State.deploy Counter _))
+    bound_calls (by show ⊨ᶠ dl[Counter]{ x <= 10 → x != 11 }; sol_prove)
+
+/-- A state with `x == 11`: no starting state of `counterM`. -/
+def at11 : State Counter [] :=
+  { State.init Counter with storage := .cons (.prim (PrimTy.ofLit .uint 11 rfl)) .nil }
+
+/-- **Control**: `x != 11` is not valid under `.any`. -/
+theorem never11_not_any :
+    ¬ ValidStart (.any : StartMode Counter Unit Act) dl[Counter]{ x != 11 } :=
+  fun h => h at11 rfl
+
+/-- So `at11` is no entry state of `counterM`. -/
+theorem at11_not_entry : ¬ EntryState counterM at11 :=
+  fun h => never11 at11 h rfl
+
+/-- The constructor commits, at address `0` and time `0`. -/
+private theorem deploy_fields :
+    (Counter.deployT (counterM.deploy ()) tx0).toOption.map
+      (fun σ => (σ.tx.selfAddress, σ.tx.timestamp)) = some (PrimTy.dflt .uint, PrimTy.dflt .uint) := by
+  decide +kernel
+
+/-- **Not vacuous**: `counterM` has an entry state. -/
+theorem counter_entry : ∃ σ, EntryState counterM σ := by
+  have hf := deploy_fields
+  cases hd : Counter.deployT (counterM.deploy ()) tx0 with
+  | error e => rw [hd] at hf; cases hf
+  | ok σ =>
+    rw [hd] at hf
+    simp only [Except.toOption, Option.map_some, Option.some.injEq, Prod.mk.injEq] at hf
+    exact ⟨_, World.ofState σ, tx1, .init ⟨(), tx0, σ, trivial, hd, rfl⟩,
+      accepts_tx1 hf.1 hf.2, World.enter_zero _ tx1 rfl⟩
+
+end Solidity.Examples.Tactics.Reachable.Counter

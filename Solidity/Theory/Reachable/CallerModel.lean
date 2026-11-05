@@ -55,7 +55,7 @@ def CallerStub.exec : CallerStub C → Exec C
   | .withCallback J => fun σ P r => ExecP J σ P r
 
 /-- Whether an entry call is refused before it runs (`System.run`'s guard). -/
-def System.refuses (M : System C D A) (a : A) (tx : TTx) : Bool :=
+def _root_.Solidity.Lifetime.System.refuses (M : System C D A) (a : A) (tx : TTx) : Bool :=
   !M.payable a && tx.msgValue.1 != 0
 
 /-- **One entry call under `E`**: refused, failing to enter, or run under
@@ -148,7 +148,7 @@ theorem runE_noCallback_iff {M : System C D A} {s : World C} {a : A} {tx : TTx}
     cases h with
     | refused g =>
       unfold System.run
-      rw [if_pos g]
+      rw [if_pos (show (!M.payable a && tx.msgValue.1 != 0) = true from g)]
     | enterFail g en =>
       unfold System.run
       rw [if_neg (by simp only [System.refuses] at g; simp only [g]; decide)]
@@ -182,7 +182,7 @@ theorem runE_noCallback_iff {M : System C D A} {s : World C} {a : A} {tx : TTx}
     cases g : M.refuses a tx with
     | true =>
       unfold System.run
-      rw [if_pos g]
+      rw [if_pos (show (!M.payable a && tx.msgValue.1 != 0) = true from g)]
       exact .refused g
     | false =>
       unfold System.run

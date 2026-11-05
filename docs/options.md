@@ -745,10 +745,12 @@ invariant (`cleanTail_invariant`; the transaction boundary's transient reset
 keeps them, `Storage.resetTransient_cleanTail`), so
 `ValidTail .clean φ → ValidStart (.reachable M) φ`
 (`ValidTail.validStart_reachable`, `Theory/Reachable/CleanTail.lean`).
-Witness and controls: `Theory/Reachable/Witness.lean` (the claim holds under
+Witness and controls: `Examples/Tactics/Reachable.lean` (the claim holds under
 `.reachable safeM`, fails under `.any` at a dirty-tail state that is no entry
 state, and fails under an interface with an entry that writes through a
-dangling alias, `dirty_refutes`).
+dangling alias, `dirty_refutes`); `Counter` there proves `x <= 10` once over
+its entries and reads `x != 11` under `.reachable` (`never11`), refuted under
+`.any` (`never11_not_any`).
 
 **Callbacks inside the sequence (O11).** `Theory/Reachable/CallerModel.lean`
 runs each entry under an execution relation `Exec C` chosen by a caller model

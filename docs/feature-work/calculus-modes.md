@@ -73,10 +73,14 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 `ValidTail.validStart_reachable`), `CallerModel.lean` (`Exec`, `RunE`,
 `StepE`, `ReachableE`, `InvariantE`, `ValidStartE`, the stub `CallerStub`,
 monotonicity, `reachableE_noCallback_iff`, `cleanTail_invariantE`,
-`ValidTail.validStartE_withCallback`), `Witness.lean` (contract `Bag`,
-witnesses and negative controls). Docs: options.md O12 (row and section,
-Lean-only), correctness.md paragraph, module-map rows in
-`docs/module-map/theories.md`. No edit to `Calculus/TailMode.lean` or
+`ValidTail.validStartE_withCallback`), and `PersistentFml.ofStorage`.
+Witnesses and negative controls are in `Solidity/Examples/Tactics/Reachable.lean`
+(contracts `Bag` and `Counter`), outside `Theory/Reachable/**`: `Theory/` is
+core, and `scripts/check-layers.mjs` refuses a core module that reaches the
+elaborator (`contract!{}`, `sol[…]{}`, `dl[…]{}`, `sol_prove`). Docs:
+options.md O12 (row and section, Lean-only), correctness.md paragraph,
+module-map rows in `docs/module-map/theories.md` and
+`docs/module-map/examples.md`. No edit to `Calculus/TailMode.lean` or
 `Calculus/CleanTailBoundary.lean` was needed.
 
 **O11 adaptation (for after VC2 lands).** `CallerStub` stands for VC2's

@@ -14,7 +14,7 @@ the validity proved (`ValidStart m φ`), never a setting; `.any` is
 
 The mode takes the contract and its interface (`Lifetime.System`): the
 starting states are those of that interface, so a claim proved under one
-interface is not one about another (`Witness.lean`'s two interfaces).
+interface is not one about another (`Examples/Tactics/Reachable.lean`'s two interfaces).
 
 A proof under `.reachable M` needs no induction of its own: the contract's
 invariant is proved once, by induction over the entry points
@@ -60,7 +60,7 @@ theorem validStart_reachable {M : System C D A} {φ : Fml C []} :
 
 /-- `.any` assumes less: what it proves holds under every interface. -/
 theorem ValidStart.reachable_of_any {M : System C D A} {φ : Fml C []}
-    (h : ValidStart .any φ) : ValidStart (.reachable M) φ :=
+    (h : ValidStart (.any : StartMode C D A) φ) : ValidStart (.reachable M) φ :=
   fun σ _ => h σ
 
 /-- **Validity under `.reachable` from a contract invariant.** `I` is the
@@ -94,6 +94,17 @@ structure PersistentFml (C : Contract) where
   reads : ∀ σ σ' : State C [],
     Storage.resetTransient σ.storage = Storage.resetTransient σ'.storage →
       holds σ fml → holds σ' fml
+
+/-- **A formula of a contract without transient cells that reads the
+storage alone**: it holds where it holds at the initial state carrying the
+same storage (for a formula over state variables this is `Iff.rfl`). -/
+def PersistentFml.ofStorage {C : Contract} (φ : Fml C []) (hT : C.transientRoots = [])
+    (h : ∀ σ : State C [], holds σ φ ↔ holds { State.init C with storage := σ.storage } φ) :
+    PersistentFml C where
+  fml := φ
+  reads σ σ' e hσ := by
+    rw [Storage.resetTransient_none _ hT, Storage.resetTransient_none _ hT] at e
+    exact (h σ').2 (e ▸ (h σ).1 hσ)
 
 /-- The formula read at a world's observation frame. -/
 def PersistentFml.At (J : PersistentFml C) (s : World C) : Prop := holds s.observe J.fml

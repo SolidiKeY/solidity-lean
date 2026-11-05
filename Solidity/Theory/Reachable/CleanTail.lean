@@ -17,7 +17,7 @@ The transaction boundary resets the transient cells to their defaults
 (`Storage.resetTransient_cleanTail`); a rollback and waiting keep the
 storage. An interface that admits an entry exposing a dangling alias
 reaches a dirty tail, and the implication fails there
-(`Theory/Reachable/Witness.lean`, `dirty_refutes`).
+(`Examples/Tactics/Reachable.lean`, `dirty_refutes`).
 -/
 
 namespace Solidity
@@ -30,7 +30,8 @@ theorem SFields.all_anon {P : Hered} {fs : List (Name × Ty)} :
     have ih := SFields.all_anon L hx hy
     unfold SFields.copyFrom
     split
-    · exact SFields.all_set _ _ ih (SFields.all_get _ _ hy)
+    · rename_i h
+      exact SFields.all_set (P := P) h ih (SFields.all_get (P := P) h hy)
     · exact ih
 
 /-- **Resetting the transient cells keeps clean tails**: a reset root reads
