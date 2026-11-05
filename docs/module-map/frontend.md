@@ -165,3 +165,10 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Kernel controls for executed collection, not an assumed owner order or supplied collection result. |
 | `Frontend/QualifiedUnits/SignatureMembers.lean` | Identity-based inherited overload collection. |
 | `Frontend/ExecutableAst/Shared/Compose.lean` | One executable callback composition for producer-owned memory and control packets. |
+| `Backend/PrimitivePackets/UnsignedCast/Boundaries.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Compiler.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Controls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Semantics.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/UnsignedCast/Transport.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Selected.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Source.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |

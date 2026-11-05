@@ -56,6 +56,8 @@
 | `Backend/Selection/StackSelection.lean` | Native stack-family selection and physical frame capacity. |
 | `Backend/AbiEntry/HeadCheck.lean` | Actual short-head predicate in the existing numeric bytecode slice. |
 | `Backend/AbiEntry/HeadCheckInterface.lean` | Ordinary indexed ABI entry's initial selector-inclusive head predicate. |
+| `Backend/Selection/FramedLowering.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/MixedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 
 
 ## V15 selected stack consumers
@@ -64,3 +66,4 @@
 |---|---|
 | `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean` | Published one-based IR DUP/SWAP certificates composed with charged fetched family execution and separate complete frames. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean` | Every-depth selected clients, populated whole-State expectations, ordered SWAP16 observations and index/resource negatives. |
+
