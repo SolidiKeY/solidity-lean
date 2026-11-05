@@ -769,6 +769,33 @@ registered by `scripts/coord-tools/register.sh`, have rows in
 axiom pins are recorded in `scripts/g07-axiom-pins.json` (additions only).
 This puts them in the default `Solidity` build.
 
+## Moved-lane handoff (Claude VM, 2026-11-05)
+
+Branch `cloud/moved2-20261105/v09-compiler-passes`: `origin/cloud/v09-move`
+(504c2d17) merged with origin/master (b86ae456), then `origin/cloud/v09-tf-move`
+(1b7b365f), then the registration, machine SAR, pins and these notes.
+Lean 4.24.0 (toolchain `leanprover/lean4:v4.24.0`), 4 cores, 15 GiB RAM.
+
+Gates (cold cache, one build at a time):
+
+- `gate.sh checkpoint` at the final source commit: build-touched, library
+  (`lake build Solidity`, 3802 jobs), trust, orphans, layers, roots and
+  axiom-pins pass; doc-paths fails with exactly the two findings below.
+- `gate.sh full`: the Lean build in `run-lean.sh` completes (4148 jobs,
+  including `SolidityExamples` and `SolkeyTestSuite`); automatic-strict passes.
+  `run-lean.sh`'s final SolKey sort check, `check-testsuite.sh` and
+  `check-corpus.sh` fail only because the VM's sibling `../solkey` is at
+  `69e251f`, not the pin `473da894`. Against a worktree at the pin, all three pass
+  (`solkeycheck: OK`, `check-testsuite: ok`, `check-corpus: ok`).
+- TF-gate: `test_cases.py` (15) and `test_targets.py` (8) pass in the merged
+  tree; `accept_repaired.py --head 1b7b365f…` passes all 33 cases at its frozen
+  head. `test_contract.py` is bound to that exact head and is not run elsewhere.
+- doc-paths: `tests/terra-20261103/gate/test_cases.py` cites the fixture names
+  `Solidity/A.lean` and `Solidity/MissingFixture.lean`. They come from the TF-gate
+  head itself, where the check also fails; master passes. Both that file and
+  `scripts/check-doc-paths.sh` are hash-frozen by the TF-gate snapshot, so this is
+  left for a decision.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
