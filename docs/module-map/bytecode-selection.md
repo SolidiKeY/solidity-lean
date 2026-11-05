@@ -37,3 +37,5 @@
 | `Backend/AbiEntry/CalldataWordInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationFreshness.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationFreshnessControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/ArithmeticSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/BitwiseSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |

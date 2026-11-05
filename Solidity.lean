@@ -703,6 +703,8 @@ import Solidity.Backend.Scalar.Values
 import Solidity.Backend.Scalar.WidthGuards
 import Solidity.Backend.Scalar.Widths
 import Solidity.Backend.Scalar.Wrapping
+import Solidity.Backend.Selection.ArithmeticSelection
+import Solidity.Backend.Selection.BitwiseSelection
 import Solidity.Backend.Selection.FrameCapacityV2
 import Solidity.Backend.Selection.FramedLoweringInterface
 import Solidity.Backend.Selection.Interface
