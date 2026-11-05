@@ -932,3 +932,35 @@ no warnings in the changed modules.
 `SingleWordGateInterface.lean` specifies sequential head/primitive validation
 for one value parameter, actual entry-rejection agreement and explicit raw
 representation/fuel boundaries. Native loading and aggregates remain separate.
+
+`SingleWordGate.lean` now selects a typed head-guard block followed by the
+existing all-kind primitive validator through the public compiler. General
+execution preserves the input word and every machine component except the
+continuation/result local, with zero pending skip. The intermediate and final
+writes to that local are identical. Short heads reject before inspecting the
+word cell. For one `.value` primitive parameter, represented raw word at byte
+4 and represented input size imply rejection iff the actual entry decoder
+returns `.revert` at fuel `fuel + 2`. The successful semantic result is a typed
+word constructed directly from the byte load and its validity proof; no decoded
+payload, desired execution or poststate is assumed. The explicit two-level
+fuel requirement is retained: full heads at fuel zero/one return `.fuel`,
+whereas short heads reject even at zero fuel.
+
+Controls execute actual selected artifacts for a nonzero arbitrary selector
+and trailing bytes, dirty bool input, a short head with malformed word memory,
+a full head with malformed word memory, insufficient decoder fuel and protected
+input/heap/storage/balance/saved stack. A direct whole-program fault reduction
+hit the existing heartbeat bound; the final proof instead composes the proved
+head execution and small unsigned condition code. No budget was raised.
+Independent read-only finder and skeptic found no semantic issues in compiler
+selection, exact state, raw value derivation or failure/fuel ordering; their
+requested final validation, scoped axiom guards and implementation description
+were completed. Scoped reports use only standard axioms.
+
+This increment covers validation and semantic typed decoding of one primitive
+value parameter. Native byte loading, argument materialization in the compiler,
+aggregate/multiple parameters, dispatch-to-body linkage, exact native failure
+bytes and whole G40 composition remain open. G46.02 general memory/calldata
+correspondence and the physical writer counterexample are unchanged. Full
+assignment final gates and fixture replay remain pending; shared doc-path and
+axiom-inventory failures from previous checkpoints remain outside this lane.

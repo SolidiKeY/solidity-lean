@@ -184,3 +184,6 @@
 | `Backend/AbiEntry/WordGateInterface.lean` | Unified actual compiler certificate for every existing ABI word kind. |
 | `Backend/AbiEntry/WordGate.lean` | Delegated all-kind validation with raw scalar rejection equivalence. |
 | `Backend/AbiEntry/WordGateControls.lean` | Unified kind acceptance/rejection, byte padding and raw value controls. |
+| `Backend/AbiEntry/SingleWordGateInterface.lean` | Composed singleton value-entry guard certificate with raw representation/fuel boundary. |
+| `Backend/AbiEntry/SingleWordGate.lean` | Actual head/word compiler composition and exact singleton raw decoder agreement. |
+| `Backend/AbiEntry/SingleWordGateControls.lean` | Raw success/rejection, trailing bytes, head ordering, fuel and protected-state controls. |
