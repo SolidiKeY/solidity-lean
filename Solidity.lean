@@ -458,6 +458,7 @@ import Solidity.Backend.MemoryOps.SourceUintFixedDelete
 import Solidity.Backend.MemoryOps.SourceUintFixedFuel
 import Solidity.Backend.MemoryOps.SourceUintFixedIncrement
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsMemory
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsWrite
 import Solidity.Backend.MemoryOps.SourceUintFixedWrite

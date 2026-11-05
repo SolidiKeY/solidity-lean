@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceUintFixedRefsWrite
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
@@ -273,5 +273,88 @@ theorem nested_mutation (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms mutation_initial
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_mutation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_mutation
+
+
+/-- A materially changed prefix followed by actual nested deletion in one
+Source Items execution; both Source object tables and typed payloads are retained. -/
+theorem nested_mutation_delete (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 ΓW),
+      hp.writeAddr (.index left .fixed (u 1)) (u 42)=some mid ∧
+      mid.writeAddr (.index left .fixed (u 1)) (PrimTy.dflt .uint)=some out ∧
+      (Source.execS (G0 pipeline) F0 (horizon+6) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wj wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wj wv))
+          (.stmt (.expr (sourceUintFixedNestedDelete wr wi wj)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ SourceUintFixedRefsAt z 2 out root address ∧
+      Source.MemOK E0 SH ym ∧ Source.MemOK E0 SH z ∧
+      MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] ∧
+      MObj.elems .fixed (out.get left)=[u 7,u 0,u (W-1)] ∧
+      MObj.elems .fixed (mid.get left)≠MObj.elems .fixed (out.get left) ∧
+      mid.get right=hp.get right ∧ out.get right=hp.get right ∧
+      [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2]=
+        [some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (mid.get left)⟩,
+         some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩,
+         some ⟨SourceUintFixedRefsTy 3,sourceUintFixedRefMemory address [left,left,right]⟩] ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2]=
+        [some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (out.get left)⟩,
+         some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩,
+         some ⟨SourceUintFixedRefsTy 3,sourceUintFixedRefMemory address [left,left,right]⟩] ∧
+      ym.1=(sw 1 1 42).1 ∧ z.1=(sw 1 1 42).1 ∧ ym.2.heap.next=3 ∧ z.2.heap.next=3 ∧
+      (∀ a,3≤a → ym.2.heap.get a=none ∧ z.2.heap.get a=none) ∧
+      ym.2.ex=(sw 1 1 42).2.ex ∧ z.2.ex=(sw 1 1 42).2.ex ∧
+      ym.2.events=(sw 1 1 42).2.events ∧ z.2.events=(sw 1 1 42).2.events ∧
+      ym.2.logs=(sw 1 1 42).2.logs ∧ z.2.logs=(sw 1 1 42).2.logs ∧
+      ym.2.fnLocals=(sw 1 1 42).2.fnLocals ∧ z.2.fnLocals=(sw 1 1 42).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,ym,tw,ew,swm,rm,mm,read42,contents,sibling,table,lm,nm,bounded,wm,em,lgm,fm⟩ := nested_mutation pipeline (horizon+1) nps
+    have parent : mid.get root=hp.get root := by
+      have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=
+          some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+        have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+        simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+      rw [Option.some.inj (tw.symm.trans canonical)]
+      exact Heap.get_set_ne hp left root (by decide) _
+    have middleIndex : mid.index root .dyn (u 1)=some left := by
+      change (MObj.elems .dyn (mid.get root))[1]?=some left
+      rw [parent];exact selectLeft
+    have sep : ∀ t∈MObj.elems .dyn (mid.get root),t.id≠left.id → address t.id≠address left.id := by
+      rw [parent];exact selectedSeparation
+    obtain ⟨out,z,td,ed,sd,rz,mz,lz,nz,pz,oz,az,wz,ez,lgz,fz⟩ :=
+      rm.resolved_delete (G0 pipeline) F0 horizon nps wr wi wj (u 1) (u 1) left
+        (by rw [lm];rfl) (by rw [lm];rfl) (by rw [lm];rfl) middleIndex sep (by decide) SH mm
+    have outEq : out=mid.set left (MObj.setElem .fixed (mid.get left) 1 (PrimTy.dflt .uint)) := by
+      have canonical : mid.writeAddr (.index left .fixed (u 1)) (PrimTy.dflt .uint)=
+          some (mid.set left (MObj.setElem .fixed (mid.get left) 1 (PrimTy.dflt .uint))) := by
+        have valid : (u 1).1.toNat<(MObj.elems .fixed (mid.get left)).length := by rw [contents];decide
+        simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+      exact Option.some.inj (td.symm.trans canonical)
+    have cleared : MObj.elems .fixed (out.get left)=[u 7,u 0,u (W-1)] := by
+      rw [outEq,Heap.get_set_same,MObj.elems_setElem,contents];rfl
+    have leftNow := rz.children left (by rw [pz,parent,parentElements];exact List.mem_cons_self)
+    change z.2.heap.get 0=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (out.get left)⟩ at leftNow
+    have rightNow := (az 1 (by decide)).trans (show ym.2.heap.get 1=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩ from (List.cons.inj table).2 |> List.cons.inj |> And.left)
+    have parentNow := rz.parent
+    rw [pz,parent,parentElements] at parentNow
+    refine ⟨mid,out,ym,z,tw,td,swm,source_items_pair_run (G0 pipeline) F0 (horizon+1) nps _ _ (sw 1 1 42) ym z swm sd,
+      rm,rz,mm,mz,contents,cleared,(by rw [contents,cleared];decide),sibling,(oz right (by decide)).trans sibling,table,?_,lm,lz.trans lm,nm,nz.trans nm,?_,
+      wm,wz.trans wm,em,ez.trans em,lgm,lgz.trans lgm,fm,fz.trans fm⟩
+    · rw [leftNow,rightNow,parentNow]
+    · intro a ha
+      exact ⟨bounded a ha,z.2.heap.bounded a (by rw [nz,nm];exact ha)⟩
+
+/-- At any actual reached state, horizon zero times out before deletion and
+retains that state; this is not a transaction rollback theorem. -/
+theorem nested_delete_zero_horizon (pipeline : Roadmap.Pipeline) (y : Source.EMState E0 ΓW) :
+    (Source.evalE (G0 pipeline) F0 0 (sourceUintFixedNestedDelete wr wi wj)).run y=(.error .timeout,y) := by
+  first | rfl | simp only [] | decide
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_mutation_delete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_mutation_delete
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_delete_zero_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_delete_zero_horizon
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
