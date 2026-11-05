@@ -1,5 +1,5 @@
 import Solidity.Yul.Compilation.NormalControl
-import Solidity.Backend.Selection.Interface
+import Solidity.Backend.Selection.InterfaceV2
 /-! Original Yul normal-control compilation to the existing StructuredExec
 relation. No replacement AST, block semantics or source state is introduced.
 This is not native/LabelExec realization, capacity or general Source/G24. -/

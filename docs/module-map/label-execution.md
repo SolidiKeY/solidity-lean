@@ -67,3 +67,5 @@
 | `Backend/PrimitivePackets/UnsignedDiv/Witness.lean` | Bounded revert-outcome-specs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/StructuredFlow/MappedBranch.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/StructuredFlow/MappedBranchControls.lean` | Bounded v17-validation-release checkpoint; typed scope and retained obligations are stated in the module. |
