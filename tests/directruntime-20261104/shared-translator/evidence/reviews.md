@@ -193,3 +193,18 @@ byte-delivered versus neweb91 locally verified/coordinator-pending;actual bounde
 resource and KeySort evidence;source bindings versus native closure. Skeptic noted
 stale future-tense cache wording;API-HANDOFF now records completed verification
 and current receipt. Neither used Lean/server or wrote files.
+
+
+## Published8bf and paired modal backfill
+
+Read-only finder/skeptic,no Lean/server/writes,found no confirmed control or
+provenance defect. Six source/compiler/AST identities and three identical body-byte
+pairs support regression intent;canonical typed/public tags are checked separately.
+Frozen MCP/per-file exit0. Three proved/three refuted are trusted model results;
+preflight checks counterexample presence,not independent validity/replay. Source/
+Lean proof/native preservation and original complex pending cases remain open.
+
+Final raw/provenance packet finder/skeptic found no material defect. Raw and
+normalized function IDs/source spans are joined;gated fixture remained byte-identical.
+Both confirmed explicit counterexample-presence-only limits,IR-selector versus CR
+migration distinction,and preservation of older pending cases/original obligations.

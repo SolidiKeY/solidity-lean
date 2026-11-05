@@ -1,7 +1,7 @@
 {
   "status": "concrete API and observation packet; producer migration pending",
-  "sourceHead": "34afa7f0ad9acc225db708ba1ec15a7f05ba7629",
-  "adoptedMaster": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "sourceHead": "b4990c26bd407131471151ab4bdec9266a753cc3",
+  "adoptedMaster": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
   "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
   "publicRoots": [
     "Shared.function executableReader",
@@ -69,5 +69,19 @@
       "unsupported": 4
     },
     "boundary": "Trusted executable model-checker observations; not Lean proof terms,source preservation,native/WASM closure or refutation of pending cases."
+  },
+  "modalityControls": {
+    "ledger": "tests/directruntime-20261104/shared-translator/modality-ledger.json",
+    "cases": 6,
+    "pairs": 3,
+    "trustedCheckerCounts": {
+      "proved": 3,
+      "refuted": 3
+    },
+    "boundary": "Source-backed paired body observations through canonical reader/public checker; finite model runs and trusted refutations are not compiler preservation or native correctness. Counterexample objects are not independently replayed by preflight."
+  },
+  "newProducerApiReview": {
+    "path": "Solidity/Frontend/SolcJson/IrImport.lean",
+    "role": "Exact JSON IR-channel selector; does not migrate existing AST import."
   }
 }

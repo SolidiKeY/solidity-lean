@@ -165,5 +165,7 @@ for case in result['composedControls']['cases']:
  row=verifier[case['name']];assert row['sourceId']==case['nodeId'] and row['tag']=='diamond'
  case['trustedExecutableVerifier']={k:row[k] for k in ['status','reason','tag','sourceId','verification','reading']}
 result['directCheckerObservations']={'path':'tests/directruntime-20261104/shared-translator/direct-result-observations.json','sha256':sha('tests/directruntime-20261104/shared-translator/direct-result-observations.json'),'controls':'tests/directruntime-20261104/shared-translator/DirectResultControls.lean','gate':'tests/directruntime-20261104/shared-translator/evidence/adoption-b86/direct-result-frozen.log','counts':{status:sum(row['status']==status for row in observed) for status in sorted({row['status'] for row in observed})},'boundary':'Actual public trusted executable checker outcomes under Lean control harness; no proof terms/declarations constructed. Pending is not refutation; proved is not Solidity preservation or native/WASM correctness.'}
+result['modalityControls']=json.loads((owned/'modality-ledger.json').read_text())
+result['modalityControls']['gate']='tests/directruntime-20261104/shared-translator/evidence/adoption-8bf/modality-frozen.log'
 (owned/'coverage-inventory.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({'counts':result['counts'],'rawConstructorCounts':{k:len(v) for k,v in raw.items()},'localSharedImportModules':len(seen),'localIntrinsicImportModules':len(intrinsicClosure),'status':result['status']},sort_keys=True))

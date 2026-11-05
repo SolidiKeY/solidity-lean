@@ -523,3 +523,34 @@ pending and requires matching dependencies/toolchain. The earlier047cfd99 pack
 is byte-delivered per coordinator receipt; that receipt does not cover this new
 pack. H41 obeyed; no ship-cache.sh invocation. Evidence and fresh source bindings
 are in adoption-b86. RUNTIME_GATE_PASS remains pending.
+
+
+## Published8bf and paired box/diamond backfill
+
+Remote-verified8bf83218 adopted cleanly inb4990c26;owned production files remain
+byte-identical to459c19a8. New SolcJson.IrImport selects an IR JSON channel,not the
+existing AST import migration. All five Shared modules remain centrally registered.
+Local344-job build,axiom inventory and Composed/DirectResult controls passed in
+31.133s,RSS1250004KiB,minimum outer available6072496128bytes. Actual toolchain
+remains Lean4.24.0/Lake5.0.0-src+797c613;no source proof/budget/trust policy changed.
+
+New ModalityControls source explicitly marks box functions and leaves diamonds
+unmarked. Three function-body byte pairs are identical. Canonical reader/obligation
+and public checker verify source identity,provenance and modal tags;separate finite
+initial-state runs check normal/revert/panic halts. Results:normal proved both;
+revert proved box/refuted diamond;panic refuted both. Three proved/three refuted
+are trusted executable-model outcomes,not exported Lean proof terms or source/
+native correctness. Counterexample objects are present for refuted results but are
+not independently replayed/validated by preflight. Older four complex failing
+diamond fixtures remain pending;the new simple cases do not discharge those gaps.
+
+Exact0.8.34binary/source/raw AST/normalized AST identities and6source IDs are saved;
+raw AST is unchanged compiler output. Fixture generator reuses the existing helper,
+with no metadata-restoration adapter/new translation. Frozen MCP0/per-file/preflight
+passed in42.053s,RSS1249292KiB,minimum available5282668544bytes. Raw-provenance
+regeneration preserved the gated normalized fixture byte-for-byte and passed in
+2.150s,RSS169496KiB. Inventory/migration packet link the complete6-case ledger.
+Both independent read-only finder/skeptic reviews found no confirmed defect and
+used no Lean/server. No full original queue item or RUNTIME_GATE_PASS is claimed.
+CR migration,DR-A-META,complete form/source parity,native/WASM closure,before/after
+runtime and final full gates remain open. H41 remains in force.

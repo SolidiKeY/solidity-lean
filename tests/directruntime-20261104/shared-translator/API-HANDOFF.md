@@ -124,3 +124,18 @@ has been separately verified and left for H41 pickup:964484bytes,SHA256
 eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519.
 Current receipt:evidence/adoption-b86/cache-receipt.json;delivery coordinator-pending.
 No ship-cache.sh invocation.
+
+
+## Published8bf and paired modal controls
+
+Published8bf adds an IR JSON-channel selector,not the pending CR AST migration.
+Owned production bytes are unchanged. Six new source-backed modal cases have
+three byte-identical source-body pairs. Canonical typed obligation construction,
+finite initial-state runs and actual public checker tags/results are checked.
+Normal is proved in both modes;revert is proved in box/refuted in diamond;
+panic is refuted in both. Refuted means the trusted checker returned a counterexample
+object;preflight checks presence but does not independently replay/validate it.
+None of these observations is a Lean proof term,Solidity preservation or native/
+WASM proof. Modality-ledger pins source,raw and normalized AST,compiler hashes,
+source IDs and tags. Existing compiler helper is reused without a new translator.
+Frozen MCP/per-file gates pass;all original producer/native obligations remain.
