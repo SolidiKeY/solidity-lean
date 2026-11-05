@@ -3343,6 +3343,9 @@ import Solidity.Signature
 import Solidity.SolcValidation.DataLayout
 import Solidity.SolcValidation.DataResolution
 import Solidity.SolcValidation.Dialect
+import Solidity.SolcValidation.IrCensus
+import Solidity.SolcValidation.IrParse
+import Solidity.SolcValidation.IrSyntax
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.QuantifiedDiamond
