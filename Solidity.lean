@@ -1964,6 +1964,8 @@ import Solidity.Lowering.StorageOps.SourceStorageCopy
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrier
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyControls
+import Solidity.Lowering.StorageOps.SourceStorageCopyEmpty
+import Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyPayload
 import Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyPrefix
