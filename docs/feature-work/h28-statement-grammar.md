@@ -2027,3 +2027,45 @@ outside this fragment, remaining true parser coverage, full repository gates
 and whole-scope acceptance/reviews remain open. SOL-EU remains excluded and
 SG-CEX-01/02 remain OPEN/REFUTED. This checkpoint neither resets nor completes
 the existing frozen persistent objective.
+
+
+## Rebase onto e6849d3b
+
+Coordinator-requested rebase adopted published
+`e6849d3bdf516099d20c33d3581d523449764018` before the next authored commit.
+The pre-rebase head was `32cb2d35df071147888d5e63a8401f7fcc648f6d`; the
+rebased source head is `e8f53d3729dcaac17f0c4e070438e3847e69233f`.
+All26 replay input commits touched only owned paths. The sole conflict was
+FixtureData: its authored checkpoint version was restored, and the later G0
+repair replayed. Final direct Git comparison and all189 owned-file hashes
+matched the pre-rebase snapshot, including the repaired observer. Seven pinned
+inputs are unchanged, published master is an ancestor, and the final delta
+from master contains only the three owned paths. No proof, premise, exclusion,
+producer interface, resource limit or heartbeat budget was changed.
+
+Old checkpoint IDs and immutable evidence remain historical records. The old
+head is retained at `refs/backup/statement-grammar/pre-e6849d3b`, with a verified
+incremental recovery bundle. Its seven prerequisite commits are all retained
+by that ref and are ancestors of the published master; the bundle is not
+standalone. Prerequisite IDs, replay/conflict records, range-diff and before/after
+source hashes are under
+`/workspace/h28-statement-grammar-evidence/rebase-e6849d3b-1793899528150148986/`.
+The exact rebase receipt is linked by
+`/workspace/h28-statement-grammar-evidence/rebase-e684-locations.json`.
+No older gate/cache receipt is relabeled as evidence for the new head.
+
+Separate read-only finder and skeptic rebase reviews passed without source
+findings. The skeptic's incremental-bundle caveat is recorded above, with
+prerequisite ancestry/retention verified. Final acceptance additionally requires
+fresh committed-head builds, axiom/control/KeySort gates, exact-evidence review
+and an H41 cache receipt. Those are linked from
+`/workspace/h28-statement-grammar-evidence/rebase-e684-validation.json` and
+`/workspace/h28-statement-grammar-evidence/rebase-e684-final-locations.json`.
+No reviewer used Lean, servers, builds, solc or writes. H41 delivery remains
+coordinator-pending after local verification; never run ship-cache.sh here.
+
+The existing frozen G11 objective remains partial and was not reset or replaced.
+General compound/item framing, broader true coverage, repository final gates
+and whole-scope acceptance/reviews remain pending. SOL-EU stays excluded and
+SG-CEX-01/02 remain OPEN/REFUTED. Shared generated roots/maps/trust inventories
+remain coordinator-owned.
