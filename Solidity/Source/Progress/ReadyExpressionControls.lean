@@ -69,7 +69,7 @@ theorem literal_refused : ¬ReadyExpr (E := E) (Γ := Γ) (fun _ => False) (.str
 #print axioms literal_refused
 end Solidity.Source.Progress.ReadyExpressionControls
 
-namespace Solidity.Source.Progress.ReadyProgramControls
+namespace Solidity.Source.Progress.ReadyExpressionControls.Program
 open EM Preservation.MemoryProgramControls
 
 def selection (flag : Bool) : RExpr E [Aty] Aty :=
@@ -136,4 +136,4 @@ theorem parameters_preserved (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) (fla
 #print axioms checked
 #print axioms preserved
 #print axioms run
-end Solidity.Source.Progress.ReadyProgramControls
+end Solidity.Source.Progress.ReadyExpressionControls.Program
