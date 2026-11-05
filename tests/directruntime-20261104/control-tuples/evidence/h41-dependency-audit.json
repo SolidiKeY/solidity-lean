@@ -1,0 +1,14 @@
+{
+  "fetched_origin_master": "1d14f57a3a048bb1c1969c4c2c958d010ab84cb5",
+  "worker_head": "7e7ca1f3574fb78d15831a3221c16ef88c88951c",
+  "remote_control_tuple_paths": [],
+  "remote_control_tuple_root_imports": [],
+  "remote_runtime_imports_control_tuple": false,
+  "shared_boundary_unchanged": true,
+  "remote_merged_into_worker": false,
+  "remaining": [
+    "central registration",
+    "A producer composition",
+    "integrated full/default-target/runtime-boundary gates"
+  ]
+}
