@@ -1597,6 +1597,8 @@ import Solidity.Frontend.ConstantDepth.Complete
 import Solidity.Frontend.ConstantDepth.Lookup
 import Solidity.Frontend.ConstantDepth.Rank
 import Solidity.Frontend.CreationTryImport
+import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
+import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
 import Solidity.Frontend.ExecutableAst.Memory.Reader
 import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Translate
