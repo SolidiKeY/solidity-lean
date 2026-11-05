@@ -69,6 +69,8 @@ import Solidity.Backend.Aggregates.G18StorageCellControls
 import Solidity.Backend.Aggregates.G18StorageClient
 import Solidity.Backend.Aggregates.G18StorageValues
 import Solidity.Backend.Assembler
+import Solidity.Backend.CalldataPackets.RawAddress.Controls
+import Solidity.Backend.CalldataPackets.RawAddress.Execution
 import Solidity.Backend.CalldataPackets.RawInt.Controls
 import Solidity.Backend.CalldataPackets.RawInt.Execution
 import Solidity.Backend.CalldataPackets.RawUint.Controls
