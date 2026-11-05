@@ -170,3 +170,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Backend/PrimitivePackets/UnsignedCast/Controls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/UnsignedCast/Semantics.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/UnsignedCast/Transport.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Selected.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/Constants/Source.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
