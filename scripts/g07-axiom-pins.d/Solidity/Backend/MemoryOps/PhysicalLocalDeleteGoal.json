@@ -1,0 +1,60 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.Controls.reframe_stack_client_goal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.pointer_frame_alias_client": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.primitive_child_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.primitive_child_store_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.primitive_child_store_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.primitive_child_store_negative": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.reference_array_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.reference_array_frame_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.reference_store_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.reference_store_frames_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.resolved_delete_physical": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalLocalDeleteGoal.lean:Solidity.Backend.MemoryOps.Physical.uint_array_reframe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

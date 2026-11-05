@@ -1,0 +1,28 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frame_snapshot_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frame_store32_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frame_wordByte": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frameBytes_expandZero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.frameBytes_store32": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalFrameImage.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.frame_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

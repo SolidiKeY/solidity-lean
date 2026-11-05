@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedAliasProgram.lean:Solidity.Backend.MemoryOps.source_uint_fixed_alias_program_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

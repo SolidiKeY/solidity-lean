@@ -20,7 +20,8 @@ A dependency-free Lean 4 model of [SolKey](https://github.com/SolidiKeY/solkey).
   printers or tactic front ends. The library roots (`Solidity.lean`,
   `SolidityExamples.lean`, `Bridge/SolidityBridge.lean`) are generated: register
   new modules with `scripts/coord-tools/register.sh`, give each a row in its
-  area's `docs/module-map/` file, and follow
+  area's fragment `docs/module-map/<area>.d/<lane>.md` (then run
+  `scripts/coord-tools/fragments.sh`), and follow
   [parallelism.md](docs/parallelism.md).
 - Do not raise `maxHeartbeats` to rescue a proof. Use `simp only [...]` in
   finished proofs and write explicit signature and `have` types.

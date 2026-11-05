@@ -1,0 +1,66 @@
+{
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.exp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.exp_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.expFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ExpSelectionControls.lean:SolidityBridge.Yul.ExpSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

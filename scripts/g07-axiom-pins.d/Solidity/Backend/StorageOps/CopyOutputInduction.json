@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/CopyOutputInduction.lean:Solidity.Backend.StorageOps.CopyOutput.copy_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputInduction.lean:Solidity.Backend.StorageOps.CopyOutput.numeric_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputInduction.lean:Solidity.Backend.StorageOps.CopyOutput.represented_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyOutputInduction.lean:Solidity.Backend.StorageOps.CopyOutput.slot_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

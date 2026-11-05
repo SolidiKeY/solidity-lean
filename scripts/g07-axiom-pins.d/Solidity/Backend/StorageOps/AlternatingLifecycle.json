@@ -1,0 +1,128 @@
+{
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.graphPopBlocks": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.graphPushBlocks": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_accesses_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pop_blocks_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.popBlockAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.popBlockLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.popBlocks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.popHeaderCoverage": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_accesses_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.push_blocks_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pushBlockAccesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pushBlockLog": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pushBlocks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycle.lean:Solidity.Backend.StorageOps.AlternatingLifecycle.pushHeaderCoverage": [
+  "Quot.sound",
+  "propext"
+ ]
+}

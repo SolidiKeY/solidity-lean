@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.clear_range_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.data_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.source_array_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceIntArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceIntArrayDeleteNumeric.source_array_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

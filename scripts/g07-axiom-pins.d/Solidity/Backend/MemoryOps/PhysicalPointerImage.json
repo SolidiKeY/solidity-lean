@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalPointerImage.lean:Solidity.Backend.MemoryOps.Physical.frame_reference_local_impossible": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerImage.lean:Solidity.Backend.MemoryOps.Physical.PointerFrame.frame_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerImage.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.store_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

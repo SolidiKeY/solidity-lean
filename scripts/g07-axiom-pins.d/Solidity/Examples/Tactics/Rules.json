@@ -1,0 +1,6 @@
+{
+ "Solidity/Examples/Tactics/Rules.lean:Solidity.Rule.premise_unique": [
+  "Quot.sound",
+  "propext"
+ ]
+}

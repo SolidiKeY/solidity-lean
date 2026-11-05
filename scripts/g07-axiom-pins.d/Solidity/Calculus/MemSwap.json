@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/MemSwap.lean:Solidity.Fml.mxTop_holds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

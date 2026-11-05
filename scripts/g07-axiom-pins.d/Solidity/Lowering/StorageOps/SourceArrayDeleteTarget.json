@@ -1,0 +1,137 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.array_header_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.array_index_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.clear_range_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.clear_word_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.clear_word_same": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.clear_words_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.coupled_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.empty_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.explicit_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.input_facts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.observation_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.ordered_runtime_three": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.outside_mapping": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.runtime_length_three": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.static_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.wrong_extent_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.Controls.wrong_program_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.data_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.delete_components": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.outside_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayDeleteTarget.lean:Solidity.Backend.StorageOps.SourceArrayDeleteTarget.source_array_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

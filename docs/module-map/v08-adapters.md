@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/v08-adapters.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V08 independent adapters
 
 | Module | Purpose |

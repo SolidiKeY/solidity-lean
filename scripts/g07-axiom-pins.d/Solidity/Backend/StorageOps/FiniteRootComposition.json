@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/FiniteRootComposition.lean:Solidity.Backend.StorageOps.FiniteRootComposition.root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

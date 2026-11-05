@@ -1,0 +1,62 @@
+{
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.deletion_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.ordered_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.reuse_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.timeout_not_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.typed_paths": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.wrong_erasure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.Controls.wrong_erasure_distinct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.mapping_array_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.mapping_delete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.mapping_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceMappingDelete.lean:Solidity.Backend.StorageOps.SourceMappingDelete.mapping_range_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

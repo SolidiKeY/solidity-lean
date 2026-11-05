@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/Tactics/RevertFormulas.lean:Solidity.revModal_box_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

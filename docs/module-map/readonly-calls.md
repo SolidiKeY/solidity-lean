@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/readonly-calls.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Read-only calls and world-call consumers (G22, G42)
 
 | Module | Purpose |

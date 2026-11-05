@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.Controls.frozen_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.Controls.prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumericControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.Controls.wrong_streaming": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

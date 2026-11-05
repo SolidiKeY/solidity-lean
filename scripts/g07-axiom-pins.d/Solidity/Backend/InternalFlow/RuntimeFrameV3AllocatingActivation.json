@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingActivation.Checks.whole": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

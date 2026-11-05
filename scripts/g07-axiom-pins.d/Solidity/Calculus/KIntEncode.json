@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/KIntEncode.lean:Solidity.Fml.holds_kenc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
