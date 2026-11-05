@@ -383,8 +383,8 @@ Adopted published8495f1de in merge d6894545, preserving owned metadata controls.
 Compose wires the published Memory.Reader and ControlTuple.Adapter through one
 recursive executableReader; DirectRuntime uses it for contract/function reads.
 There is no failure-catching fallback. Reference parameters/returns and unsupported
-siblings retain their existing guards. New Scope/Compose registration is proposed
-locally, without modifying shared roots.
+siblings retain their existing guards. At this checkpoint Scope/Compose registration was proposed
+locally, without modifying shared roots; published9584 later registers Scope.
 
 Plain obligation preparation now reuses the existing renameStmts before the loop
 callback. The callback therefore receives freshly renamed syntax. Scope guards
@@ -465,3 +465,15 @@ independent read-only finder/skeptic reviews found no driver/comparison/ledger d
 neither used Lean/server. CR migration,DR-A-META,full per-form parity,compiled
 native/WASM closure,before/after runtime and final gates remain pending. No goal
 completion or RUNTIME_GATE_PASS is claimed.
+
+
+Fresh post9584 KeySort per-file gate and refreshed SolKey checker passed:
+377taclets,131read-bearing,table131,annotations OK. KeySort/cache command exit0,
+wall6.013s,RSS252608KiB,minimum outer available6093467648bytes. The six-module
+cache delta was regenerated and fully verified against current successful build
+traces and mappings; bytes are identical to the earlier local delta:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/1a3bce261301/owned-delta.tar.zst
+SHA256047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167,
+965584bytes,18artifacts/6mappings. Delivery remains coordinator-pending; dependency
+caches/toolchain must match. H41 was obeyed: no ship-cache.sh invocation. Fresh
+source/C/olean/trace fingerprints and cache/gate receipts are in adoption-9584.

@@ -79,8 +79,9 @@ DR-A-META: CR/D must choose required metadata retention alongside existing built
 normalization/loop annotations, or an owner-reviewed checked compatibility adapter.
 The composed fixture implements retention only in A's test scope. CR still owns
 actual existing Lean import migration; no independent optional wrapper suffices.
-Native/WASM ordinary closure is pending owner D evidence. New Scope/Compose roots
-remain local registration proposals; A does not edit generated registrations.
+Native/WASM ordinary closure is pending owner D evidence. At this historical checkpoint both Scope/Compose roots were local proposals;
+published9584 later registers Scope. Compose remains pending; A does not edit
+generated registrations.
 
 
 ## Published9584 adoption and canonical kind observations

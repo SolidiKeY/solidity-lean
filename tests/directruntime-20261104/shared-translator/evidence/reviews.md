@@ -171,3 +171,9 @@ or inventory. Both checked six exact differences: four existing refusal-reason
 changes and two fresh decoded witnesses. Both checked57keys,37unknown-root refusals,
 producer printing unchanged and source hashes. Frozen gate/MCP exit0; whole-witness
 and child-failure limits retained. Producer migration/native closure remain open.
+
+Final adoption9584 packet finder/skeptic found no material claim defect. Both
+confirmed Scope central registration,Compose proposal,fresh KeySort377/131/131,
+six-module cache local verification/coordinator-pending status and retained CR/
+metadata/native obligations. Their minor historical registration wording ambiguity
+was corrected in API-HANDOFF and lane docs. No Lean/server or writes by reviewers.
