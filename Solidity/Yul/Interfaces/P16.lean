@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawTypedScope
 import Solidity.Yul.RawControlGrowingBlock
 import Solidity.Yul.RawControlGrowingSequence
 import Solidity.Yul.RawControlForPost
@@ -168,3 +169,10 @@ initializer/tail errors, older effects and checked/coherent premises.
 Closed/nested Source computations and control/error-frame witnesses are in
 Solidity.Yul.Checks.RawControlGrowingBlock. Other declarations, dirty Source
 readback and general frontend admission remain separate. -/
+
+/-! RawTypedScope supplies one typed LOCAL binder drop/closure with actual
+Source restore/Out.up/close laws and genuine coherence premises. Its Boolean
+specializations are definitionally the existing operations. Signed/unsigned
+integer, dirty-word and control witnesses are in Solidity.Yul.Checks.RawTypedScope.
+No initializer execution, physical layout or broader admission follows; concrete
+integer declaration composition remains a separate obligation. -/
