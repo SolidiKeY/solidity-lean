@@ -1,0 +1,18 @@
+{
+  "published": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
+  "merge": "79c0d8f7c1e6ab4a10e4eba9492092c9bd4f3193",
+  "status": "partial",
+  "source_delta": [],
+  "scoped_acceptance": "PASS:372 rows,23 theorem pins,72 declarations,five negative controls",
+  "full_local_validation": "pending; historical failures preserved",
+  "coordinator_gates": "Publication reports full integration gates; not a new local gate run",
+  "original_QN_goal": "incomplete",
+  "cache": "no ship-cache.sh run",
+  "register": [
+    "Solidity.Backend.PrimitivePackets.UnsignedCast.Semantics",
+    "Solidity.Backend.PrimitivePackets.UnsignedCast.Compiler",
+    "Solidity.Backend.PrimitivePackets.UnsignedCast.Transport",
+    "Solidity.Backend.PrimitivePackets.UnsignedCast.Boundaries",
+    "Solidity.Backend.PrimitivePackets.UnsignedCast.Controls"
+  ]
+}

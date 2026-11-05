@@ -252,6 +252,7 @@ import Solidity.Examples.Tactics.SourceUnitsImport
 import Solidity.Examples.Tactics.SourceUnitsMetadata
 import Solidity.Examples.Tactics.Spec
 import Solidity.Examples.Tactics.Specs
+import Solidity.Examples.Tactics.StaticStorageCompatibility
 import Solidity.Examples.Tactics.Step
 import Solidity.Examples.Tactics.StorageDangling
 import Solidity.Examples.Tactics.StorageDelete
