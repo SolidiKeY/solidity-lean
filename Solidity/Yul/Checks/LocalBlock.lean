@@ -1,3 +1,4 @@
+import Solidity.Yul.Checks.ClosedRun
 import Solidity.Yul.RawFrameLogic
 import Solidity.Yul.RawCoherent
 import Solidity.Yul.RawHorizon
@@ -364,5 +365,87 @@ theorem logicPremiseWitness : ∀ mode : Solidity.Modality,
 /-- info: 'Solidity.Yul.Checks.LocalBlock.logicPremiseWitness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.logicPremiseWitness
+
+
+/- A genuine recursive function group, not a finite collection of failed horizons. -/
+def recursiveCtx : Solidity.Source.Ctx := {env:=env,scope:=none,locals:=[]}
+def recursiveCode : Stmt [] (localExternalTypes recursiveCtx) ⟨false,false⟩ 0 :=
+  .functions [ClosedRun.divergeSig]
+    (.cons (.discard (.call .here Fin.elim0)) .nil)
+    (.discard (.call .here Fin.elim0))
+def recursivePolicy : Policy.StmtP .A recursiveCode :=
+  (Policy.stmt_iff .A recursiveCode).mp rfl
+def recursiveInitial : RawFrame.State recursiveCtx :=
+  RawFrame.ofClean .nil (Solidity.Source.St.init env)
+
+
+theorem recursiveNone : ∀ (fuel : Nat) (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.LocalBlock.recursiveCtx),
+ Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.recursiveCode Solidity.Yul.Checks.LocalBlock.recursivePolicy fuel state = none := by
+  intro fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      unfold RawFrame.run WordAdapter.run
+      change Option.map _ (Option.map _
+        ((Closed.evalExpr fuel ClosedRun.divergeEnv ClosedRun.divergeEnvD.profile
+          ClosedRun.divergeCall ClosedRun.divergeCallD.profile _).bind _)) = none
+      rw [ClosedRun.diverge_all]
+      rfl
+
+
+theorem recursiveFalseBox : RawFrame.Logic.holds .box recursiveCode recursivePolicy
+    (fun _ => False) recursiveInitial :=
+  (RawFrame.Logic.box_false_iff_none recursiveCtx ⟨false,false⟩
+    recursiveCode recursivePolicy recursiveInitial).mpr (fun fuel => recursiveNone fuel recursiveInitial)
+theorem recursiveNoDiamond : ¬ RawFrame.Logic.holds .diamond recursiveCode recursivePolicy
+    (fun _ => True) recursiveInitial := by
+  rintro ⟨fuel,result,done,_⟩
+  rw [recursiveNone fuel recursiveInitial] at done
+  cases done
+theorem recursiveNoSelection : ∀ bound, Solidity.Source.firstDone
+    (fun fuel => Closed.sourceResult (RawFrame.run recursiveCode recursivePolicy fuel recursiveInitial))
+    bound = none := by
+  intro bound
+  exact (RawFrame.firstDone_none_iff_bound recursiveCtx ⟨false,false⟩
+    recursiveCode recursivePolicy recursiveInitial bound).mpr (recursiveNone bound recursiveInitial)
+theorem logicFactored :
+    RawFrame.Logic.holds .diamond code policy (fun _ => True) rawInitial ∧
+    RawFrame.Logic.holds .box code policy logicPost rawInitial :=
+  (RawFrame.Logic.diamond_iff_termination_and_box ctx ⟨false,false⟩
+    code policy logicPost rawInitial).mp logicDiamond
+theorem finiteTimeoutAndDiamond : RawFrame.run code policy 0 rawInitial = none ∧
+    RawFrame.Logic.holds .diamond code policy (fun _ => True) rawInitial :=
+  ⟨rfl,logicFactored.1⟩
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.diamond_implies_box' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.diamond_implies_box
+/-- info: 'Solidity.Yul.RawFrame.Logic.box_false_iff_none' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.box_false_iff_none
+/-- info: 'Solidity.Yul.RawFrame.Logic.diamond_iff_termination_and_box' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.diamond_iff_termination_and_box
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveNone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveNone
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveFalseBox' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveFalseBox
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveNoDiamond' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveNoDiamond
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveNoSelection' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveNoSelection
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicFactored' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicFactored
+/-- info: 'Solidity.Yul.Checks.LocalBlock.finiteTimeoutAndDiamond' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.finiteTimeoutAndDiamond
 
 end Solidity.Yul.Checks.LocalBlock

@@ -25,7 +25,7 @@ def formula {ctx control} (mode : Solidity.Modality)
 theorem formula_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
  (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
  (policy : Solidity.Yul.Policy.StmtP .A code)
- (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx), 
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx),
  (Solidity.Yul.RawFrame.Logic.formula mode code policy post state).holds
  (Solidity.Yul.WordState.pack ⟨Fin.elim0,Solidity.Yul.RawFrame.view state⟩) ↔
  Solidity.Yul.RawFrame.Logic.holds mode code policy post state := by
@@ -63,7 +63,7 @@ The shallow word calculus and every original Rule side condition are unchanged. 
 theorem rule_premise_sound : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
  (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
  (policy : Solidity.Yul.Policy.StmtP .A code)
- (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx), 
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx),
  ∀ (premise : Solidity.Yul.Logic.Fml (0 + Solidity.Yul.wordCellCount (Solidity.Yul.localExternalTypes ctx))),
  Solidity.Yul.Logic.Rule (Solidity.Yul.RawFrame.Logic.formula mode code policy post state) premise →
  (Solidity.Yul.RawFrame.Logic.holds mode code policy post state ↔
@@ -71,5 +71,48 @@ theorem rule_premise_sound : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity
   intro ctx control mode code policy post state premise rule
   exact (formula_iff ctx control mode code policy post state).symm.trans
     (Solidity.Yul.Logic.Rule.sound rule _)
+
+
+/-- Deterministic completed outcomes let a successful diamond establish its box postcondition. -/
+theorem diamond_implies_box : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawFrame.Logic.holds .diamond code policy post state → Solidity.Yul.RawFrame.Logic.holds .box code policy post state := by
+  intro ctx control code policy post state actual
+  obtain ⟨chosen,out,finished,valid⟩ := actual
+  intro fuel result done
+  have same := RawFrame.run_completed_unique ctx control code policy state
+    fuel chosen result out done finished
+  rw [same]
+  exact valid
+
+/-- A false-postcondition box is exactly noncompletion at every fuel, never one finite timeout. -/
+theorem box_false_iff_none : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawFrame.Logic.holds .box code policy (fun _ => False) state ↔ ∀ fuel, Solidity.Yul.RawFrame.run code policy fuel state = none := by
+  intro ctx control code policy state
+  constructor
+  · intro valid fuel
+    cases actual : RawFrame.run code policy fuel state with
+    | none => rfl
+    | some result => exact False.elim (valid fuel result actual)
+  · intro all fuel result done
+    rw [all fuel] at done
+    cases done
+
+/-- A diamond is termination plus its box postcondition for the actual deterministic raw interpreter. -/
+theorem diamond_iff_termination_and_box : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop) (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawFrame.Logic.holds .diamond code policy post state ↔ Solidity.Yul.RawFrame.Logic.holds .diamond code policy (fun _ => True) state ∧ Solidity.Yul.RawFrame.Logic.holds .box code policy post state := by
+  intro ctx control code policy post state
+  constructor
+  · intro actual
+    obtain ⟨fuel,result,done,valid⟩ := actual
+    exact ⟨⟨fuel,result,done,True.intro⟩,
+      diamond_implies_box ctx control code policy post state ⟨fuel,result,done,valid⟩⟩
+  · rintro ⟨⟨fuel,result,done,_⟩,valid⟩
+    exact ⟨fuel,result,done,valid fuel result done⟩
 
 end Solidity.Yul.RawFrame.Logic
