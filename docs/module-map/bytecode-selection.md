@@ -61,3 +61,5 @@
 | `Backend/AbiEntry/LengthCheck.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/LengthCheckControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/AbiEntry/LengthCheckInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/IRBranchPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/IRLoopPackets.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
