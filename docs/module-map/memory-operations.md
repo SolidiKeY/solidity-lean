@@ -345,3 +345,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/DefaultDemand.lean` | Actual default-cell demand agrees with successful existing finite planners and their plans. |
 | `Backend/MemoryCopies/DefaultDemandControls.lean` | Actual finite plans, nested/long defaults, unused huge children and distinct selector/capacity boundaries. |
 | `Backend/MemoryCopies/CheckedFiniteDefaultInterface.lean` | Total guarded finite-plan body and declaration contracts retaining root offsets and complete success fields. |
+| `Backend/MemoryCopies/CheckedFiniteDefault.lean` | Guarded existing finite-plan body and declaration execution with complete retained success guarantees. |
+| `Backend/MemoryCopies/CheckedFiniteDefaultControls.lean` | Actual nonzero-root plans, declarations, retained old children and represented saturation/refusal controls. |
