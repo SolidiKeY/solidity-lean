@@ -19,4 +19,3 @@ import Solidity.Backend.Executable.CreationPatchOrderControls
 /-- info: 'Solidity.Backend.Executable.CreationPatchOrder.Controls.opposite_runtime' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.Executable.CreationPatchOrder.Controls.opposite_runtime
-

@@ -19,4 +19,3 @@ import Solidity.Backend.Executable.CreationLinkIdentityControls
 /-- info: 'Solidity.Backend.Executable.CreationLinkIdentity.Controls.wrong_link_return' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.Executable.CreationLinkIdentity.Controls.wrong_link_return
-

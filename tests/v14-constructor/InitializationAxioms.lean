@@ -19,4 +19,3 @@ import Solidity.Backend.Executable.ConstructorInitialization
 /-- info: 'Solidity.Backend.Executable.ConstructorInitialization.Controls.different_states' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.Executable.ConstructorInitialization.Controls.different_states
-

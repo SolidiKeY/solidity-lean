@@ -19,4 +19,3 @@ import Solidity.Backend.Executable.CreationFreshnessControls
 /-- info: 'Solidity.Backend.Executable.CreationFreshness.Controls.storage_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.Executable.CreationFreshness.Controls.storage_observations
-

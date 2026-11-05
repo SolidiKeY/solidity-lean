@@ -15,4 +15,3 @@ import Solidity.Backend.Aggregates.IntegerReadBoundaryWitness
 /-- info: 'Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.inhabited_boundary' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.Aggregates.IntegerReadBoundaryWitness.inhabited_boundary
-

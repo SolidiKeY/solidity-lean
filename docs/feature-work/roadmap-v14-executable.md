@@ -439,3 +439,24 @@ Its exact-head checkpoint has all eight gates passing, including current-source
 trust and zero-drift pins. All four audit modules and eight standalone axiom
 files also pass current guard checks. These results apply to that candidate,
 not this older helper; only this receipt is copied here, never its inventory.
+
+
+### Published-master rebase receipt (2026-11-05)
+
+Preserved old helper4531b0f851befa8ceb686e08758bb6dd15801f0b in its existing
+sealed bundles/reflog; rebased its remaining history onto published
+3ad22f66d8fc6431378c22e71823436c79dede7f. Kept the reviewed published
+ByteParameters and narrower ConstructorLocalArguments imports, current index,
+both TERRA work lists, README entries and missing area-map rows. Regenerated all
+three roots after the completed rebase (307376bd). Separate read-only finder and
+skeptic accepted the conflict resolutions. Finder's five inherited trailing EOF
+blank lines in lane audit files were trimmed without changing declarations.
+
+The requested touched gate ran serially under unchanged12GiB/no-swap180s limits
+and exited124 at its180s cap during the broad changed-Source dependency closure.
+Private ByteSlices/ByteSliceControls built, but the overall gate did NOT pass;
+no unchanged timeout retry or budget increase. Raw failure is retained. Held
+H16 Source code remains inherited private work, not a published prerequisite or
+authorization for V14 to implement VY5 semantics. G18/ByteSlices still waits for
+VY5's cdStride/evaluator publication. H39SAR and general constructor/source/world
+producer waits remain unchanged; no full-lane completion is claimed.
