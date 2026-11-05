@@ -1310,6 +1310,7 @@ import Solidity.Calculus.Preconditions
 import Solidity.Calculus.PremiseSound
 import Solidity.Calculus.Prenex
 import Solidity.Calculus.PresburgerDecision
+import Solidity.Calculus.PrimitiveReturnTransport
 import Solidity.Calculus.Print
 import Solidity.Calculus.PrintStmt
 import Solidity.Calculus.PrintTerm
@@ -1396,6 +1397,7 @@ import Solidity.Calculus.StateFacts
 import Solidity.Calculus.StatePartsScoped
 import Solidity.Calculus.StaticInvocation
 import Solidity.Calculus.StaticLinear
+import Solidity.Calculus.StaticStorageTransport
 import Solidity.Calculus.Step
 import Solidity.Calculus.StepFragment
 import Solidity.Calculus.StmtSound
@@ -2482,6 +2484,7 @@ import Solidity.Semantics.RunFrame
 import Solidity.Semantics.RunFuel
 import Solidity.Semantics.RunWk
 import Solidity.Semantics.State
+import Solidity.Semantics.StaticCallState
 import Solidity.Semantics.StaticInvocation
 import Solidity.Semantics.Storage
 import Solidity.Semantics.Storage.Anon
