@@ -22,8 +22,8 @@
     "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
     "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
   },
-  "checker_sha256": "2af0f9a57772547fefc39c0abacd1821abd9bb94bbc604a586a38565ab5a6787",
-  "manifest_sha256": "ae2606eb64354a199baaa2e3c260515eb97960464ee55fc415995daa8ecc6b16",
+  "checker_sha256": "3f77dc017aedcd3f8e4b11df9ade95053bfe1506ebe5e3e17936fdff43ba2712",
+  "manifest_sha256": "3a9bcf4ffe59176316e3272df0925f533f807bae578e77c12319c42844008680",
   "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted.",
   "publication_review": {
     "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
@@ -37,5 +37,9 @@
   "integrated_review": {
     "finder": "PASS: 47proof/10untracked hashes preserved, backupref, all47rootimports, strict integratedbaseline/scope and nonexistentmodule refusal. Read-only/noLeanserver.",
     "skeptic": "PASS: oldownedheadancestor708, all5Constants published exact, APIpins unchanged, scopeguard retains strict subsequent changes; map/fullruntime obligations separate. Read-only/noLeanserver."
+  },
+  "latest_rebase_review": {
+    "finder": "PASS: published equivalent ancestor, actual pinned stable patch IDs match; unrelated roots commit rejected;47proof10untracked hashes unchanged; scope strict. Read-only/noLeanserver.",
+    "skeptic": "PASS: actual patch identity c8eb7f3, published a3b ancestor1ae; exact proof/APIpins preserved and baseline/scopeguard intact. Read-only/noLeanserver."
   }
 }
