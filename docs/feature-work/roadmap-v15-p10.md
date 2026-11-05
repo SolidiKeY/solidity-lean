@@ -1975,3 +1975,7 @@ LT/GT/EQ/SLT/SGT short-stack consumers connect actual certificate refusal with t
 ### Subtraction refusal
 
 The SUB short-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked ADD case by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### POP refusal
+
+The POP empty-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Its gate proof uses the actual two-gas cost and one-operand arity. Populated surrounding states witness the empty-operand case; controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.

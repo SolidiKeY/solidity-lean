@@ -1,3 +1,4 @@
+import Solidity.Backend.Selection.StackSelection
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 
 /-! Failure consumers for the concrete published arithmetic certificates.
@@ -1379,4 +1380,119 @@ theorem sub_input_observation (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms sub_input_observation
+private theorem pop_short_scalar (words : Scalar.Stack) (short : words.length<1) :
+    Scalar.run Selection.popCertificate.code words=none := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | cases words with
+    | nil => rfl
+    | cons a tail => simp only [List.length_cons] at short;omega
+
+private theorem pop_short_gate (valid : Array UInt256) (s : EVM.State)
+    (gas : 2≤s.gasAvailable.toNat) (short : s.stack.length<1) :
+    Assembly.driverGate valid s .POP=.error .StackUnderflow := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | have expansion : EVM.memoryExpansionCost s .POP=0 := by
+      simp only [EVM.memoryExpansionCost,EVM.memoryExpansionCost.μᵢ',Nat.sub_self]
+    have cost : EVM.C' s .POP=2 := rfl
+    have delta : EVM.δ .POP=some 1 := rfl
+    have charge : s.gasAvailable-UInt256.ofNat 0=s.gasAvailable := by
+      change UInt256.mk (s.gasAvailable.val-0)=s.gasAvailable
+      rw [sub_zero]
+    simp only [Assembly.driverGate]
+    rw [expansion,charge]
+    simp only [cost,delta,Option.getD_some,if_neg (Nat.not_lt_zero _),
+      if_neg (Nat.not_lt_of_ge gas),reduceCtorEq,if_false,if_pos short,bind,Except.bind,pure,Except.pure]
+
+theorem pop_refusal (valid : Array UInt256) (site : Site .POP)
+    (words : Scalar.Stack) (m : Solidity.Evm.Machine)
+    (represented : m.stack=Selection.irStack words) (short : words.length<1)
+    (gas : 2≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    Solidity.Evm.Instr.step .pop m=.fault ∧
+    Scalar.run Selection.popCertificate.code words=none ∧
+    Assembly.driverSteps 1 (fuel+2) valid (modularSite site words).state=.error .StackUnderflow := by
+  have scalar := pop_short_scalar words short
+  refine ⟨(Selection.popCertificate.refusal words m represented).mpr scalar,scalar,?_⟩
+  have gate := pop_short_gate valid (modularSite site words).state gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind,DecoderAgreement.referenceOp,gate]
+
+theorem pop_native_refusal (valid : Array UInt256) (site : Site .POP)
+    (words : Scalar.Stack) (short : words.length<1)
+    (gas : 2≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    EVM.X (fuel+1) valid (modularSite site words).state=.error .StackUnderflow := by
+  have gate := pop_short_gate valid (modularSite site words).state gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.X_unfold,decoded,Option.getD_some,DecoderAgreement.referenceOp,gate]
+
+theorem pop_empty_client (perm : Bool) :
+    let m := {InstructionSelectionControls.ir 7 3 with stack:=Selection.irStack []}
+    Solidity.Evm.Instr.step .pop m=.fault ∧
+    Scalar.run Selection.popCertificate.code []=none ∧
+    Assembly.driverSteps 1 2 #[u 37,u 99]
+      (modularSite (WrappingArithmeticFixtures.site .POP 12 perm) []).state=.error .StackUnderflow := by
+  exact pop_refusal _ _ _ _ rfl (by decide) (by change 2≤12;decide) 0
+
+theorem pop_priority_controls (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .POP 1 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .POP 2 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (WrappingArithmeticFixtures.input .POP 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl⟩
+
+theorem pop_native_fuel_boundary (perm : Bool) :
+    EVM.X 1 #[] (modularSite (WrappingArithmeticFixtures.site .POP 12 perm) []).state=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (modularSite (WrappingArithmeticFixtures.site .POP 12 perm) []).state=.error .OutOfFuel := by
+  exact ⟨pop_native_refusal _ _ _ (by decide) (by change 2≤12;decide) 0,rfl⟩
+
+theorem pop_input_observation (perm : Bool) :
+    let input := WrappingArithmeticFixtures.input .POP 12 perm []
+    input.stack=[] ∧ input.executionEnv.perm=perm ∧
+    input.executionEnv.code.data.toList=[0x60,0x7f,0x50,0x50,0] ∧
+    input.pc=u 3 ∧ input.gasAvailable=u 12 ∧ input.execLength=41 ∧
+    input.memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    input.returnData.data.toList=[0xcc,0xdd] ∧ input.H_return.data.toList=[0xee,0xff] ∧
+    input.executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    input.accountMap=WordPushFixtures.accounts ∧ input.σ₀=WordPushFixtures.accounts := by
+  first | rfl | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_native_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_native_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_empty_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_empty_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_priority_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_priority_controls
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_native_fuel_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_native_fuel_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.pop_input_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms pop_input_observation
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal
