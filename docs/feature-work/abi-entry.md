@@ -1294,7 +1294,7 @@ handoff. A lingering diagnostic worker overlapped the focused build after its
 stop request failed; the owned container was restarted after build completion,
 and subsequent validation uses verified shutdown before building. No proof
 budget or resource limit changed. This is a single-match/reject continuation;
-short receive/fallback routing, general dispatch trees, authenticated Source
+short receive/fallback routing, Source-authenticated dispatch trees, authenticated Source
 association, native loaders, aggregate decoding and complete G40 remain open.
 
 Independent read-only finder and skeptic reviews found no semantic issues.
@@ -1334,7 +1334,7 @@ miss continuation does not authenticate Source fallback declarations/parameters.
 Focused compilation and scoped standard-only axiom guards pass. Repairs and
 bounded bridge trial timeouts remain in the handoff. Diagnostic containers are
 restarted and worker absence verified before builds; no concurrent diagnostic
-worker/build is claimed for this checkpoint. General dispatch trees, native
+worker/build is claimed for this checkpoint. Source-authenticated dispatch trees, native
 construction of represented inputs, receive/fallback Source association, loaders, aggregate
 input decoding and full G40/G46.02 remain open, as do fixture replay and final
 assignment gates.
@@ -1382,3 +1382,35 @@ artifacts nor body executions/results are metadata premises. Whole and target
 selection use the public compiler; execution retains the existing represented
 input and per-row allocation bounds. Source table/body authenticity, short
 special routing and native frame construction remain separate obligations.
+
+
+`CoreDispatch.lean` constructs finite nested conditionals through the existing
+typed compiler. Each row contains an existing intrinsic body, its output context
+and actual core-classifier witness; it contains no assumed execution or selected
+artifact. The whole route and every body are publicly selected. The execution
+proof relates first-match lookup to the complete selected body outcome from the
+existing represented input and per-row allocation bounds, reusing `CoreJoin` and
+`SelectorBranches`. A miss leaves the original input for the remaining rows;
+a match is terminal even if its body reverts. Target equality is proved before
+projecting its context-indexed program, retaining intrinsic body/context links.
+No replacement interpreter, decoder, compiler or untyped AST is introduced.
+
+Controls reuse the inhabited typed representation and execute differently typed
+bodies. They cover a first match with a colliding later row, a later match, no
+match, an empty table, a reverting default and terminal first-match failure even
+though the colliding body succeeds independently. Allocation bounds and actual
+public whole/body selections are proved; saved state and stack remain explicit.
+Focused compilation and scoped standard-only axiom guards pass. Predicate repair
+trials and failed attempts are retained in the handoff.
+
+This proves finite dispatch over core bodies from represented inputs. Source
+exposed-table/body/pipeline authority, short receive/fallback routing, native
+input-frame and selector loading, aggregate input decoding, exact physical
+failure bytes and full G40 remain open. The default continuation does not
+establish Source fallback declaration or parameter correspondence. G46.02,
+fixture replay and full assignment gates remain pending.
+
+Independent read-only finder and skeptic reviews found no semantic issues.
+Both confirmed actual whole/body selection, heterogeneous target transport,
+terminal first-match behavior and unchanged input/resource premises. Final
+guarded diagnostics report zero errors; exact gates accompany the handoff.

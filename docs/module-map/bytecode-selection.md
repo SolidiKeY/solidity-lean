@@ -224,3 +224,5 @@
 | `Backend/AbiEntry/CoreJoin.lean` | Represented core join removal and selected branch outcomes from existing compiler correctness. |
 | `Backend/AbiEntry/CoreJoinControls.lean` | Inhabited representation, return/revert/divergence joins and escaping raw-code counterexample. |
 | `Backend/AbiEntry/CoreDispatchInterface.lean` | Finite typed-body dispatch contract with actual classifier witnesses and first-match outcome agreement. |
+| `Backend/AbiEntry/CoreDispatch.lean` | Finite first-match dispatch to actual typed core bodies using represented join removal. |
+| `Backend/AbiEntry/CoreDispatchControls.lean` | Heterogeneous body outputs, first/later/default dispatch, terminal collisions and saved-state controls. |
