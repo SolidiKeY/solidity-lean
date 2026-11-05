@@ -67,13 +67,32 @@ theorem unchecked_yield_head {l : Bool} (b : Syn (.block ⟨l, true⟩))
   rw [he]
   rfl
 
-def FramedItem {k : SCtx} : Syn (.item k) → Prop
-  | .stmtItem s => FramedStatement s
-  | .uncheckedItem _ => True
+private def framedItemResult : Cat → Type
+  | .item _ => Prop
+  | _ => PUnit
 
-def FramedItems {k : SCtx} : Syn (.list (.item k)) → Prop
-  | .nil => True
-  | .cons x xs => FramedItem x ∧ FramedItems xs
+private def framedItemAt {category : Cat} (tree : Syn category) : framedItemResult category := by
+  apply Syn.casesOn (motive := fun category _ => framedItemResult category) tree
+  case stmtItem => intro k s; exact FramedStatement s
+  case uncheckedItem => intros; exact True
+  all_goals intros; exact PUnit.unit
+
+def FramedItem {k : SCtx} (x : Syn (.item k)) : Prop := framedItemAt x
+
+def FramedItems {k : SCtx} (xs : Syn (.list (.item k))) : Prop :=
+  (g0ListValues xs).foldr (fun x rest => FramedItem x ∧ rest) True
+
+theorem FramedItem_stmtItem {k : SCtx} (s : Syn (.stmt k)) :
+    FramedItem (.stmtItem s) = FramedStatement s := rfl
+
+theorem FramedItem_uncheckedItem {l : Bool} (b : Syn (.block ⟨l,true⟩)) :
+    FramedItem (.uncheckedItem b) = True := rfl
+
+theorem FramedItems_nil {k : SCtx} :
+    FramedItems (Syn.nil (c := .item k)) = True := rfl
+
+theorem FramedItems_cons {k : SCtx} (x : Syn (.item k)) (xs : Syn (.list (.item k))) :
+    FramedItems (.cons x xs) = (FramedItem x ∧ FramedItems xs) := rfl
 
 theorem item_yield_nonempty {k : SCtx} (x : Syn (.item k))
     (L M : List Choice) (parts : List (List Tok))
@@ -137,7 +156,7 @@ theorem framed_item_list_split {k j : SCtx}
       have empty : head.flatten = [] := (List.append_eq_nil_iff.mp he.symm).1
       exact False.elim (item_yield_nonempty t N mid head hh empty)
   | cons s ss =>
-    simp only [FramedItems] at hs
+    simp only [FramedItems_cons] at hs
     obtain ⟨head, tail, mid, hh, ht, ex⟩ := list_yield_cons_decompose s ss L M xs hyS
     subst xs
     cases ts with

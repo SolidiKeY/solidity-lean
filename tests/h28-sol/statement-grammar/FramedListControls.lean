@@ -36,7 +36,8 @@ def mixedFramedList : Syn (.list (.stmt frameCtx)) :=
   .cons (.simpleStmt (.exprStmt (.ident "x"))) (.cons (.blockStmt (.block (.cons (.stmtItem (.ifStmt (.ident "c") (.returnStmt (.some (.ident "x"))) .none)) .nil))) (.cons (.returnStmt (.some (.lit (.str [59])))) (.cons (.continueStmt) (.cons (.breakStmt) (.cons (.emit (.ident "E") (.positional .nil)) (.cons (.revert (.ident "E") (.positional .nil)) (.nil)))))))
 
 theorem mixed_framed_inhabited : FramedStatements mixedFramedList := by
-  simp only [mixedFramedList, FramedStatements, FramedStatement, root, SemiRoot,
+  simp only [mixedFramedList, FramedStatements_nil, FramedStatements_cons, FramedStatement, root_simpleStmt, root_blockStmt, root_returnStmt, root_continueStmt,
+    root_breakStmt, root_emit, root_revert, SemiRoot,
     or_true, true_or, and_true]
 
 def mixedFramedTokens : List (List Tok) :=
@@ -59,15 +60,16 @@ theorem any_matching_list_segments {j : SCtx}
   framed_statement_list_split mixedFramedList other mixed_framed_inhabited
     [.frags [1]] [] L M mixedFramedTokens parts mixed_framed_actual_yield hy he
 
-def actualStatementRoots {k : SCtx} : Syn (.list (.stmt k)) → List Root
-  | .nil => []
-  | .cons s ss => root s :: actualStatementRoots ss
+def actualStatementRoots {k : SCtx} (ss : Syn (.list (.stmt k))) : List Root :=
+  (g0ListValues ss).map root
 
 theorem mixed_seven_roots :
     actualStatementRoots mixedFramedList =
       [.simple, .block, .returnValue, .continueLoop, .breakLoop, .emitEvent,
         .revertError] := by
-  simp only [actualStatementRoots, mixedFramedList, root]
+  simp only [actualStatementRoots, mixedFramedList, g0ListValues_nil, g0ListValues_cons,
+    List.map_cons, List.map_nil, root_simpleStmt, root_blockStmt, root_returnStmt, root_continueStmt,
+    root_breakStmt, root_emit, root_revert]
 
 /-- First-semicolon framing is false for a do-while body that returns. -/
 theorem do_while_not_first_semicolon :

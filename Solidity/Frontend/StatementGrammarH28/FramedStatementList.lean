@@ -1,5 +1,6 @@
 import Solidity.Frontend.StatementGrammarH28.SemicolonSplit
 import Solidity.Frontend.StatementGrammarH28.SyntaxBalance
+import Solidity.Frontend.StatementGrammarH28.G0List
 
 /-! Actual mixed statement-list segmentation for six semicolon roots and
 arbitrary block statements, against any other successful statement-list yield.
@@ -10,9 +11,14 @@ open Solidity.Source Solidity.Frontend.Checked
 def FramedStatement {k : SCtx} (s : Syn (.stmt k)) : Prop :=
   root s = .block ∨ SemiRoot (root s) = true
 
-def FramedStatements {k : SCtx} : Syn (.list (.stmt k)) → Prop
-  | .nil => True
-  | .cons s ss => FramedStatement s ∧ FramedStatements ss
+def FramedStatements {k : SCtx} (ss : Syn (.list (.stmt k))) : Prop :=
+  (g0ListValues ss).foldr (fun s rest => FramedStatement s ∧ rest) True
+
+theorem FramedStatements_nil {k : SCtx} :
+    FramedStatements (Syn.nil (c := .stmt k)) = True := rfl
+
+theorem FramedStatements_cons {k : SCtx} (s : Syn (.stmt k)) (ss : Syn (.list (.stmt k))) :
+    FramedStatements (.cons s ss) = (FramedStatement s ∧ FramedStatements ss) := rfl
 
 theorem statement_yield_nonempty {k : SCtx} (s : Syn (.stmt k))
     (L M : List Choice) (parts : List (List Tok))
@@ -92,7 +98,7 @@ theorem framed_statement_list_split {k j : SCtx}
       have empty : head.flatten = [] := (List.append_eq_nil_iff.mp he.symm).1
       exact False.elim (statement_yield_nonempty t N mid head hh empty)
   | cons s ss =>
-    simp only [FramedStatements] at hs
+    simp only [FramedStatements_cons] at hs
     obtain ⟨head, tail, mid, hh, ht, ex⟩ := list_yield_cons_decompose s ss L M xs hyS
     subst xs
     cases ts with

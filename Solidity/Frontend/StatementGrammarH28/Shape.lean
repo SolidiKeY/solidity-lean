@@ -15,20 +15,64 @@ inductive Root where
   | continueLoop | breakLoop | tryCatch | returnValue | emitEvent | revertError | assembly
   deriving DecidableEq, Repr
 
-def root {k : SCtx} : Syn (.stmt k) → Root
-  | .blockStmt _ => .block
-  | .simpleStmt _ => .simple
-  | .ifStmt _ _ _ => .conditional
-  | .forStmt _ _ _ _ => .forLoop
-  | .whileStmt _ _ => .whileLoop
-  | .doWhile _ _ => .doLoop
-  | .continueStmt => .continueLoop
-  | .breakStmt => .breakLoop
-  | .tryStmt _ _ _ _ _ => .tryCatch
-  | .returnStmt _ => .returnValue
-  | .emit _ _ => .emitEvent
-  | .revert _ _ => .revertError
-  | .assembly _ _ _ => .assembly
+private def rootResult : Cat → Type
+  | .stmt _ => Root
+  | _ => PUnit
+
+private def rootAt {category : Cat} (tree : Syn category) : rootResult category := by
+  apply Syn.casesOn (motive := fun category _ => rootResult category) tree
+  case blockStmt => intros; exact .block
+  case simpleStmt => intros; exact .simple
+  case ifStmt => intros; exact .conditional
+  case forStmt => intros; exact .forLoop
+  case whileStmt => intros; exact .whileLoop
+  case doWhile => intros; exact .doLoop
+  case continueStmt => intros; exact .continueLoop
+  case breakStmt => intros; exact .breakLoop
+  case tryStmt => intros; exact .tryCatch
+  case returnStmt => intros; exact .returnValue
+  case emit => intros; exact .emitEvent
+  case revert => intros; exact .revertError
+  case assembly => intros; exact .assembly
+  all_goals intros; exact PUnit.unit
+
+def root {k : SCtx} (s : Syn (.stmt k)) : Root := rootAt s
+
+theorem root_blockStmt {k : SCtx} (b : Syn (.block k)) : root (.blockStmt b) = .block := rfl
+
+theorem root_simpleStmt {k : SCtx} (s : Syn .simple) : root (.simpleStmt (k := k) s) = .simple := rfl
+
+theorem root_ifStmt {k : SCtx} (c : Syn .expr) (t : Syn (.stmt k)) (e : Syn (.opt (.stmt k))) :
+    root (.ifStmt c t e) = .conditional := rfl
+
+theorem root_forStmt {l u : Bool} (i : Syn (.opt .simple)) (c v : Syn (.opt .expr))
+    (b : Syn (.stmt ⟨true,u⟩)) : root (.forStmt (l := l) i c v b) = .forLoop := rfl
+
+theorem root_whileStmt {l u : Bool} (c : Syn .expr) (b : Syn (.stmt ⟨true,u⟩)) :
+    root (.whileStmt (l := l) c b) = .whileLoop := rfl
+
+theorem root_doWhile {l u : Bool} (b : Syn (.stmt ⟨true,u⟩)) (c : Syn .expr) :
+    root (.doWhile (l := l) b c) = .doLoop := rfl
+
+theorem root_continueStmt {u : Bool} : root (Syn.continueStmt (u := u)) = .continueLoop := rfl
+
+theorem root_breakStmt {u : Bool} : root (Syn.breakStmt (u := u)) = .breakLoop := rfl
+
+theorem root_tryStmt {k : SCtx} (e : Syn .expr) (rs : Syn (.list .param)) (b : Syn (.block k))
+    (h : Syn (.catchClause k)) (hs : Syn (.list (.catchClause k))) :
+    root (.tryStmt e rs b h hs) = .tryCatch := rfl
+
+theorem root_returnStmt {k : SCtx} (e : Syn (.opt .expr)) :
+    root (.returnStmt (k := k) e) = .returnValue := rfl
+
+theorem root_emit {k : SCtx} (e : Syn .expr) (args : Syn .callArgs) :
+    root (.emit (k := k) e args) = .emitEvent := rfl
+
+theorem root_revert {k : SCtx} (e : Syn .expr) (args : Syn .callArgs) :
+    root (.revert (k := k) e args) = .revertError := rfl
+
+theorem root_assembly {k : SCtx} (evm : Bool) (flags : List String) (body : Syn (.list .yulStmt)) :
+    root (.assembly (k := k) evm flags body) = .assembly := rfl
 
 /-- Intrinsic shape relation: its subject remains the existing indexed syntax. -/
 def HasRoot {k : SCtx} (s : Syn (.stmt k)) (r : Root) : Prop := root s = r

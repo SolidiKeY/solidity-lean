@@ -12,7 +12,9 @@ def mixedFramedItems : Syn (.list (.item itemFrameCtx)) :=
   .cons (.stmtItem (.simpleStmt (.exprStmt (.ident "x")))) (.cons (.uncheckedItem (.block (.cons (.stmtItem (.ifStmt (.ident "c") (.returnStmt .none) .none)) .nil))) (.cons (.stmtItem (.blockStmt (.block (.cons (.stmtItem (.tryStmt (.call (.ident "g") (.positional .nil)) .nil (.block .nil) (.catchPlain (.block .nil)) .nil)) .nil)))) (.cons (.stmtItem (.returnStmt (.some (.lit (.str [59,125]))))) (.cons (.stmtItem .continueStmt) (.cons (.stmtItem .breakStmt) (.cons (.stmtItem (.emit (.ident "E") (.positional .nil))) (.cons (.stmtItem (.revert (.ident "E") (.positional .nil))) (.nil))))))))
 
 theorem mixed_items_inhabited : FramedItems mixedFramedItems := by
-  simp only [mixedFramedItems, FramedItems, FramedItem, FramedStatement, root, SemiRoot,
+  simp only [mixedFramedItems, FramedItems_nil, FramedItems_cons,
+    FramedItem_stmtItem, FramedItem_uncheckedItem, FramedStatement, root_simpleStmt, root_blockStmt, root_returnStmt, root_continueStmt,
+    root_breakStmt, root_emit, root_revert, SemiRoot,
     or_true, true_or, and_true, true_and]
 
 def mixedFramedItemTokens : List (List Tok) :=
@@ -31,13 +33,13 @@ theorem mixed_items_actual_yield :
     mixedFramedItems.yield [.frags [2], .attrs []] =
       some (mixedFramedItemTokens, [.attrs []]) := by decide +kernel
 
-def actualItemCtors {k : SCtx} : Syn (.list (.item k)) → List Ctor
-  | .nil => []
-  | .cons x xs => x.ctor :: actualItemCtors xs
+def actualItemCtors {k : SCtx} (xs : Syn (.list (.item k))) : List Ctor :=
+  (g0ListValues xs).map (fun x => x.ctor)
 
 theorem both_item_constructors_observed :
     (actualItemCtors mixedFramedItems).eraseDups = [.stmtItem, .uncheckedItem] := by
-  simp only [actualItemCtors, mixedFramedItems]
+  simp only [actualItemCtors, mixedFramedItems, g0ListValues_nil, g0ListValues_cons,
+    List.map_cons, List.map_nil]
   decide +kernel
 
 theorem arbitrary_matching_item_segments {j : SCtx}

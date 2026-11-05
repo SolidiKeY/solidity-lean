@@ -1668,3 +1668,91 @@ work: general compound statement/item framing and conditional token association/
 uniqueness independently of SOL-EU, remaining true structural-fuel coverage,
 full repository final gates, whole-scope acceptance/reviews. SG-CEX-01/02 remain
 OPEN/REFUTED. The original persistent goal is not reset or marked complete.
+
+
+## Checkpoint T: published adoption and Gate G0 observer repair
+
+The coordinator withheld FixtureData because kernel-evaluated Syn matches violate
+Gate G0. The owned branch adopted published8495f1deb0a95dd6b9301822d8649ab76b217681
+without reset or conflict in merge9a0f4ef8c1d7a13319d1459b88d6a797a3a00802.
+Original base6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 remains an ancestor.
+All7 pinned Checked/Source inputs are byte-identical. Incoming master changes
+are coordinator-authored adoption; repair edits stay in the3 exclusive paths.
+No cache freshness or whole producer/lane completion is inferred from adoption.
+
+Independent finder and skeptic confirmed12 computational declarations:
+FixtureData's4 observers (including its nested optional body elimination),
+Shape.root, BlockLeafCoverage.itemCount/itemsAsList, FramedStatements,
+FramedItem/FramedItems, and the2 test inventory observers. All are repaired.
+G0List uses Syn.casesOn with category-generalising motives and typed result
+families for list cells/projections, with structural recursion. Root/item
+results dispatch by Cat, returning only PUnit outside their relevant categories.
+The fixture observers retain fuel64, exact name-f selection and actual body
+node observations. Nat/Option/FnName matches remain parameter-only. Guards
+fold over typed ordinary lists. No alternate AST, fabricated successful
+relation, producer change, new premise/exclusion or budget raise is introduced.
+
+Explicit rfl constructor equations preserve public observer contracts. Existing
+theorem statements are unchanged; dependent proof bodies use these equations
+instead of unfolding indexed matches. All45 fixture definitions and original
+inventory tail are byte-identical from statementFixture0 onward. The source/
+Lean/manifest synchronization check still covers45cases and40constructor
+obligations. The corrected observations retain actual acceptance/refusal
+checks rather than mocking successful parses.
+
+G0ObserverControls checks exact typed-cell/count/guard equations, arbitrary
+zero fuel, genuine constructor observations at fuel0/1/2, actual f-body
+selection versus g refusal, and the original contract/unit64budgets.
+G0ElaborationAudit records9 private eliminators plus4result families from
+the actual environment. Independent reviewers inspected the emitted
+generalised casesOn/brecOn/below terms and found no indexed-match helper or
+Eq.rec/Eq.ndrec cast in these bodies. The audit is elaboration-time evidence,
+not an object-language correctness theorem or a scanner-policy exception.
+Proof-producing spineOfOpen/slotOfOpen and their isOpen proofs are Prop
+inhabitants with no computational result extraction; this applicability
+distinction is not a new G0 exemption.
+
+The warned refactor has matched before/after VM measurements:3rounds of all45
+fixture kernel checks plus5affected controls per side, same order/wrapper,
+-j1/12GiB/no swap/4GiB VM headroom. Median aggregate user+system CPU:
+81.54s before,78.74s after (-3.43%). The largest individual median increase
+is5.77%; no target crosses10%. Before rounds:81.87/81.54/79.29s. After:
+78.74/80.92/77.71s. Original logs are immutable. Two stdout PASS lines
+interleaved into GNU time stderr; their exact timing values were recovered
+by removing only those gate lines, without rerunning checks or changing code.
+This is evidence for this measured workload, not a universal speed claim.
+
+Both timing phases identify committed9a0, because repair sources were then
+uncommitted. g0-measured-source-identities.json records exact before/after
+Lean hashes from the immutable runtime inputs and links them to this repair.
+Do not confuse equal head IDs with equal measured sources. The final committed
+head receives its own complete VM validation before checkpoint completion.
+
+Evidence under /workspace/h28-statement-grammar-evidence:
+- g0-repair-setup-1793848768897341152: fetch, ancestry, protected inputs,
+  published policy and adoption receipts.
+- g0-before-1793849302056445273 and g0-after-1793851683702714898:
+  all300kernel checks, exact commands/exits/CPU/wall/RSS and process samples.
+- g0-performance-detail.json: per-target medians and10%threshold check.
+- inventory-t-g0.json and axioms-t-g0-precommit.json: all repaired source
+  identities,94public theorem audits,13observer definitions and controls.
+- run-1793852325587304623: observer controls PASS.
+- run-1793852331164482421: actual elaborated term audit PASS.
+- run-1793852337953538618: public signatures/axioms PASS.
+
+Retained failed checks: run-1793851186880623093 stopped the same container
+when MCP setup tried to rebuild stale BoundaryHeadPr without explicit-j1.
+Its0Lean errors did not count as a runtime PASS. After serial prebuilds,
+the bounded check passed. run-1793851323180751968 required explicit root
+constructor equations in unchanged control assertions. run-1793851461817450340
+corrected the audit's String.endsWith API. Guards and budgets were never relaxed.
+The84th module is locally registered; authored repair changes no shared root,
+central module map, trust inventory or frozen Source/Core file.
+
+H41 remains in force: verified packs are left on the VM with path/SHA and
+delivery coordinator-pending; never run ship-cache.sh here. Original remaining
+work is unchanged: general compound statement/item framing, conditional token
+association/uniqueness independently of SOL-EU, remaining true structural-fuel
+coverage, full repository final gates and whole-scope acceptance/reviews.
+SG-CEX-01/02 remain OPEN/REFUTED. This repair does not complete the full lane
+or reset/complete the persistent objective.

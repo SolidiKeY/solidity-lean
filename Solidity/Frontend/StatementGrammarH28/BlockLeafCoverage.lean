@@ -1,5 +1,6 @@
 import Solidity.Frontend.StatementGrammarH28.LeafCoverage
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
+import Solidity.Frontend.StatementGrammarH28.G0List
 
 /-!
 # Structural list fuel for blocks of control leaves
@@ -14,19 +15,25 @@ open Solidity.Source Solidity.Frontend.Checked
 def locatedInput (ts : List Tok) (s : St) : St :=
   { s with ts := ts.map (fun t => atToken t 0 0) ++ s.ts }
 
-def itemCount {c : Cat} : Syn (.list c) → Nat
-  | .nil => 0
-  | .cons _ xs => itemCount xs + 1
+def itemCount {c : Cat} (xs : Syn (.list c)) : Nat := g0ListLength xs
 
-def itemsAsList {c : Cat} : Syn (.list c) → List (Syn c)
-  | .nil => []
-  | .cons x xs => x :: itemsAsList xs
+def itemsAsList {c : Cat} (xs : Syn (.list c)) : List (Syn c) := g0ListValues xs
+
+theorem itemCount_nil {c : Cat} : itemCount (Syn.nil (c := c)) = 0 := rfl
+
+theorem itemCount_cons {c : Cat} (x : Syn c) (xs : Syn (.list c)) :
+    itemCount (.cons x xs) = itemCount xs + 1 := rfl
+
+theorem itemsAsList_nil {c : Cat} : itemsAsList (Syn.nil (c := c)) = [] := rfl
+
+theorem itemsAsList_cons {c : Cat} (x : Syn c) (xs : Syn (.list c)) :
+    itemsAsList (.cons x xs) = x :: itemsAsList xs := rfl
 
 theorem itemsAsList_inverse : {c : Cat} → (xs : Syn (.list c)) →
     toSynList (itemsAsList xs) = xs
-  | _, .nil => by simp only [itemsAsList, toSynList]
+  | _, .nil => by simp only [itemsAsList_nil, itemsAsList_cons, toSynList]
   | _, .cons x xs => by
-    simp only [itemsAsList, toSynList]
+    simp only [itemsAsList_nil, itemsAsList_cons, toSynList]
     exact congrArg (Syn.cons x) (itemsAsList_inverse xs)
 
 inductive LeafItems : {k : SCtx} → Syn (.list (.item k)) → List Tok → Prop where
@@ -87,13 +94,13 @@ def leafInput (ts : List Tok) (s : St) : St := locatedInput ts (endState s)
 theorem leaf_items_token_length {k : SCtx} {xs : Syn (.list (.item k))} {ts : List Tok}
     (h : LeafItems xs ts) : ts.length = itemCount xs + itemCount xs := by
   induction h with
-  | nil => simp only [List.length_nil, itemCount, Nat.add_zero]
+  | nil => simp only [List.length_nil, itemCount_nil, itemCount_cons, Nat.add_zero]
   | returnCons h ih =>
-    simp only [List.length_cons, itemCount, ih, Nat.add_succ, Nat.succ_add]
+    simp only [List.length_cons, itemCount_nil, itemCount_cons, ih, Nat.add_succ, Nat.succ_add]
   | breakCons h ih =>
-    simp only [List.length_cons, itemCount, ih, Nat.add_succ, Nat.succ_add]
+    simp only [List.length_cons, itemCount_nil, itemCount_cons, ih, Nat.add_succ, Nat.succ_add]
   | continueCons h ih =>
-    simp only [List.length_cons, itemCount, ih, Nat.add_succ, Nat.succ_add]
+    simp only [List.length_cons, itemCount_nil, itemCount_cons, ih, Nat.add_succ, Nat.succ_add]
 
 /-- Operational composition lemma; its premises are discharged by the
 concrete step equations in the constructor-completeness proof below. -/
@@ -133,21 +140,21 @@ theorem leaf_items_many_aux {k : SCtx} {xs : Syn (.list (.item k))} {ts : List T
       .ok (itemsAsList xs, endState s) := by
   induction h generalizing n extra s with
   | nil =>
-    simp only [itemCount, itemsAsList]
+    simp only [itemCount_nil, itemCount_cons, itemsAsList_nil, itemsAsList_cons]
     change manyAux (blockLeafStep (n + 3) _) (extra + 1) (endState s) = _
     exact many_aux_none (leaf_step_stop _ _ _)
   | @returnCons k xs ts hx ih =>
-    simp only [itemCount, itemsAsList]
+    simp only [itemCount_nil, itemCount_cons, itemsAsList_nil, itemsAsList_cons]
     change manyAux (blockLeafStep (n + 3) k) ((extra + itemCount xs + 1) + 1)
       (controlInput (.kw .return_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons (leaf_step_return n k (leafInput ts s)) (ih n extra s)
   | @breakCons u xs ts hx ih =>
-    simp only [itemCount, itemsAsList]
+    simp only [itemCount_nil, itemCount_cons, itemsAsList_nil, itemsAsList_cons]
     change manyAux (blockLeafStep (n + 3) ⟨true, u⟩) ((extra + itemCount xs + 1) + 1)
       (controlInput (.kw .break_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons (leaf_step_break n u (leafInput ts s)) (ih n extra s)
   | @continueCons u xs ts hx ih =>
-    simp only [itemCount, itemsAsList]
+    simp only [itemCount_nil, itemCount_cons, itemsAsList_nil, itemsAsList_cons]
     change manyAux (blockLeafStep (n + 3) ⟨true, u⟩) ((extra + itemCount xs + 1) + 1)
       (controlInput (.kw .continue_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons (leaf_step_continue n u (leafInput ts s)) (ih n extra s)
@@ -306,19 +313,19 @@ theorem leaf_items_many_underfuel {k : SCtx} {xs : Syn (.list (.item k))} {ts : 
     manyAux (blockLeafStep (n + 3) k) (itemCount xs) (leafInput ts s) =
       .error ⟨0, "no progress"⟩ := by
   induction h generalizing n s with
-  | nil => simp only [itemCount, manyAux]; rfl
+  | nil => simp only [itemCount_nil, itemCount_cons, manyAux]; rfl
   | @returnCons k xs ts hx ih =>
-    simp only [itemCount]
+    simp only [itemCount_nil, itemCount_cons]
     change manyAux (blockLeafStep (n + 3) k) (itemCount xs + 1)
       (controlInput (.kw .return_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons_error (leaf_step_return n k (leafInput ts s)) (ih n s)
   | @breakCons u xs ts hx ih =>
-    simp only [itemCount]
+    simp only [itemCount_nil, itemCount_cons]
     change manyAux (blockLeafStep (n + 3) ⟨true, u⟩) (itemCount xs + 1)
       (controlInput (.kw .break_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons_error (leaf_step_break n u (leafInput ts s)) (ih n s)
   | @continueCons u xs ts hx ih =>
-    simp only [itemCount]
+    simp only [itemCount_nil, itemCount_cons]
     change manyAux (blockLeafStep (n + 3) ⟨true, u⟩) (itemCount xs + 1)
       (controlInput (.kw .continue_) 0 0 0 0 (leafInput ts s)) = _
     exact many_aux_cons_error (leaf_step_continue n u (leafInput ts s)) (ih n s)

@@ -30,15 +30,15 @@ inductive NestedItems : {k : SCtx} → Syn (.list (.item k)) → List Tok → Na
 theorem nested_items_count_le {k : SCtx} {xs : Syn (.list (.item k))}
     {ts : List Tok} {d : Nat} (h : NestedItems xs ts d) : itemCount xs ≤ ts.length := by
   induction h with
-  | nil => simp only [itemCount, List.length_nil, Nat.le_refl]
-  | returnCons h ih => simp only [itemCount, List.length_cons]; omega
-  | breakCons h ih => simp only [itemCount, List.length_cons]; omega
-  | continueCons h ih => simp only [itemCount, List.length_cons]; omega
+  | nil => simp only [itemCount_nil, itemCount_cons, List.length_nil, Nat.le_refl]
+  | returnCons h ih => simp only [itemCount_nil, itemCount_cons, List.length_cons]; omega
+  | breakCons h ih => simp only [itemCount_nil, itemCount_cons, List.length_cons]; omega
+  | continueCons h ih => simp only [itemCount_nil, itemCount_cons, List.length_cons]; omega
   | blockCons hb ht ihb iht =>
-    simp only [itemCount, braces, pu, List.length_append, List.length_cons, List.length_nil]
+    simp only [itemCount_nil, itemCount_cons, braces, pu, List.length_append, List.length_cons, List.length_nil]
     omega
   | uncheckedCons hb ht ihb iht =>
-    simp only [itemCount, braces, pu, List.length_append, List.length_cons, List.length_nil]
+    simp only [itemCount_nil, itemCount_cons, braces, pu, List.length_append, List.length_cons, List.length_nil]
     omega
 
 def ItemsAt {k : SCtx} (xs : Syn (.list (.item k))) (ts : List Tok) (fuel : Nat) : Prop :=
@@ -54,7 +54,7 @@ theorem itemsAt_cons {k : SCtx} (x : Syn (.item k)) (xs : Syn (.list (.item k)))
     (hh : ∀ s, blockLeafStep fuel k (locatedInput head s) = .ok (some x, s))
     (ht : ItemsAt xs tail fuel) : ItemsAt (.cons x xs) (head ++ tail) fuel := by
   intro extra s
-  simp only [itemCount, itemsAsList]
+  simp only [itemCount_nil, itemCount_cons, itemsAsList_nil, itemsAsList_cons]
   change manyAux _ ((extra + itemCount xs + 1) + 1)
     (locatedInput (head ++ tail) (endState s)) = _
   rw [locatedInput_append]
@@ -120,7 +120,7 @@ theorem nested_items_at {k : SCtx} {xs : Syn (.list (.item k))}
   induction h with
   | nil =>
     intro fuel hf extra s
-    simp only [itemsAsList, itemCount]
+    simp only [itemsAsList_nil, itemsAsList_cons, itemCount_nil, itemCount_cons]
     change manyAux (blockLeafStep fuel _) (extra + 1) (endState s) = _
     exact many_aux_none (leaf_step_stop _ _ _)
   | @returnCons k xs ts d ht ih =>

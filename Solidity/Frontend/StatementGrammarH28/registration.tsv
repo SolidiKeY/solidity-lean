@@ -82,3 +82,4 @@ Solidity.Frontend.StatementGrammarH28.ParenBalance	Parenthesis token balance/sca
 Solidity.Frontend.StatementGrammarH28.ParenPr	Parenthesis invariant printer combinators
 Solidity.Frontend.StatementGrammarH28.ParenAtoms	Immutable atom/operator/attribute parenthesis invariants
 Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance	All79statementdependencyconstructor parenthesis balance and actual headers
+Solidity.Frontend.StatementGrammarH28.G0List	GateG0 category-generalised typed list observers with exact constructor equations
