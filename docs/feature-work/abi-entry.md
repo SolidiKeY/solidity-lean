@@ -1267,3 +1267,37 @@ an existing core-admitted body. Distinct selector/argument/length cells can be
 represented without changing the decoder framework. The contract is a single
 match/reject continuation, retaining selector loading, short routing and Source
 table/body authenticity as separate obligations; no body run/result is assumed.
+
+
+`SelectorGateBody.lean` compiles a selector equality requirement at an arbitrary
+intrinsic uint local before an actual core-admitted continuation. Whole and body
+artifacts are selected by the public compiler. The checked prefix leaves the
+entire machine and saved stack unchanged on a match; a miss rejects before any
+continuation-local facts or body execution. The selector comparison compilation
+reuses `SelectorRoutes.condition_code`; the Source predicate adapter reuses
+`SourceRoutes.predicate` with its explicit four-byte length condition. Source
+signature/body association and selector loading are not inferred.
+
+A three-local control adds a distinct outer selector through existing `Prog.wk`
+to the proved primitive entry/body program. Its actual compiled entry code is
+definitionally identical to the existing code at the shifted base, avoiding a
+copied decoder or compiler. Raw-byte selector match executes value/head/enum
+validation, carrier binding and a Boolean-producing body. Miss, malformed-word
+short head, dirty enum, non-payable value, raw typed-value/body agreement and
+saved state are checked. A matching reverting body distinguishes selector
+acceptance from body success. Source match/miss controls use the published model
+hash fixture; they make no native Keccak or Source body-authenticity claim.
+
+Focused compilation and scoped standard-only axiom guards pass. Proof repair
+used bounded bridge trials; timeouts and diagnostic recovery are retained in the
+handoff. A lingering diagnostic worker overlapped the focused build after its
+stop request failed; the owned container was restarted after build completion,
+and subsequent validation uses verified shutdown before building. No proof
+budget or resource limit changed. This is a single-match/reject continuation;
+short receive/fallback routing, general dispatch trees, authenticated Source
+association, native loaders, aggregate decoding and complete G40 remain open.
+
+Independent read-only finder and skeptic reviews found no semantic issues.
+Both retain the validation-process incident and require the final checkpoint
+after verified diagnostic shutdown; its exact commands and outcomes are sealed.
+Final guarded per-file diagnostics report zero errors.
