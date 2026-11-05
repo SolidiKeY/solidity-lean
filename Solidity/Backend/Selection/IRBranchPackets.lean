@@ -62,12 +62,19 @@ theorem join_normal (right : List Evm.Instr) (initial : Evm.Machine) :
   change Evm.exec right right.length initial = .ok initial 0
   exact Evm.exec_length right initial
 
-#print axioms numeric_zero
-#print axioms test_run
-#print axioms suffix_run
-#print axioms run
-#print axioms split
-#print axioms empty_suffix
-#print axioms join_normal
+/-- info: 'Solidity.Backend.Selection.IRBranch.numeric_zero' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms numeric_zero
+/-- info: 'Solidity.Backend.Selection.IRBranch.test_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms test_run
+/-- info: 'Solidity.Backend.Selection.IRBranch.suffix_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms suffix_run
+/-- info: 'Solidity.Backend.Selection.IRBranch.run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms run
+/-- info: 'Solidity.Backend.Selection.IRBranch.split' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms split
+/-- info: 'Solidity.Backend.Selection.IRBranch.empty_suffix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms empty_suffix
+/-- info: 'Solidity.Backend.Selection.IRBranch.join_normal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms join_normal
 
 end Solidity.Backend.Selection.IRBranch
