@@ -493,6 +493,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/CalldataPackets/RawUintN/Controls.lean` | Bounded memory-storage-copy checkpoint; typed scope and retained obligations are stated in the module. |
 | `Calculus/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Examples/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawBool/Controls.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawBool/Execution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
