@@ -900,3 +900,31 @@ compilation has no warnings in the changed modules.
 `BytesGateInterface.lean` specifies actual fixed-byte padding validation;
 `WordGateInterface.lean` unifies actual compiler validation for every existing
 ABI word kind. Input loading and aggregate/body execution remain separate.
+
+`BytesGate.lean` emits actual fixed-byte padding checks using the existing
+intrinsic bitwise compiler. The mask is representable for every semantic size;
+the standard mask/modulus identity already used by the numeric validator links
+emitted execution to `Kind.fixedBytes.valid`. Input words and saved machine
+state remain unchanged except the continuation/result cell, with zero pending
+skip. Size zero and sizes at/above the full word retain their existing semantic
+behavior, without a new admission restriction or input cleanup.
+`WordGate.lean` delegates every existing ABI word kind to the proved unsigned,
+signed or fixed-byte family. It exports general public compiler selection,
+exact actual execution, rejection iff semantic validity is false, and raw
+positive-fuel scalar decoder rejection equivalence for all kinds. No decoded
+payload or successful run is supplied. This closes primitive word validation
+at the intrinsic compiler boundary; native loading/byte failure transport,
+aggregate decoding, head/span/signature integration, typed argument construction
+and successful ABI body/full-entry execution remain separate obligations.
+Unified controls exercise accepted and rejected uint, signed, bool, fixed-byte
+and enum inputs, bytes0/1/31 boundaries, all words at full and oversized byte
+sizes, prefixed unaligned padding failure and successful value derivation,
+malformed cells and protected saved state. Existing numeric validators and
+certificates are unchanged; their mask arithmetic lemma is reused.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked mask representability/saturating sizes, actual compiler selection
+and saved state, exhaustive kind delegation and the positive-fuel raw scalar
+correspondence. Both confirmed the primitive-only boundary and meaningful
+unified controls; neither used a build or Lean server. Focused compilation has
+no warnings in the changed modules.

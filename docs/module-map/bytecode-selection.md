@@ -179,3 +179,8 @@
 | `Backend/AbiEntry/SignedGateInterface.lean` | Actual signed cleanup compiler execution certificate. |
 | `Backend/AbiEntry/SignedGate.lean` | Signed two-range guards with exact execution and raw decoder correspondence. |
 | `Backend/AbiEntry/SignedGateControls.lean` | Sign-extension edges, full/wide widths and raw negative-word controls. |
+| `Backend/AbiEntry/BytesGateInterface.lean` | Actual fixed-byte padding compiler execution certificate. |
+| `Backend/AbiEntry/BytesGate.lean` | Fixed-byte mask validation with exact intrinsic compiler execution. |
+| `Backend/AbiEntry/WordGateInterface.lean` | Unified actual compiler certificate for every existing ABI word kind. |
+| `Backend/AbiEntry/WordGate.lean` | Delegated all-kind validation with raw scalar rejection equivalence. |
+| `Backend/AbiEntry/WordGateControls.lean` | Unified kind acceptance/rejection, byte padding and raw value controls. |

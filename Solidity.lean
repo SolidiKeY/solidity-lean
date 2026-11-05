@@ -7,6 +7,8 @@ import Solidity.AST
 import Solidity.Automation.H28.Chain
 import Solidity.Automation.H28.Context
 import Solidity.Automation.H28.Prove
+import Solidity.Backend.AbiEntry.BytesGate
+import Solidity.Backend.AbiEntry.BytesGateInterface
 import Solidity.Backend.AbiEntry.CalldataWord
 import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
@@ -82,6 +84,9 @@ import Solidity.Backend.AbiEntry.ValueGateBodyControls
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
 import Solidity.Backend.AbiEntry.ValueGateControls
 import Solidity.Backend.AbiEntry.ValueGateInterface
+import Solidity.Backend.AbiEntry.WordGate
+import Solidity.Backend.AbiEntry.WordGateControls
+import Solidity.Backend.AbiEntry.WordGateInterface
 import Solidity.Backend.AbiEntry.WordValidation
 import Solidity.Backend.AbiEntry.WordValidationInterface
 import Solidity.Backend.AbiWorld.CallerWordBytes
