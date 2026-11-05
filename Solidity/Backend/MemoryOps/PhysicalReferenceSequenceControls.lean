@@ -702,4 +702,67 @@ theorem dirty_pointer_checkpoint (pipeline : Roadmap.Pipeline) (horizon : Nat) (
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_checkpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms dirty_pointer_checkpoint
 
+private theorem prefix_image_read (c v : Nat) (hit : (c,v)∈image) :
+    Environment.readMemory byteAfter (32*c) 32=Semantics.wordBytes v := by
+  have sep : 32*c+32≤384 ∨ 384+payloadBytes.length≤32*c := by
+    simp only [image,List.mem_cons,List.not_mem_nil,or_false,Prod.mk.injEq] at hit
+    rcases hit with ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ <;> decide
+  exact (readMemory_write_frame bytes (32*c) 32 384 payloadBytes sep).trans (image_read c v hit)
+
+private theorem dirty_image_vector :
+    byteVector dirtyPointerBytes=image.map (fun cv =>
+      if cv.1=17 then (Semantics.wordBytes cv.2).set 31 7 else Semantics.wordBytes cv.2) := by
+  change image.map (fun cv => Environment.readMemory dirtyPointerBytes (32*cv.1) 32)=_
+  apply List.map_congr_left
+  intro cv hit
+  rcases cv with ⟨c,v⟩
+  by_cases selected : c=17
+  · subst c
+    rw [if_pos rfl]
+    exact (readMemory_writeByte_at byteAfter 544 32 31 7).trans
+      (congrArg (fun bs : List UInt8 => bs.set 31 7) (prefix_image_read 17 v hit))
+  · rw [if_neg selected]
+    have sep : 32*c+32≤575 ∨ 575+([7] : List UInt8).length≤32*c := by
+      change 32*c+32≤575 ∨ 576≤32*c
+      simp only [image,List.mem_cons,List.not_mem_nil,or_false,Prod.mk.injEq] at hit
+      rcases hit with ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ <;> omega
+    exact (readMemory_write_frame byteAfter (32*c) 32 575 [7] sep).trans (prefix_image_read c v hit)
+
+/-- Complete twelve-word observations in actual initial/saved/dirty/restored
+order. Only byte31 of the first repeated pointer changes in the dirty table;
+all other bytes, child objects, neighbour and allocator word remain explicit. -/
+theorem dirty_pointer_complete_tables :
+    [byteVector bytes,byteVector byteAfter,byteVector dirtyPointerBytes,byteVector savedBytePrefix.memory]=
+      [[1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes,
+       [1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes,
+       ([1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes).set 7 ((Semantics.wordBytes 32).set 31 7),
+       [1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes] := by
+  first
+  | solve | simp only [] | omega
+  | rw [initial_byte_vector,byte_vectors_framed,initial_byte_vector,dirty_image_vector]
+    simp only [image,List.map_cons,List.map_nil,List.set_cons_zero,List.set_cons_succ,Nat.reduceEqDiff,if_true,if_false,savedBytePrefix]
+    rw [byte_vectors_framed,initial_byte_vector]
+    simp only [List.map_cons,List.map_nil]
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_complete_tables' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dirty_pointer_complete_tables
+
+/-- The complete dirty table cannot be replaced by the stale saved table.
+The observed last byte of the first pointer is7 rather than32. -/
+theorem dirty_pointer_table_not_saved : byteVector dirtyPointerBytes≠byteVector byteAfter := by
+  first
+  | solve | simp only [] | omega
+  | intro same
+    have dirty : ((byteVector dirtyPointerBytes)[7]?).bind (fun word => word[31]?)=some (7 : UInt8) := by
+      rw [dirty_image_vector]
+      decide
+    have saved : ((byteVector byteAfter)[7]?).bind (fun word => word[31]?)=some (32 : UInt8) := by
+      rw [byte_vectors_framed,initial_byte_vector]
+      decide
+    rw [same,saved] at dirty
+    exact (by decide : (some (32 : UInt8))≠some 7) dirty
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_table_not_saved' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dirty_pointer_table_not_saved
+
 end Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls

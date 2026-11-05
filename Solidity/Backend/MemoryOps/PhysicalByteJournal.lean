@@ -37,6 +37,26 @@ theorem readMemory_eq_getBytes (bytes : Environment.Memory) (a n : Nat) :
     simp only [Environment.readMemory,List.getElem_map,List.getElem_range]
     exact (getBytes_at bytes a n j (by rw [getBytes_length] at hj';exact hj')).symm
 
+/-- Every observed byte of a single-byte overwrite is an actual list update.
+There is no index-admission bound: an offset outside the read leaves the list
+unchanged, exactly as List.set specifies. -/
+theorem readMemory_writeByte_at (bytes : Environment.Memory) (a n j : Nat) (b : UInt8) :
+    Environment.readMemory (Environment.writeByte bytes (a+j) b) a n=
+      (Environment.readMemory bytes a n).set j b := by
+  first
+  | solve | simp only [] | omega
+  | apply List.ext_getElem
+    · simp only [Environment.readMemory,List.length_map,List.length_range,List.length_set]
+    · intro i hi hi'
+      simp only [Environment.readMemory,List.getElem_map,List.getElem_range,List.getElem_set,Environment.writeByte]
+      by_cases same : i=j
+      · subst i
+        simp only
+      · rw [if_neg (Ne.symm same),if_neg (by omega : a+i≠a+j)]
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.readMemory_writeByte_at' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms readMemory_writeByte_at
+
 /-- Actual byte writes agree too, reusing both independently published APIs. -/
 theorem writeBytes_eq_putBytes (bytes : Environment.Memory) (a : Nat) (bs : List UInt8) :
     Environment.writeBytes bytes a bs=Failure.Slice.putBytes bytes a bs := by
