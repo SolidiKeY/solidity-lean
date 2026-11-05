@@ -1,0 +1,37 @@
+{
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.invariant_via_loom": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.mixed_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.mixed_via_loom": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.panic_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.revert_accepted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.straight_vc_is_wp_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoomExamples.lean:Solidity.Bridge.LoomExamples.straight_via_loom": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

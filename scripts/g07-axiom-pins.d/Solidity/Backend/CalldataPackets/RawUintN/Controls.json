@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/CalldataPackets/RawUintN/Controls.lean:Solidity.Backend.CalldataPackets.RawUintN.Controls.dirty_second": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Controls.lean:Solidity.Backend.CalldataPackets.RawUintN.Controls.largest_clean": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Controls.lean:Solidity.Backend.CalldataPackets.RawUintN.Controls.local_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/CalldataPackets/RawUintN/Controls.lean:Solidity.Backend.CalldataPackets.RawUintN.Controls.prefix_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

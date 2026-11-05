@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayRepeat.lean:Solidity.Backend.StorageOps.TargetArrayRepeat.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

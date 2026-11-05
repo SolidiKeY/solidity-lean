@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/FilteredMembership.lean:Solidity.holds_filteredMember": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

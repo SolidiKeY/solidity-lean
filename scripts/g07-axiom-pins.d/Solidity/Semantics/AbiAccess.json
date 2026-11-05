@@ -1,0 +1,23 @@
+{
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.cat_cpart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.cpart_agree": [
+  "propext"
+ ],
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.cpart_of_cval": [
+  "propext"
+ ],
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.verdictA_off": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.verdictA_revert_iff": [
+  "propext"
+ ],
+ "Solidity/Semantics/AbiAccess.lean:Solidity.AbiEntry.verdictA_run_entry": [
+  "propext"
+ ]
+}

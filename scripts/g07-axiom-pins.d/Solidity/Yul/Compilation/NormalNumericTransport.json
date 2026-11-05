@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/NormalNumericTransport.lean:Solidity.Yul.Compilation.NormalNumericTransport.machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalNumericTransport.lean:Solidity.Yul.Compilation.NormalNumericTransport.source_machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

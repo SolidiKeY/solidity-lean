@@ -1,0 +1,56 @@
+{
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.bytes_agree": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.capacity_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.image_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.materialized_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.opcode_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.operand_prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.push_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.selected_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.store_hash_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.store_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/DirectMemory.lean:SolidityBridge.Yul.DirectMemory.view_read_after_store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

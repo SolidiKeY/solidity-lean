@@ -1,0 +1,41 @@
+{
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.blocked_not_rejected": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.body_from_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.body_witness": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.calldata_handoff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.eager_lazy_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.entry_revert_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.rejection_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.run_not_rejected": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.single_calldata_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.verdict_of_values": [],
+ "Solidity/Backend/AbiEntry/EntryTransport.lean:Solidity.Backend.AbiEntry.EntryTransport.verdict_revert_exec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

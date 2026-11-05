@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgram.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgram.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.run_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleProgram.lean:Solidity.Backend.StorageOps.PrimitiveCycleProgram.store_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

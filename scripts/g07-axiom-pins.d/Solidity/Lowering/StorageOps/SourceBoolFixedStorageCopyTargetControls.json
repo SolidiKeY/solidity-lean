@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.false_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.required_old_agreements": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.root_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.selected_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.source_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.target_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.wrong_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolFixedStorageCopyTargetControls.lean:Solidity.Backend.StorageOps.SourceBoolFixedStorageCopyTarget.Controls.wrong_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

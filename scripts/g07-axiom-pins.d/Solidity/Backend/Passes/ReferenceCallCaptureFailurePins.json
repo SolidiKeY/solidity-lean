@@ -1,0 +1,47 @@
+{
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.capture_revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.joined_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.returned_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.FailureControls.wrong_zero_capture_cell": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallCaptureFailurePins.lean:Solidity.Backend.Passes.ReferenceCallReadback.source_capture_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
