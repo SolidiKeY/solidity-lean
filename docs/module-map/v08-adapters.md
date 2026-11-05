@@ -833,3 +833,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean` | Populated actual producer, scalar result and restored pointer controls for paired transport. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean` | All-count actual native recursive source and paired target scalar observation agreement, with heap identity separate. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean` | Populated source/target scalar result and distinct native exhaustion versus target success controls. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherence.lean` | Complete native allocating-recursive output coherence across all sufficient quotation indices; target heap identity remains separate. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeAllocationCoherenceControls.lean` | Exact populated two-allocation output at two sufficient indices and genuine insufficient-index exhaustion. |
