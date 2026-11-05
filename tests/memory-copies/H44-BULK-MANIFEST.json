@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-parallel-20261103",
+  "slug": "memory-copies",
+  "purpose": "H44 bulk remains on the original VM; only this manifest is committed. No theorem/gate/budget changes.",
+  "archives": [
+    {
+      "path": "/workspace/parallel-20261103/memory-copies/h44-code-only/memory-copies-bulk.tar.gz",
+      "size_bytes": 97173367,
+      "sha256": "82283feb93dbb09babcd021634308bfebbc4f3d10ef8bbdc3e783aa3d65a57fc"
+    }
+  ],
+  "original_evidence_directory": "/workspace/parallel-20261103/memory-copies",
+  "source_head": "f64216d11c70ca932e8c5d6516a77ff3ce6a02cb",
+  "published_base": "bec99c307eeb546d8fbc42b7540426e4ef64bcf2",
+  "continuation_branch": "codex/solidity-parallel-20261103/memory-copies-continuation-h44",
+  "continuation_repository": "/workspace/memory-copies",
+  "unfinished_work": "Preserved implementation/control WIP; full G33/G35 and original producer waits remain open."
+}

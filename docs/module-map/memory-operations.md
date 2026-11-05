@@ -318,3 +318,18 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalByteStoreSequence.lean` | Actual prepared two-MSTORE Environment slice with initial-derived numeric/pointer intermediate and final frames, same-cell overwrite support and live REVERT observation. |
 
 | `Backend/MemoryOps/PhysicalByteOverwrite.lean` | Actual two-byte-store reached REVERT payload, arbitrary overlap, complete read updates, disjoint represented-word frame and short-stack prefix failure. |
+| `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |
+| `Backend/MemoryCopies/AliasBindingInterface.lean` | Actual pointer-compiler selection and emitted alias rebinding success/refusal with allocator framing. |
+| `Backend/MemoryCopies/AliasBinding.lean` | Actual selected pointer compiler followed by alias-local store, deriving exact source/target success or bounds refusal. |
+| `Backend/MemoryCopies/AliasBindingControls.lean` | Populated indexed-alias source/target observations, bounds refusal and fresh-pointer/empty-code negative controls. |
+| `Backend/MemoryCopies/AllocationPanicInterface.lean` | Explicit Source allocation-panic state and byte-exact emitted terminal-slice obligation; no size-selector premise hidden. |
+| `Backend/MemoryCopies/CheckedDefaultControls.lean` | Inhabited nested defaults, impossible-capacity refusal and unused huge child controls. |
+| `Backend/MemoryCopies/CheckedReference.lean` | Actual division-based full-demand guard and total reference-array default execution. |
+| `Backend/MemoryCopies/CheckedReferenceControls.lean` | Nested runtime defaults, unused oversized children and inhabited quotient-boundary controls. |
+| `Backend/MemoryCopies/HeapContentsControls.lean` | Populated nested 2/0/64-length children, fresh parent, struct/fixed holders and wrong-live-value/shadow controls. |
+| `Backend/MemoryCopies/DeepCopyContents.lean` | Inhabited fresh snapshot-copy heap certificate and initial live contents after actual old-object overlap schedules, with alias/empty/refusal controls. |
+| `Backend/MemoryCopies/RuntimeArrays.lean` | Production-selected runtime reference-array loop and scoped declaration correctness, complete parent demand and size-independent code. |
+| `Backend/MemoryCopies/RuntimeArrayControls.lean` | Actual populated runtime lengths0/2/64, empty-any-child and same-code controls, scoped declaration execution and wrong-cursor rejection. |
+| `Backend/MemoryCopies/RuntimeRebindInterface.lean` | Allocating runtime-array rebind outcome with exact scoped/target execution and old-object versus fresh-root separation. |
+| `Backend/MemoryCopies/RuntimeRebind.lean` | Existing allocating runtime rebind execution plus universal old-object preservation and fresh-root distinction. |
+| `Backend/MemoryCopies/RuntimeRebindControls.lean` | Actual declaration-then-rebind composition over populated ownership, retained old parent and empty/long/wrong-cursor/skipped-code controls. |

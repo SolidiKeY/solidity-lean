@@ -54,3 +54,32 @@ object's allocation size is still open, no V2 certificate is inhabited yet
 pushed address to the old cursor or keep V1's `Gap` clause. The new V1
 Source certificates are not yet inhabited; `NewArrayLengthPanicPremise.failure`
 assumes the panic equation.
+
+
+## H44 bounded code-only increment MC01
+
+This first dependency-ordered increment contains17 owned changed Lean modules, including7 Controls files, plus the generated root, owned module-map rows and12 owned standard axiom pins. It preserves the previously reviewed source bytes; no theorem, premise, gate or proof budget is changed. Original signature/proof history, the remaining12 increments and unfinished nested-location-pipeline work remain in `/workspace/memory-copies` on the preservation branch recorded in the manifest. Full G33/G35 remains open.
+
+Bulk is not part of this increment. The only new lane test file is [the H44 archive manifest](../../tests/memory-copies/H44-BULK-MANIFEST.json), recording absolute VM archive path, byte size and SHA256. Generated evidence, corpora, fixtures and logs stay on the original VM. The archive is transport/storage only and is not claimed as proof.
+
+Modules and controls:
+
+- `Solidity.Backend.MemoryCopies.NestedDefaultControls`
+- `Solidity.Backend.MemoryCopies.AliasBindingInterface`
+- `Solidity.Backend.MemoryCopies.AliasBinding`
+- `Solidity.Backend.MemoryCopies.AliasBindingControls`
+- `Solidity.Backend.MemoryCopies.AllocationPanicInterface`
+- `Solidity.Backend.MemoryCopies.CheckedDefault`
+- `Solidity.Backend.MemoryCopies.CheckedDefaultControls`
+- `Solidity.Backend.MemoryCopies.CheckedReference`
+- `Solidity.Backend.MemoryCopies.CheckedReferenceControls`
+- `Solidity.Backend.MemoryCopies.HeapContents`
+- `Solidity.Backend.MemoryCopies.HeapContentsControls`
+- `Solidity.Backend.MemoryCopies.DeepCopyContents`
+- `Solidity.Backend.MemoryCopies.RuntimeArrays`
+- `Solidity.Backend.MemoryCopies.RuntimeArrayControls`
+- `Solidity.Backend.MemoryCopies.RuntimeRebindInterface`
+- `Solidity.Backend.MemoryCopies.RuntimeRebind`
+- `Solidity.Backend.MemoryCopies.RuntimeRebindControls`
+
+Validation is recorded in the external handoff. Existing Source/physical/gas/recursive/compiler and typed producer obligations remain unchanged. Source root collision and global trust/pin drift are retained as external blockers, not waived.
