@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8GrowingBlock
 import Solidity.Yul.RawU8GrowingSequence
 import Solidity.Yul.RawU8Declaration
 import Solidity.Yul.RawIntegerBlock
@@ -220,3 +221,10 @@ and projection. The Source.execItems law retains checked/coherent premises.
 Checks exercise arithmetic consumption of the new local, older mutation,
 control restoration, dirty words and pipeline-specific initializer timeout effects.
 Block closure and general initializer admission remain separate obligations. -/
+
+/-! RawU8GrowingBlock.adapter closes the supported uint8 initializer/checked Items
+sequence using existing integer scope closure. Its concrete Source.execS law
+retains checked-frame and input-coherence premises. Checks exercise retained
+older arithmetic mutation, nested checked blocks, control restoration, dirty
+words and per-pipeline partial initializer errors. General initializer admission
+and dirty ordinary Source readback remain separate obligations. -/
