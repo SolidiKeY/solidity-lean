@@ -48,9 +48,9 @@ theorem storeVal_word {E : Source.Env} {Γ : Source.RCtx} (frame : Source.Fr)
 #guard_msgs in #print axioms read_after
 /-- info: 'Solidity.Lowering.StorageOps.SourceWordWrite.storeVal_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms storeVal_word
-/-- Both actual independent executions and written-word observations.
-The target operand is supplied on the stack. Word agreement is an INPUT;
-no address/liveness, value-lowering, compiler or world result is assumed. -/
+/-- Two independent executions sharing an input word. The Source path and
+ target slot are independent parameters: no address/layout relation is a premise
+ or conclusion. These component facts do not establish compiler preservation. -/
 theorem complete :
  ∀ (E : Source.Env) (Γ : Source.RCtx) (frame : Source.Fr) (path : Source.SPath)
  (value : Source.Val E.layout (E.cellTy path)) (locals : Source.Locals E.layout Γ) (state : Source.St E)
