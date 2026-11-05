@@ -6770,6 +6770,57 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSlice.lean:Solidity.Backend.MemoryOps.source_bool_slice_copy_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSlice.lean:Solidity.Backend.MemoryOps.source_bool_slice_copy_window": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSlice.lean:Solidity.Backend.MemoryOps.source_bool_slice_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSlice.lean:Solidity.Backend.MemoryOps.source_bool_slice_value": [],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.empty_and_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.raw_word_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.reached_failure_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.slice_and_decoder_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceControls.lean:Solidity.Backend.MemoryOps.BoolSliceControls.wrong_order_and_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean:Solidity.Backend.MemoryOps.source_bool_slice_copy_late_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/SourceCalldataCopy.lean:Solidity.Backend.MemoryOps.source_bool_value_array": [
   "Quot.sound",
   "propext"
@@ -7328,6 +7379,16 @@
   "propext"
  ],
  "Solidity/Backend/MemoryOps/SourceRawBoolEntry.lean:Solidity.Backend.MemoryOps.source_raw_bool_guarded_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean:Solidity.Backend.MemoryOps.raw_bool_values_first_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceRawBoolSliceSequence.lean:Solidity.Backend.MemoryOps.source_bool_slice_raw_late_error": [
   "Classical.choice",
   "Quot.sound",
   "propext"
