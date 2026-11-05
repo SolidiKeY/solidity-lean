@@ -3646,6 +3646,9 @@ import Solidity.Solkey.ScopedFlip
 import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
+import Solidity.Source.Agreement.BoolSlot
+import Solidity.Source.Agreement.BoolSlotAssign
+import Solidity.Source.Agreement.BoolSlotControls
 import Solidity.Source.Agreement.Locals
 import Solidity.Source.Agreement.NormalBoolAssign
 import Solidity.Source.Agreement.NormalBoolAssignControls

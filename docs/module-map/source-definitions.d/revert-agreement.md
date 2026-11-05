@@ -11,3 +11,6 @@
 | `Source/Agreement/NormalStatement.lean` | One-way normal-locals target; conditional sequence proofs are separate, and general Source/model agreement remains open. |
 | `Source/Agreement/NormalBoolAssign.lean` | Concrete head-local boolean assignment and initializer-overwrite normal-step producers; actual local tail retained. |
 | `Source/Agreement/NormalBoolAssignControls.lean` | Both interpreter histories, total initial-locals client, Source horizon failures and wrong-value countercontrol. |
+| `Source/Agreement/BoolSlot.lean` | Existing intrinsic indices at an arbitrary typed primitive prefix and actual local-set correspondence. |
+| `Source/Agreement/BoolSlotAssign.lean` | Arbitrary-position boolean assignment producer, internally instantiated normal client and short-horizon control. |
+| `Source/Agreement/BoolSlotControls.lean` | Actual middle-slot Source/model preservation and a wrong-slot countercontrol. |
