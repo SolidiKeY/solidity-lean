@@ -3299,6 +3299,55 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.eager_array_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.eager_bytes_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.frameCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheck.lean:Solidity.Backend.AbiEntry.LengthCheck.lazy_revert": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.boundaries": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.fuel_before_panic": [],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.inhabited_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_eager_array_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_eager_bytes_panic": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.raw_lazy_revert": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/LengthCheckControls.lean:Solidity.Backend.AbiEntry.LengthCheckControls.short_before_panic": [],
  "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.calldata_step": [
   "propext"
  ],
