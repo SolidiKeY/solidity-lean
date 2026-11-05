@@ -197,6 +197,8 @@ import SolidityBridge.RoadmapV15.P10.DecoderAgreementControls
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationProducer
 import SolidityBridge.RoadmapV15.P10.EnvironmentObservationWitness
 import SolidityBridge.RoadmapV15.P10.EnvironmentTasksV1
+import SolidityBridge.RoadmapV15.P10.EqualityConsumer
+import SolidityBridge.RoadmapV15.P10.EqualityControls
 import SolidityBridge.RoadmapV15.P10.Execution
 import SolidityBridge.RoadmapV15.P10.ExecutionControls
 import SolidityBridge.RoadmapV15.P10.ExponentConsumer
@@ -207,6 +209,8 @@ import SolidityBridge.RoadmapV15.P10.FrozenWitness
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 import SolidityBridge.RoadmapV15.P10.Interface
+import SolidityBridge.RoadmapV15.P10.InvocationEnvironment
+import SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls
 import SolidityBridge.RoadmapV15.P10.JumpMemberConsumer
 import SolidityBridge.RoadmapV15.P10.JumpMemberControls
 import SolidityBridge.RoadmapV15.P10.JumpZeroConsumer
