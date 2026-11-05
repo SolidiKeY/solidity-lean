@@ -479,6 +479,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/CheckedSub/Source.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/CheckedSub/Target.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawUintN/Execution.lean` | Bounded memory-storage-copy checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawInt/Controls.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawInt/Execution.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
