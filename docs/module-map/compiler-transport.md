@@ -60,3 +60,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/InternalFlow/RuntimeFrameV3FrozenScopeFamily.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/InternalFlow/RuntimeFrameV3RecursiveScopeLaws.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/MemoryScopeAllocation.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/MemoryScopeBoundary.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
