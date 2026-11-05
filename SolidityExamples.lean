@@ -116,6 +116,7 @@ import Solidity.Examples.Tactics.CallbackRuns
 import Solidity.Examples.Tactics.CallbackStrategy
 import Solidity.Examples.Tactics.CallbackUnwk
 import Solidity.Examples.Tactics.CallbackWk
+import Solidity.Examples.Tactics.CallerModel
 import Solidity.Examples.Tactics.Calls
 import Solidity.Examples.Tactics.Chains
 import Solidity.Examples.Tactics.Checked
@@ -177,6 +178,7 @@ import Solidity.Examples.Tactics.Memory
 import Solidity.Examples.Tactics.MemoryPush
 import Solidity.Examples.Tactics.MemoryReturns
 import Solidity.Examples.Tactics.ModularArithmetic
+import Solidity.Examples.Tactics.Mutability
 import Solidity.Examples.Tactics.NativeDeferred
 import Solidity.Examples.Tactics.NativeDeferredCallback
 import Solidity.Examples.Tactics.NativeDeferredSource
@@ -209,6 +211,7 @@ import Solidity.Examples.Tactics.PushSuffixRules
 import Solidity.Examples.Tactics.PushSuffixRun
 import Solidity.Examples.Tactics.PushSuffixSource
 import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Examples.Tactics.Reachable
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.Recursion
 import Solidity.Examples.Tactics.ReferenceParameters
