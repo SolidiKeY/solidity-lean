@@ -1,1 +1,0 @@
-tests/sol-expression-uniqueness/environment-names.lean:1:0: error: object file '/workspace/solidity-lean/.lake/build/lib/lean/Solidity/Frontend/ExpressionUniqueness/AxiomPins.olean' of module Solidity.Frontend.ExpressionUniqueness.AxiomPins does not exist

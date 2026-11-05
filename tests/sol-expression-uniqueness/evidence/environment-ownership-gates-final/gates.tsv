@@ -1,1 +1,0 @@
-PASS	lean:tests/sol-expression-uniqueness/environment-names.lean	1	/workspace/solidity-lean/tests/sol-expression-uniqueness/evidence/environment-ownership-gates-final/1.log	lake env lean --tstack=131072 tests/sol-expression-uniqueness/environment-names.lean

@@ -1,1 +1,0 @@
-PASS	lean:Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean	8	/workspace/solidity-lean/tests/sol-expression-uniqueness/evidence/checkpoint-gates-spans/1.log	lake env lean --tstack=131072 Solidity/Frontend/ExpressionUniqueness/AxiomPins.lean

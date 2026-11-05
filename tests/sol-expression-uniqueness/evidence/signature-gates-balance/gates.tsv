@@ -1,1 +1,0 @@
-PASS	lean:tests/sol-expression-uniqueness/signatures.lean	3	/workspace/solidity-lean/tests/sol-expression-uniqueness/evidence/signature-gates-balance/1.log	lake env lean --tstack=131072 tests/sol-expression-uniqueness/signatures.lean
