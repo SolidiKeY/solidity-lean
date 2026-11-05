@@ -484,6 +484,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallDual
 import Solidity.Backend.InternalFlow.RuntimeFrameV3SameCallInputs
 import Solidity.Backend.InternalFlow.RuntimeFrameV3SameSelectedRevert
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarAllocatingDescent
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarCallerControls
@@ -498,6 +499,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemand
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandClaims
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDemandDual
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescent
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDual
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDualControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter
