@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/bytecode-selection.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Executable bytecode selection
 
 | Module | Role |

@@ -1,0 +1,28 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.bool_word": [],
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.clear_word_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.clear_words_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.copy_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.copy_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolCopyReadbacks.lean:Solidity.Backend.StorageOps.SourceBoolCopyReadbacks.writes_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

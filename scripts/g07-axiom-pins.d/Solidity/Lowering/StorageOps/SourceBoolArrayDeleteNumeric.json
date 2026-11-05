@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.array_clear_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.clear_range_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.data_correspondence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.source_array_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.source_array_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceBoolArrayDeleteNumeric.lean:Solidity.Backend.StorageOps.SourceBoolArrayDeleteNumeric.source_array_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

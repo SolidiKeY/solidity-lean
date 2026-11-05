@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCapturedBytePhase.lean:Solidity.Lowering.StorageOps.SourceCapturedBytePhase.run_phase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

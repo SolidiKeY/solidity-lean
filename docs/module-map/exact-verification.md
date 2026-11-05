@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/exact-verification.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Exact verification
 
 | Module | What it defines |

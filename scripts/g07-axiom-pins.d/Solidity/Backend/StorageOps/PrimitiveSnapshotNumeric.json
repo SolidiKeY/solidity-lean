@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumeric.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.numeric_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumeric.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.numeric_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumeric.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.target_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotNumeric.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotNumeric.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

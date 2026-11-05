@@ -1,0 +1,50 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.child_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.child_header": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.context": [],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.graph_outer_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.other_child_data": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.other_child_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.outer_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedPop.lean:Solidity.Backend.StorageOps.TargetNestedPop.run_select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

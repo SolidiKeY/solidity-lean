@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3CallerPrefixes.lean:Solidity.Backend.InternalFlow.RuntimeFrame.CallerPrefixes.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

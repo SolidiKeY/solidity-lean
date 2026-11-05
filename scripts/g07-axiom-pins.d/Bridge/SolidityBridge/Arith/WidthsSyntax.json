@@ -1,0 +1,10 @@
+{
+ "Bridge/SolidityBridge/Arith/WidthsSyntax.lean:Solidity.Bridge.Arith.WidthsSyntax.synth_head": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/WidthsSyntax.lean:Solidity.Bridge.Arith.WidthsSyntax.synth_unary": [
+  "Quot.sound",
+  "propext"
+ ]
+}

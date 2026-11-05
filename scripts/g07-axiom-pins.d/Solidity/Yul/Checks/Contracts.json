@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.checkAccess_iff": [],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.checkLiteral_iff": [
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.checkLiteral_value": [],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.div_zero": [
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.fresh_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.mod_zero": [
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.powBits_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.powWord_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.resolve_complete": [],
+ "Solidity/Yul/Checks/Contracts.lean:Solidity.Yul.resolve_sound": []
+}

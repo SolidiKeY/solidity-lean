@@ -1,0 +1,65 @@
+{
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.caller_rescue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.capacity_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.closed_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.decode_roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.distinct_bytes": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.leafCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.model_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.padded_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.prefix_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.pushCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.same_model_selection": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.scalar_result": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.selected_model": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecutionControls.lean:Solidity.Yul.Compilation.WordInstructionCertificates.Controls.symbolic_rescue": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
