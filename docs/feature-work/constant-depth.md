@@ -20,7 +20,8 @@ under the existing contract: the clash-free projection
 | `ConstantDepth/Lookup.lean` (on master) | a resolved constant normalizes to itself (`lookup_constant_canonical`); `rank_resolved_dependency_lt` |
 | `ConstantDepth/Complete.lean` (on master) | `nconst_rank_complete` (rank many levels suffice), `nconst_levels_complete`, `evalConst_complete`, `evalConst_iff`, `evalConst_none_iff` (overflow refusals included), `arrayLenB_complete/iff/none_iff`, and the `*_resolved_complete` corollaries taking `WellFormed (resolveUnit s u)` |
 | `ConstantDepth/Correspondence.lean` (new, backfill) | `constDeps_declared_iff` (a declared constant's edges are exactly its initializer's resolved constant paths), `rank_declared_dependency_lt`, `depPath_rank_no_return`, `teval_unique`, `nconst_unique`, `arrayLen_unique`, `arrayLen_static_value` |
-| `ConstantDepth/Controls.lean` (new, item 4) | kernel `decide` controls on the real `evalConst`/`nconstP`/`rank`/`acyclicB`; exact axiom pins of all 80 lane theorems |
+| `ConstantDepth/Determinism.lean` (new, backfill) | `teval_det`, `nconst_det`, `arrayLen_det`: deterministic in every environment, no premise (mutual structural recursion) |
+| `ConstantDepth/Controls.lean` (new, item 4) | kernel `decide` controls on the real `evalConst`/`nconstP`/`rank`/`acyclicB`; exact axiom pins of all 83 lane theorems |
 
 The original bound is therefore **true**; no counterexample or additive evaluator
 was needed. Work-queue items 1–3 were on master (including the arrayLenB
@@ -56,7 +57,7 @@ read-only inputs match their sha256 pins. A deleted pin is rejected (mutation-ch
 
 Pin registration in `scripts/g07-axiom-pins.json` stays with the coordinator (Q-PIN-1):
 after integration run `node scripts/check-axiom-pins.mjs --write`; the proposal is
-`tests/sol-constant-depth/Axioms.lean` (80 pins, regenerated from the current
+`tests/sol-constant-depth/Axioms.lean` (83 pins, regenerated from the current
 declarations; the old 79-pin packet is superseded) and
 `tests/calldata-packets-1105/RawInt/Axioms.lean` (55 pins).
 
@@ -68,8 +69,9 @@ concluding `rank b < rank a ∧ ¬Reach b a`); `chain_levels` was a definitional
 restatement (removed); missing "near" chain (added `near_*`); unused-cycle value
 not tied to `TEval` (added `unused_cycle_teval`); "qualified paths included" was
 vacuous for expressions (docstring corrected, `qualified_*` controls added).
-Suspected and recorded: the uniqueness theorems may not need the contract
-(determinism by induction is not proved here).
+Suspected: the uniqueness theorems do not need the contract — confirmed by
+proving `teval_det`/`nconst_det`/`arrayLen_det` with no premise (`Determinism.lean`);
+the contract versions are kept unchanged.
 
 ConstantDepth skeptic — ACCEPT-WITH-FINDINGS: premises are projections of the
 existing contract; controls run the real checkers; Rank/Lookup/Complete unchanged.
@@ -87,7 +89,6 @@ Recorded in the RawInt document's increment section (one build covers both).
 
 - No general family of environments with rank = `decls.length` for every size: the
   tightness is a witness (6 declarations), the bound itself is general.
-- Determinism of `TEval`/`NamedConst` without the contract is not proved.
 - A qualified constant reference (`K.X`) is no graph edge and has no typed value in
   the existing semantics (`Syn.paths`, `TEval`), unlike solc; `Solidity/Source/**`
   is VY5's, so this is recorded, not changed.

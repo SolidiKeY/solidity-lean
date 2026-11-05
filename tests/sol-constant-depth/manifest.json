@@ -5,10 +5,12 @@
   "Solidity.Frontend.ConstantDepth.Rank",
   "Solidity.Frontend.ConstantDepth.Lookup",
   "Solidity.Frontend.ConstantDepth.Complete",
+  "Solidity.Frontend.ConstantDepth.Determinism",
   "Solidity.Frontend.ConstantDepth.Correspondence",
   "Solidity.Frontend.ConstantDepth.Controls"
  ],
  "new_modules": [
+  "Solidity.Frontend.ConstantDepth.Determinism",
   "Solidity.Frontend.ConstantDepth.Correspondence",
   "Solidity.Frontend.ConstantDepth.Controls"
  ],
@@ -31,7 +33,10 @@
   "rank_resolved_dependency_lt",
   "constDeps_declared_iff",
   "teval_unique",
-  "arrayLen_unique"
+  "arrayLen_unique",
+  "teval_det",
+  "nconst_det",
+  "arrayLen_det"
  ],
  "control_families": {
   "chain at declaration count": [

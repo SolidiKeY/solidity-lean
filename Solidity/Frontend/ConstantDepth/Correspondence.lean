@@ -1,4 +1,5 @@
 import Solidity.Frontend.ConstantDepth.Complete
+import Solidity.Frontend.ConstantDepth.Determinism
 
 /-! # Exact dependency correspondence and determinism (backfill)
 
@@ -63,8 +64,8 @@ theorem depPath_rank_no_return {E : Env} (ha : ConstsAcyclic E) {a b : Node}
   have h2 := rank_mono hb hba
   omega
 
-/-- Typed evaluation is functional under the unchanged contract (derived from
-completeness; determinism without the contract is not stated here). -/
+/-- Typed evaluation is functional under the unchanged contract, here derived
+from completeness; `teval_det` (`Determinism.lean`) needs no contract. -/
 theorem teval_unique {E : Env} {scope : Option String} {e : Syn .expr} {v w : TVal}
     (hw : E.decls.Pairwise fun a b => a.clash E b = false) (ha : ConstsAcyclic E)
     (hv : TEval E scope e v) (hw' : TEval E scope e w) : v = w := by

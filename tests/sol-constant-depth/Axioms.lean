@@ -79,6 +79,12 @@ the same pins close `Controls.lean`, so the library build enforces them too. -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.arrayLenB_none_iff
 /-- info: 'Solidity.Frontend.ConstantDepth.arrayLenB_resolved_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.arrayLenB_resolved_complete
+/-- info: 'Solidity.Frontend.ConstantDepth.teval_det' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.teval_det
+/-- info: 'Solidity.Frontend.ConstantDepth.nconst_det' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.nconst_det
+/-- info: 'Solidity.Frontend.ConstantDepth.arrayLen_det' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.arrayLen_det
 /-- info: 'Solidity.Frontend.ConstantDepth.lookup_declared_constant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.lookup_declared_constant
 /-- info: 'Solidity.Frontend.ConstantDepth.constDeps_declared_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
