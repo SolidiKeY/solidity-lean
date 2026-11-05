@@ -1935,3 +1935,7 @@ The numeric NOT certificate now composes with the charged fetched reference law,
 ### Selected signed LT
 
 The numeric SLT certificate now composes with the charged fetched reference theorem, retaining explicit stack representation, capacity, gas and fuel premises. Controls distinguish signed from unsigned order using negative one and the minimum signed word, check equality and reversed operands, preserve populated separate frames, and establish gas-before-arity and fuel priority. This is raw numeric selection agreement; checked Source behavior, physical input origin and account-world adequacy remain separate.
+
+### Selected signed GT
+
+The numeric SGT certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Negative-one, minimum-signed-word, equality and reversed-operand controls distinguish signed order, preserve the populated separate frames and reject wrong result/tail observations while retaining gas-before-arity and fuel priority. This proves a primitive selection leaf, not checked Source behavior, physical input origin or account-world adequacy.
