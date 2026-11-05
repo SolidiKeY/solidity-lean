@@ -399,21 +399,8 @@ from Codex Cloud VMs, worktrees and branches, with delivery to `origin/master`.
 That authorizes serial integration after the existing reviews and validation;
 it does not establish that any assembly implementation is complete.
 
-## Automation lane decisions (2026-10-31)
-
-The human approved the after-roadmap automation lanes in the originating chat
-on 2026-10-31. This isolated VA2 checkout records the exact decision receipt:
-
-| ID | Exact human answer |
-|---|---|
-| AQ1 | "Yes, start both lanes" |
-| AQ2 | "Yes, keep unrolling and warn" |
-
-AQ1 authorizes VA1 and VA2. AQ2 keeps unrolling unannotated literal-bounded
-loops and adds a warning naming the loop, with no new option. These answers
-close no proof obligation and grant no broader scope. Decisions c, c-prime,
-d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
-classes remain unknown; exact validity and hash premises remain unchanged.
+VY5's [composition backfill](feature-work/inline-assembly-vy5.md)
+changes no admission, observations, feature status, proof budget or prerequisite.
 
 ### VY5 human amendments relayed 2026-11-02
 
@@ -431,7 +418,6 @@ Original strict report/validator and failed exits remain immutable. See
 `tests/yul-composition/rethrow-trace-contract.json` and the VY5 lane handoff.
 VY5-DISK1 is resolved by H1; no filesystem growth/migration requested.
 
-
 ### H3 continuation: LIB1 and unchecked-add (2026-11-02)
 
 The coordinator relayed that human H3 **“Per-pipeline”** also answers
@@ -443,3 +429,20 @@ re-ask the decisions, assume package availability or mark these gates passed.
 Their status is pending committed producer evidence, not pending human choice.
 Earlier unanswered wording remains historical. Other original decisions/gates
 remain unchanged.
+
+## Automation lane decisions (2026-10-31)
+
+The human approved the after-roadmap automation lanes in the originating chat
+on 2026-10-31. This isolated VA2 checkout records the exact decision receipt:
+
+| ID | Exact human answer |
+|---|---|
+| AQ1 | "Yes, start both lanes" |
+| AQ2 | "Yes, keep unrolling and warn" |
+
+AQ1 authorizes VA1 and VA2. AQ2 keeps unrolling unannotated literal-bounded
+loops and adds a warning naming the loop, with no new option. These answers
+close no proof obligation and grant no broader scope. Decisions c, c-prime,
+d, e3-prime and e3-double-prime remain in force: undecidable or unprovable
+classes remain unknown; exact validity and hash premises remain unchanged.
+

@@ -3058,9 +3058,7 @@ continues from `cloud/vy5-move` (`5209dc728a5d230d31e1345d383bb87bb67120b3`),
 merged with `origin/master` `b86ae4568cef6d6226f4d170360bbb089debe3fb`.
 Five files conflicted (`docs/README.md`, `docs/feature-work/inline-assembly.md`,
 `docs/solc-alignment.md`, `docs/solidity-scope.md` and
-`scripts/check-layers.mjs`). In each one both sides are kept. Master's copy of
-the YQ1–YQ7 record replaces the lane's duplicate, and the lane's H1/H3
-subsections follow it. The library roots were regenerated with `register.sh`.
+`scripts/check-layers.mjs`). In each one both sides are kept, except that in `docs/solidity-scope.md` master's YQ1–YQ7 record replaces the lane's duplicate table. The lane's H1/H3 subsections and its composition-backfill sentence stay in master's inline-assembly section, and the lane's H3 trace subsection stays before master's new overload section in `docs/solc-alignment.md`. The library roots were regenerated with `register.sh`.
 
 **Gate failure relay (scheduled merge 2026-11-05 12:52).** Master does not
 define `Monetary.wide`. The moved branch also lacks it, and lacks
@@ -3077,7 +3075,9 @@ only in the Codex VM's private dependency tree (`/workspace/vy5-dependencies-202
 | Lane module | Missing producer |
 |---|---|
 | `FailurePhysical` | `Solidity.Yul.World.FailureFuel` |
-| `IndexedWritePhysical` | `Solidity.Yul.World.IndexedEmitHeap` (`ScalarEmitPort`, `PhysicalCompletion`) |
+| `IndexedWritePhysical` | `Solidity.Yul.World.IndexedEmitHeap` |
+
+All three also need the missing producer files `Solidity/Yul/World/ScalarEmitPort.lean` and `Solidity/Yul/World/PhysicalCompletion.lean`, which `indexed-write-inputs.json` lists with hashes; each held module opens `PhysicalCompletion`.
 | `ReturningPhysical` | `Solidity.Yul.World.GeneralReturningOutput` |
 
 The first touched gate (`gate.sh touched` at `2a322d1e`) failed only on six modules: the three missing producers (`no such file`) and the three lane modules importing them (`bad import`). Its log is on this VM only, not in the repository. The three lane modules
@@ -3098,3 +3098,19 @@ They remain failures and are not relabelled as passes. The run happened before t
 Queue status is unchanged. Work 1 and Work 3 remain blocked on actual
 V16/VY3/VY4 assembly correctness interfaces. Work 2 and Backfill A/B remain
 partial. Neither master nor any ref on origin has the three producers listed above.
+
+**Move reviews.** A read-only finder and a separate read-only skeptic reviewed
+the move. Neither used the Lean server. Confirmed findings, all fixed:
+- The merge had dropped the lane's composition-backfill sentence from
+  `solidity-scope.md`, and the lane's H1/H3 subsections had landed under the
+  wrong sections in `solidity-scope.md` and `solc-alignment.md`.
+- The producer list for the held modules was incomplete.
+- `FailureDriver.lean` imported a held module but was not held. It is now held.
+- Ledgers and validators still name the pre-move paths. This is now stated.
+- Earlier sections described held-module results without saying they are
+  Codex-VM results. Each now carries a note.
+- The import-closure wording was false, and the "never pushed" wording was too
+  strong. Both are corrected.
+Checked with no defect: every import resolves, the roots match the tree,
+`check-layers.mjs` is valid, the moves are byte-identical, and the absence of
+the producer and Monetary files from every origin ref holds.

@@ -20,5 +20,9 @@ these modules under `tests/yul-composition/` and `scripts/yul-composition/`
 still name the pre-move paths; their hashes bind provenance, so they are left
 unchanged.
 
+All three also open `PhysicalCompletion`. They need the missing producers
+`Solidity/Yul/World/PhysicalCompletion.lean` and `ScalarEmitPort.lean`, which
+are in no ref either.
+
 They return to `Solidity/Yul/Composition/` once VY4 publishes those producers
 on master; until then their kernel facts are not part of the checked tree.

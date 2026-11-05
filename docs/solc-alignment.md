@@ -718,14 +718,6 @@ This lowering uses existing typed statements and sound rules. Runtime/EVM
 agreement and the fixed-program proof controls do not constitute a universal
 compiler-correctness theorem.
 
-## Overloads differing only in return types
-
-solc rejects two functions with the same name and parameter types and
-different return types. The Source elaborator (`Source.elaborate`) accepts
-them, and dispatch selects the first declaration.
-`Lowering/P9/ReturnControls.lean` checks that P9's whole-program checker
-refuses such a unit, but the elaborator itself does not reject it yet.
-
 ### VY5 H3: pinned canonical-rethrow operational traces (2026-11-02)
 
 Human decision H3 **“Per-pipeline”** authorizes the versioned finite trace
@@ -765,3 +757,11 @@ VY1 owns their implementation/fresh validation. VY5 records the approved mapping
 in `tests/yul-composition/vy1-h3-input-obligations.json`; it awaits exact committed
 producer evidence, without re-asking or presenting approval as implemented support.
 This does not change any existing sealed fixture/report or establish adequacy.
+
+## Overloads differing only in return types
+
+solc rejects two functions with the same name and parameter types and
+different return types. The Source elaborator (`Source.elaborate`) accepts
+them, and dispatch selects the first declaration.
+`Lowering/P9/ReturnControls.lean` checks that P9's whole-program checker
+refuses such a unit, but the elaborator itself does not reject it yet.
