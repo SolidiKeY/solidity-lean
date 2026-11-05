@@ -308,6 +308,42 @@ theorem expressionMutation : ∀ (pipeline : Solidity.Roadmap.Pipeline)
   rw [start,finish]
   exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
 
+
+def accumulate : LocalU8Expr.Supported Old.ctx.env Old.ctx.tys
+    (.assign (.local .here) (.binary .add (.local .here) (.local (.there .here)))) :=
+  .assign .here (.add (.local .here) (.local (.there .here)))
+
+theorem expressionWorldAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawContinueLoop.Old.ctx),
+(Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.assign pipeline fuel state).2.world = state.world := by
+  intro pipeline fuel state
+  exact RawContinueLoop.uint8_world Old.ctx [] false false _ Init.assign pipeline fuel state
+
+theorem expressionFaultWorldAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawContinueLoop.Old.ctx),
+(Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.timeout pipeline fuel state).2.world = state.world := by
+  intro pipeline fuel state
+  exact RawContinueLoop.uint8_world Old.ctx [] false false _ Init.timeout pipeline fuel state
+
+theorem expressionSourceErrorAll : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env)
+ (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env))
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ ∃ halt : Solidity.Source.Halt,
+ (Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.whileLoop (R := []) (M := false) (l := true) (u := false)
+     (.bool true) (.block (.stmt
+       (.expr (.assign (.local .here) (.binary .add (.local .here) (.local (.there .here)))))
+       .nil))) Solidity.Yul.Checks.RawContinueLoop.Old.clean).run
+   (Solidity.Source.L0 Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env,world) =
+ (.error halt,(Solidity.Source.L0 Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env,world)) := by
+  intro glob frame checked fuel nps ph world
+  exact RawContinueLoop.source_uint8_error Old.ctx [] false false _ accumulate
+    glob frame checked fuel nps ph (RawFrame.ofClean Old.clean world)
+    (RawCoherent.coherent_ofClean Old.clean world)
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -354,3 +390,25 @@ end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.Checks.RawContinueLoop.expressionPrepare
 #print axioms Solidity.Yul.Checks.RawContinueLoop.expressionRefresh
 #print axioms Solidity.Yul.Checks.RawContinueLoop.expressionMutation
+
+/-- info: 'Solidity.Yul.RawContinueLoop.uint8_statement_world' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.uint8_statement_world
+/-- info: 'Solidity.Yul.RawContinueLoop.uint8_body_world' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.uint8_body_world
+/-- info: 'Solidity.Yul.RawContinueLoop.uint8_world' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.uint8_world
+/-- info: 'Solidity.Yul.RawContinueLoop.source_uint8_error' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.source_uint8_error
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.expressionWorldAll' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionWorldAll
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.expressionFaultWorldAll' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionFaultWorldAll
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.expressionSourceErrorAll' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionSourceErrorAll

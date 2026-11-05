@@ -297,3 +297,11 @@ source_uint8_no_success retains checked/coherent input. Body errors and partial
 mutations remain observable; no-success does not mean every error is timeout.
 Controls retain dirty mutation and per-pipeline partial words. General dirty
 Source readback, arbitrary loop admission and full adequacy remain separate. -/
+
+/-! RawContinueLoop.uint8_statement_world/uint8_body_world/uint8_world preserve
+the existing Source.St field for this local-word expression loop at every fuel
+and raw input, including body failures. source_uint8_error gives the exact
+Source error/world pair under checked/coherent input, leaving the actual halt
+existentially quantified. Partial locals are retained; neither rollback nor
+universal timeout is inferred. Controls instantiate assignment, partial-failure
+bodies and a mutating checked-add Source body. Other effects remain separate. -/

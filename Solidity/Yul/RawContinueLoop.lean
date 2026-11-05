@@ -411,4 +411,101 @@ theorem source_uint8_no_success : ∀ (ctx : Solidity.Source.Ctx) (returns : Lis
     rw [actual] at rejected
     cases rejected
 
+/-- Checked word statements preserve world even when evaluation fails. -/
+theorem uint8_statement_world : ∀ (ctx : Solidity.Source.Ctx) (_returns : List Solidity.Source.STy) (_modifier _u : Bool)
+ (expr : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (proof : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys expr)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+(Solidity.Yul.RawU8Statement.run proof pipeline fuel state).2.world = state.world := by
+  intro ctx _returns _modifier _u expr proof pipeline fuel state
+  cases fuel with
+  | zero => exact refresh_world ctx state
+  | succ fuel =>
+    change (LocalU8Expr.eval proof pipeline fuel (RawCoherent.prepare state)).2.2 = state.world
+    rw [LocalU8Expr.world]
+    exact refresh_world ctx state
+
+theorem uint8_body_world : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (expr : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (proof : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys expr)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+((Solidity.Yul.RawContinueLoop.uint8Body ctx returns modifier u proof).run pipeline fuel state).2.world = state.world := by
+  intro ctx returns modifier u expr proof pipeline fuel state
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      change (RawCheckedControlSequence.run (ctx := ctx) (returns := returns)
+        (modifier := modifier) (u := u) (.uint8 proof .nil) pipeline (fuel+1) state).2.world =
+        state.world
+      rw [RawCheckedControlSequence.run_uint8]
+      have unchanged := uint8_statement_world ctx returns modifier u expr proof pipeline fuel state
+      cases actual : RawU8Statement.run proof pipeline fuel state with
+      | mk tag next =>
+        rw [actual] at unchanged
+        cases tag with
+        | error halt => exact unchanged
+        | ok value => cases fuel <;> exact unchanged
+
+/-- The concrete expression loop preserves world at every horizon and raw input. -/
+theorem uint8_world : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (expr : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (proof : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys expr)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+(Solidity.Yul.RawContinueLoop.uint8Run ctx returns modifier u proof pipeline fuel state).2.world = state.world := by
+  intro ctx returns modifier u expr proof pipeline fuel
+  induction fuel with
+  | zero => intro state; rfl
+  | succ fuel ih =>
+    intro state
+    cases fuel with
+    | zero => exact refresh_world ctx state
+    | succ fuel =>
+      have guard : RawCondition.eval (test ctx) (fuel+1) state =
+          (.ok true,refresh state) := by rfl
+      obtain ⟨result,tag⟩ := uint8_body_result ctx returns modifier u expr proof
+        pipeline (fuel+1) (refresh state)
+      have unchanged := uint8_body_world ctx returns modifier u expr proof
+        pipeline (fuel+1) (refresh state)
+      unfold uint8Run
+      rw [RawCheckedAdapterLoop.run,guard]
+      dsimp only
+      rw [tag]
+      cases result with
+      | error halt => exact unchanged.trans (refresh_world ctx state)
+      | ok value =>
+        exact (ih (((uint8Body ctx returns modifier u proof).run pipeline (fuel+1)
+          (refresh state)).2)).trans (unchanged.trans (refresh_world ctx state))
+
+/-- Exact error/world Source observation; the body error need not be timeout. -/
+theorem source_uint8_error : ∀ (ctx : Solidity.Source.Ctx) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (expr : Solidity.Source.RExpr ctx.env ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (proof : Solidity.Yul.LocalU8Expr.Supported ctx.env ctx.tys expr)
+ (glob : Solidity.Source.Glob ctx.env) (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph ctx.env))
+ (state : Solidity.Yul.RawFrame.State ctx), Solidity.Yul.RawCoherent.coherent state = true →
+ ∃ halt : Solidity.Source.Halt,
+ (Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.whileLoop (R := returns) (M := modifier) (l := true) (u := u)
+     (.bool true) (.block (.stmt (.expr expr) .nil))) state.clean).run
+   (Solidity.Source.L0 ctx.env,state.world) =
+ (.error halt,(Solidity.Source.L0 ctx.env,state.world)) := by
+  intro ctx returns modifier u expr proof glob frame checked fuel nps ph state same
+  have compared := (RawCheckedAdapterLoop.correct ctx returns modifier true u (.bool true)
+    (test ctx) (.block (.stmt (.expr expr) .nil)) (uint8Body ctx returns modifier u proof)
+    glob frame checked fuel nps ph state same).2
+  have unchanged := uint8_world ctx returns modifier u expr proof glob.pipeline fuel state
+  have rejected := uint8_no_success ctx returns modifier u expr proof glob.pipeline fuel state
+  cases actual : (uint8Run ctx returns modifier u proof glob.pipeline fuel state).1 with
+  | error halt =>
+    refine ⟨halt,?_⟩
+    rw [compared]
+    change RawSequence.represented (uint8Run ctx returns modifier u proof glob.pipeline fuel state) = _
+    simp only [RawSequence.represented,actual,Except.map,unchanged]
+  | ok value =>
+    rw [actual] at rejected
+    cases rejected
+
 end Solidity.Yul.RawContinueLoop
