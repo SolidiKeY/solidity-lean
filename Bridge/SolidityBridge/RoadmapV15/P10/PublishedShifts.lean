@@ -80,8 +80,16 @@ theorem shr_fetched {E : Source.Env} {Γ : Source.RCtx}
   rw [BitVec.toNat_ofFin,shr_word] at native
   exact ⟨src,native.1,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
 
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShifts.shl_word' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms shl_word
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShifts.shr_word' depends on axioms: [propext] -/
+#guard_msgs in
 #print axioms shr_word
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShifts.shl_fetched' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms shl_fetched
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShifts.shr_fetched' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
 #print axioms shr_fetched
 end SolidityBridge.RoadmapV15.P10.PublishedShifts

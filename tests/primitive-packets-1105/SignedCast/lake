@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""Route toolkit build invocations through the existing unchanged VM guard.
+This is test tooling, not a semantic or resource-policy implementation.
+Requires SIGNEDCAST_EVIDENCE and SIGNEDCAST_SERIAL_PATH from the invoking VM.
+"""
+import os,shlex,subprocess,sys,uuid
+from pathlib import Path
+root=Path(__file__).resolve().parents[3]
+args=sys.argv[1:]
+if args[:1]!=['build']:
+    raise SystemExit('SignedCast gate route accepts lake build only')
+evidence=Path(os.environ['SIGNEDCAST_EVIDENCE'])
+serial=os.environ['SIGNEDCAST_SERIAL_PATH']
+if not evidence.is_absolute():raise SystemExit('absolute evidence directory required')
+command='export PATH='+shlex.quote(serial)+':$PATH; timeout 5400 lake -j1 '+shlex.join(args)
+raise SystemExit(subprocess.run([sys.executable,str(root/'scripts/roadmap-v15-bounded-pidfd.py'),
+    str(evidence),'signedcast-gate-'+uuid.uuid4().hex,command],cwd=root).returncode)
