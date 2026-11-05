@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.element_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.numeric_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.numeric_prefix_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.prefix_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.prefix_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.represented_spec": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.symbolic_data": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetClearRepresentation.lean:Solidity.Backend.StorageOps.TargetClearRepresentation.symbolic_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

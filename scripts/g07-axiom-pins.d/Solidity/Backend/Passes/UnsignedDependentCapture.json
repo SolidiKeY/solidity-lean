@@ -1,0 +1,62 @@
+{
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.actual_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.code_join": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.component_origins": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.compose_mapped": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.declare_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.first_emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.first_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.reached_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.second_emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedDependentCapture.lean:Solidity.Backend.Passes.UnsignedDependentCapture.whole_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

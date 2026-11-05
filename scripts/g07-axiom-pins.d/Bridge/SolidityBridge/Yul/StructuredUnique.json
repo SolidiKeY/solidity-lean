@@ -1,0 +1,6 @@
+{
+ "Bridge/SolidityBridge/Yul/StructuredUnique.lean:SolidityBridge.Yul.StructuredUnique.output_unique": [
+  "Quot.sound",
+  "propext"
+ ]
+}

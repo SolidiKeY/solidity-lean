@@ -1,0 +1,59 @@
+{
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.account_of_lookup": [
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.context_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.finish_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.library_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.library_observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.populated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.populated_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.populated_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.runtime_of_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.source_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.static_read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryFrameTransport.lean:Solidity.Lowering.V08.LibraryFrameTransport.wrong_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

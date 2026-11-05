@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/frontend.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The solc front end
 
 `SolkeyTestSuite` (`lake build SolkeyTestSuite`): solkey's `TestSuite.sol` from

@@ -1,0 +1,15 @@
+{
+ "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerAssign_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.lowerSeq_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/StatementVisitorShapes.lean:Solidity.Yul.Compilation.StatementVisitorShapes.visit_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

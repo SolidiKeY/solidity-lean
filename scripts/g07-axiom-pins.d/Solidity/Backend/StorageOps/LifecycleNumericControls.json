@@ -1,0 +1,72 @@
+{
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.aggregate_countermodel_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.boundary_numeric_read_agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.boundary_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.fresh_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.fresh_mapping_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.full_capacity_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.full_push_bridges": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.full_push_numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.numeric_coverage_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.primitive_executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.primitive_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.push_symbolic_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.representation_coverage_countermodel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LifecycleNumericControls.lean:Solidity.Backend.StorageOps.LifecycleNumericControls.reused_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

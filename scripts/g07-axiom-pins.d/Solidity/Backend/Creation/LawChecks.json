@@ -1,0 +1,31 @@
+{
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.Artifact.payload_deterministic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.Artifact.sections_unique": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.link_permutation": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.Provenance.bytes_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.Provenance.global_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Creation/LawChecks.lean:Solidity.Backend.Creation.wrapper_decode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

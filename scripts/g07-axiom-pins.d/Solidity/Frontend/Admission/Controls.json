@@ -1,0 +1,35 @@
+{
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.accepted_roots": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.Controls.two_roots_admitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.Controls.wrong_roots_refuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Admission.ObservationSite.allowed_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Source.ScopeScan.certify_iff": [
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Frontend.Source.ScopeScan.certify_rejected_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Source.FailureResources.no_horizon_retraction": [],
+ "Solidity/Frontend/Admission/Controls.lean:Solidity.Source.FailureResources.noFail_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

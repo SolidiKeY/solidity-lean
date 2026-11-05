@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilation.lean:SolidityBridge.Yul.WordStructuredCompilation.nested_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilation.lean:SolidityBridge.Yul.WordStructuredCompilation.nested_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilation.lean:SolidityBridge.Yul.WordStructuredCompilation.scoped_for_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilation.lean:SolidityBridge.Yul.WordStructuredCompilation.scoped_for_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

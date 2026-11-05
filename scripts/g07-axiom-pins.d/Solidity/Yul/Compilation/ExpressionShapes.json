@@ -1,0 +1,19 @@
+{
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.binary": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ExpressionShapes.lean:Solidity.Yul.Compilation.ExpressionShapes.local_shape": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Calculus/PresburgerDecision.lean:Solidity.Linear.QFml.decide_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/PresburgerDecision.lean:Solidity.Linear.QFml.verify": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/ShrinkRootComposition.lean:Solidity.Backend.StorageOps.ShrinkRootComposition.retained_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

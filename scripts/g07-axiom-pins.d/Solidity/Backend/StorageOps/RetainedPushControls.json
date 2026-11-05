@@ -1,0 +1,117 @@
+{
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.capacity_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.capacity_failure_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.capacity_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.changed_current_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.failed_word_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.fresh_allocation_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.fresh_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.fresh_run_evidence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.fresh_target_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.fresh_target_counter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.mapping_alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.mapping_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.mapping_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.mapping_reset_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.nested_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.target_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.target_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.target_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.unchecked_capacity_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.wrong_reset_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RetainedPushControls.lean:Solidity.Backend.StorageOps.RetainedPushControls.zero_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

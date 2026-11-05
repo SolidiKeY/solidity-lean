@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalReferenceArray.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.child_bytes": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceArray.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.set": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceArray.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.store": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/FreshDefaultPush.lean:Solidity.Backend.StorageOps.FreshDefaultPush.child_location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultPush.lean:Solidity.Backend.StorageOps.FreshDefaultPush.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultPush.lean:Solidity.Backend.StorageOps.FreshDefaultPush.execute_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultPush.lean:Solidity.Backend.StorageOps.FreshDefaultPush.fresh_find": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshDefaultPush.lean:Solidity.Backend.StorageOps.FreshDefaultPush.root_separation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,16 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopPaths.lean:Solidity.Backend.StorageOps.AggregatePopPaths.captured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPaths.lean:Solidity.Backend.StorageOps.AggregatePopPaths.complete_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopPaths.lean:Solidity.Backend.StorageOps.AggregatePopPaths.failure_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

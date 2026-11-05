@@ -1,0 +1,74 @@
+{
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.caller_declared": [],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.library_declared": [],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.populated_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.retained_fields": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.source_and_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.wrong_source_class": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.Controls.wrong_target_kind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.delegated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.instance_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.library_account_preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.no_second_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.role_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.source_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.source_library": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryPremises.lean:Solidity.Lowering.V08.LibraryPremises.source_roles_separate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.graph_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.malformed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.raw_presence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.required_default_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.storage_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotOwnerControls.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotOwner.Controls.wrong_streaming": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

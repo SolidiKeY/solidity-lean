@@ -1,0 +1,92 @@
+{
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.fault_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.fault_iff_with": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.selected_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.selected_classified_with": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.selected_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlCompleteness.selected_lowering_with": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlRealization.selectBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlRealization.selectBlockWith": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlRealization.selectSlice": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.ControlRealization.selectSliceWith": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientControlControls.lean:SolidityBridge.Yul.QuotientControl.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

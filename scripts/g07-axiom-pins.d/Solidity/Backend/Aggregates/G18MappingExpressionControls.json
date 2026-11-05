@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Aggregates/G18MappingExpressionControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.Controls.baselines": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpressionControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.Controls.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpressionControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.Controls.wrong_phase": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18MappingExpressionControls.lean:Solidity.Backend.Aggregates.ScalarMapping.SourceMachine.Expression.Controls.wrong_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
