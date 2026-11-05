@@ -35,5 +35,48 @@
     "tests/h28-sol/mutation-testing/manifests/pop-delete-pilot.json",
     "tests/h28-sol/mutation-testing/manifests/push-pilot.json",
     "tests/h28-sol/mutation-testing/manifests/runner-pilot.json"
-  ]
+  ],
+  "validation": {
+    "archive": "/workspace/h28-h44-validation-9863cd53/validation.tar.gz",
+    "sha256": "4beb9afcf794973c558d9ac2b5d15bc3ec6f638780e2a93d6b752f297510c6ea",
+    "bytes": 16514,
+    "proof_input_head": "9863cd532396595cccd57ab021cbb8e398f9c0a2",
+    "files": 14
+  },
+  "callback_proof_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-callback-export-9863cd53/proof-worlds.tar.gz",
+    "sha256": "15b179909a17ed80e7e29c8b356f9fbbb7f25f53baaeb917903ce7e1d8154d5d",
+    "bytes": 6035778,
+    "archive_seconds": 5.645620486997359,
+    "process_maxrss_kib": 17280,
+    "catalog": "/workspace/h28-callback-export-9863cd53/catalog.json",
+    "dependency_pack": {
+      "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+      "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+      "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c"
+    },
+    "coordinator_pull_observed": false,
+    "prior_dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    }
+  },
+  "normal_callback_cache_pack": {
+    "authorization": "H41",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-callback-cache-export-v2/normal-callback-cache.tar.gz",
+    "sha256": "53a79b476cb19a2ef3c1e0bd8c532e4ef2133c29ff0b7924d65a22761423ece8",
+    "bytes": 9374835,
+    "archive_seconds": 7.230988657000125,
+    "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+    "dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false
+  }
 }
