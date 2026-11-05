@@ -1628,6 +1628,7 @@ import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
 import Solidity.Frontend.ExecutableAst.Memory.Reader
 import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
+import Solidity.Frontend.ExecutableAst.Shared.Scope
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExpressionUniqueness.Families
 import Solidity.Frontend.ExpressionUniqueness.Fixtures
