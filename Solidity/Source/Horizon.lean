@@ -982,6 +982,11 @@ theorem lengthOf_grow (F : Fr) {τ : STy} (v : Val E.layout τ) : Grow (lengthOf
 theorem indexLoc_grow (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat} (a : Val E.layout (.array l σ k))
     (i : Nat) : Grow (indexLoc (Γ := Γ) F a i) := by
   unfold indexLoc; grow_go [lengthOf_grow, heapPut_grow, alloc_grow, readCell_grow, readAt_grow, applyOp_grow, setCell_grow, writeAt_grow, readLen_grow, writeLen_grow, heapObj_grow, heapAt_grow, heapBytes_grow, allocRef_grow, storRef_grow, getV_grow, zeroVal_grow, zeroData_grow, loadMem_grow, deleteStor_grow, storeData_grow, storeVal_grow]
+  all_goals cases σ with
+    | bytes l => cases l <;> exact Grow.pure _
+    | string l => cases l <;> exact Grow.pure _
+    | array l e c => cases l <;> cases c <;> (try split) <;> exact Grow.pure _
+    | _ => exact Grow.pure _
 theorem indexNat_grow {σ : STy} (v : RVal E.layout σ) : Grow (indexNat (Γ := Γ) v) := Grow.lift _
 theorem instanceAt_grow (G : Glob E) (a : Address) : Grow (instanceAt (Γ := Γ) G a) := by
   unfold instanceAt; grow_go []
@@ -1604,6 +1609,11 @@ theorem lengthOf_const (F : Fr) {τ : STy} (v : Val E.layout τ) : Const (length
 theorem indexLoc_const (F : Fr) {l : DataLoc} {σ : STy} {k : Option Nat} (a : Val E.layout (.array l σ k))
     (i : Nat) : Const (indexLoc (Γ := Γ) F a i) := by
   unfold indexLoc; const_go [lengthOf_const, heapPut_const, alloc_const, readCell_const, readAt_const, applyOp_const, setCell_const, writeAt_const, readLen_const, writeLen_const, heapObj_const, heapAt_const, heapBytes_const, allocRef_const, storRef_const, getV_const, zeroVal_const, zeroData_const, loadMem_const, deleteStor_const, storeData_const, storeVal_const]
+  all_goals cases σ with
+    | bytes l => cases l <;> exact Const.pure _
+    | string l => cases l <;> exact Const.pure _
+    | array l e c => cases l <;> cases c <;> (try split) <;> exact Const.pure _
+    | _ => exact Const.pure _
 theorem indexNat_const {σ : STy} (v : RVal E.layout σ) : Const (indexNat (Γ := Γ) v) := Const.lift _
 theorem instanceAt_const (G : Glob E) (a : Address) : Const (instanceAt (Γ := Γ) G a) := by
   unfold instanceAt; const_go []
