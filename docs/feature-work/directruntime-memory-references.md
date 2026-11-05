@@ -456,3 +456,25 @@ All six module cache identities still match the existing b86 pickup pack;
 its archive was freshly rehashed successfully. No replacement pack is needed.
 Delivery remains coordinator-pending. This establishes no freshness for
 other merged modules and no ordinary runtime verdict or RUNTIME_GATE_PASS.
+
+
+## Published checkpoint adoption: 3ad22f66
+
+Adopted `3ad22f66d8fc6431378c22e71823436c79dede7f` at merge
+`49378ff880612abec20569933992b92cabc3c916`,preserving all owned work.
+No DirectRuntime or executable-AST interface changed. Existing canonical
+reader/obligation handoff instructions remain applicable; ordinary consumer
+integration and fresh native/browser acceptance remain blocked.
+
+Fresh bounded serial VM owned build,both-reader per-file controls,and54
+standard-only matching-source theorem reports pass. Each reader checks84
+AST fixtures representing42 source variants,constructs84 obligations and
+checks84 initial models,with two type refusals and20 schema refusals.
+KeySort377/131,registration,and648-module layer checks pass. Commands,
+exits,wall/RSS are saved under `evidence/published-3ad`. No source,proof
+budget,or premise changed. The full merged gate was not rerun here.
+
+All six cache identities match the b86 pickup pack,and a fresh archive SHA256
+check passes. No replacement pack is required; delivery remains coordinator-
+pending until receipt. No full-tree cache freshness,ordinary runtime verdict
+or RUNTIME_GATE_PASS is claimed.
