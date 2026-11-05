@@ -345,3 +345,18 @@ remain pending. No original obligation or whole-lane completion follows.
 Exact commands/results: `evidence/adoption-8bf.json`; handoff and current
 adoption manifest: `evidence/HANDOFF-adoption-8bf.md` and
 `evidence/SHA256SUMS-adoption-8bf`. Historical proof seals are preserved.
+
+## Published dependency adoption, 2026-11-05T1608Z
+
+Adopted `3ad22f66d8fc6431378c22e71823436c79dede7f` via merge
+`e2c6faef3edce821b636ec01c42ccc518bcbe172`, preserving the previous lane head
+and separate Exp packet. All five precompile modules and 75 pins are unchanged.
+Independent read-only finder and skeptic adoption reviews PASS without findings
+or Lean/server/build use. Fresh bounded scope/kernel-evidence and roots checks
+pass. Central axiom inventory remains EXIT1: 8279 pins, zero errors and 164
+unrecorded changes. Coordinator-owned registration and full local validation
+remain pending. No whole-goal or runtime-gate completion is inferred.
+Exact commands/timings/results: `evidence/adoption-3ad.json`; handoff and
+checksums: `evidence/HANDOFF-adoption-3ad.md` and
+`evidence/SHA256SUMS-adoption-3ad`. Previous proof seals and raw failures remain
+preserved. No new composition, shared registry write or ship-cache.sh run.
