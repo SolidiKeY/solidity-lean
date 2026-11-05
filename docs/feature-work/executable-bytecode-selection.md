@@ -458,3 +458,26 @@ monitor container was stopped; the workload was uninterrupted. Independent
 read-only skeptic review confirms these narrow recovery fixes. This closes
 the monitor implementation repair, not the historical gaps or full gate.
 The unchanged full validation continues; no completed runtime gate is claimed.
+
+
+## Full9584 RAM stop and b86 adoption
+
+The durable v2 monitor stopped the existing full validation at parent
+memory12398383104 bytes, leaving4781486080 bytes headroom. Its unchanged
+threshold was12348030976; the observed4GiB reserve was preserved. This is
+a runtime RAM safety-margin stop, not a reported Lean proof failure. Only
+build-touched passed; the full gate remains incomplete. Last completed
+example is Tactics.Notation; the latest setup file is Tactics.OpenLoops,
+which is a candidate active module, not a captured compiler-argv witness.
+All six VA1 split check modules built successfully earlier in this run.
+Historical monitoring gaps remain recorded. No unchanged heavy retry follows.
+
+Published b86ae4568cef6d6226f4d170360bbb089debe3fb is preserved in
+merge9a56b0da88cffe1871bace67858676b13ed00f26 after the workload stopped.
+Roots are regenerated. Its accepted NumericSequence/StackSelection increment
+does not complete this local lane or replace its outstanding full validation.
+Coordinator H21 cache delivery for this publication is separately pending;
+cache transport must be verified against actual source keys before reuse.
+The next full-gate attempt needs a materially changed cache/resource state
+or separately authorized repair, retaining all original limits. No Source,
+Core ExtCall, premise, theorem, heartbeat or trust change is inferred.
