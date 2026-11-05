@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceVaryingByteCapture.lean:Solidity.Lowering.StorageOps.SourceVaryingByteCapture.timeout_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

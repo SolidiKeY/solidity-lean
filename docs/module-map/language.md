@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/language.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The language
 
 The separate dependency-bearing package (`Bridge/`, Mathlib, CSLib, Loom,

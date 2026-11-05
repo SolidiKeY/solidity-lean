@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/Scalar/Wrapping.lean:Solidity.Backend.Scalar.encoded_mod": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Wrapping.lean:Solidity.Backend.Scalar.wrappingAdd": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Wrapping.lean:Solidity.Backend.Scalar.wrappingMul": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Wrapping.lean:Solidity.Backend.Scalar.wrappingSub": [
+  "Quot.sound",
+  "propext"
+ ]
+}

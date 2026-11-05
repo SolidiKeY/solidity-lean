@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout.payload_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceCapturedByteWriteTimeout.lean:Solidity.Lowering.StorageOps.SourceCapturedByteWriteTimeout.write_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

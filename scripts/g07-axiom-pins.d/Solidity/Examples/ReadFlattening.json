@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/ReadFlattening.lean:Solidity.Decide.FlattenedArithmetic.countermodelOf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/ReadFlattening.lean:Solidity.Decide.ReadFlattening.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

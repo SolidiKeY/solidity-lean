@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/try-evidence.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # External try execution evidence
 
 | Module | What it defines |

@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/roadmap.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Roadmap statements
 
 | Module | What it defines |

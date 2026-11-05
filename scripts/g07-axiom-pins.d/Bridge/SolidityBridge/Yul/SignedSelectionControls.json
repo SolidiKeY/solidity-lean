@@ -1,0 +1,97 @@
+{
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.ControlRealization.selectSliceUsing": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.sdiv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.sdivFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.sgt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.sgtFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.slt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.sltFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.smod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.smodFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/SignedSelectionControls.lean:SolidityBridge.Yul.SignedSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

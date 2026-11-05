@@ -1,0 +1,32 @@
+{
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.after_prelude": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.every_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.no_finite_loop_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.prelude": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.two_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ScopedForPrefixesControls.lean:SolidityBridge.Yul.ScopedForPrefixes.Controls.two_turns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

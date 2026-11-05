@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.accept_eq_upstream": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.exact_observation_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceObservationAdmission.lean:Solidity.Lowering.P8.SourceObservationAdmission.sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

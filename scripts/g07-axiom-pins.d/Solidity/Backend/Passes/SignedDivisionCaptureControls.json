@@ -1,0 +1,88 @@
+{
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.checked_not_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.checked_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.corrupt_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.initial7": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.overflow_joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.overflow_observations": [],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.overflow_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.recapture_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.unchecked_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.wrong_floor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.zero_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedDivisionCaptureControls.lean:Solidity.Backend.Passes.SignedDivisionCaptureControls.zero_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

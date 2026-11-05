@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/label-execution.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Label execution
 | Module | Purpose |
 |---|---|

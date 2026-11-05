@@ -1,0 +1,35 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.nonalias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.retained_live_none": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.separated": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWriteFrameControls.lean:Solidity.Lowering.StorageOps.SourceArrayWriteFrameControls.written_read_changes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

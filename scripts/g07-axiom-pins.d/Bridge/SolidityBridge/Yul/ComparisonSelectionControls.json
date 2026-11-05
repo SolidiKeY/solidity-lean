@@ -1,0 +1,82 @@
+{
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.eqFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.gt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.gtFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.ltFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ComparisonSelectionControls.lean:SolidityBridge.Yul.ComparisonSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

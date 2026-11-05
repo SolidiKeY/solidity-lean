@@ -1,0 +1,14 @@
+{
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.invalid_bool_refused": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.noncanonical_error_classified": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.short_word_refused": [
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/ExternalReturnBytes.lean:Solidity.Examples.Tactics.ExternalReturnBytes.signed_then_bool": [
+  "propext"
+ ]
+}

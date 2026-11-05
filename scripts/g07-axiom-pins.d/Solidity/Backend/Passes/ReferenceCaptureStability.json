@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/ReferenceCaptureStability.lean:Solidity.Backend.Passes.ReferenceCaptureStability.capture_rebind_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

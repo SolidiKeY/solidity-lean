@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.base_acceptance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.contract_acceptance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.corrupted_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.packed_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.single_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptanceControls.lean:Solidity.Lowering.P8.SourceProgramAcceptanceControls.two_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

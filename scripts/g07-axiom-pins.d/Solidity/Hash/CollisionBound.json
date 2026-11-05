@@ -1,0 +1,37 @@
+{
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.adaptive_lazy_collision_prob_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.collisions_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.keccak_premise_fails_prob_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.keccak_premise_fails_prob_le_dedup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.keccak_region_premise_fails_prob_le": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.keccak_region_premise_fails_prob_le_dedup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Hash/CollisionBound.lean:Solidity.Hash.near_of_overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

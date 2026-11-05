@@ -1,0 +1,48 @@
+{
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.revert_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.revert_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.revert_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.success_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.success_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.timeout_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.timeout_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.wrong_success_return": [],
+ "Solidity/Lowering/V08/SourceTransactionControls.lean:Solidity.Lowering.V08.SourceTransactionControls.wrong_timeout_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

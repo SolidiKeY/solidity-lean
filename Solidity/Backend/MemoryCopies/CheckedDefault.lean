@@ -78,11 +78,45 @@ theorem SelectedCheckedDefault.correct {root : RefTy} {memory : (Ty.ref root).ma
 
 def checkedDefault : CheckedDefaultCertificate := ⟨SelectedCheckedDefault.correct⟩
 
+/--
+info: 'Solidity.Backend.MemoryCopies.selectedCheckedDefault' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
 #print axioms selectedCheckedDefault
+/--
+info: 'Solidity.Backend.MemoryCopies.checkedNestedDefault' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
 #print axioms checkedNestedDefault
+/--
+info: 'Solidity.Backend.MemoryCopies.default_capacity_guard_run' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
 #print axioms default_capacity_guard_run
+/--
+info: 'Solidity.Backend.MemoryCopies.SelectedCheckedDefault.run_checked' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
 #print axioms SelectedCheckedDefault.run_checked
+/--
+info: 'Solidity.Backend.MemoryCopies.SelectedCheckedDefault.success' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
 #print axioms SelectedCheckedDefault.success
+/--
+info: 'Solidity.Backend.MemoryCopies.SelectedCheckedDefault.correct' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+-/
+#guard_msgs in
 #print axioms SelectedCheckedDefault.correct
+/--
+info: 'Solidity.Backend.MemoryCopies.checkedDefault' depends on axioms: [propext, Classical.choice, Quot.sound]
+-/
+#guard_msgs in
 #print axioms checkedDefault
 end Solidity.Backend.MemoryCopies

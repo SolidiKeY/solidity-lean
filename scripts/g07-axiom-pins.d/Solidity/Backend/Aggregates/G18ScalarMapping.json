@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/Aggregates/G18ScalarMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Aggregates/G18ScalarMapping.lean:Solidity.Backend.Aggregates.ScalarMapping.write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
