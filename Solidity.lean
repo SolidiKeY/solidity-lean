@@ -2370,6 +2370,8 @@ import Solidity.Source.Progress.InitializedChainControls
 import Solidity.Source.Progress.InitializedControls
 import Solidity.Source.Progress.InitializedLocals
 import Solidity.Source.Progress.InitializedPrefixes
+import Solidity.Source.Progress.InlineArrayParentControls
+import Solidity.Source.Progress.InlineArrayParents
 import Solidity.Source.Progress.LiteralBuiltinControls
 import Solidity.Source.Progress.LiteralBuiltins
 import Solidity.Source.Progress.NewArray

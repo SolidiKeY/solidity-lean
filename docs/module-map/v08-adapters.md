@@ -542,3 +542,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/FailurePaths/GuardBodySelectionControls.lean` | Direct mixed-context Source-items selector clients in both pipelines, exact observations and structural/guard refusal controls. |
 | `Backend/FailurePaths/GuardBlockSelection.lean` | Root Source guard-block lowering through public checked statement compilation, exact code provenance and actual Source scope restoration/run simulation. |
 | `Backend/FailurePaths/GuardBlockSelectionControls.lean` | Inhabited root-block clients and exact joint outcomes in both pipelines, low-horizon timeouts and root/body refusal controls. |
+
+| `Source/Progress/InlineArrayParents.lean` | Ready inline-array allocation expression/statement progress, derived memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/InlineArrayParentControls.lean` | Inhabited inline allocation over live caller memory, exact statement/fuel/panic runs and retained readiness/element exclusions in both pipelines. |

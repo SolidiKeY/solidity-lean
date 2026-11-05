@@ -245,3 +245,11 @@ A one-statement ordinary return body now also has a checked progress companion
 when its expression and return-slot default have explicit readiness certificates;
 see [ready single-return calls](source-progress-checked.md#ready-single-return-memory-calls).
 This does not prove progress for arbitrary `MemoryItems` bodies.
+
+
+Inline-array allocation parents now also have standalone progress and joint
+preservation adapters under syntactic `ReadyArgs`, including an actual
+expression-statement consumer; see
+[source-progress-checked.md](source-progress-checked.md#ready-inline-array-allocation-parents).
+The existing memory-body and readiness certificates are unchanged, so this does
+not admit unrestricted allocation nesting or general memory-body progress.

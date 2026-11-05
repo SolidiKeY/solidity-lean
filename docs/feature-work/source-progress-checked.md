@@ -566,3 +566,40 @@ check passed in 4.464 seconds with 523,563,008 bytes peak aggregate RSS. Printed
 axioms are only `propext`, `Classical.choice` and `Quot.sound`. Independent
 read-only finder and skeptic reviews found no confirmed defect. The earlier
 full-checkpoint timeout remains failed; no unchanged full retry is claimed.
+
+
+## Ready inline-array allocation parents
+
+`Progress.InlineArrayParents` derives non-stuckness for the existing
+`inlineArray` evaluator arm from syntactic exact-type `ReadyArgs`. It follows
+the real argument evaluator and `allocRef`; no child execution or preservation
+equation is assumed. The joint result derives `MemOK` and result-reference
+validity from the existing one-word-gated preservation rule, retaining memory
+validity on every halt. An expression-statement adapter uses actual `execS`
+and `EM.sub`, with explicit caller-local validity for preservation.
+
+`inline_array_from_elaborate` derives the original value-call hypothesis using
+P9's checked catalogue and actual successful elaboration. Readiness, one-word
+element eligibility and frame membership remain explicit. The existing
+`ReadyExpr`, `ReadyStmt` and `ReadyItems` certificates are unchanged; these
+standalone adapters do not automatically admit inline-array parents into
+arbitrary nested arguments or general memory-call bodies.
+
+`InlineArrayParentControls` consumes the adapter over the existing elaborated
+memory-unit environment. The inline-array node itself is constructed directly;
+this does not establish its frontend elaboration. Both evaluator pipelines
+allocate object 1 over a nonempty heap with a live caller reference to object 0.
+Inhabited expression and statement consumers retain memory validity, old-object
+contents, logs and function-local state for this fixture. Exact horizon four
+succeeds while three and zero time out. A ready integer-division child still
+panics on zero before the parent allocates; non-stuckness permits that revert.
+The prior readiness certificate still refuses the inline-array parent, and
+reference element types retain the one-word exclusion.
+
+The focused serial check passed in 6.899 seconds with 520,368,128 bytes peak
+aggregate RSS. All twenty-one printed theorem axiom reports use only
+`propext`, `Classical.choice` and `Quot.sound` or subsets. Independent read-only
+finder and skeptic reviews found no confirmed defect. This is Source progress
+and preservation, not termination, physical resource adequacy, compiler/EVM
+refinement or universal source coverage. The historical full-build timeout and
+published documentation-path failure remain open.
