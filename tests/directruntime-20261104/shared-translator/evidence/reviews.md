@@ -213,3 +213,28 @@ Final8bf resource/KeySort/cache/source-binding finder/skeptic found no claim def
 Currenteb91 local verification/coordinator-pending delivery is separate from old047
 user-reported byte delivery. Provenance is not migration/source preservation/native
 closure or RUNTIME_GATE_PASS. Neither used Lean/server or wrote files.
+
+
+## Published3ad native producer validation
+
+Read-only finder/skeptic,no Lean/server/writes,confirmed safe adoption/existing
+unchanged producer script/local prefix policy. Final binary18exact saved outcomes+
+2fail-closed controls pass;source/trace/dynlib checks are finite-input provenance.
+Both reviewed all14frontend-origin candidates:6linked empty IO-unit initializers
+with heartbeat/alloc/OOM handling;8generic JSON,array,string,list,option helpers.
+No actual frontend functionality among those14;no policy exception assumed. They
+explicitly did NOT certify exhaustive closure for all206modules/full binary.
+Resource stop and missing-cc failures are preserved;retry used same limits/reserve
+and existing supported CC override. Older source/WASM/migration goals stay open.
+
+
+Mandatede684 rebase preserved code/WIP;17commits replayed,autostash applied and
+three merge-only evidence blobs restored exactly. Post-fix rebased build/axioms/
+controls/native18+2/ownership gate exit0. Initial stale-baseline failure retained.
+
+
+Final packet/rebase finder/skeptic independently checked e684 ancestry and3restored
+historical blobs,actual post-rebase exit0 and38-member archive verification. No
+material defect found. Native evidence remains18comparisons+2failclosed+14reviewed
+candidate bodies;not exhaustive closure,WASM,source preservation or CR migration.
+Neither reviewer used Lean/server or wrote files.

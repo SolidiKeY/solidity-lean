@@ -139,3 +139,33 @@ None of these observations is a Lean proof term,Solidity preservation or native/
 WASM proof. Modality-ledger pins source,raw and normalized AST,compiler hashes,
 source IDs and tags. Existing compiler helper is reused without a new translator.
 Frozen MCP/per-file gates pass;all original producer/native obligations remain.
+
+
+## Published3ad and native functional parity
+
+Master3ad adopted without owned production changes. CR migration is still absent.
+The unchanged existing native producer builder was run using exact clean Lean
+source797c613 and the pinned4.24toolchain. Only the local Lake policy wrapper and
+supported CC override were supplied;no producer edits. First attempt resource-
+stopped at the4GiB reserve;second completed206objects but found cc's broken image
+alternative;third reused objects with explicitGCC14 and linked successfully.
+
+Native binary SHA2561d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d
+matches18saved public API outcomes and2fail-closed inputs. Tests use empty cwd and
+remove Lean search variables;strace sees no serialized Lean env access,external
+frontend exec or network;ldd contains only system libraries. Fourteen frontend-
+origin candidates were independently reviewed:6empty IO-unit initializers and8
+primitive JSON/array/string/list/option helpers. Names reflect specialization
+origin;no frontend functionality was found among those candidates. This is NOT an
+exhaustive whole-binary closure proof. WASM,CR migration,full parity/source
+preservation,before/after runtime and final gates remain open. Native receipts,
+source/binary hashes,traces,exact helper bodies/disassembly and reviews are in
+adoption-3ad. No policy exception or new trust premise is assumed.
+
+
+Coordinator then required rebase ontoe6849d3b. It completed before the native
+checkpoint commit,with production bytes/WIP preserved and old history retained in
+an owned recovery ref. Fresh rebased build/axioms/Lean controls/native18+2/ownership
+checks passed. Current migration-packet pins the new published base;native source/
+C hashes still bind the same binary. Original CR/WASM/exhaustive closure obligations
+are unchanged. No RuntimeGate or whole-lane completion is claimed.

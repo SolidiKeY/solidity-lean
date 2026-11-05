@@ -41,7 +41,7 @@ assert all(not re.search(r'\b(?:sorry|axiom|admit)\b', q.read_text())
 # The coordinator explicitly authorized adoption of this exact published tree.
 # Ownership is checked against it once it is an ancestor; unowned deviations
 # from that tree still fail, including any direct producer edits.
-adopted='8bf8321873befa3f35ca31e97e5339a1baee93e6'
+adopted='e6849d3bdf516099d20c33d3581d523449764018'
 usesAdoption=subprocess.run(['git','merge-base','--is-ancestor',adopted,'HEAD'],cwd=root,capture_output=True).returncode==0
 ownershipBase=adopted if usesAdoption else base
 files=subprocess.check_output(['git','diff','--name-only',ownershipBase],cwd=root,text=True).splitlines()+subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()

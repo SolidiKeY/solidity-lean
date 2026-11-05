@@ -567,3 +567,80 @@ Delivery remains coordinator-pending;dependency caches/toolchain must match. Old
 047pack byte delivery remains separately user-reported. No ship-cache.sh invoked;
 source/compiled provenance and gate/cache receipts are in adoption-8bf. No final
 RUNTIME_GATE_PASS or full original queue completion follows.
+
+
+## Published3ad and native executable checkpoint
+
+Verified master3ad22f66 adopted cleanly in8de74453. Owned production bytes are
+unchanged;no new frontend/runtime producer API or CR AST migration was delivered.
+Local344-job build,axiom inventory,modal and prior direct-result controls passed
+before native compilation. No Lean implementation,theorem,budget or trust change.
+
+Ran existing scripts/build-direct-native.py unchanged with exact clean Lean source
+797c613 and toolchain4.24. The owned prefix only redirects Lake to existing bounded
+policy;all other files symlink actual toolchain. Native code compiles serially at
+producer default-O2. First attempt outer guard stopped at307.511s,minimum available
+4290482176bytes,outer137/guard125;this is a resource failure,not a passing gate.
+Read-only POSIX_FADV_DONTNEED hints on OWNED regular artifact/source files reclaimed
+clean pages without data mutation,symlink traversal,global cache drop or limit/
+reserve changes. Retry compiled all206retained modules but failed at bridge cc
+lookup;486.234s,RSS1229488KiB,min4789747712bytes. Existing supported CC override
+selected/usr/bin/x86_64-linux-gnu-gcc-14(Debian14.2.0-19);cached retry linked in
+50.519s,RSS1229536KiB,min5243146240bytes. Both failures and completed objects remain
+preserved. Exact source checkout stayed clean;producer scripts/source unchanged.
+
+Native binary20962960bytes,SHA2561d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d.
+18exact saved model outcomes and2malformed/unknown-root fail-closed controls passed.
+Runtime executes in empty cwd with Lean search vars removed;file/process/network
+trace observes no serialized Lean environment access,external frontend executable
+or network;dynamic dependencies are system-only. Native execution with strace took
+0.097s(contains instrumentation overhead;not a before/after benchmark);complete
+control/audit command0.632s,RSS21308KiB,min6463283200bytes. Exact inputs/source IDs,
+source/C/binary/trace hashes and stdout are saved. Native references the canonical
+Shared executable reader;no general producer expr/body translator root was found
+by the named-symbol inspection. This remains a bounded external regression check.
+
+Fourteen frontend-origin symbols survive link GC. Independent read-only finder/
+skeptic reviewed all exact linked disassemblies/pinned helper bodies:6initializers
+only allocate IO-unit success with heartbeat/OOM handling;8helpers implement List
+String equality,List Nat membership,Option String/Nat equality,UTF8 membership,
+JSON field/string access,JSON array construction and identity traversal. No actual
+frontend functionality among THESE candidates;origin names do not justify either
+a violation or a blanket closure claim. The review does NOT prove exhaustive
+forbidden-functionality absence over all9953retained functions/206modules. No
+exclusion/trust relaxation was requested or assumed. Broader native closure,WASM,
+source preservation,CR migration,DR-A-META,complete form parity,before/after runtime
+and final gates remain pending. No RUNTIME_GATE_PASS or original queue completion.
+
+
+During checkpoint preparation coordinator explicitly required rebase onto published
+e6849d3b before the next commit. Preserved original committed history at
+refs/codex-recovery/shared-translator/pre-e684-8de74453b38b and WIP tracked.patch/
+untracked.tar under artifacts/rebase-e684. Replayed17owned commits;only Compose
+comment conflicted,resolved to exact reviewed prior source;autostash restored WIP.
+Three merge-only historical evidence files were restored byte-exact from the old
+Git blobs. Production source,desired dirty patch and all46untracked files were
+verified preserved before metadata updates;no code/premise weakening or data loss.
+
+Initial post-rebase bundle passed build/threeLean gates/native controls but failed
+the static ownership audit because its old3ad baseline had not been updated after
+preservation check exposed those historical evidence omissions. Log retained as
+setup failure. Corrected authorized baseline to e684 and restored exact old evidence;
+final bounded344-job build,axiom inventory,modal/direct controls,native18+2 and
+ownership audit all pass:22.089s,RSS1251604KiB,min6271008768bytes. Current native
+source/C/binary bindings still match after the rebase;no recompilation assumption.
+Last instrumented native18+2 execution0.129s,not a before/after benchmark. Broader
+closure,WASM,CR migration,DR-A-META and original final gates remain pending.
+
+
+Verified native replay packet:38payload members(binary,build/source manifest,
+licenses,replay requests/oracles,trace,linked symbols and14review bodies/disasm).
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/native-packet/native-parity.tar.zst
+7901648bytes,SHA256dc2e7041beab617cb5f57ef4d5c3e299cbaa92e7691f5a67869faa03c17ced60.
+Every member size/hash/name was checked against embedded CONTENTS.json;no serialized
+Lean environments included. Packet delivery is coordinator-pending,not publication.
+Final read-only finder/skeptic independently confirmed e684 ancestry and exact
+restored historical blobs,successful final gates and honest packet limits. Source/
+exhaustive closure/WASM/migration obligations remain pending. An initial attempt to
+pipe a packager via noninteractive Docker stdin did no packaging;it is not counted
+as validation. The file-backed packager above performed the actual verified work.

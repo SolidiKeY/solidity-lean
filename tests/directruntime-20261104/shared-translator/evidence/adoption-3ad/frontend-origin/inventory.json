@@ -1,0 +1,265 @@
+{
+  "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
+  "status": "14 origin-name candidates independently classified; no frontend functionality among these candidates",
+  "symbols": [
+    {
+      "symbol": "initialize_Lean_Elab_PreDefinition_Main",
+      "binaryNm": "0000000000141980 0000000000000039 t initialize_Lean_Elab_PreDefinition_Main",
+      "sourceModule": "Lean.Elab.PreDefinition.Main",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Elab/PreDefinition/Main.c",
+      "pinnedFileSha256": "a47b8b7c8ffbddd7fa9d418b8011e43d2033f8ca934ada9b3a5e6e99d107fc07",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/6e9deb7644af55f0.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "initialize_Lean_Meta_Hint",
+      "binaryNm": "00000000001408f0 0000000000000039 t initialize_Lean_Meta_Hint",
+      "sourceModule": "Lean.Meta.Hint",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Meta/Hint.c",
+      "pinnedFileSha256": "cadf20d5f00dd0b41c77ee855e80df7b3986eb5c9905135036d03311a667ecb9",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/e9eb42f92c6388b6.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "initialize_Lean_Meta_Tactic_Grind_EMatchTheorem",
+      "binaryNm": "0000000000141700 0000000000000039 t initialize_Lean_Meta_Tactic_Grind_EMatchTheorem",
+      "sourceModule": "Lean.Meta.Tactic.Grind.EMatchTheorem",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Meta/Tactic/Grind/EMatchTheorem.c",
+      "pinnedFileSha256": "d8d6ecedb6f74e3ab6a90ec8f93d168506b9deed8f27a5256cebe6ed6ad39189",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/d7e4281d2b3ecd11.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "initialize_Lean_Parser_Types",
+      "binaryNm": "000000000013fd50 0000000000000039 t initialize_Lean_Parser_Types",
+      "sourceModule": "Lean.Parser.Types",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Parser/Types.c",
+      "pinnedFileSha256": "a642479dd6b2dff074b82f2d7f8427777accca141275fe0981da46d5dc2786d9",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/892bb2600f7d8415.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "initialize_Lean_Server_Utils",
+      "binaryNm": "00000000001411b0 0000000000000039 t initialize_Lean_Server_Utils",
+      "sourceModule": "Lean.Server.Utils",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Server/Utils.c",
+      "pinnedFileSha256": "c5fc1d9d1bc38e49039741b9f29be6e2a7b40154e86fa9df7936a121c6afe33a",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/3e6914cdf00b7d37.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "initialize_Lean_Widget_UserWidget",
+      "binaryNm": "0000000000141480 0000000000000039 t initialize_Lean_Widget_UserWidget",
+      "sourceModule": "Lean.Widget.UserWidget",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Widget/UserWidget.c",
+      "pinnedFileSha256": "171dd6adb6caa1a65d41f4fbd08b6cf3787b821e96f31d6af4f098680480d7a8",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/0c5944e2346c2965.disasm",
+      "classification": "candidate empty IO-unit initializer; no frontend registration call target in linked disassembly",
+      "callTargets": [
+        "lean_inc_heartbeat",
+        "mi_malloc_small",
+        "lean_internal_panic_out_of_memory"
+      ],
+      "originalInitializerNote": "Original source initializer is not the rewritten native initializer; linked disassembly is authoritative for this artifact.",
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "IO-unit result allocation with heartbeat/OOM handling only; no registration/environment/indirect calls"
+    },
+    {
+      "symbol": "l_Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1",
+      "binaryNm": "0000000000141410 0000000000000069 t l_Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1",
+      "sourceModule": "Lean.Widget.UserWidget",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Widget/UserWidget.c",
+      "pinnedFileSha256": "171dd6adb6caa1a65d41f4fbd08b6cf3787b821e96f31d6af4f098680480d7a8",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/5429d4f2d5a67768.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/5429d4f2d5a67768.c",
+      "bodySha256": "0eb6267d23fcfd43bc109f2d8afe6a3bd0fc7707dd7927c7938b07f7e2446776",
+      "generatedReferences": [
+        "l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1_spec__1",
+        "lean_alloc_ctor",
+        "lean_array_size",
+        "lean_ctor_set",
+        "lean_object"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "JSON array constructor"
+    },
+    {
+      "symbol": "l_Lean_Json_getObjValAs_x3f___at___Lean_Widget_instFromJsonWidgetSource_fromJson_spec__0",
+      "binaryNm": "00000000001411f0 000000000000000f t l_Lean_Json_getObjValAs_x3f___at___Lean_Widget_instFromJsonWidgetSource_fromJson_spec__0",
+      "sourceModule": "Lean.Widget.UserWidget",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Widget/UserWidget.c",
+      "pinnedFileSha256": "171dd6adb6caa1a65d41f4fbd08b6cf3787b821e96f31d6af4f098680480d7a8",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/3855a0bb9f51fd9a.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/3855a0bb9f51fd9a.c",
+      "bodySha256": "e8d18976c7e3e4d865ef8772b600f5773bec54b84448906fe843c913accb37a4",
+      "generatedReferences": [
+        "l_Lean_Json_getObjValD",
+        "l_Lean_Json_getStr_x3f",
+        "lean_object"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "JSON field/string accessor"
+    },
+    {
+      "symbol": "l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0",
+      "binaryNm": "000000000013f960 00000000000003ea t l_List_beq___at___Lean_Parser_instBEqError_beq_spec__0",
+      "sourceModule": "Lean.Parser.Types",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Parser/Types.c",
+      "pinnedFileSha256": "a642479dd6b2dff074b82f2d7f8427777accca141275fe0981da46d5dc2786d9",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/9d1d8b23befbb84b.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/9d1d8b23befbb84b.c",
+      "bodySha256": "03704b1ec8f8099df27e40e17acfa20ad78b65b7f09b3c28f8d42d411e3da201",
+      "generatedReferences": [
+        "lean_ctor_get",
+        "lean_obj_tag",
+        "lean_object",
+        "lean_string_dec_eq"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "List String equality"
+    },
+    {
+      "symbol": "l_List_elem___at_____private_Lean_Meta_Tactic_Grind_EMatchTheorem_0__Lean_Meta_Grind_ppParamsAt_spec__0",
+      "binaryNm": "00000000001414c0 0000000000000235 t l_List_elem___at_____private_Lean_Meta_Tactic_Grind_EMatchTheorem_0__Lean_Meta_Grind_ppParamsAt_spec__0",
+      "sourceModule": "Lean.Meta.Tactic.Grind.EMatchTheorem",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Meta/Tactic/Grind/EMatchTheorem.c",
+      "pinnedFileSha256": "d8d6ecedb6f74e3ab6a90ec8f93d168506b9deed8f27a5256cebe6ed6ad39189",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/c2bea6ad4c5dfb9b.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/c2bea6ad4c5dfb9b.c",
+      "bodySha256": "653ec7bf264bce3febf0824b8e59984a1e5a028bcc80f70736d839acaee5fa73",
+      "generatedReferences": [
+        "lean_ctor_get",
+        "lean_nat_dec_eq",
+        "lean_obj_tag",
+        "lean_object"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "List Nat membership"
+    },
+    {
+      "symbol": "l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0",
+      "binaryNm": "0000000000140ec0 00000000000002e7 t l_Option_instBEq_beq___at___Lean_Server_moduleFromDocumentUri_spec__0",
+      "sourceModule": "Lean.Server.Utils",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Server/Utils.c",
+      "pinnedFileSha256": "c5fc1d9d1bc38e49039741b9f29be6e2a7b40154e86fa9df7936a121c6afe33a",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/efee1e1b5af9c1e8.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/efee1e1b5af9c1e8.c",
+      "bodySha256": "9f8b371f7e2619e223bb487217002a7acca0247fbf5731df9be1f7935a842021",
+      "generatedReferences": [
+        "lean_ctor_get",
+        "lean_obj_tag",
+        "lean_object",
+        "lean_string_dec_eq"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "Option String equality"
+    },
+    {
+      "symbol": "l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18",
+      "binaryNm": "0000000000141740 000000000000023b t l_Option_instBEq_beq___at_____private_Lean_Util_SCC_0__Lean_SCC_sccAux___at___Lean_SCC_scc___at_____private_Lean_Elab_PreDefinition_Main_0__Lean_Elab_partitionPreDefs_spec__5_spec__8_spec__18",
+      "sourceModule": "Lean.Elab.PreDefinition.Main",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Elab/PreDefinition/Main.c",
+      "pinnedFileSha256": "a47b8b7c8ffbddd7fa9d418b8011e43d2033f8ca934ada9b3a5e6e99d107fc07",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/b6eee59882d8e683.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/b6eee59882d8e683.c",
+      "bodySha256": "ecd6ed70b84d6790b419111a4849d2a82ac592971c48230f817192a1ca867cf5",
+      "generatedReferences": [
+        "lean_ctor_get",
+        "lean_nat_dec_eq",
+        "lean_obj_tag",
+        "lean_object"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "Option Nat equality"
+    },
+    {
+      "symbol": "l_String_anyAux___at_____private_Lean_Meta_Hint_0__Lean_Meta_Hint_readableDiff_mkWhitespaceDiff_spec__0",
+      "binaryNm": "0000000000140810 00000000000000d3 t l_String_anyAux___at_____private_Lean_Meta_Hint_0__Lean_Meta_Hint_readableDiff_mkWhitespaceDiff_spec__0",
+      "sourceModule": "Lean.Meta.Hint",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Meta/Hint.c",
+      "pinnedFileSha256": "cadf20d5f00dd0b41c77ee855e80df7b3986eb5c9905135036d03311a667ecb9",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/ca9b1e8e1f000fd1.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/ca9b1e8e1f000fd1.c",
+      "bodySha256": "2799e94bd3290888f48f16f49c4cbbeb3ff7fb2c390430d5b52537c0d793a6ce",
+      "generatedReferences": [
+        "lean_dec",
+        "lean_nat_dec_lt",
+        "lean_object",
+        "lean_string_utf8_get",
+        "lean_string_utf8_next",
+        "lean_uint32_dec_eq"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "UTF8 character membership"
+    },
+    {
+      "symbol": "l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1_spec__1",
+      "binaryNm": "0000000000141200 0000000000000203 t l___private_Init_Data_Array_Basic_0__Array_mapMUnsafe_map___at___Array_toJson___at___Lean_Widget_instRpcEncodableGetWidgetsResponse_enc____x40_Lean_Widget_UserWidget_577854155____hygCtx___hyg_1__spec__1_spec__1",
+      "sourceModule": "Lean.Widget.UserWidget",
+      "pinnedSource": "tests/directruntime-20261104/shared-translator/artifacts/lean-source-797c613/stage0/stdlib/Lean/Widget/UserWidget.c",
+      "pinnedFileSha256": "171dd6adb6caa1a65d41f4fbd08b6cf3787b821e96f31d6af4f098680480d7a8",
+      "disassembly": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/f1600a230b84f81f.disasm",
+      "classification": "generic helper specialization; independent source/body review required",
+      "body": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/frontend-origin/f1600a230b84f81f.c",
+      "bodySha256": "3004c621ef863fd619b2e7078e47fdd0fefe0b728ffe56c8593ae6e77f9bd63d",
+      "generatedReferences": [
+        "lean_array_uget",
+        "lean_array_uset",
+        "lean_object",
+        "lean_unsigned_to_nat",
+        "lean_usize_add",
+        "lean_usize_dec_lt"
+      ],
+      "independentReview": "read-only finder and skeptic; no Lean/server; no frontend functionality found",
+      "reviewedClassification": "identity array traversal"
+    }
+  ],
+  "boundary": "Six empty initializers and eight generic helpers reviewed without any policy exception. This classification does not prove exhaustive forbidden-functionality closure for the entire binary; broader closure remains pending."
+}

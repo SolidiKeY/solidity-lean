@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "status": "initial census; full coverage gates pending",
   "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
-  "headAtGeneration": "b4990c26bd407131471151ab4bdec9266a753cc3",
+  "headAtGeneration": "8de74453b38b2ae2a8c4421d6f269c9741527853",
   "upstream": {
     "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
     "exporterGitBlob": "b855c19efcb9061c7b19b696cf7045f25e78dc74",
@@ -16481,5 +16481,12 @@
     },
     "boundary": "Six source-identified paired body-byte controls,finite initial-state runs and trusted public checker observations. This validates provenance and regression intent,not compiler/source preservation,Lean proof terms or native/WASM closure.",
     "gate": "tests/directruntime-20261104/shared-translator/evidence/adoption-8bf/modality-frozen.log"
+  },
+  "nativeControls": {
+    "receipt": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/native-controls.json",
+    "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
+    "fixtureComparisons": 18,
+    "failClosedRequests": 2,
+    "boundary": "Native functional parity and observed runtime access only;14origin-name candidates independently reviewed generic/empty. Exhaustive binary closure,WASM and source preservation remain pending."
   }
 }

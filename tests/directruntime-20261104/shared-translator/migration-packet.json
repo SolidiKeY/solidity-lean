@@ -1,7 +1,7 @@
 {
   "status": "concrete API and observation packet; producer migration pending",
-  "sourceHead": "b4990c26bd407131471151ab4bdec9266a753cc3",
-  "adoptedMaster": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
+  "sourceHead": "d3a79031a17de96359f75617a77475b15c468d7d",
+  "adoptedMaster": "e6849d3bdf516099d20c33d3581d523449764018",
   "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
   "publicRoots": [
     "Shared.function executableReader",
@@ -83,5 +83,12 @@
   "newProducerApiReview": {
     "path": "Solidity/Frontend/SolcJson/IrImport.lean",
     "role": "Exact JSON IR-channel selector; does not migrate existing AST import."
+  },
+  "nativeControls": {
+    "receipt": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/native-controls.json",
+    "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
+    "comparisons": 18,
+    "failClosed": 2,
+    "boundary": "18exact saved native-vs-Lean-harness outcomes+2failclosed,rerun after mandatede684 rebase. No serialized env/frontend library/external frontend exec observed in those runs. 14origin candidates reviewed6emptyinitializers/8generichelpers;not exhaustive binary closure,WASM,source preservation or full migration."
   }
 }
