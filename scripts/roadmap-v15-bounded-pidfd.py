@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """V15 verified terminal-process observation; original observe runner unchanged.
 Only a previously bound serial process with kernel-confirmed termination can
-retire a stale zero-RSS [lean] row. Live/unknown/unobservable cases reject.
+retire a stale blank-command, zombie, or missing ps row. Live/unknown/unobservable cases reject.
 """
 import importlib.util,json,os,re,select,sys,time
 from pathlib import Path
@@ -51,12 +51,12 @@ class TerminalTracker:
             self.closer(fd);raise
         self.bound[pid]=dict(fd=fd,identity=first)
         self.record('pidfd-bound',pid=pid,identity=first)
-    def terminated(self,pid,allow_wait=False):
+    def terminated(self,pid,allow_wait=False,retain=False):
         entry=self.bound.get(pid)
         if entry is None:raise GuardError('unbound blank-command process')
         if not self.dead(entry['fd']):
             if not allow_wait:raise GuardError('blank-command process is not kernel-terminal')
-            # Linux may clear mm/argv before signalling the pidfd during exit.
+            # ps may lose a row or report Z/Zl before pidfd exit readiness.
             # Wait at most50ms on the already identity-bound kernel handle; no
             # workload is resumed or blank/live process accepted on timeout.
             self.record('terminal-wait',pid=pid,timeoutMs=50)
@@ -67,7 +67,9 @@ class TerminalTracker:
         if current is not None and (current['start']!=entry['identity']['start'] or current['comm']!=self.comm or current['state'] not in ('Z','X','x')):
             raise GuardError('terminal PID reused or still live')
         self.record('kernel-terminal',pid=pid,bound=entry['identity'],current=current,pidfdReadable=True)
-        self.closer(entry['fd']);del self.bound[pid]
+        # Retain verified zombie bindings while their ps rows persist. Every
+        # subsequent observation rechecks readiness and terminal identity.
+        if not retain:self.closer(entry['fd']);del self.bound[pid]
     def snapshot(self,top):
         rows=top.splitlines()
         if not rows or rows[0].split()!=['PID','ELAPSED','RSS','STAT','COMMAND','COMMAND']:
@@ -81,11 +83,11 @@ class TerminalTracker:
             if pid in seen:raise GuardError('duplicate process identity row')
             seen.add(pid)
             if stat.startswith('Z'):
-                if pid in self.bound:self.terminated(pid)
+                self.terminated(pid,allow_wait=True,retain=True)
                 kept.append(row);continue
             if int(elapsed)>=300:raise GuardError('Lean reached300s limit')
             if argv=='['+self.comm+']' and int(rss)==0:
-                self.terminated(pid,allow_wait=True)
+                self.terminated(pid,allow_wait=True,retain=True)
                 continue
             if '-j1' not in argv.split():
                 # Preserve the original serial guard: do not excuse any bad argv.
@@ -99,8 +101,7 @@ class TerminalTracker:
             kept.append(row)
         for pid in list(self.bound):
             if pid not in seen:
-                if not self.dead(self.bound[pid]['fd']):raise GuardError('live bound process missing from snapshot')
-                self.terminated(pid)
+                self.terminated(pid,allow_wait=True)
         return '\n'.join(kept)+'\n'
     def close(self):
         for x in self.bound.values():self.closer(x['fd'])
