@@ -324,3 +324,15 @@ Controls retain uint8 word257 and Boolean word2, refuse normalization to word1,
 and preserve a changed outer word513 through drop. Function address/selector
 projection, full WordCells equality and ordinary Solidity readback remain
 separate; no raw-frame metadata identity or general admission is inferred. -/
+
+/-! Function address/selector projection is now concrete too. Actual
+sourceFunctionAt_surjective supplies typed occurrences; RawTypedScope
+functionRead/liftFunction and capture/drop laws preserve both full words.
+drop_view_agrees covers every WordCell constructor. RawContinueLoop
+initialized_function_read/initialized_view prove the complete authoritative
+word view unchanged for the read-local uint8 initializer/continue family at
+every fuel and arbitrary raw input, without coherence/cleanup premises.
+Controls retain non-canonical max-width address and high-bit selector words.
+This closes the previously recorded projection gap for this family; general
+ordinary Solidity readback, arbitrary loop admission and adequacy remain open.
+No raw-frame metadata identity, physical pointer or ABI-boundary claim follows. -/

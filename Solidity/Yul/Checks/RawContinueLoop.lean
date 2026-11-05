@@ -1,5 +1,6 @@
 import Solidity.Yul.RawContinueLoop
 import Solidity.Yul.Checks.RawU8ForAbsent
+import Solidity.Yul.Checks.LocalWordView
 /-! Universal continue-loop horizon controls and a terminating break countercontrol.
 Dirty word observations are separate from checked/coherent Source equality. -/
 namespace Solidity.Yul.Checks.RawContinueLoop
@@ -456,6 +457,61 @@ theorem scalarDropMutation : ∀ (world : Solidity.Source.St Solidity.Yul.Checks
   intro world
   exact ⟨rfl,rfl⟩
 
+
+namespace FunctionInput
+export Solidity.Yul.Checks.LocalWordView (ctx locals index maxWord topWord)
+def initial (world : Solidity.Source.St ctx.env) : RawFrame.State ctx :=
+ RawFrame.write (RawFrame.write (RawFrame.ofClean (ctx := ctx) locals world)
+   (.address index) maxWord) (.selector index) topWord
+def argument : Solidity.Source.Idx ctx.tys LocalU8Expr.Ty := .there (.there (.there .here))
+end FunctionInput
+
+theorem initializedFunctionView : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.env),
+ Solidity.Yul.RawFrame.view (Solidity.Yul.RawU8ForAbsent.run (.local Solidity.Yul.Checks.RawContinueLoop.FunctionInput.argument)
+   (Solidity.Yul.RawContinueLoop.body
+     (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.push "n" Solidity.Yul.LocalU8Expr.Ty)
+     [] false false) pipeline fuel
+   (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.initial world)).2 =
+ Solidity.Yul.RawFrame.view (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.initial world) := by
+  intro pipeline fuel world
+  exact RawContinueLoop.initialized_view FunctionInput.ctx "n" [] false false
+    FunctionInput.argument pipeline fuel (FunctionInput.initial world)
+
+theorem initializedFunctionFields : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.env),
+ let actual := Solidity.Yul.RawU8ForAbsent.run (.local Solidity.Yul.Checks.RawContinueLoop.FunctionInput.argument)
+   (Solidity.Yul.RawContinueLoop.body
+     (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.push "n" Solidity.Yul.LocalU8Expr.Ty)
+     [] false false) pipeline fuel
+   (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.initial world)
+ Solidity.Yul.RawFrame.view actual.2 (.address Solidity.Yul.Checks.RawContinueLoop.FunctionInput.index) =
+   Solidity.Yul.Checks.RawContinueLoop.FunctionInput.maxWord ∧
+ Solidity.Yul.RawFrame.view actual.2 (.selector Solidity.Yul.Checks.RawContinueLoop.FunctionInput.index) =
+   Solidity.Yul.Checks.RawContinueLoop.FunctionInput.topWord := by
+  intro pipeline fuel world
+  dsimp only
+  rw [initializedFunctionView pipeline fuel world]
+  exact ⟨rfl,rfl⟩
+
+theorem initializedSelectorNotClean : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.env),
+ Solidity.Yul.RawFrame.view (Solidity.Yul.RawU8ForAbsent.run (.local Solidity.Yul.Checks.RawContinueLoop.FunctionInput.argument)
+   (Solidity.Yul.RawContinueLoop.body
+     (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.push "n" Solidity.Yul.LocalU8Expr.Ty)
+     [] false false) pipeline fuel
+   (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.initial world)).2
+   (.selector Solidity.Yul.Checks.RawContinueLoop.FunctionInput.index) ≠ Solidity.Yul.word 85 := by
+  intro pipeline fuel world equal
+  have retained := (initializedFunctionFields pipeline fuel world).2
+  have distinct : FunctionInput.topWord ≠ word 85 := by decide
+  exact distinct (retained.symm.trans equal)
+
+theorem functionInputIncoherent : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.FunctionInput.ctx.env),
+ Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawContinueLoop.FunctionInput.initial world) = false := by
+  intro world
+  rfl
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -577,3 +633,49 @@ end Solidity.Yul.Checks.RawContinueLoop
 /-- info: 'Solidity.Yul.Checks.RawContinueLoop.scalarDropMutation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.RawContinueLoop.scalarDropMutation
+
+/-- info: 'Solidity.Yul.SourceFunctionCell.ref_injective' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.SourceFunctionCell.ref_injective
+/-- info: 'Solidity.Yul.sourceFunctionAt_surjective' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.sourceFunctionAt_surjective
+/-- info: 'Solidity.Yul.RawTypedScope.lift_function_fields' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.lift_function_fields
+/-- info: 'Solidity.Yul.RawTypedScope.functionRead_at' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.functionRead_at
+/-- info: 'Solidity.Yul.RawTypedScope.functionRead_capture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.functionRead_capture
+/-- info: 'Solidity.Yul.RawTypedScope.functionRead_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.functionRead_agrees
+/-- info: 'Solidity.Yul.RawTypedScope.drop_function_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.drop_function_read
+/-- info: 'Solidity.Yul.RawTypedScope.drop_function_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.drop_function_agrees
+/-- info: 'Solidity.Yul.RawTypedScope.drop_view_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawTypedScope.drop_view_agrees
+/-- info: 'Solidity.Yul.RawContinueLoop.initialized_function_read' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.initialized_function_read
+/-- info: 'Solidity.Yul.RawContinueLoop.initialized_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawContinueLoop.initialized_view
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.initializedFunctionView' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializedFunctionView
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.initializedFunctionFields' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializedFunctionFields
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.initializedSelectorNotClean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializedSelectorNotClean
+/-- info: 'Solidity.Yul.Checks.RawContinueLoop.functionInputIncoherent' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.RawContinueLoop.functionInputIncoherent
