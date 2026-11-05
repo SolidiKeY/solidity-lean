@@ -486,6 +486,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/CalldataPackets/RawAddress/Controls.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawAddress/Execution.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/IrImport.lean` | vt1-solc-validation checkpoint: extractor reproduces an already-given lookup selection; no completeness of selectContract against lookup. |
+| `Lowering/V08/LiteralFailureScalarOverflow.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

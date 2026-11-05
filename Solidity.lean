@@ -2260,6 +2260,8 @@ import Solidity.Lowering.V08.LiteralFailureReasonSequence
 import Solidity.Lowering.V08.LiteralFailureReasonSequenceControls
 import Solidity.Lowering.V08.LiteralFailureReturnSlots
 import Solidity.Lowering.V08.LiteralFailureReturnSlotsControls
+import Solidity.Lowering.V08.LiteralFailureScalarOverflow
+import Solidity.Lowering.V08.LiteralFailureScalarOverflowControls
 import Solidity.Lowering.V08.LiteralFailureSelectorBytes
 import Solidity.Lowering.V08.LiteralFailureSelectorBytesControls
 import Solidity.Lowering.V08.LiteralFailureSignatureBytes
