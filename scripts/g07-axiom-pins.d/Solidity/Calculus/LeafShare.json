@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/LeafShare.lean:Solidity.holds_upd_share": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

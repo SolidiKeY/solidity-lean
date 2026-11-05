@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.source_refs_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceWrite.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_reference_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

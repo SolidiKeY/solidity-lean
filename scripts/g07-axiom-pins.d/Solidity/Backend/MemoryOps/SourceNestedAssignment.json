@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.source_nested_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_assign_of_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_loc_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_assign_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_assign_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_nested_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

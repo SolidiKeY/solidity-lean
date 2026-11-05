@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.resolved_uint_add_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.source_uint_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.source_uint_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintCompound.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.compound_add_overflow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

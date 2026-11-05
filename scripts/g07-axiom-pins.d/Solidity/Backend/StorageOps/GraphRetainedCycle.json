@@ -1,0 +1,20 @@
+{
+ "Solidity/Backend/StorageOps/GraphRetainedCycle.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.cycle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycle.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycle.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.pop_slots": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycle.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.push_slots": [
+  "Quot.sound",
+  "propext"
+ ]
+}

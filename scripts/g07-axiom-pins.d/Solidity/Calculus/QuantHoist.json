@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/QuantHoist.lean:Solidity.Decide.hoistPrep_valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,87 @@
+{
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_complete_hash": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideGoal_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash2_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideHash3_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Decide.decideLeaf_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swInst_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/Decision.lean:Solidity.Fml.swPrefix_validH": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

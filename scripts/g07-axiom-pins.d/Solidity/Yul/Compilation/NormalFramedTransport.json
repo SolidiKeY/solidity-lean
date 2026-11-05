@@ -1,0 +1,20 @@
+{
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.irStack_words": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_instruction": [],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_selection": [
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.boundary_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.refusal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageCopyControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageCopyControls.write_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

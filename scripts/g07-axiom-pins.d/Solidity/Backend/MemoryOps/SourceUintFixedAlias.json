@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.fixed_alias_scalar_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.source_locals_get_set_other": [],
+ "Solidity/Backend/MemoryOps/SourceUintFixedAlias.lean:Solidity.Backend.MemoryOps.source_uint_fixed_alias_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

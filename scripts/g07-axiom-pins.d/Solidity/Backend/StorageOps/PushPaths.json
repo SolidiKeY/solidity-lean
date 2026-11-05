@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/StorageOps/PushPaths.lean:Solidity.Backend.StorageOps.pushAt_fresh_suffix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushPaths.lean:Solidity.Backend.StorageOps.pushAt_operational_readback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushPaths.lean:Solidity.Backend.StorageOps.pushAt_reset_suffix": [
+  "Quot.sound",
+  "propext"
+ ]
+}

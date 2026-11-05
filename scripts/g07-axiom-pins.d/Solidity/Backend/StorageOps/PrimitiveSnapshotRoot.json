@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveSnapshotRoot.lean:Solidity.Backend.StorageOps.PrimitiveSnapshotRoot.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.capture_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceByteStorageBarrierControls.lean:Solidity.Lowering.StorageOps.SourceByteStorageBarrierControls.shifted_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

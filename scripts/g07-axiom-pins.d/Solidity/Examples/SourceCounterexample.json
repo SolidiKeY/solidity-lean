@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/SourceCounterexample.lean:Solidity.Examples.SourceCounterexample.badRefuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/SourceCounterexample.lean:Solidity.Examples.SourceCounterexample.wideRefuted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

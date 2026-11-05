@@ -1,0 +1,76 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_first_exterior": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_other_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_other_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_same_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedBoolSequence_second_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_first_exterior": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_frame": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_keeps": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_other_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_other_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_same_elems": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataSequenceLaws.lean:Solidity.Backend.MemoryOps.checkedUintSequence_second_read": [
+  "Quot.sound",
+  "propext"
+ ]
+}

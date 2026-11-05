@@ -1,0 +1,7 @@
+{
+ "Solidity/Storage/HashedLayoutEvm.lean:Solidity.Storage.slot_word_inj": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

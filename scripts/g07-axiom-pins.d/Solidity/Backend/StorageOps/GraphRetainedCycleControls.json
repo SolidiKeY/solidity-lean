@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.absent_and_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.aggregate_families": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.arbitrary_runtime_depth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/GraphRetainedCycleControls.lean:Solidity.Backend.StorageOps.GraphRetainedCycle.Controls.primitive_negative": [
+  "Quot.sound",
+  "propext"
+ ]
+}
