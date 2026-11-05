@@ -1,6 +1,6 @@
 # Calculus modes O10–O13
 
-Status (2026-11-05): **VC2 (O11) and VC3 (O12) done and integrated; VC1 running** (see Handoffs). Ideas from a
+Status (2026-11-05): **VC1 (O10, O13), VC2 (O11) and VC3 (O12) done and integrated** (see Handoffs). Ideas from a
 comparison with verity (Profile, `--deny-*` gates, AdversaryModel,
 EntryPointInvariants). Rule ([options.md](../options.md)): a mode is an
 argument of the validity statement, as `ValidT`/`ValidTail` are, never a global
@@ -19,7 +19,7 @@ Existing pieces: `TailMode`/`ValidTail` (`Calculus/TailMode.lean`), `ValidT`
 
 | Group | Deliverable | Depends on |
 |---|---|---|
-| O10 | **Assumption policy.** Each `verify` row records the modes it was proved under (callback reading, overflow default/checked/ignoringOverflow, TailMode, evaluation order, opaque hash, address 0 has no code). `--require`/`--deny` flags: a row that holds only under a refused mode is reported not-proved. Per-row JSON assumption report. Docs: cli.md, options.md. | — (mode record `Calculus/Assumptions.lean` owned here; O11–O13 add fields by request) |
+| O10 | **Assumption policy.** Each `verify` row records the modes it was proved under (callback reading, overflow default/checked/ignoringOverflow, TailMode, evaluation order, opaque hash, address 0 has no code). `--require`/`--deny` flags: a row that holds only under a refused mode is reported `refused`. Per-row JSON assumption report. Docs: cli.md, options.md. | — (mode record `Calculus/Assumptions.lean` owned here; O11–O13 add fields by request) |
 | O11 | **Caller-model lattice** `none < staticOnly < nonReentrant < any`, generalizing noCallback/withCallback; `staticOnly` reuses `CallMode.static`/`Mode.readOnly`; `nonReentrant` allows callbacks only into functions outside the reentrancy lock. Weakening theorem (valid under a stronger attacker ⇒ valid under a weaker one) over `StateInv`; separating examples in the `Tactics/Callback.lean` style. | — |
 | O12 | **Reachable starting states.** A `reachable` mode: storage from deployment plus a finite sequence of public calls; a contract invariant proved once by induction over entry points (rollback on revert); `TailMode.clean` follows. Orthogonal to O11: callbacks inside the sequence follow the chosen caller model. | O11 interface (stub) |
 | O13 | **Target profile.** One named bundle of solc version, legacy/via-IR (selects O9 order) and EVM fork, carried in result rows. Built over VS4's compiler and fork parameters (S5.1/S6.1 in [semantics-extensions.md](semantics-extensions.md)); no second fork parameter. | O10, VS4 S5.1/S6.1 |
@@ -131,6 +131,7 @@ is not this lane's. `check-doc-paths.sh` fails only on
 
 **Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
 field (`any` | `reachable`) in the mode record, `any` the default.
+
 ### VC2 — O11 caller-model lattice (2026-11-05)
 
 **Inventory (step 0).** `Bridge/` has no callback or attacker notion.
@@ -203,6 +204,7 @@ The separating examples live in `Examples/Tactics/CallerModel.lean`, not
 under `Theory/CallerModel/`: they use `dl!{ … }` and `sol_symex`, which
 the core library may not reach (`scripts/check-layers.mjs`); the file is
 new and no other lane's. Other lanes' needs: none.
+
 ### VC1 (inventory, O10, O13) — 2026-11-05
 
 **Inventory (step 0).** Reused, not redefined: `TailMode`/`ValidTail`,
@@ -281,3 +283,14 @@ run time, Lean's `pinned` a constant; no lemma links a profile to S5.1's
 - VC2: replace `Assumptions.callback` by the caller model and add its
   weakening theorem as a case of `Assumptions.Entails` (and to
   `weakenings` in `scripts/solidity-lean-assumptions.mjs`).
+
+**Integration review (VC1, 2026-11-05).** Finder and skeptic (read-only)
+found no Lean bug. Fixed in docs: options.md O10/O13 sections were merged
+after O12 (reordered); missing blank lines in correctness.md and here; the
+O10 plan row said "not-proved" where the CLI reports `refused`; O10's
+"Not done" now names `inspect` rows too. Kept, noted: `ValidA` does not read
+the overflow, hash or address-`0` fields (`ValidA.labels`), so a deny on
+`overflow` is enforced by the CLI's labelling, not by Lean;
+`Policy.verdict_proved_iff` only unfolds `verdict`; `TargetProfile.fits`
+checks the order only. VC3's request (a start-mode field in `Assumptions`)
+is not done.

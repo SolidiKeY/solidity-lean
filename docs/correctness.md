@@ -46,6 +46,7 @@ starting states: `ValidStart (.reachable M) φ`
 `Theory/Reachable/Mode.lean`), discharged by a contract invariant proved once
 over the entry points; `ValidTail .clean` statements carry over
 (`ValidTail.validStart_reachable`).
+
 ## Assumption records
 
 A verdict's readings (callbacks, overflow, tails, order, hash, address `0`)
