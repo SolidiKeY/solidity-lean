@@ -2235,3 +2235,36 @@ findings and their fixes:
 - Suspected, addressed in wording: "arbitrary" conditions (only single-token
   atoms are shown to satisfy the premise); "above `a`" → "at least `a`";
   the parser's own matches are not a G0 exemption.
+
+### Round-2 reviews (for headers, rejections twin)
+
+Finder and skeptic, read-only, on `a850a62e..290f1d78`. Finder: no
+confirmed findings. It compared all 112 `nodesAt` and `placeholdersAt` cases
+with Source by script, hand-checked every exclusion and the `for` token
+list and budgets, and confirmed that no indexed `match` beyond the documented
+`isRethrow` and `parse` is reached. Skeptic: PASS-with-fixes, wording only.
+The closure claim must name the `isRethrow` exception and its four assembly
+fixtures, and "cannot be linked" becomes "could not be linked here". Both
+were fixed in `20dd3435`. A note left as is: `forAtom .none .none` and
+`forLoop` describe the same tree. That is harmless, because uniqueness is
+about trees.
+
+## Moved-lane handoff (2026-11-05)
+
+Queue accounting (handoff `.handoff/statement-grammar.md`):
+
+| Item | State |
+| --- | --- |
+| 1. Gate G0 repair of the fixture observers | Done for every lane observer except Source's `isRethrow` on the four accepted assembly fixtures, which could not be linked (checkpoint Y, `G0Nodes`, `G0Rejections`). All 45 cases still close by `decide +kernel`. |
+| 2. Compound/item framing and nearest else outside the proved fragment | Extended to arbitrary expression conditions under an exposed atom premise, arbitrarily nested blocks, `return e;`, `unchecked` items and `for (; c; u)` (checkpoint Z). Still open: `for` initialisers, simple/expression statements, emit/revert/try/assembly bodies. |
+| 3. Parser coverage with syntax-derived fuel | Covered for the `AtomStmt`/`AtomItems` fragment by mutual structural recursion. Budgets are computed from the witness, with loop fuel from the token length. Same open constructors as item 2. |
+| 4. Positive uniqueness independent of SOL-EU | Token and prefix uniqueness inside the atom fragments, from the parser being a function. Yield/`Derives` uniqueness for the atom fragments is not proved, because it needs a printer premise on the atoms. |
+| 5. SG-CEX-01/02 | Unchanged: OPEN/REFUTED. |
+| 6. Full repository gates | See the CLOUD-RESULT of this session: `./run-lean.sh`, `register.sh --check`, `check-orphans`, doc paths, trust, axiom pins. |
+| 7. Acceptance, reviews, handoff | Two rounds of finder and skeptic reviews, recorded above. This section is the handoff. |
+
+Gate notes. `check-doc-paths.sh` fails on one reference that predates this
+lane (`docs/feature-work/after-roadmap-va1.md` cites a Mathlib test path),
+and the lane adds no failure. `check-axiom-pins.mjs` reports drift only for
+other lanes' pins: the lane has no `#guard_msgs` pins, and none of the
+reported lines is in `StatementGrammarH28`. `check-trust.sh`: 0 findings.
