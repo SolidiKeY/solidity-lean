@@ -28614,6 +28614,91 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.contents_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.decode_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.read_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.contents_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.decode_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.range_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.read_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.related_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.self_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignmentControls.lean:Solidity.Lowering.V07.FixedBytesAssignmentControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/UnsignedComplement.lean:Solidity.Lowering.V07.UnsignedComplement.local_transport": [
   "Classical.choice",
   "Quot.sound",

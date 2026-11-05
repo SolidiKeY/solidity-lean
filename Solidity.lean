@@ -1947,6 +1947,8 @@ import Solidity.Lowering.V07.DoubleNegativeControls
 import Solidity.Lowering.V07.DoubleSubtraction
 import Solidity.Lowering.V07.EffectfulCondition
 import Solidity.Lowering.V07.FieldCompleteness
+import Solidity.Lowering.V07.FixedBytesAssignment
+import Solidity.Lowering.V07.FixedBytesAssignmentControls
 import Solidity.Lowering.V07.GraphAdmissionBoundary
 import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
