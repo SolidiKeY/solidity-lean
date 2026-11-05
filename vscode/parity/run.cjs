@@ -57,7 +57,7 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,runId:randomUUID()};
+  config={...config,suite:options.suite||'full',runId:randomUUID()};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
