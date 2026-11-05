@@ -1158,3 +1158,7 @@ composition and physical failure bytes remain open. G46.02, the writer
 counterexample, fixture replay and full assignment gates remain pending.
 Published master was adopted before this increment; existing evidence remains
 separate from new checkpoint outcomes.
+
+`SignedEntryBodyInterface.lean` specifies actual value-checked signed decoding,
+typed binding and core-admitted body execution with exact ordered outcomes.
+Early value rejection needs no calldata-local representation facts.
