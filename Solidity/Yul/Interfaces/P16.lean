@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingSequence
 import Solidity.Yul.RawPreparedDeclaration
 import Solidity.Yul.RawDeclarationFrame
@@ -113,3 +114,11 @@ errors from reached grown frames; project uses actual Source.Out.up for control.
 Checked/coherent premises remain explicit. This joins the child laws, while
 final block scope closure and general growing-for admission remain separate.
 Concrete joined/control/error-prefix witnesses are in Solidity.Yul.Checks.RawGrowingSequence. -/
+
+/-! RawGrowingBlock.adapter closes the single Boolean declaration around an
+actual checked Items tail into an existing same-context checked block producer.
+Its Source.execS block correspondence concretely composes the growing sequence
+with actual scope restoration/Out.close, retaining checked/coherent premises
+and reached error state. Drop removes only the bound prefix via typed values.
+Mutation/control/dirty-word controls are in Solidity.Yul.Checks.RawGrowingBlock.
+General growing-for/declaration-group/frontend admission remains separate. -/
