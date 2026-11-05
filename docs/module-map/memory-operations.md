@@ -374,3 +374,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedStorageHeaderInterface.lean` | One represented outer-slot input derives runtime count/data base; full nested-copy result with arbitrary outer shadows. |
 | `Backend/MemoryCopies/NestedStorageHeader.lean` | Runtime outer header and symbolic data-base selection derive all nested child inputs and retain full checked-copy guarantees. |
 | `Backend/MemoryCopies/NestedStorageHeaderControls.lean` | Stored outer headers 0/3/64, retained mixed payloads, arbitrary shadows, wrong headers and header-dependent capacity controls. |
+| `Backend/MemoryCopies/StorageMemoryPipelineInterface.lean` | Actual checked storage-to-memory then memory-to-memory composition and two refusal phases. |

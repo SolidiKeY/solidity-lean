@@ -1231,3 +1231,17 @@ preserving all 214 predecessors. Exact-head gates, axiom audit, canonical patch
 reconstruction and reviewed seal remain required before acceptance. Symbolic
 data-slot selection does not establish numeric hashing, Source/compiler
 admission, gas or general recursive graph adequacy; original holds remain.
+
+## Checked mixed-location pipeline
+
+`StorageMemoryPipelineInterface` specifies the G35.06 backfill while VY5
+S03-PANIC41/H16 allocation-failure delivery remains open. The actual first
+returned pointer feeds the second existing checked copier. No input capacity
+premise is required. Success retains both represented copies, distinct fresh
+identities, full allocator, exact doubled demand, frame and old gaps. Refusal
+distinguishes first-stage failure from an actual successful represented first
+prefix followed by second-stage failure; no rollback state is asserted.
+Independent design finder/skeptic reviews required weakened first references,
+retained physical contents and empty-header boundary controls. This two-location
+fragment does not close Source/physical adequacy or five-location composition.
+The signature-only interface precedes proofs and inhabited/negative controls.

@@ -493,6 +493,7 @@ import Solidity.Backend.MemoryCopies.SourceStoredReferencesInterface
 import Solidity.Backend.MemoryCopies.SourceStrings
 import Solidity.Backend.MemoryCopies.SourceStringsControls
 import Solidity.Backend.MemoryCopies.SourceStringsInterface
+import Solidity.Backend.MemoryCopies.StorageMemoryPipelineInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFootprint
 import Solidity.Backend.MemoryCopies.TraversalFootprintControls
