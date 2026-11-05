@@ -210,6 +210,7 @@ import Solidity.Examples.Tactics.PushSuffixRules
 import Solidity.Examples.Tactics.PushSuffixRun
 import Solidity.Examples.Tactics.PushSuffixSource
 import Solidity.Examples.Tactics.QuantifiedDiamond
+import Solidity.Examples.Tactics.Reachable
 import Solidity.Examples.Tactics.Recovery
 import Solidity.Examples.Tactics.Recursion
 import Solidity.Examples.Tactics.ReferenceParameters

@@ -2395,6 +2395,9 @@ import Solidity.Theory.Mutability.Closer
 import Solidity.Theory.Mutability.Payable
 import Solidity.Theory.Mutability.Pure
 import Solidity.Theory.Mutability.View
+import Solidity.Theory.Reachable.CallerModel
+import Solidity.Theory.Reachable.CleanTail
+import Solidity.Theory.Reachable.Mode
 import Solidity.Theory.Segs
 import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Typed.Mem
