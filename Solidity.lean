@@ -1678,6 +1678,7 @@ import Solidity.Frontend.OverrideValidation.Compatibility
 import Solidity.Frontend.OverrideValidation.Extraction
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
+import Solidity.Frontend.OverrideValidation.Memoized
 import Solidity.Frontend.OverrideValidation.OverrideFrontier
 import Solidity.Frontend.OverrideValidation.OverrideLists
 import Solidity.Frontend.OverrideValidation.Pruning
