@@ -1,0 +1,5 @@
+Independent read-only finder and skeptic reviews; neither used Lean/server/builds/writes.
+Both confirmed ancestry preservation, byte-identical public modules and all three generated root/frontend registration rows at published9584f9e7. DirectRuntime remains unchanged with original private readers, no ControlTuple composition. Shared.Scope is preparatory only; no new owned scope.
+Both independently verified current H41 archive SHA2560bbf0314d84a814ba9a647530a352e63620f72acc90769311a05525b04034274, size1694368, all15 unique regular members/internalchecksums,9artifacts/3exactmappings/current source hashes.
+Both checked VM receipt outcomes/current source hashes, full TSV allPASS, current cache pointers/pull=false, historical evidence separation, registration resolved and production/post-composition validation still pending. No ordinary-verifier closure, source/backend adequacy or whole-goal completion overclaim.
+No confirmed findings; final review passed.

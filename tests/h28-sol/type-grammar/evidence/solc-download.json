@@ -1,0 +1,8 @@
+{
+  "url": "https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.38+commit.1835d247.js",
+  "path": "/workspace/scratch/h28-type-grammar/solc/soljson-v0.8.38+commit.1835d247.js",
+  "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "bytes": 10798266,
+  "elapsed_s": 0.931522089000282,
+  "outcome": "verified"
+}
