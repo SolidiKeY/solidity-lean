@@ -166,3 +166,11 @@
 
 | `Yul/Compilation/WordBlockExecution.lean` | Forward actual finite StructuredExec transport under unchanged WordControl selection, one-sided branches and real loop witnesses; symbolic caller/nonstack preservation. No termination/failure iff/native/G24 claim. |
 | `Bridge/SolidityBridge/Yul/WordStructuredCompilation{,Controls}.lean` | Actual nested scope/switch and scoped FOR source/compiler consumers of concrete structured word execution, without realization callbacks; original horizon13/10, selector mutation, lexical scratch, symbolic framing and skipped bad/endless-arm controls. |
+| `Yul/Checks/LocalBoolDoDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolDoDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerHeaders.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedCallerHeadersControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLowering.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLoweringControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/ReturndataByteLoad.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/ReturndataByteLoadControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
