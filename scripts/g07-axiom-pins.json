@@ -35764,6 +35764,54 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.irStack_words": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_instruction": [],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_leaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransport.lean:Solidity.Yul.Compilation.NormalFramedTransport.word_selection": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.high_only_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.rootCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.shifted_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.shiftedCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.source_and_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/NormalFramedTransportControls.lean:Solidity.Yul.Compilation.NormalFramedTransport.Controls.whole_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Compilation/NormalNumericTransport.lean:Solidity.Yul.Compilation.NormalNumericTransport.machine": [
   "Classical.choice",
   "Quot.sound",
