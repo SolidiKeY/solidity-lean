@@ -968,3 +968,31 @@ axiom-inventory failures from previous checkpoints remain outside this lane.
 `UIntBindingInterface.lean` specifies actual compiler validation followed by
 binding a typed uint parameter local, exact frame state and raw entry rejection.
 Native loading and full Source/body correspondence remain separate.
+
+`UIntBinding.lean` now selects a typed program that performs singleton uint
+head/word validation and declares the parameter with the existing `declLocal`
+compiler path. For every semantic uint bit width, execution either rejects
+exactly at the existing checks or extends the typed frame with the preserved
+raw word. The continuation cell and new parameter cell are the only writes;
+saved stack, input word, storage, balance and all other machine fields remain
+as stated by the exact execution result. `decoded_and_bound` constructs the
+semantic typed word from bytes at offset 4 and proves its equality to the
+actual newly declared local identified through `cellOf`. No decoded payload,
+desired run or poststate is a premise. Raw rejection agreement retains the
+explicit represented word/size and `fuel + 2` boundaries.
+
+Controls cover raw uint8 value 255 after an arbitrary nonzero selector with
+trailing bytes, dirty high bits (256), zero-width acceptance/rejection, general
+full and oversized widths, a short head, insufficient decoder fuel and exact
+protected state. A separately selected compiled body reads the new typed local
+and writes the continuation cell; this exercises local usability without
+claiming whole Source-body linkage. Independent read-only finder and skeptic
+reviews found no semantic issues. Focused compilation and per-file diagnostics
+passed; individual axiom guards record only standard axioms.
+
+This supplies intrinsic singleton uint argument binding. Boolean/signed and
+aggregate bindings, native loading/frame realization, general argument and
+signature pipeline composition, Source-body correspondence and complete G40
+remain open. G46.02 and the physical writer counterexample are unchanged. The
+shared doc-path and central axiom-inventory failures remain outside lane
+ownership, and the full assignment gates and fixture replay remain pending.

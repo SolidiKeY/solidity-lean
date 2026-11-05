@@ -187,3 +187,6 @@
 | `Backend/AbiEntry/SingleWordGateInterface.lean` | Composed singleton value-entry guard certificate with raw representation/fuel boundary. |
 | `Backend/AbiEntry/SingleWordGate.lean` | Actual head/word compiler composition and exact singleton raw decoder agreement. |
 | `Backend/AbiEntry/SingleWordGateControls.lean` | Raw success/rejection, trailing bytes, head ordering, fuel and protected-state controls. |
+| `Backend/AbiEntry/UIntBindingInterface.lean` | Actual compiler contract for a validated singleton uint parameter local. |
+| `Backend/AbiEntry/UIntBinding.lean` | Typed uint declaration with exact compiler execution and raw semantic value agreement. |
+| `Backend/AbiEntry/UIntBindingControls.lean` | Raw bound frame, dirty/width/head/fuel controls and compiled typed argument read. |
