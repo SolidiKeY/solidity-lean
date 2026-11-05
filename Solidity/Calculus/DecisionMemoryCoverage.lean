@@ -1,4 +1,6 @@
 import Solidity.Calculus.Decision
+import Solidity.Calculus.DecisionResidueReasons
+import Solidity.Calculus.DecisionGivenHeapReason
 
 /-! # Coverage of the actual reversed-field memory route
 Closed single fresh-struct equations only. The array-cut route and all frozen
