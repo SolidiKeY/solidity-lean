@@ -3114,3 +3114,23 @@ the move. Neither used the Lean server. Confirmed findings, all fixed:
 Checked with no defect: every import resolves, the roots match the tree,
 `check-layers.mjs` is valid, the moves are byte-identical, and the absence of
 the producer and Monetary files from every origin ref holds.
+
+**Checkpoint gate.** `scripts/coord-tools/gate.sh checkpoint` ran at
+`f5c10f210fa175dce64df79662c1b938eadcba75`, the commit that holds the three
+modules. Every gate passed:
+
+| Gate | Result |
+|---|---|
+| build-touched | 275 jobs, including all 29 remaining `Yul/Composition` modules |
+| library (`lake build Solidity`) | `Build completed successfully (3744 jobs)` in 3865 s |
+| trust | 4090 sources, 0 findings |
+| orphans | 0 orphaned |
+| layers | 0 core modules reach the elaborator |
+| roots | pass |
+| doc-paths | pass |
+| axiom-pins | 7990 pinned, 0 errors, 0 unrecorded changes |
+
+Every later commit changes only docs or the held test driver, and none of them
+is in the library. The lane touches no Calculus, Syntax or Semantics module,
+so the examples gate does not apply. The 29 lane modules are now default-build
+roots. Together they built in under ten minutes of the touched gate.
