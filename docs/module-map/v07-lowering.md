@@ -141,3 +141,5 @@
 | `Lowering/V07/P12AssignedConditionControls.lean` | Inhabited mixed-reference producer, success witnesses, source-timeout boundary and executed missing-write/stale-capture controls. |
 | `Lowering/V07/P12NegatedCondition.lean` | Published condition-contract negation preserving exact operand code, effects, state and error payloads; double-negation run identity. |
 | `Lowering/V07/P12NegatedConditionControls.lean` | Effectful producer composition, source horizons, actual failure bytes and discriminating duplicated-prefix/wrong-write controls. |
+| `Lowering/V07/P12ContextExtension.lean` | Whole P12 condition transport across arbitrary native thinnings with heap-growing background frames |
+| `Lowering/V07/P12ContextExtensionControls.lean` | Inhabited mixed-reference extension/composition, complete caller frames and stale-index negatives |
