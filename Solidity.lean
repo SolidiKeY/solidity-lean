@@ -1665,7 +1665,9 @@ import Solidity.Frontend.LiteralGrammarH28.Body
 import Solidity.Frontend.LiteralGrammarH28.BodyControls
 import Solidity.Frontend.LiteralGrammarH28.BoundaryControls
 import Solidity.Frontend.LiteralGrammarH28.Hex
+import Solidity.Frontend.LiteralGrammarH28.HexControls
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
+import Solidity.Frontend.LiteralGrammarH28.HexPins
 import Solidity.Frontend.LiteralGrammarH28.Quoted
 import Solidity.Frontend.LiteralGrammarH28.Scanner
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
