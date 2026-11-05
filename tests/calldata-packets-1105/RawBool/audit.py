@@ -1,8 +1,9 @@
 import json,re,pathlib
 root=pathlib.Path('tests/calldata-packets-1105/RawBool');results={}
 for part,label in [('Execution','execution'),('Controls','controls')]:
- records=[p for p in (root/'evidence').glob(label+'-*.json') if json.loads(p.read_text()).get('exit')==0]
- latest=max(records,key=lambda p:int(p.stem.rsplit('-',1)[1]));record=json.loads(latest.read_text());text=pathlib.Path(record['log']).read_text();found={}
+ source=pathlib.Path(f'Solidity/Backend/CalldataPackets/RawBool/{part}.lean').read_text()
+ assert source.count('#guard_msgs in') == len(re.findall(r'^#print axioms ',source,re.M))
+ text=source;found={}
  for match in re.finditer(r"'([^']*CalldataPackets.RawBool[^']*)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",text,re.S):
   if ('.Controls.' in match.group(1)) != (part=='Controls'):continue
   axioms=sorted(x.strip() for x in (match.group(2) or '').split(',') if x.strip())

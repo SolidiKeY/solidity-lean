@@ -123,3 +123,47 @@ Register generated roots, area rows and exact standard-axiom inventories through
 central serialized integration. No VM ship-cache.sh is run (H41); verified
 source/toolchain/checksum-bound packs are left for coordinator pull. Full native,
 physical/world/resource adequacy remains outside this packet, as in RawUint.
+
+
+## Axiom-pin follow-up after scheduled publication
+
+Adopted origin/master3ad22f66d8fc6431378c22e71823436c79dede7f, preserving
+all owned commits and prior seals. Review request: pin the existing axiom prints.
+All64 existing prints now have exact `#guard_msgs` expectations:15 Execution,
+49 Controls, including all nine private theorems. Expectations were copied from
+actual saved execution-6/controls-5 output; the initial proof checks already
+verified those sets. No theorem, proof, definition, premise, observation or
+budget changed. Coverage tooling strips only added comments/guards and checks
+byte equality with published3ad source. Only existing standard axioms appear.
+
+Both files kernel-check with all guards:Execution1.604s/RSS869511168 bytes;
+Controls3.795s/RSS895467520 bytes. Per-file MCP diagnostics0 errors each; server
+stopped before further builds. A paired `copy_run` pin control passes with the
+actual three axioms; its otherwise identical negative fixture omits choice and
+Quot.sound and is rejected for exactly the expected guard-message mismatch
+(exit1, not a passing build). Fixtures use .lean.in and setup-aware stdin so
+intentional bad expectations are not production-inventory entries. Root audit
+now reads the checked source expectations because successful guards consume
+printed messages. The repository pin parser generates a64-entry per-lane
+pins-proposal.json; shared scripts/g07-axiom-pins.json remains coordinator-owned.
+
+Separate read-only finder and skeptic reviews found no defect in64-pin coverage,
+private names, actual-message agreement or unchanged proofs; neither used
+Lean/server or writes. Positive/negative controls discriminate expected sets.
+Source hashes, commands, exact output, wall/RSS and review conclusions are saved
+under PinFollowup/evidence and sealed after the committed-HEAD gates. Existing
+RawBool source controls remain unchanged; this task adds no semantic claim.
+
+Fresh runtime:Lean4.24.0 (797c613), Lake5.0.0-src+797c613. KeySort exits0 in0.912s:
+RUNTIME_GATE_PASS. Verified Docker memory.max12884901888, memory.swap.max0,
+CPU1, >=4GiB reserve, one observed Lean frontend, LEAN_NUM_THREADS1 and actual
+frontend-j1; no proof budget lift. Scope-local runner/config reuses existing
+caches and retains the180s/file/300s/group guards. No focused module above60s.
+
+Required touched/checkpoint gates run at the follow-up committed HEAD, with
+actual results in sealed HANDOFF.md and final CLOUDVM-RESULT. New source pins
+require central inventory recording, not a trust allowance; never count pending
+inventory drift as PASS. H41: leave verified cache artifacts/deltas with source,
+toolchain and checksums for coordinator pull; no VM ship-cache.sh. Prior original
+VT1 T01/T02 obligations, IrImport delivery and RawBool seals remain unchanged;
+this follow-up does not complete the whole original assignment.
