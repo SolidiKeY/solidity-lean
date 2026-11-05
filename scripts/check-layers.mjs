@@ -12,6 +12,65 @@
 import { loadGraph, findPath, reach } from "./import-fanout.mjs";
 
 const CORE = [
+  /^Solidity\.Yul\.(RawDoWhileHorizon|Checks\.RawDoWhileHorizon)$/, // Concrete body-first adapter completed-frame horizons.
+  /^Solidity\.Yul\.(RawAdapterSequenceLoopHorizon|Checks\.RawAdapterSequenceLoopHorizon)$/, // Concrete P16 sequence-loop driver agreement and full-frame horizons.
+  /^Solidity\.Yul\.(RawAdapterLoopHorizon|Checks\.RawAdapterLoopHorizon)$/, // Concrete body-factory P16 loop agreement and full-frame horizons.
+  /^Solidity\.Yul\.(RawSequenceWhileHorizon|Checks\.RawSequenceWhileHorizon)$/, // Concrete sequence-bodied while full-frame horizons.
+  /^Solidity\.Yul\.(RawControlledWhileHorizon|RawReadOnlyViews|Checks\.RawControlledWhileHorizon)$/, // Concrete controlled-while full-frame horizons and read-view laws.
+  /^Solidity\.Yul\.(RawControlSequenceHorizon|Checks\.RawControlSequenceHorizon)$/, // Concrete raw control-sequence/block whole-frame horizons.
+  /^Solidity\.Yul\.(RawLoopBodyHorizon|Checks\.RawLoopBodyHorizon)$/, // Concrete raw condition/control-body whole-frame horizons.
+  /^Solidity\.Yul\.(RawSequenceHorizon|Checks\.RawSequenceHorizon)$/, // Concrete whole raw-frame sequence/block horizons.
+  /^Solidity\.Yul\.(RawStatementHorizon|Checks\.RawStatementHorizon)$/, // Concrete whole raw-frame expression-statement horizons.
+  /^Solidity\.Yul\.(LocalForFirstDone|Checks\.LocalForFirstDone)$/, // Concrete actual Source horizon-selector consequences.
+  /^Solidity\.Yul\.(LocalForTimeout|Checks\.LocalForTimeout)$/, // Concrete full-for timeout classification and Source consequences.
+  /^Solidity\.Yul\.(LocalForNoGuardFailure|Checks\.LocalForNoGuardFailure)$/, // Initialized omitted-guard finite noncompletion.
+  /^Solidity\.Yul\.(LocalLoopReductions|Checks\.LocalLoopReductions)$/, // Exact constant-loop reductions and horizon results.
+  /^Solidity\.Yul\.(LocalPostHorizon|Checks\.LocalPostHorizon)$/, // Concrete post/do-while finite-horizon laws.
+  /^Solidity\.Yul\.(LocalLoopFailure|Checks\.LocalLoopFailure)$/, // Concrete scope/loop timeout and Source horizon laws.
+  /^Solidity\.Yul\.(LocalItemFailure|Checks\.LocalItemFailure)$/, // Indexed statement and context-growing item failure classification.
+  /^Solidity\.Yul\.(LocalU8Representation|Checks\.LocalU8Representation)$/, // Checked-u8 per-pipeline exact-result congruence.
+  /^Solidity\.Yul\.(LocalU8Horizon|Checks\.LocalU8Horizon)$/, // Checked-u8 terminal fuel stability.
+  /^Solidity\.Yul\.(LocalU8CompareHorizon|Checks\.LocalU8CompareHorizon)$/, // Checked-u8 comparison terminal fuel stability.
+  /^Solidity\.Yul\.(LocalBoolHorizon|Checks\.LocalBoolHorizon)$/, // Boolean full-run terminal fuel stability.
+  /^Solidity\.Yul\.(LocalCompareHorizon|Checks\.LocalCompareHorizon)$/, // Concrete comparison/Boolean conditional horizon composition.
+  /^Solidity\.Yul\.(LocalItemHorizon|Checks\.LocalItemHorizon)$/, // Context-growing completed item fuel stability.
+  /^Solidity\.Yul\.(LocalDefaultHorizon|Checks\.LocalDefaultHorizon)$/, // Heterogeneous default item/block completed fuel stability.
+  /^Solidity\.Yul\.(LocalUncheckedHorizon|Checks\.LocalUncheckedHorizon)$/, // Existing unchecked scope/continuation completed fuel stability.
+  /^Solidity\.Yul\.(LocalIfHorizon|Checks\.LocalIfHorizon)$/, // Independently typed conditional scope completed fuel stability.
+  /^Solidity\.Yul\.(LocalWhileHorizon|Checks\.LocalWhileHorizon)$/, // Recursive default-scoped while completed fuel stability.
+  /^Solidity\.Yul\.(LocalDoWhileHorizon|Checks\.LocalDoWhileHorizon)$/, // Body-first recursive do/while completed fuel stability.
+  /^Solidity\.Yul\.(LocalForPostHorizon|Checks\.LocalForPostHorizon)$/, // Guard/body/post recursive completed fuel stability.
+  /^Solidity\.Yul\.(LocalForInitHorizon|Checks\.LocalForInitHorizon)$/, // Concrete initializer/full-for completed horizon composition.
+  /^Solidity\.Yul\.(LocalForNoPostHorizon|Checks\.LocalForNoPostHorizon)$/, // Concrete initialized no-post for completed horizon composition.
+  /^Solidity\.Yul\.(LocalDefaultPostRepresentation|Checks\.LocalDefaultPostRepresentation)$/, // Default-scope post and omitted-guard congruence.
+  /^Solidity\.Yul\.(LocalDefaultControlRepresentation|Checks\.LocalDefaultControlRepresentation)$/, // Independently indexed default branches and loops.
+  /^Solidity\.Yul\.(LocalDefaultRepresentation|Checks\.LocalDefaultRepresentation)$/, // Heterogeneous default and unchecked exact-word congruence.
+  /^Solidity\.Yul\.(LocalBoolForPostRepresentation|Checks\.LocalBoolForPostRepresentation)$/, // Concrete initializer/post-loop word congruence.
+  /^Solidity\.Yul\.(LocalBoolPostRepresentation|Checks\.LocalBoolPostRepresentation)$/, // Exact-word post-iteration congruence.
+  /^Solidity\.Yul\.(LocalBoolForRepresentation|Checks\.LocalBoolForRepresentation)$/, // Boolean initializer for-loop exact-word congruence.
+  /^Solidity\.Yul\.(LocalBoolWhileRepresentation|Checks\.LocalBoolWhileRepresentation)$/, // Exact-word loop congruence.
+  /^Solidity\.Yul\.(LocalBoolScopeRepresentation|Checks\.LocalBoolScopeRepresentation)$/, // Exact-word scope and conditional congruence.
+  /^Solidity\.Yul\.(LocalBoolItemRepresentation|Checks\.LocalBoolItemRepresentation)$/, // Indexed context-growing exact-word relations.
+  /^Solidity\.Yul\.(LocalBoolControlRepresentation|Checks\.LocalBoolControlRepresentation)$/, // Exact-word control congruence.
+  /^Solidity\.Yul\.(LocalBoolRepresentation|Checks\.LocalBoolRepresentation)$/, // Exact-word local Boolean proof relation.
+  /^Solidity\.Yul\.(LocalBoolFailure|Checks\.LocalBoolFailure)$/, // Exact failure classification for certified local Boolean evaluators.
+  /^Solidity\.Yul\.(LocalDefaultNoGuard|Checks\.LocalDefaultNoGuard)$/, // Omitted-guard consumers of actual scoped runners.
+  /^Solidity\.Yul\.(LocalDefaultPostIter|Checks\.LocalDefaultPostIter)$/, // Actual scoped for-iterations with discarded post values.
+  /^Solidity\.Yul\.(LocalDefaultDoWhile|Checks\.LocalDefaultDoWhile)$/, // Actual body-first iteration of typed default scopes.
+  /^Solidity\.Yul\.(LocalDefaultWhile|Checks\.LocalDefaultWhile)$/, // Concrete iteration of typed default scopes.
+  /^Solidity\.Yul\.(LocalDefaultIfElse|Checks\.LocalDefaultIfElse)$/, // Conditional selection of typed default scopes.
+  /^Solidity\.Yul\.(LocalItemWorld|Checks\.LocalItemWorld)$/, // World preservation for actual pure local runners.
+  /^Solidity\.Yul\.(LocalDefaultUnchecked|Checks\.LocalDefaultUnchecked)$/, // Actual unchecked default-scope composition.
+  /^Solidity\.Yul\.(LocalDefaultItems|Checks\.LocalDefaultItems)$/, // Typed constant-default declaration sequences.
+  /^Solidity\.Yul\.(LocalDefaultBinding|Checks\.LocalDefaultBinding)$/, // Actual constant-default declaration/body composition.
+  /^Solidity\.Yul\.(LocalBoolUnchecked|Checks\.LocalBoolUnchecked)$/, // Concrete unchecked and ordinary scope composition.
+  /^Solidity\.Yul\.(LocalBoolForNoGuard|Checks\.LocalBoolForNoGuard)$/, // Exact omitted-guard transport and concrete adapters.
+  /^Solidity\.Yul\.(LocalBoolPostIter|LocalBoolForPost|Checks\.LocalBoolForPost)$/, // Scoped Boolean for posts.
+  /^Solidity\.Yul\.(LocalBoolDivergence|Checks\.LocalBoolDivergence)$/, // No finite normal completion of constant-true scoped loops.
+  /^Solidity\.Yul\.(LocalBoolDoDivergence|Checks\.LocalBoolDoDivergence)$/, // No finite normal completion of literal-true do/while.
+  /^Solidity\.Yul\.(LocalBoolFor|Checks\.LocalBoolFor)$/, // Context-growing Boolean for initializer and scoped body.
+  /^Solidity\.Yul\.(LocalBoolDoWhile|Checks\.LocalBoolDoWhile)$/, // Body-first iteration of certified Boolean scopes.
+  /^Solidity\.Yul\.(LocalBoolWhile|Checks\.LocalBoolWhile)$/, // Iteration of context-growing Boolean scopes.
   /^Solidity\.Yul\.Views\.NominalInventory(?:Laws|Controls)?$/, // Intrinsic nominal view inventory.
   /^Solidity\.Yul\.World\.SelfDestructBuiltin(?:Controls)?$/, // Typed builtin binding and controls.
   /^Solidity\.Yul\.(LocalBoolWhile|LocalBoolDivergence|Checks\.LocalBoolWhile|Checks\.LocalBoolDivergence)$/, // Typed loop checkpoints.
