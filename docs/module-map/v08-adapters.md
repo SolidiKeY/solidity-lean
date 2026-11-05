@@ -460,6 +460,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/C3Exactness/OrderObstruction.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/C3Exactness/Renaming.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExecutableAst/Memory/Reader.lean` | Bounded memory-references checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashFamilyCheck.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashFiveChain.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
