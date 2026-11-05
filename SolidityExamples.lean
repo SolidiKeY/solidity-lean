@@ -39,6 +39,8 @@ import Solidity.Examples.DecisionArrays
 import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionGaps
+import Solidity.Examples.DecisionHashCore
+import Solidity.Examples.DecisionHashFamilies
 import Solidity.Examples.DecisionHashFamilyCheck
 import Solidity.Examples.DecisionHashFiveChain
 import Solidity.Examples.DecisionHashes

@@ -1,0 +1,14 @@
+# va1-decision bounded checkpoint
+
+Producer `7514c7f55711bea476205c6fd5074ef54a175d05`. Imports only:
+
+- `Solidity/Examples/DecisionHashCore.lean`
+- `Solidity/Examples/DecisionHashFamilies.lean`
+
+Statements, premises, exclusions and proof budgets are retained. This does not
+establish completion of the lane or discharge its remaining producer obligations.
+Touched/library checkpoint gates passed.
+Separate read-only finder and skeptic reviews must pass before publication.
+Reviews use exact diff/dependency packets and read-only inspection where available.
+
+Independent area finder and skeptic review is required before publication.
