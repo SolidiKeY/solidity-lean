@@ -928,3 +928,7 @@ and saved state, exhaustive kind delegation and the positive-fuel raw scalar
 correspondence. Both confirmed the primitive-only boundary and meaningful
 unified controls; neither used a build or Lean server. Focused compilation has
 no warnings in the changed modules.
+
+`SingleWordGateInterface.lean` specifies sequential head/primitive validation
+for one value parameter, actual entry-rejection agreement and explicit raw
+representation/fuel boundaries. Native loading and aggregates remain separate.
