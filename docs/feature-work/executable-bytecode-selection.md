@@ -435,3 +435,17 @@ attached, retaining the original container start time for the aggregate
 budget and avoiding page advice on active build files. The unobserved gap
 prevents a continuous-monitoring claim for this attempt. Final gates,
 resource review and handoff remain pending; prior failures are preserved.
+
+
+The first detached host replacement also stopped between turns. Recovery
+now uses a separate Docker tooling container, executable-bytecode-monitor9584,
+limited to128MiB/no-swap/0.2CPU, binding the actual parent cgroup read-only.
+Its original-start-time aggregate accounting, parent reserve and proof-group
+guards remain unchanged. It watches and can stop only the named existing
+workload. Its inherited before_container_start label is inaccurate for
+reattachment and is explicitly disclaimed. Skeptic identified an unused
+high-memory attachment path that would exit without stopping an active
+workload; durable-guard-next.py corrects that path and the label for future
+attachments. The current attachment passed with ample reserve. Original
+executed code/logs are preserved; no full-pass or continuous-coverage claim
+is inferred. Full validation remains active and final review is pending.
