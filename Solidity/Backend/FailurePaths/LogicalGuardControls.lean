@@ -83,16 +83,48 @@ theorem zero_horizon (p : Roadmap.Pipeline) :
 
 theorem saved_tail (x y : Bool) : (machine x y).stack = [w[77]] := rfl
 
-#print axioms represented
-#print axioms checked
-#print axioms conjunction
-#print axioms disjunction
-#print axioms true_or_false
-#print axioms false_and_true
-#print axioms poison_right_faults
-#print axioms poison_right_not_revert
-#print axioms or_skips_poisoned_right
-#print axioms and_skips_poisoned_right
-#print axioms old_selector_refuses
-#print axioms zero_horizon
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.represented' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms represented
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.checked' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms checked
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.conjunction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms conjunction
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.disjunction' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms disjunction
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.true_or_false' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms true_or_false
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.false_and_true' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms false_and_true
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.poison_right_faults' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms poison_right_faults
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.poison_right_not_revert' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms poison_right_not_revert
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.or_skips_poisoned_right' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms or_skips_poisoned_right
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.and_skips_poisoned_right' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms and_skips_poisoned_right
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.old_selector_refuses' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms old_selector_refuses
+/-- info: 'Solidity.Backend.FailurePaths.LogicalGuard.Controls.zero_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms zero_horizon
 end Solidity.Backend.FailurePaths.LogicalGuard.Controls

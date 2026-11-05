@@ -705,3 +705,12 @@ unchanged. A deliberately incorrect empty expected inventory is rejected;
 both guarded modules pass. Independent read-only finder and skeptic reviews
 found no confirmed defect. This inventory follow-up changes no correspondence
 claim or failure boundary.
+
+The LogicalGuard pair also guards all nineteen existing axiom reports against
+their actual output, including the smaller two-axiom representation report.
+The generated g07 inventory records those nineteen and the preceding fifteen
+RelationalGuard entries, without changing or removing any recorded pin.
+Both guarded modules pass, and an incorrect empty expected inventory is
+rejected. Short-circuit and poisoned-right observations, theorem statements
+and proof terms are unchanged. Read-only finder and skeptic reviews found no
+confirmed defect; the pin check reports zero errors and no unrecorded changes.
