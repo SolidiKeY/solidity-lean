@@ -1,3 +1,4 @@
+import Solidity.Yul.DirectUpdates
 import Solidity.Yul.Checks.ClosedRun
 import Solidity.Yul.RawFrameLogic
 import Solidity.Yul.RawCoherent
@@ -559,5 +560,230 @@ theorem transferRejectNormal : ∀ mode : Solidity.Modality,
 /-- info: 'Solidity.Yul.Checks.LocalBlock.transferRejectNormal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.transferRejectNormal
+
+
+/- Actual root-control enclosures consume transfers rather than exposing a fragment's flow. -/
+def rootLeaveCode : Stmt [] X ⟨false,false⟩ 0 :=
+  .functions [ClosedRun.divergeSig]
+    (.cons (.seq .leave (.discard (.call .here Fin.elim0))) .nil)
+    (.discard (.call .here Fin.elim0))
+def rootBreakPost : Stmt [] X ⟨false,false⟩ 0 :=
+  assign small (.literal (word 777))
+def rootContinuePost : Stmt [] X ⟨false,false⟩ 0 :=
+  assign flag (.literal (word 0))
+def rootBreakCode : Stmt [] X ⟨false,false⟩ 0 :=
+  .for_ .skip (.literal (word 1)) rootBreakPost
+    (.functions [ClosedRun.divergeSig]
+      (.cons (.discard (.call .here Fin.elim0)) .nil)
+      (.seq .break_ (.discard (.call .here Fin.elim0))))
+def rootContinueCode : Stmt [] X ⟨false,false⟩ 0 :=
+  .for_ .skip (.external flag.readRef) rootContinuePost
+    (.functions [ClosedRun.divergeSig]
+      (.cons (.discard (.call .here Fin.elim0)) .nil)
+      (.seq .continue_ (.discard (.call .here Fin.elim0))))
+def rootLeavePolicy : Policy.StmtP .A rootLeaveCode :=
+  (Policy.stmt_iff .A rootLeaveCode).mp rfl
+def rootBreakPolicy : Policy.StmtP .A rootBreakCode :=
+  (Policy.stmt_iff .A rootBreakCode).mp rfl
+def rootContinuePolicy : Policy.StmtP .A rootContinueCode :=
+  (Policy.stmt_iff .A rootContinueCode).mp rfl
+
+
+theorem rootLeaveCompletes :
+    (RawFrame.run rootLeaveCode rootLeavePolicy 16 logicResult.state).isSome = true := by rfl
+def rootLeaveResult :=
+  (RawFrame.run rootLeaveCode rootLeavePolicy 16 logicResult.state).get rootLeaveCompletes
+theorem rootBreakCompletes :
+    (RawFrame.run rootBreakCode rootBreakPolicy 16 logicResult.state).isSome = true := by rfl
+def rootBreakResult :=
+  (RawFrame.run rootBreakCode rootBreakPolicy 16 logicResult.state).get rootBreakCompletes
+theorem rootContinueCompletes :
+    (RawFrame.run rootContinueCode rootContinuePolicy 16 logicResult.state).isSome = true := by rfl
+def rootContinueResult :=
+  (RawFrame.run rootContinueCode rootContinuePolicy 16 logicResult.state).get rootContinueCompletes
+
+def rootSnapshotPost (flagValue smallValue : Nat) (result : RawFrame.Outcome ctx ⟨false,false⟩) : Prop :=
+  rawSnapshot result = [flagValue,2^256-1,2309737967,smallValue,22136,2^256-1,171*2^248] ∧
+  result.flow.isNormal = true
+def rootBreakPostPolicy : Policy.StmtP .A rootBreakPost :=
+  (Policy.stmt_iff .A rootBreakPost).mp rfl
+def rootContinuePostPolicy : Policy.StmtP .A rootContinuePost :=
+  (Policy.stmt_iff .A rootContinuePost).mp rfl
+#guard (RawFrame.run rootBreakPost rootBreakPostPolicy 2 logicResult.state).map
+  (fun result => (RawFrame.view result.state small).val) = some 777
+#guard (RawFrame.run rootContinuePost rootContinuePostPolicy 2 logicResult.state).map
+  (fun result => (RawFrame.view result.state flag).val) = some 0
+
+
+theorem rootLeaveRun : ∀ state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.LocalBlock.ctx,
+ Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootLeaveCode Solidity.Yul.Checks.LocalBlock.rootLeavePolicy 16 state =
+ some (⟨Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state), .normal⟩ :
+ Solidity.Yul.RawFrame.Outcome Solidity.Yul.Checks.LocalBlock.ctx ⟨false,false⟩) := by
+  intro state
+  unfold RawFrame.run WordAdapter.run
+  change some (RawFrame.Outcome.ofWord state
+    ⟨WordState.unpack ((⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack),.normal⟩) = _
+  rw [WordState.unpack_pack]
+  rfl
+theorem rootBreakRun : ∀ state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.LocalBlock.ctx,
+ Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootBreakCode Solidity.Yul.Checks.LocalBlock.rootBreakPolicy 16 state =
+ some (⟨Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state), .normal⟩ :
+ Solidity.Yul.RawFrame.Outcome Solidity.Yul.Checks.LocalBlock.ctx ⟨false,false⟩) := by
+  intro state
+  unfold RawFrame.run WordAdapter.run
+  change some (RawFrame.Outcome.ofWord state
+    ⟨WordState.unpack ((⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack),.normal⟩) = _
+  rw [WordState.unpack_pack]
+  rfl
+theorem rootContinueRun : ∀ state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.LocalBlock.ctx,
+ Solidity.Yul.RawFrame.view state Solidity.Yul.Checks.LocalBlock.flag = Solidity.Yul.word 2 →
+Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootContinueCode Solidity.Yul.Checks.LocalBlock.rootContinuePolicy 16 state =
+ some (⟨Solidity.Yul.RawFrame.capture state ((Solidity.Yul.RawFrame.view state).write Solidity.Yul.Checks.LocalBlock.flag (Solidity.Yul.word 0)), .normal⟩ :
+ Solidity.Yul.RawFrame.Outcome Solidity.Yul.Checks.LocalBlock.ctx ⟨false,false⟩) := by
+  intro state guard
+  unfold RawFrame.run WordAdapter.run
+  change ((if (RawFrame.view state flag).val = 0 then
+      some (⟨(⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack,.normal⟩ :
+        Closed.Outcome ⟨false,false⟩ (0 + wordCellCount X))
+    else some ⟨(fun position => if position = flag.slot then word 0 else
+      (⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack position),.normal⟩).map
+      (fun result => (⟨WordState.unpack result.vars,result.flow⟩ :
+        WordAdapter.Outcome X ⟨false,false⟩ 0))).map
+      (RawFrame.Outcome.ofWord state) = _
+  rw [guard]
+  change some (RawFrame.Outcome.ofWord state
+    ⟨WordState.unpack (fun position => if position = flag.slot then word 0 else
+      (⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack position),.normal⟩) = _
+  change some (RawFrame.Outcome.ofWord state
+    ⟨WordState.unpack (Closed.writeTarget
+      (WordAdapter.target (.external flag.writeRef) True.intro
+        (Fin.castAdd (wordCellCount X)) (fun cell => Fin.natAdd 0 cell.slot))
+      (word 0) (⟨Fin.elim0,RawFrame.view state⟩ : WordState X 0).pack),.normal⟩) = _
+  rw [← DirectUpdates.pack_write]
+  change some (RawFrame.Outcome.ofWord state
+    ⟨WordState.unpack ((⟨Fin.elim0,(RawFrame.view state).write flag (word 0)⟩ :
+      WordState X 0).pack),.normal⟩) = _
+  rw [WordState.unpack_pack]
+  rfl
+
+
+theorem rootFinished : Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootLeaveCode Solidity.Yul.Checks.LocalBlock.rootLeavePolicy 16 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.rootLeaveResult ∧
+Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootBreakCode Solidity.Yul.Checks.LocalBlock.rootBreakPolicy 16 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.rootBreakResult ∧
+Solidity.Yul.RawFrame.run Solidity.Yul.Checks.LocalBlock.rootContinueCode Solidity.Yul.Checks.LocalBlock.rootContinuePolicy 16 Solidity.Yul.Checks.LocalBlock.logicResult.state = some Solidity.Yul.Checks.LocalBlock.rootContinueResult := ⟨rfl,rfl,rfl⟩
+theorem rootInputSnapshot : Solidity.Yul.Checks.LocalBlock.rawSnapshot Solidity.Yul.Checks.LocalBlock.logicResult = [2,2^256-1,2309737967,257,22136,2^256-1,171*2^248] := by rfl
+theorem rootWriteSnapshot : ∀ cells : Solidity.Yul.WordCells Solidity.Yul.Checks.LocalBlock.X,
+ (List.finRange (Solidity.Yul.wordCellCount Solidity.Yul.Checks.LocalBlock.X)).map
+ (fun i => ((cells.write Solidity.Yul.Checks.LocalBlock.flag (Solidity.Yul.word 0)) (Solidity.Yul.wordCellAt Solidity.Yul.Checks.LocalBlock.X i)).val) =
+ ((List.finRange (Solidity.Yul.wordCellCount Solidity.Yul.Checks.LocalBlock.X)).map
+ (fun i => (cells (Solidity.Yul.wordCellAt Solidity.Yul.Checks.LocalBlock.X i)).val)).set 0 0 := by
+  intro cells
+  rfl
+
+theorem rootValid : Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 257 Solidity.Yul.Checks.LocalBlock.rootLeaveResult ∧
+Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 257 Solidity.Yul.Checks.LocalBlock.rootBreakResult ∧
+Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 0 257 Solidity.Yul.Checks.LocalBlock.rootContinueResult := by
+  refine ⟨?_,?_,?_⟩
+  · have same := Option.some.inj
+      (rootFinished.1.symm.trans (rootLeaveRun logicResult.state))
+    rw [same]
+    exact ⟨rootInputSnapshot,rfl⟩
+  · have same := Option.some.inj
+      (rootFinished.2.1.symm.trans (rootBreakRun logicResult.state))
+    rw [same]
+    exact ⟨rootInputSnapshot,rfl⟩
+  · have same := Option.some.inj
+      (rootFinished.2.2.symm.trans (rootContinueRun logicResult.state logicValid.1))
+    rw [same]
+    constructor
+    · change (List.finRange (wordCellCount X)).map
+        (fun i => (((RawFrame.view logicResult.state).write flag (word 0))
+          (wordCellAt X i)).val) = _
+      rw [rootWriteSnapshot]
+      change (rawSnapshot logicResult).set 0 0 = _
+      rw [rootInputSnapshot]
+      rfl
+    · rfl
+
+theorem rootModal : ∀ mode : Solidity.Modality,
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootLeaveCode Solidity.Yul.Checks.LocalBlock.rootLeavePolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 257) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootBreakCode Solidity.Yul.Checks.LocalBlock.rootBreakPolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 257) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootContinueCode Solidity.Yul.Checks.LocalBlock.rootContinuePolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 0 257) Solidity.Yul.Checks.LocalBlock.logicResult.state := by
+  intro mode
+  refine ⟨?_,?_,?_⟩
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootLeaveCode
+      rootLeavePolicy (rootSnapshotPost 2 257) logicResult.state 16 rootLeaveResult
+      rootFinished.1).mpr rootValid.1
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootBreakCode
+      rootBreakPolicy (rootSnapshotPost 2 257) logicResult.state 16 rootBreakResult
+      rootFinished.2.1).mpr rootValid.2.1
+  · exact (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootContinueCode
+      rootContinuePolicy (rootSnapshotPost 0 257) logicResult.state 16 rootContinueResult
+      rootFinished.2.2).mpr rootValid.2.2
+
+theorem rootRejectWrong : ∀ mode : Solidity.Modality,
+¬ Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootLeaveCode Solidity.Yul.Checks.LocalBlock.rootLeavePolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 1) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+¬ Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootBreakCode Solidity.Yul.Checks.LocalBlock.rootBreakPolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 777) Solidity.Yul.Checks.LocalBlock.logicResult.state ∧
+¬ Solidity.Yul.RawFrame.Logic.holds mode Solidity.Yul.Checks.LocalBlock.rootContinueCode Solidity.Yul.Checks.LocalBlock.rootContinuePolicy (Solidity.Yul.Checks.LocalBlock.rootSnapshotPost 2 257) Solidity.Yul.Checks.LocalBlock.logicResult.state := by
+  intro mode
+  refine ⟨?_,?_,?_⟩
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootLeaveCode
+      rootLeavePolicy (rootSnapshotPost 2 1) logicResult.state 16 rootLeaveResult
+      rootFinished.1).mp invalid
+    have impossible : 257 = 1 := congrArg
+      (fun values : List Nat => values.getD 3 0) (rootValid.1.1.symm.trans wrong.1)
+    omega
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootBreakCode
+      rootBreakPolicy (rootSnapshotPost 2 777) logicResult.state 16 rootBreakResult
+      rootFinished.2.1).mp invalid
+    have impossible : 257 = 777 := congrArg
+      (fun values : List Nat => values.getD 3 0) (rootValid.2.1.1.symm.trans wrong.1)
+    omega
+  · intro invalid
+    have wrong := (RawFrame.Logic.holds_completed ctx ⟨false,false⟩ mode rootContinueCode
+      rootContinuePolicy (rootSnapshotPost 2 257) logicResult.state 16 rootContinueResult
+      rootFinished.2.2).mp invalid
+    have impossible : 0 = 2 := congrArg
+      (fun values : List Nat => values.getD 0 0) (rootValid.2.2.1.symm.trans wrong.1)
+    omega
+
+
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootLeaveCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootLeaveCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootBreakCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootBreakCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootContinueCompletes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootContinueCompletes
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootLeaveRun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootLeaveRun
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootBreakRun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootBreakRun
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootContinueRun' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootContinueRun
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootFinished' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootFinished
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootInputSnapshot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootInputSnapshot
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootWriteSnapshot' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootWriteSnapshot
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootValid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootValid
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootModal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootModal
+/-- info: 'Solidity.Yul.Checks.LocalBlock.rootRejectWrong' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.rootRejectWrong
 
 end Solidity.Yul.Checks.LocalBlock
