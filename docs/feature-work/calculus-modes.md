@@ -1,6 +1,6 @@
 # Calculus modes O10–O13
 
-Status (2026-11-05): **authorized; not yet implemented.** Ideas from a
+Status (2026-11-05): **VC2 (O11) and VC3 (O12) done and integrated; VC1 running** (see Handoffs). Ideas from a
 comparison with verity (Profile, `--deny-*` gates, AdversaryModel,
 EntryPointInvariants). Rule ([options.md](../options.md)): a mode is an
 argument of the validity statement, as `ValidT`/`ValidTail` are, never a global
@@ -41,4 +41,165 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 
 ## Handoffs
 
-None yet.
+### VC3 — O12 reachable starting states (branch `cloud/modes-20261105/reachable`)
+
+**Inventory (step 0).** Reused, not rebuilt:
+- `Semantics/Lifetime.lean`: `System` (deploy, entry calls, payable,
+  environment predicates), `Init` (successful `Contract.deployT`), `Step`
+  (commit, rollback of revert/revertWith/panic, wait), `Reachable`,
+  `Invariant` with `Invariant.ofRuns` (rollback needs no proof). This is the
+  O12 starting-state relation; nothing new was needed below it.
+- `Calculus/Lifetime.lean`: `post_of_deploy_box`, `System.preserves_of_fml`.
+- `Typing/CleanTailRun.lean`: `Prog.exposesNone`, `Prog.run_cleanTail`,
+  `ReachableBy` (storage-only, no rollback, no transaction frame: kept
+  distinct, as `.claude/rules/typing.md` asks).
+- `Calculus/TailMode.lean` (`ValidTail`, `holds_cleanTail_of`),
+  `Calculus/CleanTailBoundary.lean` (`StateInv.cleanTail`;
+  `Prog.CleanTailCallbackBoundary` is a box, which rules out a panic, so the
+  lane uses the weaker `KeepsCleanC` and derives it from the boundary),
+  `Semantics/Callback.lean` (`StateInv`, `ExecP`, `COut`, `ExecP.eq_run`,
+  `ExecP.of_run`).
+- Not reused: `Typing/Reachability.lean`'s `Reachable` (any single program
+  from `State.init`: storage constructibility, not a transaction sequence);
+  `ContractWorld.Reachable` (multi-contract, rooted at an empty world);
+  `Bridge/SolidityBridge/AdversaryPolicy.lean` and `CallbackTrace.lean`
+  (traces inside one callback). Nothing in `Solidity/Tools/` applies.
+- Deployment/dispatch facts: `Contract` keeps no visibility, so the
+  interface `M` is a model obligation (as in `docs/lifetime.md`); no
+  selector dispatch exists in the typed core.
+
+**Delivered** (`Solidity/Theory/Reachable/`): `Mode.lean` (`StartMode`,
+`ValidStart`, `EntryState`, `ValidStart.of_invariant`, `PersistentFml`,
+`PersistentFml.invariant`, `ValidStart.of_persistent`), `CleanTail.lean`
+(`Storage.resetTransient_cleanTail`, `cleanTail_invariant`,
+`ValidTail.validStart_reachable`), `CallerModel.lean` (`Exec`, `RunE`,
+`StepE`, `ReachableE`, `InvariantE`, `ValidStartE`, the stub `CallerStub`,
+`Exec.LeOn` and monotonicity, `reachableE_noCallback_iff`,
+`leOn_of_callsBack`, `KeepsCleanC`, `cleanTail_invariantE`,
+`ValidTail.validStartE_withCallback`), and `PersistentFml.ofStorage`.
+Witnesses and negative controls are in `Solidity/Examples/Tactics/Reachable.lean`
+(contracts `Bag` and `Counter`), outside `Theory/Reachable/**`: `Theory/` is
+core, and `scripts/check-layers.mjs` refuses a core module that reaches the
+elaborator (`contract!{}`, `sol[…]{}`, `dl[…]{}`, `sol_prove`). Docs:
+options.md O12 (row and section, Lean-only), correctness.md paragraph,
+module-map rows in `docs/module-map/theories.md` and
+`docs/module-map/examples.md`. No edit to `Calculus/TailMode.lean` or
+`Calculus/CleanTailBoundary.lean` was needed.
+
+**O11 adaptation (for after VC2 lands).** `CallerStub` stands for VC2's
+lattice. To adapt: (1) give each caller model of the lattice its `Exec C`
+(`none` ↦ `CallerStub.noCallback.exec`, `any` ↦ `ExecP J`; `staticOnly`
+and `nonReentrant` from VC2's relations); (2) prove VC2's order gives
+`Exec.Le` (or `Exec.LeOn M` on an interface) between their relations, so
+`ReachableE.mono`, `InvariantE.weaken` and `ValidStartE.weaken` instantiate
+to the lattice's weakening. Caution: the deterministic run is not below
+`ExecP J` in general (`ExecP` may report a violation where the run
+succeeds); the lane proves the order only for entries that call nobody back
+(`leOn_of_callsBack`), so VC2's weakening needs a no-violation or
+`callsBack` premise at `none ≤ any`; (3) replace `CallerStub` in
+`ValidTail.validStartE_withCallback` by the lattice's top. Nothing else in
+the lane reads the stub.
+
+**Reviews (checkpoint 1).** Finder and skeptic (read-only, no Lean server)
+found, and the lane fixed: `EntryState` ignored the payable guard and
+`allowCall` (now required); `cleanTail_invariantE` demanded a box that rules
+out panics (now `KeepsCleanC`) and had no witness (now
+`pushRead_withCallback`); no rollback was exercised (now
+`entry_after_rollback`); `Exec.Le` was never instantiated (now `Exec.LeOn`,
+`leOn_of_callsBack`, used once) and the violating control used an ad hoc
+relation (now `Exec.top`, `top_refutes`); `PersistentFml.invariant` had no
+control for its per-entry premise (now `eleven_refutes`); examples lacked
+Solidity in docstrings and stated `dl` goals as raw constructors (fixed);
+two theorems named `pushRead_reachable` (renamed `pushRead_validStart`);
+re-entry frames are not entry states (documented). Kept: `pushRead`
+repeats `Examples/Tactics/TailMode.lean`'s program over a contract with
+entry points (`Tokens` has none); the shared-namespace lemmas
+(`SFields.all_anon`, `Storage.resetTransient_cleanTail`,
+`Lifetime.System.refuses`) live in the lane's files, the owners of
+`Typing/` and `Semantics/` may move them.
+
+**Gates (checkpoint 1).** MCP diagnostics clean on the four Lean files;
+`#print axioms` on every main theorem and control: `propext`,
+`Classical.choice`, `Quot.sound` only; no `sorry`, no `maxHeartbeats`;
+`scripts/check-layers.mjs` 0 core modules reach the elaborator;
+`register.sh --check` clean; `./run-lean.sh`: `Build completed successfully
+(3839 jobs)` (SolkeyTestSuite included, its pinned report unchanged), then
+`check-solkey.sh` exits 1 with 57 annotation mismatches against the sibling
+`../solkey` checkout; the lane touches no `SortCheck/` file, so that drift
+is not this lane's. `check-doc-paths.sh` fails only on
+`Calculus/Assumptions.lean`, VC1's planned file, as on the base commit.
+
+**Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
+field (`any` | `reachable`) in the mode record, `any` the default.
+### VC2 — O11 caller-model lattice (2026-11-05)
+
+**Inventory (step 0).** `Bridge/` has no callback or attacker notion.
+`Solidity/Tools/` has none either (its counterexample `Tri` reads runs, not
+callers). Reused: `StateInv`, `ExecS`/`ExecP`/`ExecF`, `Prog.exec_run`,
+`ExecS.eq_run` (`Semantics/Callback.lean`); `holdsC`, `ValidT`,
+`TransferSem`, `validT_noCallback_iff` (`Calculus/CallbackHolds.lean`);
+`Upd.afterT_imp`, `Modality.forallB`. `CallMode.static` and `Mode.readOnly`
+name the `STATICCALL` restriction but no callback run reads them (O1 "not
+done", H22), so `staticOnly` is a model of the callee, documented against
+them, not a reading of `ExtCall.mode`. `Semantics/Lifetime.lean`'s
+`System` (entries as `Prog C [] []`) shaped `Reentry`; it reads the
+deterministic run, so it is not reused for re-entry. The reentrancy-lock
+examples in the repository are prose only (`Examples/Tactics/Callback.lean`
+has no lock); no lock judgment existed. `docs/options.md` O1/O3/O4 fixed
+the orthogonality: the transfer semantics says whether a payment calls back,
+the caller model what a callee that does may do.
+
+**Interface for VC3 (stable): `Solidity.Calculus.CallerModel`** —
+`CallerModel C` (`none | staticOnly | nonReentrant (R : Reentry C) | any`),
+`CallerModel.Allows`, `CallerModel.Le`, `Reentry` (`Entry`, `body`,
+`guarded`, `held`; `Call`, `Step`, `StepAny`, `Reach`, `ReachAny`, `Guards`,
+`KeepsHeld`), the runs
+`ExecSM M J`/`ExecPM`/`ExecFM`, `holdsR M I pay`, `ValidM M ts φ`
+(`⊨ᶠₘ[M; ts] φ`). Theorems: `Calculus/CallerModelRun.lean`
+(`ExecPM.mono`, `ExecPM.toExecP`, `ExecP.ofExecPM`, `Prog.execM_run`),
+`Calculus/CallerModelValid.lean` (`validM_any`, `validM_none`,
+`validM_none_iff_noCallback`, `ValidM.weaken`, `ValidM.of_validT`,
+`Reentry.reachAny_iff`). For O12, a reachable-states mode under model `M`
+should read callbacks inside its transaction sequence by `ExecPM M` for
+`M ≠ none`, and by `Prog.run` for `none`: `ExecSM .none` is not `none`'s
+reading (its `try` answers any data, and the invariant is owed on exit).
+
+**Done.** Lattice and lock judgment (`nonReentrant` is lock-aware: a
+guarded entry is turned away only while the lock is held); `any`/`none` coincide with today's
+readings (`validM_any` exact; `validM_none` is `Fml.Valid`, equal to
+`ValidT .noCallback` without `try`/value call); weakening theorem; one
+separating example per adjacent pair (`Examples/Tactics/CallerModel.lean`),
+the two `nonReentrant` pairs with one `R` (`setX`), each with its
+`#print axioms` pinned. Docs: options.md O11, correctness.md
+"Caller models (O11)", module-map rows.
+
+**Design note.** `ExecSM` is a model-indexed copy of `ExecS` (41
+constructors, three with an `Allows` premise more), not an edit of `ExecS`:
+an extra premise on `ExecS` would change the arity of `transferResume`,
+`sendResume` and `tryOk` in about twenty modules outside this lane
+(`CallbackWk`, `CallbackUnwk`, `CallbackFrame`, `CapturePayments`, …). The
+copy's agreement with `ExecS` is proved both ways (`toExecS`, `ofExecSM`).
+
+**Reviews.** Finder and skeptic (read-only, no Lean server). Fixed:
+`nonReentrant` ignored the lock (`Reentry.Step` now lets a guarded entry
+through while the lock is free; `Static.lean`'s inertness is relative to a
+storage predicate, `Prog.LockedAt`); the `nonReentrant` separations used two
+`R`s and the lock state played no part (now one `R`, `open_setX`/`lock_setX`;
+`lock_setX` reads `setX`'s flag and the lock, its body by `setX_guards`);
+docs overstated `none`'s coincidence with `noCallback`, the `none <
+staticOnly` example's reason, and `ExecSM .none`; stale name
+`holdsR_modal_inert`; missing docstrings. Kept, documented: re-entry with
+no value, nested callbacks under `any`.
+
+**Limitations.** No `ProvesC`-style calculus for `staticOnly` or
+`nonReentrant`: a proof there is a `ValidT` proof weakened, a `Fml.Valid`
+proof where callees change nothing (`Theory/CallerModel/Static.lean`), or by
+the runs. A re-entrant call carries no value, and its own callees read as
+`any`. The weakening theorem needs positive modalities. The `none <
+staticOnly` example separates by the invariant owed on exit; the sharper
+separation (two equal calls answered alike only under `none`) is true but
+not provable by `sol_close`, which forgets the oracle's correlation.
+The separating examples live in `Examples/Tactics/CallerModel.lean`, not
+under `Theory/CallerModel/`: they use `dl!{ … }` and `sol_symex`, which
+the core library may not reach (`scripts/check-layers.mjs`); the file is
+new and no other lane's. Other lanes' needs: none.
