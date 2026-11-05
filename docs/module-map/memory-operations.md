@@ -174,6 +174,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Discharge the existing two-statement slice program's decoder premises from actual raw words. |
 | `Backend/MemoryCopies/PublishedStorage.lean` | Exact fields of the published storage endpoint discharge the existing local execution premise. |
 | `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
+| `Backend/MemoryCopies/CheckedDefault.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/CheckedReferenceInterface.lean` | memory-copies interface only: capacity guard and checked-reference certificate statement; the certificate is not inhabited here. |
 | `Backend/MemoryCopies/SourceControls.lean` | Inhabited Source certificates with populated storage-copy observations, default/timeout controls and size-boundary witnesses. |
 | `Backend/MemoryCopies/SourceSize.lean` | Derives new-array oversized-length panic from evaluation, conversion and size hypotheses. |
 | `Backend/MemoryCopies/SourceFramesInterface.lean` | Exact Source allocation-frame obligations for all default and storage-load traversal families, including halted runs. |
@@ -318,9 +320,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedMemoryArrayInterface.lean` | Runtime capacity guard and total fresh primitive-array copy contract. |
 | `Backend/MemoryCopies/CheckedMemoryArray.lean` | Actual loaded-capacity guard and total fresh primitive-array copy execution. |
 | `Backend/MemoryCopies/CheckedMemoryArrayControls.lean` | Populated/empty/long copies, inhabited saturation refusals and last-fitting capacity controls. |
-| `Backend/MemoryCopies/CheckedDefault.lean` | Actual production default selection with total guarded allocation/refusal and complete result transport. |
 | `Backend/MemoryCopies/CheckedDefaultControls.lean` | Inhabited nested defaults, impossible-capacity refusal and unused huge child controls. |
-| `Backend/MemoryCopies/CheckedReferenceInterface.lean` | Complete-demand runtime reference-array default guard and allocation/refusal contract. |
 | `Backend/MemoryCopies/CheckedReference.lean` | Actual division-based full-demand guard and total reference-array default execution. |
 | `Backend/MemoryCopies/CheckedReferenceControls.lean` | Nested runtime defaults, unused oversized children and inhabited quotient-boundary controls. |
 | `Backend/MemoryCopies/CheckedPathCopyInterface.lean` | Selected memory-path checked fresh-copy/binding contracts without a room premise. |
