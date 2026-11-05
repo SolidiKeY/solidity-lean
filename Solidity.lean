@@ -368,6 +368,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatorReturn
@@ -523,7 +524,6 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls
-import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
