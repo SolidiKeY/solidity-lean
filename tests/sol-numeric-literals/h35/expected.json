@@ -632,5 +632,8 @@
   "print_file_sha256": "cd06f8dcadb53a715b5c9260306ed0090f09989adb5f208b30dbc1e8dc3d1139",
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "boundary": "627 direct authored #print commands plus actual #print axioms on all808 theorem constants, including generated/private helpers; full991-constant inventory also checked.",
-  "print_all_file_sha256": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec"
+  "print_all_file_sha256": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec",
+  "h41_archive_sha256": "24587e1ae5f27f1c56de497d0647a2455d928bd0384c77a16893e7229e3cdd5d",
+  "h41_handoff_sha256": "ee36b952d3e2e89c94c0bf87baf86a6d8f99de7782548e0f5032a17920c7e3a8",
+  "h41_prepared_manifest_sha256": "84d093bfe4e09eb1cce49074be314c2d299199e5d7bc500dd504a19a18a397f9"
 }

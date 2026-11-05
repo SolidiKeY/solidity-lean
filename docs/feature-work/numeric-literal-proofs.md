@@ -312,3 +312,13 @@ H35 follow-up: VM-owned build,627 exact #print axioms results and controls
 pass. Cache shipping preflight fails on absent coordinator routing; the prepared
 owned cache asset is not delivered. No new checkpoint is done. See
 tests/sol-numeric-literals/h35/HANDOFF.md and evidence/h35-cache-receipt.json.
+
+
+H41 supersedes the earlier H35 VM-shipping requirement. The verified pack
+remains on this VM; its hash matches the coordinator-reported receipt. Delivery
+is recorded as coordinator-pending. Never run ship-cache.sh on this VM. The
+completion checker now validates the preserved pack and all 42 source mappings
+instead of attempting VM delivery. Q-H35-SHIP1 is resolved; no transport choice
+remains open. The coordinator receipt path is reported provenance, not a file
+read on this VM. Original registration/full-runtime obligations remain open.
+See evidence/h41-cache-handoff.json for the exact path, hash and receipt.

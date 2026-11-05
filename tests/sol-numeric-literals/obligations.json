@@ -47,7 +47,7 @@
   {
     "id": "static-gates",
     "status": "blocked",
-    "evidence": "Trust, layers, docs, axiom pins, TestSuite, corpus and automation pass; root/orphan/module-map checks await coordinator registration."
+    "evidence": "Fresh H41 full suite: build/trust/layers/docs/axiom pins/TestSuite/corpus/automation pass; root/orphan failures remain coordinator registration. H41 cache handoff is verified coordinator-pending, not a blocker."
   },
   {
     "id": "coordinator-registration",
@@ -60,6 +60,6 @@
   {
     "id": "immutable-handoff",
     "status": "pending",
-    "evidence": "Final assignment seal follows passing integration/runtime gates and H35 verified cache delivery. VM gates pass; shipping preflight blocked on routing. See h35/HANDOFF.md and evidence/h35-cache-receipt.json."
+    "evidence": "H41 verified-pack handoff recorded coordinator-pending; transport question resolved. Final assignment seal still awaits original integration/runtime gates."
   }
 ]

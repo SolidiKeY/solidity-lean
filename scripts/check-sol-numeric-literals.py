@@ -50,8 +50,7 @@ def validate_committed_inputs():
  require(not dirty,'checked inputs differ from sealed commit: '+str(sorted(dirty)))
 
 def validate_h35_completion():
- # H35 requires real VM gates and a fresh successful required-tool receipt.
- # A prepared archive, a status flag, or a dry-run receipt is insufficient.
+ # H35 VM gates remain required; H41 replaces VM shipping with pack handoff.
  run([sys.executable,'tests/sol-numeric-literals/h35/validate-axioms.py'])
  expected={m['path']:m['sha256'] for m in source_snapshot()}
  for label in ('h35-owned-build','h35-print-axioms','h35-print-all-axioms','h35-controls'):
@@ -60,17 +59,27 @@ def validate_h35_completion():
   require(gate['proof_sources']==expected,'H35 source stamp differs '+label)
   require(gate['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1),'H35 resource envelope differs '+label)
   require(gate['minimum_parent_headroom_bytes']>=4*1024**3,'H35 reserve violated '+label)
- state=FOLDER/'evidence/h35-completion-cache-ship'
- previous=set(state.glob('*')) if state.exists() else set()
- cache=os.environ.get('LAKE_CACHE_DIR') or str(pathlib.Path(os.environ.get('XDG_CACHE_HOME',str(pathlib.Path.home()/'.cache')))/'lake')
- env=dict(os.environ,SHIP_ALLOW_HEAD='1',SHIP_STATE=str(state),LAKE_CACHE_DIR=cache)
- subprocess.run(['bash','scripts/coord-tools/ship-cache.sh',str(ROOT)],cwd=ROOT,env=env,check=True)
- fresh=[p for p in state.glob('*') if p not in previous and p.is_dir() and (p/'HEAD').is_file() and (p/'HEAD').read_text().strip()==git('rev-parse','HEAD')]
- require(len(fresh)==1,'H35 fresh shipment receipt missing or ambiguous')
- receipt=fresh[0]/'receipts.tsv'
- rows=[line.split('\t',2) for line in receipt.read_text().splitlines()]
- require(rows and all(len(row)==3 and row[1]=='ok' for row in rows),'H35 cache delivery incomplete: empty, skipped, failed or dry-run receiver')
- (FOLDER/'evidence/h35-cache-delivery.json').write_text(json.dumps(dict(status='delivered',head=git('rev-parse','HEAD'),receipt=str(receipt),receipt_sha256=sha(receipt),receivers=rows),indent=2)+'\n')
+ # H41 amends H35: preserve/verify the pack; the coordinator pulls it.
+ # Coordinator-pending is the required VM handoff state, not a VM blocker.
+ approved=json.loads((FOLDER/'h35/expected.json').read_text())
+ path=FOLDER/'evidence/h41-cache-handoff.json'
+ require(sha(path)==approved['h41_handoff_sha256'],'H41 handoff differs from committed approval')
+ validate_h41_cache_record(json.loads(path.read_text()))
+
+def validate_h41_cache_record(handoff):
+ approved=json.loads((FOLDER/'h35/expected.json').read_text())
+ require(handoff['archive_sha256']==approved['h41_archive_sha256'],'H41 approved archive digest differs')
+ require(handoff['policy']=='H41 (H35 amended)' and handoff['status']=='coordinator-pending','H41 handoff policy/state differs')
+ require(handoff['vm_shipping_forbidden'],'H41 forbids VM-side shipping')
+ archive=pathlib.Path(handoff['archive'])
+ require(sha(archive)==approved['h41_archive_sha256'],'H41 cache archive hash differs')
+ prepared_path=ROOT/handoff['prepared_manifest']
+ require(sha(prepared_path)==approved['h41_prepared_manifest_sha256'],'H41 prepared manifest differs from committed approval')
+ prepared=json.loads(prepared_path.read_text())
+ require(prepared['archive_sha256']==approved['h41_archive_sha256'],'H41 prepared manifest archive digest differs')
+ expected={m['name']:m['sha256'] for m in source_snapshot()}
+ require({m['module']:m['source_sha256'] for m in prepared['owned_modules']}==expected,'H41 cache sources differ')
+ require(prepared['mapping_count']==len(expected),'H41 cache mapping coverage differs')
 
 def validate_completion(registration,modules,manifest):
  # These are live checks, not conclusions inferred from ledger status strings.
@@ -184,6 +193,7 @@ def check(implementation=False,self_test=False):
    else:raise ValueError('uncommitted checked input bypassed the seal binding')
   finally:pathlib.Path(temporary).unlink()
   run([sys.executable,'tests/sol-numeric-literals/runtime/test-check.py'])
+  run([sys.executable,'tests/sol-numeric-literals/h35/test-h41.py'])
   print('acceptance negative controls: 5 inventory mutations, forged completion, uncommitted input and MOCK resource-stop reporting passed')
  authored=sum(len(m['authored']) for m in modules)
  print(f'implementation acceptance: {len(modules)} modules, {authored} authored declarations, {len(actual)} kernel declarations, {len(CONSTRUCTOR_CONTROLS)} inhabited constructors, {len(controls())} scanner controls, 42 paired fixtures')

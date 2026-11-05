@@ -1,84 +1,51 @@
-# H35 VM validation and cache handoff
+# H41 verified-pack handoff (H35 amended)
 
-Status: BLOCKED. The VM gates pass, but no cache-delivery receipt exists; this
-checkpoint is not done under H35. Original registration/full runtime obligations
-also remain open. No theorem, premise, exclusion, refusal or proof budget changed.
+VM cache handoff: verified, coordinator-pending. Transport is no longer a VM
+blocker. The assignment remains blocked on original coordinator registration
+and full runtime validation. No new goal was created or reset.
 
-Original base: 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5
-Validated proof source head: 7bb0d3a1d63f9ce28ffbad0a5fdc5f3da9d08cdf
-Repository: /workspace/solidity-lean
-Branch: codex/solidity-sol2-20261104/numeric-literals
+H41: "Leave verified packs on the VM and record the path and sha; the coordinator
+pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending
+and continue."
 
-## VM gates actually run
+Preserved archive:
+/workspace/sol-numeric-literals-08df5fec-h35/cache-ready/owned-cache.tar.gz
+SHA256: 24587e1ae5f27f1c56de497d0647a2455d928bd0384c77a16893e7229e3cdd5d
 
-- Owned-module build: all 42 modules, 49 jobs, cache replay; exit 0. Lean -j1 and
-  LEAN_NUM_THREADS=1,12 GiB memory/no swap,CPU 1,monitored4 GiB parent reserve.
-  0.446935 seconds; maximum child RSS59892 KiB. This was not a clean recompilation.
-- PrintAxioms.lean: all 627 authored theorem names are taken from the acceptance
-  inventory. Per-file MCP returned complete diagnostics,zero errors,all 627
-  #print axioms messages. 49.614 seconds; the existing 300 second diagnostic timeout was unchanged.
-- validate-axioms.py: exact print source/name list,complete result coverage and
-  every axiom set checked against pins. Full inventory also checks808 theorem
-  constants / 991 owned constants,including generated helpers. No new axiom,
-  unsafe declaration or proof escape; only unchanged standard primitive sets.
-- Controls:32 inhabited constructors,68 scanner controls,42 typed/compiler fixtures,
-  all 18 accepted exact values and all 5 stage differences. Negative controls pass.
-  1.109682 seconds; maximum child RSS180932 KiB. Kernel controls are checked through
-  the owned build; external compiler/Python checks are separate evidence.
-- Every command/exit/timing/resource record is in evidence/h35-*.json and logs.
-  The cgroup peak is cumulative from this owned container,not fresh process RSS.
-  No resource stop occurred. Idle MCP was stopped after the axiom gate.
+The local archive hash and all 128 members verify: 126 artifacts and metadata
+for 42 mappings covering all 42 owned modules. The coordinator reports receipt:
+/home/guilherme/.local/state/cloudvm-coord/receipts/numeric-literals-cache-received-20261105T020358Z.json
+and reports that its received hash matches. That host receipt was not read on
+this VM; evidence/h41-cache-handoff.json records this provenance accurately.
 
-The initial MCP-schema inspection tried to parse the bridge's plain tool-name
-list as JSON and failed. That probe is preserved; it is not a failed proof gate.
-The installed diagnostic schema was then inspected and the complete real call
-above succeeded. No required final gate failure is hidden.
+The approved archive, handoff metadata and prepared-manifest digests are bound
+to committed h35/expected.json, which is pinned in acceptance.json. Completion
+checks these digests, preserved archive bytes and all current owned source
+mappings. A regression rejects a self-consistent replacement archive plus edited
+metadata without modifying the actual pack. F-H41-01 is resolved.
 
-## Cache preparation versus delivery
+Actual prior VM gates remain passing and their source stamps match unchanged
+proof sources: all 42 modules/49 jobs built at explicit Lean -j1 under 12 GiB,
+no swap, CPU 1, LEAN_NUM_THREADS=1 and the monitored 4 GiB parent reserve. The
+build replayed matching cached artifacts; it was not a clean recompilation.
+There are 627 direct authored #print axioms results and all 808 theorem-constant
+prints including private/generated helpers; every set matches pins. The full
+991-constant inventory is checked. Controls cover 32 constructor witnesses,
+68 scanner cases, 42 compiler fixtures, 18 exact accepted values and all five
+recorded stage differences. No proof declaration, premise, exclusion, refusal,
+producer, intrinsic representation or proof budget changed.
 
-The required ship-cache.sh was run in documented --dry-run preflight mode with
-SHIP_ALLOW_HEAD=1 for the assigned branch,LAKE_CACHE_DIR pointing at the actual
-VM cache,and a private SHIP_STATE. It found1947 artifacts(2.19 GB),653 mappings,
-zero unresolved traces,then exited1 because coordinator polling state is absent.
-The installed script is coordinator-to-lane; its VMEXEC and batch catalog are
-also absent in the execution context. Current fetched master contains the exact
-same script. No destination was invented and no transfer was performed.
+The earlier H35 failed shipping preflight is historical evidence, superseded by
+H41. The checker no longer invokes VM shipping. Q-H35-SHIP1 is resolved and
+questions.json is empty. Original immutable packets and verified packs remain
+unchanged. New H41 controls and implementation acceptance pass on this VM.
+All gate commands, exits, timings and resource records are in evidence/*.json.
+The original registration/full-runtime/final-assignment-seal obligations remain
+open; coordinator-pending delivery is accepted by the amended H41 policy.
 
-The failure receipt is evidence/h35-cache-receipt.json. It explicitly has no
-successful delivery receipt. A verified local asset is prepared at
-/workspace/sol-numeric-literals-h35-owned-cache/owned-cache.tar.gz:
-126 artifact files,42 mappings,all 42ownedmodules. Every artifact hash and size
-matches the required script's shipment manifest,and archive contents were
-re-read and verified. The archive is14150989 bytes, SHA256
-24587e1ae5f27f1c56de497d0647a2455d928bd0384c77a16893e7229e3cdd5d.
-This asset is NOT cache shipping and does not satisfy the delivery gate.
-
-Q-H35-SHIP1 [H35;ship-cache.sh;h35-cache-preflight.log]: which supported transport
-and configuration will produce the required cache-delivery receipt?
-1. Supply a supported VM-side invocation and destination configuration,then
-   rerun the required tool and verify actual delivery.
-2. Supply coordinator-side retrieval and required ship-cache invocation for
-   the prepared archive,then return a verified delivery receipt.
-No option waives H35. No new checkpoint is reported done while this is open.
-
-Original immutable packets remain unchanged. New validation files are confined
-to the assigned tests directory. The original goal was not created or reset.
-
-The additional PrintAllAxioms.lean gate executes #print axioms on all 808
-theorem constants, including generated equations and private helpers, by their
-actual Lean Names. Complete output: 808 unique messages, 25.581 seconds, no
-errors. The validator checks every printed axiom set against the full inventory.
-No new proof declarations are added by either print file.
-
-Final separate finder and skeptic reviews PASS for the H35 gate and cache
-preparation code, including all 808 actual theorem prints. Neither used Lean
-server or wrote files. Both independently verified the complete cache archive
-(including its metadata) and confirmed no cache delivery receipt exists.
-See evidence/h35-reviews.json. The transport question remains open.
-
-Default completion now enforces H35: it revalidates both print outputs and
-all four VM source/resource records, then actually runs non-dry ship-cache.sh.
-A new current-head shipment with nonempty all-ok receivers is required. Missing,
-skipped, failed, stale or dry-run receipts cannot satisfy completion. The local
-implementation flag does not run shipment or claim completion. The controls
-were rerun after this enforcement change and pass. Transport is still blocked.
+Fresh final gate suite: 66.160141 seconds, peak child RSS 689272 KiB, no
+resource stop. Build/trust/layers/docs/axiom pins/TestSuite/corpus/automation
+pass; run-lean/root/orphan failures remain due to unapplied coordinator
+registration. See evidence/h41-full-gates and h41-reviews.json. Both separate
+read-only reviews pass the H41 change and its regression; neither used Lean
+server. No source proof or verified pack changed.
