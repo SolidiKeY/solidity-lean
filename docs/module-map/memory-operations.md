@@ -172,3 +172,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/PublishedStorage.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
