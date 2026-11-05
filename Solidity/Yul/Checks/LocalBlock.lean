@@ -152,4 +152,22 @@ def rawSnapshot (result : RawFrame.Outcome ctx ⟨false,false⟩) : List Nat :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.run_completed_unique
 
+
+/- Compare both concrete interpreters, including a failed finite horizon. -/
+def wordRun (fuel : Nat) :=
+  WordAdapter.run code policy fuel ⟨Fin.elim0, RawFrame.view rawInitial⟩
+#guard (wordRun 0).isNone
+#guard (wordRun 32).isSome
+#guard (wordRun 32).map (fun result =>
+  (List.finRange (wordCellCount X)).map (fun i => (result.state.cells (wordCellAt X i)).val)) =
+  (rawRun 32).map rawSnapshot
+#guard (wordRun 32).map (fun result => result.flow.isNormal) =
+  (rawRun 32).map (fun result => result.flow.isNormal)
+/-- info: 'Solidity.Yul.RawFrame.run_some_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_some_iff
+/-- info: 'Solidity.Yul.RawFrame.run_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_none_iff
+
 end Solidity.Yul.Checks.LocalBlock

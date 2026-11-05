@@ -139,4 +139,26 @@ theorem run_completed_unique : ∀ (ctx : Solidity.Source.Ctx) (control : Solidi
   · exact Option.some.inj ((run_stable ctx control code policy state lo hi lower first one).symm.trans two)
   · exact Option.some.inj (one.symm.trans (run_stable ctx control code policy state hi lo higher second two))
 
+
+/-- Exact reflection of actual word-interpreter some results through raw-frame capture. -/
+theorem run_some_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx), ∀ (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy fuel state = some result ↔
+ ∃ wordResult, Solidity.Yul.WordAdapter.run code policy fuel ⟨Fin.elim0, Solidity.Yul.RawFrame.view state⟩ = some wordResult ∧
+ Solidity.Yul.RawFrame.Outcome.ofWord state wordResult = result := by
+  intro ctx control code policy fuel state result
+  simp only [run, Option.map_eq_some_iff]
+
+/-- Exact reflection of actual word-interpreter none results through raw-frame capture. -/
+theorem run_none_iff : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.run code policy fuel state = none ↔
+ Solidity.Yul.WordAdapter.run code policy fuel ⟨Fin.elim0, Solidity.Yul.RawFrame.view state⟩ = none := by
+  intro ctx control code policy fuel state
+  simp only [run, Option.map_eq_none_iff]
+
 end Solidity.Yul.RawFrame
