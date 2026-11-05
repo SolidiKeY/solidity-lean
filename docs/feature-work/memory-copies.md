@@ -1450,3 +1450,15 @@ panic or gas behavior. Independent finder and skeptic reviews passed without
 findings. Final exact-head diagnostics, serial checkpoint gates, scoped axiom
 audits, patch reconstruction, handoff and sealing remain required. All prior
 231 owned modules and prior sealed evidence are preserved unchanged.
+
+The first exact candidate (`3fc9b3dd`) passed import-closure and library builds
+but failed the unchanged trust gate on published qualified-units source:
+`Solidity/Frontend/QualifiedUnits/References.lean` has unregistered
+`implemented_by expressionPathAnyM` and `implemented_by referencesM` sites.
+The source is byte-identical to adopted master `98d43a15`; its owner/integrator
+must publish a correction satisfying the existing trust gate. This lane does
+not edit that source, trust inventory or scanner, and will not rerun the
+unchanged failed gate or claim RUNTIME_GATE_PASS. Its original failed evidence
+is preserved. The copied-heap agreement map label was also clarified after
+finder review. Remaining unaffected checks require fresh receipts on the
+corrected documentation candidate; whole-checkpoint acceptance remains blocked.

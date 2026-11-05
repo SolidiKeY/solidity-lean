@@ -528,5 +528,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedMemoryLoopControls.lean` | Aliased source children, separate destination pointers, retained words and successful-prefix refusal. |
 | `Backend/MemoryCopies/NestedMemoryMixedControls.lean` | Actual 2/0/64 source producer composed with memory traversal and full destination representation. |
 | `Backend/MemoryCopies/MemoryParentSnapshotInterface.lean` | Complete parent snapshot signature from actual heap-derived primitive child rows. |
-| `Backend/MemoryCopies/MemoryParentSnapshot.lean` | Complete existing parent snapshot and copy-growth result from actual heap-derived child rows. |
+| `Backend/MemoryCopies/MemoryParentSnapshot.lean` | Complete parent snapshot and copied-heap agreement from actual heap-derived child rows. |
 | `Backend/MemoryCopies/MemoryParentSnapshotControls.lean` | Mixed, empty and aliased snapshot contents, exact word growth and rejected incorrect snapshots. |
