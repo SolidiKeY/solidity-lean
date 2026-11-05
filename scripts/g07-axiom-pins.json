@@ -35371,6 +35371,79 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.conditional": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.irStack_cons": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.arm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.condition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.emptyArm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.high_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.highCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.highCondition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.missing_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.noGuardCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditionalControls.lean:Solidity.Yul.Compilation.FramedConditional.Controls.successful": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq": [
   "Classical.choice",
   "Quot.sound",

@@ -2839,6 +2839,8 @@ import Solidity.Yul.Compilation.ExpressionShapes
 import Solidity.Yul.Compilation.ExpressionShapesControls
 import Solidity.Yul.Compilation.FramedBranch
 import Solidity.Yul.Compilation.FramedBranchControls
+import Solidity.Yul.Compilation.FramedConditional
+import Solidity.Yul.Compilation.FramedConditionalControls
 import Solidity.Yul.Compilation.FramedControl
 import Solidity.Yul.Compilation.FramedControlControls
 import Solidity.Yul.Compilation.FramedWordLowering

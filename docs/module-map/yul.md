@@ -193,3 +193,5 @@
 | `Yul/LocalBoolControlRepresentation.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Evm/MemoryLoopHorizonCost.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Evm/MemoryLoopHorizonCostControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedConditional.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedConditionalControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
