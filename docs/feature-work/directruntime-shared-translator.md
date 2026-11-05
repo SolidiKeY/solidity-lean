@@ -425,3 +425,13 @@ SHA256047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167,
 965584bytes. It is coordinator-pending, requires matching dependency caches and
 is not standalone installation or native closure evidence. ship-cache.sh was not
 run. The earlier received600MB pack remains preserved separately.
+
+
+Fresh bounded per-file Solidity/KeySort.lean gate passed. Refreshed solkeycheck
+built12jobs and reported: parsed377taclets,131read-bearing,table covers131;
+OK annotations match the pinned local solidityProgramRules.key. The check took
+6.633s within the scope (startup-inclusive49.215s),RSS252428KiB; minimum outer
+available6264778752bytes. Evidence/adoption-f77/keysort.log preserves commands and
+outputs. RUNTIME_GATE_PASS remains pending: actual versions/KeySort are necessary,
+but producer migration, full/native/WASM gates and source parity are not complete.
+Fresh six-module source/C/olean/trace fingerprints are saved beside these logs.
