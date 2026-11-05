@@ -356,6 +356,7 @@ import Solidity.Backend.MemoryCopies.LoadedArrayInterface
 import Solidity.Backend.MemoryCopies.LoadedSingleton
 import Solidity.Backend.MemoryCopies.LoadedSingletonControls
 import Solidity.Backend.MemoryCopies.LoadedSingletonInterface
+import Solidity.Backend.MemoryCopies.MemoryCopyDemandInterface
 import Solidity.Backend.MemoryCopies.MemoryPathCopy
 import Solidity.Backend.MemoryCopies.MemoryPathCopyControls
 import Solidity.Backend.MemoryCopies.MemoryPathCopyInterface
