@@ -1939,3 +1939,7 @@ The numeric SLT certificate now composes with the charged fetched reference theo
 ### Selected signed GT
 
 The numeric SGT certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Negative-one, minimum-signed-word, equality and reversed-operand controls distinguish signed order, preserve the populated separate frames and reject wrong result/tail observations while retaining gas-before-arity and fuel priority. This proves a primitive selection leaf, not checked Source behavior, physical input origin or account-world adequacy.
+
+### Selected signed division
+
+The SDIV certificate now composes with the charged fetched reference theorem, retaining explicit numeric representation, capacity, gas and fuel premises. Controls cover truncation toward zero with both divisor signs, raw zero-divisor success and minimum-word division by negative one; populated observations reject floor rounding and tail permutation and retain gas-before-arity/fuel priority. These are raw primitive outcomes, not checked Source failure policy, physical input origin or account-world adequacy.

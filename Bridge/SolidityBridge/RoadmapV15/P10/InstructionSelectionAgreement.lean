@@ -1,3 +1,4 @@
+import SolidityBridge.RoadmapV15.P10.SignedDivisionConsumer
 import SolidityBridge.RoadmapV15.P10.SignedLePrimitive
 import Solidity.Backend.Selection.SignedSelection
 import SolidityBridge.RoadmapV15.P10.SignedGeConsumer
@@ -660,4 +661,41 @@ theorem sgt (site : Site .SGT) (a b : Scalar.Word) (tail : Scalar.Stack)
  Quot.sound] -/
 #guard_msgs in
 #print axioms sgt
+theorem selected_sdiv : Selection.selectSigned .sdiv=some Selection.sdivCertificate := by
+  rfl
+
+theorem sdiv (site : Site .SDIV) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 5≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := (if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt))
+    let next := (Assembly.chargedPrepare input 5).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .sdiv m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.sdivCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) #[] input=.ok next ∧
+    EVM.X (fuel+2) #[] input=EVM.X (fuel+1) #[] next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.sdivCertificate.code (a::b::tail)=some ((if b == 0 then (0 : Scalar.Word) else BitVec.ofInt 256 (a.toInt.tdiv b.toInt))::tail) := by rfl
+    have ir := (Selection.sdivCertificate.success _ _ m represented).mpr scalar
+    have native := sdiv_agreement site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_sdiv' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_sdiv
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.sdiv' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms sdiv
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
