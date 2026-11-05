@@ -1,0 +1,11 @@
+# Source agreement producers
+
+| `Source/Agreement/NormalBoolBindings.lean` | Actual boolean literal initializer normal-step producer and two-initializer composition, retaining primitive locals only. |
+| `Source/Agreement/NormalBoolControls.lean` | Concrete two-literal importing client, actual Source horizon controls and false-versus-true initializer countercontrol. |
+| `Source/Agreement/NormalStep.lean` | Explicit per-statement normal-result producer premise over existing Source and model evaluators. |
+| `Source/Agreement/NormalCuts.lean` | Actual Source sequence/journal decomposition; normal-tail inversion without chosen intermediate state. |
+| `Source/Agreement/NormalComposition.lean` | Conditional nil/cons/two-statement proof of the existing normal-locals agreement obligation. |
+| `Source/Agreement/NormalControls.lean` | Concrete no-op producer/importer and timeout, early-return and incompatible-association controls. |
+| `Source/Agreement/NormalDefaults.lean` | Concrete bool/uint256/int256 default-declaration step producers and actual two-step composition. |
+| `Source/Agreement/NormalDefaultControls.lean` | Both evaluator histories, ordered local-tail/state preservation, horizon and wrong-default controls. |
+| `Source/Agreement/NormalStatement.lean` | One-way normal-locals target; conditional sequence proofs are separate, and general Source/model agreement remains open. |
