@@ -159,3 +159,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/SourceRawBoolCopy.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceRawBoolCopyControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/SourceRawBoolEntry.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/NestedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
