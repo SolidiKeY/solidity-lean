@@ -1979,3 +1979,7 @@ The SUB short-stack consumer connects actual certificate refusal with the charge
 ### POP refusal
 
 The POP empty-stack consumer connects actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. Its gate proof uses the actual two-gas cost and one-operand arity. Populated surrounding states witness the empty-operand case; controls retain gas-before-underflow and distinguish native and driver fuel policy. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Indexed DUP refusals
+
+DUP1 through DUP16 short-stack consumers connect the actual indexed certificates with the charged gate, fetched driver and native execution under explicit representation, depth and adequate-gas premises. Existing opcode facts are reused read-only. Populated boundary controls show DUP16 refusing fifteen words while DUP15 succeeds on the same input; all-depth controls retain gas-before-underflow and native/driver fuel distinctions. A uniform opcode-fact proof replaces finite case expansion without changing the claims. Exceptions supply no final-state, rollback or account-world conclusion.
