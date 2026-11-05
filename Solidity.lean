@@ -1453,6 +1453,8 @@ import Solidity.Evm.MemoryLoopFiniteHorizonControls
 import Solidity.Evm.MemoryLoopHorizon
 import Solidity.Evm.MemoryLoopHorizonAllocControls
 import Solidity.Evm.MemoryLoopHorizonControls
+import Solidity.Evm.MemoryLoopHorizonCost
+import Solidity.Evm.MemoryLoopHorizonCostControls
 import Solidity.Evm.MemoryLoopHorizonRestriction
 import Solidity.Evm.MemoryLoopHorizonRestrictionControls
 import Solidity.Evm.MemoryLoopScope

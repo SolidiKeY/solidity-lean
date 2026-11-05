@@ -191,3 +191,5 @@
 | `Yul/World/PendingCoupling.lean` | H26 pending P19 producer interface. |
 | `Yul/Checks/LocalBoolControlRepresentation.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/LocalBoolControlRepresentation.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Evm/MemoryLoopHorizonCost.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Evm/MemoryLoopHorizonCostControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
