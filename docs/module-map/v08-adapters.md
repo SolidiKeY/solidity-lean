@@ -358,6 +358,7 @@
 | `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth and derived three-cell parent history. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
 | `Backend/InternalDispatch.lean`, `Backend/InternalDispatch/Typed.lean`, `Backend/InternalDispatch/Agreement.lean`, `Backend/InternalDispatch/Chain.lean` | G37.03/P4 typed dispatch tables, full-signature checks and the typed equality-guard chain (not emitted bytecode). |
 | `Backend/InternalDispatch/FrozenV1.lean`, `Backend/InternalDispatch/FrozenV2.lean`, `Backend/InternalDispatch/FrozenV3.lean` | Dispatch consumers of the frozen P1 v1–v3 `Pending*` families; v3 transports an approved input through profile agreement and coverage. |
 | `Backend/InternalDispatch/Controls.lean`, `Backend/InternalDispatch/FrozenV1Controls.lean`, `Backend/InternalDispatch/FrozenV2Controls.lean`, `Backend/InternalDispatch/FrozenV3Controls.lean` | Source-backed selector controls and refusals; empty-domain refusal for v3. |

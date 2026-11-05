@@ -506,6 +506,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDualControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitter
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarEmitterSound
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPairedExecution
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPhysicalInputs
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarPlan
