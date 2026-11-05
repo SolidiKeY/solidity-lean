@@ -319,6 +319,7 @@ import Solidity.Backend.MemoryCopies.CopyPathControls
 import Solidity.Backend.MemoryCopies.CopyPathInterface
 import Solidity.Backend.MemoryCopies.CopyPaths
 import Solidity.Backend.MemoryCopies.DeepCopyContents
+import Solidity.Backend.MemoryCopies.DefaultDemandInterface
 import Solidity.Backend.MemoryCopies.DefaultSelection
 import Solidity.Backend.MemoryCopies.DefaultSelectionControls
 import Solidity.Backend.MemoryCopies.DefaultSelectionInterface

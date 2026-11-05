@@ -341,3 +341,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalWordsInterface.lean` | Unconditional intrinsic copy cell-sum growth and old-object reservation obligations. |
 | `Backend/MemoryCopies/TraversalWords.lean` | Actual object reservation sum, exact generic copy growth and preservation of old cell counts. |
 | `Backend/MemoryCopies/TraversalWordsControls.lean` | Nested/repeated/shadow/empty/long demand witnesses distinguishing words from identities and root size. |
+| `Backend/MemoryCopies/DefaultDemandInterface.lean` | Existing finite-plan cost agreement and unconditional intrinsic default-allocation demand obligations. |
