@@ -170,3 +170,6 @@
 | `Backend/AbiEntry/DispatchRefusalInterface.lean` | Exact routing refusal and Source empty-byte failure certificate. |
 | `Backend/AbiEntry/DispatchRefusal.lean` | Value-aligned actual compiled rejection iff Source routing refusal. |
 | `Backend/AbiEntry/DispatchRefusalControls.lean` | Inhabited refusal combinations and later short-head counterexample. |
+| `Backend/AbiEntry/HeadGateInterface.lean` | Actual typed/public-compiler ABI head guard certificate. |
+| `Backend/AbiEntry/HeadGate.lean` | Full-extent head-span guard with exact execution and semantic rejection. |
+| `Backend/AbiEntry/HeadGateControls.lean` | Boundary, oversized-no-wrap and passed-head decoder-failure controls. |

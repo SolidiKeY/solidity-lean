@@ -806,3 +806,30 @@ used a build or Lean server. Focused compilation has no changed-module warnings.
 `HeadGateInterface.lean` specifies a typed/public compiler head-span guard
 with exact reject/continue behavior, retaining unbounded semantic head extents.
 Passing this initial check does not certify argument decoding or body execution.
+
+`HeadGate.lean` implements the selector-inclusive ABI head-span guard as an
+intrinsic program selected by the existing public compiler. Representable
+extents compile to size comparison and conditional revert before writing a
+continuation label; extents at least the word modulus emit unconditional revert.
+General execution preserves all machine state except the result cell on
+success, with saved stack and zero pending skip. Rejection is equivalent to
+represented size below the full semantic extent. Its transport to the existing
+ABI-entry early-failure theorem reuses `HeadCheck.early_revert`; no immediate
+truncation or narrower input admission is introduced. Input-size loading and
+native byte realization remain separate.
+Controls cover empty and bool signatures, mixed static tuple/dynamic aggregate
+heads, exact boundaries, all represented sizes against huge metadata heads,
+and a wraparound counterexample (a huge extent has low word four yet rejects
+size four). They also cover malformed size cells, fuel-zero semantic head
+failure and protected state. Passing the emitted head gate still permits the
+existing dirty-bool decoder failure; that semantic counterexample reuses its
+previous proof. This guard does not certify whole decoding, typed argument
+construction, selected-signature/body integration, native failure bytes or full
+entry composition.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked actual compiler selection, operand order/equality, full-extent
+oversized rejection, exact saved state and the one-way semantic failure
+transport. Both confirmed the dirty-bool control prevents a full-decoding
+interpretation; neither used a build or Lean server. Focused compilation has
+no warnings in the changed modules.

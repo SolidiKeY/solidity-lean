@@ -26,6 +26,9 @@ import Solidity.Backend.AbiEntry.GetterRoutesInterface
 import Solidity.Backend.AbiEntry.HeadCheck
 import Solidity.Backend.AbiEntry.HeadCheckControls
 import Solidity.Backend.AbiEntry.HeadCheckInterface
+import Solidity.Backend.AbiEntry.HeadGate
+import Solidity.Backend.AbiEntry.HeadGateControls
+import Solidity.Backend.AbiEntry.HeadGateInterface
 import Solidity.Backend.AbiEntry.Interface
 import Solidity.Backend.AbiEntry.LengthCheck
 import Solidity.Backend.AbiEntry.LengthCheckControls
