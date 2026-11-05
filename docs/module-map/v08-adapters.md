@@ -453,6 +453,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/PrimitivePackets/UnsignedMul/WidthControls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/Families.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/Refusals.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/RuntimeGuard.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/RuntimeGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
