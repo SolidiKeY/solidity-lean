@@ -1731,6 +1731,9 @@ import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.StatementGrammarH28.ElsePosition
+import Solidity.Frontend.StatementGrammarH28.FixtureControls.Case00
+import Solidity.Frontend.StatementGrammarH28.FixtureData
+import Solidity.Frontend.StatementGrammarH28.G0List
 import Solidity.Frontend.StatementGrammarH28.NearestElse
 import Solidity.Frontend.Static.C3
 import Solidity.Frontend.Static.Certificates

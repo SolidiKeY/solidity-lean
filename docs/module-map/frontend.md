@@ -133,3 +133,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/NumericLiteralProofs/WordTable/Part05.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/NumericLiteralProofs/WordTable/Part06.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/Fixtures.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/FixtureControls/Case00.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/FixtureData.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/G0List.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
