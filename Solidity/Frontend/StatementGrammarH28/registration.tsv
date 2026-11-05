@@ -89,3 +89,6 @@ Solidity.Frontend.StatementGrammarH28.ConditionalCoverage	Recursive Boolean cond
 Solidity.Frontend.StatementGrammarH28.ConditionalYield	Actual Boolean fragment yields, nearest else and framed prefix tree/suffix uniqueness
 Solidity.Frontend.StatementGrammarH28.ConditionalList	Arbitrary-width intrinsic Boolean item list tree/segment uniqueness and balanced block prefix splitting
 Solidity.Frontend.StatementGrammarH28.ConditionalFuel	Constructive Boolean item-list nesting bounds and actual block/statement/unchecked parser coverage
+Solidity.Frontend.StatementGrammarH28.G0Nodes	Gate G0 node-constructor twin of Syn.nodes for the fixture observers
+Solidity.Frontend.StatementGrammarH28.AtomConditional	Conditional/loop coverage with expression-atom conditions under an exposed premise
+Solidity.Frontend.StatementGrammarH28.AtomNested	Mutual nested atom statement/item fragment: coverage, budgets, nearest else, token/prefix uniqueness

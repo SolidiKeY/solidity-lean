@@ -1,8 +1,10 @@
 # H28 statement grammar — work in progress
 
 Pinned base: `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`.
-Branch: `codex/solidity-h28-sol-20261104/statement-grammar`.
-Repository: `/workspace/solidity-lean`.
+Branch: `codex/solidity-h28-sol-20261104/statement-grammar` (Codex, to checkpoint X
+and the e6849d3b rebase); since 2026-11-05 the moved lane
+`cloud/moved4-20261105/statement-grammar`, started from master
+`aec9adf1ad8666a7e591e42a537069a93dc858cb` (see "Moved lane" at the end).
 Exclusive scope is the StatementGrammarH28 namespace, this document and
 `tests/h28-sol/statement-grammar/`. Upstream inputs are unchanged.
 Local registration is in the namespace's `registration.tsv`; shared roots and
@@ -2069,3 +2071,106 @@ General compound/item framing, broader true coverage, repository final gates
 and whole-scope acceptance/reviews remain pending. SOL-EU stays excluded and
 SG-CEX-01/02 remain OPEN/REFUTED. Shared generated roots/maps/trust inventories
 remain coordinator-owned.
+
+
+## Moved lane (2026-11-05)
+
+The lane moved from the idle Codex VM to a Claude cloud VM with the same
+scope (handoff `.handoff/statement-grammar.md` on `cloud/moved4-prompts`,
+`997382550989229ccd97f1821365b9a8af1e62aa`). It starts from master
+`aec9adf1ad8666a7e591e42a537069a93dc858cb`, which already contains every
+lane path of Codex head 70845978. The Codex evidence under `/workspace/…`
+and its caches are not reachable from this VM; nothing below cites them.
+Validation is re-run fresh with the Lean MCP server (per-file diagnostics)
+and `./run-lean.sh`.
+
+## Checkpoint Y: Gate G0 node twin for the fixture observers
+
+The held review finding: the fixture observers evaluated by `decide +kernel`
+in `FixtureControls/Case00..44` still reached an indexed-family `match`.
+Checkpoint T had already moved FixtureData's own four observers to
+`Syn.casesOn` with category-generalising motives, but `optionalBodyCtorsAt`
+read the body through `Syn.nodes` (`Source/Ctor.lean`), a generated
+`match` on `Syn` (Gate G0 condition 1). Source is read-only for this lane.
+
+Repair: `G0Nodes.lean` defines `nodeCtorsAt`, a twin of
+`Syn.nodes ·|>.map Node.ctor` over all 112 `Syn` constructors, by
+`Syn.casesOn (motive := fun _ _ => List Ctor)` with structural recursion
+(the same form as `G0List`), generated mechanically from the `Syn.nodes`
+block so the preorder and constructor names match. The public
+`g0NodeCtors` is linked to the Source observer by
+`g0NodeCtors_eq_nodes : g0NodeCtors s = s.nodes.map Node.ctor` (induction,
+axioms `propext`). `optionalBodyCtorsAt` now reads `g0NodeCtors body`.
+No fixture, statement, required-constructor list or budget (fuel 64, name
+`f`) changed; the observation is equal by the link theorem.
+
+Checks (Lean MCP, severity error, fresh on this VM): `G0Nodes`,
+`FixtureData`, all 45 `FixtureControls/Case00..44` (each closes by
+`decide +kernel`, axioms `[propext]`), `tests/…/G0ObserverControls`
+(new `g0_node_ctors_twin_actual_body` by `decide +kernel`, and the link),
+`G0PublicAxioms`, `G0ElaborationAudit` (inventory now 14 eliminators,
+including `nodeCtorsAt`). Remaining kernel-evaluated indexed matches reached
+by the fixtures are inside the producer (`parse`, `Unit.rejections`), which
+is the parser under test and read-only here; they are not lane observers.
+
+Warned refactor: the twin replaces a `match`-compiled observer by the
+`casesOn` form Gate G0 prescribes. A matched before/after timing on this VM
+was not taken (no `lean` in Bash under the repository settings); the full
+build log records the new per-module times of the 45 cases.
+
+## Checkpoint Z: expression-atom conditional framing
+
+Queue item 2 asks for compound framing and nearest-else association outside
+the Boolean fragment, with expression subtrees as read-only atoms and any
+needed expression assumption exposed exactly.
+
+`AtomConditional.lean` exposes the atom premise
+
+    ExprAtomRparen e es a :=
+      ∀ n s, expr (n + a) (locatedInput (es ++ [)]) s) = .ok (e, punctBefore ) s)
+
+(the atom's tokens parse back to exactly `e` before `)`, leaving `)`
+unread, at every fuel above `a`). It is proved for Boolean literals and
+identifiers (`bool_atom_rparen`, `ident_atom_rparen`, budget 5) and is
+otherwise a premise: expression parser completeness and SOL-EU stay with the
+expression lanes. `AtomStatements` extends `BooleanStatements` (embedded by
+its first constructor) with `if`/`if-else`/`while`/`do` over atom
+conditions and the empty-header `for`. Proved: header equations
+(`if_atom_prefix`, `while_atom_prefix`, `do_atom_tail`), coverage at every
+excess fuel and framed suffix (`atom_statements_coverage`, budget additive
+in the atom budgets), the precedence contract (`atom_statements_node`),
+nearest else (`atom_statements_nearest_else`) and token uniqueness inside the
+fragment (`atom_statements_token_unique`, from the parser being a function).
+
+`AtomNested.lean` generalises to arbitrary nesting with mutual relations
+`AtomStmt`/`AtomItems` over the existing indexed syntax: blocks of any
+width and depth whose items are atom statements, empty return, break and
+continue in their intrinsic loop contexts, `return e;` (premise
+`ExprAtomSemi`, plus the token side condition `NoSemiHead`: nonempty and not
+starting with `;`), `unchecked { … }` items only in an unchecked-free context
+(the type index forbids nesting; the actual parser refusal is checked), and
+the atom conditionals. Coverage is proved by mutual structural recursion
+(`atom_stmt_coverage`, `atom_items_at`), with budgets computed from the
+witness (`max (d + 7) b` per item, `+2` per unchecked wrapper) and loop
+fuel from the actual token length (`atom_items_count_le`); no successful
+parse is assumed. Also: block and unchecked coverage, the precedence
+contract and nearest else, token uniqueness and prefix/suffix uniqueness
+(`atom_stmt_prefix_unique`). Control-leaf lists embed
+(`atom_items_of_leaf_items`). All axioms are within `propext`/`Quot.sound`.
+
+Controls (`tests/…/AtomConditionalControls.lean`,
+`AtomNestedControls.lean`): every constructor inhabited; identifier
+conditions in every position; dangling else `if (x) if (y) {} else {}`
+parsed to the inner association (kernel `rfl` at fuel 18) and unique; the
+outer association excluded by the contract; closed loops preserving an
+`else` suffix; a block closing an open if before a following `else`;
+arbitrary width (n × `return x;`, constant budget) and arbitrary depth;
+a three-item block with `while`/`if-else`/`break`/`continue`/`return z;`/
+`unchecked`. Negative: the atom premise names the parsed expression
+(`ident "y"` refused for token `x`), refuses extra tokens and an
+insufficient budget; `NoSemiHead` refuses `[]` and `[;]`.
+
+Not claimed: yield/`Derives` uniqueness for the atom fragments (it needs
+the atoms' yields, i.e. a printer premise), `for` headers with
+init/condition/update, simple/expression statements, emit/revert/try/
+assembly, and any expression-level fact beyond the stated premises.

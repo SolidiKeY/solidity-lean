@@ -176,3 +176,6 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Backend/PrimitivePackets/Constants/Agreement.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/PrimitivePackets/Constants/Target.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Typed H22 call metadata from the retained whole-source resolution. |
+| `Frontend/StatementGrammarH28/G0Nodes.lean` | Gate G0 twin of `Syn.nodes` constructors (`g0NodeCtors`, `Syn.casesOn` with structural recursion) read by the fixture observers, linked by `g0NodeCtors_eq_nodes`. |
+| `Frontend/StatementGrammarH28/AtomConditional.lean` | Statement-grammar `if`/`while`/`do`/empty-`for` coverage with arbitrary expression conditions under the exposed atom premise `ExprAtomRparen`; nearest else and token uniqueness inside the fragment. |
+| `Frontend/StatementGrammarH28/AtomNested.lean` | Mutual `AtomStmt`/`AtomItems` fragment: arbitrarily nested blocks, control leaves, `return e;`, `unchecked` items and atom-condition `if`/`while`/`do`/`for`; coverage by mutual structural recursion with syntax-derived budgets, nearest else, token and prefix uniqueness under exposed atom premises. |
