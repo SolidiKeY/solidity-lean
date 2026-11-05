@@ -819,3 +819,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
