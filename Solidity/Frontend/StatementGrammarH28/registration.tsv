@@ -75,3 +75,6 @@ Solidity.Frontend.StatementGrammarH28.NoSemiAtoms	Semicolon-free literal/type/op
 Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi	Universal 46-constructor expression/type/argument/simple closure semicolon absence
 Solidity.Frontend.StatementGrammarH28.SemicolonSplit	Actual first-semicolon boundary splitting for six statement roots
 Solidity.Frontend.StatementGrammarH28.FramedStatementList	Universal statement nonemptiness and seven-root source list segmentation against arbitrary target
+Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr	Continuation-token-free actual atom head combinators
+Solidity.Frontend.StatementGrammarH28.BoundaryHead	All42 atom constructor head invariants for else/catch/unchecked
+Solidity.Frontend.StatementGrammarH28.FramedItemList	Universal statement continuation refusal and both-item mixed block segmentation

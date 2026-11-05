@@ -1514,3 +1514,88 @@ inventory-q-v3.json retains v2 witness-name corrections and adds these exact
 control-theorem identities (70 source/control theorem audits total). The
 earlier source inventory revisions remain saved. This audit-only follow-up
 is revalidated at its own committed head before another delivery attempt.
+
+## H41: checkpoint Q cache receipt and amended delivery policy
+
+The coordinator reports receipt statement-grammar-cache-received-20261105T020412Z.json
+at /home/guilherme/.local/state/cloudvm-coord/receipts/ and confirms its
+SHA256 verification. The worker independently recomputed the saved pack SHA:
+17559f6df217563456007fb5ec2ce5ce33e3f6ec90eb65f9bbf96fcf4f593e3b.
+The pack remains /workspace/h35-q-final-cache-1793832269544630195.tar.gz.
+This resolves Q-H35-TRANSPORT and checkpoint Q delivery. The receipt's remote
+path is coordinator-reported, not claimed locally read. The saved worker
+record is h41-q-received.json. Original queue obligations remain unfinished.
+
+H41 amends H35: leave verified packs on this VM, record absolute path and SHA,
+mark new delivery coordinator-pending and continue. Never run ship-cache.sh
+on this VM again. No transport credentials or coordinator state are needed.
+Earlier failed shipment evidence remains immutable historical evidence.
+
+
+## Checkpoint R: continuation heads and both intrinsic item constructors
+
+BoundaryHeadPr and BoundaryHead prove successful atom yields have a real first
+token distinct from actual else/catch/unchecked keywords. All42 constructors
+in the seven substantive categories are covered; other categories receive
+no head claim. Same-spelled identifiers/string payloads remain atoms. This
+does not add a lexical/parser restriction or alter original head theorems.
+
+FramedItemList lifts that result to all13 statement roots with arbitrary
+contexts/layouts/suffixes. It is a continuation-boundary prerequisite, not
+general token-level nearest-else association. Item/list/block splitting handles
+both intrinsic item constructors: source stmtItems retain Q's seven-root
+FramedStatement fragment; source uncheckedItems contain arbitrary intrinsic
+blocks. All target items/lists remain arbitrary. Exact intermediate layouts,
+token segments and suffixes are preserved. No AST equality, SOL-EU, assumed
+successful parse or general compound framing is claimed; SCtx stays intrinsic.
+
+BoundaryHeadControls checks actual successful nonempty yields for all42 atom
+constructors, all5 literals and all13 roots, plus keyword/identifier negatives
+and universal suffix refusal. FramedItemControls observes both item constructors
+in an eight-segment yield with a conditional inside unchecked, try/catch inside
+a block, literal semicolon/brace payload bytes and nonempty residual layout.
+Universal controls recover item/block segments against arbitrary targets;
+do-while is an inhabited source-fragment negative. Kernel checks do not claim
+solc acceptance. No external fixture changed from the51 pinned cases.
+
+ItemPublicAxioms checks/prints all20 source theorem signatures/axioms; the
+controls print all21 new control theorem axiom sets. inventory-r.json records
+exact identities, axioms-r.json all41 sets:22 none and19 propext/Quot.sound.
+Wrapped output whitespace is normalized. No new axiom, sorry/admit, unsafe/
+native_decide or heartbeat raise occurs. All3 modules are registered locally
+only; shared roots and producers stay frozen. This adds proofs, not a
+producer refactor or speed claim.
+
+| R gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag BoundaryHeadPr.lean | pass | run-1793844384527293533 |
+| runtime.py build BoundaryHeadPr | pass | run-1793844426182417921 |
+| runtime.py diag BoundaryHead.lean | pass | run-1793844436597586127 |
+| runtime.py build BoundaryHead | pass | run-1793844496241022247 |
+| runtime.py diag FramedItemList.lean | pass | run-1793844541688283935 |
+| runtime.py build FramedItemList | pass | run-1793844585465134315 |
+| runtime.py diag BoundaryHeadControls.lean | pass | run-1793844693715353004 |
+| runtime.py diag FramedItemControls.lean | pass | run-1793844772104751324 |
+| runtime.py diag ItemPublicAxioms.lean | pass | run-1793844781770041836 |
+| runtime.py gate BoundaryHeadControls.lean | pass | run-1793844855911377761 |
+| runtime.py gate FramedItemControls.lean | pass | run-1793844861559296866 |
+| runtime.py gate ItemPublicAxioms.lean | pass | run-1793844867557033586 |
+
+Evidence paths are under /workspace/h28-statement-grammar-evidence, with exact
+commands/exits, wall/RSS, input hashes and process samples. Lean remains serial,
+explicit -j1,12GiB/no swap and4GiB VM headroom. Final exact-head validation,
+versions, permitted KeySort and H41 pack path/SHA are in the sealed handoff.
+New delivery is coordinator-pending; ship-cache.sh is never run on this VM.
+
+Retained failures: run-1793844512352093685 corrected actual uncheckedItem
+parameters and singleton normalization; run-1793844720914885102 corrected
+the doWhile control's l/u parameters. run-1793844745667940933 refused the
+stopped runtime; the same container was restarted. No original premise,
+signature, exclusion, budget or producer changed.
+
+H41 resolves Q-H35-TRANSPORT; no R scope question remains. Remaining original
+work: general compound boundaries, conditional token association/uniqueness
+independently of SOL-EU, remaining true structural-fuel coverage, full final
+repository gates, whole-scope acceptance and reviews. SG-CEX-01/02 remain
+OPEN/REFUTED. The persistent objective is not reset or marked complete;
+get_goal is unavailable, so the existing frozen objective continues.
