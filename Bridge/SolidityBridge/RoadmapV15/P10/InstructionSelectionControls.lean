@@ -103,6 +103,72 @@ theorem frame_separation (perm : Bool) :
   change (23 : Nat)≠0
   decide
 
+
+/-- A populated client of the actual selected subtraction certificate. -/
+theorem sub_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .sub (ir a b)=.ok (irExpected a b (a-b)) 0 ∧
+    Assembly.driverSteps 1 2 F.supplied (F.input .SUB 12 perm (a::b::spill))=
+      .ok (nativeExpected .SUB 3 a b (a-b) perm) ∧
+    EVM.X 2 F.supplied (F.input .SUB 12 perm (a::b::spill))=
+      EVM.X 1 F.supplied (nativeExpected .SUB 3 a b (a-b) perm) := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | have h := InstructionSelectionAgreement.sub F.supplied (F.site .SUB 12 perm)
+      a b spill (ir a b) rfl (by decide) (by change 3≤12;decide) 0
+    dsimp only at h
+    have eq : (Assembly.chargedPrepare (F.input .SUB 12 perm (a::b::spill)) 3).replaceStackAndIncrPC
+        (((a-b)::spill).map (fun w=>UInt256.mk w.toFin))=nativeExpected .SUB 3 a b (a-b) perm := by
+      first
+      | rfl
+      | simp only [F.input,nativeExpected,F.observed,WrappingArithmeticFixtures.input,
+          WrappingArithmeticFixtures.observed,WrappingArithmeticFixtures.site,modularSite,
+          Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+          EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before]
+        rfl
+    simp only [WrappingArithmeticFixtures.input] at eq
+    rw [eq] at h
+    exact ⟨h.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem sub_wrap_client (perm : Bool) :
+    Assembly.driverSteps 1 2 F.supplied (F.input .SUB 12 perm (3::5::spill))=
+      .ok (nativeExpected .SUB 3 3 5 (BitVec.ofNat 256 ((2^256:Nat)-2)) perm) := by
+  have h := (sub_client 3 5 perm).2.1
+  have value : (3 : Scalar.Word)-5=BitVec.ofNat 256 ((2^256:Nat)-2) := by decide
+  rw [value] at h
+  exact h
+
+theorem sub_complete_observation (perm : Bool) :
+    let next := nativeExpected .SUB 3 7 3 4 perm
+    next.stack=[u 4,u 258,u 513] ∧ next.stack≠[u 4,u 513,u 258] ∧
+    next.stack≠[u (2^256-4),u 258,u 513] ∧
+    next.executionEnv.code.data.toList=[0x60,0x7f,0x50,0x03,0] ∧
+    next.pc=u 4 ∧ next.gasAvailable=u 9 ∧ next.execLength=42 ∧
+    next.memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    next.returnData.data.toList=[0xcc,0xdd] ∧ next.H_return.data.toList=[0xee,0xff] ∧
+    next.executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧ next.accountMap=accounts ∧ next.σ₀=accounts := by
+  first
+  | solve | decide
+  | refine ⟨rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+    · change [u 4,u 258,u 513]≠[u 4,u 513,u 258];decide
+    · change [u 4,u 258,u 513]≠[u (2^256-4),u 258,u 513];decide
+
+theorem sub_resource_order (perm : Bool) :
+    Solidity.Evm.Instr.step .sub (ir 7 3)=.ok (irExpected 7 3 4) 0 ∧
+    Assembly.driverSteps 1 2 F.supplied (F.input .SUB 2 perm (7::3::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 F.supplied (F.input .SUB 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 F.supplied (F.input .SUB 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 F.supplied (F.input .SUB 12 perm (7::3::spill))=.error .OutOfFuel := by
+  have h := (sub_client 7 3 perm).1
+  cases perm <;> exact ⟨h,rfl,rfl,rfl,rfl⟩
+
+#print axioms sub_client
+#print axioms sub_wrap_client
+#print axioms sub_complete_observation
+#print axioms sub_resource_order
+
 #print axioms add_client
 #print axioms mul_client
 #print axioms boundaries

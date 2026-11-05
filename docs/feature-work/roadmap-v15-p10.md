@@ -1835,3 +1835,15 @@ unfolding the driver directly. Matched numeric inputs distinguish IR success
 from native insufficient gas/fuel; empty-stack cases retain gas-before-arity and
 fuel-before-both observations. This adds no Source input-origin, whole-program
 resource, account/world or Osaka adequacy claim and closes no full opcode row.
+
+
+## Selected subtraction correspondence
+
+The instruction-selection consumer connects the published subtraction certificate
+to the actual charged fetched SUB step and native continuation. Numeric initial
+stack correspondence, legal capacity, gas and fuel remain explicit. IR and native
+frames are preserved separately; no Source-origin or cross-model world frame is
+inferred. Controls retain a populated full-state client, modular `3 - 5`
+wraparound, reversed-operand and caller-tail-order negatives, and exact
+insufficient-gas, empty-stack and fuel-first refusals. This closes no complete
+opcode row or general Osaka/driver/resource obligation.
