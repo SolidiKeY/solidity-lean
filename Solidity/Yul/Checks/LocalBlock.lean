@@ -202,4 +202,28 @@ def selectedSnapshot (bound : Nat) : Option (List Nat) :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.firstDone_none_iff_bound
 
+
+/- The selected actual dirty frame feeds the existing canonical readback API. -/
+#guard (selectedRaw 32).any (fun chosen => chosen.1 < 32)
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnBool (ctx := ctx) .legacy result.state (.here)).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnU8 (ctx := ctx) .legacy result.state (.there (.there .here))).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnBool (ctx := ctx) .viaIR result.state (.here)).key
+  | .error _ => none)) = some 1
+#guard ((selectedRaw 32).bind (fun selected =>
+  match selected.2.1 with
+  | .ok result => (RawFrame.returnU8 (ctx := ctx) .viaIR result.state (.there (.there .here))).key
+  | .error _ => none)) = some 1
+
+/-- info: 'Solidity.Yul.RawFrame.run_some_iff_firstDone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_some_iff_firstDone
+
 end Solidity.Yul.Checks.LocalBlock

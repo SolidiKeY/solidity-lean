@@ -64,4 +64,39 @@ theorem firstDone_none_iff_bound : ∀ (ctx : Solidity.Source.Ctx) (control : So
       rw [exhausted] at completed
       cases completed
 
+/-- Exact completion is equivalent to genuine bounded selection of the same whole raw outcome. -/
+theorem run_some_iff_firstDone : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx)
+ (bound : Nat) (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy bound state = some result ↔
+ ∃ chosen, Solidity.Source.firstDone
+ (fun fuel => Solidity.Yul.Closed.sourceResult (Solidity.Yul.RawFrame.run code policy fuel state)) bound =
+ some (chosen, Solidity.Yul.Closed.sourceResult (some result)) := by
+  intro ctx control code policy state bound result
+  constructor
+  · intro completed
+    cases selected : Solidity.Source.firstDone
+        (fun fuel => Closed.sourceResult (run code policy fuel state)) bound with
+    | none =>
+      have absent := (firstDone_none_iff_bound ctx control code policy state bound).mp selected
+      rw [completed] at absent
+      cases absent
+    | some found =>
+      obtain ⟨chosen,observed⟩ := found
+      have agrees := firstDone_agrees ctx control code policy state bound chosen observed selected
+      rw [completed] at agrees
+      exact ⟨chosen, congrArg (fun value => some (chosen,value)) agrees⟩
+  · rintro ⟨chosen,selected⟩
+    have agrees := firstDone_agrees ctx control code policy state bound chosen
+      (Closed.sourceResult (some result)) selected
+    cases actual : run code policy bound state with
+    | none =>
+      rw [actual] at agrees
+      cases agrees
+    | some out =>
+      rw [actual] at agrees
+      cases agrees
+      rfl
+
 end Solidity.Yul.RawFrame
