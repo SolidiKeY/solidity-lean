@@ -1,0 +1,11 @@
+
+### P1 paired allocating scalar transport
+
+| Module | Purpose |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth and derived three-cell parent history. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean` | All-count descent and return execution against the frozen producer, with derived history and allocator transport. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean` | Populated actual producer, scalar result and restored pointer controls for paired transport. |

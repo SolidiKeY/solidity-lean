@@ -356,10 +356,6 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingEmission.lean` | One state-budgeted allocating recursive image with universal Entry return/bare-revert proofs, real V2 producer and explicit remaining V3 domain duties. |
 | `Backend/InternalFlow/RuntimeFrameV3EmissionPrefixes.lean` | Actual emission Entry to native/target allocating descent horizons, saved parents, exact growth and stable stopped child before unwind. |
 | `Backend/InternalFlow/RuntimeFrameV3EmissionUnwind.lean` | Actual allocating emission Entry to represented paired-unwind parent horizons, exact growth, full populated observations and stable final guard. |
-| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
-| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth and derived three-cell parent history. |
-| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
-| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
 | `Backend/InternalDispatch.lean`, `Backend/InternalDispatch/Typed.lean`, `Backend/InternalDispatch/Agreement.lean`, `Backend/InternalDispatch/Chain.lean` | G37.03/P4 typed dispatch tables, full-signature checks and the typed equality-guard chain (not emitted bytecode). |
 | `Backend/InternalDispatch/FrozenV1.lean`, `Backend/InternalDispatch/FrozenV2.lean`, `Backend/InternalDispatch/FrozenV3.lean` | Dispatch consumers of the frozen P1 v1–v3 `Pending*` families; v3 transports an approved input through profile agreement and coverage. |
 | `Backend/InternalDispatch/Controls.lean`, `Backend/InternalDispatch/FrozenV1Controls.lean`, `Backend/InternalDispatch/FrozenV2Controls.lean`, `Backend/InternalDispatch/FrozenV3Controls.lean` | Source-backed selector controls and refusals; empty-domain refusal for v3. |
@@ -824,3 +820,14 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
+
+### P1 paired allocating scalar transport
+
+| Module | Purpose |
+|---|---|
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentInterfaceV1.lean` | Frozen typed public-guard and allocating three-cell prefix obligations, parameterized by an existing compiler certificate. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarAllocatingDescent.lean` | Actual scalar allocating descent horizons with reached representation, exact ownership growth and derived three-cell parent history. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarDescentControls.lean` | Populated zero/one/two descent horizons, old-array observations, capture-order negatives and the actual terminal guard. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean` | All-count descent and return execution against the frozen producer, with derived history and allocator transport. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean` | Populated actual producer, scalar result and restored pointer controls for paired transport. |
