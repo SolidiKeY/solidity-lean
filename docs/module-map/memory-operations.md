@@ -299,7 +299,3 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalNestedFixedWrite.lean` | Actual nested whole-word store joined to terminal byte MSTORE and live REVERT bytes, with initial-derived numeric and scaled-pointer footprints; byte-load prefix remains open. |
 | `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/NestedDefaults.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/PhysicalByteMaterialize.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/PhysicalByteStack.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/PhysicalByteStackExact.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
