@@ -1031,3 +1031,7 @@ aggregate decoding, full dispatch/entry composition or physical failure bytes.
 Those G40 obligations, G46.02, the writer counterexample, fixture replay and
 full assignment gates remain open. Published master was adopted before this
 increment; prior checkpoint evidence is retained without relabeling failures.
+
+`BoolBindingInterface.lean` specifies validation before typed Boolean local
+binding, exact compiler execution and raw entry rejection. Native loading
+and general Source/body adequacy remain separate.
