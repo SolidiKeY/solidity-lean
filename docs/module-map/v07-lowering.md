@@ -71,10 +71,8 @@
 | `Lowering/V07/SignedWordMultiplication.lean` | Actual full-range unchecked int256 multiplication and initial-family effect transport |
 | `Lowering/V07/SignedArithmeticControls.lean` | Inhabited signed add/multiply clients, boundaries, captures, frames and wrong-program controls |
 
-| `Lowering/V07/UnsignedCasts.lean` | Actual uint256-to-uintN casts and initial-family assignment transport |
 | `Lowering/V07/UnsignedCastControls.lean` | All unsigned widths, capture order, caller identity and live-reference frames |
 
-| `Lowering/V07/UnsignedWidthCasts.lean` | Actual unsigned cast transport for every approved source and destination width |
 | `Lowering/V07/UnsignedWidthCastControls.lean` | All unsigned width pairs, cast order and caller frame controls |
 | `Lowering/V07/SignedWidthCastControls.lean` | Signed thresholds, all width pairs, negative extension and caller frame controls |
 | `Lowering/V07/SignedNarrowAddition.lean` | Unchecked signed addition at every approved width, with initial-family effect transport |
@@ -129,8 +127,6 @@
 | `Lowering/V07/UdvtBoolAssignmentControls.lean` | Inhabited mixed-reference Boolean matrix, self/capture extension, stale-read and nominal-refusal controls with exact guards. |
 | `Lowering/V07/UdvtAddressAssignment.lean` | Address-underlying UDVT same-tag assignment with canonical UInt capture and initial-derived caller-context transport. |
 | `Lowering/V07/UdvtAddressAssignmentControls.lean` | Both payable flags, 160-bit boundaries, mixed references and executed wrong-narrowing/stale/nominal controls with exact guards. |
-| `Lowering/V07/FixedBytesAssignment.lean` | Same-width bytesN assignment, canonical UInt capture and exact width-indexed byte-content recovery using published byte laws. |
-| `Lowering/V07/FixedBytesAssignmentControls.lean` | All32 widths, mixed references, leading-zero/width-key collision, stale-read and executed truncation controls with exact guards. |
 | `Lowering/V07/UdvtFixedBytesAssignment.lean` | Fixed-byte-underlying UDVT same-tag assignment, canonical UInt capture and exact width-indexed content observation. |
 | `Lowering/V07/UdvtFixedBytesAssignmentControls.lean` | Real nominal metadata, all32 byte widths, mixed references and stale/truncation/nominal-refusal controls with exact guards. |
 | `Lowering/V07/FixedBytesComparisons.lean` | All six fixed-byte comparison clauses with actual assignment/read pipeline order and initial-derived caller transport. |
@@ -143,3 +139,5 @@
 | `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
 | `Lowering/V07/P12AssignedCondition.lean` | Actual published P12 Condition producer for Boolean local assignment, arbitrary successful horizons and derived caller alignment. |
 | `Lowering/V07/P12AssignedConditionControls.lean` | Inhabited mixed-reference producer, success witnesses, source-timeout boundary and executed missing-write/stale-capture controls. |
+| `Lowering/V07/P12NegatedCondition.lean` | Published condition-contract negation preserving exact operand code, effects, state and error payloads; double-negation run identity. |
+| `Lowering/V07/P12NegatedConditionControls.lean` | Effectful producer composition, source horizons, actual failure bytes and discriminating duplicated-prefix/wrong-write controls. |
