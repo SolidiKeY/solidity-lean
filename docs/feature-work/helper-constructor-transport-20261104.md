@@ -160,3 +160,11 @@ Fresh owned build (195 jobs), four kernel checks, four MCP0 diagnostics, 28 exac
 Actual current owned cache bytes and four input mappings still match the retained coordinator-received H35 archive. No cache freshness or recipient-import conclusion is drawn from the coordinator's shipment notice. Delivery remains coordinator-pending; no ship-cache.sh invocation occurs. Original controls/backfill/limitations are preserved; full lane completion is not claimed.
 
 Separate read-only finder and skeptic accepted the 9584 adoption without findings; see adoption-9584f9e7/reviews.md. Documentation references resolve. The current worker-only handoff is sealed against 9584, preserving all prior packets, original base and coordinator-pending statuses.
+
+## Publication b86ae456: read-only fetch audit
+
+Fetched exact origin/master b86ae4568cef6d6226f4d170360bbb089debe3fb, descending from validated9584. This fetch/API audit leaves the checkout and its validated9584 compilation context unchanged. The actual194-file local import closure, toolchain/configuration, protected inputs/Source/Scoped and worker paths have no overlap with publication changes. New overflow-reason controls are separate arithmetic increments; no new constructor import/producer or Lean rerun is warranted. Exact file hashes and published API blobs are recorded in publication-b86ae456/audit.json.
+
+Coordinator master-gate receipt sched-20261105T1200Z is reported publication evidence, not helper full validation. Master still lacks four helper imports. Full validation/delivery remain pending coordinator merge/coordinator-pending; the retained cache pack hash is unchanged and no global freshness/import or VM shipping is inferred. All original queues, backfill, premises, refusals and ownership holds remain as recorded. The prior9584 sealed packet remains the current implementation handoff; this supplement is an API/fetch audit only.
+
+Separate read-only finder and skeptic accepted the b86 publication-only audit without findings. See publication-b86ae456/reviews.md. The stable audit/review/documentation snapshot is checksum-bound by publication-b86ae456/SHA256SUMS; the unchanged9584 implementation seal remains current.
