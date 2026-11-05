@@ -2932,11 +2932,9 @@ import Solidity.Yul.Composition.CorrectnessInstances
 import Solidity.Yul.Composition.CorrectnessPublic
 import Solidity.Yul.Composition.CorrectnessPublicControls
 import Solidity.Yul.Composition.DoWhilePhysical
-import Solidity.Yul.Composition.FailurePhysical
 import Solidity.Yul.Composition.ForPhysical
 import Solidity.Yul.Composition.FunctionPhysical
 import Solidity.Yul.Composition.HeapCatchPhysical
-import Solidity.Yul.Composition.IndexedWritePhysical
 import Solidity.Yul.Composition.Interface
 import Solidity.Yul.Composition.LocalPhysical
 import Solidity.Yul.Composition.LocalPhysicalControls
@@ -2954,7 +2952,6 @@ import Solidity.Yul.Composition.PhysicalMemory
 import Solidity.Yul.Composition.RawCatchPhysical
 import Solidity.Yul.Composition.RecursivePhysical
 import Solidity.Yul.Composition.RethrowPhysical
-import Solidity.Yul.Composition.ReturningPhysical
 import Solidity.Yul.Composition.RuntimeBlockPhysical
 import Solidity.Yul.Composition.ScopeCatchPhysical
 import Solidity.Yul.Composition.ScopeTransport
