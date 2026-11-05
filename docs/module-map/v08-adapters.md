@@ -460,6 +460,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureStatementReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/WordCastCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureArithmeticReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureArithmeticReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
