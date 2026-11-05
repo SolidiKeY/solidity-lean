@@ -43,3 +43,6 @@
 | `Backend/AbiEntry/ValueGateInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationLinkIdentity.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Executable/CreationLinkIdentityControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/OffsetChecksInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/RawTailGuardInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/TailGuardInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |

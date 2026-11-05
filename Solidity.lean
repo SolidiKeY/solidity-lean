@@ -11,11 +11,14 @@ import Solidity.Backend.AbiEntry.EntryComposition
 import Solidity.Backend.AbiEntry.EntryTransport
 import Solidity.Backend.AbiEntry.EnumEntry
 import Solidity.Backend.AbiEntry.Interface
+import Solidity.Backend.AbiEntry.OffsetChecksInterface
 import Solidity.Backend.AbiEntry.Premises
 import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
 import Solidity.Backend.AbiEntry.Premises.CalldataViews
 import Solidity.Backend.AbiEntry.RawFreeTransport
+import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
+import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
 import Solidity.Backend.AbiEntry.ValueGateInterface
 import Solidity.Backend.AbiEntry.WordValidation
