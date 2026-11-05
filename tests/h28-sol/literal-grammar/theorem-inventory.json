@@ -216,7 +216,9 @@
     "CodepointBytes.value",
     "utf8_injective",
     "uniEscape_shape",
-    "uniEscape_value"
+    "uniEscape_value",
+    "HexBody.length_tight",
+    "HexLiteral.length_le_tight"
   ],
   "source_modules": [
     "Body",

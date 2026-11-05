@@ -749,6 +749,16 @@
     "uniEscape_value": [
       "propext",
       "Quot.sound"
+    ],
+    "HexBody.length_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "HexLiteral.length_le_tight": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
     ]
   },
   "hex_control_count": 28,
