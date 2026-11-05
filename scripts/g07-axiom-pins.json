@@ -12834,6 +12834,16 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/ReturnedStorageCapture.lean:Solidity.Backend.Passes.ReturnedStorageCapture.readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReturnedStorageCaptureControls.lean:Solidity.Backend.Passes.ReturnedStorageCapture.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/RevertPins.lean:Solidity.Backend.Passes.compilation_mapped_join_revert_iff": [
   "Classical.choice",
   "Quot.sound",

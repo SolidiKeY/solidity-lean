@@ -557,6 +557,8 @@ import Solidity.Backend.Passes.RelatedStorageCapture
 import Solidity.Backend.Passes.RelatedStorageCaptureControls
 import Solidity.Backend.Passes.ResolvedMetadata
 import Solidity.Backend.Passes.ResolvedMetadataControls
+import Solidity.Backend.Passes.ReturnedStorageCapture
+import Solidity.Backend.Passes.ReturnedStorageCaptureControls
 import Solidity.Backend.Passes.RevertControls
 import Solidity.Backend.Passes.RevertPins
 import Solidity.Backend.Passes.RevertWitness
