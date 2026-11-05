@@ -726,6 +726,38 @@ previous complete ordered observations are unchanged. Seven exact
 standard-only guards accompany these legacy-memory results; public
 Source/world/session/ABI and external EVM adequacy remain open.
 
+## Machine SAR (H39, 2026-11-05)
+
+The memory machine had no `SAR`, and `Evm.sTail .shr` emitted nothing.
+[Machine](../../Solidity/Evm/Machine.lean) now has `Instr.sar` (count on
+top) with `sarWord`: floor division of the signed reading by `2^n`, and the
+sign fill `-1`/`0` from count `256`. [Layout](../../Solidity/Evm/Layout.lean)
+emits `sarCode = DUP1 PUSH 0 SGT ISZERO MUL SAR` as `sTail .shr`: the count is
+clamped to `0` when negative, because the source reads a negative `int` count
+by its `toNat`, as the Scalar endpoint's `signedShiftPrefix` does. The two
+exhaustive `Instr` matches (`Evm/Sim.lean`'s `step_mem`, and
+`Backend/InternalFlow/RuntimeFrameCodeEquality.instruction`) gain the new arm.
+
+[MachineSar](../../Solidity/Backend/Passes/MachineSar.lean) proves, for every
+pair of words or intrinsic operands and every stack tail:
+
+- `sarCode_run`: the exact machine run, `sarWord (clamp n) a`;
+- `sarCode_simT`: `Evm.tail_simT`'s shape for `.shr` at `int` (never a revert);
+- `machine_agrees_intShr`: the same source result `r` from `BinOp.evalT`, the
+  machine word `sword r`, the Scalar `intShr.code` run yielding
+  `encodeValue .int r`, and equal numeric words;
+- `raw_sar_differs` (negative control): unclamped `SAR` on count `-1` and
+  value `8` saturates to `0` where the source keeps `8`;
+- `saturated_fill` (positive witness): `-7 >> 256` is `-1` on the machine.
+
+`MachineSarPins` pins their axioms (`propext`, `Classical.choice`,
+`Quot.sound`). `binInFrag .shr .int` stays `false`: the memory compiler's
+admitted fragment, `compileVal` and its compiler theorem are unchanged, so
+lane v14 can reprove G25-SAR-1105 at machine level from these lemmas; adding
+signed shifts to the fragment is a separate decision. Adding a constructor
+to `Instr` recompiles every importer of `Evm/Machine.lean`; no proof budget
+was raised.
+
 ## Open
 
 General source/world/backend composition remains open. Concrete intrinsic
