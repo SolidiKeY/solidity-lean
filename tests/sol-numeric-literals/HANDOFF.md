@@ -190,3 +190,6 @@ Follow-on publication f77cf60d3cea8f7f1db8db29cc027532b0cd3fce adopted by merge 
 
 
 Publication9584f9e7 adopted by merged9e1e7e preserving b225656c and every owned proof/source pin. Parts05/06 now identically integrated; remaining registration35 root imports/36 map rows. Finder/skeptic PASS. Fresh bounded owned matching-cache build PASS (0.519046s;61940KiB max child RSS), controls PASS; fresh register --check exit1 records missing imports. Complete prior axiom/KeySort evidence retained; no theorem changed. No fresh full-runtime pass/cache freshness claimed. H41 preserved pack/path/SHA unchanged, coordinator-pending, no VM shipping. Original goal unchanged and blocked on coordinator registration/final runtime.
+
+
+Publishedb86ae456 adopted by merge3c9defec preservingd7cdfb47 and all42proof files/seven source pins. Parts07/08 identically integrated; proposals now33 root imports/34 map rows. Fresh bounded owned matching-cache build and controls PASS; register --check exit1 records missing roots. Finder/skeptic PASS. Prior complete axiom/KeySort evidence retained; no theorem changed. No fresh full-runtime pass/cache freshness claimed. H41 preserved pack/path/SHA unchanged, coordinator-pending; no VM shipping. Original goal unchanged and blocked on registration/final runtime.

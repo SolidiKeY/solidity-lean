@@ -1,9 +1,9 @@
 --- a/docs/module-map/frontend.md
 +++ b/docs/module-map/frontend.md
-@@ -149,3 +149,39 @@
- | `Frontend/QualifiedUnits/TypePaths.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
- | `Frontend/C3Exactness/Audit.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
- | `Frontend/C3Exactness/Controls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+@@ -165,3 +165,37 @@
+ | `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Kernel controls for executed collection, not an assumed owner order or supplied collection result. |
+ | `Frontend/QualifiedUnits/SignatureMembers.lean` | Identity-based inherited overload collection. |
+ | `Frontend/ExecutableAst/Shared/Compose.lean` | One executable callback composition for producer-owned memory and control packets. |
 +| `Frontend/NumericLiteralProofs/Audit.lean` | Numeric literal proof lane: Audit; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/Backfill.lean` | Numeric literal proof lane: Backfill; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/Classification.lean` | Numeric literal proof lane: Classification; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
@@ -16,8 +16,6 @@
 +| `Frontend/NumericLiteralProofs/Underscores.lean` | Numeric literal proof lane: Underscores; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/Values.lean` | Numeric literal proof lane: Values; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/WordTable/Part00.lean` | Numeric literal proof lane: Part00; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
-+| `Frontend/NumericLiteralProofs/WordTable/Part07.lean` | Numeric literal proof lane: Part07; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
-+| `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Numeric literal proof lane: Part08; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/WordTable/Part09.lean` | Numeric literal proof lane: Part09; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/WordTable/Part10.lean` | Numeric literal proof lane: Part10; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/WordTable/Part11.lean` | Numeric literal proof lane: Part11; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |

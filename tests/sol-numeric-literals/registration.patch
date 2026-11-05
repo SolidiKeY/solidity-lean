@@ -1,7 +1,7 @@
 --- a/Solidity.lean
 +++ b/Solidity.lean
-@@ -1649,6 +1649,18 @@
- import Solidity.Frontend.LiteralGrammarH28.HexEncoding
+@@ -1675,6 +1675,18 @@
+ import Solidity.Frontend.LiteralGrammarH28.HexPins
  import Solidity.Frontend.LiteralGrammarH28.Quoted
  import Solidity.Frontend.LiteralGrammarH28.Scanner
 +import Solidity.Frontend.NumericLiteralProofs.Audit
@@ -19,12 +19,10 @@
  import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
  import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
  import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
-@@ -1656,6 +1668,29 @@
- import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
- import Solidity.Frontend.NumericLiteralProofs.WordTable.Part05
+@@ -1684,6 +1696,27 @@
  import Solidity.Frontend.NumericLiteralProofs.WordTable.Part06
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part07
-+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part08
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part07
+ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part08
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part09
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part10
 +import Solidity.Frontend.NumericLiteralProofs.WordTable.Part11

@@ -1,11 +1,11 @@
 {
   "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
-  "pre_adoption_head": "b225656c965235bc3a8512a876b4b11c027ef219",
-  "merge_commit": "d9e1e7e17457524202a711c2e99717c4f9fdb0d8",
+  "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "pre_adoption_head": "d7cdfb47ed6b83adbc9e157d93ecc4194e9b5c52",
+  "merge_commit": "3c9defec680288dfcba76337e84c18557041ab69",
   "authorization": "Coordinator: Adopt master in existing owned lane without discarding producer work.",
   "owned_proofs_unchanged": true,
-  "preserved_work": "/workspace/sol-numeric-literals-pre-adopt-9584f9e7",
+  "preserved_work": "/workspace/sol-numeric-literals-pre-adopt-b86ae456",
   "integrated_modules": [
     "Solidity/Frontend/NumericLiteralProofs/WordTable/Part00.lean",
     "Solidity/Frontend/NumericLiteralProofs/WordTable/Part01.lean",
@@ -13,10 +13,12 @@
     "Solidity/Frontend/NumericLiteralProofs/WordTable/Part03.lean",
     "Solidity/Frontend/NumericLiteralProofs/WordTable/Part04.lean",
     "Solidity/Frontend/NumericLiteralProofs/WordTable/Part05.lean",
-    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part06.lean"
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part06.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part07.lean",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part08.lean"
   ],
   "previous_adoption": {
-    "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
-    "merge_commit": "d83602fb2b6fc9e94da52a3460b719a06f6e8648"
+    "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+    "merge_commit": "d9e1e7e17457524202a711c2e99717c4f9fdb0d8"
   }
 }

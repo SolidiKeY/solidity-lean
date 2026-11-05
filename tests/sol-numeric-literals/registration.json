@@ -1,5 +1,5 @@
 {
-  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "adopted_master": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
   "missing_root_imports": [
     "Solidity.Frontend.NumericLiteralProofs.Audit",
     "Solidity.Frontend.NumericLiteralProofs.Backfill",
@@ -12,8 +12,6 @@
     "Solidity.Frontend.NumericLiteralProofs.Spellings",
     "Solidity.Frontend.NumericLiteralProofs.Underscores",
     "Solidity.Frontend.NumericLiteralProofs.Values",
-    "Solidity.Frontend.NumericLiteralProofs.WordTable.Part07",
-    "Solidity.Frontend.NumericLiteralProofs.WordTable.Part08",
     "Solidity.Frontend.NumericLiteralProofs.WordTable.Part09",
     "Solidity.Frontend.NumericLiteralProofs.WordTable.Part10",
     "Solidity.Frontend.NumericLiteralProofs.WordTable.Part11",
@@ -50,8 +48,6 @@
     "| `Frontend/NumericLiteralProofs/Underscores.lean` | Numeric literal proof lane: Underscores; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/Values.lean` | Numeric literal proof lane: Values; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable/Part00.lean` | Numeric literal proof lane: Part00; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
-    "| `Frontend/NumericLiteralProofs/WordTable/Part07.lean` | Numeric literal proof lane: Part07; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
-    "| `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Numeric literal proof lane: Part08; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable/Part09.lean` | Numeric literal proof lane: Part09; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable/Part10.lean` | Numeric literal proof lane: Part10; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable/Part11.lean` | Numeric literal proof lane: Part11; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
@@ -75,8 +71,8 @@
     "| `Frontend/NumericLiteralProofs/WordTable/Part29.lean` | Numeric literal proof lane: Part29; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable.lean` | Numeric literal proof lane: WordTable; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |"
   ],
-  "desired_module_map_sha256": "2d3ea43d4146f3f4eb3907c56bf859eea18d58c341ff8e7d4228158cd2d05ce6",
-  "module_map_patch_sha256": "273faf9f9505741914b54756439b2d75d3f1c47ebe4b34adfbe7e8c60477b07f",
+  "desired_module_map_sha256": "2d520d270f402cdb32caf436f0018925c9458c3aa36475503179d7c2f9596fba",
+  "module_map_patch_sha256": "9ecb53b19d855e115d811673e074e47b087b6b522a2c2696295f711561849046",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "owner": "coordinator at integration (H21 freeze)",
   "modules": [
@@ -124,9 +120,9 @@
     "Solidity.Frontend.NumericLiteralProofs.WordTable"
   ],
   "generated_root": "Solidity.lean",
-  "current_root_sha256": "a31ce11152dc2e72a361bf923357df039aeda875f7f27c700f0c6da1e43684f7",
-  "desired_root_sha256": "d110c5d3a29337aae9295fd4f75dee3d9bdda202758152b752c576045735448b",
-  "root_patch_sha256": "f428589a2935471f2148bbbf3a66b06f0df4a1cf3a870d55324df4dfcaeb60f9",
+  "current_root_sha256": "700c4a764180b83c7971b14210aee01eb67b084c71095147d3f1b3c12949d79e",
+  "desired_root_sha256": "3f23d161dff5536c10726b9fbea2a0b6833ba963ea00cf8db809a0b697b90fa0",
+  "root_patch_sha256": "152042f19398973dc1bd0301b65f6cef875a1f4f9f91ef0ec890abd26c4cacc3",
   "module_map_file": "docs/module-map/frontend.md",
   "module_map_rows": [
     "| `Frontend/NumericLiteralProofs/Audit.lean` | Numeric literal proof lane: Audit; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
