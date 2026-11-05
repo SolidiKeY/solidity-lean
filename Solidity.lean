@@ -2204,6 +2204,7 @@ import Solidity.Lowering.V07.P12Controls
 import Solidity.Lowering.V07.P12NegatedCondition
 import Solidity.Lowering.V07.P12NegatedConditionControls
 import Solidity.Lowering.V07.P12NextInterface
+import Solidity.Lowering.V07.P12StorageCaptureControls
 import Solidity.Lowering.V07.P8Bindings
 import Solidity.Lowering.V07.PrimitiveGraph
 import Solidity.Lowering.V07.PrimitiveGraphControls
