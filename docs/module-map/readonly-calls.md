@@ -80,3 +80,4 @@
 | `Lowering/Readonly/SourceCallUnknown.lean` | Exact all-value unknown Source call branch, debit refusal and live rollback histories. |
 | `Lowering/Readonly/SourceCallAddressEffects.lean` | Complete actual callAddr successor history, known/unknown instances and original guards. |
 | `Lowering/Readonly/SourceAllHistories.lean` | Closed seventeen-component bounded Source induction, actual callbacks and static storage law. |
+| `Semantics/CallResume.lean` | Bounded readonly-external checkpoint; typed scope and retained obligations are stated in the module. |
