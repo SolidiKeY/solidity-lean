@@ -865,4 +865,81 @@ theorem and_or_resource_priority (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms and_or_resource_priority
+theorem bitXor_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .xor (ir a b)=.ok (irExpected a b ((a ^^^ b))) 0 ∧
+    Scalar.run Selection.xorCertificate.code (a::b::spill)=some ((a ^^^ b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (a::b::spill))=
+      .ok (nativeExpected .XOR 3 a b ((a ^^^ b)) perm) ∧
+    EVM.X 2 #[] (F.input .XOR 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .XOR 3 a b ((a ^^^ b)) perm) := by
+  have h := InstructionSelectionAgreement.bitXor (F.site .XOR 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .XOR a b ((a ^^^ b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem xor_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (240::60::spill))=
+      .ok (nativeExpected .XOR 3 240 60 204 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (1::257::spill))=
+      .ok (nativeExpected .XOR 3 1 257 256 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (257::257::spill))=
+      .ok (nativeExpected .XOR 3 257 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (BitVec.ofNat 256 (2^255)::0::spill))=
+      .ok (nativeExpected .XOR 3 (BitVec.ofNat 256 (2^255)) 0 (BitVec.ofNat 256 (2^255)) perm) := by
+  exact ⟨(bitXor_client 240 60 perm).2.2.1,(bitXor_client 1 257 perm).2.2.1,
+    (bitXor_client 257 257 perm).2.2.1,(bitXor_client (BitVec.ofNat 256 (2^255)) 0 perm).2.2.1⟩
+
+theorem xor_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 12 perm (1::257::spill))=
+      .ok (nativeExpected .XOR 3 1 257 256 perm) ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack=[u 256,u 258,u 513] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack≠[u 0,u 258,u 513] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).stack≠[u 256,u 513,u 258] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x18,0] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).pc=u 4 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).gasAvailable=u 9 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).execLength=42 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .XOR 3 1 257 256 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .XOR 3 1 257 256 perm).accountMap=accounts ∧
+    (nativeExpected .XOR 3 1 257 256 perm).σ₀=accounts := by
+  refine ⟨(bitXor_client 1 257 perm).2.2.1,rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 256,u 258,u 513]≠[u 0,u 258,u 513];decide
+  · change [u 256,u 258,u 513]≠[u 256,u 513,u 258];decide
+
+theorem xor_resource_priority (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .XOR 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .XOR 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitXor_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitXor_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_resource_priority' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms xor_resource_priority
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls

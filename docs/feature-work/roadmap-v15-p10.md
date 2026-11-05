@@ -1923,3 +1923,7 @@ The instruction-selection agreement now connects the published LT/GT certificate
 ### Selected AND and OR
 
 The published numeric AND/OR certificates now compose with the charged fetched reference steps, with explicit stack representation, capacity, gas and fuel premises. Populated controls cover mixed-bit words, equal low bytes, a high bit beyond byte width, complete separate model frames and gas-before-arity/fuel priority. A review caught and corrected a calldata-byte transcription in the new observation statement; the original fixture was preserved. These are primitive consumers, not physical input, Source, account-world or full Osaka adequacy.
+
+### Selected XOR
+
+The published numeric XOR certificate now composes with the charged fetched reference law. Stack representation, capacity, gas and fuel remain explicit. Full-word controls distinguish equal low bytes, cancellation and high-bit identity, preserve the populated separate frames, and check wrong results, tail order and gas-before-arity/fuel priority. This supplies primitive selection agreement, not physical input origin, Source or account-world adequacy.

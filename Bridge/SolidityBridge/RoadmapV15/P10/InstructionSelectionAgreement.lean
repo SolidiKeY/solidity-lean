@@ -508,4 +508,41 @@ theorem bitOr (site : Site .OR) (a b : Scalar.Word) (tail : Scalar.Stack)
  Quot.sound] -/
 #guard_msgs in
 #print axioms bitOr
+theorem selected_xor : Selection.selectBitwiseComparison .xor=some Selection.xorCertificate := by
+  rfl
+
+theorem bitXor (site : Site .XOR) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := (a ^^^ b)
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .xor m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.xorCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) #[] input=.ok next ∧
+    EVM.X (fuel+2) #[] input=EVM.X (fuel+1) #[] next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.xorCertificate.code (a::b::tail)=some ((a ^^^ b)::tail) := by rfl
+    have ir := (Selection.xorCertificate.success _ _ m represented).mpr scalar
+    have native := bitwise_xor_agreement site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_xor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_xor
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitXor' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitXor
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
