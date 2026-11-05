@@ -274,5 +274,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 
-| `Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean` | Existing fixed Source child write and intrinsic update paired with terminal word/byte stores, deriving headerless parent and state frames. |
+| `Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean` | Resolved fixed Source assignment/statement and initial-MemOK transport paired with typed updates and terminal word/byte stores, deriving headerless parent/state frames. |
 | `Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean` | Inhabited shared fixed-child parent, nonempty protected neighbour, complete represented vectors, Source endpoint and wrong-header negatives. |

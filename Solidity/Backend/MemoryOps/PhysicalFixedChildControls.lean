@@ -1,5 +1,6 @@
 import Solidity.Backend.MemoryOps.PhysicalFixedChildWrite
 import Solidity.Source.SemanticsExamples
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 
 /-! Inhabited fixed-child controls. Repeated parent slots alias the same fixed
 child; no Source parent-to-intrinsic observer or general byte compiler is assumed. -/
@@ -155,4 +156,76 @@ theorem complete_vectors :
 #guard_msgs (whitespace := lax) in #print axioms endpoint_rejected
 /-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.wrong_dynamic_offset' does not depend on any axioms -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_dynamic_offset
+private abbrev SA : Source.STy := .array .memory (.int .u256) (some 3)
+private abbrev ΓR : Source.RCtx := [.int .u256,.int .u256,SA]
+private abbrev SH := (Source.Heap.empty (D := E0.layout)).ty
+private def si : Source.Idx ΓR (.int .u256) := .here
+private def sv : Source.Idx ΓR (.int .u256) := .there .here
+private def sr : Source.Idx ΓR SA := .there (.there .here)
+private def yr (k : Nat) : Source.EMState E0 ΓR :=
+  (.cons (sourceUint (u k)) (.cons (sourceUint (u 42)) (.cons (.memRef rfl 0) .nil)),y.2)
+private def yFirst : Source.EMState E0 [] :=
+  ((Source.allocRef (sourceUintFixedObject (hp.get child))).run (.nil,s0)).2
+private theorem sourceR (k : Nat) : SourceUintFixedAt (yr k) 0 hp child := sourceAt
+private theorem memOKR (k : Nat) : Source.MemOK E0 SH (yr k) := by
+  have h0 : Source.MemOK E0 SH ((.nil,s0) : Source.EMState E0 []) :=
+    ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
+  have h1 := source_uint_fixed_alloc_memOK (E := E0) (Γ := []) SH (hp.get child) (.nil,s0) h0
+  change Source.MemOK E0 SH yFirst ∧ _ at h1
+  have h2 := source_uint_fixed_alloc_memOK (E := E0) (Γ := []) SH (hp.get neighbor) yFirst h1.1
+  change Source.MemOK E0 SH y ∧ _ at h2
+  exact ⟨⟨h2.1.1.1,⟨trivial,⟨trivial,⟨⟨SA,rfl,rfl⟩,trivial⟩⟩⟩⟩,h2.1.2⟩
+
+/-- In both original pipelines, the actual resolved assignment and expression
+statement use the SAME derived store output. Parameter count remains explicit. -/
+theorem resolved_assignment (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (out : Heap H) (z : Source.EMState E0 ΓR) (logical offset : Fin W),
+      logical.val=9 ∧ offset.val=288 ∧
+      hp.writeAddr (.index child .fixed (indexValue (wmod 1))) (u 42)=some out ∧
+      (Source.evalE (Source.SemanticsExamples.G0 pipeline) F0 (horizon+3)
+        (sourceUintFixedIndexedAssign sr si sv)).run (yr 1)=(.ok (.val (sourceUint (u 42))),z) ∧
+      (Source.execS (Source.SemanticsExamples.G0 pipeline) F0 (horizon+4) nps none
+        (.expr (sourceUintFixedIndexedAssign sr si sv) : Source.RStmt E0 [] false .body ΓR ΓR) (yr 1).1).run (.nil,(yr 1).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Evm.run [.mstoreAt] ((machine.push w[42]).push (.val logical))=.ok (writeMachine machine 9 w[42]) 0 ∧
+      (∀ tail : List Environment.Word,Environment.cryptoStep (.op .MSTORE)
+        ⟨lenU offset.val offset.isLt::lenU 42 (by decide)::tail,bytes⟩=
+          some ⟨tail,Environment.writeBytes bytes 288 (Semantics.wordBytes 42)⟩) ∧
+      ReferenceArrayAt out root base (writeMachine machine 9 w[42])
+        (Environment.writeBytes bytes 288 (Semantics.wordBytes 42)) ∧
+      SourceUintFixedAt z 0 out child ∧ Source.MemOK E0 SH z ∧ z.1=(yr 1).1 ∧
+      z.2.ex=(yr 1).2.ex ∧ z.2.events=(yr 1).2.events ∧ z.2.logs=(yr 1).2.logs ∧ z.2.fnLocals=(yr 1).2.fnLocals ∧
+      out.get neighbor=hp.get neighbor ∧
+      z.2.heap.get 1=some ⟨.array .memory (.int .u256) (some 2),sourceUintFixedObject (hp.get neighbor)⟩ := by
+  first
+  | solve | simp only [] | omega
+  | have slots : ∀ c,ReferenceSlots hp root base c → c≠9 := by
+      intro c hc
+      obtain ⟨i,hi,eq⟩ := hc
+      change c=16+1+i at eq
+      omega
+    obtain ⟨out,z,logical,offset,loc,off,typed,run,expr,stmt,word,byte,parent,source,memOK,locals,objects,addresses,world,events,logs,fnLocals,frame⟩ :=
+      parentAt.resolved_fixed_uint (sourceR 1) (Source.SemanticsExamples.G0 pipeline) F0 horizon nps
+        sr si sv (wmod 1) (wmod 42) rfl rfl rfl (by decide) (by decide) (by decide) slots SH (memOKR 1)
+    exact ⟨out,z,logical,offset,loc,off,typed,expr,stmt,word,byte,parent,source,memOK,locals,
+      world,events,logs,fnLocals,objects neighbor (by decide),(addresses 1 (by decide)).trans sourceNeighbor⟩
+
+/-- Swapping the operand locals really indexes42 and rejects before the write.
+Zero evaluator horizon is a distinct timeout with its actual initial state. -/
+theorem resolved_refusals (pipeline : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.evalE (Source.SemanticsExamples.G0 pipeline) F0 (horizon+3)
+      (sourceUintFixedIndexedAssign sr sv si)).run (yr 1)=
+        (.error (.revert (Source.panicData .index)),yr 1) ∧
+    (Source.evalE (Source.SemanticsExamples.G0 pipeline) F0 0
+      (sourceUintFixedIndexedAssign sr si sv)).run (yr 1)=(.error .timeout,yr 1) := by
+  first
+  | solve | simp only [] | omega
+  | exact ⟨(sourceR 1).eval_assign_bounds (Source.SemanticsExamples.G0 pipeline) F0 horizon sr sv si
+      (u 42) (u 1) rfl rfl rfl (by decide),rfl⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.resolved_assignment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms resolved_assignment
+/-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.resolved_refusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms resolved_refusals
+
 end Solidity.Backend.MemoryOps.Physical.FixedChildControls
