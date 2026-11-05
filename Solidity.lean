@@ -3650,6 +3650,8 @@ import Solidity.Source.Agreement.Locals
 import Solidity.Source.Agreement.NormalComposition
 import Solidity.Source.Agreement.NormalControls
 import Solidity.Source.Agreement.NormalCuts
+import Solidity.Source.Agreement.NormalDefaultControls
+import Solidity.Source.Agreement.NormalDefaults
 import Solidity.Source.Agreement.NormalStatement
 import Solidity.Source.Agreement.NormalStep
 import Solidity.Source.Agreement.Primitive

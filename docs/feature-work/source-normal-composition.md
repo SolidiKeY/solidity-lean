@@ -89,3 +89,8 @@ worktree shell run. The inventory and unrelated producer source are untouched.
 Full original lane/source/native gates were not replayed or claimed passed.
 Read-only finder/skeptic reviews covered actual new source and raw focused
 evidence without replaying checks; no remaining source findings were reported.
+
+Existing primitive default-declaration producers and their actual importing
+client now discharge a nontrivial family of step hypotheses; see
+[source-normal-defaults.md](source-normal-defaults.md). This does not supply
+generic statement association, stateful/full-state or error agreement.
