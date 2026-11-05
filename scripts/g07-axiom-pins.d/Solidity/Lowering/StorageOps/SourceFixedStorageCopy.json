@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.captured_copy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.data_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.element_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.frame_other": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.journal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.load_fixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceFixedStorageCopy.lean:Solidity.Backend.StorageOps.SourceFixedStorageCopy.store_fixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

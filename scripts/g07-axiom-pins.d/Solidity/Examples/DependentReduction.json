@@ -1,0 +1,12 @@
+{
+ "Solidity/Examples/DependentReduction.lean:Solidity.Decide.DependentReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/DependentReduction.lean:Solidity.Examples.DependentReduction.follow_invalid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

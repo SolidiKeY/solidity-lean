@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.below_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.below_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.boolValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.enumValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordValidation.lean:Solidity.Backend.AbiEntry.WordValidation.uintValidator": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

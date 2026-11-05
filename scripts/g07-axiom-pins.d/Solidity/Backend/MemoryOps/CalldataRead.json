@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolRead_bound": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolRead_iff": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolSlice_overwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataRead.lean:Solidity.Backend.MemoryOps.decodedBoolSlice_transport": [
+  "Quot.sound",
+  "propext"
+ ]
+}

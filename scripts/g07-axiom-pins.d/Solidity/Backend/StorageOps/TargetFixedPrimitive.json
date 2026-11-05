@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.address": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.complete_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.complete_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.location": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.read_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.run_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.run_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFixedPrimitive.lean:Solidity.Backend.StorageOps.TargetFixedPrimitive.write_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

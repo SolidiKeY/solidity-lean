@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/Scalar/Guards.lean:Solidity.Backend.Scalar.guarded_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Guards.lean:Solidity.Backend.Scalar.zeroTest_correct": [
+  "Quot.sound",
+  "propext"
+ ]
+}

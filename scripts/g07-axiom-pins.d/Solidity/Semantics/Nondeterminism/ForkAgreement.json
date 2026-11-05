@@ -1,0 +1,17 @@
+{
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.blockField_difficulty": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.blockField_slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.ofViews_field": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.osaka_blobhash": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.osaka_blockhash": [
+  "propext"
+ ]
+}

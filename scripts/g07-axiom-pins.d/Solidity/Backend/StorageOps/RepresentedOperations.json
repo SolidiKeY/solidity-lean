@@ -1,0 +1,37 @@
+{
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.copyAt_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.copyAt_scalar_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.deleteAt_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.modifyAt_scalar": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.scalar_read_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.scalar_save": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RepresentedOperations.lean:Solidity.Backend.StorageOps.RepresentedOperations.scalar_save_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

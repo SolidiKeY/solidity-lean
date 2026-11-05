@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveProgress.lean:Solidity.Backend.StorageOps.recursiveArrayPrefix_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveProgress.lean:Solidity.Backend.StorageOps.recursiveArrayPrefix_progress": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveProgress.lean:Solidity.Backend.StorageOps.recursiveArrayPrefix_restart": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveProgress.lean:Solidity.Backend.StorageOps.recursiveArrayPrefix_unvisited": [
+  "Quot.sound",
+  "propext"
+ ]
+}

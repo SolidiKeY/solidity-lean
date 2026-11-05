@@ -1,0 +1,82 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.ample_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.complete_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.context_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.empty_destination_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.empty_source_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.longer_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.raw_journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.raw_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.reads_three": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.reads_two": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.short_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.uniform_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyPrefixControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyPrefixControls.varied_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

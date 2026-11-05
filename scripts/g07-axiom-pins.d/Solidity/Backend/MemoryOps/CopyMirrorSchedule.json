@@ -1,0 +1,30 @@
+{
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_none_first": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.copy_schedule_transport": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.default_schedule_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_end_replicate": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.runCaptures_mirrors": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CopyMirrorSchedule.lean:Solidity.Backend.MemoryOps.two_builder_schedules_mirrors": [
+  "Quot.sound",
+  "propext"
+ ]
+}

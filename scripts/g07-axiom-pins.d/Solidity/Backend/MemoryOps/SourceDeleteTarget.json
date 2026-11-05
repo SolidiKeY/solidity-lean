@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceDeleteTarget.lean:Solidity.Backend.MemoryOps.source_delete_word_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDeleteTarget.lean:Solidity.Backend.MemoryOps.source_delete_word_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
