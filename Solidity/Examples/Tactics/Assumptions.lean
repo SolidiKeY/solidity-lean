@@ -39,7 +39,10 @@ theorem pushRead_refused :
 
 theorem pushRead_never_proved :
     ({ deny := [.tail .clean] } : Policy).verdict { tail := .clean } true ≠ .proved :=
-  Policy.verdict_refused _ _ _ (by decide)
+  Policy.verdict_refused _ _ _ fun b hb => by
+    rcases hb with rfl | ⟨h, rfl⟩
+    · decide
+    · exact absurd h (by decide)
 
 /-- A `.solc` row stays proved when `.solc` itself is denied: it holds under
 clean tails too (`ValidA.weaken`). -/
@@ -180,7 +183,7 @@ def checkLine (l : String) : Option Bool := do
   let refused := lines.filter (·.endsWith " refused")
   IO.println s!"{lines.length} lines, {refused.length} refused, {bad.length} mismatches"
 
-/-- Negative controls: a flipped verdict, and a malformed line, fail. -/
+-- Negative controls: a flipped verdict, and a malformed line, fail.
 #guard checkLine "- tails=clean noCallback default clean legacy proved" = some false
 #guard checkLine "- tails=clean noCallback default clean legacy refused" = some true
 #guard checkLine "- tails=dirty noCallback default clean legacy refused" = none
