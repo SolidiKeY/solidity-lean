@@ -129,11 +129,17 @@ theorem emitted (xs : List UInt) (address : Nat) (tail : Program) (machine : Sli
   simpa only [List.append_nil] using words_readback xs []
 
 end Solidity.Backend.AbiWorld.ReturnWordTransport
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.encoded_values
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.emitted
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.encoded_values' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.encoded_values
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.wordAt_index
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.words_readback
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.decode_transport
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.emitted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.emitted
 
 
-#print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.truncated
+/-- info: 'Solidity.Backend.AbiWorld.ReturnWordTransport.truncated' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.ReturnWordTransport.truncated
