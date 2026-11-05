@@ -29,6 +29,42 @@ class Tests(unittest.TestCase):
   for _ in range(3):self.assertEqual(self.t.snapshot(self.top('[lean]',0)),HEADER)
   self.assertTrue(self.t.bound);self.assertEqual(self.closed,[])
   self.current=None;self.t.snapshot(HEADER);self.assertEqual(self.closed,[7])
+ def missing_launch(self):
+  def missing(pid):raise FileNotFoundError('synthetic exited executable link')
+  self.t.launch=missing
+ def test_bound_launch_missing_terminal_retained(self):
+  self.bind();self.dead=True;self.current['state']='Z';self.missing_launch()
+  self.assertEqual(self.t.snapshot(self.top()),HEADER)
+  self.assertTrue(self.t.bound);self.assertEqual(self.closed,[])
+  self.current=None;self.t.snapshot(HEADER);self.assertEqual(self.closed,[7])
+ def test_bound_launch_missing_live_rejected(self):
+  self.bind();self.missing_launch()
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top())
+  self.assertTrue(self.t.bound)
+ def test_bound_launch_missing_reused_rejected(self):
+  self.bind();self.dead=True;self.current.update(start=11,state='Z');self.missing_launch()
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top())
+ def test_bound_launch_permission_error_rejected(self):
+  self.bind();self.dead=True;self.current['state']='Z'
+  def denied(pid):raise PermissionError('not an exit observation')
+  self.t.launch=denied
+  with self.assertRaises(PermissionError):self.t.snapshot(self.top())
+ def test_unknown_launch_missing_rejected(self):
+  self.dead=True;self.missing_launch()
+  with self.assertRaises(FileNotFoundError):self.t.snapshot(self.top())
+  self.assertFalse(self.t.bound)
+ def test_bound_launch_missing_changed_snapshot_rejected(self):
+  self.bind();self.dead=True;self.current['state']='Z';self.missing_launch()
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top('/sdk/lean -j1 changed.lean'))
+ def test_bound_launch_missing_waits_for_kernel(self):
+  self.bind();self.missing_launch()
+  def finish(fd):self.dead=True;self.current['state']='Z';return True
+  self.t.wait_dead=finish
+  self.assertEqual(self.t.snapshot(self.top()),HEADER)
+  self.assertTrue(any(x['event']=='terminal-wait' for x in self.events))
+ def test_bound_launch_missing_live_identity_rejected(self):
+  self.bind();self.dead=True;self.missing_launch()
+  with self.assertRaises(m.GuardError):self.t.snapshot(self.top())
  def test_unknown_blank_rejected(self):
   self.dead=True
   with self.assertRaises(m.GuardError):self.t.snapshot(self.top('[lean]',0))

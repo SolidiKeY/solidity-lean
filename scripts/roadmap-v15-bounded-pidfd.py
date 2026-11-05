@@ -95,7 +95,15 @@ class TerminalTracker:
             if pid not in self.bound:self.bind(pid,argv)
             else:
                 entry=self.bound[pid]
-                current=self.launch(pid)
+                try:current=self.launch(pid)
+                except FileNotFoundError:
+                    # A previously bound process may exit between ps and /proc.
+                    # Never extend this fallback to a first binding or other IO errors.
+                    if argv!=' '.join(entry['identity']['argv']):
+                        raise GuardError('bound snapshot argv changed during disappearance')
+                    self.record('bound-launch-disappeared',pid=pid)
+                    self.terminated(pid,allow_wait=True,retain=True)
+                    continue
                 if any(current[k]!=entry['identity'][k] for k in ('pid','comm','start','argv','exe')):
                     raise GuardError('bound process identity changed')
             kept.append(row)
