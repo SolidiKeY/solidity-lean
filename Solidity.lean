@@ -4,6 +4,9 @@
 -- (with `Solidity/Solkey/TestSuite.lean`) belong to their own libraries, and
 -- `Solidity/Scratch/` to none.
 import Solidity.AST
+import Solidity.Automation.H28.Chain
+import Solidity.Automation.H28.Context
+import Solidity.Automation.H28.Prove
 import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
 import Solidity.Backend.AbiEntry.Consumers
