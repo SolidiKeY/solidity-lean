@@ -1880,3 +1880,21 @@ orders and complete ordered native observations. Gas-before-stack and
 fuel-before-execution failures remain explicit, including insufficient gas with
 a zero divisor. Nine new axiom reports have exact guarded expectations. These
 laws close no full opcode, Source-origin, world or Osaka adequacy obligation.
+
+
+## Selected logical shift correspondence
+
+The actual unsigned instruction selector's SHL/SHR certificates now connect IR
+and scalar execution to one charged fetched instruction and native continuation.
+Count precedes value in this IR input; it remains a full 256-bit word. The result
+saturates to zero at counts of at least 256. Initial numeric correspondence,
+legal capacity, gas and fuel remain explicit; no physical loading or Source
+argument-order adequacy is inferred from the numeric input relation.
+
+Populated controls retain both permission flags, complete native observations,
+count 255 and high-bit logical right shift, count 256 and maximum-word saturation,
+zero-count identity, wrong operand/tail order and a counterexample to reducing
+the count modulo 256. Low-gas empty-stack cases prove gas-before-arity priority;
+fuel failure remains separate. Eight new axiom reports have exact guarded
+expectations. These consumers preserve each model's own complete frame and close
+no full opcode, world, whole-program resource or Osaka adequacy obligation.

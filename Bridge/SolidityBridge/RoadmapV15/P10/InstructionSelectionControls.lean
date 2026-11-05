@@ -421,4 +421,127 @@ theorem div_mod_resource_order (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms div_mod_resource_order
+
+private theorem three_shape (op : Backend.Op) (count value result : Scalar.Word) (perm : Bool) :
+    (Assembly.chargedPrepare (F.input op 12 perm (count::value::spill)) 3).replaceStackAndIncrPC
+      ((result::spill).map (fun w=>UInt256.mk w.toFin))=nativeExpected op 3 count value result perm := by
+  first | rfl | (simp only [F.input,nativeExpected,F.observed,WrappingArithmeticFixtures.input,
+    WrappingArithmeticFixtures.observed,WrappingArithmeticFixtures.site,modularSite,Site.state,
+    Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,EVM.State.incrPC,
+    WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+
+theorem shl_client (count value : Scalar.Word) (perm : Bool) :
+    let result := (if count.toNat < 256 then value <<< count.toNat else (0 : Scalar.Word))
+    Solidity.Evm.Instr.step .shl (ir count value)=.ok (irExpected count value result) 0 ∧
+    Scalar.run Selection.shlCertificate.code (count::value::spill)=some (result::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 12 perm (count::value::spill))=
+      .ok (nativeExpected .SHL 3 count value result perm) ∧
+    EVM.X 2 #[] (F.input .SHL 12 perm (count::value::spill))=
+      EVM.X 1 #[] (nativeExpected .SHL 3 count value result perm) := by
+  dsimp only
+  have h := InstructionSelectionAgreement.shl (F.site .SHL 12 perm) count value spill (ir count value)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .SHL count value (if count.toNat < 256 then value <<< count.toNat else (0 : Scalar.Word)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem shr_client (count value : Scalar.Word) (perm : Bool) :
+    let result := (if count.toNat < 256 then value >>> count.toNat else (0 : Scalar.Word))
+    Solidity.Evm.Instr.step .shr (ir count value)=.ok (irExpected count value result) 0 ∧
+    Scalar.run Selection.shrCertificate.code (count::value::spill)=some (result::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 12 perm (count::value::spill))=
+      .ok (nativeExpected .SHR 3 count value result perm) ∧
+    EVM.X 2 #[] (F.input .SHR 12 perm (count::value::spill))=
+      EVM.X 1 #[] (nativeExpected .SHR 3 count value result perm) := by
+  dsimp only
+  have h := InstructionSelectionAgreement.shr (F.site .SHR 12 perm) count value spill (ir count value)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .SHR count value (if count.toNat < 256 then value >>> count.toNat else (0 : Scalar.Word)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem shifts_boundary (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 12 perm (255::1::spill))=
+      .ok (nativeExpected .SHL 3 255 1 (BitVec.ofNat 256 (2^255)) perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 12 perm (255::BitVec.ofNat 256 (2^255)::spill))=
+      .ok (nativeExpected .SHR 3 255 (BitVec.ofNat 256 (2^255)) 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 12 perm (256::1::spill))=
+      .ok (nativeExpected .SHL 3 256 1 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 12 perm (256::511::spill))=
+      .ok (nativeExpected .SHR 3 256 511 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 12 perm (BitVec.ofNat 256 (2^256-1)::511::spill))=
+      .ok (nativeExpected .SHR 3 (BitVec.ofNat 256 (2^256-1)) 511 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 12 perm (0::511::spill))=
+      .ok (nativeExpected .SHL 3 0 511 511 perm) := by
+  exact ⟨(shl_client 255 1 perm).2.2.1,(shr_client 255 (BitVec.ofNat 256 (2^255)) perm).2.2.1,
+    (shl_client 256 1 perm).2.2.1,
+    (shr_client 256 511 perm).2.2.1,(shr_client (BitVec.ofNat 256 (2^256-1)) 511 perm).2.2.1,
+    (shl_client 0 511 perm).2.2.1⟩
+
+theorem shifts_complete_observation (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 12 perm (2::3::spill))=
+      .ok (nativeExpected .SHL 3 2 3 12 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 12 perm (2::12::spill))=
+      .ok (nativeExpected .SHR 3 2 12 3 perm) ∧
+    (nativeExpected .SHL 3 2 3 12 perm).stack=[u 12,u 258,u 513] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).stack≠[u 16,u 258,u 513] ∧
+    (nativeExpected .SHR 3 2 12 3 perm).stack=[u 3,u 258,u 513] ∧
+    (nativeExpected .SHR 3 2 12 3 perm).stack≠[u 3,u 513,u 258] ∧
+    (nativeExpected .SHL 3 256 1 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x1b,0] ∧
+    (nativeExpected .SHR 3 2 12 3 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x1c,0] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).pc=u 4 ∧
+    (nativeExpected .SHL 3 2 3 12 perm).gasAvailable=u 9 ∧
+    (nativeExpected .SHL 3 2 3 12 perm).execLength=42 ∧
+    (nativeExpected .SHL 3 2 3 12 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (nativeExpected .SHL 3 2 3 12 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).H_return.data.toList=[0xee,0xff] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (nativeExpected .SHL 3 2 3 12 perm).accountMap=accounts ∧
+    (nativeExpected .SHL 3 2 3 12 perm).σ₀=accounts := by
+  refine ⟨(shl_client 2 3 perm).2.2.1,(shr_client 2 12 perm).2.2.1,rfl,?_,rfl,?_,?_,
+    rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 12,u 258,u 513]≠[u 16,u 258,u 513];decide
+  · change [u 3,u 258,u 513]≠[u 3,u 513,u 258];decide
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+
+theorem shifts_resource_order (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 2 perm (2::3::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 2 perm (2::12::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHL 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .SHR 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .SHL 12 perm (2::3::spill))=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shl_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms shl_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shr_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms shr_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms shifts_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms shifts_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_resource_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms shifts_resource_order
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
