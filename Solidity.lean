@@ -345,12 +345,6 @@ import Solidity.Backend.MemoryCopies.NestedDefaultControls
 import Solidity.Backend.MemoryCopies.NestedDefaultInterface
 import Solidity.Backend.MemoryCopies.NestedDefaults
 import Solidity.Backend.MemoryCopies.Premises
-import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
-import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
-import Solidity.Backend.MemoryCopies.SourceInterface
-import Solidity.Backend.MemoryCopies.TraversalControls
-import Solidity.Backend.MemoryCopies.TraversalFresh
-import Solidity.Backend.MemoryCopies.TraversalInterface
 import Solidity.Backend.MemoryCopies.PrimitiveArray
 import Solidity.Backend.MemoryCopies.PrimitiveArrayControls
 import Solidity.Backend.MemoryCopies.PrimitiveArrayInterface
