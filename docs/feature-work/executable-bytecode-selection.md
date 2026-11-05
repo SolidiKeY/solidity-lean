@@ -421,3 +421,17 @@ validation remains blocked on the existing VA1 reviewed published split or
 exact artifact, with H30/H33 receipts intact. Independent read-only finder
 and skeptic review this adoption and its gate evidence; this checkpoint is
 not RUNTIME_GATE_PASS or whole-lane closure.
+
+
+## Full9584 validation in progress
+
+Published9584f9e7 supplies VA1's six-module checks facade, changing the
+previously blocked prerequisite. Preserving mergedbffee1b35c6cc3e37db9c22fd16330593c3dcb2
+adopts it without Selection source changes. The unchanged full gate is
+running, with KeySort2jobs and build-touched passing; no final pass is claimed.
+A resumed-session inspection found that the original host monitor had
+stopped while Docker kept building. A detached replacement monitor is now
+attached, retaining the original container start time for the aggregate
+budget and avoiding page advice on active build files. The unobserved gap
+prevents a continuous-monitoring claim for this attempt. Final gates,
+resource review and handoff remain pending; prior failures are preserved.
