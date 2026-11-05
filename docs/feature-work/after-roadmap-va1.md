@@ -194,8 +194,8 @@ reverse-inclusion obligation is held specifically for VA1-Q1.
 - The nine printed axiom sets passed the automatic standard-axiom audit.
   Full `check-axiom-pins.mjs` still exits 1: 404 unrecorded changes, zero
   axiom errors, versus 403 at the frozen base. Tracked pins/sets are identical.
-  The extra untracked pin is `foo []` in the pre-existing optional
-  `Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` cache. The cache
+  The extra untracked pin is `foo []` in Mathlib's SplitIfs test file
+  inside the pre-existing optional Bridge package cache. The cache
   and inventory were preserved. This full gate is not reported as passing.
 - Strict documentation paths still exit 1 with 48 missing references and 37
   ambiguous references, exactly the frozen-base findings after qualifying
