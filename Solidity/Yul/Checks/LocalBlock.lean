@@ -1,3 +1,4 @@
+import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawBoundary
 import Solidity.Yul.LocalBlock
 import Solidity.Yul.Checks.LocalWordView
@@ -169,5 +170,25 @@ def wordRun (fuel : Nat) :=
 /-- info: 'Solidity.Yul.RawFrame.run_none_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.run_none_iff
+
+
+/- Actual S03 firstDone observes the same completed dirty frame. -/
+def selectedRaw (bound : Nat) := Solidity.Source.firstDone
+  (fun fuel => Closed.sourceResult (rawRun fuel)) bound
+def selectedSnapshot (bound : Nat) : Option (List Nat) :=
+  (selectedRaw bound).bind (fun chosen =>
+    match chosen.2.1 with
+    | .ok result => some (rawSnapshot result)
+    | .error _ => none)
+#guard (selectedRaw 0).isNone
+#guard (selectedRaw 32).isSome
+#guard selectedSnapshot 32 = (rawRun 32).map rawSnapshot
+#guard selectedSnapshot 64 = selectedSnapshot 32
+/-- info: 'Solidity.Yul.RawFrame.firstDone_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_agrees
+/-- info: 'Solidity.Yul.RawFrame.firstDone_none_iff_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.firstDone_none_iff_word
 
 end Solidity.Yul.Checks.LocalBlock
