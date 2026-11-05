@@ -212,3 +212,5 @@
 | `Backend/AbiEntry/WordCarrierBinding.lean` | Actual validated primitive raw-word declaration, exact execution and raw semantic agreement. |
 | `Backend/AbiEntry/WordCarrierBindingControls.lean` | Enum/cardinality, fixed-bytes padding, raw bytes, saved-state and selected carrier-read controls. |
 | `Backend/AbiEntry/WordCarrierEntryBodyInterface.lean` | Compiler contract for value checking, primitive raw binding and actual typed body execution. |
+| `Backend/AbiEntry/WordCarrierEntryBody.lean` | Public compiler composition of value guard, raw primitive binding and actual typed body execution. |
+| `Backend/AbiEntry/WordCarrierEntryBodyControls.lean` | Whole-artifact enum/fixed-bytes bodies, failure ordering, wide metadata and saved-state controls. |

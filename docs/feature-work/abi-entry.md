@@ -1228,3 +1228,35 @@ ordered value/head/primitive validation, raw carrier binding and body execution.
 The body is admitted by the existing core classifier; its run and result are
 not premises. Early non-payable rejection needs no local representation facts.
 The signature retains explicit raw loading and Source/body-linkage boundaries.
+
+
+`WordCarrierEntryBody.lean` selects one typed program that composes the existing
+value guard, primitive head/word validation, unchanged raw uint declaration and
+an existing core-admitted body. Both whole and body artifacts are selected by
+the public compiler. Exact execution orders value, head and word failure before
+binding/body execution and retains the body's complete actual outcome. No body
+run/result is assumed. Raw success constructs the indexed semantic word from
+bytes, identifies the actual carrier local and connects the whole artifact to
+the actual selected body at that bound state, retaining `fuel + 2` and explicit
+word/size representation. Early value rejection needs no local facts; short
+heads preempt malformed word/body access. All primitive metadata remains exact.
+
+Controls run an actual body that compares the new carrier with two and allocates
+a Boolean result. Enum values two and one produce different results; clean
+fixed-bytes input executes the same body. Payable values range over all words;
+zero non-payable success, arbitrary-machine nonzero rejection for every kind,
+out-of-range enum and dirty padding, raw typed-value/body agreement, low fuel,
+short malformed input and saved machine state are explicit. Wide byte metadata
+preserves the decoder's accepted case and executes the body on the same bytes
+that a narrow validator rejects. A reverting body after successful decoding
+prevents confusing body failure with decoder rejection. Per-file diagnostics,
+focused importing-consumer build and scoped standard-only axiom guards pass.
+
+This supplies supported raw singleton carrier value/entry/body composition.
+It does not authenticate Source type erasure, signature/body association or the
+payability flag, and keeps the existing typed Boolean/signed bindings distinct.
+Native loading/frame realization, aggregate/multiparameter decoding, general
+Source/profile/dispatch composition and physical failure bytes remain open.
+G46.02, fixture replay and full assignment gates remain pending. Independent
+read-only finder and skeptic reviews found no semantic issues. Checkpoint
+results accompany the sealed handoff.
