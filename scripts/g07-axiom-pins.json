@@ -35011,6 +35011,61 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Yul/Compilation/FramedBranch.lean:Solidity.Yul.Compilation.FramedBranch.nonzero_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranch.lean:Solidity.Yul.Compilation.FramedBranch.tail_forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranch.lean:Solidity.Yul.Compilation.FramedBranch.tail_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.chosen_literal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.empty_untaken_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.high_only_guard": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.left": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.zero_division": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedBranchControls.lean:Solidity.Yul.Compilation.FramedBranch.Controls.zero_takes_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Yul/Compilation/FramedControl.lean:Solidity.Yul.Compilation.FramedControl.seq": [
   "Classical.choice",
   "Quot.sound",
