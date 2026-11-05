@@ -802,3 +802,7 @@ eligibility, actual selected compiler code, label independence and one-way
 Source rejection correspondence. Both verified the later-head-failure negative
 control and rejected any reading as completeness for all Source reverts; neither
 used a build or Lean server. Focused compilation has no changed-module warnings.
+
+`HeadGateInterface.lean` specifies a typed/public compiler head-span guard
+with exact reject/continue behavior, retaining unbounded semantic head extents.
+Passing this initial check does not certify argument decoding or body execution.
