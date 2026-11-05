@@ -4,8 +4,13 @@ The additive modules
 [`RawUintN/Execution.lean`](../../Solidity/Backend/CalldataPackets/RawUintN/Execution.lean)
 and [`RawUintN/Controls.lean`](../../Solidity/Backend/CalldataPackets/RawUintN/Controls.lean)
 reuse the published raw uint256 packet and Source operations without modifying
-them. V11 integrates this bounded packet. No global roots, map rows or trust
-inventory are edited; register these two modules during integration.
+them. V11 integrates this bounded packet. `Execution.lean` was published in
+master `8bf8321873befa3f35ca31e97e5339a1baee93e6`, byte-identical to the original
+reviewed packet. `Controls.lean` and this owning documentation remain the
+unmerged increment. No global roots, map rows or trust inventory are edited;
+register the remaining controls module and its four standard-axiom pins during
+integration. The prior failed local checkpoint remains failed; publication does
+not substitute for local gate evidence.
 
 ## Contract and proved behavior
 
