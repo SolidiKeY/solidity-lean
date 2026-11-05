@@ -527,3 +527,5 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Concrete ADD/MUL instruction certificates, exact Scalar code and charged fetched numeric transport with separate frames. |
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Populated ADD/MUL certificate consumers, complete ordered observations, modular boundaries and resource/frame separation controls. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete ADD/MUL selection-certificate short-stack refusal against charged fetched execution, with gas/fuel priority controls. |
