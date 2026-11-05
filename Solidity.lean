@@ -2414,6 +2414,8 @@ import Solidity.Semantics.TryConditions
 import Solidity.Semantics.TryCreateConditions
 import Solidity.Semantics.Value
 import Solidity.Signature
+import Solidity.SolcValidation.DataLayout
+import Solidity.SolcValidation.DataResolution
 import Solidity.SolcValidation.Dialect
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors
