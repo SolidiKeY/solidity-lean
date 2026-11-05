@@ -1111,3 +1111,20 @@ guard); it was restored without changing code, premises or policy. Final
 acceptance pins this handoff commit and requires fresh exact-head gates,
 clean diagnostics, prior hashes, patch-tree reconstruction and a verified seal.
 This checkpoint completes one child turn; the original G33/G35 queue remains open.
+
+## Nested storage traversal
+
+`NestedStorageLoopInterface` extends the proved child turn to the existing
+finite-iteration loop controller. Source children are an intrinsic `SVec` of
+primitive dynamic arrays; output is the existing `SVec.copyStToM`, with exact
+demand equal to the sum of child lengths plus their headers. The total
+contract assumes actual per-child storage representation and a complete
+allocator/parent reservation, without an input capacity premise. It specifies
+final-base pointer contents, full ownership, framing outside the written parent
+interval and bounded success or target refusal. Empty suffixes require no
+child allocation, including at a saturated cursor. Refusal may follow earlier
+writes; no rollback is claimed. Independent read-only design finder and skeptic
+reviews confirmed these boundaries and required final-base weakening, unchanged
+storage transport and empty/later-refusal controls. Typed parent adoption,
+outer-header compilation and the original Source/physical/producer obligations
+remain open. Signature-only interface precedes proofs and controls.
