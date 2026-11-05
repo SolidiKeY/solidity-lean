@@ -41,7 +41,8 @@ the frontend's source type names. Selectors accept both `uint`/`uint256` and
 
 The statuses retain the [source testing API](solidity-testing.md) meanings:
 `proved`, `pending`, `ready`, `unsupported`, `excluded`, `skipped`, `internal`,
-`notRun`, and `error`. This source pipeline currently leaves false obligations
+`notRun`, and `error`; `verify` under `--require`/`--deny` adds `refused`
+(see [Assumption policy](#assumption-policy)). This source pipeline currently leaves false obligations
 `pending`; it does not automatically invoke the native specification
 counterexample finder. An open goal never means a certified refutation.
 Import omissions and compiler failures prevent verification success.
@@ -57,6 +58,40 @@ modules. Lean's existing heartbeat budgets also apply.
 
 `--self-address A` (decimal or hexadecimal) adds the deployment-address
 premise ([source-inputs.md](source-inputs.md)).
+
+### Assumption policy
+
+```sh
+solidity-lean verify Token.sol --deny tails=clean
+solidity-lean verify Token.sol --require callback=withCallback,order=legacy
+```
+
+Every `verify` row that stated an obligation (`proved`, `pending`,
+`refuted`) carries `assumptions`, the readings it is stated under
+([options.md](options.md), O10); `list` and `inspect` rows carry none:
+
+| Key | Values | Runner rows |
+|---|---|---|
+| `callback` | `noCallback`, `withCallback` | `noCallback` (a `try` and a value call may call back, keeping the contract's declared `invariant`, or anything without one) |
+| `overflow` | `default`, `checked`, `ignoring` | `default` |
+| `tails` | `solc`, `clean` | the row's `reading` |
+| `order` | `legacy`, `viaIR` | `legacy` |
+| `hash` | `opaque` | `opaque` |
+| `zeroAddress` | `noCode` | `noCode` |
+
+`--require KEY=VALUE` and `--deny KEY=VALUE` (repeatable, or
+comma-separated) form a policy. A `proved` row stays `proved` only when its
+record, or one it entails, is allowed: a `tails=solc` proof also holds under
+`tails=clean`, so `--deny tails=solc` keeps it. Otherwise the row becomes
+`refused`, never `proved`, with the refused readings in its reason and in
+`policy.refused`; an admitted row has `policy.under`, the accepted record.
+Rows that are not proved keep their status. Two requirements on one key, or
+a reading both required and denied, are invalid invocations (exit 2).
+`hash` and `zeroAddress` have one reading each, so denying either refuses
+every proved row. The CLI derives each row's record from its `reading` and
+from what the runner always does; the verdict mirrors `Policy.verdict` in
+`Solidity/Calculus/Assumptions.lean` and is checked against it on an
+exhaustive table (`tests/cli/assumption-policies.txt`), not proved.
 
 ## Inspect
 
@@ -149,7 +184,12 @@ progress and diagnostics use stderr. The schema is:
 ```
 
 Source results retain absolute `source`, `contract`, `function`, `signature`,
-`tag`, `status`, `reason`, `reading`, and `elapsedMs`. Inspection and runs
+`tag`, `status`, `reason`, `reading`, and `elapsedMs`, and add
+`profile` (`{solc, pipeline, evmFork}`: the compiler version solkey's
+build pins or `null`, `legacy`, `osaka`; O13) and, on `verify` rows that
+stated an obligation, `assumptions`. Under a
+policy, `verify` rows add `policy` and the document adds
+`policy: {require, deny}`; `summary` may count `refused`. Inspection and runs
 also include `text`; tree inspection adds `tree`. Rule audit rows include
 `source`, `status` (`matched` or `mismatch`) and `text`. `summary` counts rows
 by status. Consumers should accept additional fields within schema version 1.
@@ -161,7 +201,7 @@ Exit codes:
 | Code | Meaning |
 |---|---|
 | 0 | At least one checked/listed/inspected/executed obligation or matched audit, with no gaps or errors; explicitly skipped/internal rows are permitted. |
-| 1 | Pending verification, import gaps, errors while processing sources, a reverting/panicking run, or a rule mismatch. Inspection may successfully report pending goals. |
+| 1 | Pending verification, `refused` rows, import gaps, errors while processing sources, a reverting/panicking run, or a rule mismatch. Inspection may successfully report pending goals. |
 | 2 | Invalid invocation, missing input/selection, discovery failure, missing executable, or initial build failure. Compiler configuration failures found while processing a source are code 1. |
 
 An empty suite or one containing only skipped/helpers cannot pass. Existing
@@ -171,7 +211,7 @@ limitations; see [solidity-testing.md](solidity-testing.md).
 ## Tests
 
 `node --test scripts/solidity-lean.test.mjs` exercises the compiled entry
-point (statuses, source premises, open goals, proof trees, concrete runs,
+point (statuses, source premises, assumption records and policies, open goals, proof trees, concrete runs,
 large words, overloads, paths with spaces, JSON, exit codes, interruption and
 the frozen rule audit). Build the executable, `Solidity.Frontend.Cli` and
 `solkeycheck` first. The display/execution `evalExpr` sites of

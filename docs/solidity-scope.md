@@ -11,15 +11,28 @@ assert that every target feature already imports, executes, or proves correctly.
 
 ## Compiler completion target
 
-The user-requested endpoint is a complete compiler with kernel-checked proofs
-for every feature except explicit user exclusions. The
+The user-requested endpoint is a complete, optimizing compiler with
+kernel-checked proofs for **every** feature: since the
+[full-scope decision](#full-scope-decision-2026-11-04) there are no language
+exclusions. The
 [full compiler roadmap](coverage-plan.md) owns implementation groups, source
 semantics, admission/lowering coverage, backend/EVM proofs and composition.
 Existing `partial`/`missing` statuses, shape refusals and proof limits are work
-to finish, not permission to narrow the target. Its initial scope audit must
-reconcile recorded exclusions with user authorization; no new exclusion or
-assumption is introduced by scheduling a group. The former environment/log
-extension proposals do not change the profile without explicit approval.
+to finish, not permission to narrow the target. No new exclusion or
+assumption is introduced by scheduling a group.
+
+## Full-scope decision (2026-11-04)
+
+The user asked to remove the limitations and cover everything, with an
+optimizer, and with proofs that solc's EVM output behaves like this
+semantics. This **withdraws all 30 exclusions** confirmed by G00 Q1 and the
+refusals of YQ2 and YQ7 below. The work, the proposed decisions D1–D6
+(compiler-dependent values read the compiled artifact, exact gas, solc's
+physical layout, non-memory-safe assembly, the premises that stay, the
+optimizer's correctness relation) and the parallel lanes are in
+[full-scope.md](feature-work/full-scope.md). The manifest and `Unmodelled`
+keep reporting actual admission until each group lands; a row still marked
+`exclude` is open work, not a boundary.
 
 ## Artifacts and separate lists
 
@@ -73,7 +86,7 @@ manifest and the G01 statements.
 
 | Question | Decision |
 |---|---|
-| G00 Q1 — the 30 recorded exclusions | All 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
+| G00 Q1 — the 30 recorded exclusions | Superseded by the [full-scope decision](#full-scope-decision-2026-11-04). Originally: all 30 confirmed as approved exclusions (for example assembly/Yul, gas, `delegatecall`, low-level calls, selfdestruct, salted creation, raw code, physical layout, logs, extra block/transaction fields). |
 | G00 Q2 — premises of the 23 `abstract` rows | Approved: opaque hashes and `ecrecover`, and `msg`/`block`/`this`/balance values as universally quantified inputs. Not approved: `worldAssumptions` and the payment-acceptance boolean, which must be replaced or proposed again. The no-callback reading must become a proved special case (not yet proved; G01 Q4). The remaining abstract rows follow G01 Q4 and Q8. |
 | G00 Q3 — EVM fork | Osaka, for the pinned semantics and the compiled bytecode. |
 | G00 Q4 — settings | Revised in the second round below: solc's two pipelines only. The frozen profile is solc 0.8.38; 0.8.34 fixtures are SolKey compatibility checks only. |
@@ -192,7 +205,7 @@ remain necessary even without an EVM. In particular:
 **Transient values are an implementation task, not inherently an exclusion.**
 A separate logical store can reset at transaction end, persist across
 reentrant frames and roll back at failing calls. Physical transient slot
-access and gas remain excluded. The current importer/interpreter has no
+access and gas are X06 and X03 work. The current importer/interpreter has no
 complete transient-store implementation; accepting its AST as ordinary
 persistent state would be unsound.
 
@@ -209,7 +222,7 @@ The typed contract-world API and restricted factory/library source commands
 provide creation, creation catches and linked caller-storage execution
 ([supported fragments and limits](feature-work/contract-world.md)). General
 world-aware `solc_import` statements remain missing. Salt-based deployment
-remains excluded.
+is X05 work.
 
 ## What requires explicit abstraction
 
@@ -233,7 +246,12 @@ not an EVM theorem; [G00 Q2](#user-decisions-2026-10-29) requires it to become
 a proved special case. Resource fuel, bounded call expansion and mathematical
 divergence are distinct from real EVM gas and stack exhaustion.
 
-## What is deliberately outside this profile
+## Former exclusions, reopened (2026-11-04)
+
+These families were outside the profile until the
+[full-scope decision](#full-scope-decision-2026-11-04); each is now work owned
+by a group in [full-scope.md](feature-work/full-scope.md). Until it lands,
+admission still refuses it with the diagnostic below.
 
 `Unmodelled` has finite constructors, including a typed `blockField` payload.
 `BlockField` lists coinbase, difficulty, prevrandao, number, gaslimit, chainid,
@@ -243,30 +261,28 @@ accidentally be included in that constructor.
 - General inline assembly/Yul, including memory-safe flags and every listed
   Yul opcode. The separately recognized whole-buffer revert idiom is an
   explicit exception, validated by shape and declaration identity.
+  Reopened by VY1–VY5 and X07.
 - `gasleft`, gas options, exact gas forwarding/stipends/refunds and real
-  machine resource limits.
+  machine resource limits (X03).
 - Raw `msg.data`/`msg.sig`, byte-oriented fallback dispatch/output, arbitrary
   low-level call/return bytes, `delegatecall` and low-level `staticcall`.
-  Typed calldata slices and caught revert bytes are separate supported targets.
+  Typed calldata slices and caught revert bytes are separate supported
+  targets (X04).
 - `selfdestruct`, `create2` salt/address rules, address code/codehash,
   arbitrary creation/runtime bytecode execution, physical storage/transient
   slots and packing,
-  custom `layout at`, and raw memory addresses/layout.
-- Observable logs, topics, event ordering and log gas. Event arguments must
-  still execute, including their side effects and failures. Erasing the log
-  only supports properties that do not observe logs.
+  custom `layout at`, and raw memory addresses/layout (X05, X06).
+- Observable logs, topics, event ordering and log gas (X07).
 - The listed extra block fields, block/blob hashes, `tx.origin` and
-  `tx.gasprice`. Most extra fields are feasible environment extensions in a
-  different profile; their exclusion here is a deliberate boundary, not a
-  claim that modeling them is impossible. `block.slotnum` is Amsterdam-gated;
-  historical difficulty/prevrandao interpretation is fork-dependent.
+  `tx.gasprice` (X02). `block.slotnum` is Amsterdam-gated; historical
+  difficulty/prevrandao interpretation is fork-dependent.
 
 Diagnostics are stable structured names such as `solidity.inlineAssembly`,
 `solidity.rawCalldata`, and `solidity.blockField.number`, with the exact
 one-line reason stored in the manifest and returned by `Unmodelled.reason`.
 The Lean theorems `Unmodelled.excluded` and `Feature.exclusion_complete`
 (`Language/FeatureInfo.lean`) prove that every diagnostic denotes an excluded feature and every excluded
-feature has a diagnostic. `Feature.all_complete` proves the list enumerates
+feature has a diagnostic; X01 shrinks the type as the families land. `Feature.all_complete` proves the list enumerates
 the feature type.
 
 ## A subset of actual Solidity syntax
@@ -370,10 +386,12 @@ The human answered exactly:
 - YQ7: refuse non-memory-safe blocks. Preserve the existing canonical rethrow
   behavior as the documented pre-existing exception.
 
-These are implementation directions, not evidence of implemented support. The
+YQ2 and YQ7 are superseded by the
+[full-scope decision](#full-scope-decision-2026-11-04) (X07, decisions D1 and
+D4). These are implementation directions, not evidence of implemented support. The
 current manifest continues to report actual admission; affected exclusion rows
 are reopened only by reviewed implementation with its evidence and decision
-reference. Compiler-dependent observations remain excluded. Dependency gates,
+reference. Dependency gates,
 existing worker ownership and validation still apply. The original launch
 request did not authorize merging or pushing this new batch. On 2026-10-31,
 the human subsequently requested inspection and integration of completed work
