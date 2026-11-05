@@ -2,11 +2,11 @@ import Solidity.Evm.MemoryLoopHorizonObjectAllocatingTarget
 import Solidity.Evm.MemoryLoopHorizonObjectCompileAllocating
 import Solidity.Evm.MemoryObjectConstructionExamples
 
-/-! Concrete actual target cursor observations for selected allocating loops.
-The published cursor-16 complete allocator drives the actual checked code.
-For 16+n<W the target is pending with cursor cell exactly 16+n, retained stack,
-strong reached representation and complete allocator ownership. No evaluator
-fuel, assumed target observation or general/unbounded capacity is introduced. -/
+/-! Existentially witnessed target observations for selected allocating loops.
+The proof chooses the published ConstructionExamples fixture, while the theorem
+quantifies over the state, base and initial machine. Under 16+n<W it retains
+Objects.StateRepr and Objects.AllocatorRepr, with a pending target, cursor cell
+16+n and stack 77. No assumed target observation or general capacity is supplied. -/
 namespace Solidity.Evm.Memory.HorizonObjectCursorControls
 
 theorem bounded_execution (n : Nat) (space : 16+n < W) :
@@ -29,11 +29,11 @@ theorem bounded_execution (n : Nat) (space : 16+n < W) :
       Objects.AllocatorRepr out.st.heap nextBase 8 ⟨16+n,space⟩ reached ∧
       reached.mem 0 = .val ⟨16+n,space⟩ ∧ reached.stack=[w[77]] := by
   obtain ⟨compiled,accepted,_transport⟩ := HorizonObjectCompileAllocating.represented n
-    ConstructionExamples.initial_repr (by decide +kernel)
+    ConstructionExamples.initial_repr (by change 1 + 1 ≤ 8; omega)
     (.inr ⟨by decide,_,ConstructionExamples.initial_allocator,space⟩)
   obtain ⟨out,nextBase,reached,target,source,hp,current,stack,_bases,allocator⟩ :=
     HorizonObjectAllocating.target_allocator compiled n ConstructionExamples.initial_repr
-      (by decide +kernel) (by decide) ConstructionExamples.initial_allocator space
+      (by change 1 + 1 ≤ 8; omega) (by decide) ConstructionExamples.initial_allocator space
   refine ⟨_,_,_,_,compiled,out,nextBase,reached,accepted,ConstructionExamples.initial_repr,ConstructionExamples.initial_allocator,rfl,rfl,target,source,hp,current,
     allocator,allocator.free.cell,?_⟩
   exact stack
