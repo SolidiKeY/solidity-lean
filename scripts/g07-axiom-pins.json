@@ -8499,6 +8499,60 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/Passes/BitwiseValueContext.lean:Solidity.Backend.Passes.BitwiseValueContext.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.and_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.dirty_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.or_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.signed_refusal": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.source_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.wrong_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/BitwiseValueContextControls.lean:Solidity.Backend.Passes.BitwiseValueContextControls.xor_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/Passes/CapturedValueStability.lean:Solidity.Backend.Passes.CapturedValueStability.captured_source": [
   "Classical.choice",
   "Quot.sound",
@@ -14277,6 +14331,11 @@
   "propext"
  ],
  "Solidity/Backend/Passes/ValueContextPins.lean:Solidity.Backend.Passes.ValueContextControls.target_wrong_index": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ValueReflection.lean:Solidity.Backend.Passes.ValueReflection.success": [
   "Classical.choice",
   "Quot.sound",
   "propext"

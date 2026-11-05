@@ -440,6 +440,8 @@ import Solidity.Backend.Passes.AssignmentSubtractionControls
 import Solidity.Backend.Passes.AssignmentSubtractionPass
 import Solidity.Backend.Passes.AssignmentSubtractionPins
 import Solidity.Backend.Passes.AxiomPins
+import Solidity.Backend.Passes.BitwiseValueContext
+import Solidity.Backend.Passes.BitwiseValueContextControls
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases
@@ -646,6 +648,7 @@ import Solidity.Backend.Passes.ValueContextAllocation
 import Solidity.Backend.Passes.ValueContextCode
 import Solidity.Backend.Passes.ValueContextControls
 import Solidity.Backend.Passes.ValueContextPins
+import Solidity.Backend.Passes.ValueReflection
 import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
