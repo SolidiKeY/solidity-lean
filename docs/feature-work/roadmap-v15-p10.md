@@ -1943,3 +1943,7 @@ The numeric SGT certificate now composes with the charged fetched reference theo
 ### Selected signed division
 
 The SDIV certificate now composes with the charged fetched reference theorem, retaining explicit numeric representation, capacity, gas and fuel premises. Controls cover truncation toward zero with both divisor signs, raw zero-divisor success and minimum-word division by negative one; populated observations reject floor rounding and tail permutation and retain gas-before-arity/fuel priority. These are raw primitive outcomes, not checked Source failure policy, physical input origin or account-world adequacy.
+
+### Selected signed remainder
+
+The SMOD certificate now composes with the charged fetched reference theorem. Numeric representation, capacity, gas and fuel remain explicit. Sign-combination, zero-divisor and minimum-word boundary controls preserve the dividend's remainder sign, populated separate frames and gas-before-arity/fuel priority; wrong Euclidean results and permuted tails are rejected. These are raw primitive facts, not checked Source failure policy, physical input origin or account-world adequacy.
