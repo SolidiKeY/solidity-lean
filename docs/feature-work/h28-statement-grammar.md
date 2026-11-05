@@ -1599,3 +1599,72 @@ independently of SOL-EU, remaining true structural-fuel coverage, full final
 repository gates, whole-scope acceptance and reviews. SG-CEX-01/02 remain
 OPEN/REFUTED. The persistent objective is not reset or marked complete;
 get_goal is unavailable, so the existing frozen objective continues.
+
+
+## Checkpoint S: all-constructor parenthesis balance and actual header splitting
+
+ParenBalance defines a token balance predicate and a structural suffix scanner.
+The actual header consumer requires an opening parenthesis and returns exactly
+the suffix after its matching close. ParenPr and ParenAtoms prove the existing
+printer combinators preserve balance. SyntaxParenBalance covers all79
+constructors in the same complete statement dependency closure as N, including
+lists/options, tuple-declaration holes, function-type attributes and returns,
+assembly flags, unchecked blocks, both catches and every Yul constructor.
+Braces and token payload bytes are neutral to this parenthesis invariant.
+Categories outside that closure receive no balance claim.
+
+Universal actual-yield corollaries give matching expression-header token/suffix
+splits and exact scanner consumption at arbitrary layouts and suffixes. They
+do not equate expression trees, invoke SOL-EU or assume successful parsing.
+This is a compound-boundary prerequisite, not yet general statement framing
+or token-level nearest-else association. Bracket balance is not claimed.
+Original brace/head theorems, producer APIs, premises and exclusions are unchanged.
+
+ParenBalanceControls packages existing Syn values as Sigma c:Cat,Syn c×choices;
+the intrinsic index remains, so this is test packaging rather than a new AST.
+Actual successful yields cover79 distinct constructors, exactly matching the
+universal proof's79 cases and N's declared closure.77 are nonempty; nil/none
+are valid empty controls. Additional variants cover all5 literals, parenthesis
+payload bytes, assembly flags/Yul calls, nested function-type attributes and
+returns. Negative controls reject standalone delimiters and malformed headers,
+while an unmatched delimiter in the returned suffix is correctly preserved.
+Universal controls apply actual-header and content/suffix splitting lemmas.
+None of these kernel controls substitutes for external solc acceptance.
+
+ParenPublicAxioms checks/prints all48 public source theorem signatures/axioms;
+controls print all16 control theorem axiom sets. inventory-s.json and
+axioms-s.json record the exhaustive64 theorem identities and exact source
+hashes. No new axiom, sorry/admit, unsafe/native_decide or budget raise occurs.
+The4 new modules use local registration only. This adds local proof modules;
+it is not a producer refactor or speed claim. External51solc fixtures are unchanged.
+
+| S gate | Outcome | Evidence directory |
+| --- | --- | --- |
+| runtime.py diag ParenBalance.lean | pass | run-1793845883218776418 |
+| runtime.py build ParenBalance | pass | run-1793845945647278586 |
+| runtime.py diag ParenPr.lean | pass | run-1793845772092934639 |
+| runtime.py build ParenPr | pass | run-1793845953536147451 |
+| runtime.py diag ParenAtoms.lean | pass | run-1793845783924670581 |
+| runtime.py build ParenAtoms | pass | run-1793845958556009537 |
+| runtime.py diag SyntaxParenBalance.lean | pass | run-1793845963752940225 |
+| runtime.py build SyntaxParenBalance | pass | run-1793845978897790887 |
+| runtime.py diag ParenBalanceControls.lean | pass | run-1793846275589352143 |
+| runtime.py diag ParenPublicAxioms.lean | pass | run-1793846288037311534 |
+| runtime.py gate ParenBalanceControls.lean | pass | run-1793846334090109972 |
+| runtime.py gate ParenPublicAxioms.lean | pass | run-1793846341252683679 |
+
+All evidence paths are under /workspace/h28-statement-grammar-evidence and
+contain actual commands/exits, wall/RSS, input hashes and process samples.
+Lean remains serial, explicit-j1,12GiB/no swap with4GiB VM headroom.
+Retained failed control diagnostic run-1793846219014701012 corrected a nested
+fixture parenthesis by adding an explicitly typed array helper; the intended
+function-type/layout assertion is unchanged. The same bounded runtime was
+restarted, without a heartbeat increase or a weakened theorem.
+
+Final exact-head module builds/controls/all64axiom audits/KeySort, tool versions,
+static gates and H41 verified pack path/SHA are in the sealed handoff. Delivery
+is coordinator-pending; no VM ship-cache.sh command is run. Remaining original
+work: general compound statement/item framing and conditional token association/
+uniqueness independently of SOL-EU, remaining true structural-fuel coverage,
+full repository final gates, whole-scope acceptance/reviews. SG-CEX-01/02 remain
+OPEN/REFUTED. The original persistent goal is not reset or marked complete.

@@ -78,3 +78,7 @@ Solidity.Frontend.StatementGrammarH28.FramedStatementList	Universal statement no
 Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr	Continuation-token-free actual atom head combinators
 Solidity.Frontend.StatementGrammarH28.BoundaryHead	All42 atom constructor head invariants for else/catch/unchecked
 Solidity.Frontend.StatementGrammarH28.FramedItemList	Universal statement continuation refusal and both-item mixed block segmentation
+Solidity.Frontend.StatementGrammarH28.ParenBalance	Parenthesis token balance/scanner and matching header split
+Solidity.Frontend.StatementGrammarH28.ParenPr	Parenthesis invariant printer combinators
+Solidity.Frontend.StatementGrammarH28.ParenAtoms	Immutable atom/operator/attribute parenthesis invariants
+Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance	All79statementdependencyconstructor parenthesis balance and actual headers
