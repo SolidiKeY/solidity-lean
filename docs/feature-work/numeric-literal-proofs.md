@@ -358,3 +358,6 @@ The live assignment remains blocked on coordinator registration and final runtim
 validation. The final packet records the containing commit separately, plus both
 an original-base full patch and an owned delta against adopted master. Old sealed
 packets and verified cache packs remain unchanged. Questions=[]; goal not reset.
+
+
+Follow-on publication f77cf60d3cea8f7f1db8db29cc027532b0cd3fce adopted by merge d83602fb2b6fc9e94da52a3460b719a06f6e8648 preserving prehead7aabe84a and all 42 proof files/seven source pins. Both independent read-only reviews PASS. Fresh bounded owned build is matching-cache replay (49 jobs; 0.467876s, 59892 KiB max child RSS), controls PASS. Existing complete axiom/KeySort evidence is preserved; no theorem changed. Registration proposals remain 37 imports/38 rows; shared roots/maps untouched. Prior full gate failure remains outstanding; this follow-on does not claim a fresh full runtime pass or fresh cache pack. H41 archive/path/SHA and coordinator-pending handoff remain unchanged; no VM shipping. Original goal remains blocked, not reset.

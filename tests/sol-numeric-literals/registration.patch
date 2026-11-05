@@ -1,6 +1,6 @@
 --- a/Solidity.lean
 +++ b/Solidity.lean
-@@ -1613,11 +1613,48 @@
+@@ -1617,11 +1617,48 @@
  import Solidity.Frontend.LiteralGrammarH28.BodyControls
  import Solidity.Frontend.LiteralGrammarH28.Hex
  import Solidity.Frontend.LiteralGrammarH28.HexEncoding

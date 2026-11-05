@@ -1,9 +1,9 @@
 --- a/docs/module-map/frontend.md
 +++ b/docs/module-map/frontend.md
-@@ -124,3 +124,41 @@
- | `Frontend/LiteralGrammarH28/BodyControls.lean` | Bounded literal-grammar checkpoint; typed scope and retained obligations are stated in the module. |
- | `Frontend/ExecutableAst/ControlTuple/Adapter.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
- | `Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean` | Bounded control-tuples checkpoint; typed scope and retained obligations are stated in the module. |
+@@ -128,3 +128,41 @@
+ | `Frontend/TypeGrammarH28/ParserChecks.lean` | Bounded type-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+ | `Frontend/ExecutableAst/Shared/Intrinsic.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
+ | `Frontend/ExpressionUniqueness/Statement.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 +| `Frontend/NumericLiteralProofs/Audit.lean` | Numeric literal proof lane: Audit; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/Backfill.lean` | Numeric literal proof lane: Backfill; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |
 +| `Frontend/NumericLiteralProofs/Classification.lean` | Numeric literal proof lane: Classification; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |

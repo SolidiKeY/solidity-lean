@@ -1,5 +1,5 @@
 {
-  "adopted_master": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
   "missing_root_imports": [
     "Solidity.Frontend.NumericLiteralProofs.Audit",
     "Solidity.Frontend.NumericLiteralProofs.Backfill",
@@ -79,8 +79,8 @@
     "| `Frontend/NumericLiteralProofs/WordTable/Part29.lean` | Numeric literal proof lane: Part29; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
     "| `Frontend/NumericLiteralProofs/WordTable.lean` | Numeric literal proof lane: WordTable; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |"
   ],
-  "desired_module_map_sha256": "b24be6fac4477429d08ee12a556acc98529dca3ebc84bc9da0f0a296d6d1fbe0",
-  "module_map_patch_sha256": "3ff0e80c9c6c6c17e91c108e4310282b76bdc4205eb5cdedb495806cb0f19be6",
+  "desired_module_map_sha256": "0424465603ae2fe3cf8119a44f773c44a90871966aeee06e4cd4bd96266e6dc0",
+  "module_map_patch_sha256": "ed60ea17137d5611bbd79095783ebffaa5d0efa0aaf8ba0cf348e7fa4be2136b",
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "owner": "coordinator at integration (H21 freeze)",
   "modules": [
@@ -128,9 +128,9 @@
     "Solidity.Frontend.NumericLiteralProofs.WordTable"
   ],
   "generated_root": "Solidity.lean",
-  "current_root_sha256": "5a35d0b4464ec4acc6ad78f15ce64ce1c3eb6f0ffb934b527f3b9cd6996537ca",
-  "desired_root_sha256": "26afaba9070311950ba511579cc48440f7bff20011780dfda0dcd34667dc5ad2",
-  "root_patch_sha256": "60817d8fdedd4a3091a21f0a56fdee70854ce06338610899c9d267467708327d",
+  "current_root_sha256": "bf02e3dbbd816750d78e8c72a319369ea5a0b6d712d91f1e11c3e3e8f5955ed7",
+  "desired_root_sha256": "5f7b255bc530a06e09e37155a3974911e839e11758222609574f1c32e4471ab0",
+  "root_patch_sha256": "6d00919578cc35266f7405eb4c88af47707168956b6d87e9630569657f666850",
   "module_map_file": "docs/module-map/frontend.md",
   "module_map_rows": [
     "| `Frontend/NumericLiteralProofs/Audit.lean` | Numeric literal proof lane: Audit; source, declarations and trust inventory pinned in tests/sol-numeric-literals. |",
