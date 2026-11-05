@@ -434,3 +434,25 @@ Archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-reference
 SHA256: `0349a31155afbc11f7875a432d099070d204cae479f7b59b0e3229f39ffdb97c`.
 This packet supersedes the prior pickup packet for the expanded Admission
 control; prior verified archives remain preserved.
+
+
+## Published checkpoint adoption: 8bf83218
+
+Adopted `8bf8321873befa3f35ca31e97e5339a1baee93e6` at merge
+`e8c38c5ec33240da6ffb6610a0c9ddf44d49527f`,preserving all owned commits.
+This publication changes no DirectRuntime or executable-AST interface module.
+The canonical-composition handoff above remains current; A/D's consumer and
+fresh native/browser integration dependency persists.
+
+Fresh bounded serial VM owned build,both-reader per-file controls,and54
+standard-only theorem axiom reports pass. Each reader checks the same84 AST
+fixtures representing42 source variants,with84 obligations/model cases,
+two incompatible initializer refusals and20 malformed refusals. KeySort
+passes377/131; registration passes;646 core modules have zero forbidden
+layer reaches. Evidence: `evidence/published-8bf`. No owned source change
+or proof-budget change was needed. Full merged gates were not rerun here.
+
+All six module cache identities still match the existing b86 pickup pack;
+its archive was freshly rehashed successfully. No replacement pack is needed.
+Delivery remains coordinator-pending. This establishes no freshness for
+other merged modules and no ordinary runtime verdict or RUNTIME_GATE_PASS.
