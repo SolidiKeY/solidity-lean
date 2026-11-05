@@ -1951,3 +1951,7 @@ The SMOD certificate now composes with the charged fetched reference theorem. Nu
 ### Signed division and remainder refusals
 
 General SDIV/SMOD short-stack consumers derive certificate refusal and actual fetched/native stack-underflow from explicit numeric representation, short-stack and adequate-gas premises. Populated singleton controls check gas-before-underflow and distinguish the driver's fuel policy from native gate refusal at one fuel. The exceptional result carries no final state, so no rollback, account-world or source-failure correspondence follows.
+
+### Unsigned division and remainder refusals
+
+DIV/MOD short-stack consumers connect actual certificate refusal with the charged gate, fetched driver and native execution under explicit representation, short-stack and adequate-gas premises. The gate proof reuses the checked signed cases by definitional equality. Populated singleton controls retain gas-before-underflow and distinguish native and driver fuel policy. An exceptional result supplies no final state, rollback or account-world conclusion.
