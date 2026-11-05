@@ -34,11 +34,19 @@ open Lifetime
 
 variable {C : Contract} {D A : Type}
 
+/-- Whether an entry call is refused before it runs (`System.run`'s guard:
+value sent to an entry that is not payable). -/
+def _root_.Solidity.Lifetime.System.refuses (M : System C D A) (a : A) (tx : TTx) : Bool :=
+  !M.payable a && tx.msgValue.1 != 0
+
 /-- **The states a deployed contract's transactions start in**: a fresh
-entry frame, of a transaction the world accepts, over a world reached from a
-successful deployment through `M`'s interface. -/
+entry frame, of a transaction the world accepts and that some entry of `M`
+admits (not refused by its payable guard, allowed by `allowCall`), over a
+world reached from a successful deployment through `M`'s interface. Frames
+at which the contract is re-entered inside a transaction are not among them. -/
 def EntryState (M : System C D A) (σ : State C []) : Prop :=
-  ∃ s tx, Reachable M s ∧ s.accepts tx ∧ s.enter tx = .ok σ
+  ∃ s tx a, Reachable M s ∧ s.accepts tx ∧ M.refuses a tx = false ∧ M.allowCall s a tx ∧
+    s.enter tx = .ok σ
 
 /-- **Which starting states validity ranges over**: `any` typed state (the
 reading of `Fml.Valid`, solkey's), or the entry states of a contract's
@@ -69,20 +77,21 @@ induction over the entry points); `J` is what it gives at an entry frame;
 the claim is then an ordinary `Fml.Valid` with `J` as its premise. -/
 theorem ValidStart.of_invariant {M : System C D A} {I : World C → Prop} {J φ : Fml C []}
     (hI : Invariant M I)
-    (entry : ∀ s tx σ, I s → s.accepts tx → s.enter tx = .ok σ → holds σ J)
+    (entry : ∀ s tx a σ, I s → s.accepts tx → M.refuses a tx = false → M.allowCall s a tx →
+      s.enter tx = .ok σ → holds σ J)
     (h : Fml.Valid (.imp J φ)) : ValidStart (.reachable M) φ :=
-  fun σ ⟨s, tx, hs, acc, en⟩ => h σ (entry s tx σ (hI.always s hs) acc en)
+  fun σ ⟨s, tx, a, hs, acc, g, al, en⟩ => h σ (entry s tx a σ (hI.always s hs) acc g al en)
 
 /-- A contract invariant gives every entry state's persistent part. -/
 theorem EntryState.invariant {M : System C D A} {I : World C → Prop} (hI : Invariant M I)
     {σ : State C []} (h : EntryState M σ) : ∃ s tx, I s ∧ s.accepts tx ∧ s.enter tx = .ok σ :=
-  let ⟨s, tx, hs, acc, en⟩ := h
+  let ⟨s, tx, _, hs, acc, _, _, en⟩ := h
   ⟨s, tx, hI.always s hs, acc, en⟩
 
 /-- An entry state's storage is its world's, its transient cells reset. -/
 theorem EntryState.storage {M : System C D A} {σ : State C []} (h : EntryState M σ) :
     ∃ s, Reachable M s ∧ σ.storage = Storage.resetTransient s.storage :=
-  let ⟨s, _, hs, _, en⟩ := h
+  let ⟨s, _, _, hs, _, _, _, en⟩ := h
   ⟨s, hs, World.enter_storage en⟩
 
 /-! ## Invariants that read persistent storage -/
@@ -150,6 +159,6 @@ theorem ValidStart.of_persistent {M : System C D A} (J : PersistentFml C) {φ : 
       holds (State.deploy C tx) (.modal .box (M.deploy d) .nil J.fml))
     (calls : ∀ a, Fml.Valid (.imp J.fml (.modal .box (M.call a) .nil J.fml)))
     (h : Fml.Valid (.imp J.fml φ)) : ValidStart (.reachable M) φ :=
-  .of_invariant (J.invariant deploy calls) (fun _ _ _ hs _ en => J.at_enter hs en) h
+  .of_invariant (J.invariant deploy calls) (fun _ _ _ _ hs _ _ _ en => J.at_enter hs en) h
 
 end Solidity.Reachable

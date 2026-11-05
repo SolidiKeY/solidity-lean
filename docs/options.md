@@ -720,24 +720,27 @@ for binary operands and argument lists in either schedule.
 every state. Lean adds a start mode as an argument of the validity proved
 (`ValidStart m φ`, `Theory/Reachable/Mode.lean`): `.any` is `Fml.Valid`, solkey's
 reading and the default, so no TestSuite statement changes; `.reachable M`
-reads `φ` only at the entry frames of the worlds a deployed contract reaches
-through its interface `M` (`Lifetime.System`): a successful deployment, then
-a finite sequence of admitted entry calls, a revert or a panic rolled back
-(`Lifetime.Reachable`, [lifetime.md](lifetime.md)). The interface is part of
-the mode: a claim proved for one interface says nothing of another.
+reads `φ` only at the transaction entry frames (`EntryState`) of the worlds
+a deployed contract reaches through its interface `M` (`Lifetime.System`): a
+successful deployment, then a finite sequence of admitted entry calls, a
+revert or a panic rolled back (`Lifetime.Reachable`, [lifetime.md](lifetime.md)),
+then a transaction the world accepts and some entry admits (its payable
+guard `System.refuses`, `allowCall`). The interface is part of the mode: a
+claim proved for one interface says nothing of another. A frame at which a
+callback re-enters the contract inside a transaction is not an entry state.
 
 | Option | `ValidStart` | The starting state | Discharged by |
 |---|---|---|---|
 | `any` | `Fml.Valid φ` | any typed state | nothing (solkey) |
-| `reachable M` | `∀ σ, EntryState M σ → holds σ φ` | an entry frame of a world `M` reaches | a contract invariant, once |
+| `reachable M` | `∀ σ, EntryState M σ → holds σ φ` | a transaction frame over a world `M` reaches | a contract invariant, once |
 
 **The invariant, once.** `ValidStart.of_invariant` takes the contract's
 invariant (`Lifetime.Invariant M I`, proved by induction over the entry
 points; a rollback and waiting need nothing, `Invariant.ofRuns`) and its
 reading `J` at an entry frame, and leaves `Fml.Valid (J → φ)`. For an
-invariant formula that reads only persistent storage (`PersistentFml`) the
-induction is one constructor box and one box per entry
-(`PersistentFml.invariant`, `ValidStart.of_persistent`).
+invariant formula that reads only persistent storage (`PersistentFml`,
+`PersistentFml.ofStorage`) the induction is one constructor box and one box
+per entry (`PersistentFml.invariant`, `ValidStart.of_persistent`).
 
 **O6 follows.** For an interface whose constructor and entries expose
 nothing (`ExposesNone M`, `Prog.exposesNone`), clean tails are the contract's
@@ -745,25 +748,36 @@ invariant (`cleanTail_invariant`; the transaction boundary's transient reset
 keeps them, `Storage.resetTransient_cleanTail`), so
 `ValidTail .clean φ → ValidStart (.reachable M) φ`
 (`ValidTail.validStart_reachable`, `Theory/Reachable/CleanTail.lean`).
-Witness and controls: `Examples/Tactics/Reachable.lean` (the claim holds under
-`.reachable safeM`, fails under `.any` at a dirty-tail state that is no entry
-state, and fails under an interface with an entry that writes through a
-dangling alias, `dirty_refutes`); `Counter` there proves `x <= 10` once over
-its entries and reads `x != 11` under `.reachable` (`never11`), refuted under
-`.any` (`never11_not_any`).
 
 **Callbacks inside the sequence (O11).** `Theory/Reachable/CallerModel.lean`
 runs each entry under an execution relation `Exec C` chosen by a caller model
 (`ReachableE`, `ValidStartE`). Until O11's lattice lands it is a stub,
 `CallerStub` (`noCallback`: the deterministic run, `withCallback J`:
 `ExecP J`). `noCallback` is exactly the `Lifetime` reading
-(`reachableE_noCallback_iff`, `validStartE_noCallback_iff`); reachability is
-monotone in the relation, so an invariant against a stronger attacker holds
-against a weaker one (`InvariantE.weaken`, `ValidStartE.weaken`); clean tails
-stay an invariant under `withCallback` for entries that keep them across the
-callback boundary (`cleanTail_invariantE`, `ValidTail.validStartE_withCallback`).
-A run that violates the callback invariant admits any world (control:
-`violating_refutes`).
+(`reachableE_noCallback_iff`, `validStartE_noCallback_iff`). Reachability is
+monotone in the relation on an interface's entries (`Exec.LeOn`), so what
+holds against a stronger attacker holds against a weaker one
+(`InvariantE.weaken`, `ValidStartE.weaken`). The two stub readings are not
+ordered in general (`ExecP` may report a violation where the run succeeds);
+they agree on entries that call nobody back (`leOn_of_callsBack`). Clean
+tails stay an invariant under `withCallback` for entries that keep them
+across callbacks (`KeepsCleanC`, decided for entries that call nobody back by
+`KeepsCleanC.of_run`; `cleanTail_invariantE`,
+`ValidTail.validStartE_withCallback`). A run that violates the callback
+invariant admits any world.
+
+**Witnesses and controls** (`Examples/Tactics/Reachable.lean`). `Bag`: the
+recycled slot's default holds under `.reachable safeM`
+(`pushRead_validStart`) and under the `withCallback` stub
+(`pushRead_withCallback`), fails under `.any` at a dirty-tail state that is
+no entry state (`pushRead_not_any`, `danglingState_not_entry`), under an
+interface with an entry that writes through a dangling alias
+(`dirty_refutes`), and under `Exec.top` (`top_refutes`); a committed and a
+rolled-back transaction precede entry states (`entry_after_add`,
+`entry_after_rollback`). `Counter`: `x <= 10` proved once over its entries
+gives `x != 11` under `.reachable` (`never11`), refuted under `.any`
+(`never11_not_any`) and under an interface adding `eleven()`
+(`eleven_refutes`).
 
 **Not done.** No `dl{…}` syntax: the mode is a validity statement, not a
 formula. Deployment runs deterministically under every caller model. The

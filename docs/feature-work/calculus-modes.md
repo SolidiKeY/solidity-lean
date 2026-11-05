@@ -54,9 +54,11 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
   `ReachableBy` (storage-only, no rollback, no transaction frame: kept
   distinct, as `.claude/rules/typing.md` asks).
 - `Calculus/TailMode.lean` (`ValidTail`, `holds_cleanTail_of`),
-  `Calculus/CleanTailBoundary.lean` (`StateInv.cleanTail`,
-  `Prog.CleanTailCallbackBoundary`, `_exit`, `_noViolation`),
-  `Semantics/Callback.lean` (`StateInv`, `ExecP`, `COut`).
+  `Calculus/CleanTailBoundary.lean` (`StateInv.cleanTail`;
+  `Prog.CleanTailCallbackBoundary` is a box, which rules out a panic, so the
+  lane uses the weaker `KeepsCleanC` and derives it from the boundary),
+  `Semantics/Callback.lean` (`StateInv`, `ExecP`, `COut`, `ExecP.eq_run`,
+  `ExecP.of_run`).
 - Not reused: `Typing/Reachability.lean`'s `Reachable` (any single program
   from `State.init`: storage constructibility, not a transaction sequence);
   `ContractWorld.Reachable` (multi-contract, rooted at an empty world);
@@ -72,7 +74,8 @@ lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
 (`Storage.resetTransient_cleanTail`, `cleanTail_invariant`,
 `ValidTail.validStart_reachable`), `CallerModel.lean` (`Exec`, `RunE`,
 `StepE`, `ReachableE`, `InvariantE`, `ValidStartE`, the stub `CallerStub`,
-monotonicity, `reachableE_noCallback_iff`, `cleanTail_invariantE`,
+`Exec.LeOn` and monotonicity, `reachableE_noCallback_iff`,
+`leOn_of_callsBack`, `KeepsCleanC`, `cleanTail_invariantE`,
 `ValidTail.validStartE_withCallback`), and `PersistentFml.ofStorage`.
 Witnesses and negative controls are in `Solidity/Examples/Tactics/Reachable.lean`
 (contracts `Bag` and `Counter`), outside `Theory/Reachable/**`: `Theory/` is
@@ -87,10 +90,33 @@ module-map rows in `docs/module-map/theories.md` and
 lattice. To adapt: (1) give each caller model of the lattice its `Exec C`
 (`none` ↦ `CallerStub.noCallback.exec`, `any` ↦ `ExecP J`; `staticOnly`
 and `nonReentrant` from VC2's relations); (2) prove VC2's order gives
-`Exec.Le` between their relations, so `ReachableE.mono`,
-`InvariantE.weaken` and `ValidStartE.weaken` instantiate to the lattice's
-weakening; (3) replace `CallerStub` in `ValidTail.validStartE_withCallback`
-by the lattice's top. Nothing else in the lane reads the stub.
+`Exec.Le` (or `Exec.LeOn M` on an interface) between their relations, so
+`ReachableE.mono`, `InvariantE.weaken` and `ValidStartE.weaken` instantiate
+to the lattice's weakening. Caution: the deterministic run is not below
+`ExecP J` in general (`ExecP` may report a violation where the run
+succeeds); the lane proves the order only for entries that call nobody back
+(`leOn_of_callsBack`), so VC2's weakening needs a no-violation or
+`callsBack` premise at `none ≤ any`; (3) replace `CallerStub` in
+`ValidTail.validStartE_withCallback` by the lattice's top. Nothing else in
+the lane reads the stub.
+
+**Reviews (checkpoint 1).** Finder and skeptic (read-only, no Lean server)
+found, and the lane fixed: `EntryState` ignored the payable guard and
+`allowCall` (now required); `cleanTail_invariantE` demanded a box that rules
+out panics (now `KeepsCleanC`) and had no witness (now
+`pushRead_withCallback`); no rollback was exercised (now
+`entry_after_rollback`); `Exec.Le` was never instantiated (now `Exec.LeOn`,
+`leOn_of_callsBack`, used once) and the violating control used an ad hoc
+relation (now `Exec.top`, `top_refutes`); `PersistentFml.invariant` had no
+control for its per-entry premise (now `eleven_refutes`); examples lacked
+Solidity in docstrings and stated `dl` goals as raw constructors (fixed);
+two theorems named `pushRead_reachable` (renamed `pushRead_validStart`);
+re-entry frames are not entry states (documented). Kept: `pushRead`
+repeats `Examples/Tactics/TailMode.lean`'s program over a contract with
+entry points (`Tokens` has none); the shared-namespace lemmas
+(`SFields.all_anon`, `Storage.resetTransient_cleanTail`,
+`Lifetime.System.refuses`) live in the lane's files, the owners of
+`Typing/` and `Semantics/` may move them.
 
 **Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
 field (`any` | `reachable`) in the mode record, `any` the default.

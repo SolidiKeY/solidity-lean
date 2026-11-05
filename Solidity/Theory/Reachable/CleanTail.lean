@@ -105,7 +105,7 @@ theorem _root_.Solidity.ValidTail.validStart_reachable {M : System C D A}
 example {M : System C D A} (hM : ExposesNone M) {φ : Fml C []} (h : ValidTail .clean φ) :
     ValidStart (.reachable M) φ :=
   .of_invariant (cleanTail_invariant hM)
-    (fun _ _ _ hs _ en => holds_cleanTail_of
+    (fun _ _ _ _ hs _ _ _ en => holds_cleanTail_of
       ((World.enter_storage en) ▸ Storage.resetTransient_cleanTail hs)) h
 
 end Solidity.Reachable
