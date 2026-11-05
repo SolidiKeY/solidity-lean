@@ -675,3 +675,13 @@ exit0 and appropriate limits. Native replay archive remains dc2e7041 and current
 Lean cache eb91e1e4,local/coordinator-pending absent further byte-delivery receipt.
 CR migration/DR-A-META,exhaustive binary/source/form parity,WASM,before-after runtime
 and full final gates remain open. Existing goal is not reset or completed.
+
+
+Fresh708 KeySort and SolKey377/131/131 checks passed with actual scope memory.max
+12884901888,swap.max0,cpu.max100000 100000. KeySort/cache25.906s,RSS251196KiB,
+minimum outer available5536673792bytes. Current verified6module18artifact/6mapping
+cache964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/8f03f21288f3/owned-delta.tar.zst
+Local/coordinator-pending,not shipment/installation. H41 no ship-cache.sh invocation.
+Current source/compiled fingerprints and cache/gate receipt are under adoption-708.
+No get_goal capability is exposed;the existing goal is not reset or completed.
