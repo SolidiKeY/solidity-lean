@@ -1,0 +1,1 @@
+tests/directruntime-20261104/control-tuples/ProofAudit.lean:1:0: error: import Solidity.Typing.Values failed, environment already contains 'Solidity.SFields.set_get_self.match_1_1' from Solidity.Semantics.Storage.Anon

@@ -1,0 +1,6 @@
+Independent read-only finder and skeptic; neither used Lean/server/builds/writes.
+Both confirmed preserved ancestry, unchanged public ControlTuple modules/DirectRuntime and published Shared.Compose dispatch with recursive canonical callbacks and no error retry. Existing tuple guards and inherited refusal gates remain active.
+Both independently reviewed the exact owned two-reader edit against ee474262: every original20 outcome/2builderrefusal/6metadata assertion retained per reader, unchanged lowerBodyLoops/entry premise/expected statuses, all results labelled. No new translator, semantics or weakened check.
+Both independently verified current cache archive SHA25646076384942223279e926f975bb9cb28e18c7095f1041c895663eaf5f645ff20,size1694368,15unique regularmembers/internal checksums,9artifacts/3exact mappings/current source hashes.
+Both verified formal40 outcomes,20perreader with17proved/3refuted each, full11gates PASS and no resource stop. Current cache pointers agree, pull=false/coordinator-pending. Canonical consumer checks are distinguished from standalone native probe. DirectRuntime migration/post-migration validation remain pending; no loading closure, adequacy or whole-goal completion claim.
+No findings; final review PASS.
