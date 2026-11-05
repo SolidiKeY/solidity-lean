@@ -141,4 +141,3 @@ theorem block_source_agrees : ∀ (env : Solidity.Source.Env) (returns : List So
 
 
 end Solidity.Yul.LocalBoolUnchecked
-
