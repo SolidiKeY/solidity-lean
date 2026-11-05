@@ -110,4 +110,33 @@ theorem preserves {ctx control} (code : Stmt [] (localExternalTypes ctx) control
     cases done
     exact ⟨rfl, rfl⟩
 
+
+/-- A completed admitted execution retains its exact raw frame and control at every larger horizon. -/
+theorem run_stable : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx) (lo hi : Nat), lo ≤ hi →
+ ∀ (result : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy lo state = some result →
+ Solidity.Yul.RawFrame.run code policy hi state = some result := by
+  intro ctx control code policy state lo hi increasing result done
+  unfold run at done ⊢
+  cases actual : WordAdapter.run code policy lo ⟨Fin.elim0, view state⟩ with
+  | none => rw [actual] at done; cases done
+  | some raw =>
+    rw [WordAdapter.run_stable code policy _ increasing actual]
+    rw [actual] at done
+    exact done
+
+/-- Completed horizons determine the same whole outcome, without any coherence premise. -/
+theorem run_completed_unique : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (state : Solidity.Yul.RawFrame.State ctx) (lo hi : Nat),
+ ∀ (first second : Solidity.Yul.RawFrame.Outcome ctx control),
+ Solidity.Yul.RawFrame.run code policy lo state = some first →
+ Solidity.Yul.RawFrame.run code policy hi state = some second → first = second := by
+  intro ctx control code policy state lo hi first second one two
+  rcases Nat.le_total lo hi with lower | higher
+  · exact Option.some.inj ((run_stable ctx control code policy state lo hi lower first one).symm.trans two)
+  · exact Option.some.inj (one.symm.trans (run_stable ctx control code policy state hi lo higher second two))
+
 end Solidity.Yul.RawFrame

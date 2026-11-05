@@ -135,4 +135,21 @@ def rawRun (fuel : Nat) := RawFrame.run code policy fuel rawInitial
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.run_returnU8_agrees
 
+
+/- Completed-horizon countercontrols observe all seven words and normal flow. -/
+def rawSnapshot (result : RawFrame.Outcome ctx ⟨false,false⟩) : List Nat :=
+  (List.finRange (wordCellCount X)).map (fun i => (RawFrame.view result.state (wordCellAt X i)).val)
+
+#guard (rawRun 32).map rawSnapshot = (rawRun 64).map rawSnapshot
+#guard (rawRun 64).map rawSnapshot =
+  some [2,2^256-1,2309737967,257,22136,2^256-1,171*2^248]
+#guard (rawRun 32).map (fun result => result.flow.isNormal) = some true
+#guard (rawRun 64).map (fun result => result.flow.isNormal) = some true
+/-- info: 'Solidity.Yul.RawFrame.run_stable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_stable
+/-- info: 'Solidity.Yul.RawFrame.run_completed_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_completed_unique
+
 end Solidity.Yul.Checks.LocalBlock
