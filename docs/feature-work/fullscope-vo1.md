@@ -861,3 +861,89 @@ partial and O02/O03 remain open; this packaging fix establishes no additional
 D6/compiler/EVM/gas theorem and changes no premise or expected verdict.
 
 Final read-only finder and skeptic independently verified the14-file split, unchanged source/scripts/config, both committed hashes, all210 raw files and211 archive entries. No findings; no Lean/server/builds or writes by reviewers.
+
+## Moved lane (Claude VM) — O02 value passes checkpoint — 2026-11-05
+
+Batch moved4-20261105, branch `cloud/moved4-20261105/vo1-optimizer`, started from
+`origin/cloud/vo1-optimizer-move` (cdfa3601) merged with origin/master (aec9adf1,
+already contained). The Codex-VM receipts, `bounded.py`/`bin/lake`/`runtime.toml`
+tooling and the "restore evidence before bounded.py" instruction above apply only to
+that VM and are not used or cited here; every gate below is fresh. No published
+signature of `Optimizer/Pass.lean` changed; O02 only adds modules.
+
+### Delivered passes (all over the existing intrinsic `Val C Γ p` / `Prog C Γ Δ`)
+
+| Pass | Module | Headline theorem (exact) |
+|---|---|---|
+| constant folding | `Optimizer/ConstFold.lean` | `Val.cfold_evalT σ v : v.cfold.evalT σ = v.evalT σ` |
+| fold + dead branches | `Optimizer/StmtFold.lean` | `Prog.cfold_runC P : Prog.runC (Prog.cfold P) = Prog.runC P` |
+| any proved expression pass, lifted | `Optimizer/StmtFold.lean` | `Prog.vopt_runC V P : Prog.runC (Prog.vopt V P) = Prog.runC P` |
+| constant + copy propagation | `Optimizer/Propagate.lean` | `Prog.cprop_runC F P σ (hF : F.Holds σ) : Prog.runC (Prog.cprop F P) σ = Prog.runC P σ`; `Prog.cprop_empty_runC P` (no premise) |
+| expression simplification | `Optimizer/Simplify.lean` | `Val.simp_evalT σ v`; `Prog.simplify_runC P` |
+| unused-variable elimination | `Optimizer/UnusedVar.lean` | `blockDecl_runC … (hi : initSafe init = true) … (hw : P'.wk (.drop .refl) = ⟨Γ₁, h', P⟩)`; `Prog.uve_runC P` (no premise) |
+
+O01 instances (`Preserves SameRun _`): `cfold_preserves`, `vopt_preserves`,
+`cprop_preserves`, `uve_preserves`, where `SameRun P Q := Prog.runC P = Prog.runC Q`
+(equality of the typed run as a function of the typed state: value or halt kind,
+final storage, heap, ledger, locals and heap growth). The pipeline
+`[cprop, simplify, cfold, uve]` is certified in `O02Controls.o02_pipeline_preserves`
+through the unchanged `Preserves.pipeline` (O01 laws). Only the D6 binding remains
+X01's: `SameRun` is stronger than "every observation except gas values" because the
+lowering IR has no gas observation (D1 artifact/gas oracle not yet frozen), so no
+gas value is equated or fabricated.
+
+### Exact behaviour and boundaries
+
+- Failures are kept, never folded: `ofOpt none` (checked overflow outside
+  `checked { }`, zero divisor, out-of-range conversion; a revert in this model, see
+  solc-alignment "Checked arithmetic") leaves the node as written; `assert(false)`
+  (Panic) and `require(false)` are never dropped; inside `checked { }` the elaborator's
+  range `assert`s (`Stmt.guard`) are ordinary `assert`s and keep their Panic. Controls:
+  `overflow_kept`, `overflow_reverts`, `assert_folded`, `assert_panics`.
+- Short circuit: a literal left operand that decides `&&`/`||` drops the right operand
+  exactly when `BinOp.shortT` does.
+- Dead code: `if (lit)` becomes the block of the branch taken; `require(true);`,
+  `assert(true);`, `while (false) …` are dropped from the sequence.
+- Positions rewritten: local assignments, local declarations, `require`, `assert`,
+  `transfer`/`send` operands, `if`/`while` conditions, recursively in branches,
+  blocks and loop bodies. Not rewritten (left exactly as written, so trivially
+  preserved): storage/memory path index expressions, `opAssign`/`incDec`, storage
+  writes, calls and their bodies, `try`/`catch`, receiver calls, revert data.
+- Propagation records a fact only from `x = e;` / `T x = e;` whose propagated and
+  folded right side is a literal or a local (never an environment read); assigning a
+  local kills every fact reading it; facts survive only `require`/`assert`; branches,
+  blocks and loop exits reset to no facts; loop bodies and conditions start with no
+  facts. Controls: `prop_constant`, `prop_copy`, `prop_killed`.
+- Simplifier (solc `RuleList.h` reference): `X+0`, `0+X`, `X-0`, `X*1`, `1*X`, `X/1`
+  at `uint`/`int`; `X&&true`, `true&&X`, `X||false`, `false||X`; `s-s → 0`,
+  `s==s → true`, `s!=s → false` only for a simple `s`. Omitted because they would hide
+  a halt under checked semantics: `X*0`, `X-X`, `X&0` for a compound `X`, and the
+  wrapping-arithmetic rules stated modulo `2^256`. Negative controls:
+  `simp_sub_overflow_kept`, `unrestricted_sub_wrong`, `simp_mul_zero_kept`,
+  `unrestricted_mul_wrong`.
+- Unused variables: the first declaration of a block whose initialiser is absent or
+  simple and whose remaining body strengthens (`Prog.str?`, fragment: local
+  assignment/declaration, `require`, `assert`, `revert`, `assume(false)`, `transfer`,
+  `if`, blocks, over path-free values) is removed; one per block per run (iterate the
+  pass for more). A failing initialiser is kept (`failing_init_kept`,
+  `failing_init_drop_wrong`). Semantics reuse the existing `Prog.run_wk` and
+  `TWkRel.drop` unchanged.
+
+Controls: `tests/fullscope-20261104/vo1/O02Controls.lean` (not imported by the
+generated roots; checked by per-file Lean diagnostics). Axioms of every headline
+theorem and control: `propext`, `Classical.choice`, `Quot.sound` only (the classical
+ones come through the interpreter's `TLoop.run`); no `sorry`, no `native_decide`, no
+heartbeat option.
+
+Registration: the five modules are in the generated `Solidity.lean`
+(`register.sh`), with rows in `docs/module-map/compiler-transport.d/vo1-optimizer.md`
+(`fragments.sh`). `scripts/check-layers.mjs`: 857 core modules, 0 reach the
+elaborator (the Optimizer CORE enumeration stays COORD's, unchanged).
+
+### Remaining O02 obligations
+
+- D6 binding (X01) and D1 artifact/gas oracle: open, waiting on X01.
+- Optimizing inside storage/memory index expressions, compound assignments and call
+  arguments: not done (left as written); these need path-level congruences.
+- Unused-variable elimination outside the strengthening fragment and of non-first
+  declarations within one pass: not done.
