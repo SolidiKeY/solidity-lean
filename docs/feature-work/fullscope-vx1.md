@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: published `9584f9e7df09f638d9e0cb8930501d1660aa4b2f`, adopted by preservation merge `0c8b011f4c00b4cef15abc1e10ae8ab7a61bc4f4`; includes f77cf60d and earlier publications. Original assigned base unchanged. H38 producer review remains pending; no full readiness/cache freshness inferred.
+Current integrated prerequisite: published `b86ae4568cef6d6226f4d170360bbb089debe3fb`, adopted by preservation merge `35ea02206c0880f0be535854c39f64d11b628a45`; previous publications and original assigned base retained. H38 producer review remains pending; no full readiness/cache freshness inferred.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -680,3 +680,43 @@ packet for coordinator pull; no on-VM ship-cache, freshness or delivery claim.
 Prior received packet/receipt remains preserved. No push/PR/VM or goal reset.
 The manual stop_goal(blocked) call was rejected for missing trusted CCA context;
 no goal transition is claimed and get_goal is unavailable in active tools.
+
+## Checkpoint 07: scheduled 1200Z publication adoption
+
+Fetched and adopted exact b86ae4568cef6d6226f4d170360bbb089debe3fb from
+owned parent 1b118ac976a1d79ffe3dc5be3f6beb51403ffa8b by merge
+35ea02206c0880f0be535854c39f64d11b628a45. Published base 9584f9e7 and
+original assigned base remain ancestors. Disjoint deltas/exact merge union;
+ten VX1 files, protected Source/Scoped, direct Contracts imports/toolchain and
+catalog generator unchanged. No local work discarded, push or PR.
+
+The 27 bounded increments are documented in integration-20261105T1200Z.md.
+VT1 data-layout references and Yul PendingCoupling are distinct interfaces;
+PendingCoupling explicitly supplies no instance and retains Source/G01/layout
+owner review. Data-layout results do not authenticate assembly output or prove
+memory-copy semantics. No H38 approval or RunIndexed adapter arrived. Producer
+review request for Contracts.lean@06f5ae081ca5e01a976b3ae3cb9b43a3d369d033
+remains active; no full D1-D6 freeze, catalog rescope or X02 blocker discharged.
+
+Actual VM revalidation: Lean4.24.0/797c613, Lake5.0.0-src+797c613, KeySort PASS;
+owned Contracts/control kernel closure and 39 axiom inventories PASS (standard
+propext/Quot.sound or none), 8.296s. Current trust/layers/roots/catalog PASS,
+15.814s: 4061 sources, 287 inventoried sites, zero findings; 643 core modules,
+no elaborator/parser reach; 212 features/783 upstream symbols, still 30 exclusions.
+G07 FAIL, 28.944s: 4654 modules, 20 producer-owned violations. No gate/premise/
+whitelist/heartbeat weakened. Serial verified 12GiB/no-swap container envelope,
+LEAN_NUM_THREADS=1, explicit -j1, continuous 4GiB parent reserve. Full imported
+closure build, production controls and full H35 readiness remain pending.
+Commands, exit/wall/RSS and decisive outputs: /workspace/vx1-evidence/checkpoint-07-publication/.
+
+Separate read-only finder and skeptic found no preservation defect; neither used
+Lean/server. Both confirmed no H38 approval/adapter or applicable cache receipt;
+results retained in reviews-final.txt. No source fix was needed.
+
+Queue remains X01 full freeze/all-30 rescope then X02 production source/admission/
+lowering/compiler integration; completed census and toy controls are backfill,
+not Source/EVM adequacy. Owner requests and relay remain until receipt. H41:
+leave verified partial owned cache packet for coordinator pull, delivery pending;
+never on-VM ship-cache. Upstream gate/cache notices do not establish local full
+readiness/freshness. Prior packs and checksums retained. Manual blocked-goal
+transition rejected for missing trusted CCA context; no goal create/reset/complete.
