@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8ForAbsent
 import Solidity.Yul.RawU8For
 import Solidity.Yul.RawCheckedGrowingAbsent
 import Solidity.Yul.RawU8ForPost
@@ -252,3 +253,10 @@ Source.forLoop law reuses the existing forIter/while equality and retains
 checked/coherent premises. Checks cover guard-changing bodies, break/continue,
 partial body writes, dirty words and per-pipeline initializer errors.
 General loop admission and dirty ordinary Source readback remain separate. -/
+
+/-! RawU8ForAbsent.adapter concretely composes the supported uint8 no-post
+producer with omitted-guard transport, for both clauses absent. Its Source law
+retains actual initializer/body certificates and checked/coherent premises.
+Checks witness mutation/break, a finite continue-only horizon, dirty retention
+and per-pipeline initializer errors. General admission and unbounded divergence
+claims do not follow from these bounded witnesses. -/
