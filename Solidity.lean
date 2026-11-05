@@ -2780,6 +2780,7 @@ import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.Checks.LocalBoolIf
 import Solidity.Yul.Checks.LocalBoolIfElse
 import Solidity.Yul.Checks.LocalBoolInitialization
+import Solidity.Yul.Checks.LocalBoolItemRepresentation
 import Solidity.Yul.Checks.LocalBoolItemScope
 import Solidity.Yul.Checks.LocalBoolItems
 import Solidity.Yul.Checks.LocalBoolRepresentation
@@ -3030,6 +3031,7 @@ import Solidity.Yul.LocalBoolFor
 import Solidity.Yul.LocalBoolIf
 import Solidity.Yul.LocalBoolIfElse
 import Solidity.Yul.LocalBoolInitialization
+import Solidity.Yul.LocalBoolItemRepresentation
 import Solidity.Yul.LocalBoolItemScope
 import Solidity.Yul.LocalBoolItems
 import Solidity.Yul.LocalBoolRepresentation
