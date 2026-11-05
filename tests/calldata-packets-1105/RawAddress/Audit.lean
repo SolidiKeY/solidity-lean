@@ -1,0 +1,40 @@
+import Solidity.Backend.CalldataPackets.RawAddress.Controls
+
+-- Complete public theorem inventory for this packet.
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.decode_clean
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.decode_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.copy_run
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.copy_error
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.copy_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.copy_observations
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.guarded_run
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.copy_zero
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.payload_frame
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.guarded_frame_run
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.eval_copy
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.old_nonempty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.prefix_values
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.prefix_copy
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.prefix_keeps_old
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.wrong_order_rejected
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.dirty_second_word
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.dirty_after_valid_prefix
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.high_bits_are_not_masked
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.boundary_clean
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.boundary_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.maximum_word_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.payable_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.empty_padding
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.right_padding_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.zero_ignores_dirty
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.full_entry
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.full_dirty_entry
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.truncated_entry
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.oversized_entry
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.missing_head
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.dirty_is_not_allocation_panic
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.payable_positive
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.payable_copy
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.local_expression
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.zero_horizon
+#print axioms Solidity.Backend.CalldataPackets.RawAddress.Controls.one_horizon
