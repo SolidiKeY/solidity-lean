@@ -208,4 +208,37 @@ theorem holds_or : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Contr
         | inl actual => exact False.elim (absent first actual)
         | inr actual => exact False.elim (absent second actual)
 
+/-- Box negation excludes an actual diamond witness; no determinism is needed. -/
+theorem box_not_iff_not_diamond : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds .box code policy (fun result => ¬ post result) state ↔
+ ¬ Solidity.Yul.RawFrame.Logic.holds .diamond code policy post state := by
+  intro ctx control code policy post state
+  simp only [holds, not_exists, not_and]
+
+/-- Classical diamond negation is failure of the corresponding box over actual completions. -/
+theorem diamond_not_iff_not_box : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds .diamond code policy (fun result => ¬ post result) state ↔
+ ¬ Solidity.Yul.RawFrame.Logic.holds .box code policy post state := by
+  intro ctx control code policy post state
+  classical
+  constructor
+  · rintro ⟨fuel,result,done,bad⟩ all
+    exact bad (all fuel result done)
+  · intro invalid
+    apply Classical.byContradiction
+    intro absent
+    apply invalid
+    intro fuel result done
+    apply Classical.byContradiction
+    intro bad
+    exact absent ⟨fuel,result,done,bad⟩
+
 end Solidity.Yul.RawFrame.Logic

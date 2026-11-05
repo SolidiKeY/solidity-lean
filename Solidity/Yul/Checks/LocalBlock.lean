@@ -864,4 +864,46 @@ theorem recursiveDisjunctionContrast : Solidity.Yul.RawFrame.Logic.holds .box So
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.Checks.LocalBlock.recursiveDisjunctionContrast
 
+/-- The actual dirty result refutes negation of its validated whole-outcome post. -/
+theorem logicNegatedPostRejected : ¬ Solidity.Yul.RawFrame.Logic.holds .box Solidity.Yul.Checks.LocalBlock.code
+ Solidity.Yul.Checks.LocalBlock.policy (fun result => ¬ Solidity.Yul.Checks.LocalBlock.logicPost result)
+ Solidity.Yul.Checks.LocalBlock.rawInitial ∧
+ ¬ Solidity.Yul.RawFrame.Logic.holds .diamond Solidity.Yul.Checks.LocalBlock.code
+ Solidity.Yul.Checks.LocalBlock.policy (fun result => ¬ Solidity.Yul.Checks.LocalBlock.logicPost result)
+ Solidity.Yul.Checks.LocalBlock.rawInitial := by
+  constructor
+  · intro invalid
+    exact ((RawFrame.Logic.box_not_iff_not_diamond ctx ⟨false,false⟩ code policy
+      logicPost rawInitial).mp invalid) logicDiamond
+  · intro invalid
+    exact ((RawFrame.Logic.diamond_not_iff_not_box ctx ⟨false,false⟩ code policy
+      logicPost rawInitial).mp invalid) logicBox
+
+/-- Genuine noncompletion makes even a false negated box vacuous, without a diamond. -/
+theorem recursiveNegationContrast : Solidity.Yul.RawFrame.Logic.holds .box Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => ¬ True)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial ∧
+ ¬ Solidity.Yul.RawFrame.Logic.holds .diamond Solidity.Yul.Checks.LocalBlock.recursiveCode
+ Solidity.Yul.Checks.LocalBlock.recursivePolicy (fun _ => ¬ False)
+ Solidity.Yul.Checks.LocalBlock.recursiveInitial := by
+  constructor
+  · exact (RawFrame.Logic.box_not_iff_not_diamond recursiveCtx ⟨false,false⟩
+      recursiveCode recursivePolicy (fun _ => True) recursiveInitial).mpr recursiveNoDiamond
+  · intro invalid
+    exact ((RawFrame.Logic.diamond_not_iff_not_box recursiveCtx ⟨false,false⟩
+      recursiveCode recursivePolicy (fun _ => False) recursiveInitial).mp invalid) recursiveFalseBox
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.box_not_iff_not_diamond' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.box_not_iff_not_diamond
+/-- info: 'Solidity.Yul.RawFrame.Logic.diamond_not_iff_not_box' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.diamond_not_iff_not_box
+/-- info: 'Solidity.Yul.Checks.LocalBlock.logicNegatedPostRejected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.logicNegatedPostRejected
+/-- info: 'Solidity.Yul.Checks.LocalBlock.recursiveNegationContrast' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.recursiveNegationContrast
+
 end Solidity.Yul.Checks.LocalBlock
