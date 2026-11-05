@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedForPost
 import Solidity.Yul.RawCheckedAdapterAbsent
 import Solidity.Yul.RawCheckedAdapterFor
 import Solidity.Yul.RawCheckedAdapterDoWhile
@@ -69,3 +70,11 @@ for producer to the omitted-condition Source index, retaining runtime and the
 checked/coherence premises verbatim. Any post clause still requires the actual
 matching producer. Concrete initializer-write/break and refusal witnesses are
 in Solidity.Yul.Checks.RawCheckedAdapterAbsent. -/
+
+/-! RawCheckedForPost.run/correct provide same-context checked Source.forIter
+execution with a present supported boolean condition/post and an actual
+checked body producer. Real fuel induction preserves exact error/control
+frames and Source observations under checked/coherent premises. Initializer
+composition and context-growing initialization are separate obligations.
+Concrete normal/continue/post-timeout/break controls are in
+Solidity.Yul.Checks.RawCheckedForPost. -/
