@@ -135,4 +135,46 @@ theorem source_for : ∀ (ctx : Solidity.Source.Ctx) (_name : String) (returns :
   have world := initialized_world ctx name returns modifier u index glob.pipeline fuel state
   rw [actual]
   simp only [RawSequence.represented,timeout,Except.map,world]
+
+/-- Reusing a coherent LOCAL input retains its existing typed values.
+This does not decode arbitrary dirty words into Source.Val. -/
+theorem refresh_clean : ∀ (ctx : Solidity.Source.Ctx) (state : RawFrame.State ctx),
+    RawCoherent.coherent state = true →
+    (refresh state).clean = state.clean ∧
+    RawCoherent.coherent (refresh state) = true := by
+  intro ctx state same
+  unfold refresh
+  rw [RawCoherent.prepare_coherent state same]
+  constructor
+  · simp only [RawCoherent.capture,LocalState.ofClean,LocalValues.clean_ofClean,
+      Option.getD_some]
+  · exact RawCoherent.capture_coherent state state.clean state.world
+
+/-- Every actual continue-loop horizon preserves coherent typed LOCAL values.
+The raw-word invariant for arbitrary dirty inputs is all_fuel. -/
+theorem all_fuel_clean : ∀ (ctx : Solidity.Source.Ctx)
+    (returns : List Solidity.Source.STy) (modifier u : Bool)
+    (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : RawFrame.State ctx),
+    RawCoherent.coherent state = true →
+    (run ctx returns modifier u pipeline fuel state).2.clean = state.clean ∧
+    RawCoherent.coherent (run ctx returns modifier u pipeline fuel state).2 = true := by
+  intro ctx returns modifier u pipeline fuel
+  induction fuel with
+  | zero => intro state same; exact ⟨rfl,same⟩
+  | succ fuel ih =>
+    intro state same
+    have refreshed := refresh_clean ctx state same
+    cases fuel with
+    | zero => exact refreshed
+    | succ fuel =>
+      have guard : RawCondition.eval (test ctx) (fuel+1) state =
+          (.ok true,refresh state) := by rfl
+      have branch : (body ctx returns modifier u).run pipeline (fuel+1) (refresh state) =
+          (.ok (.continue_ rfl),refresh state) := by rfl
+      have next := ih (refresh state) refreshed.2
+      unfold run
+      rw [RawCheckedAdapterLoop.run,guard,branch]
+      dsimp only
+      exact ⟨next.1.trans refreshed.1,next.2⟩
+
 end Solidity.Yul.RawContinueLoop

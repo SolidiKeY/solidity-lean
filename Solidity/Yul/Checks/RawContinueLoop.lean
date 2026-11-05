@@ -76,6 +76,23 @@ theorem initializedAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
 theorem dirtyInputRefuses : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env), Solidity.Yul.RawCoherent.coherent (Solidity.Yul.Checks.RawContinueLoop.Old.initial 2 257 2 world) = false := by
   intro world
   rfl
+
+theorem coherentAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Old.ctx.env),
+ let actual := RawContinueLoop.run Old.ctx [] false false pipeline fuel
+   (RawFrame.ofClean Old.clean world)
+ actual.2.clean = Old.clean ∧ RawCoherent.coherent actual.2 = true := by
+  intro pipeline fuel world
+  exact RawContinueLoop.all_fuel_clean Old.ctx [] false false pipeline fuel
+    (RawFrame.ofClean Old.clean world) (RawCoherent.coherent_ofClean Old.clean world)
+
+theorem dirtyOneRefuses : ∀ (pipeline : Solidity.Roadmap.Pipeline)
+ (world : Solidity.Source.St Old.ctx.env),
+ RawCoherent.coherent (RawContinueLoop.run Old.ctx [] false false pipeline 1
+   (Old.initial 2 257 2 world)).2 = false := by
+  intro pipeline world
+  rfl
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -92,3 +109,8 @@ end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.Checks.RawContinueLoop.sourceForAll
 #print axioms Solidity.Yul.Checks.RawContinueLoop.initializedAll
 #print axioms Solidity.Yul.Checks.RawContinueLoop.dirtyInputRefuses
+
+#print axioms Solidity.Yul.RawContinueLoop.refresh_clean
+#print axioms Solidity.Yul.RawContinueLoop.all_fuel_clean
+#print axioms Solidity.Yul.Checks.RawContinueLoop.coherentAll
+#print axioms Solidity.Yul.Checks.RawContinueLoop.dirtyOneRefuses

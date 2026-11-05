@@ -269,3 +269,8 @@ checked/coherent premises. Initialized raw laws establish timeout/world; they do
 not claim raw-frame metadata identity or general initializer divergence.
 Checks include all-fuel dirty words and a terminating-break countercontrol.
 General program divergence, admission and compiler adequacy remain separate. -/
+
+/-! RawContinueLoop.all_fuel_clean additionally preserves the existing typed
+LOCAL values and coherence at every horizon under its genuine coherent-input
+premise. The dirty-one-horizon refusal control prevents treating refresh as a
+cleaning operation. The initialized raw word-view projection remains open. -/
