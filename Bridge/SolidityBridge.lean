@@ -291,6 +291,7 @@ import SolidityBridge.RoadmapV15.P10.PushFamily
 import SolidityBridge.RoadmapV15.P10.PushFamilyControls
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBounds
 import SolidityBridge.RoadmapV15.P10.ReturnCopyBoundsControls
+import SolidityBridge.RoadmapV15.P10.ReturnSizeObservation
 import SolidityBridge.RoadmapV15.P10.SelfBalanceControls
 import SolidityBridge.RoadmapV15.P10.SelfBalanceTransport
 import SolidityBridge.RoadmapV15.P10.SignExtensionAllWitness
