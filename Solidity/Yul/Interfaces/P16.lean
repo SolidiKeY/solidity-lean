@@ -1,3 +1,4 @@
+import Solidity.Yul.RawIntegerBlock
 import Solidity.Yul.RawIntegerSequence
 import Solidity.Yul.RawPreparedInteger
 import Solidity.Yul.RawCheckedAdapter
@@ -195,3 +196,11 @@ Source.execItems law retains checked-frame and input-coherence premises and
 actual Out.up control restoration. Checks.RawIntegerSequence witnesses mutation,
 break/continue, signed values, dirty older words and both timeout prefixes.
 Final integer-block closure, arbitrary initializers and admission remain open. -/
+
+/-! RawIntegerBlock.adapter closes the actual integer literal/checked Items
+sequence through existing RawTypedScope operations. Its concrete Source.execS
+block law preserves real range, checked-frame and input-coherence premises.
+Checks.RawIntegerBlock witnesses older mutation, nested checked blocks,
+break/continue, signed literals, dirty retained words and timeout boundaries.
+Arbitrary initializer expressions/groups, dirty ordinary Source readback and
+general frontend admission remain separate obligations. -/
