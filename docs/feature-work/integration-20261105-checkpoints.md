@@ -1,6 +1,6 @@
 # Scheduled lane checkpoints, 2026-11-05
 
-These bounded source increments were integrated from master `1d14f57a3a048bb1c1969c4c2c958d010ab84cb5`. Each selected packet
+These bounded source increments were integrated from master `1e367905c938186aac1680f25d1059721ddce333`. Each selected packet
 passed its touched, library, trust, registration, documentation and axiom-pin
 checks plus separate read-only finder and skeptic reviews. Selected Bridge
 modules also passed their focused Bridge build. Statements, premises, exclusions
@@ -43,6 +43,6 @@ exact-head combined gates and final independent reviews. Protected H16 Source
 and frozen Core ExtCall modules are excluded. Unavailable historical seals stay
 unverifiable; no evidence or seal is reconstructed.
 
-The pre-existing documentation reference to VC1’s unpublished assumption-policy
-module is described as planned rather than as an existing path. No declaration
-or proof was changed to repair that documentation gate.
+The initial planned-path documentation repair was superseded when VC1 landed.
+The combined tree retains upstream’s published assumption/profile documentation.
+No declaration or proof was changed by that documentation resolution.
