@@ -69,7 +69,7 @@
 
 | Module | Role |
 |---|---|
-| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean` | Published one-based IR DUP/SWAP certificates composed with charged fetched family execution and separate complete frames. |
-| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean` | Every-depth selected clients, populated whole-State expectations, ordered SWAP16 observations and index/resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean` | Published one-based IR DUP/SWAP and POP certificates composed with charged fetched execution and separate complete frames. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean` | Every-depth DUP/SWAP and arbitrary-tail POP clients, populated whole-State expectations, ordered observations and index/resource negatives. |
 
 
