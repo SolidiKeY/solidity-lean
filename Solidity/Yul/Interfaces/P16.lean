@@ -1,3 +1,4 @@
+import Solidity.Yul.RawIntegerSequence
 import Solidity.Yul.RawPreparedInteger
 import Solidity.Yul.RawCheckedAdapter
 import Solidity.Yul.RawTypedScope
@@ -186,3 +187,11 @@ Checks.RawPreparedInteger witnesses signed/unsigned bounds, refusals, timeout
 identity and an existing checked uint8 consumer followed by typed scope removal.
 Enclosing integer-block composition, arbitrary initializers and dirty ordinary
 Source readback remain separate obligations. -/
+
+/-! RawIntegerSequence.run/correct composes the real in-range integer literal
+initializer with an existing checked Items producer at ctx.push name (.int ty).
+Old initializer errors and grown tail frames remain distinct. The concrete
+Source.execItems law retains checked-frame and input-coherence premises and
+actual Out.up control restoration. Checks.RawIntegerSequence witnesses mutation,
+break/continue, signed values, dirty older words and both timeout prefixes.
+Final integer-block closure, arbitrary initializers and admission remain open. -/
