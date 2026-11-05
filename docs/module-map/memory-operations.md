@@ -293,3 +293,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintFixedRefsLate.lean` | Actual nested successful Source/intrinsic/word prefix followed by reached bounds error in Source Items, intrinsic Prog and complete symbolic word append, with explicit prefix frames. |
 
 | `Solidity/Backend/MemoryOps/SourceUintFixedRefsDeleteTarget.lean` | Actual nested uint delete word bridge and Source Items/intrinsic Prog/whole-word write-delete composition with derived strong representation, stack and allocator frames. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedRefsExact.lean` | Exact actual nested fixed-child store machine effect from initial typed value/path/bounds and published certificates, enabling complete prefix/final raw word tables. |

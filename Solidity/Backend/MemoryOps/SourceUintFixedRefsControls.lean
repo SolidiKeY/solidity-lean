@@ -1,5 +1,6 @@
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsLate
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsDeleteTarget
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsExact
 import Solidity.Evm.Correct
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
@@ -698,5 +699,71 @@ theorem nested_word_program (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_word_program
+
+
+private def wordTable (m : Machine) : List Word :=
+  [m.mem 0,m.mem 1,m.mem 2,m.mem 3,m.mem 4,m.mem 8,m.mem 9,m.mem 10,m.mem 11,
+   m.mem 16,m.mem 17,m.mem 18,m.mem 19,m.mem 24,m.mem 25,m.mem 26]
+private def beforeWords : List Word :=
+  [w[32],w[16],w[42],w[1],w[1],w[7],w[0],.val (wmod (W-1)),w[0],w[3],w[8],w[8],w[24],w[8],w[9],w[10]]
+
+/-- Complete initial/prefix/final raw word tables, including padding and every
+represented local/object word, derived from the actual shared program runs. -/
+theorem nested_word_tables (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 ΓW) (mm target : Machine),
+      (Source.execS (G0 pipeline) F0 (horizon+6) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wi wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execS (G0 pipeline) F0 (horizon+5) nps none
+        (.expr (sourceUintFixedNestedDelete wr wi wj) : Source.RStmt E0 [] false .body ΓW ΓW) ym.1).run (.nil,ym.2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wi wv)) (.stmt (.expr (sourceUintFixedNestedDelete wr wi wj)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Prog.run st (.cons (.assignMem (.index .fixed (uintFixedChildPath tr ti) (.simple (.local ti))) (.val (.simple (.local tv))))
+        (.cons (.deleteMem (.loc (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj)))) rfl) .nil))=
+          .ok ⟨st.withHeap out,List.prefix_refl _⟩ ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) wordMachine=.ok mm 0 ∧
+      Evm.run (uintFixedChildDeleteCode (C := CT) 1 tr ti tj) mm=.ok target 0 ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv ++ uintFixedChildDeleteCode (C := CT) 1 tr ti tj) wordMachine=.ok target 0 ∧
+      (wordTable wordMachine,wordTable mm,wordTable target)=(beforeWords,beforeWords.set 6 w[42],beforeWords) ∧
+      wordTable mm≠wordTable wordMachine ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ SourceUintFixedRefsAt z 2 out root address ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (st.withHeap mid) wordBase mm ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (st.withHeap out) wordBase target ∧
+      Objects.AllocatorRepr out wordBase 5 ⟨32,by decide⟩ target ∧ mm.stack=[w[77],w[88]] ∧ target.stack=[w[77],w[88]] := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,tw,td,first,second,items,prog,cw,cd,append,rm,rz,mok,mokz,hm,hz,lm,lz,nz,parent,objects,addresses,world,events,logs,fnLocals,stack,allocator⟩ :=
+      (graphW 1 1 42).resolved_write_delete_word (G0 pipeline) F0 horizon nps st root address wr wi wj wv tr ti tj tv
+        (u 1) (u 1) (u 42) left rfl rfl rfl rfl rfl rfl rfl rfl selectLeft selectedSeparation
+        (by decide) (by decide) SH (memOKW 1 1 42) wordRepr
+    have exactFirst : Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) wordMachine=
+        .ok (writeMachine wordMachine 9 w[42]) 0 := by
+      exact nested_fixed_store_exact wordRepr tr ti ti (.simple (.local tv)) rfl root left
+        (wmod 1) (wmod 1) (wmod 42) rfl rfl rfl rfl selectLeft (by decide)
+    have mmEq : mm=writeMachine wordMachine 9 w[42] := (Evm.Out.ok.inj (cw.symm.trans exactFirst)).1
+    have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+    have parentMid : mid.get root=hp.get root := by
+      rw [Option.some.inj (tw.symm.trans canonical)]
+      exact Heap.get_set_ne hp left root (by decide) _
+    have selected : mid.index root .dyn (u 1)=some left := by
+      change (MObj.elems .dyn (mid.get root))[1]?=some left
+      rw [parentMid];exact selectLeft
+    have exactSecond : Evm.run (uintFixedChildDeleteCode (C := CT) 1 tr ti tj) mm=
+        .ok (writeMachine mm 9 w[0]) 0 := by
+      exact nested_fixed_store_exact hm tr ti tj (Evm.Memory.deleteDefaultValue .uint) rfl root left
+        (wmod 1) (wmod 1) (wmod 0) rfl rfl rfl rfl selected (by decide)
+    have targetEq : target=writeMachine mm 9 w[0] := (Evm.Out.ok.inj (cd.symm.trans exactSecond)).1
+    refine ⟨mid,out,ym,z,mm,target,first,second,items,prog,cw,cd,append,?_,?_,rm,rz,hm,hz,
+      allocator ⟨32,by decide⟩ (by decide) wordAllocator,?_,stack⟩
+    · rw [targetEq,mmEq];rfl
+    · rw [mmEq];decide
+    · rw [mmEq];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_word_tables
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls

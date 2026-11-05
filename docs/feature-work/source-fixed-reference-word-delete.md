@@ -37,8 +37,9 @@ the complete write/delete append: LEFT becomes[7,42,max] then[7,0,max], while th
 parent and RIGHT are retained. Both reached full Objects relations and Source
 observers/MemOK, final complete allocator and saved stack are proved. Existing
 complete Source tables/locals/world/failure vectors remain intact. Explicit raw
-16-word intermediate/final projections and a concrete late-revert word fixture
-are still pending; no such additional vector coverage is claimed here.
+16-word intermediate/final projections were not part of this checkpoint; they
+are now proved by `nested_word_tables` (see source-fixed-reference-word-tables.md).
+A concrete late-revert word fixture remains pending.
 
 All four new headline laws/clients have measured exact standard-axiom guards
 [propext, Classical.choice, Quot.sound]. Actual failed controls are preserved:

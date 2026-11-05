@@ -461,6 +461,7 @@ import Solidity.Backend.MemoryOps.SourceUintFixedRefsBounds
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsDeleteTarget
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsExact
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsLate
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsMemory
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget
