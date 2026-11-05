@@ -531,3 +531,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/MemoryParentSnapshot.lean` | Complete parent snapshot and copied-heap agreement from actual heap-derived child rows. |
 | `Backend/MemoryCopies/MemoryParentSnapshotControls.lean` | Mixed, empty and aliased snapshot contents, exact word growth and rejected incorrect snapshots. |
 | `Backend/MemoryCopies/NestedMemoryParentInterface.lean` | Actual source-header load, checked nested-memory parent copy and complete allocator/snapshot contract. |
+| `Backend/MemoryCopies/NestedMemoryParent.lean` | Compiled actual-header nested-memory copy with checked reservation, traversal and complete typed parent adoption. |
+| `Backend/MemoryCopies/NestedMemoryParentDemand.lean` | Exact natural parent/child demand equals existing source snapshot word growth. |
+| `Backend/MemoryCopies/NestedMemoryParentControls.lean` | Inhabited alias, copied-word, empty/long, explicit refusal and negative parent-entry controls. |
+| `Backend/MemoryCopies/NestedMemoryParentMixedControls.lean` | Actual mixed 2/0/64 producer composed with compiled parent entry and complete copy certificate. |

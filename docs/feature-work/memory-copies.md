@@ -1495,3 +1495,23 @@ the old free pointer. Natural total-size refusal remains explicit. The scope
 is this intrinsic nested dynamic primitive-array type; Source authority/entry,
 Panic 0x41 correspondence, general recursive compiler selection and gas/physical
 adequacy remain separate existing obligations. No existing proof is refactored.
+
+The checked parent entry is implemented with the existing dynamic `mloadAt`
+instruction, capacity guard, reservation, child loop and typed adoption. Its
+inhabited certificate preserves the complete original snapshot-copy allocator,
+old cells/gaps and source snapshot; all lengths and natural total demand are
+derived from the heap. The demand equals existing symbolic snapshot word growth.
+Controls observe copied nonzero payloads and 64-element endpoints, preserve
+actual source aliases, allocate an empty parent header, reject saturated/late
+allocation sizes and witness parent reservation plus one successful child before
+later refusal. Mixed 2/0/64 source execution costs 73 words, returning a new
+parent at 113 and free pointer 186. Erased-copy and ignored-child cursor controls
+are rejected. Independent finder/skeptic implementation reviews passed. No Source
+panic, gas/physical adequacy or arbitrary recursive compiler closure is claimed.
+
+The coordinator held cumulative head `a69cda51` for size, not a proof failure.
+A dependency-ordered review split of at most 20 changed Lean modules per range,
+each containing controls, is being prepared on published `1aeaf276`. Original
+history and prior sealed evidence remain preserved; the cumulative branch head
+is not offered as one review increment. Required gates/reviews/sealing for the
+new parent proof and split ranges remain pending.
