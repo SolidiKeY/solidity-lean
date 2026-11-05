@@ -1,0 +1,26 @@
+{
+  "head": "d859fd2c666d0379c3f9f55c72a5e75bc9cf7ea8",
+  "base": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "files": [
+    {
+      "path": "checkpoint.bundle",
+      "size": 7245913,
+      "sha256": "280597300c5ea12ad3a7ad5926526b449177e17f7712b9411038d8ff9e04fa9a"
+    },
+    {
+      "path": "evidence.tar.gz",
+      "size": 657828,
+      "sha256": "d79b7f693fd4e8858337cfa5156aa3920d442a91aced8b91b9581f8eb41a5fa9"
+    },
+    {
+      "path": "handoff.json",
+      "size": 7880,
+      "sha256": "0f2ed15ef35dedb80dc69e55f4576d0a9783b359d6223db31d5d46e19c328aac"
+    },
+    {
+      "path": "original.patch",
+      "size": 14683538,
+      "sha256": "2436452596868db7fc815a989061efc13119e3d27614eceb2f48eef64890266c"
+    }
+  ]
+}
