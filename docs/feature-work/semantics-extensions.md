@@ -1,6 +1,6 @@
 # Semantics extensions
 
-Status (2026-11-05): **authorized; not yet implemented.** Six structural
+Status (2026-11-05): **VS2, VS3 and VS4 done and integrated; VS1 running; VS5 waits** (see Handoffs). Six structural
 additions beside [full-scope.md](full-scope.md), which covers the language (X),
 the optimizer (O) and solc validation (T). These groups add metatheory that
 X, O and T state separately today. Every lane starts with an inventory of
@@ -74,4 +74,482 @@ their owner as requests. Register new modules with
 
 ## Handoffs
 
-None yet.
+### VS2 — mutability soundness (S3.1, S3.2, S3.3)
+
+Branch `cloud/semantics-20261105/mutability`. Modules
+`Solidity/Theory/Mutability/{View,Pure,Payable,Assignable,Closer}.lean`;
+witnesses, negative controls and axiom pins in
+`Solidity/Examples/Tactics/Mutability.lean`.
+
+**Step 0, inventory.** Reused, not restated:
+
+- `Prog.within μ` (`Calculus/Blocks.lean`) is the mutability classifier on the
+  intrinsic syntax (`Val.readsState`, `OpLoc.writableIn`, `ARhs.pathIn`):
+  the premise of every theorem here. Nothing in `Bridge/` or `Solidity/Tools/`
+  defines another one.
+- `Prog.run_frame` / `TGFrame` (`Semantics/RunFrame.lean`) and
+  `ExecP.frame` (`Semantics/CallbackFrame.lean`): a body within `μ` keeps the
+  heap, transaction and, unless `μ` is `nonpayable`, storage, ledger and
+  balance on success.  `Prog.run_keeps` / `FrameKeeps` / `Prog.storeAt`: the
+  root-granular modifies set; `Storage.Framed.find_eq` reads it per word.
+- Transient storage has two models: transient roots inside the one typed
+  `Storage` (`Storage.RegionRoot`, `resetTransient`, `Semantics/Storage/Anon.lean`),
+  so "storage kept" covers them; and the explicit layer
+  `Semantics/Transient.lean` (`Transient.Program`, typed cells beside a state),
+  which had `static_preserves` (cells only, success only).
+- `Examples/Tactics/TransientStorage.lean` checked the read-only and static
+  restrictions per example (`rfl`/`decide` on one state).
+- `assignable` (`docs/function-specs.md`): clauses are `SpecLoc` data;
+  `assignableFml` (`Calculus/SurfaceSpec.lean`, a `partial def`) builds the
+  formula `A`; no semantic counterpart existed.
+- Payable: every entry point guards `!payable && msg.value ≠ 0`
+  (`Lifetime.System.run`, `Contract.deployT`, `ContractWorld.World.enter`,
+  `Transient.Program.transact`); `Lowering/V08/Payable*` prove the compiled
+  side.  The H16 source semantics (`Solidity/Source/**`, owned by VY5) has
+  `Source.Mutability` with `payable` but no mutability check of bodies; it was
+  not touched.
+
+**S3.1.**
+- View: `Prog.committed_view` / `Prog.committed_readOnly` — what a run commits
+  (`committed`: the end state's `Globals`, the entry's on a halt) is the
+  entry's storage (both regions), ledger and balance; with callbacks
+  `ExecP.committed_readOnly`; on the transient layer
+  `Transient.Program.static_preserves_all` (static or read-only context: cells
+  and globals) with `readOnly_preserves`, `write_readOnly`, `write_static`,
+  `read_pure`, `selfCall_nonpayable_readOnly`, `ordinary_static`.
+- Pure: `Prog.run_withOutside` — replacing a state's `Outside` (storage,
+  ledger, balance, transaction) commutes with a pure run, by structural
+  recursion over `Stmt`/`Prog` (loops through `TLoop.run_map`); corollaries
+  `Prog.pure_independent`, `pure_halt_independent`, `pure_local_independent`,
+  `pure_outside`; on the transient layer `Transient.Program.run_withOutsideCells`
+  and `Transient.Program.pure_independent` (outside and transient cells).
+- Payable: `System.run_nonpayable`, `deployT_nonpayable`,
+  `transact_nonpayable`, `ContractWorld.World.enter_nonpayable`,
+  `World.enter_static`, `World.callFrame_nonpayable`.
+
+**S3.2.** `Frames L σ τ` (every word of a root outside `L` unchanged, ledger
+and balance kept), `assignableRoots`, the decidable `assignableCheck`
+(read-only body, or modifies set inside the clause's roots) and
+`assignableCheck_sound`; from S3.1, `Prog.frames_readOnly` (every clause,
+`\nothing` included) and `Prog.storage_readOnly`; from the modifies set
+`Prog.frames_of_storeAt`; every outcome `committed_frames`.
+
+**S3.3.** `Closer.lean`: `holds_modal_readOnly` (scoped `holds` of a box or
+diamond), `Spec.box_readOnly`, `Transient.holds_readOnly`,
+`Transient.holds_frame` add the frame to a proved modal fact.
+`Examples/Tactics/TransientStorage.lean` now proves `static_write`,
+`view_write`, `pure_read`, `view_mutable_call` by the theorems (for every
+cell, value and state where they take one), adds `static_ordinary_write_all`
+and `view_reentry_frame` (frame from `holds_frame`); its remaining run checks
+are unchanged and still pass.
+
+**Evidence.** Each theorem has a decided premise on a concrete program and a
+negative control in `Examples/Tactics/Mutability.lean` (`put5_changes`,
+`peek_depends`, payable/value-free entries that commit, `setA_check_b`,
+`setA_changes_a`); axiom pins: only `propext`, `Classical.choice`,
+`Quot.sound`.
+
+**Gates.** Lean MCP diagnostics clean on every touched file;
+`./run-lean.sh` (2026-11-05): `Build completed successfully (3841 jobs)`
+(default targets, examples, `SolkeyTestSuite`), then `check-solkey.sh` fails
+with `57 mismatch(es)` against `../solkey` at `69e251f`, not the pinned
+`473da8944c` (`docs/solkey-migration.md`): environmental, and this lane
+touches no rule, taclet or sort annotation. Layers, roots and axiom pins
+passed in the earlier `gate.sh` run.
+
+**Reviews** (read-only finder and skeptic, no Lean server). Fixed:
+static frames were uncovered (now `static_preserves_all`,
+`ordinary_static`, `enter_static`); the payable docstring overclaimed
+coverage (narrowed, gaps listed below); misleading names
+(`readOnly_view` → `view_ne_nonpayable`); missing witnesses and controls for
+`assignable` and the transient payable entry; missing docstrings.  Recorded
+as limitations:
+
+- "Every outcome" is proved content only for successful runs; a halt commits
+  the entry state by construction (`TRes` carries no state), which is the
+  semantics' rollback, not a theorem about it.  Covered runs: `Prog.run`,
+  `ExecP`, `Transient.Program.run`; not the `Lifetime`/`ContractWorld` drivers.
+- The premise is `Prog.within`, not a declared `view`/`pure`: the elaborator
+  does not check declared mutability, and no theorem says a solc-accepted
+  `view` body passes `within .view`.  `within` is stricter than solc: no
+  memory locals or writes, no external `view` call (`callReceiver`), no
+  `catchData`/`new`; `pure` also rejects memory reads, memory `.length` and
+  hashing, which solc allows.  Independence is over storage, ledger, balance
+  and transaction (and, on the transient layer, the transient cells); heap
+  and locals are inputs.
+- Payable: the theorems state each entry point's guard.  Not covered:
+  `World.create` (its frame is private; it enters through `World.enter`),
+  `World.deployLibrary`, and ABI dispatch (`Semantics/Dispatch.lean`,
+  `AbiEntry*`), which models no `callvalue` check.  The `payable` flag of a
+  `Lifetime.System` action or `ContractWorld.Entry` is the model's; it is not
+  proved to equal `FunDecl.payable` (the constructor's is read directly).
+- S3.2 is root-granular: `s.f`, `m[e]` coarsen to their root; transient roots
+  are framed too.  That `Frames` implies the formula `A` (`assignableFml`, a
+  `partial def`) is argued, not proved.  `assignableCheck` rejects bodies
+  whose modifies set is `none` (payments, memory, aliases).
+- S3.3 gives lemmas for proofs; `sol_close` itself does not use them.
+
+**Interfaces requested from other owners.** To close the payable gap at the
+source level: VY5 (`Solidity/Source/**`) or the ABI dispatch owner — a
+`callvalue` check in dispatch keyed by the declared mutability, and a
+function-to-entry constructor carrying `FunDecl.payable`.  To lift the
+`within` gaps: the Calculus owner of `Calculus/Blocks.lean` — admitting memory
+reads in `Val.readsIn .pure` (the heap is already fixed by
+`Prog.run_withOutside`'s statement, so the pure proof would extend).
+### VS4 — S5.1, S5.2, S6.1 (nondeterminism split, fork parameter)
+
+Branch `cloud/semantics-20261105/nondeterminism`. New modules under
+`Solidity/Semantics/Nondeterminism/` (rows in `docs/module-map/language.md`).
+X01 and X02 were not on master at the base commit, so the work follows the
+frozen D1–D6 text in [full-scope.md](full-scope.md).
+
+**Step 0, inventory.** What already exists, and what this lane reuses:
+
+| Concern | Where it is today | Reused as |
+|---|---|---|
+| Callers, transaction order, callbacks, balances, code existence | G01 `SessionEnv` (`Roadmap/Contracts.lean`: `requests` by history and index, `callee : Strategy`, `balance`, `hasCode`), universally quantified by `Lang.Allowed` and `PublicCorrectness.refines` | the environment of every split language |
+| Callbacks at the intrinsic level | `TransferSem`, `ValidT`/`ValidC` (`docs/options.md` O1, O3) | unchanged; an option of the theorem, as before |
+| Block fields | Source: `Glob.timestamp`, fixed to `0` by `SrcProg.glob`; Yul: `Yul/Views/Inputs.lean` (`Environment`, `EnvRead`, Osaka `blockhash`); the backend slice (`Backend/Environment/Observations.lean`) keeps six opcodes; `Language.BlockField` lists the excluded `block.*` members, `slotnum` included | `BlockEnv F` mirrors `EnvRead` and maps `BlockField` |
+| Evaluation order (O9) | `EvalOrder`, `Contract.evalOrder` (`Syntax/Raw.lean`); `Pipeline.order` (`Roadmap/TypedRun.lean`); in the source `Glob.pipeline` (`Source/Eval.lean`), `SrcProg.pipeline` | `CompilerChoice.pipeline` |
+| Artifact table (G00 Q5) | `Artifact`, `SourceSpec.meaning : … → Artifact → lang.Prog` | `CompilerChoice.artifact` |
+| Gas values (D1) | none: `gasleft` is refused (`Language/Features.lean`; `Lowering/Readonly/SourceReadBuiltinControls.lean`); `EvmSpec.gas` is a resource | `GasOracle` (new) |
+| Both pipelines | `pipelines`, `SourceSpec.AllPipelines`, `PublicCorrectness.bothPipelines` | `holdsBoth_iff_pipelines`, `holdsBoth_iff_settings` |
+| D1 non-circularity | the G07 gate (`roadmap-g01-interfaces.md`, "Non-circularity as a checkable gate"; `scripts/check-noncircular.mjs`), argued for the artifact table only | `Confined`, `SoundAtOracle` |
+| Osaka choices (D2) | `Evm.Fork` (one constructor), `Evm.osaka`, `Evm.pinned`, `allButOne64`, `Evm.Precompile`; `Stipend.osakaCold` and `pinned.stipend` (`Stipend/Rule.lean`) | `ForkSpec.osaka` agrees with each by `rfl` |
+
+Nothing in `Bridge/` or `Solidity/Tools/` defines these notions.
+
+**S5.1** (`Solidity/Semantics/Nondeterminism/Split.lean`, `Solidity/Semantics/Nondeterminism/Source.lean`). `CompilerChoice` is the
+pipeline, the artifact table and a `GasOracle`, which answers D1's
+`gasleft`, `gas`, `msize` and `pc` after a history. `SplitSpec` is G01's
+language family indexed by the choice. Each language declares which programs
+read a D1 value (`readsD1`).
+
+- `Holds c p Φ` quantifies the environment and the bound at a fixed choice.
+- `HoldsFor q art` quantifies every oracle.
+- `HoldsBoth` quantifies both pipelines, each at its artifact. In these
+  user-facing forms the choice is quantified universally too. The split has
+  content where the compiler fixes the choice: refinement at its output,
+  and the oracle its target run reports.
+
+`sourceSplit` is the source semantics with the choice's pipeline, and
+`sourceSplit_own` makes it `sourceLang` at the program's own pipeline. The
+source reads no D1 value yet, so it declares none and is confined
+(`sourceSplit_confined`). `Solidity/Semantics/Nondeterminism/SourceWitness.lean` runs `sourceSplit` itself
+at an allowed environment (`envA_allowed`). A constant hash makes the
+creation address computable (`createAddress_zero`). In the run, `g()`
+returns `++x + x` after `x = 1`: `3` under legacy and `4` via IR
+(`order_legacy`, `order_viaIR`). So "completes with 3 or not at all" holds
+for the legacy run but is not a `HoldsBoth` statement (`order_not_both`).
+The contract is deployed at address `0`, the creation address under the
+constant hash. The split source is non-vacuous at
+every choice (`sourceSplit_nonVacuous`), so no choice rescues an
+always-reverting target (`sourceSplit_refutes`).
+
+**S5.2** (`Solidity/Semantics/Nondeterminism/Pipelines.lean`). The statement form is `HoldsBoth`. It reduces
+to the two cases (`holdsBoth_iff_pair`). `holdsBoth_iff_settings` is only
+bookkeeping over `SourceSpec.setPipeline`. D1's non-circularity is checked
+against the parameter in two parts.
+
+1. `Confined` says the artifact and oracle change nothing for any program
+   the language declares D1-free.
+   - Under it a wrong compiler stays wrong at every choice
+     (`Confined.refutes`).
+   - Plain-choice witnesses for each pipeline lift to every choice
+     (`Confined.nonVacuous`).
+   - `NonVacuous.refutes` refutes an always-reverting target at every
+     choice.
+2. An `OracleTarget` carries the oracle its own runs report, and
+   `SoundAtOracle` states soundness at that oracle.
+   - For oracle-blind programs the oracle drops out
+     (`soundAtOracle_iff_fixed`).
+   - An oracle-reading language still refutes a wrong target at the
+     target's own oracle (`circular_refuted`).
+
+Negative controls:
+
+- `circular` reads the oracle for a program it declares D1-free, and is not
+  confined (`circular_not_confined`). Declaring the read passes vacuously
+  (`circularHonest_confined`).
+- A target that may come with any oracle makes both an always-success and
+  an always-revert target sound (`circular_rescues`). This is why the oracle
+  must be part of the target's definition.
+- `orderToy_not_both` shows `HoldsBoth` is strictly stronger than one
+  pipeline.
+- `envToy_each` and `envToy_no_choice` show the choice may not depend on the
+  environment.
+
+**S6.1** (`Solidity/Semantics/Nondeterminism/Fork.lean`, `Solidity/Semantics/Nondeterminism/ForkAgreement.lean`, `Solidity/Semantics/Nondeterminism/ForkStipend.lean`).
+`ForkSpec` carries:
+
+- the block fields (`has`), with two invariants: `number` and `timestamp`
+  exist, and the field `block.difficulty` reads exists;
+- the precompile table;
+- the code-size, gas-cap, block-gas, depth and stack limits;
+- the gas constants;
+- the `blockhash` window;
+- the stipend constants.
+
+Osaka is `ForkSpec.osaka`. It agrees with:
+
+- `Evm.osaka` (`osaka_pin`);
+- `Evm.pinned` after the four G01/G06 idealizations
+  (`osaka_idealized_pin`);
+- D2's reading, which keeps the code-size limits (`osaka_d2_pin`);
+- `allButOne64` and the precompile table;
+- the Yul views (`ofViews_field`, `osaka_blockhash`, `osaka_blobhash`);
+- `Stipend.rule` (`osaka_stipendRule`).
+
+`BlockEnv F` reads a field only with a proof that `F` has it, and gates
+`blobhash?` on `blobbasefee`. So `block.slotnum` has no reading under Osaka
+(`field?_slotnum_osaka`) and reads the environment under `osakaWithSlotnum`.
+`EnvChoice F` adds the block of each action to `SessionEnv`, indexed like
+`requests`, so the block cannot change inside a transaction. Its `Allowed`
+includes the chain premise `EnvChoice.Chain`: non-decreasing number and
+timestamp, and constant chain id. `SplitSpec.forked` and the controls
+adopt that premise, but `ForkedSplit.Allowed` is a field, so a language may
+state less. `ForkedSplit` takes the fork as a
+parameter, and `HoldsOn` quantifies a list of forks. Controls:
+
+- `slotnum_osaka` and `slotnum_withSlotnum_not` give one statement that
+  holds at Osaka and fails once the slotnum fork is in the list;
+- `difficulty_control` and `control_difficulty` are a pre-Paris-like fork;
+- `prague_differs`;
+- `noStipend_rejects_empty`.
+
+`Fork.lean` imports only `Split.lean` (G01 contracts and G06 interface), so
+G07 can whitelist it for source modules. The Yul and `Language` agreements
+are in `ForkAgreement.lean`.
+
+**Axioms.** Every new theorem is pinned with `#guard_msgs` on
+`#print axioms`. They use at most `propext`, `Classical.choice` and
+`Quot.sound`. There is no `sorry`, no new axiom and no `maxHeartbeats`
+change.
+
+**Reviews.** A read-only re-check after the fixes confirmed the first
+four items below and the docstring fixes. It found wording residue (fixed:
+the `prague` tag, the `order_not_both` reading, the address-`0` remark) and
+two notes now listed as limitations (the free oracle field, the
+timestamps). Before that, a read-only finder and a skeptic (no Lean server) reviewed the
+first push. Their confirmed findings were fixed as follows:
+
+- The read predicate of `Confined` was free, so the check could not fail.
+  It is now the language's declared `readsD1`.
+- The oracle in `SoundAtOracle` was a free argument. It is now part of an
+  `OracleTarget`, with a refutation control.
+- The source witness ran at a disallowed environment, outside
+  `sourceSplit`. It now runs `sourceSplit` itself at an allowed environment
+  (still at address `0`, which `sessionAt` computes there), with
+  `order_not_both` and non-vacuity.
+- `Fork.lean` imported Yul and `Lean` modules. It now imports neither, and
+  the agreements moved to `ForkAgreement.lean`.
+- Drafts and controls carried the `osaka` or `amsterdam` tag. They are now
+  tagged `custom`.
+- The difficulty reading was unconstrained. It is now an invariant, with a
+  real pre-Paris-like control.
+- `blobhash` was ungated. It is now gated on `blobbasefee`.
+- Blocks were keyed by history. They are now keyed per action, with the
+  chain premise.
+- D2's code-size reading was missing. `d2` and `osaka_d2_pin` add it.
+- Docstrings that claimed more than the theorems proved were corrected
+  (`holdsBoth_iff_settings`, `Confined.nonVacuous`, the quantifier claim,
+  the `prague` instance).
+
+Findings kept as limitations are listed below.
+
+**Interfaces needed from other lanes** (not edited here):
+
+- X01 (`Roadmap/Contracts.lean`): add the oracle beside `Artifact` in
+  `SourceSpec.meaning`, and a D1-read predicate with `Confined` as a
+  `SourceSpec` field. Identify `CompilerChoice.artifact` with
+  `SourceSpec.meaning`'s artifact, which is today a second, unrelated
+  parameter. Move the pipeline out of the program (`SrcProg.pipeline` is
+  overridden by `sourceSplit`). The G07 script
+  (`scripts/check-noncircular.mjs`) should whitelist `Solidity.Semantics.Nondeterminism.Split`
+  and `.Fork` for source modules.
+- X02: route `EnvChoice.block` into the source's `Glob`, where
+  `Glob.timestamp` is the constant `0` today, and into the lowering. Then
+  `sourceForked_blind` stops holding for programs that read block fields.
+- X03/X07: the D1 reads read `CompilerChoice.oracle` and `.artifact`,
+  `readsD1` becomes the syntactic predicate, and they owe `Confined` again.
+  They also owe a substitution lemma: the oracle affects a run only through
+  the values of the read expressions. On the EVM side, `EvmSpec` defines
+  the oracle of a run, as an `OracleTarget`. D2's schedule beyond the
+  recorded constants also belongs to X03: memory expansion, refunds, code
+  deposit, creation and intrinsic costs, precompile gas, and opcode
+  availability such as `CLZ`. X03 should also read the cold and warm costs
+  and the `SSTORE` sentry from `ForkSpec.gas`.
+- G06 (`Roadmap/Evm.lean`): `Evm.Fork` has only `osaka`, so `ForkSpec.pin?`
+  is `none` elsewhere. `Evm.pinned` idealizes the code-size limits that D2
+  keeps (`osaka_d2_pin`).
+
+**Limitations.**
+
+- `OracleTarget.oracle` is a field. Nothing ties it to the target's runs
+  until the EVM side defines it (X03), and `circular_rescues` shows what a
+  freely chosen oracle allows.
+- `EnvChoice.Chain` does not relate timestamps within one block number.
+  `EnvChoice.block`'s timestamp is not related to G01's
+  `Request.timestamp`; X02 chooses one.
+
+- The intrinsic layer is not split: `Contract.evalOrder` is chosen at
+  elaboration.
+- `Confined` says nothing about programs that read a D1 value. The
+  substitution lemma is X03's.
+- `SoundAtOracle` covers soundness only. Adequacy at a target-supplied
+  oracle needs X03's gas model.
+- `GasOracle` is unconstrained: `gasleft` need not decrease and `msize`
+  need not be a multiple of 32. `HoldsFor` therefore cannot prove facts
+  that depend on such properties.
+- The real source reads none of the artifact, the oracle or the fork. The
+  parameter is wired into the source only through the pipeline.
+- `prague` and `osakaWithSlotnum` are contrast instances only. Forks before
+  Prague have no instance. EIP-7843 and solc's Amsterdam gate for
+  `block.slotnum` are taken from `docs/solidity-scope.md` and
+  `Yul/ReservedNames.lean`, not from an external source in this repository.
+- The fork data is checked against the repository's own Osaka definitions,
+  not an external specification.
+### VS3 — type soundness (progress), 2026-11-05
+
+**Step 0: inventory.** Reused, not redefined:
+
+- *Typing judgment.* Two semantics. The core `Stmt C Γ Γ'`/`Prog C Γ Γ'`
+  (`Solidity/Syntax.lean`) is intrinsically typed and its run
+  (`Prog.run`, `Prog.runF`, `Semantics/Run.lean`, `Semantics/RunFuel.lean`)
+  is total into `TRes`, whose `THalt` has no `stuck`. The source
+  interpreter (`Source/Eval.lean`) runs intrinsically typed resolved terms
+  (`RExpr`/`RStmt`, `Source/Resolved.lean`, from S01 derivations
+  `Typed`/`StmtD` by `toR`) but keeps `Halt.stuck` for run-time mismatches.
+- *Progress so far.* `NS`/`NSP` (`Source/ExprProgress.lean`); the value
+  fragment `RExpr.ValFragC`/`RStmt.ValFragC` with the joint induction
+  `FragAt`/`fragAt` under `CallsOK` (`Source/StmtProgress.lean`);
+  `CallsOK` derived for checked elaborated programs
+  (`Lowering/P9/FunctionCatalog.lean`, `Source/Progress/CheckedPrograms.lean`);
+  direct-node adapters for builtins and `emit`
+  (`Source/Progress/{BuiltinAdmission,BuiltinStatements,EmitBuiltins}.lean`,
+  `argsFragment_ns`, `builtinFragment_ns`, `encodeVals_key_ns`).
+- *Fuel/gas outcomes.* Source: `Halt.revert data` (panics are
+  `panicData c`, `Source/Observe.lean`), `Halt.timeout` (the horizon). Core:
+  `revert`, `revertWith`, `panic`, `diverge` (fuel), `exhausted`. No gas
+  is charged in either (D2, lane X03).
+- *Tuple constructs without a progress theorem.* `RStmt.declTuple`
+  (lane FU2-B, `docs/semantic-gaps.md`). A tuple *assignment* has no source
+  typing rule (`LVal` has no tuple form; `docs/solc-alignment.md`, "Returns
+  and tuples"), so it is a typing gap; in the core it is a `Prog` and
+  progresses by construction.
+- Nothing in `Bridge/` or `Solidity/Tools/` defines progress.
+
+**Delivered** (`Solidity/Theory/Progress/**`, `docs/module-map/theories.md`):
+
+| Checkpoint | Theorems |
+|---|---|
+| S4.1 | `Ends` and `ns_iff_ends` (never stuck = returns, panics, reverts, out of fuel); `CoreEnds`, `Prog.run_ends`, `Prog.runF_ends` (core, by construction); the closure `SFrag`/`IFrag`, `fragXAt` (joint induction with internal calls over `CallsOKX`, `CallsOK.toX`); `expr_progress`, `stmt_progress`, `items_progress`, `body_progress`, `call_progress`, `elaborated_call_progress`, `elaborated_stmt_progress` |
+| S4.2 | `Val.not_tuple`, `RVal.untuple_ok`, `pushVals_ns`, `tupleInit_ns`, `declTuple_ns`, `tuple_stmt_progress`, `StmtD.declTuple_frag` (from S01 derivations); the extension shape `StmtExt.Sound` with sub-blocks; leaf extensions `emitExt_sound`, `revertErrorExt_sound`, `effectExt_sound` (every program), `builtinExt_sound`, `leafExt_sound` (given expression progress at every horizon), `elaborated_leafExt_sound` |
+
+**The extension lemma shape X08 cites** (`Theory/Progress/Fragment.lean`):
+
+```lean
+structure Blk (E : Env) (R : List STy) (M : Bool) where
+  k : SCtx
+  Γ : RCtx
+  Γ' : RCtx
+  b : RItems E R M k Γ Γ'
+
+structure StmtExt (E : Env) where
+  P : ∀ {R M k Γ Γ'}, RStmt E R M k Γ Γ' → List (Blk E R M) → Prop
+
+def StmtExt.Sound (X : StmtExt E) (G : Glob E) (A : Decl → Prop) (Q : String → Prop) : Prop :=
+  ∀ Z : StmtExt E, X.Le Z → ∀ n, StmtNSAtX G Z A Q n →
+    (∀ m, m ≤ n → ∀ F, Q F.contract → ExprNSAt A G F m) →
+    ∀ F, Q F.contract → ∀ nps ph {R M k Γ Γ'} (s : RStmt E R M k Γ Γ') (bs : List (Blk E R M)) l,
+      X.P s bs → (∀ b ∈ bs, IFrag Z A b.b) → s.OpsOK → BodyFrame nps R Γ →
+      NSP (execS G F (n + 1) nps ph s l)
+        (fun o => (s.Simple → ∃ l', o = .normal l') ∧ (k.loop = false → o.esc = false))
+```
+
+A statement construct lane X adds proves its one-node step in this form:
+`P s bs` admits the node and names the sub-blocks `bs` it hands to the
+closure (a `try`'s success and catch blocks); the hypothesis over any
+enclosing closure `Z` runs those blocks, so nodes nest, and lanes that
+prove their cases separately combine by `StmtExt.Sound.or`.
+`stmt_progress`/`call_progress` then give progress for every block, loop
+and called body containing the node. `blockExt_sound`/`nestedDecl_ends`
+(`Controls.lean`) exercise the sub-block path.
+
+**Interface requests** (files not edited here):
+
+- Source lane (`Source/ValueProgress.lean`, `Source/StmtProgress.lean`): a
+  new `RStmt` constructor needs its `RStmt.OpsOK` arm and, if it binds
+  locals, its `RStmt.ext` arm.
+- Source lane (`Source/ExprProgress.lean`): this closure does not extend
+  *expressions*; a new `RExpr` constructor needs an arm in `RExpr.ValFragC`
+  and in `exprNSAt_step`. A parametric expression hook there (mirroring
+  `StmtExt`) would let X lanes add expression cases the same way.
+- Source lane (`Source/TypingExamples.lean`): `stmtCoverage`/`exprCoverage`
+  list `.assign` and `.tuple` as typed, but a tuple *assignment*
+  `(a, b) = (b, a);` has no `LVal` form; the coverage table should record
+  it as deferred.
+- Source lane (`Source/Value.lean`, `Halt.stuck`'s docstring): "a
+  well-formed program never reaches one" is false while `stuck` also marks
+  unmodelled features (`Source/Eval.lean`: dynamic ABI decoding, `new` of
+  some types, getters).
+
+**Gates.** MCP diagnostics clean on the seven modules; `#print axioms` on
+every main theorem and control: `propext`, `Classical.choice`, `Quot.sound`
+only; `./run-lean.sh`: `lake build` of the default targets and the
+SolkeyTestSuite completed (3842 jobs; two earlier runs lost unrelated
+modules to out-of-memory kills, code 137, and were resumed); its last step,
+`check-solkey.sh`, reports 57 mismatches against the container's `../solkey`
+checkout (69e251f, newer than the pin `473da8944c`) and passes against the
+pinned snapshot `tests/migration/solkey` (`solkeycheck --key …`: OK). No `sorry`, no
+axiom, no `maxHeartbeats`, no Source or Core module edited.
+
+**Witnesses and controls** (`Theory/Progress/Controls.lean`): a tuple
+declaration (`pairDecl_ends`, actual run `pairDecl_run`, timeout
+`pairDecl_timeout`), the same in a `while` loop (`loopDecl_ends`,
+`loopDecl_timeout`), a block with a tuple declaration and `assert(false)`
+ending by `Panic(0x01)` (`blockDecl_ends`, `blockDecl_run`,
+`blockDecl_panics`), nested blocks through the hook (`nestedDecl_ends`),
+S01's `w_declTuple` (`elaborated_declTuple_ends`). Negative:
+`retPair_unframed_in_frag` + `retPair_unframed_not_ends` (in the fragment
+and the domains, stuck without its frame), `all_unsound` (an extension
+admitting `_` outside a modifier is unsound), `stuck_not_ends`.
+
+**Reviews** (read-only finder and skeptic subagents, no Lean server).
+Fixed: module docs overclaiming "a well-typed program" for the source
+interpreter and gas "subsumed" (`Outcome.lean`); `CoreEnds.outOfFuel`
+renamed `diverges`; "the hashes" narrowed to string-literal hashes;
+the call-site remark for builtins made a theorem
+(`elaborated_leafExt_sound`); wrong names in module docs
+(`pairDecl_frag`, `CallsOKX` placement) and module-map rows; missing
+docstrings; the frame control now shows the other premises hold
+(`retPair_unframed_in_frag`); `slotsOK_refuses_reference` and
+`no_tuple_local` reclassified as boundaries; the extension shape could not
+carry statements with sub-blocks (`try`) and separately proved extensions
+did not combine over sub-blocks — `StmtExt.P` now takes the sub-blocks and
+`StmtExt.Sound` quantifies over enclosing closures; `emit`/custom-error
+reverts split off without the every-horizon premise (`effectExt_sound`);
+`panics` documented as read from the data. Confirmed limitations, kept
+below.
+
+**Limitations.** Progress holds for the fragment, not for every well-typed
+program; the interpreter itself is stuck on well-typed programs using
+unmodelled features. Outside `SFrag`: expressions beyond
+`RExpr.ValFragC` (strings, memory and reference values, arrays,
+`member`, `structNew`, explicit conversions, `delete`, `length`,
+`balance`, `magic`, `payable`, external calls, `transfer`/`send`,
+`abi.*`, slices, inline arrays, `new`, builtins inside expressions),
+the statements `placeholder` (modifiers), `rethrow` and `tryCall` (no
+instance yet; the shape admits one), and the transaction layer (dispatch,
+ABI decoding, deployment, callbacks). Membership in `SFrag` is a premise;
+only tuple declarations (`StmtD.declTuple_frag`) and the existing
+`ValFragC` witnesses connect S01 derivations to it. Builtin statements
+need expression progress at every horizon, so with calls they are
+admitted at call sites of checked elaborated programs, not inside called
+bodies (which `CallsOK` keeps in the value fragment). Tuple-declaration
+slots must be of value types from value types or constants (`SlotsOK`).
+A tuple assignment has no source typing rule (typing gap, recorded above).
+`Ends` tells panics from reverts by their data. Every public theorem is
+for frames of one contract (`Q = (· = c)`). Gas is not modelled (D2);
+the resource ends are `timeout` (source) and `diverge`/`exhausted`
+(core). The core statement is by construction.

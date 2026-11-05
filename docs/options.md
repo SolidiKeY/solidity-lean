@@ -26,6 +26,8 @@ can never be read as one under another.
 | O7 | the solc test runner states a calling-back obligation under `ValidT .noCallback` | done |
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
+| O11 | caller models `none < staticOnly < nonReentrant R < any` (`ValidM`), Lean-only | done |
+| O12 | reachable starting states: deployment plus a finite sequence of entry calls (`ValidStart (.reachable M)`); Lean-only | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -712,3 +714,137 @@ evaluation, a calculus proof and an imported contract.
 
 A failing read is saved before later explicit guards (`captureBefore`),
 for binary operands and argument lists in either schedule.
+
+## O11. Caller models (Lean-only)
+
+**Decision.** What a callee that calls back may do is an argument of the
+validity statement, `ValidM M ts φ` (`⊨ᶠₘ[M; ts] φ`,
+`Calculus/CallerModel.lean`), beside the transfer semantics `ts`, which
+still says whether a `transfer` and a `send` call back at all. solkey has
+no such option: its two readings are the lattice's ends, and every
+existing statement (`ValidT`, `ValidC`, `⊨ᶠ`) keeps its meaning, so the
+SolKey test suite reads nothing new.
+
+| Model | A callee that calls back may | Reading |
+|---|---|---|
+| `none` | not call back at all; it answers by the transaction's oracle | `Fml.Valid` (`validM_none`); `ValidT (.noCallback I)` with no `try` or value call (`validM_none_iff_noCallback`) |
+| `staticOnly` | call back by `STATICCALL` only (`CallMode.static`, `Mode.readOnly`): answer anything, change nothing | resumption leaves storage, ledger, balance as they were (no value arrives, forced or not) |
+| `nonReentrant R` | call back into `R`'s entries, in sequence (`Reentry.Reach`), but into one its reentrancy lock guards only while the lock is not held (`Reentry.Step`); each call a callback run of its body, whose own callees may leave any state keeping the invariant | resumption reachable by those calls |
+| `any` | leave any state keeping the invariant | `ValidT ts` (`validM_any`) |
+
+The runs `ExecSM M J` are `ExecS J` with `CallerModel.Allows` a premise
+more at each resumption (`transferResume`, `sendResume`, `tryOk`); the
+invariant's checks on exit and on resumption are unchanged.
+`Calculus/CallerModelRun.lean` proves a run under `M` a run under every
+model allowing more (`ExecPM.mono`), `any`'s runs exactly the callback runs
+(`ExecPM.toExecP`, `ExecP.ofExecPM`), and the deterministic run a run under
+every model (`Prog.execM_run`).
+
+**The lock judgment.** A `Reentry` lists the entries a callee may call back
+(`body : Entry → Prog C [] []`), the ones the lock guards (`guarded`), and
+when the lock is held (`held`, of the storage). `Reentry.Guards` states
+that a guarded entry never completes while the lock is held;
+`Reentry.reachAny_iff` proves that then, the lock held and no unguarded
+entry releasing it (`KeepsHeld`), a callee calling back into *any* entry
+reaches exactly what `nonReentrant` allows. `ValidM` does not ask for
+`Guards`: `R` states which entries carry the modifier, and `Guards` is
+what makes that claim true of their bodies (`setX_guards`).
+
+**Weakening** (`ValidM.weaken`, `Calculus/CallerModelValid.lean`): `M ≤ M'`
+and `φ` with its modalities in positive positions (`Fml.posModal true`,
+which every `pre → [ P ] post` with a first-order `pre` has) give
+`ValidM M' ts φ → ValidM M ts φ`; `ValidM.of_validT` reads a `ValidT`
+proof (`sol_prove`'s, O3) under every model. A modality in a negative
+position turns the inclusion of runs around, so such formulas are excluded.
+
+**Strictness** (`Examples/Tactics/CallerModel.lean`): one formula per
+adjacent pair, valid under the weaker model and refuted by a typed run
+under the stronger, the two `nonReentrant` pairs with one `R` (a guarded
+`setX()`): refuted with the lock free, valid with it taken. `none <
+staticOnly` separates by the invariant every calling-back model owes on
+exit, not by the callee's power; the sharper witness (two equal calls
+answered alike only under `none`, by the oracle) is true but `sol_close`
+does not prove it, as the calculus forgets the oracle's correlation.
+
+**Not done.** No calculus reads `ValidM` at `staticOnly` or `nonReentrant`:
+a proof there goes through `ValidT` (`ValidM.of_validT`), through `Fml.Valid`
+when no callback is left, or by the runs (`Theory/CallerModel/Static.lean`,
+a model that changes nothing). A re-entrant call carries no value, and its
+own callees call back as under `any`, so an entry whose body pays or calls
+out lets `nonReentrant` reach any state keeping the invariant.
+`ExecSM .none` is not `none`'s reading (its `try` answers any data); read
+`none` by `Prog.run`. `staticOnly` is a model of the callee,
+not a reading of `ExtCall.mode` (H22): a `static` call still gets the
+reading the model gives every call.
+
+
+## O12. Reachable starting states (Lean-only)
+
+**Decision.** solkey has no such option: its validity reads a formula at
+every state. Lean adds a start mode as an argument of the validity proved
+(`ValidStart m φ`, `Theory/Reachable/Mode.lean`): `.any` is `Fml.Valid`, solkey's
+reading and the default, so no TestSuite statement changes; `.reachable M`
+reads `φ` only at the transaction entry frames (`EntryState`) of the worlds
+a deployed contract reaches through its interface `M` (`Lifetime.System`): a
+successful deployment, then a finite sequence of admitted entry calls, a
+revert or a panic rolled back (`Lifetime.Reachable`, [lifetime.md](lifetime.md)),
+then a transaction the world accepts and some entry admits (its payable
+guard `System.refuses`, `allowCall`). The interface is part of the mode: a
+claim proved for one interface says nothing of another. A frame at which a
+callback re-enters the contract inside a transaction is not an entry state.
+
+| Option | `ValidStart` | The starting state | Discharged by |
+|---|---|---|---|
+| `any` | `Fml.Valid φ` | any typed state | nothing (solkey) |
+| `reachable M` | `∀ σ, EntryState M σ → holds σ φ` | a transaction frame over a world `M` reaches | a contract invariant, once |
+
+**The invariant, once.** `ValidStart.of_invariant` takes the contract's
+invariant (`Lifetime.Invariant M I`, proved by induction over the entry
+points; a rollback and waiting need nothing, `Invariant.ofRuns`) and its
+reading `J` at an entry frame, and leaves `Fml.Valid (J → φ)`. For an
+invariant formula that reads only persistent storage (`PersistentFml`,
+`PersistentFml.ofStorage`) the induction is one constructor box and one box
+per entry (`PersistentFml.invariant`, `ValidStart.of_persistent`).
+
+**O6 follows.** For an interface whose constructor and entries expose
+nothing (`ExposesNone M`, `Prog.exposesNone`), clean tails are the contract's
+invariant (`cleanTail_invariant`; the transaction boundary's transient reset
+keeps them, `Storage.resetTransient_cleanTail`), so
+`ValidTail .clean φ → ValidStart (.reachable M) φ`
+(`ValidTail.validStart_reachable`, `Theory/Reachable/CleanTail.lean`).
+
+**Callbacks inside the sequence (O11).** `Theory/Reachable/CallerModel.lean`
+runs each entry under an execution relation `Exec C` chosen by a caller model
+(`ReachableE`, `ValidStartE`). Until O11's lattice lands it is a stub,
+`CallerStub` (`noCallback`: the deterministic run, `withCallback J`:
+`ExecP J`). `noCallback` is exactly the `Lifetime` reading
+(`reachableE_noCallback_iff`, `validStartE_noCallback_iff`). Reachability is
+monotone in the relation on an interface's entries (`Exec.LeOn`), so what
+holds against a stronger attacker holds against a weaker one
+(`InvariantE.weaken`, `ValidStartE.weaken`). The two stub readings are not
+ordered in general (`ExecP` may report a violation where the run succeeds);
+they agree on entries that call nobody back (`leOn_of_callsBack`). Clean
+tails stay an invariant under `withCallback` for entries that keep them
+across callbacks (`KeepsCleanC`, decided for entries that call nobody back by
+`KeepsCleanC.of_run`; `cleanTail_invariantE`,
+`ValidTail.validStartE_withCallback`). A run that violates the callback
+invariant admits any world.
+
+**Witnesses and controls** (`Examples/Tactics/Reachable.lean`). `Bag`: the
+recycled slot's default holds under `.reachable safeM`
+(`pushRead_validStart`) and under the `withCallback` stub
+(`pushRead_withCallback`), fails under `.any` at a dirty-tail state that is
+no entry state (`pushRead_not_any`, `danglingState_not_entry`), under an
+interface with an entry that writes through a dangling alias
+(`dirty_refutes`), and under `Exec.top` (`top_refutes`); a committed and a
+rolled-back transaction precede entry states (`entry_after_add`,
+`entry_after_rollback`). `Counter`: `x <= 10` proved once over its entries
+gives `x != 11` under `.reachable` (`never11`), refuted under `.any`
+(`never11_not_any`) and under an interface adding `eleven()`
+(`eleven_refutes`).
+
+**Not done.** No `dl{…}` syntax: the mode is a validity statement, not a
+formula. Deployment runs deterministically under every caller model. The
+interface `M` is a model obligation (`Contract` keeps no visibility). The
+stub's adaptation to O11's lattice is listed in
+[calculus-modes.md](feature-work/calculus-modes.md#handoffs).
