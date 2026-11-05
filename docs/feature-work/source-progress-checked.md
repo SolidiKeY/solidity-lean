@@ -746,8 +746,8 @@ call run is composed; the expected heap observations are unchanged. Source
 semantics, allocation/halt policies and proof limits are unchanged. These
 results do not establish termination, general allocating call graphs,
 physical resource adequacy, compiler/EVM correspondence or universal coverage.
-The historical full-build timeout and published axiom-pin baseline remain open.
-Earlier documentation failures are retained as historical evidence.
+The historical full-build timeout remains open. Earlier failed documentation
+and inventory checks are retained as historical evidence.
 
 
 ## Allocating parents as direct-call arguments
@@ -796,7 +796,63 @@ admission, recursive/external/world calls, compiler/EVM correspondence,
 physical resource adequacy, termination or universal source coverage.
 Published VC1 now supplies the formerly missing Assumptions module, and the
 documentation-path check passes; earlier failed logs remain historical evidence.
-The axiom-pin gate still has the exact published baseline of 82 unrecorded pins
-and zero errors. The trust gate also reports two inventory entries in the
-newly published Assumptions module, identical on clean master. Those gates
-and the historical full-build timeout remain unresolved.
+The published integration inventories the reviewed Assumptions fingerprints
+and axiom pins; those gates now pass. Earlier failed logs remain historical
+evidence. The historical full-build timeout remains unresolved.
+
+
+## Allocation parents bound to local variables
+
+`Progress.BoundParents` adds `BoundParentItems`: a finite prefix of local
+declarations initialized by allocation parents, followed by an unchanged
+`ReadyItems` suffix. Initializers use the existing `AllocationParent`
+certificate; same-type conversion and plain extraction remain explicit.
+The old readiness and memory certificates, typed statements and evaluator are
+unchanged.
+
+The induction follows actual `execS.declInit`, including evaluation,
+conversion, extraction and insertion of the new local. It extends `BodyFrame`
+for the suffix and uses actual `Out.up`/local restoration on scope and return.
+Memory admission is derived through `MemoryItems.declInit`. Body/internal-call
+progress uses finite default certificates; joint preservation reuses the
+existing body/call memory proofs. The checked-elaboration adapter derives
+`CallsOK`; actual selected-body equality, parameter/return/local layout,
+empty modifiers, finite defaults and syntactic body admission remain explicit
+premises. No body run or desired state is assumed.
+
+`BoundParentControls` proves actual frontend inference, elaboration, program
+body identity and dispatch for a private function containing
+`bool[2] memory tmp = [true, false]; return tmp;`. Its live bytes parameter
+points to old object 0. The callee's default object 1 and initialized array
+object 2 persist; the temporary local is popped and object 2 is returned.
+Inhabited call and caller-expression consumers prove memory/reference validity
+and restoration of caller locals, saved function locals and logs. The
+declaration unit uses the legacy frontend; observations quantify over both
+evaluator pipelines and arbitrary fixed parameters. The caller node is
+intrinsic, not claimed frontend-elaborated.
+
+`BoundParentPanicControls` uses a separate elaborated function with a
+`uint256 n` parameter and an `n / n;` statement after the initializer.
+At zero, the original division panic propagates through the actual call,
+retaining both allocations and restoring caller locals. The resolved division
+includes the frontend's identity conversions; the proved body identity covers
+those exact terms. These are memory-growth and frame observations, not a
+transaction rollback claim. The old `ReadyItems` still refuses the initialized
+parent body, storage defaults remain excluded, and zero horizon retains its
+timeout and unchanged state.
+
+The positive controls passed in 12.882 seconds with 584,802,304 bytes peak
+aggregate RSS; the post-initializer panic controls passed in 16.441 seconds with
+565,542,912 bytes. All 76 new theorem reports use only `propext`,
+`Classical.choice` and `Quot.sound` or subsets. Independent read-only finder
+and skeptic reviews found no confirmed defect. No proof/search/resource or
+halt/allocation policy changed. This is Source-only finite-prefix progress and
+preservation, not general allocating-body or memory-call graph admission,
+recursive/world calls, function-value frontend elaboration, physical adequacy,
+compiler/EVM correspondence, termination or universal coverage.
+
+The published integration supplies the reviewed trust fingerprints and axiom
+pins: both gates now pass, as does the documentation-path gate. Earlier failed
+logs remain historical evidence. The historical full-build timeout remains
+unresolved; the integration notice alone does not establish VM cache freshness
+or a VM full-build pass.

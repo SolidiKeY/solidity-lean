@@ -287,3 +287,10 @@ an actual later-child panic with retained earlier memory; see
 [source-progress-checked.md](source-progress-checked.md#allocating-parents-as-direct-call-arguments).
 This leaves old argument certificates and general memory-call graph admission
 unchanged and makes no function-value frontend or compiler correspondence claim.
+
+Allocation parents may also initialize a finite prefix of new locals before
+a ready suffix. Their memory admission is derived, and the actual declaration,
+frame extension, scope exit, call and post-initializer panic are covered; see
+[source-progress-checked.md](source-progress-checked.md#allocation-parents-bound-to-local-variables).
+The old readiness/default certificates and general memory-call graph boundaries
+remain unchanged.

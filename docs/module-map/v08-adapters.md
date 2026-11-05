@@ -567,3 +567,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/ParentArguments.lean` | Exact allocating-parent argument certificates, actual left-to-right evaluation, reference growth transport and checked-elaboration direct-call composition. |
 | `Source/Progress/ParentArgumentControls.lean` | Elaborated reference identity callee, intrinsic allocating argument, returned alias distinct from retained default, inhabited caller restoration and old-argument refusal. |
 | `Source/Progress/ParentArgumentFlowControls.lean` | Two allocating arguments, early panic before callee allocation and later panic preserving earlier argument memory in both pipelines. |
+
+| `Source/Progress/BoundParents.lean` | Typed allocation-parent local prefixes, actual declaration/frame/scope progress, joint memory preservation and elaborated-call adaptation. |
+| `Source/Progress/BoundParentControls.lean` | Elaborated parent-initialized local and returned reference, retained default/fresh heap objects, inhabited caller restoration and old-body refusal. |
+| `Source/Progress/BoundParentPanicControls.lean` | Elaborated division panic after allocating a local, retained memory growth and restored caller state in both evaluator pipelines. |
