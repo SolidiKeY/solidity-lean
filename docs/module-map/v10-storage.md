@@ -81,3 +81,5 @@
 | `Lowering/StorageOps/SourceStorageCopyPayloadControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/StorageOps/SourceStorageCopyEmpty.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/StorageOps/SourceStorageCopyEmptyControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/StorageOps/SourceNestedByteCapture.lean` | Operation-side footprints of actual nested Source capture allocations. |
+| `Lowering/StorageOps/SourceNestedByteCaptureControls.lean` | Nested Source snapshots can allocate before failure. |
