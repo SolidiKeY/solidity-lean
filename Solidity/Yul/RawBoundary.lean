@@ -276,4 +276,29 @@ theorem returnU8_clean_view : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidi
     | storRef h _ => cases h
     | cdRef h _ _ => cases h
 
+/-- Unchecked addition depends on authoritative operand words within each fixed pipeline.
+This preserves the legacy/viaIR distinction and asserts no compiler adequacy. -/
+theorem uncheckedU8Add_agrees : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (left right : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.uncheckedU8Add pipeline first left right =
+ Solidity.Yul.RawFrame.uncheckedU8Add pipeline second left right := by
+  intro ctx pipeline first second same left right
+  cases pipeline with
+  | legacy =>
+    change (Except.ok (LocalValue.scalar (LocalOperations.u8Shape ctx.env)
+      (word ((u8Word first left).val + (u8Word first right).val))) :
+      Solidity.Source.R (LocalValue ctx.env (.int Solidity.Source.IntTy.u8))) =
+      .ok (.scalar (LocalOperations.u8Shape ctx.env)
+        (word ((u8Word second left).val + (u8Word second right).val)))
+    rw [u8Word_agrees ctx first second same left,u8Word_agrees ctx first second same right]
+  | viaIR =>
+    change (Solidity.Source.binVal false .add (returnU8 .viaIR first left)
+      (returnU8 .viaIR first right)).map LocalValue.clean =
+      (Solidity.Source.binVal false .add (returnU8 .viaIR second left)
+        (returnU8 .viaIR second right)).map LocalValue.clean
+    rw [returnU8_agrees ctx .viaIR first second same left,
+      returnU8_agrees ctx .viaIR first second same right]
+
 end Solidity.Yul.RawFrame
