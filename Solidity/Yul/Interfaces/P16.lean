@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8GrowingSequence
 import Solidity.Yul.RawU8Declaration
 import Solidity.Yul.RawIntegerBlock
 import Solidity.Yul.RawIntegerSequence
@@ -212,3 +213,10 @@ The Source.declInit law requires checked/coherent input. Its zero backup is only
 metadata for an incoherent result, not truncation or clean-on-write. Checks include
 dirty copies, legacy/viaIR partial timeout differences and unsupported subtraction.
 General initializer admission and composition with grown Items remain separate. -/
+
+/-! RawU8GrowingSequence.run/correct joins an existing supported uint8 initializer
+with an actual checked Items tail, reusing RawIntegerSequence's indexed result
+and projection. The Source.execItems law retains checked/coherent premises.
+Checks exercise arithmetic consumption of the new local, older mutation,
+control restoration, dirty words and pipeline-specific initializer timeout effects.
+Block closure and general initializer admission remain separate obligations. -/
