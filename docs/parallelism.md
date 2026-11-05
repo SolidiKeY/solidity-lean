@@ -253,15 +253,22 @@ The pin inventory has one fragment per Lean file,
 edits only its own fragments and runs `fragments.sh`, so two lanes never touch
 the same lines.  `fragments.sh --check` (run by `gate.sh`, `run-lean.sh` and
 CI) fails on a stale combined file; the write refuses lines in a combined file
-that no fragment produces (a direct edit) unless `--force`.  The combined
-files merge with `merge=union`; after any merge or rebase run `fragments.sh`.
-`fragments.sh --resolve [--lane NAME]`, during a conflicted merge or right
-after a merge commit, regenerates every combined file and the roots, adopts a
-branch's direct edits of a combined file into its lane's fragment (insertions
-into `<lane>.md` in the slot where they landed, deletions from the fragment
-that held the line; pins by key), and stages the result; it exits 1 while a
-path stays conflicted.  The pre-gate service runs it on merges whose only
-conflicts are in these files or the roots.
+that no fragment produces (a direct edit) unless `--force`.  The Markdown
+combined files merge with `merge=union` (the pin inventory does not: a union
+of JSON is not JSON); after any merge or rebase run `fragments.sh`.
+`fragments.sh --resolve [--lane NAME]`, during a conflicted two-parent merge
+or right after a merge commit, regenerates every combined file and the roots
+and stages the result; it exits 1 while a path stays conflicted.  A side that
+has fragments is taken from its fragments (its combined file may be stale);
+only lines none of the merged fragments has are adopted, into
+`<slot>/<lane>.md`.  A side that predates the fragments has its direct edits
+adopted: a replaced block found once is edited in place in the fragment that
+holds it, a deleted line found once is removed, inserted lines go to
+`<slot>/<lane>.md` (so they land at the end of their slot), and pins merge by
+key.  After a rebase or a fast-forward there is no merge to read; run
+`fragments.sh` and move the lines it refuses into a fragment.  The pre-gate
+service runs `--resolve` on merges whose only conflicts are in these files,
+their fragments or the roots, and records them as `auto_resolved`.
 
 Measured on the history since 2026-10-27 (non-merge commits): 214 touched
 `Solidity.lean`, whose hunks are now regenerated instead of merged.  269

@@ -227,17 +227,21 @@ def resolve(lane, ours_lane):
     gd = pathlib.Path(git("rev-parse", "--git-dir").decode().strip())
     if (gd / "MERGE_HEAD").exists():
         ours = git("rev-parse", "HEAD").decode().strip()
-        theirs = (gd / "MERGE_HEAD").read_text().split()[0]
+        mh = (gd / "MERGE_HEAD").read_text().split()
+        if len(mh) != 1: raise Error("--resolve handles a two-parent merge, not an octopus merge")
+        theirs = mh[0]
         msg = (gd / "MERGE_MSG").read_text() if (gd / "MERGE_MSG").exists() else ""
     else:
         ps = git("rev-list", "--parents", "-n1", "HEAD").decode().split()
-        if len(ps) != 3: raise Error("--resolve needs a merge in progress or a merge commit at HEAD")
+        if len(ps) != 3:
+            raise Error("--resolve needs a two-parent merge in progress or merge commit at HEAD; "
+                        "after a rebase or fast-forward run fragments.sh and move refused lines into a fragment")
         ours, theirs = ps[1], ps[2]; msg = git("log", "-1", "--format=%s", "HEAD").decode()
     base = git("merge-base", ours, theirs, check=False).decode().split()
     if not base: raise Error("no merge base")
     lane = lane_name(lane or merge_label(msg), "lane-" + theirs[:8])
     branch = git("symbolic-ref", "-q", "--short", "HEAD", check=False).decode().strip()
-    ours_lane = lane_name(ours_lane or branch, "ours-" + ours[:8])
+    ours_lane = lane_name(ours_lane or branch.rstrip("/").split("/")[-1], "ours-" + ours[:8])
     unmerged = set(git("diff", "--name-only", "--diff-filter=U", "-z").decode().split("\0")) - {""}
     w = Tree(); sides = [(Tree(ours), ours_lane), (Tree(theirs), lane)]; tb = Tree(base[0])
     resolved, notes, left = set(), [], set()
@@ -257,11 +261,12 @@ def resolve(lane, ours_lane):
         for t, name in sides:
             comb = t.read(c)
             if comb is None: continue
-            if t.has_dir(d): gen = generate(t, c, d, kind, [])
+            own = t.has_dir(d)
+            if own: gen = generate(t, c, d, kind, [])
             elif tb.has_dir(d): gen = generate(tb, c, d, kind, [])
             else: gen = tb.read(c) or ("{}\n" if kind == "json" else "")
             w = Tree()
-            ok &= (apply_md if kind == "md" else apply_json)(w, c, d, unmark(gen, d), unmark(comb, d), name, notes)
+            ok &= (apply_md if kind == "md" else apply_json)(w, c, d, unmark(gen, d), unmark(comb, d), name, notes, own)
         if not ok: left.add(c); continue
         errors = []; w = Tree(); text = generate(w, c, d, kind, errors)
         if errors: notes += errors; left.add(c); continue
@@ -269,7 +274,8 @@ def resolve(lane, ours_lane):
         git("add", "-A", "--", c, d); resolved.add(c)
     if any(r in unmerged for r in ROOTS) or os.path.isfile("scripts/coord-tools/register.sh"):
         r = subprocess.run(["bash", "scripts/coord-tools/register.sh"], capture_output=True, text=True)
-        if r.returncode: notes.append("register.sh: " + (r.stdout + r.stderr)[-300:]); left |= {x for x in ROOTS if x in unmerged}
+        if r.returncode:
+            notes.append("register.sh: " + (r.stdout + r.stderr)[-300:]); left |= {x for x in ROOTS if x in unmerged} or {"register.sh"}
         else:
             for x in ROOTS:
                 if os.path.isfile(x): git("add", "--", x)
@@ -286,48 +292,76 @@ def frag_lines(w, d):
     return [(f, lines(w.read(f))) for f in ordered(w, d, "md", [])]
 
 
-def apply_md(w, c, d, gen, comb, name, notes):
-    """Move the lines `comb` adds to or drops from `gen` into the working fragments."""
+def apply_md(w, c, d, gen, comb, name, notes, own):
+    """Move the lines `comb` adds to or drops from `gen` into the working fragments.
+
+    For a side with its own fragments (`own`), its fragments are the truth: its combined
+    file may be stale (not regenerated, or union-merged), so only lines no merged fragment
+    has are adopted, and nothing is deleted.  For an old-style side every difference is a
+    direct edit: a replaced block found once in one fragment is edited there in place,
+    a deleted line found once is removed, and an inserted run goes to `<slot>/<lane>.md`.
+    """
     a, b = lines(gen), lines(comb)
     frags = frag_lines(w, d); flat = [(f, i, l) for f, ls in frags for i, l in enumerate(ls)]
     present = {l for _, _, l in flat}
-    dels, adds = [], []
+    dels, repl, adds = set(), {}, []
+    def unique(l):
+        hits = [(f, i) for f, i, x in flat if x == l]
+        if len(hits) > 1: notes.append(f"{c}: {name} changed a line found {len(hits)} times; kept: {l.strip()[:80]}")
+        return hits[0] if len(hits) == 1 else None
+    def slot_of(i1):
+        slot = d
+        if i1 > 0:
+            anchor = a[i1 - 1]; k = a[:i1 - 1].count(anchor)
+            hits = [(f, i) for f, i, x in flat if x == anchor]
+            if hits:
+                f, i = hits[min(k, len(hits) - 1)]; slot = os.path.dirname(f)
+                names = [g for g, _ in frags]; nxt = names.index(f) + 1
+                if i == len(dict(frags)[f]) - 1 and nxt < len(names) and os.path.dirname(names[nxt]).startswith(slot + "/"):
+                    slot = os.path.dirname(names[nxt])
+        return slot
     for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
-        if tag in ("delete", "replace"):
-            for l in a[i1:i2]:
-                if not l.strip(): continue
-                hits = [(f, i) for f, i, x in flat if x == l]
-                if len(hits) == 1: dels.append(hits[0])
-                elif hits: notes.append(f"{c}: {name} removed a line found {len(hits)} times; kept: {l.strip()[:80]}")
-        if tag in ("insert", "replace"):
-            run = b[j1:j2]
-            if all(l in present for l in run if l.strip()): continue
-            slot = d
-            if i1 > 0:
-                anchor = a[i1 - 1]; k = a[:i1 - 1].count(anchor)
-                hits = [(f, i) for f, i, x in flat if x == anchor]
-                if hits:
-                    f, i = hits[min(k, len(hits) - 1)]; slot = os.path.dirname(f)
-                    names = [g for g, _ in frags]; nxt = names.index(f) + 1
-                    if i == len(dict(frags)[f]) - 1 and nxt < len(names) and os.path.dirname(names[nxt]).startswith(slot + "/"):
-                        slot = os.path.dirname(names[nxt])
-            adds.append((f"{slot}/{name}.md", run))
-    for f in {f for f, _ in dels}:
-        keep = [l for i, l in enumerate(dict(frags)[f]) if (f, i) not in dels]
+        if tag == "equal": continue
+        old, run = a[i1:i2], b[j1:j2]
+        if own:
+            run = [l for l in run if l.strip() and l not in present]
+            if run: adds.append((f"{slot_of(i1)}/{name}.md", run))
+            continue
+        hits = [unique(l) if l.strip() else None for l in old]
+        if tag == "replace" and all(h for h, l in zip(hits, old) if l.strip()) and any(hits):
+            got = [h for h in hits if h]; f0 = got[0][0]; idx = [i for _, i in got]
+            if all(f == f0 for f, _ in got) and idx == list(range(idx[0], idx[0] + len(idx))):
+                # edit in place: the block of non-blank lines is contiguous in one fragment
+                lo, hi = idx[0], idx[-1]; ls = dict(frags)[f0]
+                k0 = next(k for k, l in enumerate(old) if l.strip()); k1 = max(k for k, l in enumerate(old) if l.strip())
+                lo -= k0; hi += len(old) - 1 - k1
+                if 0 <= lo and hi < len(ls) and ls[lo:hi + 1] == old:
+                    repl[(f0, lo)] = (hi, run); dels |= {(f0, x) for x in range(lo, hi + 1)}; continue
+        dels |= {h for h in hits if h}
+        if tag in ("insert", "replace") and any(l.strip() for l in run):
+            adds.append((f"{slot_of(i1)}/{name}.md", run))
+    for f in sorted({f for f, _ in dels}):
+        keep = []
+        for i, l in enumerate(dict(frags)[f]):
+            if (f, i) in repl: keep += repl[(f, i)][1]
+            if (f, i) not in dels: keep.append(l)
         if keep: pathlib.Path(f).write_bytes("".join(keep).encode())
         else: os.remove(f)
-        notes.append(f"{c}: {name}: removed {len(dict(frags)[f]) - len(keep)} line(s) from {f}")
+        n = sum(1 for g, _ in dels if g == f); r = sum(1 for g, _ in repl if g == f)
+        notes.append(f"{c}: {name}: " + (f"edited {r} block(s) in place in {f}" if r else f"removed {n} line(s) from {f}"))
+    after = "".join(l for _, ls in frag_lines(Tree(), d) for l in ls) if dels and adds else "".join(l for _, _, l in flat)
     for f, run in adds:
+        text = "".join(run)
+        if not own and ("\n" + text) in ("\n" + after): continue  # the merged fragments already have this run
         p = pathlib.Path(f); old = p.read_bytes().decode() if p.is_file() else ""
         if old and not old.endswith("\n"): old += "\n"
-        text = "".join(run)
         if not text.endswith("\n"): text += "\n"
         p.parent.mkdir(parents=True, exist_ok=True); p.write_bytes((old + text).encode())
         notes.append(f"{c}: {name}: moved {len(run)} line(s) into {f}")
     return True
 
 
-def apply_json(w, c, d, gen, comb, name, notes):
+def apply_json(w, c, d, gen, comb, name, notes, own):
     try: a, b = json.loads(gen), json.loads(comb)
     except ValueError as e: notes.append(f"{c}: {name}'s file is not JSON ({e}); left"); return False
     errors = []; parts = json_parts(w, d, errors); cur = {}
@@ -340,10 +374,11 @@ def apply_json(w, c, d, gen, comb, name, notes):
         changed.add(f)
     for k, v in b.items():
         if a.get(k) == v or cur.get(k) == v: continue
+        if own and (k in a or k in cur): continue  # its fragments are the truth; the combined file may be stale
         if k in cur and cur[k] != a.get(k): notes.append(f"{c}: {k} changed on both sides; left"); ok = False; continue
         put(k, v)
     for k in a:
-        if k not in b and k in cur:
+        if not own and k not in b and k in cur:
             if cur[k] == a[k]: put(k, None)
             else: notes.append(f"{c}: {name} removed {k}, changed on the other side; left"); ok = False
     if not ok: return False

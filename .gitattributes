@@ -5,4 +5,3 @@ docs/module-map.md merge=union
 docs/module-map/*.md merge=union
 docs/README.md merge=union
 TERRA-TODO.md merge=union
-scripts/g07-axiom-pins.json merge=union
