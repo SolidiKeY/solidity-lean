@@ -1,30 +1,35 @@
 {
-  "status": "proposal only; shared registries not edited",
+  "status": "Local manifest only; registration read from adopted master; shared registries not edited",
   "modules": [
     {
       "module": "Solidity.Frontend.ExecutableAst.Shared.Boundary",
       "area": "docs/module-map/frontend.md",
-      "row": "Executable reader callback signatures returning the existing surface syntax; no Lean environment argument."
+      "row": "Executable reader callback signatures returning the existing surface syntax; no Lean environment argument.",
+      "registrationStatus": "published on master9584"
     },
     {
       "module": "Solidity.Frontend.ExecutableAst.Shared.Translate",
       "area": "docs/module-map/frontend.md",
-      "row": "Extracted executable AST reader and recursive extension steps; default fragment/refusals preserved."
+      "row": "Extracted executable AST reader and recursive extension steps; default fragment/refusals preserved.",
+      "registrationStatus": "published on master9584"
     },
     {
       "module": "Solidity.Frontend.ExecutableAst.Shared.Intrinsic",
       "area": "docs/module-map/frontend.md",
-      "row": "Existing intrinsic formula builders with explicit producer loop-lowering/entry-precondition callbacks; a new reference guard preserves the default AST fragment refusal."
+      "row": "Existing intrinsic formula builders with explicit producer loop-lowering/entry-precondition callbacks; a new reference guard preserves the default AST fragment refusal.",
+      "registrationStatus": "published on master9584"
     },
     {
       "module": "Solidity.Frontend.ExecutableAst.Shared.Compose",
       "area": "docs/module-map/frontend.md",
-      "row": "Canonical executable composition of reviewed memory and control/tuple callbacks; root validation and intrinsic builders remain shared."
+      "row": "Canonical executable composition of reviewed memory and control/tuple callbacks; root validation and intrinsic builders remain shared.",
+      "registrationStatus": "proposal pending central owner"
     },
     {
       "module": "Solidity.Frontend.ExecutableAst.Shared.Scope",
       "area": "docs/module-map/frontend.md",
-      "row": "Duplicate-scope checks and proved fresh-index bounds for existing lexical renaming in the shared plain builder."
+      "row": "Duplicate-scope checks and proved fresh-index bounds for existing lexical renaming in the shared plain builder.",
+      "registrationStatus": "published on master9584"
     }
   ]
 }

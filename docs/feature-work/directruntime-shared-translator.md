@@ -435,3 +435,33 @@ available6264778752bytes. Evidence/adoption-f77/keysort.log preserves commands a
 outputs. RUNTIME_GATE_PASS remains pending: actual versions/KeySort are necessary,
 but producer migration, full/native/WASM gates and source parity are not complete.
 Fresh six-module source/C/olean/trace fingerprints are saved beside these logs.
+
+
+## Published9584 adoption and canonical coverage backfill
+
+Explicitly authorized master9584f9e7 was fetched,remote-ancestry verified and merged
+without conflicts in44da2669. All owned production bytes are unchanged from
+abe3fb8c. Master delivers identical Scope plus C's separate intrinsic model controls;
+it does not deliver CR's existing-import migration. Scope is centrally registered
+on master; Compose remains a local proposal. No shared root/map edit was made.
+
+Local bounded build344jobs,MCP0 and all8focused per-file gates passed,including
+new C controls; wall87.938s,RSS1244524KiB,scopepeak1498406912bytes,minimum outer
+available4865368064bytes. Actual Lean4.24.0/Lake5.0.0-src+797c613 are recorded.
+
+The single observation driver now uses default and composed Reader configurations.
+Default matrices are frozen even in capture mode. Independent source preflight,
+frozen MCP and per-file checks passed in25.562s,RSS579044KiB,minimum available
+5455556608bytes. Each reader exercises57modern kinds in each suite,with37unknown
+root refusals and20no-standalone inputs. Existing suite counts stay11decoded/
+26refused; four refusal reasons change as composed decoding reaches deeper shapes.
+Fresh counts change14decoded/23refused to16decoded/21refused,only selected do-while
+and tuple witnesses. Reader-comparison.json preserves every exact difference and
+source identity; inventory links all four matrices. These are decoding observations,
+not exhaustive subtype support,identity adequacy,source semantics or backend proofs.
+
+Migration-packet.json pins current source/API hashes and CR/D obligations. Both
+independent read-only finder/skeptic reviews found no driver/comparison/ledger defect;
+neither used Lean/server. CR migration,DR-A-META,full per-form parity,compiled
+native/WASM closure,before/after runtime and final gates remain pending. No goal
+completion or RUNTIME_GATE_PASS is claimed.

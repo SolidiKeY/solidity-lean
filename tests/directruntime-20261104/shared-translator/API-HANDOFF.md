@@ -81,3 +81,20 @@ The composed fixture implements retention only in A's test scope. CR still owns
 actual existing Lean import migration; no independent optional wrapper suffices.
 Native/WASM ordinary closure is pending owner D evidence. New Scope/Compose roots
 remain local registration proposals; A does not edit generated registrations.
+
+
+## Published9584 adoption and canonical kind observations
+
+Migration-packet.json binds the concrete API/current producer source hashes and
+acceptance obligations. Reader-comparison.json records every same-input difference
+between default and canonical readers across both57-kind suites. Existing suite:
+11decoded/26refused/20no-entry for both,with four refusal-reason changes. Fresh suite:
+default14decoded/23refused;canonical16decoded/21refused;both20no-entry. Only selected
+DoWhileStatement/TupleExpression witnesses change to decoded. Both suites retain
+37unknown-root refusals; whole witness/child failure caveats apply. Default frozen
+matrices were preserved,not overwritten by capture. Frozen MCP and per-file gates
+passed. Source preservation and full producer parity remain open.
+
+Published9584 registers Scope centrally; Compose alone remains a local proposal.
+No generated root or map was edited by A. CR migration/DR-A-META/native closure
+remain pending; packet publication does not complete original queue item2.

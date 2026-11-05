@@ -161,3 +161,13 @@ Final handoff finder/skeptic confirmed actual KeySort377/131/131 and partial
 blocker claims. Both identified checkpoint-accounting ambiguity: original queue2
 is partial until existing tooling migration/native adoption; concrete API publication
 is only a done subtask. Machine report corrected accordingly. No other finding.
+
+
+## Published9584 and composed57-kind controls
+
+Independent read-only finder/skeptic,no Lean/server,no writes. No confirmed defect
+in generalized Reader driver,default frozen capture protection,comparison generator
+or inventory. Both checked six exact differences: four existing refusal-reason
+changes and two fresh decoded witnesses. Both checked57keys,37unknown-root refusals,
+producer printing unchanged and source hashes. Frozen gate/MCP exit0; whole-witness
+and child-failure limits retained. Producer migration/native closure remain open.

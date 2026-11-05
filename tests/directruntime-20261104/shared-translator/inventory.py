@@ -97,8 +97,8 @@ for kind in sorted(emitted):
       'positiveNegativeRegressions':{'status':'full per-construct controls pending',
         'existingSourceCandidates':[p for p in evidence if p.startswith(('tests/','Solidity/Examples/'))]}})
 # Observation matrices pin whole-witness reader behavior, not form-level semantics.
-for prefix,label in [('', 'existingFixture'),('fresh-', 'freshCompilerFixture')]:
- matrix=owned/(prefix+'construct-reader-matrix.json');casefile=owned/(prefix+'construct-reader-cases.json')
+for prefix,casePrefix,label in [('', '', 'existingFixture'),('fresh-', 'fresh-', 'freshCompilerFixture'),('composed-', '', 'composedExistingFixture'),('composed-fresh-', 'fresh-', 'composedFreshCompilerFixture')]:
+ matrix=owned/(prefix+'construct-reader-matrix.json');casefile=owned/(casePrefix+'construct-reader-cases.json')
  if matrix.exists() and casefile.exists():
   observed={r['nodeType']:r for r in json.loads(matrix.read_text())}
   cases={r['nodeType']:r for r in json.loads(casefile.read_text())['cases']}
@@ -107,7 +107,8 @@ for prefix,label in [('', 'existingFixture'),('fresh-', 'freshCompilerFixture')]
    if kind not in observed:continue
    item=observed[kind];case=cases[kind]
    row.setdefault('standaloneReaderObservations',{})[label]={
-    'stage':'Whole-witness standalone tree decoding only; child refusals may dominate. No intrinsic, identity-resolution, semantic or backend support verdict.',
+    'stage':'Whole-witness decoding with existing root metadata checks; child refusals may dominate. No intrinsic, identity-resolution, semantic or backend support verdict.',
+    'readerConfiguration':'Shared.executableReader' if prefix.startswith('composed-') else 'Shared.reader',
     'matrix':str(matrix.relative_to(root)),'cases':str(casefile.relative_to(root)),
     'route':item['route'],'natural':item['natural'],'unknownRoot':item['unknownRoot'],
     'producerExpression':item['producerExpression'],

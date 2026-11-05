@@ -3,7 +3,7 @@ from pathlib import Path
 import hashlib,json,subprocess,tarfile
 root=Path(__file__).resolve().parents[3];owned=Path(__file__).resolve().parent
 head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
-out=owned/'artifacts/cache-f77'/head[:12];out.mkdir(parents=True,exist_ok=True)
+out=owned/'artifacts/cache-packs'/head[:12];out.mkdir(parents=True,exist_ok=True)
 cache=Path('/workspace/.setup/cache/lake/artifacts')
 def sha(p):
  h=hashlib.sha256()
