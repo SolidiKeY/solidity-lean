@@ -1,4 +1,6 @@
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsLate
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsDeleteTarget
+import Solidity.Evm.Correct
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
@@ -544,5 +546,157 @@ theorem nested_late_program (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_late_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_late_program
+
+
+private def wordBase (id : Nat) : Fin W := if id=0 then wmod 16 else if id=1 then wmod 8 else wmod 24
+private def wordMachine : Machine := {Machine.init with stack := [w[77],w[88]],mem := fun c =>
+  if c=0 then w[32] else if c=1 then w[16] else if c=2 then w[42] else if c=3 ∨ c=4 then w[1]
+  else if c=16 then w[3] else if c=17 ∨ c=18 then w[8] else if c=19 then w[24]
+  else if c=8 then w[7] else if c=10 then (Word.val (wmod (W-1)))
+  else if c=24 then w[8] else if c=25 then w[9] else if c=26 then w[10] else w[0]}
+private theorem parentLength : hp.len root .dyn=3 := by
+  simp only [Heap.len,MObj.elems_dyn];rfl
+private theorem refs {Q : RefTy} (q : HRef H Q) :
+    (Q=P ∧ HEq q root) ∨ (Q=A ∧ HEq q left) ∨ (Q=A ∧ HEq q right) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi;exact .inl ⟨rfl,HEq.rfl⟩
+  | succ i => cases i with
+    | zero => cases hi;exact .inr (.inl ⟨rfl,HEq.rfl⟩)
+    | succ i => cases i with
+      | zero => cases hi;exact .inr (.inr ⟨rfl,HEq.rfl⟩)
+      | succ i => cases hi
+private theorem wordHeap : Objects.HeapRepr hp wordBase 5 wordMachine := by
+  refine ⟨⟨?_,?_,?_⟩,?_,?_,?_⟩
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq <;> decide
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+    all_goals simp only [Objects.cells,parentLength];decide
+  · intro Q V q r hn
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+      <;> rcases refs r with ⟨rfl,hr⟩ | ⟨rfl,hr⟩ | ⟨rfl,hr⟩ <;> cases hr
+      <;> first | exact (hn rfl).elim | (simp only [Objects.cells,parentLength];decide)
+  · intro Q V a r
+    rcases refs r with ⟨rfl,hr⟩ | ⟨rfl,hr⟩ | ⟨rfl,hr⟩ <;> cases hr <;> cases a
+    all_goals
+      refine ⟨?_,?_,?_⟩
+      · simp only [Objects.cells,parentLength];decide
+      · intro hh
+        first | cases (by simpa only [Objects.header] using hh : (0 : Nat)=1)
+              | (rw [parentLength];rfl)
+      · intro i v hit
+        first
+        | rw [parentElements] at hit
+          cases i with
+          | zero => cases hit;rfl
+          | succ i => cases i with
+            | zero => cases hit;rfl
+            | succ i => cases i with
+              | zero => cases hit;rfl
+              | succ i => cases hit
+        | rw [MObj.elems_fixed] at hit
+          cases i with
+          | zero => cases hit;exact ReprV.uint_of rfl
+          | succ i => cases i with
+            | zero => cases hit;exact ReprV.uint_of rfl
+            | succ i => cases i with
+              | zero => first | (cases hit;exact ReprV.uint_of rfl) | cases hit
+              | succ i => cases hit
+  · intro s r
+    rcases refs r with ⟨eq,_⟩ | ⟨eq,_⟩ | ⟨eq,_⟩ <;> cases eq
+  · intro s f Q r hf
+    rcases refs r with ⟨eq,_⟩ | ⟨eq,_⟩ | ⟨eq,_⟩ <;> cases eq
+private theorem wordRepr : Objects.StateRepr 1 1 5 (Frag.init ΔT) st wordBase wordMachine := by
+  have hc := Sim.init CT 0 W_pos (fun _ => 0) ⟨0,W_pos⟩ rfl
+  refine ⟨?_,wordHeap,?_,by decide⟩
+  · refine ⟨hc.store,?_,?_,hc.net,hc.netSelf,hc.bound,?_,hc.env,hc.funds,hc.oracle⟩
+    · intro p i
+      cases i with
+      | here => exact ReprV.uint_of rfl
+      | there i => cases i with
+        | here => exact ReprV.uint_of rfl
+        | there i => cases i with
+          | here => exact ReprV.uint_of rfl
+          | there i => cases i with | there i => nomatch i
+    · intro Q i hi
+      cases i with | there i => cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+    · intro Q i hi
+      cases i with | there i => cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+  · intro Q i
+    cases i with | there i => cases i with | there i => cases i with | there i => cases i with
+      | here => exact ⟨root,rfl,rfl⟩
+      | there i => nomatch i
+
+private theorem wordAllocator : Objects.AllocatorRepr hp wordBase 5 ⟨32,by decide⟩ wordMachine := by
+  refine ⟨wordHeap,⟨by decide,by decide,rfl,?_⟩,?_⟩
+  · intro a ha
+    change 32≤a at ha
+    simp only [wordMachine,if_neg (show a≠0 by omega),if_neg (show a≠1 by omega),
+      if_neg (show a≠2 by omega),if_neg (show ¬(a=3 ∨ a=4) by omega),if_neg (show a≠16 by omega),
+      if_neg (show ¬(a=17 ∨ a=18) by omega),if_neg (show a≠19 by omega),if_neg (show a≠8 by omega),
+      if_neg (show a≠10 by omega),if_neg (show a≠24 by omega),if_neg (show a≠25 by omega),if_neg (show a≠26 by omega)]
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+    all_goals simp only [Objects.cells,parentLength];decide
+
+/-- Actual populated strong Objects input for the existing Source fixture. -/
+theorem nested_word_initial : Objects.StateRepr 1 1 5 (Frag.init ΔT) st wordBase wordMachine ∧
+    Objects.AllocatorRepr hp wordBase 5 ⟨32,by decide⟩ wordMachine ∧
+    SourceUintFixedRefsAt (sw 1 1 42) 2 hp root address ∧ Source.MemOK E0 SH (sw 1 1 42) :=
+  ⟨wordRepr,wordAllocator,graphW 1 1 42,memOKW 1 1 42⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_word_initial
+
+
+/-- Actual whole-word write/delete on the same inhabited Source/typed graph.
+The full initial word table and saved stack are explicit; both reached Objects
+representations and the final complete allocator are derived. -/
+theorem nested_word_program (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 ΓW) (mm target : Machine),
+      [wordMachine.mem 0,wordMachine.mem 1,wordMachine.mem 2,wordMachine.mem 3,wordMachine.mem 4,
+        wordMachine.mem 8,wordMachine.mem 9,wordMachine.mem 10,wordMachine.mem 11,
+        wordMachine.mem 16,wordMachine.mem 17,wordMachine.mem 18,wordMachine.mem 19,
+        wordMachine.mem 24,wordMachine.mem 25,wordMachine.mem 26]=
+        [w[32],w[16],w[42],w[1],w[1],w[7],w[0],.val (wmod (W-1)),w[0],w[3],w[8],w[8],w[24],w[8],w[9],w[10]] ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wi wv)) (.stmt (.expr (sourceUintFixedNestedDelete wr wi wj)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) wordMachine=.ok mm 0 ∧
+      Evm.run (uintFixedChildDeleteCode (C := CT) 1 tr ti tj) mm=.ok target 0 ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv ++ uintFixedChildDeleteCode (C := CT) 1 tr ti tj) wordMachine=.ok target 0 ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ SourceUintFixedRefsAt z 2 out root address ∧
+      Source.MemOK E0 SH ym ∧ Source.MemOK E0 SH z ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (st.withHeap mid) wordBase mm ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (st.withHeap out) wordBase target ∧
+      Objects.AllocatorRepr out wordBase 5 ⟨32,by decide⟩ target ∧ target.stack=[w[77],w[88]] ∧
+      MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] ∧
+      (MObj.elems .dyn (out.get root),MObj.elems .fixed (out.get left),MObj.elems .fixed (out.get right))=
+        ([left,left,right],[u 7,u 0,u (W-1)],[u 8,u 9,u 10]) := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,mm,target,tw,td,first,second,items,prog,cw,cd,append,rm,rz,mok,mokz,hm,hz,lm,lz,nz,parent,objects,addresses,world,events,logs,fnLocals,stack,allocator⟩ :=
+      (graphW 1 1 42).resolved_write_delete_word (G0 pipeline) F0 horizon nps st root address wr wi wj wv tr ti tj tv
+        (u 1) (u 1) (u 42) left rfl rfl rfl rfl rfl rfl rfl rfl selectLeft selectedSeparation
+        (by decide) (by decide) SH (memOKW 1 1 42) wordRepr
+    have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+    have contents : MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] := by
+      rw [Option.some.inj (tw.symm.trans canonical),Heap.get_set_same,MObj.elems_setElem,MObj.elems_fixed];rfl
+    have clear : mid.writeAddr (.index left .fixed (u 1)) (PrimTy.dflt .uint)=some (mid.set left (MObj.setElem .fixed (mid.get left) 1 (PrimTy.dflt .uint))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (mid.get left)).length := by rw [contents];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+    have final : MObj.elems .fixed (out.get left)=[u 7,u 0,u (W-1)] := by
+      rw [Option.some.inj (td.symm.trans clear),Heap.get_set_same,MObj.elems_setElem,contents];rfl
+    refine ⟨mid,out,ym,z,mm,target,rfl,items,cw,cd,append,rm,rz,mok,mokz,hm,hz,
+      allocator ⟨32,by decide⟩ (by decide) wordAllocator,stack,contents,?_⟩
+    rw [parent,final,objects right (by decide)]
+    change (MObj.elems .dyn (hp.get root),[u 7,u 0,u (W-1)],MObj.elems .fixed (hp.get right))=_
+    rw [parentElements,MObj.elems_fixed];rfl
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_word_program
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
