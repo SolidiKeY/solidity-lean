@@ -8,6 +8,8 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
+| [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
 | [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
@@ -22,11 +24,11 @@ history is in git.
 | [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor and stdio comparison harnesses, independent feature/test discovery, measurements and completeness limits. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 18 VM lanes of eight to ten hours covering 118 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: VM lanes of eight to ten hours, proof work packages, dependencies, the full-scope extension and source-to-bytecode completion gates. |
 | [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and the decisions they implement. |
 | [feature-work/frontend-parse.md](feature-work/frontend-parse.md) | Lane V05 (G08–G11): the checked lexer and parser to S00's syntax: lexical certificate, token yield and layouts, precedence, whole-source parsing, coverage, corpus regression and G05 parse-stage instance. |
 | [feature-work/roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) | Roadmap G05: audit of frontend, provenance and unsafe elaborator paths; checked certificate interfaces for raw input, parse, resolution and metadata; link settings and admitted settings. |
-| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
+| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy, the full-scope decision and the reopened former exclusions. |
 | [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md) | Roadmap G00: pins and their disagreements, evidence for each recorded exclusion, manifest/ledger reconciliation, owners and open scope questions. |
 | [feature-work/roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md) | Roadmap G03: constructor/feature → admission → lowering → backend → EVM → theorem ledger with combinations and decision rows, and the module/lemma dependency ledger (`scripts/roadmap-g03-ledger.py`, generated JSON). |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
@@ -57,6 +59,7 @@ history is in git.
 | [feature-work/backend-assembler.md](feature-work/backend-assembler.md) | Roadmap G45.05/G45.04 lane: the Osaka instruction datatype, byte encoder/decoder and jump-destination analysis, then the assembler; a handoff per checkpoint. |
 | [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
 | [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
+| [feature-work/full-scope.md](feature-work/full-scope.md) | Full scope (2026-11-04): every exclusion withdrawn, optimizing compiler and solc translation validation; groups X/O/T, decisions D1–D6, parallel lanes and waves. |
 | [feature-work/inline-assembly.md](feature-work/inline-assembly.md) | Authorized inline assembly extension: the exclusions it reopens, tiers, groups Y01–Y10, lanes VY1–VY5 and approved decisions YQ1–YQ7; implementation gates remain open. |
 | [feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md) | Compiler transport proofs, reached failure controls, full small-frame output and remaining Source/EVM obligations. |
 | [feature-work/memory-operation-proofs.md](feature-work/memory-operation-proofs.md) | Typed Source/heap/word memory-operation lemmas, reached decrement failures and the remaining physical/backend boundary. |
