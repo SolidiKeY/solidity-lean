@@ -1,0 +1,150 @@
+{
+  "status": "external name/id association, not semantic matching",
+  "definitions": [
+    {
+      "contract": "LinkedMath",
+      "id": 13,
+      "name": "twice",
+      "kind": "function",
+      "src": "88:69:0"
+    },
+    {
+      "contract": "Census",
+      "id": 35,
+      "name": "",
+      "kind": "constructor",
+      "src": "241:75:0"
+    },
+    {
+      "contract": "Census",
+      "id": 55,
+      "name": "arithmetic",
+      "kind": "function",
+      "src": "321:110:0"
+    },
+    {
+      "contract": "Census",
+      "id": 69,
+      "name": "signed",
+      "kind": "function",
+      "src": "436:75:0"
+    },
+    {
+      "contract": "Census",
+      "id": 90,
+      "name": "push",
+      "kind": "function",
+      "src": "516:119:0"
+    },
+    {
+      "contract": "Census",
+      "id": 99,
+      "name": "pop",
+      "kind": "function",
+      "src": "640:41:0"
+    },
+    {
+      "contract": "Census",
+      "id": 109,
+      "name": "echo",
+      "kind": "function",
+      "src": "686:90:0"
+    },
+    {
+      "contract": "Census",
+      "id": 124,
+      "name": "linked",
+      "kind": "function",
+      "src": "781:91:0"
+    },
+    {
+      "contract": "Census",
+      "id": 133,
+      "name": "assemblyWord",
+      "kind": "function",
+      "src": "877:117:0"
+    }
+  ],
+  "crosswalk": [
+    {
+      "irName": "fun_linked_124",
+      "definition": {
+        "contract": "Census",
+        "id": 124,
+        "name": "linked",
+        "kind": "function",
+        "src": "781:91:0"
+      }
+    },
+    {
+      "irName": "fun_echo_109",
+      "definition": {
+        "contract": "Census",
+        "id": 109,
+        "name": "echo",
+        "kind": "function",
+        "src": "686:90:0"
+      }
+    },
+    {
+      "irName": "fun_arithmetic_55",
+      "definition": {
+        "contract": "Census",
+        "id": 55,
+        "name": "arithmetic",
+        "kind": "function",
+        "src": "321:110:0"
+      }
+    },
+    {
+      "irName": "fun_assemblyWord_133",
+      "definition": {
+        "contract": "Census",
+        "id": 133,
+        "name": "assemblyWord",
+        "kind": "function",
+        "src": "877:117:0"
+      }
+    },
+    {
+      "irName": "fun_signed_69",
+      "definition": {
+        "contract": "Census",
+        "id": 69,
+        "name": "signed",
+        "kind": "function",
+        "src": "436:75:0"
+      }
+    },
+    {
+      "irName": "fun_push_90",
+      "definition": {
+        "contract": "Census",
+        "id": 90,
+        "name": "push",
+        "kind": "function",
+        "src": "516:119:0"
+      }
+    },
+    {
+      "irName": "fun_pop_99",
+      "definition": {
+        "contract": "Census",
+        "id": 99,
+        "name": "pop",
+        "kind": "function",
+        "src": "640:41:0"
+      }
+    },
+    {
+      "irName": "fun_twice_13",
+      "definition": {
+        "contract": "LinkedMath",
+        "id": 13,
+        "name": "twice",
+        "kind": "function",
+        "src": "88:69:0"
+      }
+    }
+  ]
+}

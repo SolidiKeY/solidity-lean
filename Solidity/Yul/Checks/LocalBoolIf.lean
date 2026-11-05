@@ -38,7 +38,7 @@ Solidity.Yul.LocalBoolIf.run Solidity.Yul.Checks.LocalBoolInitialization.partial
 
   exact ⟨rfl,rfl⟩
 
-#print axioms Solidity.Yul.LocalBoolIf.restore_self
+#print axioms Solidity.Yul.RawSequence.restore_self
 #print axioms Solidity.Yul.LocalBoolIf.source_agrees
 #print axioms concrete
 #print axioms branches

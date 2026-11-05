@@ -4434,6 +4434,175 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.exact_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.intrinsic_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.selected_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuard.lean:Solidity.Backend.FailurePaths.LogicalGuard.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.and_skips_poisoned_right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.conjunction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.disjunction": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.false_and_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.old_selector_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.or_skips_poisoned_right": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.poison_right_faults": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.poison_right_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.represented": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.true_or_false": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/LogicalGuardControls.lean:Solidity.Backend.FailurePaths.LogicalGuard.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.agreement": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.exact_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.selected_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuard.lean:Solidity.Backend.FailurePaths.RelationalGuard.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.equal_lt_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.equality": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.maximum_lt_zero_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.negative_lt_zero_succeeds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.old_selector_refuses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.sign_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.signed_extremes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.unsigned_maximum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/RelationalGuardControls.lean:Solidity.Backend.FailurePaths.RelationalGuard.Controls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingActivation.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingActivation.Checks.whole": [
   "Classical.choice",
   "Quot.sound",

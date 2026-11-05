@@ -1,0 +1,15 @@
+{
+  "command": [
+    "env",
+    "GATE_BASE=6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+    "GATE_LOGS=tests/sol-numeric-literals/evidence/target-closure",
+    "bash",
+    "scripts/coord-tools/gate.sh",
+    "touched"
+  ],
+  "exit": 0,
+  "seconds": 218.66008,
+  "peak_child_rss_kib": 2105736,
+  "user_seconds": 209.950874,
+  "system_seconds": 7.690217
+}

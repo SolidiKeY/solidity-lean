@@ -3,7 +3,7 @@ import SolidityBridge.RoadmapV15.P10.LogicalShiftFixtures
 import Solidity.Backend.PrimitivePackets.SignedMod.Controls
 
 /-! Explicit unchecked Source clients and populated two-step native records.
-Counts retain all256bits; no physical load, frame or whole compiler claim. -/
+Counts retain all 256 bits; no physical load, frame or whole compiler claim. -/
 namespace SolidityBridge.RoadmapV15.P10.PublishedShiftsControls
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 open Solidity.Backend.PrimitivePackets.Shifts
@@ -113,9 +113,29 @@ theorem complete_observation (perm : Bool) :
   · change [u 12,u 258,u 513]≠[u 12,u 513,u 258];decide
   · decide
 
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShiftsControls.shl_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms shl_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShiftsControls.shr_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms shr_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShiftsControls.nonzero_clients' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms nonzero_clients
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShiftsControls.count_boundaries' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms count_boundaries
+/-- info: 'SolidityBridge.RoadmapV15.P10.PublishedShiftsControls.complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms complete_observation
 end SolidityBridge.RoadmapV15.P10.PublishedShiftsControls

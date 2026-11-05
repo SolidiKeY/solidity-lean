@@ -1,0 +1,189 @@
+{
+  "boundary": "Whole selected witness decoding, followed by existing metadata checks for expressions/statements and public function/contract checks. Child failures can dominate. Reader configurations use the actual Shared.reader and Shared.executableReader; neither decoding success nor reason differences establish intrinsic closure, identity adequacy, source preservation or backend support.",
+  "suites": [
+    {
+      "suite": "existing",
+      "inputs": [
+        {
+          "path": "tests/directruntime-20261104/shared-translator/construct-reader-matrix.json",
+          "sha256": "a6dbb6d8a9f5c73afe7d952ce88ac2d643ba27f153543fd6df89e1e13c46f222"
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/composed-construct-reader-matrix.json",
+          "sha256": "4b6ce78334b04be2f1c358a5626d4976b6fc5fbc2605d67d22ddab81ef81ab99"
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/construct-reader-cases.json",
+          "sha256": "e7a6552022f8fbf40538217ca815408d70c6cab9c394dc9a37764f9c0a89f130"
+        }
+      ],
+      "defaultCounts": {
+        "decoded": 11,
+        "refused": 26,
+        "not-standalone": 20
+      },
+      "composedCounts": {
+        "decoded": 11,
+        "refused": 26,
+        "not-standalone": 20
+      },
+      "unknownRootRefusals": 37,
+      "changes": [
+        {
+          "nodeType": "Conditional",
+          "route": "expression",
+          "before": {
+            "status": "refused",
+            "reason": "compact verifier: unsupported expression"
+          },
+          "composed": {
+            "status": "refused",
+            "reason": "unary operator"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+            "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+            "pointer": "/sourceUnits/2/ast/nodes/6/nodes/7/body/statements/1/expression/expression/components/0",
+            "nodeId": 128,
+            "src": "756:22:0",
+            "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+          }
+        },
+        {
+          "nodeType": "DoWhileStatement",
+          "route": "statements",
+          "before": {
+            "status": "refused",
+            "reason": "compact verifier: unsupported statement"
+          },
+          "composed": {
+            "status": "refused",
+            "reason": "binary expression lacks its common type"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/solc/Loops.ast.json",
+            "fixtureSha256": "c9a1dd4ad027a6ad4b9e167e862a0ebe19dc95c1fb59b9c6c71add40c784ff5a",
+            "pointer": "/ast/nodes/1/nodes/4/body/statements/1",
+            "nodeId": null,
+            "src": "1131:52:0",
+            "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+            "compilerSha256": null
+          }
+        },
+        {
+          "nodeType": "TupleExpression",
+          "route": "expression",
+          "before": {
+            "status": "refused",
+            "reason": "compact verifier: unsupported expression"
+          },
+          "composed": {
+            "status": "refused",
+            "reason": "unary operator"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/solc/source-units/SourceUnits.ast.json",
+            "fixtureSha256": "fdd168c44b0a82bbe2fb0ad8cbc7351d9f1f2e7ffdc943710dbb3476032d1384",
+            "pointer": "/sourceUnits/2/ast/nodes/6/nodes/3/body/statements/1/initialValue/expression/expression",
+            "nodeId": 65,
+            "src": "484:5:0",
+            "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+          }
+        },
+        {
+          "nodeType": "VariableDeclarationStatement",
+          "route": "statements",
+          "before": {
+            "status": "refused",
+            "reason": "tuple declaration"
+          },
+          "composed": {
+            "status": "refused",
+            "reason": "expected explicit tuple"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/solc/EntryPointsLeft.ast.json",
+            "fixtureSha256": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+            "pointer": "/ast/nodes/3/nodes/0/body/statements/1",
+            "nodeId": null,
+            "src": "1306:53:0",
+            "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+          }
+        }
+      ]
+    },
+    {
+      "suite": "fresh-",
+      "inputs": [
+        {
+          "path": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-matrix.json",
+          "sha256": "dc9bc329f03b9c60c5bb3a60bc62b238a232b23b4c569ba12f7905a74ae19db5"
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/composed-fresh-construct-reader-matrix.json",
+          "sha256": "452ebcfd80d67931b2ad2b6051b6bbb5aa18d977220e395b6849e0135ca26c8d"
+        },
+        {
+          "path": "tests/directruntime-20261104/shared-translator/fresh-construct-reader-cases.json",
+          "sha256": "8e1de225ef44ab754acc969e31319e7ebb9493674854d6d6c713e7d72e9a34b4"
+        }
+      ],
+      "defaultCounts": {
+        "decoded": 14,
+        "refused": 23,
+        "not-standalone": 20
+      },
+      "composedCounts": {
+        "decoded": 16,
+        "refused": 21,
+        "not-standalone": 20
+      },
+      "unknownRootRefusals": 37,
+      "changes": [
+        {
+          "nodeType": "DoWhileStatement",
+          "route": "statements",
+          "before": {
+            "status": "refused",
+            "reason": "compact verifier: unsupported statement"
+          },
+          "composed": {
+            "status": "decoded"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+            "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+            "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/4/body/statements/1",
+            "nodeId": 86,
+            "src": "1131:52:0",
+            "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+            "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+          }
+        },
+        {
+          "nodeType": "TupleExpression",
+          "route": "expression",
+          "before": {
+            "status": "refused",
+            "reason": "compact verifier: unsupported expression"
+          },
+          "composed": {
+            "status": "decoded"
+          },
+          "sourceIdentity": {
+            "fixture": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+            "fixtureSha256": "31be58f4442d8ca027df3ec9b719bfc0427729092768c47ed41c272e44a4d1c0",
+            "pointer": "/compilerAsts/Group07.sol/nodes/1/nodes/4/body/statements/0/expression/falseExpression",
+            "nodeId": 36,
+            "src": "239:6:0",
+            "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+          }
+        }
+      ]
+    }
+  ]
+}

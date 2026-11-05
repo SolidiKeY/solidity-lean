@@ -1,0 +1,540 @@
+{
+  "boundary": "Kernel identity/normalization observations; no verified Solidity parser or general override adequacy.",
+  "rows": [
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.base_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.base_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.derived_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.derived_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.inherited_distinct_parameters",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.inherited_distinct_parameters"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.two_units_same_spelling",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.two_units_same_spelling"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_same_parameters",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_same_parameters"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_distinct_declarations",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.aliases_distinct_declarations"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.multihop_type_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.multihop_type_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.cyclic_alias_type_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.cyclic_alias_type_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.diamond_type_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.diamond_type_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_type_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_type_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.ambiguous_type_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.ambiguous_type_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.unresolved_is_not_distinct",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.unresolved_is_not_distinct"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_declaration_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.missing_declaration_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.first_original_owner",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.first_original_owner"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.second_original_owner",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.second_original_owner"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.storage_memory_distinct",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.storage_memory_distinct"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.external_calldata_public_memory_hides",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.external_calldata_public_memory_hides"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.public_memory_calldata_distinct",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.public_memory_calldata_distinct"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_memory_calldata_distinct",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_memory_calldata_distinct"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_storage_memory_distinct",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.internal_storage_memory_distinct"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.NormalizationControls.hiding_unresolved_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.NormalizationControls.hiding_unresolved_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_nominal_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_nominal_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_all_nominal_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureHiding.externalKey_all_nominal_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_none_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_none_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_originals",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureHiding.hides_originals"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inherited_overloads",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inherited_overloads"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.cross_unit_nominal_overloads",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.cross_unit_nominal_overloads"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.same_owner_duplicates_preserved",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.same_owner_duplicates_preserved"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.external_location_override",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.external_location_override"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.storage_memory_overloads",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.storage_memory_overloads"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.unresolved_first_owner_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.unresolved_first_owner_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_root_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_root_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.noncontainer_root_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.noncontainer_root_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_base_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.missing_base_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inheritance_cycle_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.inheritance_cycle_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_owner_order",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_owner_order"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_original_override",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.diamond_original_override"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.ambiguous_written_base_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.ambiguous_written_base_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.empty_name_collection",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMemberControls.empty_name_collection"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_select",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_select"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_walk",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.mem_walk"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.WalkMember.owner",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.WalkMember.owner"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.ready_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.ready_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_total",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.unhidden_total"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.select_total",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.select_total"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.walk_total",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.walk_total"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collected_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collected_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_normalizes",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureMembers.collect_normalizes"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_same",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_same"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_sameList",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.eq_of_sameList"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.same_refl",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.same_refl"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.sameList_refl",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.TypeKey.sameList_refl"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_origin",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_origin"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.preserves_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.preserves_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.normalize_injective",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.normalize_injective"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.original_declaration",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.original_declaration"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.nominal_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.enumeration_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.enumeration_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_true_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_true_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_false_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_false_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_none_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureNormalization.sameParams_none_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.eligible_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.eligible_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.safeOwners_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.safeOwners_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_candidates",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_candidates"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.nearest_exists",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.nearest_exists"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.decl_exists",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Member.decl_exists"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.prefix_unique",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.prefix_unique"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.coherent",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.coherent"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.local_shadows",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.local_shadows"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_namespaceCandidates",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_namespaceCandidates"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_headCandidates",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.mem_headCandidates"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.checkSuffix_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.checkSuffix_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_noClash",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_noClash"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.NamespaceStep.decl_exists",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.NamespaceStep.decl_exists"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Head.decl_exists",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Head.decl_exists"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.decl_exists",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.Admits.decl_exists"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolution.resolve_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.multi_hop_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.multi_hop_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.missing_symbol_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.missing_symbol_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_namespace_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_namespace_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_1",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.same_spelling_units_1"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.symbol_namespace_alias_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.symbol_namespace_alias_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.transitive_all_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.transitive_all_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_identity_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_identity_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.cyclic_namespace_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.cyclic_namespace_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_fallback_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_fallback_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_base_shadow_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_base_shadow_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.local_shadow_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.local_shadow_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_1",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_type_1"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_base_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.ambiguous_base_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_overload_gap_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.inherited_overload_gap_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_parameter_overload_gap_0",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_parameter_overload_gap_0"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.failed_signature_no_global_fallback",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.failed_signature_no_global_fallback"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.own_private_still_shadows",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.own_private_still_shadows"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_nonoverload_still_shadows",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_nonoverload_still_shadows"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_global_fallback",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.private_base_global_fallback"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_override_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.diamond_override_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.external_location_override",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.external_location_override"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.foreign_scope_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.foreign_scope_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_intermediate_barrier_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.visible_intermediate_barrier_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_barrier_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.qualified_barrier_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.getter_override_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.SignatureResolutionControls.getter_override_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.TypePaths.tail_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.TypePaths.tail_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.TypePaths.lookup_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.TypePaths.lookup_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.available_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.available_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_nonempty",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.first_nonempty"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_sound",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_sound"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_complete",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_complete"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_iff",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_iff"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.First.member",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.First.member"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_remove",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_remove"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_nonempty",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.mem_nonempty"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.members",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.members"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.nodup",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.nodup"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_monotone",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.merge_monotone"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.unique",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.Merge.unique"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_result",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_result"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_judgment",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.diamond_judgment"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.duplicate_route_identity",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.duplicate_route_identity"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.blocked_first_head",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.blocked_first_head"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_order_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_order_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_judgment_absent",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.inconsistent_judgment_absent"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.exact_budget_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.exact_budget_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.zero_fuel_refused",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.zero_fuel_refused"
+    },
+    {
+      "id": "Solidity.Frontend.QualifiedUnits.MergeSpecification.empty_rows_accepted",
+      "kernel_theorem": "Solidity.Frontend.QualifiedUnits.MergeSpecification.empty_rows_accepted"
+    }
+  ],
+  "compiler_probe_ids": [
+    "public-memory-calldata",
+    "internal-memory-calldata",
+    "external-calldata-public-memory",
+    "internal-storage-memory-override",
+    "internal-storage-memory-overload"
+  ]
+}

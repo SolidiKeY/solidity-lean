@@ -232,6 +232,121 @@ VY1 follow-up: arbitrary certified Boolean item scope closure with derived typed
 - VY1: LocalBoolIf adds concrete clean-input Source conditional/scope agreement with retained condition effects and partial branch contexts; full lane gates remain open. See [lane handoff](inline-assembly-vy1.md).
 - VY1: LocalBoolIfElse adds clean-input Source agreement for independently indexed conditional branches, retaining partial effects; see [lane handoff](inline-assembly-vy1.md). General P16 and final gates remain open.
 
+- VY1: LocalBoolWhile adds concrete clean-input Source agreement for context-growing scoped loop bodies; partial contexts and dirty runtime words are retained. See [lane handoff](inline-assembly-vy1.md); full P16 and lane gates remain open.
+
+- VY1: LocalBoolDivergence proves no finite normal completion for constant-true certified scoped loops, for arbitrary raw frames and actual clean Source execution. See [lane handoff](inline-assembly-vy1.md); full lane remains open.
+
+- VY1: LocalBoolDoWhile adds concrete clean Source agreement for body-first context-growing scoped loops, with partial-body/condition and recursion controls. See [lane handoff](inline-assembly-vy1.md); full P16 and lane gates remain open.
+
+- VY1 integration review: conditional and scoped-loop proofs reuse RawSequence.restore_self; the duplicate was removed, with unchanged agreement statements and control expectations.
+
+- VY1: LocalBoolDoDivergence adds universal raw/clean-Source no-normal-completion laws for constant-true certified do/while bodies; full lane remains open.
+
+- VY1: LocalBoolFor adds concrete clean Source agreement for a Boolean for initializer and scoped item body without post, preserving enclosing effects and partial contexts. Full lane remains open.
+
+- VY1: LocalBoolPostIter/LocalBoolForPost add concrete all-fuel clean Source composition for present Boolean posts, preserving post effects and scoped failure contexts. Full lane remains open.
+
+- VY1: LocalBoolForNoGuard adds exact Source omitted-guard transport and concrete clean adapters for both post modes, with independent Source and raw guard controls. Full lane remains open.
+
+- VY1: LocalBoolUnchecked adds concrete clean Source item/block composition across unchecked and ordinary scopes, retaining reached failure contexts. Full lane remains open.
+
+- VY1: LocalDefaultBinding adds concrete clean Source constant-default declaration/body composition with typed context growth; allocating references and dirty compiler adequacy remain separate obligations.
+
+VY1: constant-default scopes now have concrete clean-input Source block agreement and raw restoration controls; full P16 and lane validation remain open.
+
+VY1: heterogeneous constant-default declaration sequences have concrete clean-input Source item agreement and raw partial-context controls; general P16 remains open.
+
+VY1: heterogeneous default sequences now have raw scope closure and concrete clean-input Source block agreement; general P16 and final lane validation remain open.
+
+VY1: unchecked heterogeneous default scopes and ordinary continuations now have concrete clean-input Source item/block composition; full P16 and lane gates remain open.
+
+VY1: pure local item/default/unchecked runners now preserve the existing world for all raw inputs and fuel values; local effects and broader P16 remain distinct.
+
+VY1: conditional selection between independently typed default scopes now has concrete Source agreement, raw world preservation and condition-effect controls; full P16 remains open.
+
+VY1: loops over heterogeneous default scopes have concrete Source agreement, raw world preservation and constant-true finite-normal exclusion; full P16 remains open.
+
+VY1: body-first default-scope loops now have concrete Source agreement, raw world preservation and finite-normal exclusion; full P16 remains open.
+
+VY1: scoped default for-iterations with Boolean posts have concrete Source agreement, raw purity and post-value-discard controls; full P16 remains open.
+
+VY1: H22 rebased with H21 registries; omitted-guard default iterations reuse actual Source transport and have concrete scoped agreement/purity/noncompletion. Full P16 remains open.
+
+VY1: local Boolean expression/control failures are proved to be timeouts for all raw inputs and fuel; see [lane handoff](inline-assembly-vy1.md#boolean-failure-classification). General P16 remains open.
+
+VY1: actual statement/initialization and context-growing item failures are proved to be timeouts without erasing reached locals; see [lane handoff](inline-assembly-vy1.md#context-growing-item-failures). General P16 remains open.
+
+VY1: concrete scoped-loop timeout classification and all-horizon omitted-guard Source output proved, with retained raw results and a break counterexample; see [lane handoff](inline-assembly-vy1.md#concrete-finite-horizon-loop-timeouts). General P16 remains open.
+
+VY1: concrete post/do-while classifications and omitted-guard post-loop Source horizons proved; see [lane handoff](inline-assembly-vy1.md#post-and-body-first-horizons). General P16 remains open.
+
+VY1: exact constant-loop reductions and constant-true do/while Source horizons proved, with effectful-post and breaking-body counterexamples; see [lane handoff](inline-assembly-vy1.md#constant-loop-reductions). General P16 remains open.
+
+VY1: exact-word congruence now composes through certified Boolean expressions, context-growing items, scopes, conditionals and loops, including Boolean-initialized no-post for execution; see [lane handoff](inline-assembly-vy1.md#boolean-initialized-for-congruence). General P16 remains open.
+
+VY1: all-fuel exact-word congruence now covers certified guarded Boolean post iterations, retaining body/post partial states while discarding post values; see [lane handoff](inline-assembly-vy1.md#post-iteration-exact-word-congruence). General P16 remains open.
+
+VY1: exact-word congruence now composes Boolean initialization with guarded post iteration and normal-only scope closure; see [lane handoff](inline-assembly-vy1.md#initializer-and-post-loop-congruence). General P16 remains open.
+
+VY1: exact-word congruence now covers certified heterogeneous defaults and unchecked scope/continuation composition, with related clean/raw frames whose Source projections differ; see [lane handoff](inline-assembly-vy1.md#heterogeneous-default-and-unchecked-congruence). General P16 remains open.
+
+VY1: exact-word congruence covers independently indexed heterogeneous branches and default-scope while/do-while execution, retaining typed failure prefixes; see [lane handoff](inline-assembly-vy1.md#independently-indexed-default-control-congruence). General P16 remains open.
+
+VY1: exact-word congruence covers default-scope post iterations and existing omitted-guard wrappers, with controls separating post effects from discarded values; see [lane handoff](inline-assembly-vy1.md#default-post-and-omitted-guard-congruence). General P16 remains open.
+
+VY1: exact-result congruence covers checked uint8 arithmetic, comparison and Boolean selection within each pipeline, retaining operand order and partial errors; see [lane handoff](inline-assembly-vy1.md#checked-uint8-and-comparison-congruence). General P16 remains open.
+
+VY1: checked-u8 terminal horizon stability and timeout controls; see [lane handoff](inline-assembly-vy1.md#checked-uint8-terminal-horizons). Full lane remains open.
+
+VY1: checked-u8 comparison terminal horizon stability and pipeline/timeout controls; see [lane handoff](inline-assembly-vy1.md#checked-uint8-comparison-horizons). Full lane remains open.
+
+VY1: Boolean full-run terminal horizon stability and selected/skipped branch controls; see [lane handoff](inline-assembly-vy1.md#boolean-terminal-horizons). Full lane remains open.
+
+VY1: concrete comparison/Boolean conditional terminal horizon composition; see [lane handoff](inline-assembly-vy1.md#mixed-comparison-and-boolean-conditional-horizons). Full lane remains open.
+
+VY1: context-growing completed item horizon stability and multi-declaration controls; see [lane handoff](inline-assembly-vy1.md#context-growing-completed-item-horizons). Full lane remains open.
+
+VY1: heterogeneous default-item and restored-block completed horizon stability; see [lane handoff](inline-assembly-vy1.md#heterogeneous-default-item-and-block-horizons). Full lane remains open.
+
+VY1: completed unchecked-scope/ordinary-continuation horizon stability; see [lane handoff](inline-assembly-vy1.md#unchecked-scope-and-ordinary-continuation-horizons). Full lane remains open.
+
+VY1: independently typed conditional-scope completed horizon stability; see [lane handoff](inline-assembly-vy1.md#independently-typed-conditional-scope-horizons). Full lane remains open.
+
+VY1: adopted the published P16 dependency without changing its interface; retained local checkpoints and explicit P20 producer obligations. See [lane handoff](inline-assembly-vy1.md#published-p16-dependency-adoption).
+
+VY1: recursive default-scoped while completed horizon stability and mutating-iteration controls; see [lane handoff](inline-assembly-vy1.md#recursive-while-completed-horizons). Full lane remains open.
+
+VY1: body-first recursive do/while completed horizon stability and two-iteration controls; see [lane handoff](inline-assembly-vy1.md#body-first-dowhile-completed-horizons). Full lane remains open.
+
+VY1: guarded for/post completed horizon stability and retained-post-effect controls; see [lane handoff](inline-assembly-vy1.md#guarded-forpost-completed-horizons). Full lane remains open.
+
+VY1: concrete full initialized-for completed horizon composition and exact scope/iteration agreement; see [lane handoff](inline-assembly-vy1.md#full-for-initializer-completed-horizons). Full lane remains open.
+
+VY1: concrete initialized no-post for completed horizon composition and nested-scope caller-write controls; see [lane handoff](inline-assembly-vy1.md#initialized-no-post-for-completed-horizons). Full lane remains open.
+
+VY1: concrete initialized omitted-guard noncompletion and clean Source consequences; [scope and controls](inline-assembly-vy1.md#initialized-omitted-guard-noncompletion). Full lane remains open.
+
+VY1: concrete full Boolean for timeout classification and clean Source outcomes; [scope and controls](inline-assembly-vy1.md#full-boolean-for-timeout-classification). Full lane remains open.
+
+VY1: concrete Source firstDone horizon selection; [scope and controls](inline-assembly-vy1.md#concrete-source-horizon-selection). Full lane remains open.
+
+VY1: concrete completed raw-frame statement horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-frame-statement-horizons). Full lane remains open.
+
+VY1: completed raw sequence/block horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-sequence-and-block-horizons). Full lane remains open.
+
+VY1: completed raw condition/control-body horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-condition-and-loop-body-horizons). Full lane remains open.
+
+VY1: completed raw control-sequence/block horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-control-sequence-horizons). Full lane remains open.
+
+VY1: completed raw controlled-while horizons and read views; [scope and controls](inline-assembly-vy1.md#completed-raw-controlled-while-horizons). Full lane remains open.
+
+VY1: completed raw sequence-bodied while horizons; [scope and controls](inline-assembly-vy1.md#completed-raw-sequence-bodied-while-horizons). Full lane remains open.
+
+VY1: concrete P16 loop-adapter horizons; [scope and controls](inline-assembly-vy1.md#concrete-p16-loop-adapter-horizons). Full lane remains open.
+
+VY1: concrete P16 sequence-loop adapter horizons; [scope and controls](inline-assembly-vy1.md#concrete-p16-sequence-loop-adapter-horizons). Full lane remains open.
+
+VY1: concrete body-first adapter horizons; [scope and controls](inline-assembly-vy1.md#concrete-body-first-adapter-horizons). Full lane remains open.
 VY3 arithmetic source/model branch: [lane handoff](inline-assembly-vy3.md#arithmetic-source-branches-through-actual-model-execution). Real child-code certificates derive complete model execution; native/full lane remains partial.
 
 - VY3 checked control selection: `ControlRealization` constructs scalar iff

@@ -1,0 +1,8 @@
+COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264 --tstack=131072 tests/precompile-agreement/TrustProbe.lean
+'SolidityBridge.PrecompileAgreement.identity_success' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.identity_charged' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.sha_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.ecrecover_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.bnadd_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SolidityBridge.PrecompileAgreement.point_gas' depends on axioms: [propext, Classical.choice, Quot.sound]
+EXIT=0 SECONDS=1.908 PEAK_RSS=391675904 MIN_AVAILABLE=17629261824 RESOURCE_STOP=False

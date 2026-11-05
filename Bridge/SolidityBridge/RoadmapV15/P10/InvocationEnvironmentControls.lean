@@ -114,11 +114,39 @@ theorem complete_ordered_observation :
     (observed .CALLVALUE false spill (u 37)).substate = (seed 9 false).substate := by
   exact ⟨rfl,by decide,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
 
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.address_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms address_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.caller_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms caller_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.callvalue_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms callvalue_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.legal_capacity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms legal_capacity
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.resource_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms resource_order
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.distinct_identities' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms distinct_identities
+/-- info: 'SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.complete_ordered_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
 #print axioms complete_ordered_observation
 end SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls

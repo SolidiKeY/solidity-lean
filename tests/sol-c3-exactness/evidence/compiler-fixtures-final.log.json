@@ -6,16 +6,16 @@
     "tests/sol-c3-exactness/evidence/compiler-fixtures.json"
   ],
   "exit": 0,
-  "elapsed_seconds": 3.3913663090061164,
-  "minimum_parent_available_bytes": 10616721408,
+  "elapsed_seconds": 3.324777878005989,
+  "minimum_parent_available_bytes": 10590396416,
   "pressure_stop": false,
   "interrupted": false,
   "error": null,
   "memory_limit_bytes": 12884901888,
   "swap_limit_bytes": 0,
-  "container_cumulative_peak_bytes": 1650262016,
+  "container_cumulative_peak_bytes": 1607135232,
   "log": "/workspace/solidity-lean/tests/sol-c3-exactness/evidence/compiler-fixtures-final.log",
-  "log_sha256": "d4466815d8a8f872fbabcf5d55e4c84874dac23d376b56a6fd8cddafda546a46",
+  "log_sha256": "ebeee9fcea48a05c97000a55f0d4bad89d33d2cdcdcca1f580be6b09a0e2805f",
   "input_hashes": {
     "Solidity/Frontend/C3Exactness/Admission.lean": "3b4a8d7414967ebacc18c5f8afc0acede2bcb54c8298bbb85455b83b9faebde6",
     "Solidity/Frontend/C3Exactness/Audit.lean": "065a0a5df00310129ad12fde1ebdb31bcd03e78c6e0a020a3ba4ed9bbec663b8",
@@ -32,7 +32,7 @@
     "Solidity/Source/Inheritance.lean": "fac8c3b392d5dd3e917ce4ca8920f37790cf6d81801b2b3780d3e8cdc743190b",
     "Solidity/Source/Resolve.lean": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
     "Solidity/Source/WellFormed.lean": "7b1ed96f14f9ff91c34bca8150cdd657e12eb520c05c7c2aa463bba86e69189a",
-    "scripts/check-sol-c3-exactness.py": "3fca01a90895a14b08876dfdd38c19c8b292d56896daaf7ef3edee6bdafc2dce",
+    "scripts/check-sol-c3-exactness.py": "75f5d7928b90fe1278d34f419da036ae0453ad669b6c8efc1e863d3ef7ec7fac",
     "tests/sol-c3-exactness/axiom-registration.json": "410ac76125a3400db76f6ed4e015b6147ab4b95f4119b048346eec4d717896ca",
     "tests/sol-c3-exactness/bin/lake": "87462f3936ded36cd82b276119c31e88f6b17bc39c5e96cc8eaeddf64374eb0d",
     "tests/sol-c3-exactness/check-fixtures.mjs": "3e8e0f377e037113425ded8314bf9f067ef617e8c2dcb36a98b2ccb07092b3c2",
@@ -48,12 +48,12 @@
     "tests/sol-c3-exactness/fixtures/self-cycle.sol": "f434f086d8a767e77b87a8158f3486614547a6845cbbb82dbdeaeee8c3829822",
     "tests/sol-c3-exactness/fixtures/shared.sol": "d06bb070efe3f7d703b3f493feb8a066972003f21b9208acc2fe027b7760e29a",
     "tests/sol-c3-exactness/lakefile.worker.toml": "ea90a54c0c0a2838565b1c79df8774786fbf2f485b80949696212f39fe39d007",
-    "tests/sol-c3-exactness/manifest.json": "fc65cd37a4ecfae5074c40f6683b4ab5f6c1a9edd6a46536a37adfa454bff7b7",
+    "tests/sol-c3-exactness/manifest.json": "63ff670f5090695b24cc64d055ab818183f27e02dbfca85f788536521e5ad956",
     "tests/sol-c3-exactness/release-owned-file-cache.py": "410333dfb1d9153feb4e607cc7f2cc5423336b8a3b08279a92d4dd7b6cbf05e3",
     "tests/sol-c3-exactness/run-bounded.py": "c0f39226464ec1c12d695c77e29733b9d86ea533b91bb029425f6970d7401be1"
   },
   "lean_version": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
   "lake_version": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
-  "checked_head": "0b561e0d3ae3116343dbbf40a20cbc163a6e42dc",
-  "git_status_before": " M docs/feature-work/c3-exactness.md\n M scripts/check-sol-c3-exactness.py\n M tests/sol-c3-exactness/evidence/audit-confirmation.log\n M tests/sol-c3-exactness/evidence/audit-confirmation.log.json\n M tests/sol-c3-exactness/evidence/compiler-fixtures-final.log\n M tests/sol-c3-exactness/evidence/compiler-fixtures-final.log.json\n M tests/sol-c3-exactness/evidence/corpus-final.log\n M tests/sol-c3-exactness/evidence/corpus-final.log.json\n M tests/sol-c3-exactness/evidence/final-source-1.log\n M tests/sol-c3-exactness/evidence/final-source-2.log\n M tests/sol-c3-exactness/evidence/final-source-3.log\n M tests/sol-c3-exactness/evidence/final-source-6.log\n M tests/sol-c3-exactness/evidence/final-source-gates.json\n M tests/sol-c3-exactness/evidence/final-source-gates.log\n M tests/sol-c3-exactness/evidence/final-source-gates.log.json\n M tests/sol-c3-exactness/evidence/keysort-final.log\n M tests/sol-c3-exactness/evidence/keysort-final.log.json\n M tests/sol-c3-exactness/integration-manifest.json\n M tests/sol-c3-exactness/manifest.json\n M tests/sol-c3-exactness/registration.md\n?? tests/sol-c3-exactness/B86-HANDOFF.md\n?? tests/sol-c3-exactness/evidence/adoption-b86ae456.json\n?? tests/sol-c3-exactness/evidence/b86-acceptance.log\n?? tests/sol-c3-exactness/evidence/b86-acceptance.log.json\n?? tests/sol-c3-exactness/evidence/b86-artifact-contamination-final-source-6.log\n?? tests/sol-c3-exactness/evidence/b86-artifact-contamination-final-source-gates.json\n?? tests/sol-c3-exactness/evidence/b86-artifact-contamination-final-source-gates.log\n?? tests/sol-c3-exactness/evidence/b86-artifact-contamination-final-source-gates.log.json\n?? tests/sol-c3-exactness/evidence/b86-artifact-relocation.json\n?? tests/sol-c3-exactness/evidence/b86-axiom-mcp.log\n?? tests/sol-c3-exactness/evidence/b86-axiom-mcp.log.json\n?? tests/sol-c3-exactness/evidence/b86-cache-identity.log\n?? tests/sol-c3-exactness/evidence/b86-cache-identity.log.json\n?? tests/sol-c3-exactness/evidence/b86-controls-mcp.log\n?? tests/sol-c3-exactness/evidence/b86-controls-mcp.log.json\n?? tests/sol-c3-exactness/evidence/b86-full-acceptance-pending.log\n?? tests/sol-c3-exactness/evidence/b86-full-acceptance-pending.log.json\n?? tests/sol-c3-exactness/evidence/b86-gates.json\n?? tests/sol-c3-exactness/evidence/b86-graph-controls-mcp.log\n?? tests/sol-c3-exactness/evidence/b86-graph-controls-mcp.log.json\n?? tests/sol-c3-exactness/evidence/b86-mcp-stop.log\n?? tests/sol-c3-exactness/evidence/b86-mcp-stop.log.json\n"
+  "checked_head": "e6849d3bdf516099d20c33d3581d523449764018",
+  "git_status_before": " M scripts/check-sol-c3-exactness.py\n M tests/sol-c3-exactness/evidence/audit-confirmation.log\n M tests/sol-c3-exactness/evidence/audit-confirmation.log.json\n M tests/sol-c3-exactness/evidence/compiler-fixtures-final.log\n M tests/sol-c3-exactness/evidence/compiler-fixtures-final.log.json\n M tests/sol-c3-exactness/evidence/final-source-gates.json\n M tests/sol-c3-exactness/evidence/final-source-gates.log\n M tests/sol-c3-exactness/integration-manifest.json\n M tests/sol-c3-exactness/manifest.json\n?? tests/sol-c3-exactness/.gitignore\n?? tests/sol-c3-exactness/evidence/e684-acceptance.log\n?? tests/sol-c3-exactness/evidence/e684-acceptance.log.json\n?? tests/sol-c3-exactness/evidence/e684-axiom-mcp.log\n?? tests/sol-c3-exactness/evidence/e684-axiom-mcp.log.json\n?? tests/sol-c3-exactness/evidence/e684-cache-request.json\n?? tests/sol-c3-exactness/evidence/e684-cache-verifier-provenance.json\n?? tests/sol-c3-exactness/evidence/e684-controls-mcp.log\n?? tests/sol-c3-exactness/evidence/e684-controls-mcp.log.json\n?? tests/sol-c3-exactness/evidence/e684-graph-controls-mcp.log\n?? tests/sol-c3-exactness/evidence/e684-graph-controls-mcp.log.json\n?? tests/sol-c3-exactness/evidence/e684-inventory-first-final-source-6.log\n?? tests/sol-c3-exactness/evidence/e684-inventory-first-final-source-gates.json\n?? tests/sol-c3-exactness/evidence/e684-inventory-first-final-source-gates.log\n?? tests/sol-c3-exactness/evidence/e684-inventory-first-final-source-gates.log.json\n?? tests/sol-c3-exactness/evidence/e684-inventory-gap.json\n?? tests/sol-c3-exactness/evidence/e684-mcp-stop.log\n?? tests/sol-c3-exactness/evidence/e684-mcp-stop.log.json\n?? tests/sol-c3-exactness/evidence/e684-pin-diagnosis.log\n?? tests/sol-c3-exactness/evidence/e684-pin-diagnosis.log.json\n?? tests/sol-c3-exactness/evidence/e684-rebase.json\n?? tests/sol-c3-exactness/evidence/final-source-1.log\n?? tests/sol-c3-exactness/evidence/final-source-2.log\n?? tests/sol-c3-exactness/evidence/final-source-3.log\n?? tests/sol-c3-exactness/evidence/final-source-4.log\n?? tests/sol-c3-exactness/evidence/final-source-5.log\n?? tests/sol-c3-exactness/evidence/final-source-6.log\n?? tests/sol-c3-exactness/evidence/final-source-7.log\n?? tests/sol-c3-exactness/evidence/final-source-8.log\n?? tests/sol-c3-exactness/evidence/final-source-gates.log.json\n?? tests/sol-c3-exactness/evidence/keysort-final.log\n?? tests/sol-c3-exactness/evidence/keysort-final.log.json\n"
 }

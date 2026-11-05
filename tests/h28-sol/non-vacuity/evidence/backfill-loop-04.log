@@ -1,0 +1,19 @@
+H28_DEP_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "--deps", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+H28_PRIVATE_IMPORTS {"module": "Solidity.Assurance.NonVacuityH28.LoopContracts", "imports": {"Solidity.Assurance.NonVacuityH28.CheckedFamilies": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/CheckedFamilies.olean"}}
+H28_KERNEL_COMMAND ["lean", "-j1", "--tstack=131072", "--root=/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean", "-o", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/build/lib/Solidity/Assurance/NonVacuityH28/LoopContracts.olean", "/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean"]
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:104:62: error: Application type mismatch: The argument
+  Evm.Memory.LoopPrefix.start
+has type
+  Evm.Memory.LoopPrefix ?m.73 ?m.74 ?m.75 { st := ?m.75, ext := ⋯ } 0
+but is expected to have type
+  Evm.Memory.Loops.StmtCert.Cost ?m.60 σ { st := σ, ext := ⋯ } ?m.65
+in the application
+  Evm.Memory.Loops.Cost.cons (false_loop_stmt_source C σ a ?m.69) Evm.Memory.LoopPrefix.start
+/workspace/solidity-lean/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean:104:62: error: Application type mismatch: The argument
+  Evm.Memory.LoopPrefix.start
+has type
+  Evm.Memory.LoopPrefix ?m.105 ?m.106 ?m.107 { st := ?m.107, ext := ⋯ } 0
+but is expected to have type
+  Evm.Memory.Loops.StmtCert.Cost ?m.92 σ { st := σ, ext := ⋯ } ?m.97
+in the application
+  Evm.Memory.Loops.Cost.cons (false_loop_stmt_source C σ a ?m.101) Evm.Memory.LoopPrefix.start

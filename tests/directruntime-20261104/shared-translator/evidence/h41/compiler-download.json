@@ -1,0 +1,9 @@
+{
+  "url": "https://raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.38+commit.1835d247.js",
+  "expectedSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "executed": true,
+  "actualSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "bytes": 10798266,
+  "verified": true,
+  "executionEvidence": "evidence/h41/fresh-compilation.json"
+}

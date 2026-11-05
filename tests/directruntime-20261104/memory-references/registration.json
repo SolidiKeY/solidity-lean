@@ -1,0 +1,9 @@
+{
+  "modules": [{
+    "module": "Solidity.Frontend.ExecutableAst.Memory.Reader",
+    "root": "Solidity.lean",
+    "area": "docs/module-map/frontend.md",
+    "row": "ExecutableAst/Memory/Reader | Location-aware primitive/array reference locals and dynamic allocation through Shared.Reader; existing intrinsic elaboration owns alias/copy and indexing semantics."
+  }],
+  "centralRegistration": "proposal only; coordinator owns generated roots and shared maps"
+}

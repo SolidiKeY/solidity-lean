@@ -1,0 +1,93 @@
+[
+  {
+    "command": "git status --short",
+    "exit": 0,
+    "seconds": 0.011383,
+    "output": "",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "git rev-parse HEAD origin/master",
+    "exit": 0,
+    "seconds": 0.002329,
+    "output": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5\n6f3eedf0788ee1f8a3bcf230558c712ecdca04d5\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "git merge-base --is-ancestor 6f3eedf0788ee1f8a3bcf230558c712ecdca04d5 origin/master",
+    "exit": 0,
+    "seconds": 0.002747,
+    "output": "",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean --version",
+    "exit": 0,
+    "seconds": 0.032488,
+    "output": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake --version",
+    "exit": 0,
+    "seconds": 0.038481,
+    "output": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "systemd-run --user --scope -p MemoryMax=12G -p MemorySwapMax=0 true",
+    "exit": 1,
+    "seconds": 0.005045,
+    "output": "Failed to connect to user scope bus via local transport: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "systemd-run --scope -p MemoryMax=12G -p MemorySwapMax=0 true",
+    "exit": 1,
+    "seconds": 0.005617,
+    "output": "System has not been booted with systemd as init system (PID 1). Can't operate.\nFailed to connect to system scope bus via local transport: Host is down\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "stat -c \"%A %U %n\" /sys/fs/cgroup /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max",
+    "exit": 0,
+    "seconds": 0.003386,
+    "output": "drwxr-xr-x root /sys/fs/cgroup\n-rw-r--r-- root /sys/fs/cgroup/memory.max\n-rw-r--r-- root /sys/fs/cgroup/memory.swap.max\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "cat /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.swap.max /sys/fs/cgroup/memory.swap.current",
+    "exit": 0,
+    "seconds": 0.001724,
+    "output": "17179869184\nmax\n0\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "cat /proc/1/comm",
+    "exit": 0,
+    "seconds": 0.001718,
+    "output": "tail\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "command -v sudo",
+    "exit": 1,
+    "seconds": 0.001315,
+    "output": "",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "node scripts/check-layers.mjs",
+    "exit": 0,
+    "seconds": 0.413938,
+    "output": "559 core modules, 0 reach the elaborator\n559 core modules, 0 reach the checked parser adapters\n",
+    "peak_rss_kib": null
+  },
+  {
+    "command": "bash scripts/coord-tools/register.sh --check",
+    "exit": 0,
+    "seconds": 0.078546,
+    "output": "",
+    "peak_rss_kib": null
+  }
+]
