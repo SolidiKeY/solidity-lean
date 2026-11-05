@@ -13,11 +13,60 @@
   "capabilities": { "untrustedWorkspaces": { "supported": false }, "virtualWorkspaces": false },
   "contributes": {
     "commands": [
+      { "command": "solidityLean.openStatusBarMenu", "title": "Solidity Lean: Open Status Actions" },
+      { "command": "solidityLean.showOutput", "title": "Solidity Lean: Show Verification Output" },
       { "command": "solidityLean.verify", "title": "Solidity Lean: Verify File" },
       { "command": "solidityLean.list", "title": "Solidity Lean: Discover Obligations" },
       { "command": "solidityLean.cancel", "title": "Solidity Lean: Cancel Verification" },
       { "command": "solidityLean.restartServer", "title": "Solidity Lean: Restart Language Server" }
     ],
+    "submenus": [
+      {
+        "id": "solidityLean.context",
+        "label": "Solidity Lean"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "submenu": "solidityLean.context",
+          "group": "7_SolidityLean@5"
+        }
+      ],
+      "solidityLean.context": [
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.verify",
+          "group": "1_verification@0"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.list",
+          "group": "1_verification@1"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.cancel",
+          "group": "1_verification@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.showOutput",
+          "group": "2_status@3"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.openStatusBarMenu",
+          "group": "2_status@4"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.restartServer",
+          "group": "2_status@5"
+        }
+      ]
+    },
     "languages": [{"id":"solidity","aliases":["Solidity"],"extensions":[".sol"],"configuration":"./language-configuration.json"}],
     "grammars": [{"language":"solidity","scopeName":"source.solidity","path":"./syntaxes/solidity.tmLanguage.json"}],
     "configuration": {
@@ -29,6 +78,7 @@
         "solidityLean.verifyOnSave": { "type": "boolean", "default": false, "scope": "resource", "description": "Verify Solidity files automatically when saved." },
         "solidityLean.automaticVerification": { "type": "string", "enum": ["never", "onchange", "onsave"], "default": "onchange", "scope": "resource", "description": "When the persistent language server verifies document snapshots. verifyOnSave overrides this setting with onsave." },
         "solidityLean.workers": { "type": "integer", "minimum": 1, "maximum": 4, "default": 1, "scope": "resource", "description": "Maximum concurrent function/file verification workers per backend configuration. Each worker keeps its verifier runtime alive." },
+        "solidityLean.displayVerificationAsTests": { "type": "boolean", "default": true, "scope": "resource", "description": "Display verification results in the Test Explorer and editor test actions." },
         "solidityLean.displayGutterStatus": { "type": "boolean", "default": true, "scope": "resource", "description": "Show current-version verification status beside function declarations." },
         "solidityLean.includePaths": { "type":"array", "items":{"type":"string"}, "default":[], "scope":"resource", "description":"Additional directories allowed for Solidity imports, relative to the workspace." },
         "solidityLean.remappings": { "type":"array", "items":{"type":"string"}, "default":[], "scope":"resource", "description":"Solidity import remappings (prefix=target), resolved from the workspace." },
@@ -38,6 +88,8 @@
     }
   },
   "scripts": {
+    "inventory-check": "node parity/inventory-check.cjs",
+    "parity-gate": "node parity/parity-gate.cjs",
     "test": "node --test test/*.test.cjs",
     "parity": "node parity/run.cjs",
     "parity:stdio": "node parity/stdio.cjs",

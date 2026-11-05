@@ -212,3 +212,17 @@ runs the real servers without Electron. It defaults to language-service checks;
 `parity:check` also checks the independent upstream test-discovery ledger. The
 manual editor-parity workflow offers both transports. Stdio results do not
 establish VS Code UI behavior.
+
+Startup checks the configured Node executable against the existing Node18+ requirement and verifies that the backend directory contains readable `scripts/test-solidity.mjs` and `lean-toolchain` files. Failures offer settings or an explicit Node download-page link; the extension does not install or replace executables. The version item shows actual server initialize identity (or unknown), Node runtime and extension metadata. Initialization is not proof/backend readiness: compiler/runtime/toolchain checks still occur when their operations run. Resource configuration changes restart affected owners while retaining healthy clients.
+
+After LSP initialization, the version item waits separately up to five seconds for the running server's `solidityLean/serverVersion` metadata notification. Missing/malformed data yields unknown; a late notification cannot replace that settled result. The separate initialization deadline remains30seconds. Timers and subscriptions are released on decision, failure or disposal. Early metadata retains normalized name/version only; more than128 candidates or64KiB fails explicitly as startup metadata overflow. These transport bounds do not change version-support or proof budgets.
+
+The status summary distinguishes document compilation/queue/running phases from reported function outcomes. Completion counts include reported proved/direct-correct/failed outcomes, not a count of kernel proofs; unknown, unsupported, stale, cancelled, skipped and audit-qualified results stay explicit. Direct checks are labeled separately. Status packets carry source hashes and reopen synchronization identities. The menu offers local output inspection and a repository-derived issue draft with current version metadata and no automatically attached source; it never submits the issue. External proof-help routing is awaiting an explicit destination.
+
+## Testing hierarchy and editor context
+
+Accepted function results appear under their current compiler symbol ancestors when matching symbols are available. A row verified in a derived contract can refer to a base declaration; its label retains the verification contract and its description identifies that distinction. Missing or historical symbols use a labeled result grouping without inventing parent locations. Parent selection and exclusion apply to their descendants.
+
+The trusted Solidity-file editor context menu exposes the existing verification, discovery, cancellation, output, status and restart actions. These do not compile target programs, execute Solidity programs/tests or supply verification traces. Build/run/test/trace parity and their keybindings remain incomplete pending authentic backend contracts/data.
+
+Owned worker retirement now waits for closure before reusing capacity. The matching local server/client negotiate process ownership for compiler workers and builds; an existing build command starts only after ownership acknowledgement. Cleanup failures remain visible and can block replacement admission. Legacy servers/platforms without these ownership observations do not establish the same crash-cleanup guarantees. This lifecycle infrastructure does not certify proofs, solver retention or rendered Dafny parity.
