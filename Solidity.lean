@@ -3557,6 +3557,8 @@ import Solidity.Yul.World.ReturnSize
 import Solidity.Yul.World.ReturnSizeChecks
 import Solidity.Yul.World.ReturndataBuiltin
 import Solidity.Yul.World.ReturndataBuiltinControls
+import Solidity.Yul.World.ReturndataByteLoad
+import Solidity.Yul.World.ReturndataByteLoadControls
 import Solidity.Yul.World.SelfDestruct
 import Solidity.Yul.World.SelfDestructBuiltin
 import Solidity.Yul.World.SelfDestructBuiltinControls
