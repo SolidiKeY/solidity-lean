@@ -2168,6 +2168,8 @@ import Solidity.Lowering.V08.LiteralFailureMemoryReason
 import Solidity.Lowering.V08.LiteralFailureMemoryReasonControls
 import Solidity.Lowering.V08.LiteralFailureMemoryRevert
 import Solidity.Lowering.V08.LiteralFailureMemoryRevertControls
+import Solidity.Lowering.V08.LiteralFailureOverflowReason
+import Solidity.Lowering.V08.LiteralFailureOverflowReasonControls
 import Solidity.Lowering.V08.LiteralFailurePackedBytes
 import Solidity.Lowering.V08.LiteralFailurePackedBytesControls
 import Solidity.Lowering.V08.LiteralFailureReturnSlots
