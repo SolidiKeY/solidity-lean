@@ -108,6 +108,8 @@ import Solidity.Backend.AbiEntry.ValueGateBodyControls
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
 import Solidity.Backend.AbiEntry.ValueGateControls
 import Solidity.Backend.AbiEntry.ValueGateInterface
+import Solidity.Backend.AbiEntry.WordCarrierBinding
+import Solidity.Backend.AbiEntry.WordCarrierBindingControls
 import Solidity.Backend.AbiEntry.WordCarrierBindingInterface
 import Solidity.Backend.AbiEntry.WordGate
 import Solidity.Backend.AbiEntry.WordGateControls

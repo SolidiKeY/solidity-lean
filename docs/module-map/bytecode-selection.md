@@ -209,3 +209,5 @@
 | `Backend/AbiEntry/SignedEntryBody.lean` | Actual signed body and value-check compilation with raw signed-local agreement. |
 | `Backend/AbiEntry/SignedEntryBodyControls.lean` | Both-sign allocating bodies, early value/short rejection and decoder/body failure controls. |
 | `Backend/AbiEntry/WordCarrierBindingInterface.lean` | Compiler contract for validated primitive raw-word binding into the existing uint carrier. |
+| `Backend/AbiEntry/WordCarrierBinding.lean` | Actual validated primitive raw-word declaration, exact execution and raw semantic agreement. |
+| `Backend/AbiEntry/WordCarrierBindingControls.lean` | Enum/cardinality, fixed-bytes padding, raw bytes, saved-state and selected carrier-read controls. |

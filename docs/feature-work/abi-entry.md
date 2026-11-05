@@ -1196,5 +1196,29 @@ singleton primitive validation followed by declaration of the existing typed
 uint carrier, including enum and fixed-bytes words. The carrier stores raw
 accepted bits; it does not replace typed Boolean/signed binding or authenticate
 Source type erasure. Raw semantic failure agreement retains `fuel + 2` and
-explicit word/size loading obligations. Implementation and controls follow this
-signature checkpoint; native loading and general entry composition remain open.
+explicit word/size loading obligations. Native loading and general entry
+composition remain open.
+
+`WordCarrierBinding.lean` extends the existing singleton head/word gate with
+`UIntBinding.parameter` and the same typed declaration and machine carrier.
+Public compiler selection, exact execution and raw semantic success/failure
+agreement hold for every primitive kind and semantic metadata value. The uint
+specialization is definitionally the existing binder. The fresh local stores
+the validated raw bits without cleanup; Boolean and signed Source locals still
+use their distinct bindings. No decoded payload, desired run or poststate is
+assumed. Exact success changes only the continuation and fresh argument cells;
+short heads reject before any word-cell representation fact is needed.
+
+Controls cover raw enum values at and below the cardinality, fixed-bytes data
+with clean and dirty right padding, arbitrary selector and trailing bytes,
+nonzero free pointer, empty enum and zero-byte boundaries, full/wide bytes
+metadata, and all words for enum cardinalities at least the word modulus.
+They retain low semantic fuel, malformed-word short input, exact saved state
+and an actually selected compiled read of the new carrier. Per-file diagnostics,
+focused importing-consumer build and scoped standard-only axiom guards pass.
+This is raw carrier binding, not Source signature erasure or whole body linkage.
+Independent read-only finder and skeptic reviews found no semantic issues.
+Checkpoint outcomes accompany the sealed handoff. Native loading,
+aggregate/multiparameter decoding/binding, Source
+signature/body/profile association, full dispatch-entry composition and exact
+physical failure bytes remain open, as do G46.02 and fixture replay.
