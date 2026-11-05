@@ -554,3 +554,16 @@ Both independent read-only finder/skeptic reviews found no confirmed defect and
 used no Lean/server. No full original queue item or RUNTIME_GATE_PASS is claimed.
 CR migration,DR-A-META,complete form/source parity,native/WASM closure,before/after
 runtime and final full gates remain open. H41 remains in force.
+
+
+Fresh8bf KeySort and SolKey377/131/131 annotations checks passed;actual cgroup
+memory.max12884901888,swap.max0,cpu.max100000/100000. KeySort/cache8.535s,
+RSS252580KiB,minimum outer available6055948288bytes. Six-module cache regenerated
+and verified against fresh successful build traces/mappings;18artifacts/6mappings,
+964484bytes,SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519,
+byte-identical to the prior pendingeb91pack. Current path:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/defe3f023c1b/owned-delta.tar.zst
+Delivery remains coordinator-pending;dependency caches/toolchain must match. Old
+047pack byte delivery remains separately user-reported. No ship-cache.sh invoked;
+source/compiled provenance and gate/cache receipts are in adoption-8bf. No final
+RUNTIME_GATE_PASS or full original queue completion follows.

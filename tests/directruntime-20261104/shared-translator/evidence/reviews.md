@@ -208,3 +208,8 @@ Final raw/provenance packet finder/skeptic found no material defect. Raw and
 normalized function IDs/source spans are joined;gated fixture remained byte-identical.
 Both confirmed explicit counterexample-presence-only limits,IR-selector versus CR
 migration distinction,and preservation of older pending cases/original obligations.
+
+Final8bf resource/KeySort/cache/source-binding finder/skeptic found no claim defect.
+Currenteb91 local verification/coordinator-pending delivery is separate from old047
+user-reported byte delivery. Provenance is not migration/source preservation/native
+closure or RUNTIME_GATE_PASS. Neither used Lean/server or wrote files.
