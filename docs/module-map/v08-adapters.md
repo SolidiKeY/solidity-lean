@@ -116,6 +116,8 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadConsumer.lean` | Actual charged/fetched SLOAD/TLOAD, exact warm/cold resource bounds and existing finite typed source-observation transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/StorageReadControls.lean` | Populated root/transient/source witnesses, exact two-insertion warming states and gas/fuel/permission/coverage negatives. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentConsumer.lean` | Charged fetched BALANCE; the frame `funds` field is defined from the EVM account map (G31 ledger observation). |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmTransport.lean` | Actual BALANCE warmth, low160 probe aliases, ledger preservation and charged fetched transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BalanceWarmControls.lean` | Populated complete post-read state, distinct account probes and gas/fuel/order refusals. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/BalanceEnvironmentControls.lean` | Populated complete-state balance, alias, warm/cold, ordered failure and ledger-origin controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreement.lean` | All 117 non-immediate Backend/reference decoder targets and fetched dispatch, exposing CLZ→INVALID. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/DecoderAgreementControls.lean` | Populated family, ordered byte/state and real fallback/PC/opcode decoder controls. |
@@ -226,6 +228,60 @@
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedProgramControls.lean` | Both permissions, legal capacity, exact gas/fuel and wrong-table refusals, nonzero prefix and complete ordered terminal State. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthrough.lean` | Derived nonzero ISZERO flag and actual five/six-step fallthrough prefixes to PC37/38, exact resource and native-frame transport. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/LinkedFallthroughControls.lean` | Arbitrary tables, both permissions, nonzero/signed capacity clients, zero counterexample and ordered resource failures/state. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironment.lean` | H7-checked charged fetched ADDRESS, CALLER and CALLVALUE, whole native State/X continuation and explicit resource bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean` | H7-checked populated invocation controls: complete expected States, distinct identities, legal capacity and gas/fuel/overflow ordering. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironment.lean` | Charged fetched TIMESTAMP and SELFBALANCE at arbitrary emitted sites, exact costs2/5 and whole-State/X observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SelfBalanceTransport.lean` | Canonical code-owner ledger view and G31 SELFBALANCE slice/fetched correspondence. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SelfBalanceControls.lean` | Direct source/fetched API client, distinct owner/stack/candidate views and maximum-address boundary. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/HeaderEnvironmentControls.lean` | Populated owner-ledger/time controls, raw word wrapping and absent-account behavior, capacity/resource order and complete ordered States. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadata.lean` | Charged native COINBASE/NUMBER/PREVRANDAO/GASLIMIT/BASEFEE reads for arbitrary supplied arrays, paired with unchanged six-opcode environment-slice refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BlockMetadataControls.lean` | Distinct populated header values, raw number wrapping, complete ordered States and gas/fuel/capacity/refusal controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePush.lean` | Charged final PUSH32 continuation of the nonzero linked prefix; explicit gas, stack and fuel bounds. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedBackedgePushControls.lean` | Complete populated state and ordered-byte controls, boundary capacity and resource refusals. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycle.lean` | One charged nonzero fetched cycle to byte zero, consuming the existing linked reference certificate. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/LinkedCycleControls.lean` | Populated finite-cycle states, exact gas/fuel boundaries and missing-target refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBody.lean` | Actual selected G25 signed-negation body to two fetched steps, exact resources and frame; checked guard/panic execution remains open. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationBodyControls.lean` | Complete signed/zero/boundary States, peak capacity, gas/fuel refusals and minimum-wrap versus Scalar-guard controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceConsumer.lean` | Derives non-minimum source range/result and relates its encoding to the actual fetched negation body; minimum failure separate. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationSourceControls.lean` | Typed signed/zero/max clients, ordered native output and simultaneous minimum source-failure/body-success control. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | General fetched EQ word/typed-certificate agreement with actual decoder, charged gate, full State and continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated typed/same/high-bit-distinct/boundary clients, gas/fuel/arity refusals and complete ordered State observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTest.lean` | Three actual fetched DUP1/PUSH32-minimum/EQ steps to the existing Scalar overflow flag, exact resources/frame and legal-entry peak overflow refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/NegationTestControls.lean` | Complete ordinary/minimum States, legal peak1024 and refused peak1025, gas/fuel negatives and ordered code/buffer/account observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityConsumer.lean` | Actual fetched EQ/ISZERO composition with typed scalarNe certificate, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InequalityControls.lean` | Direct all-primitive clients, complete expected States, high-bit/signed/capacity/resource and ordered-observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderConsumer.lean` | General fetched LT/GT word and typed-certificate agreement with actual decoder, charged gate and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedOrderControls.lean` | Direct typed clients, unsigned-versus-signed/reversed order, boundary/capacity/resource negatives and complete ordered States. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictConsumer.lean` | Actual fetched GT/ISZERO and LT/ISZERO typed LE/GE transport, exact resource premises and full State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/UnsignedNonStrictControls.lean` | Direct typed clients, equality-versus-strict/directional negatives, complete States and capacity/resource/ordered-observation controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeConsumer.lean` | General actual signed SLT and SLT/ISZERO typed intGe transport with reserved word bridge, explicit resources and complete State continuation. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SignedGeControls.lean` | Direct typed signed LT/GE clients, unsigned contrast/min/max/equality, complete States and capacity/resource/order negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushConsumer.lean` | Published bounded metadata emitter to actual fetched PUSH0–PUSH32 with precise width/value, charged gas, full State/X and full-stack refusal. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/MetadataPushControls.lean` | Complete zero/byte/selector/ABI/full-width States, cost/capacity/resource and endian/length/order controls; no allocator premise. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentSelection.lean` | Canonical five-key G31 view, typed source representation and charged fetched transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentSelectionControls.lean` | Inhabited all-key source/native clients, wrapped timestamp and ordered negative observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuards.lean` | Exact all-key gas/stack checks, counted-prefix result and actual X fuel/refusal order. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentGuardControls.lean` | Both-permission legal stack boundaries, populated full States and ordered fuel/resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BinaryGuards.lean` | Twenty-op numeric charged-gate correspondence, legal capacity, fetched refusals and exact short-fuel order. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/BinaryGuardControls.lean` | Populated result/cost rows, complete ordered States and distinct legal/raw-overlimit resource controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean` | Published pure Source-local signed remainder through typed Scalar encoding to the actual native SMOD body; explicit zero mismatch. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean` | Both-pipeline/mode clients, signed and min/max controls, zero panic/raw success, and complete ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivision.lean` | Source-local signed division and exceptional branches against constructed fetched SDIV bodies. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedDivisionControls.lean` | Signed division clients, zero/overflow controls and ordered state observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwise.lean` | Published clean-width unsigned Source bitwise evaluation to charged fetched AND/OR/XOR bodies. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedBitwiseControls.lean` | Both-pipeline bitwise clients, width/horizon negatives and complete ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrder.lean` | Published int256 Source-local less-than and greater-or-equal results against fetched SLT and SLT/ISZERO bodies. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedOrderControls.lean` | Both-pipeline signed comparison clients, equality/minimum/horizon boundaries and ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrder.lean` | Published uint256 Source-local LT/GT results to actual charged fetched bodies via existing Scalar certificates. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedUnsignedOrderControls.lean` | Direct combined-law clients, uint256 boundaries, short horizons and complete ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShifts.lean` | All-count published unchecked Source shifts through Fin-word/BitVec transport to fetched SWAP1/SHL and SWAP1/SHR. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedShiftsControls.lean` | Direct Source/Scalar/native/X clients, zero/boundary/saturated counts and complete ordered observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAdd.lean` | Published checked Source addition success and overflow boundary against the raw fetched ADD body. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedCheckedAddControls.lean` | Direct combined-law clients, maximum-fit/overflow controls, exact panic bytes and ordered native observations. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiply.lean` | Actual Source word/BitVec encoding and unchecked uint256 multiplication observation against fetched MUL. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedMultiplyControls.lean` | Direct Source/word/driver/X clients, modular overflow and negative encoding controls, complete ordered native states. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SourceWordBytes.lean` | Exact Source/backend32-byte observations, typed readback, pure pinned reader and emitted PUSH32 transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/SourceWordBytesControls.lean` | Populated Source byte, signed/narrow, endian/length and fetched PUSH32 complete-state controls. |
 
 ## P1 runtime frames (producer checkpoint; [runtime-frame-p1.md](../feature-work/runtime-frame-p1.md))
 
@@ -497,6 +553,76 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/CalldataPackets/RawBool/Execution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
+| `Source/Preservation/AllocatingControls.lean` | Inhabited memory-expression and exact-argument witnesses in both source pipelines. |
+| `Source/Preservation/AllocatingFragment.lean` | An additive memory-expression admission over intrinsic resolved syntax. |
+| `Source/Preservation/MemoryBodies.lean` | An additive memory-body certificate and joint statement/sequence Hoare proof. |
+| `Source/Preservation/MemoryBodyCalls.lean` | Actual modifier-free internal calls with syntactically admitted memory bodies. |
+| `Source/Preservation/MemoryBodyControls.lean` | An inhabited intrinsic memory-call body: mutate through alias a, rebind a to a fresh allocation, and return alias b. |
+| `Source/Preservation/MemoryBranchControls.lean` | Conditional memory statements over inhabited runtime inputs. |
+| `Source/Preservation/MemoryExpressions.lean` | Memory body expressions over the existing intrinsic source syntax. |
+| `Source/Preservation/NewArrayFragment.lean` | Dynamic-new consumer of published allocation preservation. |
+| `Source/Preservation/NewArrayFragmentControls.lean` | Computed local length with a live caller reference: two plus two allocates four elements; oversized lengths and low horizons keep their halts. |
+| `Source/Preservation/ReferenceArguments.lean` | Exact-type arguments may be reference locals or allocating expressions. |
+| `Source/Preservation/ReferenceReturnControls.lean` | An actual intrinsic return-only call with a memory parameter and two reference results. |
+| `Source/Preservation/ReferenceReturns.lean` | Reference-return consumers of actual sub/body/call frames. |
+| `Source/Progress/EffectBodies.lean` | Callee-body sequences containing the proved builtin and emit statements. |
+| `Source/Progress/EffectCatalogue.lean` | A finite declaration-order certificate for nonrecursive effect bodies. |
+| `Source/Progress/EffectCatalogueControls.lean` | Actual elaborated source functions with an emit in the leaf, a require that calls the leaf, and an assert-failing callee. |
+| `Source/Preservation/AllocationBodyControls.lean` | Actual typed allocation nodes composed in admitted memory-body statements. |
+| `Source/Preservation/EncodingArguments.lean` | Syntactic ABI arguments with allocating expression children and raw string literals. |
+| `Source/Preservation/MemoryProgram.lean` | Source memory-call admission tied to actual elaborated bodies. |
+| `Source/Preservation/MemoryProgramControls.lean` | A source-elaborated memory parameter and ordinary single-reference return. |
+| `Source/Progress/NewArray.lean` | Non-stuck dynamic allocation for explicit ready memory types. |
+| `Source/Progress/NewArrayControls.lean` | Inhabited allocation progress and exact observations. |
+| `Source/Progress/ReadyArguments.lean` | Exact-type ready arguments combine non-stuck extraction with the existing reference-preserving argument evaluator. |
+| `Source/Progress/ReadyExpressionControls.lean` | Ready reference conditionals and exact argument lists over inhabited memory. |
+| `Source/Progress/ReadyExpressions.lean` | Readiness-decorated allocating expressions, over the existing intrinsic syntax and preservation admission. |
+| `Source/Progress/ReadyDefaults.lean` | Default return-slot progress for explicit ready types. |
+| `Source/Progress/ReadyReturnControls.lean` | Actual source-elaborated alias and allocating reference returns. |
+| `Source/Progress/ReadyReturns.lean` | Actual single-return memory bodies and calls. |
+| `Source/Progress/ReadyProgram.lean` | Complete hybrid value and ready memory function catalogues derive call progress and preservation. |
+| `Source/Progress/ReadyProgramControls.lean` | Elaborated mixed and identity units with inhabited call and expression witnesses. |
+| `Source/Progress/ReadyBodies.lean` | Ready memory statement and sequence progress with explicit frame and readiness certificates. |
+| `Source/Progress/ReadyBodyCalls.lean` | Actual modifier-free calls and call expressions over ready memory sequences. |
+| `Source/Progress/ReadyBodyControls.lean` | Elaborated nested allocation scopes, returned references and exact halt controls. |
+| `Source/Progress/ReadyScopeControls.lean` | Intrinsic conditional, unchecked restoration and reference-tuple controls. |
+| `Source/Progress/ReadyCatalogue.lean` | Ready-body call progress and preservation with frame metadata derived from elaboration. |
+| `Source/Progress/ReadyCatalogueControls.lean` | Inhabited elaborated ready-unit, reference-input and hybrid coverage clients. |
+| `Source/Progress/ReadyDispatchControls.lean` | Nonidentity inherited dispatch consumes elaboration-derived ready-frame metadata. |
+| `Source/Progress/CallComposition.lean` | Finite nested certified calls and exact arguments preserve source memory and progress. |
+| `Source/Progress/CallCompositionControls.lean` | Inhabited nested alias returns, argument growth and exact halt/refusal controls. |
+| `Source/Progress/ForwardingReturns.lean` | Actual single-return forwarding bodies and calls derive progress and memory preservation from composed expressions. |
+| `Source/Progress/ForwardingControls.lean` | Elaborated primitive-argument memory-return relay with escaped references and callee-panic restoration. |
+| `Source/Progress/ForwardingChain.lean` | Finite source forwarding certificates derive per-entry and whole-unit call guarantees. |
+| `Source/Progress/ForwardingChainControls.lean` | Inhabited base/relay, caller restoration and freshness/coverage controls. |
+
+| `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSub.lean` | Published unchecked signed Source-local subtraction, canonical word and charged fetched SUB transport. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PublishedSignedSubControls.lean` | Signed wrap boundaries, populated full observations and gas/stack/fuel negative controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushFamily.lean` | Exact arbitrary payload and Scalar-tail transport through existing all-width charged metadata PUSH. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/PushFamilyControls.lean` | Leading-zero/width/PC/cost distinctions, populated complete observations and resource negatives. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Concrete ADD/MUL instruction certificates, exact Scalar code and charged fetched numeric transport with separate frames. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Populated ADD/MUL certificate consumers, complete ordered observations, modular boundaries and resource/frame separation controls. |
+
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete ADD/MUL selection-certificate short-stack refusal against charged fetched execution, with gas/fuel priority controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` | Concrete ADD/MUL certificate sequence, two charged fetched steps, native continuation and populated order/wrap/resource controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` | Exact STOP decoding, actual arithmetic-sequence termination and populated buffer/PC/fuel controls against the pinned reference. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/ReturnSizeObservation.lean` | Charged frozen-API return-data-size observation, exact gate ordering and populated distinct-buffer/capacity controls. |
+
+
+## Signed cast primitive packet
+
+| Module | Purpose |
+|---|---|
+| `Backend/PrimitivePackets/SignedCast/CastSource.lean` | Existing Source local signed casts at all approved byte widths, retaining the exact input state. |
+| `Backend/PrimitivePackets/SignedCast/Selected.lean` | Total public compiler selection at all approved signed byte widths, with no supplied certificate. |
+| `Backend/PrimitivePackets/SignedCast/Target.lean` | Selected intrinsic execution with complete caller frame and separate SIGNEXTEND/Source-wrap equality. |
+| `Backend/PrimitivePackets/SignedCast/Agreement.lean` | Source origin through selected code under explicit initial local-family and full representation premises. |
+| `Backend/PrimitivePackets/SignedCast/CastControls.lean` | Populated narrowing/widening, boundary, both-pipeline and wrong-width/index/tail controls. |
 
 ## Exact return-slot consumers
 
@@ -621,3 +747,74 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
 | `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
 | `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
+| `Source/Progress/InitializedLocals` | Composed initialized-local progress and reference preservation. |
+| `Source/Progress/InitializedPrefixes` | Finite initialized-local prefixes ending in one return. |
+| `Source/Progress/InitializedCalls` | Actual internal-call frames for initialized-return bodies. |
+| `Source/Progress/InitializedControls` | Elaborated initialized-local relay and success/panic/refusal consumers. |
+
+| `Source/Progress/InitializedChain` | Finite initialized-return extensions and whole-unit call/composition proofs. |
+| `Source/Progress/InitializedChainControls` | Whole-unit initialized relay, caller/panic consumers and coverage refusals. |
+
+
+| `Backend/FailurePaths/FramedEmission.lean` | Actual checked payload emission preserves disjoint physical word frames; Source reason selection/readback consumer. |
+| `Backend/FailurePaths/FramedEmissionControls.lean` | Inhabited reason/Boolean return frames, adjacent byte boundaries and overlapping-emission refusal. |
+
+| `Backend/FailurePaths/RuntimeGuard.lean` | Actual Source Boolean-local bare require and public checked memory statement selection/run. |
+| `Backend/FailurePaths/RuntimeGuardControls.lean` | Inhabited true/false guards in both pipelines, saved stack, panic boundary and literal-selector refusal. |
+
+| `Backend/FailurePaths/RelationalGuard.lean` | Actual Source relational bare require and public checked memory statement selection/run. |
+| `Backend/FailurePaths/RelationalGuardControls.lean` | Inhabited signed/unsigned guards, equality/extrema, both pipelines and refusal/horizon controls. |
+
+| `Backend/FailurePaths/LogicalGuard.lean` | Actual short-circuit Source Boolean-local require and public checked memory selection/run. |
+| `Backend/FailurePaths/LogicalGuardControls.lean` | Inhabited logical guards in both pipelines, saved stack, target-only skipped-invalid-RHS and fault/revert distinctions. |
+
+| `Source/Progress/ReadyRebinding.lean` | Finite ready local-rebinding prefixes and actual Source body/call progress paired with reference preservation. |
+| `Source/Progress/ReadyRebindingControls.lean` | Inhabited parameter rebinding, distinct old/fresh aliases, caller restoration, heap persistence and panic/refusal controls. |
+
+| `Backend/FailurePaths/LocalGuardSelection.lean` | Executable indexed Source Boolean-local require selection through the public memory compiler, with every-success correctness. |
+| `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Inhabited actual selector consumers in both pipelines and selector/refuted-relation/horizon controls. |
+
+| `Backend/FailurePaths/LogicalGuardSelection.lean` | Executable indexed Source logical-local require selection and every-success actual run correctness. |
+| `Backend/FailurePaths/LogicalGuardSelectionControls.lean` | Inhabited logical-selector clients, exact Boolean observations, complementary refusals and relation/horizon controls. |
+
+| `Backend/FailurePaths/RelationalGuardSelection.lean` | Actual full-width integer-local Source guard selection, preserving width/sign/operator evidence and proving every-success runs. |
+| `Backend/FailurePaths/RelationalGuardSelectionControls.lean` | Inhabited signed/unsigned selector clients, integer-index map, exact boundaries and successful-but-refused uint8 Source control. |
+
+| `Backend/FailurePaths/CheckedGuards.lean` | Unified indexed Source guard dispatch, every-success actual runs and exact public checked compiler/code provenance. |
+| `Backend/FailurePaths/CheckedGuardsControls.lean` | One inhabited mixed Boolean/integer frame for all dispatch branches, provenance clients and outcome/refusal/relation controls. |
+
+| `Backend/FailurePaths/GuardLowering.lean` | Computable intrinsic guard targets, guaranteed public compilation and exact dispatcher/code/refusal equivalence. |
+| `Backend/FailurePaths/GuardLoweringControls.lean` | Computed mixed-context targets and public compile/run clients for all three guard families, with refusal controls. |
+| `Backend/FailurePaths/GuardSequences.lean` | Finite indexed guard lists lowered to public-compiled intrinsic programs, unchanged fragments and actual Source/target short-circuit simulation. |
+| `Backend/FailurePaths/GuardSequencesControls.lean` | Mixed three-guard public selection, exact Source/target outcomes in both pipelines and positioned failure/refusal/horizon controls. |
+| `Backend/FailurePaths/GuardBodySelection.lean` | Computed structural Source-items admission, exact reconstruction and public guard-program compilation/execution provenance. |
+| `Backend/FailurePaths/GuardBodySelectionControls.lean` | Direct mixed-context Source-items selector clients in both pipelines, exact observations and structural/guard refusal controls. |
+| `Backend/FailurePaths/GuardBlockSelection.lean` | Root Source guard-block lowering through public checked statement compilation, exact code provenance and actual Source scope restoration/run simulation. |
+| `Backend/FailurePaths/GuardBlockSelectionControls.lean` | Inhabited root-block clients and exact joint outcomes in both pipelines, low-horizon timeouts and root/body refusal controls. |
+
+| `Source/Progress/InlineArrayParents.lean` | Ready inline-array allocation expression/statement progress, derived memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/InlineArrayParentControls.lean` | Inhabited inline allocation over live caller memory, exact statement/fuel/panic runs and retained readiness/element exclusions in both pipelines. |
+
+| `Source/Progress/StructParents.lean` | Constructor-derived member layout, actual packing/allocation progress and joint expression/statement preservation with checked-elaboration adaptation. |
+| `Source/Progress/StructParentControls.lean` | Inhabited reference-field constructors, old/fresh heap observations, early/later allocation panic, exact fuel and retained packing/readiness boundaries in both pipelines. |
+
+| `Source/Progress/AllocationBodyCalls.lean` | Syntactic allocation-parent body prefixes, actual modifier-free internal-call progress, joint memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/AllocationBodyCallControls.lean` | Source-inferred callee body, inhabited old-reference returns, persistent default/child/struct allocations, propagated panic and caller restoration in both evaluator pipelines. |
+
+| `Source/Progress/AggregateDefaults.lean` | Finite memory-array/struct default certificates, actual all-horizon default progress and joint memory preservation. |
+| `Source/Progress/AllocationReturns.lean` | Allocating-parent return statements, modifier-free body/internal-call progress, memory preservation and checked-elaboration adapters. |
+| `Source/Progress/AggregateReturnControls.lean` | Actual elaborated fixed-array return, distinct default/fresh references, inhabited caller restoration and unchanged default/readiness refusals in both pipelines. |
+| `Source/Progress/AggregateDefaultControls.lean` | Inhabited reference-field struct defaults, retained earlier allocation on timeout and old default-certificate refusal. |
+
+| `Source/Progress/ParentArguments.lean` | Exact allocating-parent argument certificates, actual left-to-right evaluation, reference growth transport and checked-elaboration direct-call composition. |
+| `Source/Progress/ParentArgumentControls.lean` | Elaborated reference identity callee, intrinsic allocating argument, returned alias distinct from retained default, inhabited caller restoration and old-argument refusal. |
+| `Source/Progress/ParentArgumentFlowControls.lean` | Two allocating arguments, early panic before callee allocation and later panic preserving earlier argument memory in both pipelines. |
+
+| `Source/Progress/BoundParents.lean` | Typed allocation-parent local prefixes, actual declaration/frame/scope progress, joint memory preservation and elaborated-call adaptation. |
+| `Source/Progress/BoundParentControls.lean` | Elaborated parent-initialized local and returned reference, retained default/fresh heap objects, inhabited caller restoration and old-body refusal. |
+| `Source/Progress/BoundParentPanicControls.lean` | Elaborated division panic after allocating a local, retained memory growth and restored caller state in both evaluator pipelines. |
+
+| `Source/Progress/BoundCatalogue.lean` | Bound-parent body catalogues with elaboration-derived frame metadata, checked complete function coverage and ready/parent argument adapters. |
+| `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
+| `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
+| `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |

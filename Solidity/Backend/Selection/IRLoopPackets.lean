@@ -76,15 +76,24 @@ theorem iter_two (rc rb : Evm.Machine → Evm.Out) (initial next : Evm.Machine) 
     Evm.loopIterN rc rb 2 initial = .inr result := by
   simp only [Evm.loopIterN, one, two]
 
-#print axioms turn_continue
-#print axioms turn_done
-#print axioms iter_three
-#print axioms iter_two
+/-- info: 'Solidity.Backend.Selection.IRLoop.turn_continue' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms turn_continue
+/-- info: 'Solidity.Backend.Selection.IRLoop.turn_done' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms turn_done
+/-- info: 'Solidity.Backend.Selection.IRLoop.iter_three' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms iter_three
+/-- info: 'Solidity.Backend.Selection.IRLoop.iter_two' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms iter_two
 
-#print axioms out_bind_self
-#print axioms single_run
-#print axioms finite_success
-#print axioms turn_word
-#print axioms turn_empty
+/-- info: 'Solidity.Backend.Selection.IRLoop.out_bind_self' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms out_bind_self
+/-- info: 'Solidity.Backend.Selection.IRLoop.single_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms single_run
+/-- info: 'Solidity.Backend.Selection.IRLoop.finite_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms finite_success
+/-- info: 'Solidity.Backend.Selection.IRLoop.turn_word' depends on axioms: [propext] -/
+#guard_msgs (whitespace := lax) in #print axioms turn_word
+/-- info: 'Solidity.Backend.Selection.IRLoop.turn_empty' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms turn_empty
 
 end Solidity.Backend.Selection.IRLoop
