@@ -3133,4 +3133,4 @@ modules. Every gate passed:
 Every later commit changes only docs or the held test driver, and none of them
 is in the library. The lane touches no Calculus, Syntax or Semantics module,
 so the examples gate does not apply. The 29 lane modules are now default-build
-roots. Together they built in under ten minutes of the touched gate.
+roots.
