@@ -355,6 +355,9 @@ import Solidity.Backend.MemoryOps.SourceNestedDelete
 import Solidity.Backend.MemoryOps.SourceNestedMemory
 import Solidity.Backend.MemoryOps.SourceNestedMutation
 import Solidity.Backend.MemoryOps.SourceNestedSelect
+import Solidity.Backend.MemoryOps.SourceRawBoolCopy
+import Solidity.Backend.MemoryOps.SourceRawBoolCopyControls
+import Solidity.Backend.MemoryOps.SourceRawBoolEntry
 import Solidity.Backend.MemoryOps.SourceReferenceAssignment
 import Solidity.Backend.MemoryOps.SourceReferenceSequence
 import Solidity.Backend.MemoryOps.SourceReferenceWrite
