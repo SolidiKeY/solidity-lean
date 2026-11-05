@@ -38,7 +38,8 @@ read-only source/control and committed-artifact reviews are recorded in delivery
 No heartbeat, fuel, node, test or wall-time budget was raised; exact component
 certificates avoid monolithic instruction-program normalization.
 
-Concrete late-revert word fixtures, physical bytes, general construction/failure,
+The concrete late-revert word fixture is now supplied by nested_word_late_tables
+(see source-fixed-reference-word-late-fixture.md). Physical bytes, general construction/failure,
 full original gates and final Source/V10/target/world/compiler adequacy remain
 open. G32/P6b/G34/G35.02 reference remainder/G35.03/Backfills A/B are partial;
 G33 and G35.01/.04/.05/.06 remain delegated/open. Goal remains unchanged BLOCKED.

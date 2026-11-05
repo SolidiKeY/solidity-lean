@@ -766,4 +766,84 @@ theorem nested_word_tables (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_word_tables
 
+
+private def lateMachine : Machine := writeMachine wordMachine 3 w[3]
+private theorem lateRepr : Objects.StateRepr 1 1 5 (Frag.init ΔT) stEnd wordBase lateMachine := by
+  exact wordRepr.setVal tj (u 3) w[3] (ReprV.uint_of rfl)
+private theorem lateAllocator : Objects.AllocatorRepr hp wordBase 5 ⟨32,by decide⟩ lateMachine :=
+  wordAllocator.localWrite 3 (by decide) (by decide) w[3]
+
+/-- Actual endpoint3 initial local/word binding, with unchanged represented
+objects and complete allocator; no conditional fixture premise. -/
+theorem nested_word_late_initial : Objects.StateRepr 1 1 5 (Frag.init ΔT) stEnd wordBase lateMachine ∧
+    Objects.AllocatorRepr hp wordBase 5 ⟨32,by decide⟩ lateMachine ∧
+    SourceUintFixedRefsAt (sw 1 3 42) 2 hp root address ∧ Source.MemOK E0 SH (sw 1 3 42) :=
+  ⟨lateRepr,lateAllocator,graphW 1 3 42,memOKW 1 3 42⟩
+
+/-- Complete concrete late-revert witness: the materialized prefix table and
+Source globals survive at the scope their outcome types expose. No post-revert
+word machine, panic payload equality or transaction rollback is asserted. -/
+theorem nested_word_late_tables (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 ΓW) (mm : Machine),
+      (Source.execS (G0 pipeline) F0 (horizon+6) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wi wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 3 42).1).run (.nil,(sw 1 3 42).2)=
+          (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.evalE (G0 pipeline) F0 (horizon+4) (sourceUintFixedNestedAssign wr wi wj wv)).run ym=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wi wv)) (.stmt (.expr (sourceUintFixedNestedAssign wr wi wj wv)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 3 42).1).run (.nil,(sw 1 3 42).2)=
+          (.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Stmt.run stEnd prefixStmt=.ok ⟨stEnd.withHeap mid,List.prefix_refl _⟩ ∧
+      Stmt.run (stEnd.withHeap mid) writeStmt=.error .revert ∧
+      Prog.run stEnd (.cons prefixStmt (.cons writeStmt .nil))=.error .revert ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) lateMachine=.ok mm 0 ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti tj tv) mm=.revert ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv ++ uintFixedChildWriteCode (C := CT) 1 tr ti tj tv) lateMachine=.revert ∧
+      (wordTable lateMachine,wordTable mm)=(beforeWords.set 3 w[3],(beforeWords.set 3 w[3]).set 6 w[42]) ∧
+      wordTable mm≠wordTable lateMachine ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ Source.MemOK E0 SH ym ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (stEnd.withHeap mid) wordBase mm ∧
+      Objects.AllocatorRepr mid wordBase 5 ⟨32,by decide⟩ mm ∧ mm.stack=[w[77],w[88]] ∧
+      MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] ∧ mid.get right=hp.get right ∧
+      [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2]=
+        [some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (mid.get left)⟩,
+         some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩,
+         some ⟨SourceUintFixedRefsTy 3,sourceUintFixedRefMemory address [left,left,right]⟩] ∧
+      ym.1=(sw 1 3 42).1 ∧ ym.2.heap.next=3 ∧ (∀ a,3≤a → ym.2.heap.get a=none) ∧
+      ym.2.ex=(sw 1 3 42).2.ex ∧ ym.2.events=(sw 1 3 42).2.events ∧
+      ym.2.logs=(sw 1 3 42).2.logs ∧ ym.2.fnLocals=(sw 1 3 42).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,ym,mm,tw,first,failed,items,iw,ir,prog,cw,cr,append,rm,mok,hm,locals,next,parent,objects,addresses,world,events,logs,fnLocals,stack,allocator⟩ :=
+      (graphW 1 3 42).resolved_write_late_bounds_word (G0 pipeline) F0 horizon nps stEnd root address wr wi wj wv tr ti tj tv
+        (u 1) (u 3) (u 42) left rfl rfl rfl rfl rfl rfl rfl rfl selectLeft selectedSeparation
+        (by decide) (by decide) SH (memOKW 1 3 42) lateRepr
+    have exactFirst : Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) lateMachine=
+        .ok (writeMachine lateMachine 9 w[42]) 0 := by
+      exact nested_fixed_store_exact lateRepr tr ti ti (.simple (.local tv)) rfl root left
+        (wmod 1) (wmod 1) (wmod 42) rfl rfl rfl rfl selectLeft (by decide)
+    have mmEq : mm=writeMachine lateMachine 9 w[42] := (Evm.Out.ok.inj (cw.symm.trans exactFirst)).1
+    have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+    have contents : MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] := by
+      rw [Option.some.inj (tw.symm.trans canonical),Heap.get_set_same,MObj.elems_setElem,MObj.elems_fixed];rfl
+    have sourceParent : mid.get root=hp.get root := parent
+    have leftNow := rm.children left (by rw [sourceParent,parentElements];exact List.mem_cons_self)
+    change ym.2.heap.get 0=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (mid.get left)⟩ at leftNow
+    have rightNow := (addresses 1 (by decide)).trans (show (sw 1 3 42).2.heap.get 1=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩ from rfl)
+    have parentNow := rm.parent
+    rw [sourceParent,parentElements] at parentNow
+    refine ⟨mid,ym,mm,first,failed,items,iw,ir,prog,cw,cr,append,?_,?_,rm,mok,hm,
+      allocator ⟨32,by decide⟩ (by decide) lateAllocator,stack,contents,objects right (by decide),?_,locals,next,?_,world,events,logs,fnLocals⟩
+    · rw [mmEq];rfl
+    · rw [mmEq];decide
+    · rw [leftNow,rightNow,parentNow]
+    · intro a ha;exact ym.2.heap.bounded a (by rw [next];exact ha)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_late_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_word_late_initial
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_late_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_word_late_tables
+
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
