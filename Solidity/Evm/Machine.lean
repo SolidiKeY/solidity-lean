@@ -208,6 +208,8 @@ inductive Instr where
   /-- The bitwise and exponentiation opcodes of the `uint` operators with no
   overflow check: `XOR`, `NOT`, `SHL`, `SHR`, `EXP`. -/
   | xor | not | shl | shr | exp
+  /-- `SAR`, the arithmetic (sign-filling) right shift, count on top. -/
+  | sar
   /-- The transaction's environment: `CALLER` (`msg.sender`), `CALLVALUE`
   (`msg.value`), `TIMESTAMP` (`block.timestamp`), `SELFBALANCE`
   (`address(this).balance`). -/
@@ -242,6 +244,7 @@ instance : ToString Instr where
     | .call => "CALL"
     | .revert => "REVERT"
     | .xor => "XOR" | .not => "NOT" | .shl => "SHL" | .shr => "SHR" | .exp => "EXP"
+    | .sar => "SAR"
     | .caller => "CALLER" | .callvalue => "CALLVALUE" | .timestamp => "TIMESTAMP"
     | .selfbalance => "SELFBALANCE"
     | .address => "ADDRESS"
@@ -467,6 +470,12 @@ theorem loopRun_of_forall {rc rb : Machine → Out} {m : Machine}
     cases hn
   simp only [loopRun, hex, dif_neg, not_false_eq_true]
 
+/-- `SAR`'s result: the signed reading of `a` divided by `2^n` rounding
+toward `-∞`, and the sign's fill (`-1` or `0`) for counts of `256` or more. -/
+def sarWord (n a : Fin W) : Fin W :=
+  if n.1 < 256 then sword (sgn a.1 / ((2 ^ n.1 : Nat) : Int))
+  else if sgn a.1 < 0 then wMax else ⟨0, W_pos⟩
+
 /-- One step with the stack's top replaced: `ok` with nothing to skip. -/
 @[inline] def Machine.next (m : Machine) (st : List Word) : Out := .ok { m with stack := st } 0
 
@@ -591,6 +600,9 @@ def Instr.step : Instr → Machine → Out
     | _ => .fault
   | .exp, m => match m.stack with
     | .val a :: .val b :: st => m.next (.val (wmod (a.1 ^ b.1)) :: st)
+    | _ => .fault
+  | .sar, m => match m.stack with
+    | .val n :: .val a :: st => m.next (.val (sarWord n a) :: st)
     | _ => .fault
   | .caller, m => m.next (.val m.caller :: m.stack)
   | .callvalue, m => m.next (.val m.callvalue :: m.stack)
