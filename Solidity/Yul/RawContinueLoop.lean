@@ -613,4 +613,44 @@ theorem source_uint8_for_error : ∀ (ctx : Solidity.Source.Ctx) (name : String)
     rw [actual] at rejected
     cases rejected
 
+/-- Every old scalar retains its raw word through this concrete initialized loop, even for incoherent input. -/
+theorem initialized_scalar_read : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx)
+ (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead
+   (Solidity.Yul.RawU8ForAbsent.run (.local index)
+     (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+     pipeline fuel state).2 cell =
+ Solidity.Yul.RawTypedScope.scalarRead state cell := by
+  intro ctx name returns modifier u index pipeline fuel state cell
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      cases fuel with
+      | zero =>
+        exact RawTypedScope.scalarRead_agrees ctx (refresh state) state (refresh_view ctx state) cell
+      | succ fuel =>
+        let reached : RawFrame.State (ctx.push name LocalU8Expr.Ty) :=
+          RawCoherent.capture
+            (RawFrame.ofClean (.cons (.int 0 (by decide)) state.clean) state.world)
+            (((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1),
+              (RawCoherent.prepare state).2)
+        have stayed := (all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u
+          pipeline (fuel+2) reached).2.1
+        have projected := RawTypedScope.drop_scalar_agrees ctx name LocalU8Expr.Ty
+          (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2
+          reached stayed cell
+        change RawTypedScope.scalarRead
+          (RawTypedScope.drop (run (ctx.push name LocalU8Expr.Ty) returns modifier u
+            pipeline (fuel+2) reached).2) cell = _
+        rw [projected,RawTypedScope.drop_scalar_read]
+        dsimp only [reached]
+        rw [RawTypedScope.scalarRead_capture]
+        exact RawTypedScope.lift_scalar_read ctx name LocalU8Expr.Ty cell
+          ((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1)
+
 end Solidity.Yul.RawContinueLoop

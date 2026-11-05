@@ -1,0 +1,28 @@
+{
+  "proof_sources": {
+    "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "26c3562a284570b99a0571d33e7cc8f9cb48fb2c7af443b3785e676cff24939c",
+    "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "e66a25cc73e9600cddd208913dfd567961a8383376bb3fb98f8b0a771d32746b",
+    "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+    "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+    "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
+  },
+  "container_id": "454723131c0d84eb64ec5e3aeb89227d92cc6c11dba05d69d58ef98c671346e3",
+  "command": [
+    "lake",
+    "build",
+    "Solidity.Backend.PrimitivePackets.Constants.Selected"
+  ],
+  "exit": 0,
+  "process_exit": 0,
+  "seconds": 140.232,
+  "container_memory_peak_bytes": 8661929984,
+  "minimum_parent_headroom_bytes": 5292875776,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/primitive-packets-1105/Constants/evidence/selected-build.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

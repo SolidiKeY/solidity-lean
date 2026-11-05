@@ -1,0 +1,4 @@
+'Solidity.Frontend.SolcJson.Ir.Selection.sound' does not depend on any axioms
+'Solidity.Frontend.SolcJson.Ir.Selection.complete' does not depend on any axioms
+'Solidity.Frontend.SolcJson.Ir.ContractSelection.sound' depends on axioms: [propext]
+IR_CHANNEL_FIXTURES_PASS 4

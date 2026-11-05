@@ -544,4 +544,114 @@ theorem shifts_resource_order (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms shifts_resource_order
+
+def unaryExpected (a result : Scalar.Word) (perm : Bool) : EVM.State :=
+  {F.input .ISZERO 12 perm (a::spill) with
+    pc:=u 4,gasAvailable:=u 9,execLength:=42,
+    stack:=(result::spill).map (fun w=>UInt256.mk w.toFin)}
+
+theorem eq_client (a b : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .eq (ir a b)=.ok (irExpected a b (Scalar.flag (a == b))) 0 ∧
+    Scalar.run Selection.eqCertificate.code (a::b::spill)=some (Scalar.flag (a == b)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (a::b::spill))=
+      .ok (nativeExpected .EQ 3 a b (Scalar.flag (a == b)) perm) ∧
+    EVM.X 2 #[] (F.input .EQ 12 perm (a::b::spill))=
+      EVM.X 1 #[] (nativeExpected .EQ 3 a b (Scalar.flag (a == b)) perm) := by
+  have h := InstructionSelectionAgreement.eq #[] (F.site .EQ 12 perm) a b spill (ir a b)
+    rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape := three_shape .EQ a b (Scalar.flag (a == b)) perm
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem iszero_client (a : Scalar.Word) (perm : Bool) :
+    Solidity.Evm.Instr.step .iszero {ir a 0 with stack:=Selection.irStack (a::spill)}=
+      .ok {ir a 0 with stack:=Selection.irStack (Scalar.flag (a == 0)::spill)} 0 ∧
+    Scalar.run Selection.iszeroCertificate.code (a::spill)=some (Scalar.flag (a == 0)::spill) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (a::spill))=
+      .ok (unaryExpected a (Scalar.flag (a == 0)) perm) ∧
+    EVM.X 2 #[] (F.input .ISZERO 12 perm (a::spill))=
+      EVM.X 1 #[] (unaryExpected a (Scalar.flag (a == 0)) perm) := by
+  have h := InstructionSelectionAgreement.iszero #[] (F.site .ISZERO 12 perm) a spill
+    {ir a 0 with stack:=Selection.irStack (a::spill)} rfl (by decide) (by change 3≤12;decide) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (F.input .ISZERO 12 perm (a::spill)) 3).replaceStackAndIncrPC
+      ((Scalar.flag (a == 0)::spill).map (fun w=>UInt256.mk w.toFin))=
+        unaryExpected a (Scalar.flag (a == 0)) perm := by
+    first | rfl | (simp only [F.input,WrappingArithmeticFixtures.input,WrappingArithmeticFixtures.site,
+      unaryExpected,modularSite,Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+      EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem flags_full_word_cases (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (1::257::spill))=
+      .ok (nativeExpected .EQ 3 1 257 0 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 12 perm (257::257::spill))=
+      .ok (nativeExpected .EQ 3 257 257 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (0::spill))=
+      .ok (unaryExpected 0 1 perm) ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 12 perm (256::spill))=
+      .ok (unaryExpected 256 0 perm) := by
+  exact ⟨(eq_client 1 257 perm).2.2.1,(eq_client 257 257 perm).2.2.1,
+    (iszero_client 0 perm).2.2.1,(iszero_client 256 perm).2.2.1⟩
+
+theorem flags_complete_observation (perm : Bool) :
+    (nativeExpected .EQ 3 1 257 0 perm).stack=[u 0,u 258,u 513] ∧
+    (unaryExpected 256 0 perm).stack=[u 0,u 258,u 513] ∧
+    (unaryExpected 0 1 perm).stack=[u 1,u 258,u 513] ∧
+    (nativeExpected .EQ 3 1 257 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (unaryExpected 256 0 perm).stack≠[u 1,u 258,u 513] ∧
+    (unaryExpected 0 1 perm).stack≠[u 1,u 513,u 258] ∧
+    (nativeExpected .EQ 3 1 257 0 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x14,0] ∧
+    (unaryExpected 256 0 perm).executionEnv.code.data.toList=[0x60,0x7f,0x50,0x15,0] ∧
+    (unaryExpected 256 0 perm).pc=u 4 ∧ (unaryExpected 256 0 perm).gasAvailable=u 9 ∧
+    (unaryExpected 256 0 perm).execLength=42 ∧
+    (unaryExpected 256 0 perm).memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    (unaryExpected 256 0 perm).returnData.data.toList=[0xcc,0xdd] ∧
+    (unaryExpected 256 0 perm).H_return.data.toList=[0xee,0xff] ∧
+    (unaryExpected 256 0 perm).executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    (unaryExpected 256 0 perm).accountMap=accounts ∧ (unaryExpected 256 0 perm).σ₀=accounts := by
+  refine ⟨rfl,rfl,rfl,?_,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+  · change [u 0,u 258,u 513]≠[u 1,u 258,u 513];decide
+  · change [u 1,u 258,u 513]≠[u 1,u 513,u 258];decide
+
+theorem flags_resource_order (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 2 perm (1::257::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 2 perm (256::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EQ 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (F.input .ISZERO 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (F.input .EQ 0 perm [])=.error .OutOfFuel := by
+  cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.eq_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms eq_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.iszero_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms iszero_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_full_word_cases' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_full_word_cases
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_complete_observation
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_resource_order' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms flags_resource_order
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionControls

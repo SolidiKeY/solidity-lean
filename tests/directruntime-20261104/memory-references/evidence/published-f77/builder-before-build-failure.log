@@ -1,0 +1,1 @@
+tests/directruntime-20261104/memory-references/Admission.lean:1:0: error: import Solidity.Frontend.SolcJson failed, environment already contains 'Solidity.Frontend.SolcFun' from Solidity.Frontend.SolcJson.Body

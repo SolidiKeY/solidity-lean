@@ -1,0 +1,37 @@
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Audit.lean` | Environment-level declaration and transitive axiom inventory This command records every imported declaration owned by a NumericLiteralProofs module, including generated constructors, recursors and equation helpers. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Backfill.lean` | Exact consumed prefixes, source ranges and denomination separation |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Classification.lean` | Accepted-token, source-range and separation consequences |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Controls.lean` | Inhabited constructor witnesses and kernel-evaluated scanner-arm controls |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Digits.lean` | Independent decimal digit spelling `Tail` describes maximal decimal-tail scanning, including a leading underscore followed by a digit. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Fixtures.lean` | Typed observations for every fixed differential spelling fixture |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Refusals.lean` | Arbitrary-length refusal and suffix-consumption consequences |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Span.lean` | Source-level glued numeric suffix refusal |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Spellings.lean` | Independent decimal and hexadecimal numeric spelling The relations preserve decoded digits, fractional scale, signed exponent and the existing deterministic checksum flag. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Underscores.lean` | Global decimal underscore placement, including fractions and exponents |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/Values.lean` | Whole-spelling erasure and exact numeric interpretation |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable.lean` | Every fixed word is disjoint from numeric tokens |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part05.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part06.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part07.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part09.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part10.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part11.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part12.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part13.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part14.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part15.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part16.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part17.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part18.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part19.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part20.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part21.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part22.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part23.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part24.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part25.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part26.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part27.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part28.lean` | Generated direct structural word-table proof. |
+docs/module-map/frontend.md: | `Frontend/NumericLiteralProofs/WordTable/Part29.lean` | Generated direct structural word-table proof. |

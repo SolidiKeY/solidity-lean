@@ -1,0 +1,4 @@
+Solidity.Tools.DirectRuntime.check (request : Lean.Json) : Except String Lean.Json
+'Solidity.Tools.DirectRuntime.check' depends on axioms: [propext, Classical.choice, Quot.sound]
+Solidity.Tools.DirectRuntime.checkString (input : String) : String
+'Solidity.Tools.DirectRuntime.checkString' depends on axioms: [propext, Classical.choice, Quot.sound]

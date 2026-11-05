@@ -1,0 +1,33 @@
+ERROR 35:62 Application type mismatch: The argument
+  ((one, ()), ())
+has type
+  (PrimTy.uint.Denote × Unit) × Unit
+but is expected to have type
+  Heap ?m.7
+in the application
+  Grown.mk ⋯ ((one, ()), ())
+ERROR 54:40 don't know how to synthesize implicit argument `R`
+  @MAddrT.index (RefTy.fixed Ty.uint ?m.8) Ty.uint 0 ArrTy.fixed z
+context:
+⊢ RefTy
+
+Note: All parameter types and holes (e.g., `_`) in the header of a theorem are resolved before the proof is processed; information from the proof cannot be used to infer what these values should be
+ERROR 54:49 don't know how to synthesize implicit argument `n`
+  @ArrTy.fixed Ty.uint ?m.8
+context:
+⊢ Nat
+
+Note: All parameter types and holes (e.g., `_`) in the header of a theorem are resolved before the proof is processed; information from the proof cannot be used to infer what these values should be
+ERROR 54:119 Tactic `rfl` failed: The left-hand side
+  fixedMem.writeT (MAddrT.index 0 ArrTy.fixed z) z
+is not definitionally equal to the right-hand side
+  some fixedMem
+
+⊢ fixedMem.writeT (MAddrT.index 0 ArrTy.fixed z) z = some fixedMem
+ERROR 37:44 Tactic `rfl` failed: The left-hand side
+  tokenMem.writeT (MAddrT.field 0 ⋯) one
+is not definitionally equal to the right-hand side
+  some tokenOne
+
+⊢ tokenMem.writeT (MAddrT.field 0 ⋯) one = some tokenOne
+diag: 5 errors
