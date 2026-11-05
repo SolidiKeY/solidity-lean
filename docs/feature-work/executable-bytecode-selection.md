@@ -481,3 +481,15 @@ cache transport must be verified against actual source keys before reuse.
 The next full-gate attempt needs a materially changed cache/resource state
 or separately authorized repair, retaining all original limits. No Source,
 Core ExtCall, premise, theorem, heartbeat or trust change is inferred.
+
+## IR packet axiom-output pins
+
+Published3ad22f66d8fc6431378c22e71823436c79dede7f is preserved in
+mergea7080a863fa0b2a91f4c01fedc7aa7b8b8140c8d. Its review follow-up adds
+exact guarded output for all7IRBranchPackets and9IRLoopPackets axiom reports,
+including the two axiom-free results. No theorem, proof, import, budget or
+premise changes: stripping only these guards recovers the prior files exactly.
+Both per-file Lean MCP diagnostics pass; independent read-only finder and
+skeptic accept the pin-only diff. Audit evidence distinguishes guarded prints
+from ordinary emitted reports rather than silently dropping these16checks.
+Original RAM-stop and coordinator-owned RawBytesN registration remain open.
