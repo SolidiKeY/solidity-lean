@@ -62,3 +62,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean` | Successful quotation coherence for actual scalar-result recursion, including callers outside the inhabited successful controls. |
 | `Backend/Passes/MemoryScopeAllocation.lean` | Scoped proofs and retained obligations for MemoryScopeAllocation. |
 | `Backend/Passes/MemoryScopeBoundary.lean` | Scope exit keeps actual emitted code, reached cost and selected map. |
+| `Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |

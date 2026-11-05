@@ -236,6 +236,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3CallerPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CallerReframe
 import Solidity.Backend.InternalFlow.RuntimeFrameV3CountdownWitness
 import Solidity.Backend.InternalFlow.RuntimeFrameV3DomainTransport
+import Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulScalarSource
+import Solidity.Backend.InternalFlow.RuntimeFrameV3EffectfulSourceCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionPrefixes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3EmissionUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3FixedThunkProducer
