@@ -154,3 +154,5 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/NumericLiteralProofs/WordTable/Part08.lean` | Bounded numeric-literals checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/SeparatorSplit.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/ExpressionUniqueness/TokenSplit.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/Balance.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/StatementGrammarH28/YieldSplit.lean` | Bounded statement-grammar checkpoint; typed scope and retained obligations are stated in the module. |
