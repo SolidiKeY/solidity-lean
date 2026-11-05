@@ -243,17 +243,17 @@
     "tests/sol-numeric-literals/evidence/integrationb86-committed.log": "0960084d6ccaf13d0bc93d405e2aac2a81601d142758c4425457f7a46b499d5f"
   },
   "published_delivery": {
-    "master": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
-    "receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1422Z",
+    "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
+    "receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1608Z",
     "receipt_source": "Coordinator-reported; not locally read",
     "integrated": {
       "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
-      "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19"
+      "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
+      "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e",
+      "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4"
     },
     "remaining": [
-      "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean",
-      "Solidity/Backend/PrimitivePackets/Constants/Controls.lean",
-      "Solidity/Backend/PrimitivePackets/Constants/Target.lean"
+      "Solidity/Backend/PrimitivePackets/Constants/Controls.lean"
     ],
     "adoption": "Fetched and verified; owned branch unchanged; no producer duplicated"
   }

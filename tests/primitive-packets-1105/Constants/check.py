@@ -30,11 +30,19 @@ def validate_authored():
   prefix='Solidity.Backend.PrimitivePackets.Constants.'+('Controls.' if p.endswith('/Controls.lean') else '')
   rows += [dict(name=prefix+n,kind=k,module=p[:-5].replace('/','.')) for k,n in re.findall(r'^(theorem|def|abbrev) (\w+)',(ROOT/p).read_text(),re.M)]
  assert rows==M['declarations'],'authored declaration enumeration drift'
+def validate_published_modules(actual,integrated):
+ assert set(actual)==set(integrated),'published module inventory differs'
 def main():
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],'HEAD'],cwd=ROOT,check=True)
  validate_modules(str(p.relative_to(ROOT)) for p in (ROOT/'Solidity/Backend/PrimitivePackets/Constants').rglob('*.lean'))
  validate_authored()
  delivery=M['published_delivery']
+ published_files=subprocess.check_output(['git','ls-tree','-r','--name-only',delivery['master'],'--','Solidity/Backend/PrimitivePackets/Constants/'],cwd=ROOT,text=True).splitlines()
+ published_modules=[p for p in published_files if p.endswith('.lean')]
+ validate_published_modules(published_modules,delivery['integrated'])
+ try:validate_published_modules(published_modules,set(delivery['integrated'])|set(delivery['remaining']))
+ except AssertionError:pass
+ else:raise AssertionError('forged fully-integrated subset accepted')
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],delivery['master']],cwd=ROOT,check=True)
  subprocess.run(['git','merge-base','--is-ancestor',delivery['master'],'origin/master'],cwd=ROOT,check=True)
  assert set(delivery['integrated'])|set(delivery['remaining'])==set(M['modules']) and not set(delivery['integrated'])&set(delivery['remaining'])
@@ -91,5 +99,5 @@ def main():
  else:raise AssertionError('unlisted module mutation accepted')
  for p in M['modules']:
   text=(ROOT/p).read_text();assert not re.search(r'\b(sorry|admit|axiom|unsafe|native_decide|maxHeartbeats)\b',text),'forbidden proof token'
- print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and six mutation controls')
+ print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and seven mutation controls')
 if __name__=='__main__':main()
