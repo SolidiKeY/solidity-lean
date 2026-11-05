@@ -97,3 +97,5 @@
 | `Source/Agreement/NormalDefaults.lean` | Concrete bool/uint256/int256 default-declaration step producers and actual two-step composition. |
 | `Source/Agreement/NormalDefaultControls.lean` | Both evaluator histories, ordered local-tail/state preservation, horizon and wrong-default controls. |
 | `Source/Agreement/NormalStatement.lean` | One-way normal-locals target; conditional sequence proofs are separate, and general Source/model agreement remains open. |
+| `Source/Agreement/NormalBoolAssign.lean` | Concrete head-local boolean assignment and initializer-overwrite normal-step producers; actual local tail retained. |
+| `Source/Agreement/NormalBoolAssignControls.lean` | Both interpreter histories, total initial-locals client, Source horizon failures and wrong-value countercontrol. |

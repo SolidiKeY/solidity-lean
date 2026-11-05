@@ -3647,6 +3647,8 @@ import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
 import Solidity.Source.Agreement.Locals
+import Solidity.Source.Agreement.NormalBoolAssign
+import Solidity.Source.Agreement.NormalBoolAssignControls
 import Solidity.Source.Agreement.NormalBoolBindings
 import Solidity.Source.Agreement.NormalBoolControls
 import Solidity.Source.Agreement.NormalComposition
