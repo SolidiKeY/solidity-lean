@@ -1,5 +1,32 @@
 # SOL-EU: certified expression yield uniqueness
 
+## Current status (Claude VM continuation, 2026-11-05)
+
+This section supersedes the Codex-VM status text below wherever they differ.
+
+- **Evidence moved out (H44).** Commit e48d82a2 removed 1137 generated files
+  from `tests/sol-expression-uniqueness/`: everything under `evidence/` and the
+  `kernel-{declarations,emissions,module-declarations}.json(.gz)` dumps. It
+  removed no `.lean` file. Only `bulk-manifest.json` indexes them, and the copies
+  stay on the Codex VM. Every later reference below to `evidence/…`, a
+  `*.inside.json` or `*.outer.json`, or a review-verdict JSON names a file that
+  is **not in git**; it is history, not something the repository can check now.
+- **Codex tooling removed.** `bounded.py`, `inside.py`, `serial-build.py`,
+  `runtime-bin/lake`, `runtime-lakefile.toml` and `runtime-mcp.sh` are deleted.
+  The runtime-enforcement paragraphs below describe the Codex VM only.
+- **Checker.** `scripts/check-sol-expression-uniqueness.py` reads the kernel axiom
+  report from the `#guard_msgs` docstrings of `AxiomPins.lean`, which the
+  library build re-checks. `--checkpoint --build-log LOG` requires a completed
+  `./run-lean.sh` log from this checkout. The Codex evidence checks (kernel
+  environment dumps, 130 solc parsing observations) run only with
+  `--external-evidence`. They were not re-run here: the pinned soljson 0.8.38
+  (sha256 `6c74ffba…`) cannot be downloaded from this VM, and the npm `solc@0.8.38`
+  build hashes differently (`0b15fcb2…`).
+- **Registration.** `register.sh` already lists all 100 modules in the library
+  roots. The module-map rows are in `docs/module-map/frontend.d/expression-uniqueness.md`,
+  and the axiom pins go through `scripts/g07-axiom-pins.d/` (`check-axiom-pins.mjs --write`).
+- **Post-split reviews (read-only, no Lean server).** See "Claude-VM reviews" at the end.
+
 Status: the original certified uniqueness theorem and accepted-tree corollaries
 are kernel-checked by exhaustive intrinsic induction. All1241declaration axiom pins and
 all2323unique logical declaration type/axiom audits pass. H26 runtime setup remains resolved without changing
