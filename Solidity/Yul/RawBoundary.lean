@@ -56,4 +56,61 @@ def uncheckedU8Add {ctx} (pipeline : Pipeline) (state : State ctx)
   LocalOperations.uncheckedU8Add pipeline
     ((materialize state).1.get left) ((materialize state).1.get right)
 
+/-- Materialized scalar reads are determined by the authoritative word view. -/
+theorem materialized_scalar_agrees : ∀ (ctx : Solidity.Source.Ctx) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (cell : Solidity.Yul.SourceScalarCell ctx),
+ cell.wordRead (Solidity.Yul.RawFrame.materialize first).1 =
+ cell.wordRead (Solidity.Yul.RawFrame.materialize second).1 := by
+  intro ctx first second same cell
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  rw [← selected]
+  change localWordCells ctx (materialize first).1 (.scalar ref) =
+    localWordCells ctx (materialize second).1 (.scalar ref)
+  rw [materialize_view,materialize_view,same]
+
+theorem boolWord_agrees : ∀ (ctx : Solidity.Source.Ctx) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys .bool),
+ Solidity.Yul.RawFrame.boolWord first index = Solidity.Yul.RawFrame.boolWord second index := by
+  intro ctx first second same index
+  exact materialized_scalar_agrees ctx first second same
+    ⟨⟨index⟩,.boolean,LocalOperations.boolShape ctx.env⟩
+
+theorem u8Word_agrees : ∀ (ctx : Solidity.Source.Ctx) (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.u8Word first index = Solidity.Yul.RawFrame.u8Word second index := by
+  intro ctx first second same index
+  exact materialized_scalar_agrees ctx first second same
+    ⟨⟨index⟩,.unsigned 0,LocalOperations.u8Shape ctx.env⟩
+
+/-- Existing canonical return operations ignore raw-overlay and clean-backup representation. -/
+theorem returnBool_agrees : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys .bool),
+ Solidity.Yul.RawFrame.returnBool pipeline first index = Solidity.Yul.RawFrame.returnBool pipeline second index := by
+  intro ctx pipeline first second same index
+  have words := boolWord_agrees ctx first second same index
+  cases pipeline <;>
+    change (Solidity.Source.Val.bool ((boolWord first index).val != 0) :
+      Solidity.Source.Val ctx.env.layout .bool) =
+      Solidity.Source.Val.bool ((boolWord second index).val != 0)
+  all_goals rw [words]
+
+theorem returnU8_agrees : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ ∀ (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.returnU8 pipeline first index = Solidity.Yul.RawFrame.returnU8 pipeline second index := by
+  intro ctx pipeline first second same index
+  have words := u8Word_agrees ctx first second same index
+  cases pipeline <;>
+    change Solidity.Source.Val.int (D := ctx.env.layout)
+      (((u8Word first index).val % 256 : Nat) : Int) _ = _
+  all_goals
+    congr 1
+    exact congrArg (fun raw : Word => ((raw.val % 256 : Nat) : Int)) words
+
 end Solidity.Yul.RawFrame

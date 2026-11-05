@@ -37,8 +37,14 @@ def main():
  assert M['owned_start']==rebase['rebased_owned_start'] and M['published_delivery']['master']==rebase['target'],'rebase identity drift'
  for before,after in [(rebase['target'],M['owned_start']),(M['owned_start'],'HEAD'),(rebase['post_rebase_head'],'HEAD')]:
   subprocess.run(['git','merge-base','--is-ancestor',before,after],cwd=ROOT,check=True)
- subprocess.run(['git','diff','--quiet',rebase['target'],M['owned_start'],'--','Solidity/Backend/PrimitivePackets/Constants'],cwd=ROOT,check=True)
- assert subprocess.check_output(['git','log','-1','--format=%s',M['owned_start']],cwd=ROOT,text=True).strip()=='Validate b86ae456 integration adoption','wrong protected baseline'
+ if rebase.get('mode')=='integrated_checkpoint':
+  assert M['owned_start']==rebase['target'] and not M['published_delivery']['remaining'],'invalid integrated baseline'
+  assert set(M['published_delivery']['integrated'])==set(M['modules']),'integrated baseline omits modules'
+  subprocess.run(['git','merge-base','--is-ancestor',rebase['pre_rebase_head'],rebase['target']],cwd=ROOT,check=True)
+  for p,h in M['modules'].items():assert hashlib.sha256(subprocess.check_output(['git','show',rebase['target']+':'+p],cwd=ROOT)).hexdigest()==h,'integrated baseline source drift'
+ else:
+  subprocess.run(['git','diff','--quiet',rebase['target'],M['owned_start'],'--','Solidity/Backend/PrimitivePackets/Constants'],cwd=ROOT,check=True)
+  assert subprocess.check_output(['git','log','-1','--format=%s',M['owned_start']],cwd=ROOT,text=True).strip()=='Validate b86ae456 integration adoption','wrong protected baseline'
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],'HEAD'],cwd=ROOT,check=True)
  validate_modules(str(p.relative_to(ROOT)) for p in (ROOT/'Solidity/Backend/PrimitivePackets/Constants').rglob('*.lean'))
  validate_authored()
@@ -46,9 +52,9 @@ def main():
  published_files=subprocess.check_output(['git','ls-tree','-r','--name-only',delivery['master'],'--','Solidity/Backend/PrimitivePackets/Constants/'],cwd=ROOT,text=True).splitlines()
  published_modules=[p for p in published_files if p.endswith('.lean')]
  validate_published_modules(published_modules,delivery['integrated'])
- try:validate_published_modules(published_modules,set(delivery['integrated'])|set(delivery['remaining']))
+ try:validate_published_modules(published_modules,set(delivery['integrated'])|{'Solidity/Backend/PrimitivePackets/Constants/Unpublished.lean'})
  except AssertionError:pass
- else:raise AssertionError('forged fully-integrated subset accepted')
+ else:raise AssertionError('forged published module accepted')
  subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],delivery['master']],cwd=ROOT,check=True)
  subprocess.run(['git','merge-base','--is-ancestor',delivery['master'],'origin/master'],cwd=ROOT,check=True)
  assert set(delivery['integrated'])|set(delivery['remaining'])==set(M['modules']) and not set(delivery['integrated'])&set(delivery['remaining'])
@@ -65,7 +71,7 @@ def main():
  validate_inventory(actual)
  # Both the frozen signatures and the generated namespace-outside sword.eq_1
  # belong to their actual defining modules, rather than a name-prefix filter.
- for label in ['source-diagnostics','selected-diagnostics','target-diagnostics','agreement-diagnostics','controls-final-diagnostics','axioms-diagnostics','rebase-axioms']:
+ for label in ['source-diagnostics','selected-diagnostics','target-diagnostics','agreement-diagnostics','controls-final-diagnostics','axioms-diagnostics','rebase-axioms','integrated-axioms']:
   printed={}
   row=json.loads((F/'evidence'/ (label+'.json')).read_text());diag=json.loads((F/'evidence'/ (label+'.log')).read_text())
   assert row['exit']==0 and not row['resource_stop']
@@ -76,7 +82,7 @@ def main():
    if match: printed[match[1]]=set(x.strip() for x in match[2].split(',') if x.strip())
    match=re.fullmatch(r"'([^']+)' does not depend on any axioms",item['message'])
    if match: printed[match[1]]=set()
-  if label in ('axioms-diagnostics','rebase-axioms'):assert printed=={r['name']:set(r['axioms']) for r in actual},'actual axiom prints differ'
+  if label in ('axioms-diagnostics','rebase-axioms','integrated-axioms'):assert printed=={r['name']:set(r['axioms']) for r in actual},'actual axiom prints differ'
  for label,module in [('source-build-corrected','Source'),('selected-build','Selected'),('target-build','Target'),('agreement-build','Agreement'),('controls-build','Controls')]:
   row=json.loads((F/'evidence'/ (label+'.json')).read_text());p='Solidity/Backend/PrimitivePackets/Constants/'+module+'.lean'
   assert row['exit']==0 and not row['resource_stop'] and row['proof_sources'][p]==M['modules'][p]
