@@ -797,4 +797,6 @@ physical resource adequacy, termination or universal source coverage.
 Published VC1 now supplies the formerly missing Assumptions module, and the
 documentation-path check passes; earlier failed logs remain historical evidence.
 The axiom-pin gate still has the exact published baseline of 82 unrecorded pins
-and zero errors, and the historical full-build timeout remains unresolved.
+and zero errors. The trust gate also reports two inventory entries in the
+newly published Assumptions module, identical on clean master. Those gates
+and the historical full-build timeout remain unresolved.
