@@ -810,3 +810,31 @@ VY5 moved to a Claude VM (2026-11-05, H37). The lane was merged with master.
 MonetaryLifecycleControls and `Monetary.wide` are in no ref on origin (checked 2026-11-05), so they stay
 out of this checkpoint. Three modules that import unpublished VY4 producers are
 held outside the library. See [the lane handoff](inline-assembly-vy5.md#move-to-a-claude-vm-2026-11-05-h37).
+VY5 consumer checkpoint: actual published Source try/catch bytes allocation
+and canonical rethrow are composed with complete-state/all-byte/horizon≥3
+kernel laws in `Yul/Composition/SourceCatchBinding.lean`. See
+[the lane record](vy5-composition.md). This is not general Yul/compiler
+adequacy or native execution; the24 full obligations/six combinations stay open.
+
+VY5/H16 producer checkpoint: actual scheduled Source root dispatch, rollback,
+full-state/error-byte controls and measured legacy-path preservation; see
+[the lane record](vy5-composition.md). General assembly and P8 closure remain open.
+
+VY5 H16 request-admission child: rebased on published6f3eedf0; actual
+requestValueScope reuses unchanged requestScope with exact-Nat sender-value
+admission, four general/preservation laws and eleven full-state controls.
+Checkpoint at674cc1797b911fbf5bf3d626cc4a44e2af949ec1 passes library3359,
+trust/layers/roots/doc-paths/axiom-pins and strict classification. V17 WhileReturn
+needs only one proof-side legacy None disambiguation. Evidence/interface:
+`/workspace/vy5-composition/request-admission-20261104/final`. The held
+factored-core timing candidate is not landed. H16 session/P8, H19 and all24/six
+remain open; no new native evidence or full-lane/runtime-gate pass.
+
+VY5 H16 no-cut primitive child: eight cursor/check laws, one actual emitter
+execution law and eleven complete-state/negative controls;21 exact axiom
+guards. Checkpoint at6889b6dc686f15492df703e5b550614505bc3898 passes
+library3362, strict classification and all checkpoint static gates. Structural
+CutFree is an explicit real premise; NoFail plan alone is insufficient on
+arbitrary cursors. Existing evaluator/cursor bodies unchanged. Interface and
+receipts: `/workspace/vy5-composition/no-cuts-20261104/final`. Full Source
+coherence/NoFail/session/P8, H19 and all24/six remain open. No native pass.

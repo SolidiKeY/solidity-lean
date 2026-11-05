@@ -144,8 +144,8 @@ def link : Roadmap.Address := ⟨4, by decide +kernel⟩
 def codeAt (a : Roadmap.Address) : Option Nat :=
   if a = caller then some 0 else if a = link then some 1 else none
 def source : Source.St E :=
-  ⟨⟨⟨fun a => {Source.Account.empty _ with code := codeAt a, balance := ⟨if a = caller then 7 else 93, by split <;> decide +kernel⟩}⟩,
-      Source.Transient.empty, []⟩, Source.Heap.empty, [], [], ⟨[],.nil⟩⟩
+  ⟨⟨⟨fun a => {Source.Account.empty _ with code := codeAt a, balance := if a = caller then 7 else 93}⟩,
+      Source.Transient.empty, []⟩, Source.Heap.empty, [], [], ⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩
 def program : Source.Program E :=
   {body := fun _ => none, consts := fun _ => none, inits := fun _ => [], ctor := fun _ => none,
     ctorLocals := fun _ => [], baseArgs := fun _ => [], contracts := ["C","L"]}
