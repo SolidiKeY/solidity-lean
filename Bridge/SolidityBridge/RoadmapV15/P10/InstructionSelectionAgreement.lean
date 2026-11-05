@@ -1,3 +1,4 @@
+import SolidityBridge.RoadmapV15.P10.UintNotConsumer
 import SolidityBridge.RoadmapV15.P10.BitwiseConsumer
 import SolidityBridge.RoadmapV15.P10.UnsignedOrderConsumer
 import SolidityBridge.RoadmapV15.P10.EqualityConsumer
@@ -545,4 +546,41 @@ theorem bitXor (site : Site .XOR) (a b : Scalar.Word) (tail : Scalar.Stack)
  Quot.sound] -/
 #guard_msgs in
 #print axioms bitXor
+theorem selected_not : Selection.selectBitwiseComparison .not=some Selection.notCertificate := by
+  rfl
+
+theorem bitNot (valid : Array UInt256) (site : Site .NOT) (a : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::tail))
+    (room : tail.length+1≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::tail)).state
+    let result := (~~~a)
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .not m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.notCertificate.code (a::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.notCertificate.code (a::tail)=some ((~~~a)::tail) := by rfl
+    have ir := (Selection.notCertificate.success _ _ m represented).mpr scalar
+    have native := uint_not_agreement valid site a tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_not' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_not
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitNot' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms bitNot
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement

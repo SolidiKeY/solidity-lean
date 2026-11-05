@@ -1927,3 +1927,7 @@ The published numeric AND/OR certificates now compose with the charged fetched r
 ### Selected XOR
 
 The published numeric XOR certificate now composes with the charged fetched reference law. Stack representation, capacity, gas and fuel remain explicit. Full-word controls distinguish equal low bytes, cancellation and high-bit identity, preserve the populated separate frames, and check wrong results, tail order and gas-before-arity/fuel priority. This supplies primitive selection agreement, not physical input origin, Source or account-world adequacy.
+
+### Selected bitwise NOT
+
+The numeric NOT certificate now composes with the charged fetched reference law, retaining explicit stack representation, capacity, gas and fuel premises. Controls cover zero, the maximum word and the complement of256; they distinguish full-word complement from Boolean negation, preserve complete separate frames and check wrong results, ordered tails and gas-before-arity/fuel priority. No physical input origin, Source, account-world or full Osaka adequacy follows.
