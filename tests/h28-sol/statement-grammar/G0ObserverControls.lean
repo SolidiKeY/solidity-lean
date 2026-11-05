@@ -64,6 +64,24 @@ theorem g0_guard_cons_equations {k : SCtx} (s : Syn (.stmt k))
     FramedStatements (.cons s ss) = (FramedStatement s ∧ FramedStatements ss) ∧
     FramedItems (.cons x xs) = (FramedItem x ∧ FramedItems xs) := ⟨rfl,rfl⟩
 
+/-- The Gate G0 node twin agrees with `Syn.nodes` on an actual body, and the
+link theorem covers every syntax tree. -/
+theorem g0_node_ctors_twin_actual_body :
+    g0NodeCtors (Syn.some (Syn.block (k := ⟨false, false⟩)
+        (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))) =
+      [.some, .block, .cons, .stmtItem, .ifStmt, .lit, .returnStmt, .none, .none, .nil] ∧
+    g0NodeCtors (Syn.some (Syn.block (k := ⟨false, false⟩)
+        (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))) =
+      (Syn.some (Syn.block (k := ⟨false, false⟩)
+        (.cons (.stmtItem (.ifStmt (.lit (.bool true)) (.returnStmt .none) .none)) .nil))).nodes.map
+        Node.ctor := by
+  decide +kernel
+
+theorem g0_node_ctors_twin_link {c : Cat} (s : Syn c) :
+    g0NodeCtors s = s.nodes.map Node.ctor := g0NodeCtors_eq_nodes s
+
+#print axioms g0_node_ctors_twin_actual_body
+#print axioms g0_node_ctors_twin_link
 #print axioms g0_typed_list_empty_and_cons
 #print axioms g0_zero_fuel_still_empty
 #print axioms g0_fuel_exhaustion_is_not_success

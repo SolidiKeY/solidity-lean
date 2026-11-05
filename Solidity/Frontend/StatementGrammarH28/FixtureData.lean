@@ -1,5 +1,6 @@
 import Solidity.Frontend.Checked.Check
 import Solidity.Frontend.StatementGrammarH28.G0List
+import Solidity.Frontend.StatementGrammarH28.G0Nodes
 
 /-! Finite kernel controls for every assigned statement/block constructor.
 Acceptance and constructor observations are checked, not AST equality or
@@ -26,7 +27,7 @@ def fixtureListCtors {c : Cat} (f : Syn c → List Ctor)
 
 private def optionalBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
   apply Syn.casesOn (motive := fun _ _ => List Ctor) tree
-  case some => intro category body; exact body.nodes.map Node.ctor
+  case some => intro category body; exact g0NodeCtors body
   all_goals intros; exact []
 
 private def functionBodyCtorsAt {category : Cat} (tree : Syn category) : List Ctor := by
