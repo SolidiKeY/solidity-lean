@@ -3077,7 +3077,7 @@ only in the Codex VM's private dependency tree (`/workspace/vy5-dependencies-202
 | `FailurePhysical` | `Solidity.Yul.World.FailureFuel` |
 | `IndexedWritePhysical` | `Solidity.Yul.World.IndexedEmitHeap` |
 
-All three also need the missing producer files `Solidity/Yul/World/ScalarEmitPort.lean` and `Solidity/Yul/World/PhysicalCompletion.lean`, which `indexed-write-inputs.json` lists with hashes; each held module opens `PhysicalCompletion`.
+All three also need the missing producer files `Solidity.Yul.World.ScalarEmitPort` and `Solidity.Yul.World.PhysicalCompletion`, which `indexed-write-inputs.json` lists with hashes; each held module opens `PhysicalCompletion`.
 | `ReturningPhysical` | `Solidity.Yul.World.GeneralReturningOutput` |
 
 The first touched gate (`gate.sh touched` at `2a322d1e`) failed only on six modules: the three missing producers (`no such file`) and the three lane modules importing them (`bad import`). Its log is on this VM only, not in the repository. The three lane modules

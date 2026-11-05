@@ -21,7 +21,7 @@ still name the pre-move paths; their hashes bind provenance, so they are left
 unchanged.
 
 All three also open `PhysicalCompletion`. They need the missing producers
-`Solidity/Yul/World/PhysicalCompletion.lean` and `ScalarEmitPort.lean`, which
+`Solidity.Yul.World.PhysicalCompletion` and `Solidity.Yul.World.ScalarEmitPort`, which
 are in no ref either.
 
 They return to `Solidity/Yul/Composition/` once VY4 publishes those producers
