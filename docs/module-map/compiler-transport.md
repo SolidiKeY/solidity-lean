@@ -127,8 +127,9 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/UnsignedWidthCapture.lean` | Publicly selected low-bit cleanup, captured before clearing its operand. |
 | `Backend/Passes/MachineSar.lean` | Signed `>>` in the memory compiler (`shr_int_inFrag`, `sarCode_simT` via `Evm.tail_simT`; machine lemmas in `Evm/Signed.lean`), agreement with the Scalar endpoint `intShr`, unclamped-`SAR` negative control and saturated positive witness. |
 | `Backend/Passes/MachineSarPins.lean` | `#guard_msgs` axiom guards for the MachineSar results. |
+| `Optimizer/CSE.lean` | O03 common-subexpression elimination: typed syntactic equality on pure values (`Val.pbeq_eq`), available-expression invariant; `ConstFold.Prog.cse_empty_runC`. |
 | `Optimizer/ConstFold.lean` | O02 constant folding on the typed `Val`; failing operations kept; `Val.cfold_evalT` (equal result in every state). |
-| `Optimizer/StmtFold.lean` | Expression passes lifted to `Prog` (`ValPass`, `Prog.vopt_runC`), dead-branch/`require(true)`/`while(false)` elimination, `Prog.cfold_runC`. |
 | `Optimizer/Propagate.lean` | O02 constant and copy propagation with a fact invariant on locals; `Prog.cprop_empty_runC`. |
 | `Optimizer/Simplify.lean` | O02 solc-rule expression simplifier restricted to checked-safe identities; `Val.simp_evalT`, `Prog.simplify_runC`. |
+| `Optimizer/StmtFold.lean` | Expression passes lifted to `Prog` (`ValPass`, `Prog.vopt_runC`), dead-branch/`require(true)`/`while(false)` elimination, `Prog.cfold_runC`. |
 | `Optimizer/UnusedVar.lean` | O02 unused-variable elimination: proved strengthening (`Prog.str?_wk`) and `Prog.run_wk`; `Prog.uve_runC`. |

@@ -3223,6 +3223,7 @@ import Solidity.Lowering.V08.WorldImageAccess
 import Solidity.Lowering.V08.WorldImageAccessControls
 import Solidity.Lowering.V08.WorldReset
 import Solidity.Lowering.V08.WorldResetControls
+import Solidity.Optimizer.CSE
 import Solidity.Optimizer.ConstFold
 import Solidity.Optimizer.Controls
 import Solidity.Optimizer.Laws
