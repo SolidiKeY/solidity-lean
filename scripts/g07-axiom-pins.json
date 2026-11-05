@@ -4524,6 +4524,41 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.checkedDefault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.checkedNestedDefault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.default_capacity_guard_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.selectedCheckedDefault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.SelectedCheckedDefault.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.SelectedCheckedDefault.run_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/CheckedDefault.lean:Solidity.Backend.MemoryCopies.SelectedCheckedDefault.success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/CalldataAgreementChildren.lean:Solidity.Backend.MemoryOps.BoolChildRepr.mixedSequence_agrees": [
   "Classical.choice",
   "Quot.sound",

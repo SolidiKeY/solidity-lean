@@ -1366,3 +1366,11 @@ remain explicit; upstream full-gate passes are not a local candidate pass.
 Independent source/tooling finder and skeptic reviews passed. Finder corrected
 the handoff sentence to match verification of patch reconstruction before the
 runtime marker, followed by the partial handoff and seal.
+
+The first exact candidate (`b1e957d6`) failed the axiom-pin inventory gate:
+zero trust errors, seven new pins not yet registered. Its evidence is preserved
+separately and is not a passing gate. G07 section 4 requires recording new pins
+with `node scripts/check-axiom-pins.mjs --write`; that generator adds exactly
+these seven standard-axiom entries. All 8,059 existing entries are unchanged.
+A new committed candidate requires eleven fresh exact-head gates; this does
+not rerun an unchanged failed candidate or weaken the inventory check.
