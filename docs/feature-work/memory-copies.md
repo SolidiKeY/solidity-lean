@@ -1515,3 +1515,30 @@ each containing controls, is being prepared on published `1aeaf276`. Original
 history and prior sealed evidence remain preserved; the cumulative branch head
 is not offered as one review increment. Required gates/reviews/sealing for the
 new parent proof and split ranges remain pending.
+
+
+## Bounded review split on published master
+
+The cumulative source at `57c78d7a9cab6f513c9f7d261efd0fb43c56627d` is preserved. The following linear review ranges use exact published base `1aeaf276da8145d9cffdbbc76ff4b192f6360efb` in `/workspace/memory-copies-review-split` on branch `codex/solidity-parallel-20261103/memory-copies-review-1aeaf276-pinned`. Each includes Controls and at most20 changed Lean files including its generated root. All13 exact-prefix touched/root gates pass. All239 owned source files are preserved. The first range registers only12 owned generated standard pins.
+
+| Increment | Commit range | Changed Lean files | Controls |
+|---|---|---:|---:|
+| MC01 | `1aeaf276da8145d9cffdbbc76ff4b192f6360efb..791a586c218d4f31ef572ae027bf49809a8041a4` | 18 | 7 |
+| MC02 | `791a586c218d4f31ef572ae027bf49809a8041a4..a16be01b7efa62c4bd54648cff0b3e19189d26dc` | 20 | 7 |
+| MC03 | `a16be01b7efa62c4bd54648cff0b3e19189d26dc..8c749b950dff94a3dff28b03c9974ef5596f25c1` | 20 | 7 |
+| MC04 | `8c749b950dff94a3dff28b03c9974ef5596f25c1..5e202f6146a9ab01c5ae1e9960f676ba75ca8740` | 18 | 5 |
+| MC05 | `5e202f6146a9ab01c5ae1e9960f676ba75ca8740..f7fd2c863c8dc327cc283af2bb2a9896a8b7c96d` | 19 | 6 |
+| MC06 | `f7fd2c863c8dc327cc283af2bb2a9896a8b7c96d..0cf8298abf97de125e0847bb3850f119f011509c` | 19 | 6 |
+| MC07 | `0cf8298abf97de125e0847bb3850f119f011509c..d9df08f6e80aaa7ee5bc0106c0fb99849d24b8e1` | 19 | 6 |
+| MC08 | `d9df08f6e80aaa7ee5bc0106c0fb99849d24b8e1..e2519716ccd9e452ac0de69034062325dc2707af` | 13 | 3 |
+| MC09 | `e2519716ccd9e452ac0de69034062325dc2707af..9109a34fd755ef2c6cce674bdc9e8277216f61ec` | 18 | 4 |
+| MC10 | `9109a34fd755ef2c6cce674bdc9e8277216f61ec..34d526355f2ba9a8455c01dd9cba0188ecae3560` | 19 | 6 |
+| MC11 | `34d526355f2ba9a8455c01dd9cba0188ecae3560..9f9b61a65d263c432e300f47f5c40d43dd3ddbcb` | 20 | 8 |
+| MC12 | `9f9b61a65d263c432e300f47f5c40d43dd3ddbcb..92cf0c3cee1058d541754d209627bfa9c6dab5d5` | 20 | 7 |
+| MC13 | `92cf0c3cee1058d541754d209627bfa9c6dab5d5..2e15ab45c9ec440361148f48f0bf4aaa18d56489` | 9 | 3 |
+
+The exact module names, module-map rows, Controls, individual patches, verified receipt heads, gates, original independent finder/skeptic messages and checksums are under `/workspace/parallel-20261103/memory-copies/review-split/`. Review these ranges in order; the cumulative original patch is archival transport. Source/interface commit `a69cda51221d518c2458f8a24fa73a5850d1375f` precedes proof commit `57c78d7a9cab6f513c9f7d261efd0fb43c56627d`. The checked nested primitive-array memory parent loads its actual header, derives natural demand, runs the existing child-copy loop and adopts the parent. Controls observe copied contents, old source preservation, empty/long/mixed arrays and late-child refusal.
+
+Full G33/G35 Source/physical/gas adequacy, approved recursive compiler closure and existing producer obligations remain open. The combined library gate fails on the published S05 Source control declaration collision `Solidity.Source.Progress.ReadyProgramControls.fresh` from the unchanged ReadyExpressionControls and ReadyProgramControls modules. Producing commits are recorded in global-root-blocker.json. No protected Source edit or unchanged failed gate retry is performed. The global pin gate reports3560 unrecorded published foreign pins with zero axiom errors; only12 owned pins were registered. The prior qualified-units trust failure is retained separately, not rerun or claimed passing. The environment restart interrupted the first library supervisor; recovered exact-candidate outcomes are recorded separately. No full lane or runtime acceptance is claimed.
+
+Independent finalizer reviews found unchecked PASS attribution, missing exact-head/clean-tree protections, implicit locking, incomplete MCP/scheduling checks and delayed resource aborts. Before execution these were repaired with an internally owned writer lock, raw exact-prefix receipt checks and fresh root checks, the retained failed recovered library receipt and fresh exact-head doc/root receipts, original review-message preservation, asserted trust provenance, explicit MCP-off/serial settings and immediate owned-workload termination on reserve/swap violations. Original findings and final review receipts are preserved in the evidence directory.
