@@ -1,9 +1,11 @@
 import Solidity.Yul.Compilation.NormalControl
 import Solidity.Yul.Compilation.FramedConditional
-/-! Strong compiler-model certificates for the EXISTING original-AST-indexed
-normal-control derivation and unchanged emitted/selected code. This is a proof
-consumer, not another visitor, source evaluator or interface. Source/G24,
-physical/native/resource and function/loop/divergence closure remain open. -/
+/-! Framed compiler-model transport for the existing original-AST-indexed
+normal-control derivation and unchanged emitted/selected code. Word-selected
+leaves are transported to the signed selector before applying
+`FramedWordLowering.lowering`; sequence and conditional cases compose those
+certificates. Source/G24, physical/native/resource and function/loop/divergence
+closure remain open. -/
 namespace Solidity.Yul.Compilation.NormalFramedTransport
 open Backend Scalar Selection MachineAdapter
 
@@ -31,8 +33,9 @@ def word_leaf (p : Backend.Program) (code : List Evm.Instr)
  FramedWordLowering.lowering p code (word_selection p code selected)
 
 /-- Every successfully emitted/selected existing normal-control derivation has
-an actual strong frame certificate. Recursive cases reuse the SAME source AST
-index and actual component emissions; no component-correctness blanket is an
+a framed lowering certificate whose leaves use the signed-selector transport
+in `word_leaf`. Recursive cases reuse the same source AST index and actual
+component emissions; no component-correctness blanket is an
 input parameter and no failure/admission/native coverage is inferred. -/
 def certificate {c n fuel} {stmt : Solidity.Yul.Stmt [] [] c n}
  (compiled : NormalControl.Derivation fuel stmt) (depth : Nat)

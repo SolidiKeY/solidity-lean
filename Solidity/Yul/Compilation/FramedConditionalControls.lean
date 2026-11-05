@@ -46,8 +46,9 @@ theorem missing_guard (m : Evm.Machine) :
  Evm.run (MachineControl.branchCode [] FramedBranch.Controls.yesModel FramedBranch.Controls.noModel)
  {m with stack := []} = .fault := rfl
 
-/-- Full condition compilation, whole model conditional and a genuinely faulting untaken
-arm: a high-only original literal expression selects the successful arm. -/
+/-- A high-only original literal expression selects the successful arm in the
+whole model conditional. The untaken SDIV arm faults on an empty stack by
+`Solidity.Yul.Compilation.FramedBranch.Controls.empty_untaken_fault`. -/
 def high : Scalar.Word := BitVec.ofNat 256 (2^200)
 def highExpression := ProducerExpressions.literal 0 (n := 0) high.toFin
 def highCode := (highExpression.lowered.code 0).get (by rfl)
