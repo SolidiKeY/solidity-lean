@@ -964,3 +964,7 @@ bytes and whole G40 composition remain open. G46.02 general memory/calldata
 correspondence and the physical writer counterexample are unchanged. Full
 assignment final gates and fixture replay remain pending; shared doc-path and
 axiom-inventory failures from previous checkpoints remain outside this lane.
+
+`UIntBindingInterface.lean` specifies actual compiler validation followed by
+binding a typed uint parameter local, exact frame state and raw entry rejection.
+Native loading and full Source/body correspondence remain separate.
