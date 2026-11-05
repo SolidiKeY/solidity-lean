@@ -177,10 +177,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/DeepCopyContents.lean` | Inhabited fresh snapshot-copy heap certificate and initial live contents after actual old-object overlap schedules, with alias/empty/refusal controls. |
 | `Backend/MemoryCopies/AllocationPanicInterface.lean` | Explicit Source allocation-panic state and byte-exact emitted terminal-slice obligation; no size-selector premise hidden. |
 | `Backend/MemoryCopies/AllocationPanic.lean` | Derived oversized Source failure joined to reused byte-exact Panic(0x41) emission, packet framing and wrong-result/timeout/zero-length controls. |
-| `Backend/MemoryCopies/NestedDefaultInterface.lean` | Production-selected nested-array default builder with a real fitting allocator witness; no new compiler or admission filter. |
 | `Backend/MemoryCopies/NestedDefaults.lean` | Total production selection for fixed dimensions around empty dynamic defaults, exact cost and existing allocator-growth execution. |
 | `Backend/MemoryCopies/NestedDefaultControls.lean` | Populated represented inputs with actual selected-code root/cursor/old-word observations and empty-code/wrong-cursor controls. |
-| `Backend/MemoryCopies/RuntimeArrayInterface.lean` | Production-selected child defaults with complete runtime-parent allocation demand and a real fitting input; no unused-child feasibility condition. |
 | `Backend/MemoryCopies/RuntimeArrays.lean` | Production-selected runtime reference-array loop and scoped declaration correctness, complete parent demand and size-independent code. |
 | `Backend/MemoryCopies/RuntimeArrayControls.lean` | Actual populated runtime lengths0/2/64, empty-any-child and same-code controls, scoped declaration execution and wrong-cursor rejection. |
 
@@ -220,7 +218,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalFootprintInterface.lean` | Exact intrinsic copy allocation-count, parent-last identity and sequential subtree separation obligations. |
 | `Backend/MemoryCopies/TraversalFootprint.lean` | Live intrinsic object measures and exact copy growth, parent-last, positive footprint and pair root-boundary proofs. |
 | `Backend/MemoryCopies/TraversalFootprintControls.lean` | Nested duplicate subtree identities/contents, old-object retention, shadows, empty and64-branch footprint controls. |
-| `Backend/MemoryCopies/SelectedArrayDefaultInterface.lean` | Production-selected runtime reference-array defaults over arbitrary supported roots and fixed wrappers, with whole-parent feasibility. |
 | `Backend/MemoryCopies/SelectedArrayDefaults.lean` | Lifts existing production selection through fixed wrappers and reuses runtime reference-array/scoped declaration correctness for supported roots. |
 | `Backend/MemoryCopies/SelectedArrayDefaultControls.lean` | Emitted arrays of structs/fixed structs at0/2/64, whole-parent feasibility, nested default identities and actual scoped declaration controls. |
 | `Backend/MemoryCopies/SourceCopyHorizonInterface.lean` | Exact non-timeout result/reached-state preservation obligations under additional Source storage-copy traversal fuel. |
