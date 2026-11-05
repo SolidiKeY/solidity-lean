@@ -39,3 +39,17 @@ the preservation prose now explicitly excludes heap.next. Final diagnostic,
 serial module timings and touched/checkpoint gate outcomes belong to the
 sealed handoff. Shared imports, pins and module-map are coordinator-owned;
 registration-dependent failures must remain visible rather than be waived.
+
+Final proof commit: 8471246f52829cd0a11423b8d85848c5984193dc. All modules
+check serially: Interface0.210s, Execution0.212s, Controls5.109s wall time;
+no assigned module exceeds60s. Per-file diagnostics pass and the final module
+logs have no owned warnings. Sixteen source-bound scoped reports use only
+propext, Classical.choice and Quot.sound. The guard completes normally.
+
+Touched passes. Checkpoint: library3741jobs/50s, trust, layers, doc-paths and
+axiom-pins pass; orphan/root checks fail exclusively for these three modules
+awaiting coordinator-owned registration. This is not a checkpoint PASS and
+library success does not establish their root reachability. Finder/skeptic
+confirm both the source fixes and final evidence. V11 integrates the packet;
+the coordinator must register the modules and supply map rows before the
+registration-dependent gates can pass. No shared registry is edited here.
