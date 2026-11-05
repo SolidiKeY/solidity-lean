@@ -2654,7 +2654,9 @@ import Solidity.Lowering.G19.ReturnTail
 import Solidity.Lowering.G19.ReturnTailControls
 import Solidity.Lowering.G19.WhileReturn
 import Solidity.Lowering.G19.WhileReturnControls
+import Solidity.Lowering.P8.CheckedFrontendAdmission
 import Solidity.Lowering.P8.CheckedSyntax
+import Solidity.Lowering.P8.ConditionalAssembly
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.P8.DeclarationGraphCheck
 import Solidity.Lowering.P8.DeclarationGraphControls

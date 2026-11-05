@@ -820,8 +820,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Source/Progress/BoundCatalogueControls.lean` | Inhabited complete-catalogue success and caller consumers, omitted-coverage and false-body metadata refusals. |
 | `Source/Progress/BoundCataloguePanicControls.lean` | Inhabited whole-catalogue post-initializer panic and caller preservation with coverage/metadata refusal controls. |
 | `Source/Progress/BoundCatalogueParentControls.lean` | Actual elaborated bound-local callee with allocating intrinsic parent argument, distinct argument/default/local references and restored caller state. |
-
-
 <!-- Retained V17 lane modules not yet present in the published map. -->
 | `Backend/StructuredFlow/ConditionalSourceCompiler.lean` | Compile the existing V07-related conditional statement, preserving its actual Source run and reached map as well as the intrinsic compiler contract. |
 | `Backend/StructuredFlow/ConditionalSourceCompilerControls.lean` | Inhabited witnesses and negative controls for the corresponding mapped lowering/compiler component. |
