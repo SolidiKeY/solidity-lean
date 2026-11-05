@@ -383,6 +383,7 @@ import Solidity.Backend.MemoryCopies.MemoryPathCopyInterface
 import Solidity.Backend.MemoryCopies.NestedDefaultControls
 import Solidity.Backend.MemoryCopies.NestedDefaultInterface
 import Solidity.Backend.MemoryCopies.NestedDefaults
+import Solidity.Backend.MemoryCopies.NestedStorageTurnInterface
 import Solidity.Backend.MemoryCopies.Premises
 import Solidity.Backend.MemoryCopies.PrimitiveArray
 import Solidity.Backend.MemoryCopies.PrimitiveArrayControls

@@ -358,3 +358,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/EmptyReferenceMemoryInterface.lean` | Existing runtime/checked empty memory-array deep-copy contracts at arbitrary map-free elements, with complete ownership and freshness. |
 | `Backend/MemoryCopies/EmptyReferenceMemory.lean` | Actual empty snapshots and ownership-derived source bounds yield fresh runtime/checked copies with complete framing. |
 | `Backend/MemoryCopies/EmptyReferenceMemoryControls.lean` | Represented adjacent-source copying, strict freshness, old caller aliases, unused children and saturated refusal controls. |
+| `Backend/MemoryCopies/NestedStorageTurnInterface.lean` | Concrete checked storage-child turn and reserved-parent ownership contract; outer traversal/adoption remain open. |

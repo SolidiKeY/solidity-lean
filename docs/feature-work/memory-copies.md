@@ -1053,3 +1053,21 @@ Scoped adoption finder/skeptic PASS: all published area-map rows are retained ve
 Adoption checkpoint handoff: original interface38e16f039da82e4666cea567169e92d025fb2b7b and implementationb9b82a0f956e93eb48061f8387808883ccc80311 are preserved; merge/diagnostic repairf740eb90bbd701c052197cf2e2b0bf15c19a87d5 adopts9584 with both histories intact. A fresh candidate must pass ten gates/205 files/1194 standard scoped reports, strict zero-warning JSON checks for all three modules, all202 earlier proof hashes, all prior sealed digests including warning-rejected407 packet, published map rows, unowned tree equality to master and exact one-lemma owned-source repair checks. Actual versions/KeySort precede checkpoint-only acceptance. Fresh patch/bundle/partial handoff/evidence/checksums go under /workspace/parallel-20261103/memory-copies/empty-reference-memory-adoption/ only after passing gates and final independent metadata reviews. Full original queue/final run-lean remain open.
 
 The adopted packet's original.patch is the exact binary tree diff from9584 to its final head, verified by temporary-index application and exact tree equality; actual index/worktree remain untouched. additive.patch carries the same canonical diff. commit-series.patch retains historical commits separately because format-patch omits merge resolutions. This preserves the one-lemma merge repair in the reviewable patch.
+
+## Nested storage child turn: interface
+
+`NestedStorageTurnInterface` specifies one actual dynamic primitive-array child
+copy at `source.add index`, followed by the existing reserved-parent pointer
+store and index increment. It reuses `checked_storage_array_success`,
+`checked_storage_array_correct`, `Objects.defaultStoreStep_run`, and
+`Objects.AllocatorRepr.writeGap`; no producer definition is duplicated.
+The actual child-slot `ReprAt`, complete allocator and parent ownership gap
+remain explicit. The total contract checks capacity without an input fits
+premise. It does not assert outer traversal, typed parent adoption, physical
+slot hashing, Source panic or gas adequacy. Existing VY5/V11/V10/P1 producer
+waits and full G33/G35 obligations remain open.
+
+Independent read-only design reviews found no semantic blocker. Skeptic
+required exact stack restoration, real child-slot representation and no claim
+that an ownership gap is an adopted parent; those are explicit in the contract.
+Proofs and inhabited empty/nonempty/long/last-index/refusal controls are pending.
