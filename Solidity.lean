@@ -2109,6 +2109,8 @@ import Solidity.Lowering.V07.LocationProducerControls
 import Solidity.Lowering.V07.MixedAssignmentControls
 import Solidity.Lowering.V07.NodeRank
 import Solidity.Lowering.V07.Operands
+import Solidity.Lowering.V07.P12AssignedCondition
+import Solidity.Lowering.V07.P12AssignedConditionControls
 import Solidity.Lowering.V07.P12Controls
 import Solidity.Lowering.V07.P12NextInterface
 import Solidity.Lowering.V07.P8Bindings

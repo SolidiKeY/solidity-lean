@@ -30119,6 +30119,111 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.aligned_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_one": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedCondition.lean:Solidity.Lowering.V07.P12AssignedCondition.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.bool_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.initial_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.live_reference_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.pair_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.prefix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.self_producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.source_not_revert_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.source_one_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.source_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.source_zero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12AssignedConditionControls.lean:Solidity.Lowering.V07.P12AssignedConditionControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/UnsignedComplement.lean:Solidity.Lowering.V07.UnsignedComplement.local_transport": [
   "Classical.choice",
   "Quot.sound",
