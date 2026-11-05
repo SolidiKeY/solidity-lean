@@ -384,3 +384,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/SnapshotTransport.lean` | Generic rank-bounded snapshot and indexed-child transport through kept heap extensions. |
 | `Backend/MemoryCopies/SnapshotTransportControls.lean` | Shared aliases, aggregate extensions, absent indices and changed reachable-payload negative controls. |
 | `Backend/MemoryCopies/NestedMemoryLoopInterface.lean` | Actual child-copy traversal with heap-derived rows/count, canonical controls and checked capacity refusal. |
+| `Backend/MemoryCopies/NestedMemoryRows.lean` | Heap-derived child rows, kept-heap transport and represented traversal-demand bounds. |
+| `Backend/MemoryCopies/NestedMemoryLoop.lean` | Finite checked nested-memory traversal, allocator and source preservation, and explicit capacity refusal. |
+| `Backend/MemoryCopies/NestedMemoryLoopControls.lean` | Aliased source children, separate destination pointers, retained words and successful-prefix refusal. |
+| `Backend/MemoryCopies/NestedMemoryMixedControls.lean` | Actual 2/0/64 source producer composed with memory traversal and full destination representation. |

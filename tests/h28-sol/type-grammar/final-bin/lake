@@ -1,0 +1,25 @@
+#!/bin/sh
+# Final policy only: serialize even the corpus runner's parallel Lake probes.
+# This inner container lock differs from the host lifetime/writer locks.
+if [ "$#" -eq 1 ] && [ "$1" = --version ]; then
+  exec /opt/lean/bin/lake --version
+fi
+h28_mode=other
+h28_env=no
+h28_separator=no
+for h28_argument in "$@"; do
+  case "$h28_argument" in
+    env) h28_env=yes ;;
+    lean) h28_mode=lean ;;
+    --) h28_separator=yes ;;
+    serve|setup-file) echo 'final policy wrapper does not run an LSP' >&2; exit 2 ;;
+  esac
+done
+h28_config=/workspace/solidity-lean/tests/h28-sol/type-grammar/runtime.toml
+if [ "$h28_mode" = lean ]; then
+  if [ "$h28_env" = yes ] || [ "$h28_separator" = yes ]; then
+    exec flock /tmp/h28-type-final-inner.lock /opt/lean/bin/lake -f "$h28_config" "$@" -j1 --tstack=131072
+  fi
+  exec flock /tmp/h28-type-final-inner.lock /opt/lean/bin/lake -f "$h28_config" "$@" -- -j1 --tstack=131072
+fi
+exec flock /tmp/h28-type-final-inner.lock /opt/lean/bin/lake -f "$h28_config" "$@"

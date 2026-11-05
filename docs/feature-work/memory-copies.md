@@ -1388,3 +1388,40 @@ Independent design reviews required transport of every suffix observation,
 empty traversal at saturation, mixed retained payloads and a successful
 prefix before later refusal. Parent adoption, outer entry compilation and
 general recursive/Source/physical adequacy remain open.
+
+The implementation derives actual child selections and snapshots at each
+suffix, transports them through kept heaps, and uses a direct physical-address
+equality through the existing loop. `memory_rows_demand_bound` bounds the
+natural allocation sum from represented live spans; it does not truncate costs
+or add capacity premises. The public certificate is inhabited. The completed
+suffix control at saturation is not a zero-child full-source test.
+
+Controls execute two aliases of children of lengths 0, 2 and 64, preserve source
+words/reservation boundaries, and prove their destination pointer words differ.
+A concrete size refusal follows a successful first child. The mixed control
+reuses the existing storage-header producer to build a real 2/0/64 source,
+links its represented source root to the actual operand, and exposes the full
+destination allocator, copied-reference pointer correspondence and ordered
+freshness. Its literal payload observations are retained source words; no
+literal fresh-child coordinates or payload addresses are claimed.
+
+Finder and skeptic confirmed the induction and corrected explicit local types,
+the initially hidden mixed destination representation, and the mixed witness's
+source-root link. These repairs retain all premises and proof budgets. Five
+`HeapContents` axiom prints now have exact message guards without proof changes;
+a fresh compiled-module audit must retain these suppressed reports together
+with the seven existing guarded `CheckedDefault` reports. G07 inventory updates
+use its existing generator. Exact candidate gates, reviews, patch reconstruction
+and sealing are required; this bounded traversal checkpoint is not whole G33/G35
+completion. General parent/header compilation and recursive/Source/physical
+closure remain open under the existing producer waits.
+
+During adoption of published `e6849d3b`, the unchanged G07 generator registered
+12 owned guards and 479 guards already present in the published source (414
+non-vacuity fixture pins, 58 V08 pins and seven V16 pins). All 8,120 master
+inventory entries are unchanged. This is generated registry synchronization,
+not foreign proof completion; the foreign source files and scanner are byte
+identical to published master. The evidence records every addition and source
+hash, and a fresh normal pin gate remains required. Adoption preserves the
+existing branch history, prior sealed evidence and all owned proof bytes;
+only the five requested HeapContents message guards modify prior owned code.
