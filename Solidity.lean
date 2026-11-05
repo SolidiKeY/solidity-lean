@@ -460,6 +460,7 @@ import Solidity.Backend.MemoryOps.SourceUintFixedIncrement
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsBounds
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsLate
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsMemory
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsWrite
