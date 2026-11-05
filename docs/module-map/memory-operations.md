@@ -168,9 +168,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStack.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryOps/PhysicalByteStackExact.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryCopies/PublishedStorage.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
-| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Actual resolved calldata slicing followed by the existing Boolean conversion. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Actual Boolean calldata views select or exclude a malformed word. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | A real two-statement Source program, with an actual sliced first copy and a later malformed Boolean decoder. |
+| `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Discharge the existing two-statement slice program's decoder premises from actual raw words. |
+| `Backend/MemoryCopies/PublishedStorage.lean` | Exact fields of the published storage endpoint discharge the existing local execution premise. |
+| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
