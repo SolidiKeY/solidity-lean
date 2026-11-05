@@ -1,0 +1,12 @@
+{
+  "status": "coordinator-pending",
+  "head": "c9230cc9692a5974728959907afa1f60733409ad",
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/cache-c9230cc9/cache.tar.zst",
+  "sha256": "5a25d13aab46396562e7adcf9a2aa4f0bf6ce5f82ba193b0e1c68d43e6953be5",
+  "bytes": 584977490,
+  "artifacts": 1707,
+  "mappings": 573,
+  "omittedTraces": 8,
+  "archiveReadbackVerified": true,
+  "scope": "Present cache mappings and trace outputs only; not a full-tree build/freshness claim. No remote shipment or mapping mutation."
+}

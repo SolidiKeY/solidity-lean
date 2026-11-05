@@ -1,0 +1,86 @@
+[
+  {
+    "module": "Solidity/Frontend/ExecutableAst/Memory/Reader",
+    "depHash": "14877962398733315875",
+    "outputs": {
+      "o": [
+        "11130056817812893567"
+      ],
+      "i": "7117707189657963384",
+      "c": "15628058199523782113"
+    },
+    "included": true
+  },
+  {
+    "module": "Solidity/Frontend/ExecutableAst/Shared/Compose",
+    "depHash": "6483876197350389376",
+    "outputs": {
+      "o": [
+        "13025383197000037234"
+      ],
+      "i": "16679893663621594746",
+      "c": "16818198897768088215"
+    },
+    "included": true
+  },
+  {
+    "module": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic",
+    "depHash": "11965463524471384961",
+    "outputs": {
+      "o": [
+        "5160299700377506122"
+      ],
+      "i": "3029502063360010648",
+      "c": "3032444762263435487"
+    },
+    "included": true
+  },
+  {
+    "module": "Solidity/Tools/DirectRuntime",
+    "depHash": "11425707603205141099",
+    "outputs": {
+      "o": [
+        "696107153694490292"
+      ],
+      "i": "12997599892297476721",
+      "c": "10414197815842361743"
+    },
+    "included": true
+  },
+  {
+    "module": "Admission",
+    "depHash": "6451080270098966407",
+    "outputs": {
+      "o": [
+        "6270224746121661813"
+      ],
+      "i": "7196382591581263800",
+      "c": "7602060328084212308"
+    },
+    "included": true
+  },
+  {
+    "module": "KernelControls",
+    "depHash": "6494079015756461676",
+    "outputs": {
+      "o": [
+        "11919700512173391980"
+      ],
+      "i": "10874938030126546364",
+      "c": "4093213584616870044"
+    },
+    "included": true
+  },
+  {
+    "module": "KernelMatrix",
+    "depHash": "1041677325719808177",
+    "outputs": {
+      "o": [
+        "2014185406205990155"
+      ],
+      "i": "5055324375212804261",
+      "c": "2237881385088949192"
+    },
+    "included": true
+  }
+]

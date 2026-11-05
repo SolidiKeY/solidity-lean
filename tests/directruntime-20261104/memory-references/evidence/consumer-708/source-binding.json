@@ -1,0 +1,15 @@
+{
+  "codeHead": "c9230cc9692a5974728959907afa1f60733409ad",
+  "backendSourceHead": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "sources": {
+    "native-source-controls.mjs": "eff5f27017d9737ab570ee42d817372dab24d8159572d4666e45a9ef8818d327",
+    "native-refusal-controls.py": "e8c1c04126733c62a3ac9132dd406777642ea7af34fcda1a0498c4e4902f8bd4",
+    "native-boundary-audit.py": "7b779c6e195851e78e985f53a93ee08de03cab04c0eb203ed58ef20cb4b88a12",
+    "native-closure-evidence.py": "489145463919ce84c7a1c5b397d0cad7e770bf3618b5ac55071fae8d5b51af35",
+    "Admission.lean": "775a294c098df3b9e4bdff17822240f2895af22f3e8e3d3d0daa9bb244c4106d",
+    "KernelControls.lean": "3e75458d8d547cf56c1196e27e01e800a18d1bc5cb45ccbebd4fe7e54ca26467",
+    "KernelMatrix.lean": "9bbdce2bd1a417d3c52bc43151d41c24fc647a5b5027afc1c579a2590bdb8986",
+    "pack-cache.py": "715025be54ed2947e8df314e17192e5e993c999cdf5c88a880703037877828d0"
+  },
+  "note": "Final evidence-only follow-up commits do not alter these gated bytes."
+}

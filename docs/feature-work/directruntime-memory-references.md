@@ -602,3 +602,14 @@ The explicit signed-int mandatory subset is44/44 decisive as expected
 subset does not replace or weaken the full84-case gate,which stays failed
 with four pending conditional-storage diamonds. All required positive cases
 in that full matrix are proved;no expected-negative case was proved.
+
+H41 pickup pack for checkpoint `c9230cc9692a5974728959907afa1f60733409ad` passed complete archive
+readback: 1707 artifacts,573 mappings,584977490 bytes.
+All seven Reader/Compose/Intrinsic/DirectRuntime/Admission/KernelControls/
+KernelMatrix output mappings are included. Packing exit0,69.750 s,64352 KiB
+sampled aggregate RSS. Delivery remains coordinator-pending.
+Archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/cache-c9230cc9/cache.tar.zst`.
+SHA256: `5a25d13aab46396562e7adcf9a2aa4f0bf6ce5f82ba193b0e1c68d43e6953be5`.
+Native binary remains at the absolute path recorded in provenance.json and
+D-HANDOFF.json,with SHA2565f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01.
+No ship-cache.sh was run;all prior verified archives remain preserved.
