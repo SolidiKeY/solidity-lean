@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`. Original clean `work` branch preserved a
 `9c44a2f9acbdddba82d56a693eb7dba6e8eb8028`. Fetch of origin/master succeeded;
 base ancestry check exits 0. No push, reset, merge, or implementation edits.
 
-## Runtime blocker
+## Historical bootstrap blocker (recovered below)
 
 Lean reports 4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b);
 Lake reports 5.0.0-src+797c613 (Lean 4.24.0). KeySort is pending,
@@ -98,3 +98,85 @@ Check command: `bash tests/fullscope-20261104/vt1/check-dialect.sh`.
 Exit 0, KEYSORT_PASS, DIALECT_INTERFACE_PASS; cgroup peak 111190016 bytes.
 This is not full H35 readiness: full builds, negative/combination controls,
 module-registration proposal, trust inventory/cache shipment remain open.
+
+## C02: exact IR channel extraction and owned fixture backfill
+
+Status: locally kernel-checked extraction component; T01 and T02 remain partial.
+This section supersedes historical bootstrap statuses. Original base remains
+`e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`; C01 dialect interface is committed at
+`78d97c92956c1ef50f974f09a24bdbbe1b078570`. Same assigned branch/VM, no push.
+
+`Frontend/SolcJson/IrImport.lean` selects a contract by its exact source/name and
+retains the requested `ir` or `irOptimized` String with equality certificates.
+The raw JSON source is parsed by Lean's existing JSON parser. This is not a
+parser for Yul bodies or a proof of compiler authenticity. `irOptimized` here
+is the requested output channel with optimizer.enabled=false, not a separate
+optimizer-enabled build. Neither mode tags nor hashes authenticate execution.
+
+Exact theorem statements and premises (all parameters universally quantified):
+- `Selection.sound {contract : Lean.Json} {mode : IrMode} (selection : Selection contract mode) : contract.getObjValAs? String (field mode) = .ok selection.text`
+- `Selection.complete {contract : Lean.Json} {mode : IrMode} (selection : Selection contract mode) : select contract mode = .ok selection`
+- `ContractSelection.sound {output : Lean.Json} {source name : String} {mode : IrMode} (selection : ContractSelection output source name mode) : lookup output source name mode = .ok selection.selection.text`
+The first two use no axioms; the third reports only propext. Selection records
+carry exact lookup derivations; no producer semantics/proofs are assumed.
+
+Pinned compiler SHA-256 matches the repository's 0.8.38 pin. Census.sol combines
+constructor immutables, linked library call, checked arithmetic/exponentiation,
+signed division, ABI dynamic bytes, storage push/pop, and Osaka CLZ. Saved
+standard input/output and four raw IR strings cover two contracts/two channels.
+Lexical census finds 296 function declarations (including duplicate names in
+different object scopes); no semantic scope resolution is claimed. Source IDs
+for the eight unoptimized fun_* declarations are cross-referenced to the saved
+compiler AST (13, 55, 69, 90, 99, 109, 124, 133); this is external name/ID
+association, not intrinsic Stmt matching. Helpers remain semantically unmatched.
+
+Six compiler-rejection controls assert exact diagnostic types/messages, with a
+positive literal-memoryguard control. Nine mutation controls reject altered bytes,
+wrong compiler/source metadata, mode swaps (including rehashed), and rehashed
+census/diagnostic/source-ID/control-input alterations. The verifier establishes
+bundle consistency against the saved output/source/specification; coordinated
+forgery of all artifacts is not excluded by checksums. Kernel controls separately
+exercise exact mode, wrong field type, missing mode, wrong source and wrong
+contract without falling back to a valid alternative. Four actual saved IR strings
+pass through Lean's JSON parser and exact-channel extraction unchanged.
+
+Reviews: separate read-only finder/skeptic, no Lean server. Fixed source-comment
+function names inflating census (312 to 296); exact diagnostic assertions;
+verification-only path and rehashed mode controls; recomputed census and AST ID
+crosswalk; exact negative-control requests; and wording preserving String rather
+than raw serialized JSON bytes. Both final reviews confirm all reported findings
+resolved within this component's stated boundary. No semantic adequacy is claimed.
+
+Validation: `bash tests/fullscope-20261104/vt1/check-import.sh`, exit 0.
+Per-command logs/exit/wall/sampled aggregate RSS are under evidence/import/.
+Maximum recorded aggregate RSS 303394816 bytes; cgroup peak 188370944 bytes in
+that run (RSS sums may double-count shared pages). All commands serial, one CPU,
+LEAN_NUM_THREADS=1, explicit -j1, each <=180s, group capped at 300s, no swap,
+12 GiB hard cap, 4 GiB admission/ongoing reserve guard. Per-file MCP diagnostics
+on Dialect, IrImport and IrImportChecks all report zero errors; bounded MCP stopped
+before other checks. No full cold build has run. No maxHeartbeats/axiom/exclusion
+changes. Lean errors during implementation were corrected without weakening proofs.
+
+Static gate logs in evidence/gates/: layers, trust (3837 sources, 285 sites,
+zero findings), axiom pins (7385 existing pins, no errors), and doc paths pass.
+Existing-pin gate does not register the new theorems: their explicit inventories
+above accompany the central proposal. Roots/orphans/module-map gates fail on the
+two new modules because COORD owns registration. Proposal is registration-proposal.md.
+Full run-lean and integrated final closure remain pending; no H35 readiness.
+
+Cache-helper probe with SHIP_ALLOW_HEAD=1 and the configured cache fails because
+`/home/agent/.local/state/cloudvm-coord/poll-state.json` is absent. Export a
+source/toolchain/checksum-bound kernel artifact packet and request host helper
+transfer. Shipment is not delivered without a coordinator receipt.
+
+Open queue remains: full object/Yul parsing and provenance; dialect operation
+semantics and lowering (all seven compiler-only operations plus complete core
+EVM interpretation), object/static validity, immutable/link layout, physical
+memory writeback and Osaka resources; T02 typed matcher and every helper/function
+simulation, dispatcher/constructor composition; frozen X01/G01 and VX4 integration;
+semantic/combination controls; final builds/inventories/reviews/cache receipts.
+No new exclusion, weakened observation, assumed producer proof, or closure claim.
+
+Raw fixture whitespace: git diff --cached --check reports trailing blank lines
+in two compiler-emitted unoptimized IR files. Preserve exact compiler Strings;
+source/script whitespace checks exclude only raw *.yul fixtures and pass.

@@ -3,7 +3,7 @@ set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
 mkdir -p /tmp/solidity-lean-feature-groups-20261025
 exec flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock \
- docker run --rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000 \
+ timeout 300 docker run --rm --memory=12g --memory-swap=12g --cpus=1 --user=1000:1000 \
  -v /workspace:/workspace -v /opt:/opt:ro -v /usr:/usr:ro \
  -w /workspace/solidity-lean ubuntu:24.04 bash -c '
 set -euo pipefail
