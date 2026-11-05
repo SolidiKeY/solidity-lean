@@ -643,3 +643,50 @@ alone was not accepted as proof. Source semantics, halt/allocation policies and
 proof limits are unchanged. General body/graph admission, physical resource
 adequacy, compiler/EVM refinement and universal coverage remain outside this
 result, as do the historical failed full/doc gates.
+
+
+## Allocation-parent prefixes in ordinary internal bodies
+
+`Progress.AllocationBodyCalls` adds `AllocationParent` and `AllocationItems`
+certificates over the existing typed Source expressions and items. A finite
+prefix of inline-array or struct-constructor expression statements may precede
+an unchanged `ReadyItems` suffix. Each parent's exact arguments satisfy the
+existing syntactic `ReadyArgs`; constructors derive member-layout agreement
+from their intrinsic typing proof. This does not extend the old readiness
+predicate or admit unrestricted allocation nesting.
+
+The induction proves actual item and modifier-free body progress, then composes
+it with `callInternal`, return extraction and caller substitution. The joint
+call and expression theorems derive memory admission from the new certificate
+and reuse existing preservation. They give non-stuckness at every horizon,
+`MemOK` on success and halt, and valid returned references on success.
+`allocation_body_from_elaborate` derives `CallsOK` from successful Source
+elaboration and the checked value-call catalogue. Selected-body equality,
+parameter/return layout, empty modifiers, default-value readiness and body
+admission remain explicit premises; neither body execution nor its poststate
+is assumed.
+
+`AllocationBodyCallControls` proves actual frontend inference, elaboration,
+program-body identity and dispatch for a contract function with a
+`Pair(a, new bytes(n)); return a;` body. The declaration unit uses the legacy
+frontend; observations quantify over both evaluator pipelines and arbitrary
+fixed parameters. The caller call node is built intrinsically, rather than
+claimed to be frontend-elaborated. There is no override-dispatch control here.
+Inhabited call and caller-expression consumers return the old object 0 by
+alias, keep the return default at object 1, allocate child bytes at object 2
+and the reference-field struct at object 3, and restore caller locals.
+Oversized length propagates the existing allocation panic while retaining only
+the already allocated default. Heap, saved function locals and logs are checked
+explicitly. Zero horizon retains the unchanged state and timeout. The old
+`ReadyItems` certificate still refuses this body.
+
+The final focused control build passed in 19.172 seconds with 598,106,112 bytes
+peak aggregate RSS. All 48 printed theorem reports use only `propext`,
+`Classical.choice` and `Quot.sound` or subsets. Independent read-only finder
+and skeptic reviews found no confirmed defect after the panic and timeout
+controls were added. A deep direct panic reduction failed at the existing
+recursion limit; explicit evaluator/body/frame cuts prove the same observation
+without raising any limit. This is Source progress and preservation, not
+termination, general allocating-call graph admission, physical resource
+adequacy, compiler/EVM correspondence or universal coverage. Historical
+full-build and published documentation-path failures remain open.

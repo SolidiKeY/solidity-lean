@@ -548,3 +548,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Source/Progress/StructParents.lean` | Constructor-derived member layout, actual packing/allocation progress and joint expression/statement preservation with checked-elaboration adaptation. |
 | `Source/Progress/StructParentControls.lean` | Inhabited reference-field constructors, old/fresh heap observations, early/later allocation panic, exact fuel and retained packing/readiness boundaries in both pipelines. |
+
+| `Source/Progress/AllocationBodyCalls.lean` | Syntactic allocation-parent body prefixes, actual modifier-free internal-call progress, joint memory preservation and checked-elaboration adaptation. |
+| `Source/Progress/AllocationBodyCallControls.lean` | Source-inferred callee body, inhabited old-reference returns, persistent default/child/struct allocations, propagated panic and caller restoration in both evaluator pipelines. |

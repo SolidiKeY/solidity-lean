@@ -262,3 +262,12 @@ reference fields and allocating children; see
 [source-progress-checked.md](source-progress-checked.md#ready-struct-constructor-allocation-parents).
 This does not extend the existing readiness certificate or establish general
 memory-body, compiler or physical-layout coverage.
+
+Finite inline-array and struct-constructor expression prefixes now compose
+with ready suffixes in modifier-free ordinary internal bodies, with actual
+call and caller-expression progress jointly consuming the existing memory
+proofs; see
+[source-progress-checked.md](source-progress-checked.md#allocation-parent-prefixes-in-ordinary-internal-bodies).
+Body selection, layout, defaults, argument readiness and input-reference
+validity retain their explicit premises. This is not general memory-call
+graph or compiler coverage.

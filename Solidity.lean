@@ -2348,6 +2348,8 @@ import Solidity.Source.Preservation.StatementFrames
 import Solidity.Source.Preservation.Statements
 import Solidity.Source.Preservation.StorageCopyControls
 import Solidity.Source.Preservation.ValueConversions
+import Solidity.Source.Progress.AllocationBodyCallControls
+import Solidity.Source.Progress.AllocationBodyCalls
 import Solidity.Source.Progress.ArithmeticBuiltins
 import Solidity.Source.Progress.BuiltinAdmission
 import Solidity.Source.Progress.BuiltinControls
