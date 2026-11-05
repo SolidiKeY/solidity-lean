@@ -120,4 +120,7 @@ Coordinator reports verified byte delivery of the previous965584-byte delta,
 SHA047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167;
 host receipt was not read locally. This does not establish migration or closure.
 The published comment correction changes source inputs; the refreshed local cache
-will be separately verified and left for H41 pickup. No ship-cache.sh invocation.
+has been separately verified and left for H41 pickup:964484bytes,SHA256
+eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519.
+Current receipt:evidence/adoption-b86/cache-receipt.json;delivery coordinator-pending.
+No ship-cache.sh invocation.

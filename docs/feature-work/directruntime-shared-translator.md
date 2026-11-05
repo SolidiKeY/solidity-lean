@@ -510,3 +510,16 @@ closure do not follow. H41 remains in force for refreshed packs. CR migration,
 DR-A-META,exhaustive form parity,source preservation,native/WASM closure,before/after
 runtime and full final gates remain open. Original queue checkpoints stay partial;
 no RUNTIME_GATE_PASS or goal completion is asserted.
+
+
+Fresh KeySort and SolKey377/131/131 annotations checks passed under actual cgroup
+memory.max12884901888,swap.max0,cpu.max100000/100000. Actual toolchain remains
+Lean4.24.0/Lake5.0.0-src+797c613. KeySort/cache run6.353s,RSS251580KiB,minimum outer
+available6049267712bytes. New refreshed pack differs from the received prior pack:
+/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/cache-packs/14d0d88411fa/owned-delta.tar.zst
+SHA256eb91e1e42a61cbd72744bb8290fea7cdb10c139cbfeaa47a08a52a2e52646519,
+964484bytes,18artifacts/6mappings,fully verified locally. It remains coordinator-
+pending and requires matching dependencies/toolchain. The earlier047cfd99 pack
+is byte-delivered per coordinator receipt; that receipt does not cover this new
+pack. H41 obeyed; no ship-cache.sh invocation. Evidence and fresh source bindings
+are in adoption-b86. RUNTIME_GATE_PASS remains pending.
