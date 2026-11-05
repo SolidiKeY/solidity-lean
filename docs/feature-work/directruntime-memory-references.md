@@ -365,3 +365,26 @@ KernelMatrix trace mappings and outputs are included. Delivery is
 coordinator-pending. Absolute archive: `/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/published-f77/cache-aaeca878/cache.tar.zst`.
 SHA256: `c739666161edd563c7156758216fd035855202577039ddf729364cc9101ad2ad`. Manifest, receipt, readback command and
 source binding are retained under evidence/published-f77.
+
+
+## Published checkpoint adoption: 9584f9e7
+
+Adopted `9584f9e7df09f638d9e0cb8930501d1660aa4b2f` at merge
+`bde0666398836312311348f35daa72e1c4ee7724`, preserving all owned work.
+The publication adds Shared.Scope/control-tuple helpers but leaves Memory
+and DirectRuntime unchanged. The consumer integration dependency persists.
+
+Fresh bounded serial VM build and setup-aware per-file controls pass:84 real
+shared obligations,84 initial-model cases,two incompatible initializer refusals
+and20 malformed AST refusals. All54 matching-source theorem axiom reports
+remain standard-only. KeySort passes377 taclets/131 read-bearing/table entries;
+registration passes and641 core modules have zero forbidden layer reaches.
+The actual toolchain remains Lean4.24.0/Lake5.0.0-src+797c613. No source
+change or proof-budget change was needed. Evidence: `evidence/published-9584`.
+
+All five relevant module input/output hashes still match the existing
+H41 pickup pack documented above; no replacement archive is required. Its
+delivery remains coordinator-pending until receipt. This is not a freshness
+claim for other merged modules. The full merged gate was not rerun here.
+Ordinary native/browser acceptance including positive diamond Identity remains
+blocked on A/D consumer integration; no RUNTIME_GATE_PASS is claimed.
