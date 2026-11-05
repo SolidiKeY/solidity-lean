@@ -348,5 +348,111 @@ theorem smul_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : 
       · refine ⟨fun ha0 => h (k1.1 ⟨hn, .inr ha0⟩), fun hq => h (k1.1 ⟨hn, .inl (by
           exact hq.trans (by split <;> first | rfl | exact sword_val hq'.1 hq'.2))⟩)⟩
 
+/-! ## Arithmetic right shift
+
+`sarCode` clamps a negative count to `0` (the source reads a negative `int`
+count by its `toNat`), then runs `SAR`: floor division by `2^n`, the sign's
+fill from count `256`. -/
+
+/-- The clamped count: `0` for a negative signed reading. -/
+def sarClamp (n : Fin W) : Fin W := if sgn n.1 < 0 then ⟨0, W_pos⟩ else n
+
+/-- The clamp prefix computes `sarClamp`: `SGT` against `0`, `ISZERO`, `MUL`. -/
+theorem sarClamp_word (n : Fin W) :
+    wmod ((bword (decide ((bword (decide (sgn n.1 < sgn 0))).1 = 0))).1 * n.1) = sarClamp n := by
+  rw [sgn_zero]; unfold sarClamp
+  by_cases hn : sgn n.1 < 0
+  · simp only [hn, decide_true, if_true, bword]
+    exact Fin.ext (by simp)
+  · simp only [hn, decide_false, if_false, bword]
+    exact Fin.ext (by simp [Nat.mod_eq_of_lt n.2])
+
+/-- `sarCode` on any two value words: the clamp, then `SAR`. -/
+theorem sarCode_run (m : Machine) (st : List Word) (n a : Fin W) :
+    run sarCode { m with stack := .val n :: .val a :: st } =
+      .ok { m with stack := .val (sarWord (sarClamp n) a) :: st } 0 := by
+  simp only [run, sarCode, exec_cons_zero, Instr.step, Machine.next, Out.ok_bind, exec_nil,
+    Nat.sub_self, List.getElem?_cons_zero]
+  rw [sarClamp_word]
+
+/-- The source's signed right shift (`BinOp.arithInt .shr`) on two readings. -/
+def sarShr (a n : Int) : Int :=
+  if n < 256 then a / 2 ^ n.toNat else if a < 0 then -1 else 0
+
+/-- Floor division by a positive power keeps a signed reading in range. -/
+theorem div_pow_range {x : Int} (k : Nat) (h : -(H : Int) ≤ x ∧ x < H) :
+    -(H : Int) ≤ x / ((2 ^ k : Nat) : Int) ∧ x / ((2 ^ k : Nat) : Int) < H := by
+  have hp : (0 : Int) < ((2 ^ k : Nat) : Int) := by
+    have := Nat.two_pow_pos k; omega
+  constructor
+  · by_cases hx : 0 ≤ x
+    · have := Int.ediv_nonneg hx (Int.le_of_lt hp); omega
+    · have h1 : x ≤ x / ((2 ^ k : Nat) : Int) := by
+        rw [Int.le_ediv_iff_mul_le hp]
+        have : x * ((2 ^ k : Nat) : Int) ≤ x * 1 :=
+          Int.mul_le_mul_of_nonpos_left (by omega) (by omega)
+        omega
+      omega
+  · by_cases hx : 0 ≤ x
+    · have := Int.ediv_le_self ((2 ^ k : Nat) : Int) hx; omega
+    · have : x / ((2 ^ k : Nat) : Int) < 0 := Int.ediv_neg_of_neg_of_pos (by omega) hp
+      have : (0 : Int) < H := by have := H_pos; omega
+      omega
+
+/-- The source's shift result is an `int256`. -/
+theorem sarShr_range {a : Int} (n : Int) (h : -(H : Int) ≤ a ∧ a < H) :
+    -(H : Int) ≤ sarShr a n ∧ sarShr a n < H := by
+  unfold sarShr
+  split
+  · rw [show ((2 : Int) ^ n.toNat) = ((2 ^ n.toNat : Nat) : Int) from
+      (Int.natCast_pow 2 _).symm]
+    exact div_pow_range _ h
+  · have := H_pos; split <;> omega
+
+/-- `SAR` on the clamped count is the source result's two's complement word. -/
+theorem sarWord_clamp {a n : Nat} (ha : a < W) (hn : n < W) :
+    sarWord (sarClamp ⟨n, hn⟩) ⟨a, ha⟩ = sword (sarShr (sgn a) (sgn n)) := by
+  by_cases hneg : sgn n < 0
+  · have h256 : sgn n < 256 := by omega
+    have hz : (sgn n).toNat = 0 := Int.toNat_of_nonpos (by omega)
+    rw [show sarClamp ⟨n, hn⟩ = ⟨0, W_pos⟩ from if_pos hneg]
+    simp only [sarWord, sarShr, h256, hz, if_true]
+    simp
+  · have hlt : n < H := by
+      have := W_eq; unfold sgn at hneg; split at hneg <;> omega
+    have hs : sgn n = (n : Int) := by unfold sgn; simp [hlt]
+    rw [show sarClamp ⟨n, hn⟩ = ⟨n, hn⟩ from if_neg hneg]
+    simp only [sarWord, sarShr, hs, Int.toNat_natCast]
+    by_cases h256 : n < 256
+    · have : ((n : Int) < 256) := by omega
+      simp only [h256, if_true, this]
+      rw [show ((2 : Int) ^ n) = ((2 ^ n : Nat) : Int) from (Int.natCast_pow 2 n).symm]
+    · have : ¬((n : Int) < 256) := by omega
+      simp only [h256, if_false, this]
+      have hW := W_pos
+      by_cases ha0 : sgn a < 0
+      · simp only [ha0, if_true]
+        apply Fin.ext
+        simp only [wMax_def, sword, toWord, wmod_def]
+        rw [if_neg (by omega), Nat.mod_eq_of_lt (by omega)]
+        omega
+      · simp only [ha0, if_false]
+        apply Fin.ext
+        simp [sword, toWord]
+
+/-- `a >> n` on `int`s (`n` on top): `SAR` on the clamped count pushes the
+word of the source result. -/
+theorem sar_tail (m : Machine) (st : List Word) {a b : Nat} (ha : a < W) (hb : b < W) :
+    run (sTail .shr) { m with stack := w[b] :: w[a] :: st } =
+      .ok { m with stack := .val (sword (sarShr (sgn a) (sgn b))) :: st } 0 := by
+  show run sarCode _ = _
+  rw [sarCode_run, sarWord_clamp ha hb]
+
+/-- A signed reading of a two's complement word is the integer. -/
+theorem sgn_sword {v : Int} (h : -(H : Int) ≤ v ∧ v < H) : sgn (sword v).1 = v := by
+  have hW := W_eq
+  have hl : toWord v < W := toWord_lt (by omega) (by omega)
+  unfold sword; rw [wmod_of_lt hl]; exact sgn_toWord h.1 h.2
+
 end Evm
 end Solidity
