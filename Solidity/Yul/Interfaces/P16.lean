@@ -1,3 +1,4 @@
+import Solidity.Yul.RawPreparedInteger
 import Solidity.Yul.RawCheckedAdapter
 import Solidity.Yul.RawTypedScope
 import Solidity.Yul.RawControlGrowingBlock
@@ -176,3 +177,12 @@ specializations are definitionally the existing operations. Signed/unsigned
 integer, dirty-word and control witnesses are in Solidity.Yul.Checks.RawTypedScope.
 No initializer execution, physical layout or broader admission follows; concrete
 integer declaration composition remains a separate obligation. -/
+
+/-! RawPreparedInteger.run exports an intrinsically typed integer-literal declaration
+into a named grown raw frame. The real integer range proof is required. Its
+Source.execS law projects stored clean locals; output coherence is proved under
+genuine input coherence, while dirty older words are retained independently.
+Checks.RawPreparedInteger witnesses signed/unsigned bounds, refusals, timeout
+identity and an existing checked uint8 consumer followed by typed scope removal.
+Enclosing integer-block composition, arbitrary initializers and dirty ordinary
+Source readback remain separate obligations. -/
