@@ -1331,3 +1331,38 @@ scoped reports over 226 modules, preserving 223 predecessors. Exact-head gates,
 axiom audit, canonical patch reconstruction and seal remain required. This
 proves observation invariance, leaving traversal compilation, Source/physical
 adequacy and the full original G33/G35 obligations open.
+
+## Published master and checked-reference follow-up
+
+Master `8bf8321873befa3f35ca31e97e5339a1baee93e6` is adopted in
+`3213b658a91435ed648f298e93e1389cc461a7be`. Its imported `CheckedDefault`
+and `CheckedReferenceInterface` match the lane versions. The only merge
+conflict was the area module map: all published rows were retained verbatim,
+unique owned rows appended, and roots regenerated. All 226 owned modules
+were unchanged by adoption.
+
+The published reference certificate already has the local inhabitant
+`checkedReference` and `CheckedReferenceControls.certificate_inhabited`, from
+implementation `030866e11708afa7ed1dc99df88e217e911eae40`, against the exact
+frozen interface `d5e252f4f2cd63bab54ea7960fa4ddb1f1b57c4f`. Existing
+empty/two/64-child runtime and capacity-refusal controls are delivered with
+that proof, without adding a duplicate implementation or producer premise.
+
+The coordinator's seven unguarded `CheckedDefault` axiom prints are now exact
+message pins. Removing just the seven message wrappers restores the previous
+source byte-for-byte; all 225 other owned modules remain unchanged. Since
+guarded messages suppress ordinary output, an additional serial gate freshly
+imports the compiled module and prints all seven declarations. The scoped
+audit requires these fresh exact-head reports, retaining all 1,339 targets
+over 226 modules. Existing gates, proof budgets, premises and trust checks
+remain intact; no theorem or proof body changes. Final four MCP diagnostics
+have zero errors/empty warnings. Exact-head reviews/gates, fresh axiom audit,
+patch reconstruction and seal remain required.
+
+This follow-up does not complete the queued nested-memory loop or the original
+G33/G35 assignment. Source/physical/compiler obligations and producer waits
+remain explicit; upstream full-gate passes are not a local candidate pass.
+
+Independent source/tooling finder and skeptic reviews passed. Finder corrected
+the handoff sentence to match verification of patch reconstruction before the
+runtime marker, followed by the partial handoff and seal.
