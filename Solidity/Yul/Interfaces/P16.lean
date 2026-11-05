@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingSequence
 import Solidity.Yul.RawPreparedDeclaration
@@ -122,3 +123,11 @@ with actual scope restoration/Out.close, retaining checked/coherent premises
 and reached error state. Drop removes only the bound prefix via typed values.
 Mutation/control/dirty-word controls are in Solidity.Yul.Checks.RawGrowingBlock.
 General growing-for/declaration-group/frontend admission remains separate. -/
+
+/-! RawGrowingForPost.adapter composes a Boolean literal initializer that grows
+the actual context with present supported Boolean condition/post and a concrete
+checked body, then restores the enclosing scope. Its Source.execS forLoop law
+joins actual declaration/iteration/restoration proofs with checked/coherent
+premises; it is not a preparation-only interface. Mutation/control/post-error
+witnesses are in Solidity.Yul.Checks.RawGrowingForPost. General initializers,
+declaration groups and frontend admission remain separate obligations. -/
