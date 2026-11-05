@@ -1,0 +1,13 @@
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const source=readFileSync('tests/v07/EffectFixtures.lean','utf8');
+const expected=readFileSync('tests/v07/effect-fixtures.expected.txt','utf8').trimEnd();
+const guard=source.match(/\/-- info: ([\s\S]*?) -\/\n#guard_msgs in\n#eval IO.println/);
+assert.ok(guard,'missing guarded observation table');
+assert.equal(guard[1],expected,'changed ordered observations');
+const names=expected.split('\n').map(s=>s.split('=')[0]);
+assert.equal(names.length,173);
+assert.equal(new Set(names).size,173);
+const rows=source.slice(source.indexOf('def rows'),source.indexOf('/-- info:'));
+assert.deepEqual([...rows.matchAll(/\("([^"\n]+)",/g)].map(m=>m[1]),names,'missing/reordered fixture case');
+console.log('V07 complete ordered fixtures: 173 cases; expected observations and order match');
