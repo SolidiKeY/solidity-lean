@@ -901,3 +901,46 @@ other heavy gates run; no RUNTIME_GATE_PASS. Full assignment, five unanswered hu
 questions, actual proof/rendered/performance matrices and paired row judgments
 remain outstanding. Goal status is untouched. Full receipts and hashes are in
 /workspace/dafny-parity-bulk-h44/; prior artifact manifests remain unchanged.
+
+
+### Human decisions H47-H50 and serial resource authorization —2026-11-05
+
+The five prior questions now have answers, recorded in docs/dafny-human-decisions.json.
+H49 excludes the proof-help action only: it is removed and the mixed status-actions
+row records that human exclusion without waiving other aspects or changing gates.
+The official VSCode1.108.0 archive provisioned at /workspace/vscode-official/ passes
+sha256sum -c against the saved official API hash. docs/dafny-provisioned-assets.json
+records exact paths/sizes/hashes. Editor/version is1.108.0/94e8ae2b28cb5cc932b86e1070569c4463565c37;
+archive, extraction and cached Xvfb remain offgit under H44; no download retried.
+Rendered rows remain open until fresh paired evidence is collected.
+
+Q-CLI-01 chooses the existing concrete typed-model CLI, documented in vscode/README.md.
+Build writes a real compiler AST/source-hash artifact; Run selects Contract::function;
+Test executes concrete cases and compares exact status/text. None publishes proof
+or EVM-equivalence evidence. Source/dependency/function identity, pending prompt
+nonces/resource config, stale errors and physical child retirement are guarded.
+Reviewer failures were retained before fixes;25 targeted command/status and39
+command/editor checks pass. The initial full Node run retained an old contextual
+help assertion failure; its H49-excluded action was replaced by ordinary output,
+while unrelated-folder picker ownership assertions remain. No budgets increased.
+
+Q-REL-01 is authorized but not implemented: whole-goal kernel refutation cannot
+identify a particular failed ensures clause, direct results are uncertified, and
+raw clause byte provenance is lost before binding. The real hook needs stable
+owner/ordinal/source spans and clause-specific certification before decoration;
+no fabricated postcondition metadata was emitted. Read-only source review retained.
+
+Coordinator Q-RES authorization permits isolated serial heavy gates without a
+systemd scope. They will be attempted, not left blocked: pinned Lean4.24.0 and
+Lake5.0.0-src+797c613, LEAN_NUM_THREADS=1, temporary weak -j1 arguments only, no other
+work alongside,12GiB observed aggregate intent/available reserve and no swap.
+Missing enforced scope remains a limitation. Cache --no-build readiness exits3
+because modules require building; not a successful proof gate. Actual full,
+TestSuite,timed strict,KeySort and renderer outcomes will follow in the handoff.
+
+All480 original IDs/frozen270 remain;4 concrete-command scenarios are additive and
+partial. Original source/bulk split persists. Receipts remain outside git under
+/workspace/dafny-parity-decisions-20261105/. Full original proof/rendered/performance/
+scaling/adversarial/paired-judge obligations remain; no RUNTIME_GATE_PASS, theorem,
+axiom/sorry, proof/fuel/node/test/deadline budget, goal-state or gate changes.
+No push/merge/PR. Execution interrupted before committing; no heavy gate started.

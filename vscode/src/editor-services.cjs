@@ -108,7 +108,7 @@ function install(vscode,context,servers,reportError){
       const owner=vscode.window.activeTextEditor?.document,version=owner?.version,text=owner?.getText(),epoch=owner?pickerEpochs.get(owner.uri.toString()):lifecycleRevision,active=activeRevision,identitySnapshot=owner&&identities.get(owner.uri.toString());
       const actions=[{label:'Restart Solidity Lean',description:'Restart the language servers',command:'solidityLean.restartServer'},
         {label:'Show verification output',description:'Open the Solidity Lean output channel',command:'solidityLean.showOutput'}];
-      const summary=owner&&current(owner)&&summarize(current(owner),owner);if(summary?.help)actions.push({label:'Inspect verification output',description:'Review reported failures or active work locally',command:'solidityLean.showOutput'});
+      // H49: proof-help action excluded by the human; ordinary output remains available.
       const link=issueURL(identitySnapshot,owner&&current(owner));if(link)actions.push({label:'Report verification issue',description:'Open an issue draft with server and extension versions; no source attached',uri:link,reportIssue:true});
       const selected=await vscode.window.showQuickPick(actions,{matchOnDescription:true,placeHolder:'Pick an action'});
       if(disposed||!actions.includes(selected)||!vscode.workspace.isTrusted)return;

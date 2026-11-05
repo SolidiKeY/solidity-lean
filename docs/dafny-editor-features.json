@@ -2313,7 +2313,7 @@
       "detail": {},
       "assessment": {
         "status": "partial",
-        "reason": "Authentic local summaries now retain completion counts, running/preparing names, failed names/counts, skipped/stale/unknown/unsupported/direct and audit qualifications. Native document-job scope, compiler failure/recovery and source/session/picker guards are evidenced. Explicit repository-derived issue draft uses current version metadata; conditional local-output help is implemented. Public proof-help destination Q-STATUS-HELP-01, exact recorded text/menu differences, rendered lifecycle equivalence and both row judgments remain unproved.",
+        "reason": "Authentic local summaries now retain completion counts, running/preparing names, failed names/counts, skipped/stale/unknown/unsupported/direct and audit qualifications. Native document-job scope, compiler failure/recovery and source/session/picker guards are evidenced. Explicit repository-derived issue draft uses current version metadata; conditional local-output help is implemented. Public proof-help destination Q-STATUS-HELP-01, exact recorded text/menu differences, rendered lifecycle equivalence and both row judgments remain unproved. Human H49 excludes the proof-help action only. Other menu/lifecycle aspects remain partial; no entire mixed row or gate was waived.",
         "localSource": [
           "vscode/src/extension.cjs",
           "vscode/src/backend.cjs",
@@ -2355,6 +2355,14 @@
           "tests/editor-parity/recovery-status/services.tar.gz",
           "tests/editor-parity/recovery-status/reviews.md",
           "tests/editor-parity/recovery-status/attempts.json"
+        ],
+        "humanExclusions": [
+          {
+            "status": "excluded",
+            "decision": "H49",
+            "aspect": "proof-help action",
+            "evidenceFile": "docs/dafny-human-decisions.json"
+          }
         ]
       }
     },
@@ -13813,6 +13821,78 @@
             "tests/editor-parity/recovery-hover/lexical-second/report.json",
             "tests/editor-parity/recovery-hover/lifecycle-first/report.json",
             "tests/editor-parity/recovery-hover/upstream-expectations.json"
+          ]
+        }
+      },
+      {
+        "id": "scenario:concrete-build-compiler-artifact",
+        "kind": "scenario",
+        "upstream": [],
+        "detail": {
+          "scope": "scenario:concrete-build-compiler-artifact"
+        },
+        "assessment": {
+          "status": "partial",
+          "reason": "Human Q-CLI-01 authorizes existing typed-model runner and compiler artifact contract. Actual compiler Build and injected concrete-runner/controller regressions exist; fresh kernel/concrete/native rendered equivalence and both row judges remain required. Test success is not proof or EVM equivalence.",
+          "evidenceFiles": [
+            "vscode/src/source-commands.cjs",
+            "vscode/test/source-commands.test.cjs",
+            "vscode/README.md",
+            "docs/dafny-human-decisions.json"
+          ]
+        }
+      },
+      {
+        "id": "scenario:concrete-run-typed-model",
+        "kind": "scenario",
+        "upstream": [],
+        "detail": {
+          "scope": "scenario:concrete-run-typed-model"
+        },
+        "assessment": {
+          "status": "partial",
+          "reason": "Human Q-CLI-01 authorizes existing typed-model runner and compiler artifact contract. Actual compiler Build and injected concrete-runner/controller regressions exist; fresh kernel/concrete/native rendered equivalence and both row judges remain required. Test success is not proof or EVM equivalence.",
+          "evidenceFiles": [
+            "vscode/src/source-commands.cjs",
+            "vscode/test/source-commands.test.cjs",
+            "vscode/README.md",
+            "docs/dafny-human-decisions.json"
+          ]
+        }
+      },
+      {
+        "id": "scenario:concrete-test-exact-cases",
+        "kind": "scenario",
+        "upstream": [],
+        "detail": {
+          "scope": "scenario:concrete-test-exact-cases"
+        },
+        "assessment": {
+          "status": "partial",
+          "reason": "Human Q-CLI-01 authorizes existing typed-model runner and compiler artifact contract. Actual compiler Build and injected concrete-runner/controller regressions exist; fresh kernel/concrete/native rendered equivalence and both row judges remain required. Test success is not proof or EVM equivalence.",
+          "evidenceFiles": [
+            "vscode/src/source-commands.cjs",
+            "vscode/test/source-commands.test.cjs",
+            "vscode/README.md",
+            "docs/dafny-human-decisions.json"
+          ]
+        }
+      },
+      {
+        "id": "scenario:concrete-command-resource-lifecycle",
+        "kind": "scenario",
+        "upstream": [],
+        "detail": {
+          "scope": "scenario:concrete-command-resource-lifecycle"
+        },
+        "assessment": {
+          "status": "partial",
+          "reason": "Human Q-CLI-01 authorizes existing typed-model runner and compiler artifact contract. Actual compiler Build and injected concrete-runner/controller regressions exist; fresh kernel/concrete/native rendered equivalence and both row judges remain required. Test success is not proof or EVM equivalence.",
+          "evidenceFiles": [
+            "vscode/src/source-commands.cjs",
+            "vscode/test/source-commands.test.cjs",
+            "vscode/README.md",
+            "docs/dafny-human-decisions.json"
           ]
         }
       }

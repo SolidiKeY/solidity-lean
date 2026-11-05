@@ -37,7 +37,9 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
       projectRoot:workspace||dirname(doc.uri.fsPath),includePaths:cfg.get('includePaths',[]),remappings:cfg.get('remappings',[]),
       workers: cfg.get('workers', 1), automaticVerification: {onchange:'change',onsave:'save',never:'never'}[automatic] || 'never' };
   }
-  function cancel(uri) {
+  const sourceCommands=require('./source-commands.cjs').install(vscode,context,{settings,output,cancelVerification:uri=>cancel(uri,true)});
+  function cancel(uri,preserveSource=false) {
+    if(!preserveSource)sourceCommands.cancel(uri?key(uri):undefined);
     automaticTests.stop(uri);
     service?.cancel(uri);
     if (uri) { saving.delete(key(uri)); active.get(key(uri))?.abort(); }
@@ -311,7 +313,7 @@ function createExtension(vscode, context, backend = runBackend, service = null) 
     for(const doc of vscode.workspace.textDocuments)open(doc);
   }
   return { verify, cancel, controller, diagnostics, reports, service,
-    async dispose(){if(disposed)return;disposed=true;disposeTesting();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();for(const item of context.subscriptions)item.dispose();await service?.dispose();} };
+    async dispose(){if(disposed)return;disposed=true;disposeTesting();for(const cancellation of testRunCancellations)cancellation.cancel();cancel();for(const item of context.subscriptions)item.dispose();const sourceRetirement=sourceCommands.dispose();try{await service?.dispose();}finally{await sourceRetirement;}} };
 }
 let runtime;
 function activate(context) {
