@@ -209,6 +209,8 @@ import SolidityBridge.RoadmapV15.P10.FrozenWitness
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 import SolidityBridge.RoadmapV15.P10.Interface
+import SolidityBridge.RoadmapV15.P10.InvocationEnvironment
+import SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls
 import SolidityBridge.RoadmapV15.P10.JumpMemberConsumer
 import SolidityBridge.RoadmapV15.P10.JumpMemberControls
 import SolidityBridge.RoadmapV15.P10.JumpZeroConsumer
