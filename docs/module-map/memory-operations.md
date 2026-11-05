@@ -351,3 +351,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/MemoryCopyDemand.lean` | Strip-invariant demand, actual snapshot and repeated-copy cell growth, and real alias-rebinding zero growth. |
 | `Backend/MemoryCopies/MemoryCopyDemandControls.lean` | Real shared-child heaps, distinct copied descendants, repeated/empty/long demand and same-input intrinsic/compiled alias controls. |
 | `Backend/MemoryCopies/EmptyReferenceStorageInterface.lean` | Existing runtime/checked storage code contracts for empty live arrays with arbitrary map-free elements and shadows. |
+| `Backend/MemoryCopies/EmptyReferenceStorage.lean` | Actual zero-header runtime/checked storage copying for arbitrary map-free elements with full allocator and fresh empty-object guarantees. |
+| `Backend/MemoryCopies/EmptyReferenceStorageControls.lean` | Reference/shadow/unread-store and unused-child runtime witnesses, complete saturated inputs and wrong-header negatives. |

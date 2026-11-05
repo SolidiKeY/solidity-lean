@@ -328,6 +328,8 @@ import Solidity.Backend.MemoryCopies.DefaultDemandInterface
 import Solidity.Backend.MemoryCopies.DefaultSelection
 import Solidity.Backend.MemoryCopies.DefaultSelectionControls
 import Solidity.Backend.MemoryCopies.DefaultSelectionInterface
+import Solidity.Backend.MemoryCopies.EmptyReferenceStorage
+import Solidity.Backend.MemoryCopies.EmptyReferenceStorageControls
 import Solidity.Backend.MemoryCopies.EmptyReferenceStorageInterface
 import Solidity.Backend.MemoryCopies.FixedMemoryCopy
 import Solidity.Backend.MemoryCopies.FixedMemoryCopyControls
