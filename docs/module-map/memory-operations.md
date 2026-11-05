@@ -278,3 +278,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean` | Inhabited shared fixed-child parent, nonempty protected neighbour, complete represented vectors, Source endpoint and wrong-header negatives. |
 
 | `Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean` | Actual strong whole-word fixed assignment joined to initial physical parent/value bytes, with derived local separation, MemOK and supplied allocator transport. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean` | Initial genuine fixed-uint-child reference-parent observer with derived selected values and actual nested Source reads/bounds. |
+| `Solidity/Backend/MemoryOps/SourceUintFixedRefsControls.lean` | Inhabited repeated/distinct fixed children, complete Source objects/locals, both-pipeline reads and bounds/timeout/type/empty-parent controls. |
