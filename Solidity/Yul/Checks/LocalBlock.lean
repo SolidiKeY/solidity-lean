@@ -1,3 +1,4 @@
+import Solidity.Yul.RawCoherent
 import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawBoundary
 import Solidity.Yul.LocalBlock
@@ -267,5 +268,27 @@ local instance (pipeline : RawFrame.Pipeline) (state : RawFrame.State ctx)
 /-- info: 'Solidity.Yul.RawFrame.returnU8_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.returnU8_complete
+
+
+/- Clean boundary identity is conditional; raw writes with a different value violate its premise. -/
+def dirtyFalse := RawFrame.write rawInitial flag (word 0)
+def dirtyTwo := RawFrame.write rawInitial small (word 258)
+#guard RawCoherent.coherent rawInitial
+#guard !RawCoherent.coherent dirtyFalse
+#guard !RawCoherent.coherent dirtyTwo
+#guard (RawFrame.returnBool (ctx := ctx) .legacy rawInitial (.here)).key = (locals.get (.here)).key
+#guard (RawFrame.returnU8 (ctx := ctx) .legacy rawInitial (.there (.there .here))).key = (locals.get (.there (.there .here))).key
+#guard (RawFrame.returnBool (ctx := ctx) .legacy dirtyFalse .here).key = some 0
+#guard (RawFrame.returnU8 (ctx := ctx) .legacy dirtyTwo (.there (.there .here))).key = some 2
+#guard (RawFrame.returnBool (ctx := ctx) .viaIR rawInitial (.here)).key = (locals.get (.here)).key
+#guard (RawFrame.returnU8 (ctx := ctx) .viaIR rawInitial (.there (.there .here))).key = (locals.get (.there (.there .here))).key
+#guard (RawFrame.returnBool (ctx := ctx) .viaIR dirtyFalse .here).key = some 0
+#guard (RawFrame.returnU8 (ctx := ctx) .viaIR dirtyTwo (.there (.there .here))).key = some 2
+/-- info: 'Solidity.Yul.RawFrame.returnBool_clean_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnBool_clean_view
+/-- info: 'Solidity.Yul.RawFrame.returnU8_clean_view' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.returnU8_clean_view
 
 end Solidity.Yul.Checks.LocalBlock

@@ -209,4 +209,71 @@ theorem returnU8_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity
     rw [same]
     exact returnU8_sound pipeline state index
 
+/-- Canonical readback preserves the intrinsic clean local under explicit authoritative-view agreement. -/
+theorem returnBool_clean_view : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view state =
+ Solidity.Yul.localWordCells ctx (Solidity.Yul.LocalValues.ofClean state.clean) →
+
+ ∀ (index : Solidity.Source.Idx ctx.tys .bool),
+ Solidity.Yul.RawFrame.returnBool pipeline state index = state.clean.get index := by
+  intro ctx pipeline state same index
+  let cell : SourceScalarCell ctx := ⟨⟨index⟩,.boolean,LocalOperations.boolShape ctx.env⟩
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  have words : cell.wordRead (materialize state).1 =
+      cell.wordRead (LocalValues.ofClean state.clean) := by
+    rw [← selected]
+    change localWordCells ctx (materialize state).1 (.scalar ref) =
+      localWordCells ctx (LocalValues.ofClean state.clean) (.scalar ref)
+    rw [materialize_view,same]
+  change LocalOperations.scalarWord ((materialize state).1.get index) (LocalOperations.boolShape ctx.env) =
+    LocalOperations.scalarWord ((LocalValues.ofClean state.clean).get index) (LocalOperations.boolShape ctx.env) at words
+  rw [LocalValues.get_ofClean] at words
+  cases pipeline <;>
+    change LocalOperations.boolInput ((materialize state).1.get index) = state.clean.get index
+  all_goals
+    unfold LocalOperations.boolInput
+    rw [words]
+    cases actual : state.clean.get index with
+    | bool b => cases b <;> rfl
+    | memRef h _ => cases h
+    | storRef h _ => cases h
+    | cdRef h _ _ => cases h
+
+/-- Canonical readback preserves the intrinsic clean local under explicit authoritative-view agreement. -/
+theorem returnU8_clean_view : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view state =
+ Solidity.Yul.localWordCells ctx (Solidity.Yul.LocalValues.ofClean state.clean) →
+
+ ∀ (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.returnU8 pipeline state index = state.clean.get index := by
+  intro ctx pipeline state same index
+  let cell : SourceScalarCell ctx := ⟨⟨index⟩,.unsigned 0,LocalOperations.u8Shape ctx.env⟩
+  obtain ⟨ref,selected⟩ := sourceScalarAt_surjective ctx cell
+  have words : cell.wordRead (materialize state).1 =
+      cell.wordRead (LocalValues.ofClean state.clean) := by
+    rw [← selected]
+    change localWordCells ctx (materialize state).1 (.scalar ref) =
+      localWordCells ctx (LocalValues.ofClean state.clean) (.scalar ref)
+    rw [materialize_view,same]
+  change LocalOperations.scalarWord ((materialize state).1.get index) (LocalOperations.u8Shape ctx.env) =
+    LocalOperations.scalarWord ((LocalValues.ofClean state.clean).get index) (LocalOperations.u8Shape ctx.env) at words
+  rw [LocalValues.get_ofClean] at words
+  cases pipeline <;>
+    change LocalOperations.u8Input ((materialize state).1.get index) = state.clean.get index
+  all_goals
+    have inputs : LocalOperations.u8Input ((materialize state).1.get index) =
+        LocalOperations.u8Input (.clean (state.clean.get index)) := by
+      unfold LocalOperations.u8Input
+      dsimp only
+      congr 1
+      exact congrArg (fun raw : Word => ((raw.val % 256 : Nat) : Int)) words
+    rw [inputs]
+    cases actual : state.clean.get index with
+    | int n range => exact LocalOperations.u8Input_clean n range
+    | memRef h _ => cases h
+    | storRef h _ => cases h
+    | cdRef h _ _ => cases h
+
 end Solidity.Yul.RawFrame
