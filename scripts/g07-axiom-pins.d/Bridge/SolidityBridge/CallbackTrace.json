@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/CallbackTrace.lean:Solidity.Bridge.Adversary.holdsC_iff_weakObservable_traces": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/CallbackTrace.lean:Solidity.Bridge.Adversary.weakBisim_callSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

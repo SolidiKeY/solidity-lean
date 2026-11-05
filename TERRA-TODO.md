@@ -1,3 +1,4 @@
+<!-- Generated from TERRA-TODO.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # V15 H14 routine proof packet — EnvironmentTasksV1
 
 Generated signatures: `Bridge/SolidityBridge/RoadmapV15/P10/EnvironmentTasksV1.lean`.

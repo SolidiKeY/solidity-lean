@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/Placement.lean:Solidity.Evm.External.Assembly.Image.decoded_destination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

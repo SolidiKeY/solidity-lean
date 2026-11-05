@@ -1,0 +1,22 @@
+{
+ "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.allocation_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.eval_new_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.local_new_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocation.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.newData_valid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

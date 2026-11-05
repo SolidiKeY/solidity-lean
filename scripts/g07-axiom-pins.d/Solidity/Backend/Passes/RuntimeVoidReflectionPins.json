@@ -1,0 +1,104 @@
+{
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.argument_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.argument_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.argument_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.bad_need": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.bad_nonallocating": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.bad_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.body_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.body_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.captured_window": [],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.loop_selector_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.original_arguments_succeed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.original_body_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.panic_selector_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.panic_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.skipped_capture_window_refused": [],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.success_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.Controls.success_reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.no_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.reflect_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.revert_iff_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RuntimeVoidReflectionPins.lean:Solidity.Backend.Passes.RuntimeVoidReflection.terminal_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

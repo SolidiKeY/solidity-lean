@@ -1,0 +1,129 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.actual_order_discriminates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_byte_steps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_discriminates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_images": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_physical_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.assignment_delete_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.complete_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.delete_assign_byte_steps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.delete_assign_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.delete_assign_images": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.disjoint_order_byte_steps": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.disjoint_order_images": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.disjoint_orders_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.initial_views": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.reached_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_byte_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_images": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.rejected_suffix_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.resolved_delete_physical_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalResolvedDeleteControls.lean:Solidity.Backend.MemoryOps.Physical.ResolvedDeleteControls.stale_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

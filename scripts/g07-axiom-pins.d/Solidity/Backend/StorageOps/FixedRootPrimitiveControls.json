@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.malformed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.read_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.retained_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.write_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedRootPrimitiveControls.lean:Solidity.Backend.StorageOps.FixedRootPrimitive.Controls.wrong_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/LoopFixpoint.lean:Solidity.TLoop.outcome_lfp_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/LoopFixpoint.lean:Solidity.TLoop.run_correct_of_wellFounded_on": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.parent_ne_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedMutation.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.write_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

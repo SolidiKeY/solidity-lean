@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/evm-compiler.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The EVM compiler
 
 `docs/compiler-verification.md` has the theorem, the fragment and what is out.

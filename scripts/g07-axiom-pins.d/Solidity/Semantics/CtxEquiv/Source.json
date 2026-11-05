@@ -1,0 +1,17 @@
+{
+ "Solidity/Semantics/CtxEquiv/Source.lean:Solidity.CtxEquiv.srcContract_completes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Source.lean:Solidity.CtxEquiv.srcContract_ctxEquiv_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/CtxEquiv/Source.lean:Solidity.CtxEquiv.srcContract_ctxEquiv_of_sessions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

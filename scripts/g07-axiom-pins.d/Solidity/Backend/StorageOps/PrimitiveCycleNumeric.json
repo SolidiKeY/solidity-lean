@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumeric.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.cycle": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumeric.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.pop_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumeric.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.pop_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PrimitiveCycleNumeric.lean:Solidity.Backend.StorageOps.PrimitiveCycleNumeric.selected_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

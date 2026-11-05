@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/P8/SourceProgramAcceptance.lean:Solidity.Lowering.P8.SourceProgramAcceptance.acceptance_projection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptance.lean:Solidity.Lowering.P8.SourceProgramAcceptance.elaborate_acceptance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceProgramAcceptance.lean:Solidity.Lowering.P8.SourceProgramAcceptance.units_acceptance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

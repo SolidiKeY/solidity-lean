@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/V08/UnsignedUpdateCallable.lean:Solidity.Lowering.V08.UnsignedUpdateCallable.argument_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/UnsignedUpdateCallable.lean:Solidity.Lowering.V08.UnsignedUpdateCallable.arguments": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/UnsignedUpdateCallable.lean:Solidity.Lowering.V08.UnsignedUpdateCallable.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/UnsignedUpdateCallable.lean:Solidity.Lowering.V08.UnsignedUpdateCallable.transport_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

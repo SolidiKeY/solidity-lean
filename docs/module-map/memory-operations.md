@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/memory-operations.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Memory operation proof components
 
 These modules retain explicit Source/heap/word representation premises. Their

@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/yul.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Inline assembly (Yul)
 | Modules | Purpose |
 |---|---|

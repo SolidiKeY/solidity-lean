@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/Scalar/Modular.lean:Solidity.Backend.Scalar.addmod_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Modular.lean:Solidity.Backend.Scalar.mulmod_correct": [
+  "Quot.sound",
+  "propext"
+ ]
+}

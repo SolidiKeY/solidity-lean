@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.emitted_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.public_selection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.selectable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/SignedSubtractionCapture.lean:Solidity.Backend.Passes.SignedSubtractionCapture.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

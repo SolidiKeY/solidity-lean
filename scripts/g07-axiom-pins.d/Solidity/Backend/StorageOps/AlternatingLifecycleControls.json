@@ -1,0 +1,67 @@
+{
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.capacity_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.empty_parity_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.failed_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.failure_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.multi_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.multi_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.represented_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.restart": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.restart_accesses": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.reverse_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.reverse_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AlternatingLifecycleControls.lean:Solidity.Backend.StorageOps.AlternatingLifecycleControls.wrong_restart_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
