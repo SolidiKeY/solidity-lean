@@ -1151,3 +1151,18 @@ axiom and KeySort gates, patch-tree verification and reviewed seal remain
 required before acceptance. Typed parent adoption, full outer-header compiler
 integration and all original Source/physical/producer obligations remain open;
 this is not whole G33/G35 completion.
+
+## Nested parent adoption
+
+`NestedStorageParentInterface` composes the existing parent-only guard,
+reservation prefix, actual child traversal and generic typed-parent adoption.
+The count operand is explicitly tied to the represented row count; the source
+child base and row representations remain inputs. The output is the actual
+nested `SVal.copyStToM`, with complete allocator, root at the old cursor, base
+extension, frame/old gaps, fresh identity, dynamic length and intrinsic snapshot
+contents. The total contract has no input capacity premise. Empty parents still
+require their header cell; later child refusal may follow reservation/writes.
+Independent design finder/skeptic reviews required correct physical-versus-
+intrinsic allocation order, header/pointer transport and cleanup of the source
+operand. Outer storage-header loading, Source/physical adequacy and the original
+producer obligations remain open. Interface precedes proofs and controls.
