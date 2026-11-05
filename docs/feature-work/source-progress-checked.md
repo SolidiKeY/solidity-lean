@@ -911,6 +911,11 @@ function-value reference-argument elaboration, compiler/EVM correspondence,
 physical adequacy or termination. Existing full-build and cache-delivery
 obligations remain separate from this bounded proof increment.
 
-The latest published contextual-equivalence increment adds 44 unrecorded axiom
-pins with zero axiom errors, identically on clean master. That inventory gate
-remains failed; these standard-only Source theorem reports do not pass it.
+The published follow-on inventory records the 44 contextual-equivalence pins.
+After adopting it, the axiom-pin gate reports zero errors and zero unrecorded
+changes; trust and the four bound-catalogue per-file checks also pass. The
+compatibility group took 52.376 seconds with 564,547,584 bytes peak aggregate
+RSS. The Source proofs are unchanged. Independent read-only finder and skeptic
+reviews found no integration defect. Earlier failed inventory logs remain
+historical evidence; neither this focused compatibility check nor publication
+establishes a VM full-build pass or outgoing cache delivery.
