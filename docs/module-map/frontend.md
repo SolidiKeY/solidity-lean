@@ -164,3 +164,4 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `SolcValidation/DataResolution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/SignatureMemberControls.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/QualifiedUnits/SignatureMembers.lean` | Bounded qualified-units checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/ExecutableAst/Shared/Compose.lean` | Bounded shared-translator checkpoint; typed scope and retained obligations are stated in the module. |
