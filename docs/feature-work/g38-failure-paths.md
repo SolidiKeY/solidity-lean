@@ -714,3 +714,47 @@ Both guarded modules pass, and an incorrect empty expected inventory is
 rejected. Short-circuit and poisoned-right observations, theorem statements
 and proof terms are unchanged. Read-only finder and skeptic reviews found no
 confirmed defect; the pin check reports zero errors and no unrecorded changes.
+
+## Local custom-error arguments under explicit producer contracts
+
+EncodedError derives a real singleton local argument evaluation and custom-error
+statement run from the existing Premises.EncodingAt equation. Argument type and
+implicit identity conversion remain intrinsic. Parameter count and return
+signature are retained, and selector bytes come from the actual Source global.
+No completed statement run or target run is assumed as the encoder premise.
+
+Emission derives actual checked byte execution, exact readback, saved-stack
+preservation, terminal suffix absorption and a disjoint numeric/byte WordFrame.
+That frame is not a whole Source/world representation. World unwind separately
+derives Source journal rollback and local checkpoint restoration from an
+explicit actual operation-list witness. It does not restore Source heap, logs,
+events or function locals implicitly.
+
+| Consumer | Explicit fact | Producer or discharge |
+|---|---|---|
+| source_run, emitted_frame, world_unwind | Existing Premises.EncodingAt for the actual value and reached state | G41 general encoder; Boolean controls discharge it |
+| source_incomplete | Existing Premises.IncompleteAt for the actual encoder | H16 failure-point producer; no general instance supplied |
+| arguments_incomplete | Existing Premises.IncompleteAt for the actual arguments and reached state | H16; actual zero-fuel local control supplies an instance |
+| world_unwind | reached.ex = caller.ex.run ops | Caller operation-list witness; dirty-journal control discharges it |
+| transient_transport | Existing Premises.TransientPayloadAt | P7 nonempty transport remains an explicit hypothesis |
+
+Boolean controls quantify over both pipelines, using populated Source state,
+a nonempty physical frame and saved stack. They derive nonempty custom failures
+from local values, distinguish bytes, reject a false encoder equation, preserve
+zero/one-horizon timeout and prove timeout is not revert. A dirty persistent
+and transient journal is actually unwound by the component checkpoint.
+The old literal selector still refuses this local argument, and the existing
+P7 nonempty-adapter counterexample remains.
+
+This is an encoder/emitter-boundary consumer, not new public compiler admission,
+frontend lowering, whole Source/physical/world adequacy or internal-call frame
+transport. The P7 theorem supplies no nonempty producer instance. The journal
+components do not establish Source/target dirty-prefix correspondence.
+All 21 theorem inventories are guarded against actual standard-only reports.
+Independent read-only finder and skeptic reviews found no confirmed defect.
+Registration and pin proposals are left for coordinator-owned shared files.
+
+The final guarded general module passed in 18.468 seconds and its control module
+in 2.854 seconds, with 1,220,100,096 bytes peak aggregate RSS. Neither owned
+module exceeded 60 seconds. The checks use one Lean thread and unchanged proof
+budgets; these focused results do not assert that the full lane gates pass.
