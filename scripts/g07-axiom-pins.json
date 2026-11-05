@@ -23731,6 +23731,21 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.Reentry.reachAny_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.validM_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/CallerModelValid.lean:Solidity.ValidM.weaken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/Correct.lean:Solidity.Spec.sat_iff_holds": [
   "Classical.choice",
   "Quot.sound",
@@ -24498,6 +24513,51 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.exit_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.exit_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_any": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_setX": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.lock_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.open_setX": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.open_staticOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.setX_guards": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/CallerModel.lean:Solidity.Examples.Tactics.CallerModel.setX_reachAny": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Examples/Tactics/CallSummary.lean:Solidity.Examples.Tactics.CallSummary.CheckedResult.signedTripling": [
   "Classical.choice",
   "Quot.sound",
@@ -24606,6 +24666,139 @@
   "propext"
  ],
  "Solidity/Examples/Tactics/MemoryReturns.lean:Solidity.Examples.Tactics.MemoryReturns.valueAlias_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.assignableCheck_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.committed_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.enter_nonpayable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.enter_static": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.deployT_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ExecP.committed_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.holds_modal_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.committed_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.committed_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.frames_of_storeAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.frames_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_halt_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_local_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.run_withOutside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Spec.box_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.System.run_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.transact_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.holds_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.holds_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.ordinary_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.pure_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.readOnly_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.run_withOutsideCells": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.static_preserves_all": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -30967,6 +31160,125 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.BlockEnv.difficulty_control": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.BlockEnv.field?_slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkControls.slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkControls.slotnum_withSlotnum_not": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkedSplit.holdsOn_of_forkBlind": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_d2_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_idealized_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_pin": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osakaWithSlotnum_has": [],
+ "Solidity/Semantics/Nondeterminism/Fork.lean:Solidity.Semantics.Nondeterminism.ForkSpec.prague_differs": [],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.blockField_difficulty": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.blockField_slotnum_osaka": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.ofViews_field": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.osaka_blobhash": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkAgreement.lean:Solidity.Semantics.Nondeterminism.osaka_blockhash": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.noStipend_rejects_empty": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_fits_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/ForkStipend.lean:Solidity.Semantics.Nondeterminism.ForkSpec.osaka_stipendRule": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_not_confined": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_refuted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circular_rescues": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.circularHonest_confined": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.confinedToy_refutes": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.confinedToy_wrong": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.envToy_no_choice": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.Controls.orderToy_not_both": [
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.Confined.nonVacuous": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.Confined.refutes": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_iff_pair": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_iff_settings": [
+  "Quot.sound"
+ ],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.NonVacuous.refutes": [],
+ "Solidity/Semantics/Nondeterminism/Pipelines.lean:Solidity.Semantics.Nondeterminism.SplitSpec.soundAtOracle_iff_fixed": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Source.lean:Solidity.Semantics.Nondeterminism.sourceForked_blind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Source.lean:Solidity.Semantics.Nondeterminism.sourceSplit_confined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.envA_allowed": [],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_not_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_viaIR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.sourceSplit_nonVacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.sourceSplit_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsBoth_of_pipelineBlind": [],
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsFor_artifact": [],
+ "Solidity/Semantics/Nondeterminism/Split.lean:Solidity.Semantics.Nondeterminism.SplitSpec.holdsFor_of_oracleBlind": [],
  "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.declared_failure": [
   "propext"
  ],

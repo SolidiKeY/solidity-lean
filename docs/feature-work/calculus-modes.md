@@ -19,7 +19,7 @@ Existing pieces: `TailMode`/`ValidTail` (`Calculus/TailMode.lean`), `ValidT`
 
 | Group | Deliverable | Depends on |
 |---|---|---|
-| O10 | **Assumption policy.** Each `verify` row records the modes it was proved under (callback reading, overflow default/checked/ignoringOverflow, TailMode, evaluation order, opaque hash, address 0 has no code). `--require`/`--deny` flags: a row that holds only under a refused mode is reported not-proved. Per-row JSON assumption report. Docs: cli.md, options.md. | — (mode record `Calculus/Assumptions.lean` owned here; O11–O13 add fields by request) |
+| O10 | **Assumption policy.** Each `verify` row records the modes it was proved under (callback reading, overflow default/checked/ignoringOverflow, TailMode, evaluation order, opaque hash, address 0 has no code). `--require`/`--deny` flags: a row that holds only under a refused mode is reported not-proved. Per-row JSON assumption report. Docs: cli.md, options.md. | — (mode record the planned VC1 assumption-policy module owned here; O11–O13 add fields by request) |
 | O11 | **Caller-model lattice** `none < staticOnly < nonReentrant < any`, generalizing noCallback/withCallback; `staticOnly` reuses `CallMode.static`/`Mode.readOnly`; `nonReentrant` allows callbacks only into functions outside the reentrancy lock. Weakening theorem (valid under a stronger attacker ⇒ valid under a weaker one) over `StateInv`; separating examples in the `Tactics/Callback.lean` style. | — |
 | O12 | **Reachable starting states.** A `reachable` mode: storage from deployment plus a finite sequence of public calls; a contract invariant proved once by induction over entry points (rollback on revert); `TailMode.clean` follows. Orthogonal to O11: callbacks inside the sequence follow the chosen caller model. | O11 interface (stub) |
 | O13 | **Target profile.** One named bundle of solc version, legacy/via-IR (selects O9 order) and EVM fork, carried in result rows. Built over VS4's compiler and fork parameters (S5.1/S6.1 in [semantics-extensions.md](semantics-extensions.md)); no second fork parameter. | O10, VS4 S5.1/S6.1 |
@@ -31,7 +31,7 @@ where needed, never an axiom), more overflow modes.
 
 | Lane | Checkpoints | Owned files |
 |---|---|---|
-| VC1 | inventory, O10, O13 | `Calculus/Assumptions.lean`, `scripts/solidity-lean*.mjs`, docs/cli.md |
+| VC1 | inventory, O10, O13 | the planned VC1 assumption-policy module, `scripts/solidity-lean*.mjs`, docs/cli.md |
 | VC2 | inventory, O11 | new `Calculus/CallerModel*.lean`, `Theory/CallerModel/**`; sole editor of `Semantics/Callback.lean` and `Calculus/CallbackHolds.lean` in this batch |
 | VC3 | inventory, O12 | new `Theory/Reachable/**`; sole editor of `Calculus/TailMode.lean`, `Calculus/CleanTailBoundary.lean` |
 
@@ -127,9 +127,9 @@ entry points (`Tokens` has none); the shared-namespace lemmas
 `check-solkey.sh` exits 1 with 57 annotation mismatches against the sibling
 `../solkey` checkout; the lane touches no `SortCheck/` file, so that drift
 is not this lane's. `check-doc-paths.sh` fails only on
-`Calculus/Assumptions.lean`, VC1's planned file, as on the base commit.
+the planned VC1 assumption-policy module, VC1's planned file, as on the base commit.
 
-**Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
+**Requests to other owners.** VC1 (the planned VC1 assumption-policy module): a start-mode
 field (`any` | `reachable`) in the mode record, `any` the default.
 ### VC2 — O11 caller-model lattice (2026-11-05)
 
