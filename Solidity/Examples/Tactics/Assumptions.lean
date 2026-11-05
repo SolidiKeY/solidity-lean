@@ -1,9 +1,9 @@
-import Solidity.Calculus.Assumptions
+import Solidity.Calculus.TargetProfile
 import Solidity.Examples.Tactics.TailMode
 import Solidity.Examples.Tactics.Callback
 
 /-!
-# Assumption records and policies (`docs/options.md`, O10, O13)
+# Assumption records, policies and profiles (`docs/options.md`, O10, O13)
 
 Witnesses and negative controls for `Calculus/Assumptions.lean`, over the
 option examples already proved: `pushRead` (O6,
@@ -89,15 +89,22 @@ order, whatever the formula. -/
 theorem not_validA_viaIR : ¬ ValidA (C := Vault) .top { order := .viaIR } withdrawUnsafe :=
   fun h => Bool.false_ne_true h.1
 
-/-- The pinned profile fits the runner's record, not a via-IR one. -/
+/-- The pinned profile (solc 0.8.34, legacy, VS4's Osaka) fits the
+runner's record, not a via-IR one; a via-IR profile fits the via-IR record. -/
 example : TargetProfile.pinned.fits {} = true := by decide
 example : TargetProfile.pinned.fits { order := .viaIR } = false := by decide
 example : ({ solc := ⟨0, 8, 38⟩, pipeline := .viaIR } : TargetProfile).fits { order := .viaIR } = true := by
   decide
+example : TargetProfile.pinned.fork.fork = .osaka := rfl
 
 /-- The pinned profile's pipeline is the vault's order. -/
-theorem withdrawUnsafe_pinned : Vault.evalOrder = TargetProfile.pinned.pipeline.order.toEvalOrder :=
+theorem withdrawUnsafe_pinned : Vault.evalOrder = TargetProfile.pinned.pipeline.order :=
   TargetProfile.evalOrder_of_fits (by decide) withdrawUnsafe_validA
+
+/-- Negative control: under the pinned profile, the via-IR record of the
+vault holds of no formula. -/
+theorem withdrawUnsafe_not_viaIR_pinned : ¬ ValidA .top { order := .viaIR } withdrawUnsafe :=
+  TargetProfile.not_validA_of_not_fits (p := .pinned) (by decide) rfl
 
 /-- A proved row as the report states it, under a policy denying via-IR. -/
 def withdrawUnsafe_row : ProvedRow .top { deny := [.order .viaIR] } withdrawUnsafe :=

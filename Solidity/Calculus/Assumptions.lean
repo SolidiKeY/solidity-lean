@@ -2,7 +2,7 @@ import Solidity.Calculus.TailMode
 import Solidity.Calculus.CallbackHolds
 
 /-!
-# The assumption record of a verdict (`docs/options.md`, O10, O13)
+# The assumption record of a verdict (`docs/options.md`, O10)
 
 A verdict is proved under readings O1–O9 fix: who may call back (O1, O7), how
 arithmetic out of range is read (O2, O5), whether the starting storage's
@@ -45,11 +45,8 @@ The fields:
 * `hash`, `zeroAddress`: the model's only readings; refusing one refuses
   every row (no certificate records that a proof does not depend on it).
 
-O13's `TargetProfile` bundles the compiler version, the pipeline (which
-selects the order) and the EVM fork.  The fork is a stub with Osaka its one
-instance (`EvmForkStub`) until VS4's fork parameter (S6.1,
-`docs/feature-work/semantics-extensions.md`) lands; it is not a second fork
-parameter, and adapting means replacing the stub by VS4's type.
+O13's target profile, which ties `order` to a compiler pipeline, is
+`Calculus/TargetProfile.lean`.
 -/
 
 namespace Solidity
@@ -304,58 +301,5 @@ structure ProvedRow (I : Invariant C) (P : Policy) (φ : Fml C []) where
 theorem ProvedRow.holds {I : Invariant C} {P : Policy} {φ : Fml C []} (r : ProvedRow I P φ) :
     ∃ b, P.allows b = true ∧ ValidA I b φ :=
   Policy.admits_sound r.admitted r.valid
-
-/-! ## The target profile (O13) -/
-
-/-- A solc version. -/
-structure SolcVersion where
-  major : Nat
-  minor : Nat
-  patch : Nat
-  deriving DecidableEq, Repr
-
-/-- solc's code generator: the legacy pipeline or via IR (`--via-ir`).  A
-stub of VS4's compiler parameter (S5.1); it selects the O9 order. -/
-inductive Pipeline where
-  | legacy
-  | viaIR
-  deriving DecidableEq, Repr, Inhabited
-
-/-- The order a pipeline evaluates expressions in. -/
-def Pipeline.order : Pipeline → OrderReading
-  | .legacy => .legacy
-  | .viaIR => .viaIR
-
-/-- The EVM fork: a stub of VS4's fork parameter (S6.1), Osaka its one
-instance, the pinned one.  Replaced by VS4's type, not kept beside it. -/
-inductive EvmForkStub where
-  | osaka
-  deriving DecidableEq, Repr, Inhabited
-
-/-- **A target profile**: compiler version, pipeline and fork, carried in
-each result row. -/
-structure TargetProfile where
-  solc : SolcVersion
-  pipeline : Pipeline := .legacy
-  fork : EvmForkStub := .osaka
-  deriving DecidableEq, Repr
-
-/-- The runner's profile: solkey's pinned compiler, legacy, Osaka. -/
-def TargetProfile.pinned : TargetProfile := { solc := ⟨0, 8, 34⟩ }
-
-/-- A record is read under a profile when its order is the pipeline's. -/
-def TargetProfile.fits (p : TargetProfile) (a : Assumptions) : Bool :=
-  a.order == p.pipeline.order
-
-/-- **A proof that fits the profile is about the profile's pipeline**: the
-contract elaborates with the pipeline's expression order.  Only the
-pipeline is tied to validity; the version and the fork are labels until
-VS4's parameters (S5.1, S6.1) read them. -/
-theorem TargetProfile.evalOrder_of_fits {p : TargetProfile} {I : Invariant C}
-    {a : Assumptions} {φ : Fml C []} (hp : p.fits a = true) (h : ValidA I a φ) :
-    C.evalOrder = p.pipeline.order.toEvalOrder := by
-  have ho : a.order = p.pipeline.order := of_decide_eq_true hp
-  rw [← ho]
-  exact (OrderReading.matches_iff _ _).1 h.1
 
 end Solidity

@@ -1291,6 +1291,7 @@ import Solidity.Calculus.SyntaxSize
 import Solidity.Calculus.Taclet
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.TailMode
+import Solidity.Calculus.TargetProfile
 import Solidity.Calculus.TermAgree
 import Solidity.Calculus.TermEq
 import Solidity.Calculus.TermEval

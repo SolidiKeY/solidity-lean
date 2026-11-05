@@ -27,7 +27,7 @@ can never be read as one under another.
 | O8 | a `try` whose receiver is the contract itself runs its callee; no code at address `0`; a value call to `this` runs `receive` | done |
 | O9 | configurable expression order: legacy and Solidity via IR | done |
 | O10 | assumption record of a verdict; `verify --require/--deny` (Lean-only; overflow, hash and address `0` labels) | done |
-| O13 | target profile (solc version, pipeline, EVM fork) in result rows (Lean-only; fork a stub until VS4's S6.1) | partial |
+| O13 | target profile (solc version, pipeline, EVM fork) in result rows (Lean-only) | done |
 
 ## O1. Who calls back (bug 5)
 
@@ -781,19 +781,29 @@ address `0`, so denying either refuses every row.
 
 ## O13. The target profile (Lean-only)
 
-`TargetProfile` (`Calculus/Assumptions.lean`) bundles the solc version, the
-pipeline (`Pipeline.legacy`/`viaIR`, which selects the O9 order:
-`Pipeline.order`, `TargetProfile.fits`, `evalOrder_of_fits`) and the EVM
-fork.  `TargetProfile.pinned` is solkey's compiler at its current pin
-(0.8.34), legacy, Osaka; it is a constant and does not follow a re-pin.
-The CLI writes `profile` on each source row: `solc` read at run time from
-the compiler file solkey's build pins (`ext.soljsonFile`, the one `scripts/solc-ast.mjs`
-loads; `null` without a checkout), `pipeline` `legacy` and `evmFork`
-`osaka` (the compiler's `evmVersion`).
+`TargetProfile` (`Calculus/TargetProfile.lean`) bundles the solc version,
+the pipeline and the EVM fork, and adds no parameter of its own: the
+pipeline is G01's `Roadmap.Pipeline`, whose expression order is
+`Pipeline.order` (`Roadmap/TypedRun.lean`), the compiler parameter of VS4's
+split (S5.1, `Semantics/Nondeterminism/Split.lean`); the fork is VS4's
+`ForkSpec` (S6.1, `Semantics/Nondeterminism/Fork.lean`).  A record fits a
+profile when its order is the pipeline's (`OrderReading.ofPipeline`,
+`TargetProfile.fits`); a proof that fits is about a contract in the
+pipeline's order (`evalOrder_of_fits`), and a record that does not fit is
+valid of nothing there (`not_validA_of_not_fits`).  `TargetProfile.pinned`
+is solkey's compiler at its current pin (0.8.34), legacy, `ForkSpec.osaka`
+(`pinned_pin`: the pinned EVM's); it is a constant and does not follow a
+re-pin.  Only the pipeline is tied to `ValidA`: the version and the fork are
+data no formula reads (the intrinsic run has no fork argument).
 
-**Partial.** `Pipeline` and `EvmForkStub` (Osaka only) stand in for VS4's
-compiler parameter (S5.1) and fork parameter (S6.1,
-`docs/feature-work/semantics-extensions.md`), which were not pushed when
-this landed.  Adapting replaces both by VS4's types; there is no second fork
-parameter.  The runner (`scripts/test-solidity.mjs`) neither passes
-`--via-ir` nor reports the fixture header's `solcVersion` per row.
+The CLI writes `profile` on each source row: `solc` read at run time from
+the compiler file solkey's build pins (`ext.soljsonFile`, the one
+`scripts/solc-ast.mjs` loads; `null` without a checkout), `pipeline`
+`legacy` and `evmFork` `osaka` (the compiler's `evmVersion`).
+
+**Not done.** The runner (`scripts/test-solidity.mjs`) neither passes
+`--via-ir` nor reports the fixture header's `solcVersion` per row, so the
+CLI's `solc` is the pin, not the compile's; `SolcVersion` is not the
+frontend's `Frontend.Source.Compiler` (which the core cannot import).
+This module was built over VS4's branch
+(`cloud/semantics-20261105/nondeterminism`), merged into this lane's.

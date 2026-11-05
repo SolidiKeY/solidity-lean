@@ -73,16 +73,36 @@ the runner's statements as cases (`validA_iff_validT`,
 (`scripts/solidity-lean-assumptions.mjs`, mirrored decision table in
 `scripts/solidity-lean.test.mjs`). Docs: options.md O10, cli.md, correctness.md.
 
-**O13, partial (stub).** `TargetProfile` over stubs `Pipeline` and
-`EvmForkStub` (Osaka); rows carry `profile`. Adaptation once VS4's S5.1/S6.1
-land: replace `Pipeline` by S5.1's compiler parameter and `EvmForkStub` by
-S6.1's fork type (keep `TargetProfile.fits`/`evalOrder_of_fits`), and read
-the fork from that parameter in the CLI.
+**O13, done.** `Solidity/Calculus/TargetProfile.lean`: `TargetProfile`
+over G01's `Roadmap.Pipeline`/`Pipeline.order` (on master; missed by the
+first inventory, which defined a duplicate `Pipeline`, now removed) and
+VS4's `ForkSpec` (S6.1), with `fits`, `evalOrder_of_fits`,
+`not_validA_of_not_fits`, `pinned_pin`. VS4's branch was merged into this
+lane to build on it; no second fork or pipeline type remains. Rows carry
+`profile`.
+
+**Reviews.** Finder and skeptic (read-only, no Lean server) on O10/O13.
+Fixed: the docs claimed every record field is read by `ValidA` (now
+`ValidA.labels` and the docs say overflow, hash and address `0` are labels);
+`verdict_refused`'s docstring overclaimed (reworded; the guarantee is
+`admits_sound`); the JS policy was checked on 13 cases only (now an
+exhaustive 3192-line table, `tests/cli/assumption-policies.txt`, checked
+against `Policy.verdict` when the examples build); `table_notProved` was
+definitional (removed; real controls `solc_record_not_allowed`,
+`clean_row_not_admitted_solc`); the callback control changed the invariant
+too (now `withdrawUnsafe_validA_inv`, same invariant); `list`/`inspect` and
+obligation-free rows carried records they were not stated under (now only
+`verify` rows that stated an obligation); `SOLKEY_ROOT=""`; the exit table
+and the CLI example. Documented, not fixed: the callee invariant and
+`--self-address` premise are not record fields; a mixed `EvalOrder` has no
+reading; the CLI's `solc` is the pin, not the compile's.
 
 **Requests to other owners.**
 - `Frontend/Testing.lean` / `scripts/test-solidity.mjs` owner: emit the row's
-  record from Lean (whether the obligation called back, its order), and the
-  fixture header's `solcVersion` per row; the CLI derives both today.
+  record from Lean (whether the obligation called back, its order, its
+  callee invariant), and the fixture header's `solcVersion` per row; the CLI
+  derives the first and reads the pin for the second today. A `--via-ir`
+  runner option would make `pipeline`/`order` vary.
 - VC2: replace `Assumptions.callback` by the caller model and add its
   weakening theorem as a case of `Assumptions.Entails` (and to
   `weakenings` in `scripts/solidity-lean-assumptions.mjs`).
