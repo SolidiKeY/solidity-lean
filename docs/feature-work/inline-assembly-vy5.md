@@ -3219,3 +3219,8 @@ modules:
 
 No statement or pinned value changed. `check-axiom-pins --write` recorded the
 new pins from the merged modules, and it reported no errors.
+
+`gate.sh checkpoint` at d83228da passed: build-touched, library, trust,
+orphans, layers, roots, doc-paths and axiom-pins all PASS. The full gate
+(`run-lean.sh`, testsuite, corpus, automatic) was not rerun after this merge.
+The last full-gate result is the one recorded in the move section above.
