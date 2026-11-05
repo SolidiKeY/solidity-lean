@@ -1,0 +1,14 @@
+import Solidity.Backend.PrimitivePackets.BitNot.Controls
+open Solidity.Backend.PrimitivePackets
+#check BitNot.masked_value
+#check BitNot.source_success
+#check BitNot.public_selection
+#check BitNot.narrow_code
+#check BitNot.full_code
+#check BitNot.target_success
+#check BitNot.success
+#check BitNot.Controls.Fixture.result
+#check BitNot.Controls.Fixture.joint8
+#check BitNot.Controls.Fixture.missing_mask_refused
+#check BitNot.Controls.Fixture.wrong_value_refused
+#check BitNot.Controls.Fixture.wrong_index_refused

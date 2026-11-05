@@ -1,0 +1,10 @@
+PASS lean:Solidity/KeySort.lean 4s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/keysort-f77/1.log
+⚠ [3/12] Replayed Solidity.AST
+warning: Solidity/AST.lean:355:4: unused variable `k`
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+Build completed successfully (12 jobs).
+solkeycheck: parsed 377 taclets, 131 read-bearing, table covers 131
+solkeycheck: OK — annotations match /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key
+{"childMaxRssKiB": 252428, "command": ["env", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/keysort-f77", "bash", "-c", "set -e; bash scripts/coord-tools/gate.sh per-file Solidity/KeySort.lean; rm -f .lake/build/bin/solkeycheck; lake build solkeycheck; .lake/build/bin/solkeycheck --key /workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"], "exit": 0, "scopeMemoryPeakBytes": "390639616", "wallSeconds": 6.633114904005197}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 6264778752, "outerWallSeconds": 49.21470496099937}

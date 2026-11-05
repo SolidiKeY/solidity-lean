@@ -24,7 +24,9 @@ assert git('branch','--show-current')=='codex/solidity-h28-sol-20261104/solkey-p
 subprocess.run(['git','merge-base','--is-ancestor',base,'HEAD'],cwd=root,check=True)
 # Adopt only the coordinator's explicitly published integration, preserving
 # the original frozen source provenance and the lane's exclusive delta.
-approved_publications=('9584f9e7df09f638d9e0cb8930501d1660aa4b2f',
+approved_publications=('70845978ab616a63b13d0dee8b31b28893ccf591',
+                       'e6849d3bdf516099d20c33d3581d523449764018',
+                       '9584f9e7df09f638d9e0cb8930501d1660aa4b2f',
                        'f77cf60d3cea8f7f1db8db29cc027532b0cd3fce',
                        '8495f1deb0a95dd6b9301822d8649ab76b217681')
 scope_base=next((published for published in approved_publications

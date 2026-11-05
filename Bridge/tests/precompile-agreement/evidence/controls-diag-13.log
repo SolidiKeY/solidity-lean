@@ -1,0 +1,1053 @@
+ERROR 188:13 `simp` made no progress
+ERROR 185:107 unsolved goals
+case right
+⊢ (if
+            (UInt256.ofNat 6000).toNat <
+              max 200
+                (((max
+                            (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                            (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) +
+                          7) /
+                        8) ^
+                      2 *
+                    max
+                      (if
+                          (decide
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                  32) &&
+                              fromBytesBigEndian
+                                    ((array oversized_modexp).readWithoutPadding
+                                          (96 +
+                                            fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                          (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                            (8 *
+                                              (32 -
+                                                ((array oversized_modexp).readWithoutPadding 32
+                                                    32).size)))).data.toList <<<
+                                  (8 *
+                                    (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                      ((array oversized_modexp).readWithoutPadding
+                                          (96 +
+                                            fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                          (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                            (8 *
+                                              (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)) ==
+                                0) =
+                            true then
+                        0
+                      else
+                        if
+                            fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                              32 then
+                          Nat.log 2
+                            (fromBytesBigEndian
+                                ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 32 32).size)))).data.toList <<<
+                              (8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                  ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)))
+                        else
+                          8 *
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                32) +
+                            if
+                                32 <
+                                    fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ∧
+                                  (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                32).size)) !=
+                                      0) =
+                                    true then
+                              Nat.log 2
+                                (fromBytesBigEndian
+                                    ((array oversized_modexp).readWithoutPadding
+                                          (96 +
+                                            fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                          32).data.toList <<<
+                                  (8 *
+                                    (32 -
+                                      ((array oversized_modexp).readWithoutPadding
+                                          (96 +
+                                            fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                          32).size)))
+                            else 0)
+                      1 /
+                  3) then
+          (false, ∅, { val := 0 }, default, ByteArray.empty)
+        else
+          (true, default,
+            UInt256.ofNat 6000 -
+              UInt256.ofNat
+                (max 200
+                  (((max
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) +
+                            7) /
+                          8) ^
+                        2 *
+                      max
+                        (if
+                            (decide
+                                  (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                    32) &&
+                                fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)) ==
+                                  0) =
+                              true then
+                          0
+                        else
+                          if
+                              fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                32 then
+                            Nat.log 2
+                              (fromBytesBigEndian
+                                  ((array oversized_modexp).readWithoutPadding
+                                        (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 *
+                                            (32 -
+                                              ((array oversized_modexp).readWithoutPadding 32 32).size)))).data.toList <<<
+                                (8 *
+                                  (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                    ((array oversized_modexp).readWithoutPadding
+                                        (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)))
+                          else
+                            8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                  32) +
+                              if
+                                  32 <
+                                      fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ∧
+                                    (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  32).data.toList <<<
+                                          (8 *
+                                            (32 -
+                                              ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  32).size)) !=
+                                        0) =
+                                      true then
+                                Nat.log 2
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            32).data.toList <<<
+                                    (8 *
+                                      (32 -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            32).size)))
+                              else 0)
+                        1 /
+                    3)),
+            default,
+            if
+                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) ==
+                      0 ||
+                    fromBytesBigEndian
+                          ((array oversized_modexp).readWithoutPadding
+                                (96 +
+                                    fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                  fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).data.toList <<<
+                        (8 *
+                          (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                            ((array oversized_modexp).readWithoutPadding
+                                (96 +
+                                    fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                  fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)) ==
+                      0) =
+                  true then
+              ffi.ByteArray.zeroes
+                {
+                  toBitVec :=
+                    ↑(fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) }
+            else
+              (if
+                    fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) ≥
+                      (BE
+                          (expMod
+                            (fromBytesBigEndian
+                                ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 64 32).size)))).data.toList <<<
+                              (8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                  ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)))
+                            (UInt256.ofNat
+                              (fromBytesBigEndian
+                                  ((array oversized_modexp).readWithoutPadding 96
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 *
+                                            (32 -
+                                              ((array oversized_modexp).readWithoutPadding 0 32).size)))).data.toList <<<
+                                (8 *
+                                  (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                                    ((array oversized_modexp).readWithoutPadding 96
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))).size))))
+                            (fromBytesBigEndian
+                                ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 32 32).size)))).data.toList <<<
+                              (8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                  ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 32
+                                                32).size)))).size))))).size then
+                  ffi.ByteArray.zeroes
+                    {
+                      toBitVec :=
+                        ↑(fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) -
+                          ↑(BE
+                                (expMod
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 64
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                              (8 *
+                                                (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)))
+                                  (UInt256.ofNat
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 96
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 0
+                                                        32).size)))).data.toList <<<
+                                      (8 *
+                                        (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                                          ((array oversized_modexp).readWithoutPadding 96
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).size)))).size))))
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).size))))).size }
+                else ByteArray.empty) ++
+                BE
+                  (expMod
+                    (fromBytesBigEndian
+                        ((array oversized_modexp).readWithoutPadding
+                              (96 +
+                                  fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).data.toList <<<
+                      (8 *
+                        (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                          ((array oversized_modexp).readWithoutPadding
+                              (96 +
+                                  fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)))
+                    (UInt256.ofNat
+                      (fromBytesBigEndian
+                          ((array oversized_modexp).readWithoutPadding 96
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))).data.toList <<<
+                        (8 *
+                          (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                            ((array oversized_modexp).readWithoutPadding 96
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))).size))))
+                    (fromBytesBigEndian
+                        ((array oversized_modexp).readWithoutPadding
+                              (96 +
+                                fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).data.toList <<<
+                      (8 *
+                        (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                          ((array oversized_modexp).readWithoutPadding
+                              (96 +
+                                fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)))))).1 =
+      true ∧
+    (if
+                  (UInt256.ofNat 6000).toNat <
+                    max 200
+                      (((max
+                                  (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                  (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) +
+                                7) /
+                              8) ^
+                            2 *
+                          max
+                            (if
+                                (decide
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                        32) &&
+                                    fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                (fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                  (8 *
+                                                    (32 -
+                                                      ((array oversized_modexp).readWithoutPadding 32
+                                                          32).size)))).data.toList <<<
+                                        (8 *
+                                          (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                            ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                (fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                  (8 *
+                                                    (32 -
+                                                      ((array oversized_modexp).readWithoutPadding 32
+                                                          32).size)))).size)) ==
+                                      0) =
+                                  true then
+                              0
+                            else
+                              if
+                                  fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                    32 then
+                                Nat.log 2
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)))
+                              else
+                                8 *
+                                    (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                      32) +
+                                  if
+                                      32 <
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ∧
+                                        (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding
+                                                      (96 +
+                                                        fromBytesBigEndian
+                                                            ((array oversized_modexp).readWithoutPadding 0
+                                                                  32).data.toList <<<
+                                                          (8 *
+                                                            (32 -
+                                                              ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                      32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding
+                                                      (96 +
+                                                        fromBytesBigEndian
+                                                            ((array oversized_modexp).readWithoutPadding 0
+                                                                  32).data.toList <<<
+                                                          (8 *
+                                                            (32 -
+                                                              ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                      32).size)) !=
+                                            0) =
+                                          true then
+                                    Nat.log 2
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding
+                                                (96 +
+                                                  fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                32).size)))
+                                  else 0)
+                            1 /
+                        3) then
+                (false, ∅, { val := 0 }, default, ByteArray.empty)
+              else
+                (true, default,
+                  UInt256.ofNat 6000 -
+                    UInt256.ofNat
+                      (max 200
+                        (((max
+                                    (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) +
+                                  7) /
+                                8) ^
+                              2 *
+                            max
+                              (if
+                                  (decide
+                                        (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                          32) &&
+                                      fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                            32).size)))).data.toList <<<
+                                          (8 *
+                                            (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                              ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                            32).size)))).size)) ==
+                                        0) =
+                                    true then
+                                0
+                              else
+                                if
+                                    fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ≤
+                                      32 then
+                                  Nat.log 2
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding
+                                              (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 32
+                                                        32).size)))).data.toList <<<
+                                      (8 *
+                                        (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                          ((array oversized_modexp).readWithoutPadding
+                                              (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 32 32).size)))).size)))
+                                else
+                                  8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                        32) +
+                                    if
+                                        32 <
+                                            fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) ∧
+                                          (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding
+                                                        (96 +
+                                                          fromBytesBigEndian
+                                                              ((array oversized_modexp).readWithoutPadding 0
+                                                                    32).data.toList <<<
+                                                            (8 *
+                                                              (32 -
+                                                                ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                        32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding
+                                                        (96 +
+                                                          fromBytesBigEndian
+                                                              ((array oversized_modexp).readWithoutPadding 0
+                                                                    32).data.toList <<<
+                                                            (8 *
+                                                              (32 -
+                                                                ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                        32).size)) !=
+                                              0) =
+                                            true then
+                                      Nat.log 2
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  32).data.toList <<<
+                                          (8 *
+                                            (32 -
+                                              ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  32).size)))
+                                    else 0)
+                              1 /
+                          3)),
+                  default,
+                  if
+                      (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) ==
+                            0 ||
+                          fromBytesBigEndian
+                                ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 64 32).size)))).data.toList <<<
+                              (8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                  ((array oversized_modexp).readWithoutPadding
+                                      (96 +
+                                          fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)) ==
+                            0) =
+                        true then
+                    ffi.ByteArray.zeroes
+                      {
+                        toBitVec :=
+                          ↑(fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) }
+                  else
+                    (if
+                          fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                              (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) ≥
+                            (BE
+                                (expMod
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 64
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                                fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                              (8 *
+                                                (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)))
+                                  (UInt256.ofNat
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 96
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 0
+                                                        32).size)))).data.toList <<<
+                                      (8 *
+                                        (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                            (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                                          ((array oversized_modexp).readWithoutPadding 96
+                                              (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 *
+                                                  (32 -
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).size)))).size))))
+                                  (fromBytesBigEndian
+                                      ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).data.toList <<<
+                                    (8 *
+                                      (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                        ((array oversized_modexp).readWithoutPadding
+                                            (96 +
+                                              fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                            (fromBytesBigEndian
+                                                ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                              (8 *
+                                                (32 -
+                                                  ((array oversized_modexp).readWithoutPadding 32
+                                                      32).size)))).size))))).size then
+                        ffi.ByteArray.zeroes
+                          {
+                            toBitVec :=
+                              ↑(fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size))) -
+                                ↑(BE
+                                      (expMod
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                      fromBytesBigEndian
+                                                          ((array oversized_modexp).readWithoutPadding 0
+                                                                32).data.toList <<<
+                                                        (8 *
+                                                          (32 -
+                                                            ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                              32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 64
+                                                            32).size)))).data.toList <<<
+                                          (8 *
+                                            (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                              ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                      fromBytesBigEndian
+                                                          ((array oversized_modexp).readWithoutPadding 0
+                                                                32).data.toList <<<
+                                                        (8 *
+                                                          (32 -
+                                                            ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                              32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 64
+                                                            32).size)))).size)))
+                                        (UInt256.ofNat
+                                          (fromBytesBigEndian
+                                              ((array oversized_modexp).readWithoutPadding 96
+                                                    (fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 -
+                                                          ((array oversized_modexp).readWithoutPadding 0
+                                                              32).size)))).data.toList <<<
+                                            (8 *
+                                              (fromBytesBigEndian
+                                                    ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                                                ((array oversized_modexp).readWithoutPadding 96
+                                                    (fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 -
+                                                          ((array oversized_modexp).readWithoutPadding 0
+                                                              32).size)))).size))))
+                                        (fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                            32).size)))).data.toList <<<
+                                          (8 *
+                                            (fromBytesBigEndian
+                                                  ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                              ((array oversized_modexp).readWithoutPadding
+                                                  (96 +
+                                                    fromBytesBigEndian
+                                                        ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                                      (8 *
+                                                        (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                                  (fromBytesBigEndian
+                                                      ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                                    (8 *
+                                                      (32 -
+                                                        ((array oversized_modexp).readWithoutPadding 32
+                                                            32).size)))).size))))).size }
+                      else ByteArray.empty) ++
+                      BE
+                        (expMod
+                          (fromBytesBigEndian
+                              ((array oversized_modexp).readWithoutPadding
+                                    (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                      fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                      (8 *
+                                        (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).data.toList <<<
+                            (8 *
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)) -
+                                ((array oversized_modexp).readWithoutPadding
+                                    (96 +
+                                        fromBytesBigEndian
+                                            ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                          (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) +
+                                      fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 64 32).data.toList <<<
+                                      (8 * (32 - ((array oversized_modexp).readWithoutPadding 64 32).size)))).size)))
+                          (UInt256.ofNat
+                            (fromBytesBigEndian
+                                ((array oversized_modexp).readWithoutPadding 96
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                        (8 *
+                                          (32 -
+                                            ((array oversized_modexp).readWithoutPadding 0 32).size)))).data.toList <<<
+                              (8 *
+                                (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                    (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)) -
+                                  ((array oversized_modexp).readWithoutPadding 96
+                                      (fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))).size))))
+                          (fromBytesBigEndian
+                              ((array oversized_modexp).readWithoutPadding
+                                    (96 +
+                                      fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 *
+                                        (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)))).data.toList <<<
+                            (8 *
+                              (fromBytesBigEndian ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                  (8 * (32 - ((array oversized_modexp).readWithoutPadding 32 32).size)) -
+                                ((array oversized_modexp).readWithoutPadding
+                                    (96 +
+                                      fromBytesBigEndian
+                                          ((array oversized_modexp).readWithoutPadding 0 32).data.toList <<<
+                                        (8 * (32 - ((array oversized_modexp).readWithoutPadding 0 32).size)))
+                                    (fromBytesBigEndian
+                                        ((array oversized_modexp).readWithoutPadding 32 32).data.toList <<<
+                                      (8 *
+                                        (32 -
+                                          ((array oversized_modexp).readWithoutPadding 32
+                                              32).size)))).size)))))).2.2.1.toNat =
+      453
+diag: 2 errors

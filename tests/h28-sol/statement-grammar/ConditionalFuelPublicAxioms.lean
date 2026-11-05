@@ -1,0 +1,26 @@
+import Solidity.Frontend.StatementGrammarH28.ConditionalFuel
+
+namespace Solidity.Frontend.StatementGrammarH28
+#check boolean_statement_item_step
+#print axioms boolean_statement_item_step
+#check boolean_list_bound_items
+#print axioms boolean_list_bound_items
+#check boolean_item_list_has_bound
+#print axioms boolean_item_list_has_bound
+#check boolean_item_list_count_le
+#print axioms boolean_item_list_count_le
+#check boolean_list_items_at
+#print axioms boolean_list_items_at
+#check boolean_list_block_coverage
+#print axioms boolean_list_block_coverage
+#check boolean_list_block_stmt_coverage
+#print axioms boolean_list_block_stmt_coverage
+#check boolean_list_unchecked_coverage
+#print axioms boolean_list_unchecked_coverage
+#check boolean_item_list_block_complete
+#print axioms boolean_item_list_block_complete
+#check BooleanListBound.nil
+#print axioms BooleanListBound.nil
+#check BooleanListBound.cons
+#print axioms BooleanListBound.cons
+end Solidity.Frontend.StatementGrammarH28

@@ -653,6 +653,40 @@ set_option pp.universes true
 #print axioms Solidity.Assurance.NonVacuityH28.scalar_scope_demand
 #check @Solidity.Assurance.NonVacuityH28.scalar_scope_cost
 #print axioms Solidity.Assurance.NonVacuityH28.scalar_scope_cost
+#check @Solidity.Assurance.NonVacuityH28.false_loop_stmt_source
+#print axioms Solidity.Assurance.NonVacuityH28.false_loop_stmt_source
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_source
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_source
+#check @Solidity.Assurance.NonVacuityH28.skipped_body_reverts
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_body_reverts
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_input
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_input
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty
+#check @Solidity.Assurance.NonVacuityH28.zero_condition_target
+#print axioms Solidity.Assurance.NonVacuityH28.zero_condition_target
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_target
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_target
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_demand
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_demand
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_cost
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_cost
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_checked
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_checked
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_joint
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_joint
+#check @Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout
+#print axioms Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout
+#check @Solidity.Assurance.NonVacuityH28.entered_revert_source
+#print axioms Solidity.Assurance.NonVacuityH28.entered_revert_source
+#check @Solidity.Assurance.NonVacuityH28.entered_revert_target
+#print axioms Solidity.Assurance.NonVacuityH28.entered_revert_target
+#check @Solidity.Assurance.NonVacuityH28.entered_revert_input
+#print axioms Solidity.Assurance.NonVacuityH28.entered_revert_input
+#check @Solidity.Assurance.NonVacuityH28.entered_revert_demand
+#print axioms Solidity.Assurance.NonVacuityH28.entered_revert_demand
+#check @Solidity.Assurance.NonVacuityH28.entered_revert_joint
+#print axioms Solidity.Assurance.NonVacuityH28.entered_revert_joint
 #check @Solidity.Assurance.NonVacuityH28.near_end_state
 #print axioms Solidity.Assurance.NonVacuityH28.near_end_state
 #check @Solidity.Assurance.NonVacuityH28.near_end_allocator

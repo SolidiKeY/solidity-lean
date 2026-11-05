@@ -1,0 +1,16 @@
+{
+  "target": "e6849d3bdf516099d20c33d3581d523449764018",
+  "oldHead": "8de74453b38b2ae2a8c4421d6f269c9741527853",
+  "rebasedHeadBeforeCheckpoint": "d3a79031a17de96359f75617a77475b15c468d7d",
+  "productionSourceIdentical": true,
+  "desiredOwnedWorktreeAndDirtyPatchIdentical": true,
+  "allUntrackedPreserved": true,
+  "restoredHistoricalMergeEvidence": [
+    "tests/directruntime-20261104/shared-translator/evidence/adoption-8495/merge-resolution.json",
+    "tests/directruntime-20261104/shared-translator/evidence/adoption-b86/adoption.json",
+    "tests/directruntime-20261104/shared-translator/evidence/adoption-f77/merge-resolution.json"
+  ],
+  "resolution": "Compose retained exact reviewed source;17owned commits replayed;autostash restored WIP;3merge-only evidence files restored from exact old Git blobs.",
+  "preservation": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/rebase-e684/preservation.json",
+  "boundary": "Original history remains under owned recovery ref;no source work lost. Fresh gate bundle follows."
+}

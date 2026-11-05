@@ -1,0 +1,14 @@
+ERROR 114:9 unsolved goals
+case nil
+post : Bytes
+b : UInt8
+hb : isDigit b = false
+⊢ (if (UInt8.toNat 95 == 95) = true then
+      (Option.map isDigit (b :: post).head?).getD false &&
+        if (b.toNat == 95) = true then (Option.map isDigit (List.head? post)).getD false && underscoreOk post
+        else underscoreOk post
+    else
+      if (b.toNat == 95) = true then (Option.map isDigit (List.head? post)).getD false && underscoreOk post
+      else underscoreOk post) =
+    false
+diag: 1 errors

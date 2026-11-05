@@ -1,0 +1,55 @@
+{
+  "compiler": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "file": "soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "sourceSha256": "01b33b88730ee2cc0b67464475133e1f02ed35f1051420dbc6838c75d6fc8802",
+  "files": [
+    {
+      "name": "input.json",
+      "sha256": "5ffc7eb56b8acc2891f095c1cd3b0a76bd137ae960ccca14c06daea508456951",
+      "bytes": 1484
+    },
+    {
+      "name": "output.json",
+      "sha256": "e089facb0ac632a5accb59592d430d8844607d9c392af59614f7310089008e5f",
+      "bytes": 180438
+    },
+    {
+      "name": "Census.unoptimized.yul",
+      "sha256": "54717e7d61cee95bfae5d2524d935bff43bc43988195a154940909084c16cf26",
+      "bytes": 45105
+    },
+    {
+      "name": "Census.optimized.yul",
+      "sha256": "e3fd7d802f0ef43c3caaa553684ee908bee8873773bd428febae68efc7cf70cd",
+      "bytes": 39296
+    },
+    {
+      "name": "LinkedMath.unoptimized.yul",
+      "sha256": "d637d269c301f49b4d95b57257249868974a0bbabee43a07e7a283e3a8d18d8f",
+      "bytes": 6314
+    },
+    {
+      "name": "LinkedMath.optimized.yul",
+      "sha256": "a19dad8923fd11adebb7d4777d15949b01ebabb08d466b0a4041a079edf8687b",
+      "bytes": 5287
+    },
+    {
+      "name": "census.json",
+      "sha256": "359140cad7108a33e9a300b229d523b405e0ca0e991d55b8c362ae86917cf0a9",
+      "bytes": 25543
+    },
+    {
+      "name": "source-id-crosswalk.json",
+      "sha256": "9a50f44e934e8fad2f09e66a3a77b033faf0a4b450af712bc581a8a16482d30c",
+      "bytes": 2949
+    },
+    {
+      "name": "controls.json",
+      "sha256": "e498af2fcb0285deb8798f43532dfd3229e7a15850903ad68012e3573cf8a3e4",
+      "bytes": 6435
+    }
+  ]
+}
