@@ -65,6 +65,64 @@ theorem ReferenceArrayAt.materialize_world_unwind {H : HTy} {R : RefTy} {hp : He
     · exact h.materialize_outside offset (b::bs) header pointers
     · exact words.materialize_outside offset (b::bs) numbers
 
+/-- Both byte prefixes really execute before live ABI failure emission. The
+second interval may overlap the represented parent: only the saved prefix
+requires frame separation. Restoration is the separate explicit local API. -/
+theorem ReferenceArrayAt.materialize_dirty_world_unwind {H : HTy} {R : RefTy} {hp : Heap H}
+    {root : HRef H (.array (.ref R))} {base : Nat → Fin Evm.W} {m : Evm.Machine} {bytes : Environment.Memory}
+    (h : ReferenceArrayAt hp root base m bytes) (numeric : Nat → Prop) (words : WordFrame m bytes numeric)
+    {D : Source.Layout} {L T : Roadmap.Address → Source.SPath → Source.STy}
+    (state : Source.ExecState D L T) (prefixOps dirtyOps : List (Source.Op D L T))
+    (this caller : Roadmap.Address) (value : Roadmap.Word) (input : Roadmap.Bytes) (static : Bool)
+    (b : UInt8) (bs : List UInt8) (offset : Nat)
+    (c : UInt8) (cs : List UInt8) (dirtyOffset : Nat) (tail : List Roadmap.Word)
+    (fits : offset+(b::bs).length≤2^256) (dirtyFits : dirtyOffset+(c::cs).length≤2^256)
+    (room : tail.length+2≤1024)
+    (header : offset+(b::bs).length≤32*(base root.id).val ∨ 32*(base root.id).val+32≤offset)
+    (pointers : ∀ cell,ReferenceSlots hp root base cell → offset+(b::bs).length≤32*cell ∨ 32*cell+32≤offset)
+    (numbers : ∀ cell,numeric cell → offset+(b::bs).length≤32*cell ∨ 32*cell+32≤offset)
+    (a : Nat) (reason : Roadmap.Bytes) (suffix : Backend.Program)
+    (reasonFits : Failure.Fits a (Semantics.encodeError reason)) :
+    let savedBytes := Environment.writeBytes bytes offset (b::bs)
+    let dirtyBytes := Environment.writeBytes savedBytes dirtyOffset (c::cs)
+    let saved : Failure.Slice.Machine := ⟨tail,savedBytes⟩
+    let dirtyMachine : Failure.Slice.Machine := ⟨tail,dirtyBytes⟩
+    let before := state.run prefixOps
+    let dirty := before.run dirtyOps
+    Failure.Slice.checkedRun (Environment.materialize offset (b::bs)) ⟨tail,bytes⟩=some (saved,none) ∧
+    Failure.Slice.checkedRun (Environment.materialize dirtyOffset (c::cs)) saved=some (dirtyMachine,none) ∧
+    Failure.Slice.checkedRun (Environment.materialize offset (b::bs)++
+      (Environment.materialize dirtyOffset (c::cs)++(Failure.emit a (.reason reason)++suffix))) ⟨tail,bytes⟩=
+      some ({dirtyMachine with memory := Failure.Slice.putBytes dirtyBytes a (Source.errorData reason)},
+        some (.revert (Source.errorData reason))) ∧
+    (before.enter this caller value input static).rollback dirty=before ∧
+    Failure.Local.execute (Failure.Local.save (worldJournal before saved)) a (.reason reason)
+      (worldJournal dirty dirtyMachine)=some (worldJournal before saved,.revert (Source.errorData reason)) ∧
+    ReferenceArrayAt hp root base m saved.memory ∧ WordFrame m saved.memory numeric := by
+  first
+  | solve | simp only [] | omega
+  | dsimp only
+    have firstRun := materialize_checked_complete b bs offset tail bytes fits room
+    have dirtyRun := materialize_checked_complete c cs dirtyOffset tail
+      (Environment.writeBytes bytes offset (b::bs)) dirtyFits room
+    have linked := materialize_checked_suffix_exact b bs offset tail bytes
+      (Environment.materialize dirtyOffset (c::cs)++(Failure.emit a (.reason reason)++suffix)) fits
+    rw [if_pos room,materialize_checked_suffix_exact c cs dirtyOffset tail
+      (Environment.writeBytes bytes offset (b::bs)) (Failure.emit a (.reason reason)++suffix) dirtyFits,
+      if_pos room] at linked
+    have emitted := reason_live_bytes a reason
+      ⟨tail,Environment.writeBytes (Environment.writeBytes bytes offset (b::bs)) dirtyOffset (c::cs)⟩ suffix reasonFits room
+    rw [emitted] at linked
+    have world := world_reason_unwind (state.run prefixOps) dirtyOps this caller value input static
+      ⟨tail,Environment.writeBytes bytes offset (b::bs)⟩
+      ⟨tail,Environment.writeBytes (Environment.writeBytes bytes offset (b::bs)) dirtyOffset (c::cs)⟩ a reason reasonFits room
+    exact ⟨firstRun,dirtyRun,linked,world.1,world.2,
+      h.materialize_outside offset (b::bs) header pointers,
+      words.materialize_outside offset (b::bs) numbers⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_dirty_world_unwind' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ReferenceArrayAt.materialize_dirty_world_unwind
+
 /-- info: 'Solidity.Backend.MemoryOps.Physical.materialize_checked_complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms materialize_checked_complete
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_world_unwind' depends on axioms: [propext, Classical.choice, Quot.sound] -/

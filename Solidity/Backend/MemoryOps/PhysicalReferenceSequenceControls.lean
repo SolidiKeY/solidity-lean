@@ -639,4 +639,67 @@ theorem wrong_initial_checkpoint :
 #guard_msgs (whitespace := lax) in #print axioms materialize_world_checkpoint
 /-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.wrong_initial_checkpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_initial_checkpoint
+private def dirtyPointerBytes := Environment.writeBytes byteAfter 575 [7]
+private def dirtyPointerMachine : Failure.Slice.Machine := ⟨savedBytePrefix.stack,dirtyPointerBytes⟩
+
+/-- The actual second materializer corrupts a typed pointer after saving the
+reached prefix. The whole append emits from dirty memory; explicit restore
+recovers the saved mixed frame. Source failure independently retains dirty state. -/
+theorem dirty_pointer_checkpoint (pipeline : Roadmap.Pipeline) (horizon : Nat) (suffix : Backend.Program) :
+    (Source.evalE (Lowering.V08.SourceEnvironmentControls.global pipeline) Lowering.V08.SourceEnvironmentControls.frame (horizon+5)
+      (Lowering.V08.SourceFailures.reason WorldControls.reason)).run (Lowering.V08.SourceEnvironmentControls.locals,dirtyWorld)=
+        (.error (.revert (Source.errorData WorldControls.reason)),(Lowering.V08.SourceEnvironmentControls.locals,dirtyWorld)) ∧
+    Failure.Slice.checkedRun (Environment.materialize 384 payloadBytes++
+      (Environment.materialize 575 [7]++(Failure.emit 544 (.reason WorldControls.reason)++suffix))) ⟨savedBytePrefix.stack,bytes⟩=
+      some ({dirtyPointerMachine with memory := Failure.Slice.putBytes dirtyPointerBytes 544 (Source.errorData WorldControls.reason)},
+        some (.revert (Source.errorData WorldControls.reason))) ∧
+    Failure.Local.execute (Failure.Local.save (worldJournal beforeWorld.ex savedBytePrefix)) 544 (.reason WorldControls.reason)
+      (worldJournal dirtyWorld.ex dirtyPointerMachine)=some (worldJournal beforeWorld.ex savedBytePrefix,.revert (Source.errorData WorldControls.reason)) ∧
+    ReferenceArrayAt hp root base machine savedBytePrefix.memory ∧
+    WordFrame machine savedBytePrefix.memory (fun c => (base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn) ∧
+    byteVector savedBytePrefix.memory=[1024,2,1,0,1,0,2,32,32,2,8,9].map Semantics.wordBytes ∧
+    ¬ReferenceArrayAt hp root base machine dirtyPointerBytes := by
+  first
+  | solve | simp only [] | omega
+  | have header : 384+payloadBytes.length≤32*(base root.id).val ∨ 32*(base root.id).val+32≤384 := by decide
+    have ptrs : ∀ c,ReferenceSlots hp root base c → 384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      obtain ⟨i,hi,eq⟩ := hc
+      rw [parentLength] at hi
+      change c=16+1+i at eq
+      subst c
+      change 387≤32*(16+1+i) ∨ 32*(16+1+i)+32≤384
+      omega
+    have nums : ∀ c,(base right.id).val≤c ∧ c<(base right.id).val+1+hp.len right .dyn →
+        384+payloadBytes.length≤32*c ∨ 32*c+32≤384 := by
+      intro c hc
+      rw [rightLength] at hc
+      change 8≤c ∧ c<10 at hc
+      change 387≤32*c ∨ 32*c+32≤384
+      omega
+    obtain ⟨firstRun,dirtyRun,linked,rollback,execute,parent,numeric⟩ :=
+      parentAt.materialize_dirty_world_unwind _ rightBytes originalWorld.ex WorldControls.ops dirtyOps
+        Lowering.V08.SourceEnvironmentControls.frame.this Lowering.V08.SourceEnvironmentControls.frame.sender
+        Lowering.V08.SourceEnvironmentControls.frame.value Lowering.V08.SourceEnvironmentControls.frame.cd
+        Lowering.V08.SourceEnvironmentControls.frame.static 7 [0,255] 384 7 [] 575 savedBytePrefix.stack
+        (by decide) (by decide) (by decide) header ptrs nums 544 WorldControls.reason suffix (by unfold Failure.Fits;decide)
+    refine ⟨Lowering.V08.SourceFailures.eval_reason _ _ horizon WorldControls.reason _ _,linked,execute,parent,numeric,
+      byte_vectors_framed.trans initial_byte_vector,?_⟩
+    intro wrong
+    have selected : (MObj.elems .dyn (hp.get root))[0]?=some left := by rw [parentElements];rfl
+    have read := (wrong.child_bytes 0 left selected).2
+    change Environment.readMemory dirtyPointerBytes 544 32=Semantics.wordBytes 32 at read
+    have asBytes : Failure.Slice.getBytes dirtyPointerBytes 544 32=Semantics.wordBytes 32 :=
+      (readMemory_eq_getBytes _ 544 32).symm.trans read
+    have found : (Failure.Slice.getBytes dirtyPointerBytes 544 32)[31]?=some (7 : UInt8) := by
+      rw [List.getElem?_eq_getElem (by rw [getBytes_length];decide),getBytes_at dirtyPointerBytes 544 32 31 (by decide)]
+      rfl
+    have low := congrArg (fun xs : List UInt8 => xs[31]?) asBytes
+    change (Failure.Slice.getBytes dirtyPointerBytes 544 32)[31]?=(Semantics.wordBytes 32)[31]? at low
+    rw [found,show (Semantics.wordBytes 32)[31]?=some (32 : UInt8) by decide] at low
+    exact (by decide : (some (7 : UInt8))≠some 32) low
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls.dirty_pointer_checkpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms dirty_pointer_checkpoint
+
 end Solidity.Backend.MemoryOps.Physical.ReferenceSequenceControls
