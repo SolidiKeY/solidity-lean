@@ -193,3 +193,6 @@
 | `Backend/AbiEntry/UIntBindingBodyInterface.lean` | One-artifact uint validation, binding and core-admitted typed body contract. |
 | `Backend/AbiEntry/UIntBindingBody.lean` | Public whole/body selection and exact ordered raw uint entry/body execution. |
 | `Backend/AbiEntry/UIntBindingBodyControls.lean` | Checked allocating body, decoder/body failure distinction, short/fuel and saved-state controls. |
+| `Backend/AbiEntry/BoolBindingInterface.lean` | Actual compiler contract for validated typed Boolean parameter binding. |
+| `Backend/AbiEntry/BoolBinding.lean` | Typed Boolean declaration with exact execution, accepted-bit preservation and raw entry agreement. |
+| `Backend/AbiEntry/BoolBindingControls.lean` | True/false binding, dirty-value rejection and compiled typed Boolean branch controls. |

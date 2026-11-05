@@ -1035,3 +1035,30 @@ increment; prior checkpoint evidence is retained without relabeling failures.
 `BoolBindingInterface.lean` specifies validation before typed Boolean local
 binding, exact compiler execution and raw entry rejection. Native loading
 and general Source/body adequacy remain separate.
+
+`BoolBinding.lean` selects a typed program that validates a singleton Boolean
+entry and declares a `.bool` parameter through the existing compiler. The
+initializer compares the raw word to one only after the existing exact
+validator succeeds. `validated_word` derives zero-or-one from semantic
+validity and proves the emitted Boolean encoding preserves that accepted raw
+bit. Dirty values are rejected before conversion. Execution changes only the
+continuation and fresh Boolean local, retaining the input word and remaining
+machine state. Raw semantic decoding constructs the typed word from bytes and
+identifies it with the actual new local; rejection agreement retains explicit
+word/size representation and `fuel + 2`.
+
+Controls bind both false and true after arbitrary selectors with trailing
+bytes. Dirty raw two would convert to false in isolation but the actual
+validated program rejects it; short heads reject before malformed word access.
+A separately selected compiled typed branch reads the Boolean local and
+writes different results for true and false. Low semantic fuel and protected
+input/storage/balance/saved stack remain explicit. Per-file diagnostics and
+focused compilation pass, with individually scoped standard-only axiom guards.
+Independent read-only finder and skeptic reviews found no semantic issues.
+
+This closes intrinsic singleton Boolean binding only. Successful whole Boolean
+body composition, signed/aggregate binding, native byte loading/frame
+realization, general Source/profile/body association, full dispatch/entry
+composition and physical failure bytes remain open. G46.02, its physical writer
+counterexample, fixture replay and full assignment gates are unchanged. The
+existing shared metadata gate failures remain outside this lane.
