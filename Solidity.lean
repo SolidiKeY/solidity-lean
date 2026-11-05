@@ -2400,14 +2400,12 @@ import Solidity.Syntax.Scoped
 import Solidity.Syntax.Splice
 import Solidity.Theorems
 import Solidity.Theory.Bridge.Denote
+import Solidity.Theory.CallerModel.Static
 import Solidity.Theory.Mutability.Assignable
 import Solidity.Theory.Mutability.Closer
 import Solidity.Theory.Mutability.Payable
 import Solidity.Theory.Mutability.Pure
 import Solidity.Theory.Mutability.View
-import Solidity.Theory.Reachable.CallerModel
-import Solidity.Theory.Reachable.CleanTail
-import Solidity.Theory.Reachable.Mode
 import Solidity.Theory.Progress.Calls
 import Solidity.Theory.Progress.Controls
 import Solidity.Theory.Progress.Fragment
@@ -2415,7 +2413,9 @@ import Solidity.Theory.Progress.Leaves
 import Solidity.Theory.Progress.Outcome
 import Solidity.Theory.Progress.Program
 import Solidity.Theory.Progress.Tuple
-import Solidity.Theory.CallerModel.Static
+import Solidity.Theory.Reachable.CallerModel
+import Solidity.Theory.Reachable.CleanTail
+import Solidity.Theory.Reachable.Mode
 import Solidity.Theory.Segs
 import Solidity.Theory.Typed.Leaves
 import Solidity.Theory.Typed.Mem
