@@ -31,13 +31,13 @@ where needed, never an axiom), more overflow modes.
 
 | Lane | Checkpoints | Owned files |
 |---|---|---|
-| VC1 | inventory, O10, O13 | `Calculus/Assumptions.lean`, `scripts/solidity-lean*.mjs`, docs/cli.md |
+| VC1 | inventory, O10, O13 | `Calculus/Assumptions.lean`, `Calculus/TargetProfile.lean`, `scripts/solidity-lean*.mjs`, docs/cli.md |
 | VC2 | inventory, O11 | new `Calculus/CallerModel*.lean`, `Theory/CallerModel/**`; sole editor of `Semantics/Callback.lean` and `Calculus/CallbackHolds.lean` in this batch |
 | VC3 | inventory, O12 | new `Theory/Reachable/**`; sole editor of `Calculus/TailMode.lean`, `Calculus/CleanTailBoundary.lean` |
 
 All three run in parallel; each adds only its own section to options.md and
 correctness.md. VC3 states its O11 needs against a stub and adapts after VC2
-lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
+lands; VC1's O13 waited for VS4's S5.1/S6.1 (built over them once pushed).
 
 ## Handoffs
 
@@ -203,3 +203,81 @@ The separating examples live in `Examples/Tactics/CallerModel.lean`, not
 under `Theory/CallerModel/`: they use `dl!{ … }` and `sol_symex`, which
 the core library may not reach (`scripts/check-layers.mjs`); the file is
 new and no other lane's. Other lanes' needs: none.
+### VC1 (inventory, O10, O13) — 2026-11-05
+
+**Inventory (step 0).** Reused, not redefined: `TailMode`/`ValidTail`,
+`ValidTail.clean_of_solc` (`Calculus/TailMode.lean`); `ValidC`, `TransferSem`,
+`ValidT`, `validC_false_iff` (`Calculus/CallbackHolds.lean`); `OFMode`
+(`Syntax/Raw.lean`, the blocks' modes; the record's `OverflowReading` adds
+`default`, neither block); `EvalOrder`/`EvalOrder.viaIR`/`Contract.evalOrder`
+(`Syntax/Raw.lean`, O9); `keccakBytes` (`Semantics/Heap.lean`, irreducible,
+no collision resistance); O8's address-`0` reading (`TRun.tryCall`). Rows:
+`#solkey_test` (`Frontend/Testing.lean`) writes `reading` (the tail mode,
+`contractTailMode`) and states a calling-back obligation as
+`ValidT (.noCallback invariant[N])`, a plain one as `⊢ N.f.problem`
+(O7); `scripts/test-solidity.mjs` adds `source`, `contract`, `sourceHash`,
+`range`; `scripts/solidity-lean.mjs` wraps them in the schema-1 envelope
+(`docs/cli.md`). Compiler: `scripts/solc-ast.mjs` loads solkey's pinned
+`ext.soljsonFile` (0.8.34; 0.8.38 is also an audited pin), `viaIR: false`
+unless `--via-ir`, `evmVersion` default `osaka`; the fixture header records
+`solcVersion`, which rows do not carry. `Bridge/` and `Solidity/Tools/` hold
+no assumption or profile record; no fork type exists (Osaka appears only as
+pinned constants, `Stipend/Rule.lean` `osakaCold`, `Yul/*`). VS4's branch
+`cloud/semantics-20261105/nondeterminism` was not on origin.
+
+**O10, done.** `Solidity/Calculus/Assumptions.lean`: `Assumptions`,
+`ValidA`, `Entails`/`ValidA.weaken`, `Policy`/`verdict`
+(`verdict_proved_iff`, `verdict_refused`, `admits_sound`), `ProvedRow`;
+the runner's statements as cases (`validA_iff_validT`,
+`validA_of_validTail`). Witnesses and controls:
+`Examples/Tactics/Assumptions.lean`. CLI: `--require`/`--deny`,
+`assumptions`/`policy` per row, status `refused`
+(`scripts/solidity-lean-assumptions.mjs`, mirrored decision table in
+`scripts/solidity-lean.test.mjs`). Docs: options.md O10, cli.md, correctness.md.
+
+**O13, done.** `Solidity/Calculus/TargetProfile.lean`: `TargetProfile`
+over G01's `Roadmap.Pipeline`/`Pipeline.order` (on master; missed by the
+first inventory, which defined a duplicate `Pipeline`, now removed) and
+VS4's `ForkSpec` (S6.1), with `fits`, `evalOrder_of_fits`,
+`not_validA_of_not_fits`, `pinned_pin`. VS4's branch was merged into this
+lane to build on it; no second fork type, and the duplicate `Pipeline` is
+gone (`OrderReading`, the record's O9 reading, is bridged to `Pipeline` by
+`ofPipeline`; making `Assumptions.order` a `Pipeline` is a possible
+follow-up). Rows carry
+`profile`.
+
+**Reviews.** Finder and skeptic (read-only, no Lean server) on O10/O13.
+Fixed: the docs claimed every record field is read by `ValidA` (now
+`ValidA.labels` and the docs say overflow, hash and address `0` are labels);
+`verdict_refused`'s docstring overclaimed (reworded; the guarantee is
+`admits_sound`); the JS policy was checked on 13 cases only (now an
+exhaustive 3192-line table, `tests/cli/assumption-policies.txt`, checked
+against `Policy.verdict` when the examples build); `table_notProved` was
+definitional (removed; real controls `solc_record_not_allowed`,
+`clean_row_not_admitted_solc`); the callback control changed the invariant
+too (now `withdrawUnsafe_validA_inv`, same invariant); `list`/`inspect` and
+obligation-free rows carried records they were not stated under (now only
+`verify` rows that stated an obligation); `SOLKEY_ROOT=""`; the exit table
+and the CLI example. Documented, not fixed: the callee invariant and
+`--self-address` premise are not record fields; a mixed `EvalOrder` has no
+reading; the CLI's `solc` is the pin, not the compile's.
+
+**O13 review** (finder and skeptic in one read-only pass). Fixed: the
+"no second pipeline type" claim (reworded: `OrderReading` is bridged),
+cli.md attaching `profile`'s shape to `assumptions`, a redundant control
+(replaced by `viaIR_profile_not_fits`, `legacy_record_not_valid_viaIR`),
+stale lane lines, `pinned_pin`'s naming against `Evm.pinned`, and a CLI test
+that `profile.pipeline` is the record's order. Documented: the version and
+fork are data `fits` ignores; the CLI's `solc` string is the pin read at
+run time, Lean's `pinned` a constant; no lemma links a profile to S5.1's
+`CompilerChoice` beyond the shared `Pipeline`.
+
+**Requests to other owners.**
+- `Frontend/Testing.lean` / `scripts/test-solidity.mjs` owner: emit the row's
+  record from Lean (whether the obligation called back, its order, its
+  callee invariant), and the fixture header's `solcVersion` per row; the CLI
+  derives the first and reads the pin for the second today. A `--via-ir`
+  runner option would make `pipeline`/`order` vary.
+- VC2: replace `Assumptions.callback` by the caller model and add its
+  weakening theorem as a case of `Assumptions.Entails` (and to
+  `weakenings` in `scripts/solidity-lean-assumptions.mjs`).

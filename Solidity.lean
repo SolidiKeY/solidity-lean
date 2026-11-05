@@ -1008,6 +1008,7 @@ import Solidity.Calculus.ArrayCut
 import Solidity.Calculus.ArrayFold
 import Solidity.Calculus.ArrayProperty
 import Solidity.Calculus.ArrayReduction
+import Solidity.Calculus.Assumptions
 import Solidity.Calculus.AutoComplete
 import Solidity.Calculus.BitArith
 import Solidity.Calculus.Blocks
@@ -1293,6 +1294,7 @@ import Solidity.Calculus.SyntaxSize
 import Solidity.Calculus.Taclet
 import Solidity.Calculus.TacticSyntax
 import Solidity.Calculus.TailMode
+import Solidity.Calculus.TargetProfile
 import Solidity.Calculus.TermAgree
 import Solidity.Calculus.TermEq
 import Solidity.Calculus.TermEval
