@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawDeclarationFrame
 import Solidity.Yul.RawCheckedInitializedForPost
 import Solidity.Yul.RawCheckedForPost
 import Solidity.Yul.RawCheckedAdapterAbsent
@@ -86,3 +87,11 @@ Its concrete Source.execS forLoop law preserves checked/coherent premises,
 initializer control/error frames and actual post-iteration observations.
 Context-growing declarations and general assembly admission remain separate.
 Combination/refusal witnesses are in Solidity.Yul.Checks.RawCheckedInitializedForPost. -/
+
+/-! RawDeclarationFrame bridges existing typed declaration snapshots into the
+existing raw frame at the actual named Source context, with exact word view,
+clean-backup/world and conditional coherence laws. Its concrete Boolean literal
+runner grows ctx.push and retains the original frame on timeout. The Source law
+observes the explicit stored-clean projection; it does not imply dirty-read
+cleanup, lexical admission, or general context-growing loop composition.
+Dirty-word/growth/refusal controls are in Solidity.Yul.Checks.RawDeclarationFrame. -/
