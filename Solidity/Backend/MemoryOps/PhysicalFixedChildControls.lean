@@ -1,4 +1,5 @@
-import Solidity.Backend.MemoryOps.PhysicalFixedChildWrite
+import Solidity.Backend.MemoryOps.PhysicalFixedChildProgram
+import Solidity.Evm.Correct
 import Solidity.Source.SemanticsExamples
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 
@@ -227,5 +228,172 @@ theorem resolved_refusals (pipeline : Roadmap.Pipeline) (horizon : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms resolved_assignment
 /-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.resolved_refusals' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms resolved_refusals
+
+private def CArgs : Contract := {vars := []}
+private abbrev ΔArgs : Ctx := [.val .uint,.val .uint,.mem A]
+private def stateArgs : State CArgs ΔArgs := {storage := Storage.init CArgs,H := H,heap := hp,env := (u 1,u 42,some child,())}
+private def mArgs : Machine := {machine with mem := fun a =>
+  if a=1 then w[8] else if a=2 then w[42] else if a=3 then w[1] else machine.mem a}
+private theorem refs {Q : RefTy} (q : HRef H Q) :
+    (Q=P ∧ HEq q root) ∨ (Q=A ∧ HEq q child) ∨ (Q=N ∧ HEq q neighbor) := by
+  rcases q with ⟨i,hi⟩
+  cases i with
+  | zero => cases hi;exact .inl ⟨rfl,HEq.rfl⟩
+  | succ i => cases i with
+    | zero => cases hi;exact .inr (.inl ⟨rfl,HEq.rfl⟩)
+    | succ i => cases i with
+      | zero => cases hi;exact .inr (.inr ⟨rfl,HEq.rfl⟩)
+      | succ i => cases hi
+private theorem heapArgs : Objects.HeapRepr hp base 4 mArgs := by
+  refine ⟨⟨?_,?_,?_⟩,?_,?_,?_⟩
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq <;> decide
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+    all_goals simp only [Objects.cells,parentLength];decide
+  · intro Q V q r hn
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+      <;> rcases refs r with ⟨rfl,hr⟩ | ⟨rfl,hr⟩ | ⟨rfl,hr⟩ <;> cases hr
+      <;> first | exact (hn rfl).elim | (simp only [Objects.cells,parentLength];decide)
+  · intro Q V a r
+    rcases refs r with ⟨rfl,hr⟩ | ⟨rfl,hr⟩ | ⟨rfl,hr⟩ <;> cases hr <;> cases a
+    all_goals
+      refine ⟨?_,?_,?_⟩
+      · simp only [Objects.cells,parentLength];decide
+      · intro hh
+        first | cases (by simpa only [Objects.header] using hh : (0 : Nat)=1)
+              | (rw [parentLength];rfl)
+      · intro i v hit
+        first
+        | rw [parentElements] at hit
+          cases i with
+          | zero => cases hit;rfl
+          | succ i => cases i with
+            | zero => cases hit;rfl
+            | succ i => cases hit
+        | rw [MObj.elems_fixed] at hit
+          cases i with
+          | zero => cases hit;exact ReprV.uint_of rfl
+          | succ i => cases i with
+            | zero => cases hit;exact ReprV.uint_of rfl
+            | succ i => cases i with
+              | zero => first | (cases hit;exact ReprV.uint_of rfl) | cases hit
+              | succ i => cases hit
+  · intro s r
+    rcases refs r with ⟨eq,_⟩ | ⟨eq,_⟩ | ⟨eq,_⟩ <;> cases eq
+  · intro s f Q r hf
+    rcases refs r with ⟨eq,_⟩ | ⟨eq,_⟩ | ⟨eq,_⟩ <;> cases eq
+private theorem reprArgs : Objects.StateRepr 1 1 4 (Frag.init ΔArgs) stateArgs base mArgs := by
+  have hc := Sim.init CArgs 0 W_pos (fun _ => 0) ⟨0,W_pos⟩ rfl
+  refine ⟨?_,heapArgs,?_,by decide⟩
+  · refine ⟨hc.store,?_,?_,hc.net,hc.netSelf,hc.bound,?_,hc.env,hc.funds,hc.oracle⟩
+    · intro p i
+      cases i with
+      | here => exact ReprV.uint_of rfl
+      | there i => cases i with
+        | here => exact ReprV.uint_of rfl
+        | there i => cases i with | there i => nomatch i
+    · intro Q i hi
+      cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+    · intro Q i hi
+      cases i with | there i => cases i with | there i => cases i with | there i => nomatch i
+  · intro Q i
+    cases i with | there i => cases i with | there i => cases i with
+      | here => exact ⟨child,rfl,rfl⟩
+      | there i => nomatch i
+private theorem allocatorArgs : Objects.AllocatorRepr hp base 4 ⟨32,by decide⟩ mArgs := by
+  refine ⟨heapArgs,⟨by decide,by decide,rfl,?_⟩,?_⟩
+  · intro a ha
+    change 32≤a at ha
+    simp only [mArgs,machine,if_neg (show a≠0 by omega),if_neg (show a≠1 by omega),
+      if_neg (show a≠2 by omega),if_neg (show a≠3 by omega),if_neg (show a≠8 by omega),
+      if_neg (show a≠10 by omega),if_neg (show a≠16 by omega),if_neg (show ¬(a=17 ∨ a=18) by omega),
+      if_neg (show a≠24 by omega),if_neg (show a≠25 by omega)]
+  · intro Q q
+    rcases refs q with ⟨rfl,hq⟩ | ⟨rfl,hq⟩ | ⟨rfl,hq⟩ <;> cases hq
+    all_goals simp only [Objects.cells,parentLength];decide
+private theorem parentArgs : ReferenceArrayAt hp root base mArgs bytes := by
+  refine ⟨(heapArgs.arrays .dyn root).reference,parentAt.headerFits,?_,parentAt.pointers.fits,?_⟩
+  · exact ⟨wmod 2,rfl,image_read 16 2 (by decide)⟩
+  · intro c hc
+    obtain ⟨i,hi,eq⟩ := hc
+    change c=16+1+i at eq
+    have big : 17≤c := by omega
+    obtain ⟨v,stored,fit,read⟩ := parentAt.pointers.cells c ⟨i,hi,eq⟩
+    refine ⟨v,?_,fit,read⟩
+    simp only [mArgs,if_neg (show c≠1 by omega),if_neg (show c≠2 by omega),if_neg (show c≠3 by omega)]
+    exact stored
+
+/-- A nonempty, shared-child strong input, including the actual allocator. -/
+theorem strong_initial : Objects.StateRepr 1 1 4 (Frag.init ΔArgs) stateArgs base mArgs ∧
+    Objects.AllocatorRepr hp base 4 ⟨32,by decide⟩ mArgs ∧
+    ReferenceArrayAt hp root base mArgs bytes ∧ Source.MemOK E0 SH (yr 1) :=
+  ⟨reprArgs,allocatorArgs,parentArgs,memOKR 1⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.strong_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms strong_initial
+
+private def tri : Idx ΔArgs (.mem A) := .there (.there .here)
+private def tii : Idx ΔArgs (.val .uint) := .here
+private def tvi : Idx ΔArgs (.val .uint) := .there .here
+private def assignCode : List Evm.Instr := compileVal 1 (.simple (.local tvi) : Val CArgs ΔArgs .uint) ++
+  [.mload (cellOf 1 tri)] ++ compileVal 1 (.simple (.local tii) : Val CArgs ΔArgs .uint) ++
+  Objects.writeCode (.fixed : ArrTy A (.prim .uint))
+
+/-- Actual complete local-load/index/write word program, from inhabited strong
+inputs. The terminal byte store is joined to its reached word parent/value. -/
+theorem whole_word_write (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (out : Heap H) (z : Source.EMState E0 ΓR) (target : Machine) (offset : Fin W),
+      offset.val=288 ∧
+      (Source.evalE (Source.SemanticsExamples.G0 pipeline) F0 (horizon+3)
+        (sourceUintFixedIndexedAssign sr si sv)).run (yr 1)=(.ok (.val (sourceUint (u 42))),z) ∧
+      (Source.execS (Source.SemanticsExamples.G0 pipeline) F0 (horizon+4) nps none
+        (.expr (sourceUintFixedIndexedAssign sr si sv) : Source.RStmt E0 [] false .body ΓR ΓR) (yr 1).1).run (.nil,(yr 1).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Stmt.run stateArgs (.assignMem (.index .fixed (.var tri rfl) (.simple (.local tii))) (.val (.simple (.local tvi))))=
+        .ok ⟨stateArgs.withHeap out,List.prefix_refl _⟩ ∧
+      Evm.run assignCode mArgs=.ok target 0 ∧
+      Objects.StateRepr 1 1 4 (Frag.init ΔArgs) (stateArgs.withHeap out) base target ∧
+      Objects.AllocatorRepr out base 4 ⟨32,by decide⟩ target ∧
+      ReferenceArrayAt out root base target (Environment.writeBytes bytes 288 (Semantics.wordBytes 42)) ∧
+      CellAt target (Environment.writeBytes bytes 288 (Semantics.wordBytes 42)) 9 ∧
+      SourceUintFixedAt z 0 out child ∧ Source.MemOK E0 SH z ∧ z.1=(yr 1).1 ∧ target.stack=[w[77],w[88]] ∧
+      target.mem 0=w[32] ∧
+      (∀ tail : List Environment.Word,Environment.cryptoStep (.op .MSTORE)
+        ⟨lenU offset.val offset.isLt::lenU 42 (by decide)::tail,bytes⟩=
+          some ⟨tail,Environment.writeBytes bytes 288 (Semantics.wordBytes 42)⟩) ∧
+      out.get neighbor=hp.get neighbor ∧
+      z.2.heap.get 1=some ⟨.array .memory (.int .u256) (some 2),sourceUintFixedObject (hp.get neighbor)⟩ ∧
+      z.2.ex=(yr 1).2.ex ∧ z.2.events=(yr 1).2.events ∧ z.2.logs=(yr 1).2.logs ∧ z.2.fnLocals=(yr 1).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨out,z,target,offset,off,typed,expr,stmt,intrinsic,word,strong,allocator,parent,cell,source,memOK,locals,stack,byte,objects,addresses,world,events,logs,fnLocals⟩ :=
+      resolved_fixed_parent_word (Source.SemanticsExamples.G0 pipeline) F0 horizon nps stateArgs child root
+        (sourceR 1) sr si sv tri tii tvi (wmod 1) (wmod 42) rfl rfl rfl rfl rfl rfl (by decide)
+        reprArgs bytes parentArgs (by decide) SH (memOKR 1) ⟨32,by decide⟩ (by decide) allocatorArgs
+    exact ⟨out,z,target,offset,off,expr,stmt,intrinsic,word,strong,allocator,parent,cell,source,memOK,locals,stack,
+      allocator.free.cell,byte,objects neighbor (by decide),(addresses 1 (by decide)).trans sourceNeighbor,world,events,logs,fnLocals⟩
+
+private def badState := stateArgs.setLocal tii (u 3)
+private def badMachine := writeMachine mArgs (cellOf 1 tii) w[3]
+private theorem badRepr : Objects.StateRepr 1 1 4 (Frag.init ΔArgs) badState base badMachine :=
+  reprArgs.setVal tii (u 3) w[3] (ReprV.uint_of rfl)
+
+/-- Endpoint failure uses the real whole word guard, unlike terminal MSTORE.
+Source exposes index panic/state; Evm.Out.revert exposes no suffix machine. -/
+theorem whole_word_bounds (pipeline : Roadmap.Pipeline) (horizon : Nat) :
+    (Source.evalE (Source.SemanticsExamples.G0 pipeline) F0 (horizon+3)
+      (sourceUintFixedIndexedAssign sr si sv)).run (yr 3)=
+        (.error (.revert (Source.panicData .index)),yr 3) ∧
+    Evm.run assignCode badMachine=.revert := by
+  first
+  | solve | simp only [] | omega
+  | exact resolved_uint_fixed_assign_word_bounds (Source.SemanticsExamples.G0 pipeline) F0 horizon
+      badState child (sourceR 3) sr si sv tri tii tvi (u 3) (u 42) rfl rfl rfl rfl rfl rfl (by decide) badRepr
+
+/-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.whole_word_write' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms whole_word_write
+/-- info: 'Solidity.Backend.MemoryOps.Physical.FixedChildControls.whole_word_bounds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms whole_word_bounds
 
 end Solidity.Backend.MemoryOps.Physical.FixedChildControls

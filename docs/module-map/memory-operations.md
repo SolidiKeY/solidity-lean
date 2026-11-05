@@ -276,3 +276,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 
 | `Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean` | Resolved fixed Source assignment/statement and initial-MemOK transport paired with typed updates and terminal word/byte stores, deriving headerless parent/state frames. |
 | `Solidity/Backend/MemoryOps/PhysicalFixedChildControls.lean` | Inhabited shared fixed-child parent, nonempty protected neighbour, complete represented vectors, Source endpoint and wrong-header negatives. |
+
+| `Solidity/Backend/MemoryOps/PhysicalFixedChildProgram.lean` | Actual strong whole-word fixed assignment joined to initial physical parent/value bytes, with derived local separation, MemOK and supplied allocator transport. |
