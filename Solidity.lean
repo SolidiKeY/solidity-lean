@@ -16,6 +16,9 @@ import Solidity.Backend.AbiEntry.EnumEntry
 import Solidity.Backend.AbiEntry.HeadCheck
 import Solidity.Backend.AbiEntry.HeadCheckInterface
 import Solidity.Backend.AbiEntry.Interface
+import Solidity.Backend.AbiEntry.LengthCheck
+import Solidity.Backend.AbiEntry.LengthCheckControls
+import Solidity.Backend.AbiEntry.LengthCheckInterface
 import Solidity.Backend.AbiEntry.OffsetChecksInterface
 import Solidity.Backend.AbiEntry.Premises
 import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
@@ -71,10 +74,13 @@ import Solidity.Backend.Aggregates.G18StorageValues
 import Solidity.Backend.Assembler
 import Solidity.Backend.CalldataPackets.RawAddress.Controls
 import Solidity.Backend.CalldataPackets.RawAddress.Execution
+import Solidity.Backend.CalldataPackets.RawBool.Controls
+import Solidity.Backend.CalldataPackets.RawBool.Execution
 import Solidity.Backend.CalldataPackets.RawInt.Controls
 import Solidity.Backend.CalldataPackets.RawInt.Execution
 import Solidity.Backend.CalldataPackets.RawUint.Controls
 import Solidity.Backend.CalldataPackets.RawUint.Execution
+import Solidity.Backend.CalldataPackets.RawUintN.Controls
 import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
 import Solidity.Backend.Control
@@ -143,6 +149,8 @@ import Solidity.Backend.FailurePaths.FramedEmissionControls
 import Solidity.Backend.FailurePaths.Interface
 import Solidity.Backend.FailurePaths.LocalGuardSelection
 import Solidity.Backend.FailurePaths.LocalGuardSelectionControls
+import Solidity.Backend.FailurePaths.LogicalGuard
+import Solidity.Backend.FailurePaths.LogicalGuardControls
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
 import Solidity.Backend.FailurePaths.Premises
@@ -273,6 +281,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeLaws
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarParentRestore
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveCall
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveSource
@@ -280,6 +289,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveStep
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarRecursiveTurn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarSourceCheckLaws
+import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwind
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
@@ -301,6 +311,8 @@ import Solidity.Backend.MemoryCopies.CheckedDefault
 import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
 import Solidity.Backend.MemoryCopies.CheckedReferenceInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
+import Solidity.Backend.MemoryCopies.HeapContents
+import Solidity.Backend.MemoryCopies.HeapContentsInterface
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
@@ -312,6 +324,7 @@ import Solidity.Backend.MemoryCopies.PublishedStorage
 import Solidity.Backend.MemoryCopies.PublishedStorageInterface
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
+import Solidity.Backend.MemoryCopies.SingletonCopyInterface
 import Solidity.Backend.MemoryCopies.SourceInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFresh
@@ -564,6 +577,8 @@ import Solidity.Backend.Passes.MemoryCallReuseApplication
 import Solidity.Backend.Passes.MemoryCallReuseFailure
 import Solidity.Backend.Passes.MemoryCallReuseObservations
 import Solidity.Backend.Passes.MemoryCallReusePins
+import Solidity.Backend.Passes.MemoryCallScopeBoundary
+import Solidity.Backend.Passes.MemoryCallScopeControls
 import Solidity.Backend.Passes.MemoryCompilerSequence
 import Solidity.Backend.Passes.MemoryScopeAllocation
 import Solidity.Backend.Passes.MemoryScopeBoundary
@@ -708,8 +723,10 @@ import Solidity.Backend.PrimitivePackets.Comparisons.Agreement
 import Solidity.Backend.PrimitivePackets.Comparisons.Controls
 import Solidity.Backend.PrimitivePackets.Comparisons.LocalReads
 import Solidity.Backend.PrimitivePackets.Comparisons.Selected
+import Solidity.Backend.PrimitivePackets.Constants.Agreement
 import Solidity.Backend.PrimitivePackets.Constants.Selected
 import Solidity.Backend.PrimitivePackets.Constants.Source
+import Solidity.Backend.PrimitivePackets.Constants.Target
 import Solidity.Backend.PrimitivePackets.Shifts.Controls
 import Solidity.Backend.PrimitivePackets.Shifts.General
 import Solidity.Backend.PrimitivePackets.Shifts.Transport
@@ -782,6 +799,8 @@ import Solidity.Backend.Selection.BitwiseSelection
 import Solidity.Backend.Selection.FrameCapacityV2
 import Solidity.Backend.Selection.FramedLowering
 import Solidity.Backend.Selection.FramedLoweringInterface
+import Solidity.Backend.Selection.IRBranchPackets
+import Solidity.Backend.Selection.IRLoopPackets
 import Solidity.Backend.Selection.Interface
 import Solidity.Backend.Selection.InterfaceV2
 import Solidity.Backend.Selection.InterfaceV2Controls
@@ -1204,6 +1223,7 @@ import Solidity.Calculus.ExpandLaws
 import Solidity.Calculus.FilteredMembership
 import Solidity.Calculus.FiniteMembership
 import Solidity.Calculus.FirstOrder
+import Solidity.Calculus.FixedArrayFloor
 import Solidity.Calculus.FlattenReads
 import Solidity.Calculus.FlattenTotality
 import Solidity.Calculus.FloorRegion
@@ -1478,6 +1498,8 @@ import Solidity.Evm.MemoryLoopHorizonAllocControls
 import Solidity.Evm.MemoryLoopHorizonControls
 import Solidity.Evm.MemoryLoopHorizonCost
 import Solidity.Evm.MemoryLoopHorizonCostControls
+import Solidity.Evm.MemoryLoopHorizonCostGrowth
+import Solidity.Evm.MemoryLoopHorizonCostGrowthControls
 import Solidity.Evm.MemoryLoopHorizonRestriction
 import Solidity.Evm.MemoryLoopHorizonRestrictionControls
 import Solidity.Evm.MemoryLoopScope
@@ -1868,6 +1890,9 @@ import Solidity.Language.FixedPoint.Laws
 import Solidity.Language.FixedPoint.Literals
 import Solidity.Language.FixedPoint.Storage
 import Solidity.Lowering.G19.AssignmentReturnFlag
+import Solidity.Lowering.G19.AssignmentReturnFlagControls
+import Solidity.Lowering.G19.AssignmentWhileBreak
+import Solidity.Lowering.G19.AssignmentWhileBreakControls
 import Solidity.Lowering.G19.ConditionalSequence
 import Solidity.Lowering.G19.ConditionalSequenceControls
 import Solidity.Lowering.G19.ConditionalStatement
@@ -2042,8 +2067,11 @@ import Solidity.Lowering.StorageOps.SourceBoolFixedStorageCopyTargetControls
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopy
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTarget
 import Solidity.Lowering.StorageOps.SourceBoolStorageCopyTargetControls
+import Solidity.Lowering.StorageOps.SourceByteStorageClear
 import Solidity.Lowering.StorageOps.SourceByteStorageCopy
 import Solidity.Lowering.StorageOps.SourceByteStorageCopyControls
+import Solidity.Lowering.StorageOps.SourceByteStoragePrepared
+import Solidity.Lowering.StorageOps.SourceByteStoragePreparedControls
 import Solidity.Lowering.StorageOps.SourceCopyCommutation
 import Solidity.Lowering.StorageOps.SourceCopyCommutationControls
 import Solidity.Lowering.StorageOps.SourceCopyFrames
@@ -2141,6 +2169,8 @@ import Solidity.Lowering.V07.NodeRank
 import Solidity.Lowering.V07.Operands
 import Solidity.Lowering.V07.P12AssignedCondition
 import Solidity.Lowering.V07.P12AssignedConditionControls
+import Solidity.Lowering.V07.P12ContextExtension
+import Solidity.Lowering.V07.P12ContextExtensionControls
 import Solidity.Lowering.V07.P12Controls
 import Solidity.Lowering.V07.P12NextInterface
 import Solidity.Lowering.V07.P8Bindings
@@ -2252,6 +2282,8 @@ import Solidity.Lowering.V08.LiteralFailureReasonSequence
 import Solidity.Lowering.V08.LiteralFailureReasonSequenceControls
 import Solidity.Lowering.V08.LiteralFailureReturnSlots
 import Solidity.Lowering.V08.LiteralFailureReturnSlotsControls
+import Solidity.Lowering.V08.LiteralFailureScalarOverflow
+import Solidity.Lowering.V08.LiteralFailureScalarOverflowControls
 import Solidity.Lowering.V08.LiteralFailureSelectorBytes
 import Solidity.Lowering.V08.LiteralFailureSelectorBytesControls
 import Solidity.Lowering.V08.LiteralFailureSignatureBytes
@@ -2760,6 +2792,7 @@ import Solidity.Yul.Checks.LocalBoolFor
 import Solidity.Yul.Checks.LocalBoolIf
 import Solidity.Yul.Checks.LocalBoolIfElse
 import Solidity.Yul.Checks.LocalBoolInitialization
+import Solidity.Yul.Checks.LocalBoolItemRepresentation
 import Solidity.Yul.Checks.LocalBoolItemScope
 import Solidity.Yul.Checks.LocalBoolItems
 import Solidity.Yul.Checks.LocalBoolRepresentation
@@ -2880,6 +2913,8 @@ import Solidity.Yul.Compilation.NestedWrites
 import Solidity.Yul.Compilation.NestedWritesControls
 import Solidity.Yul.Compilation.NormalControl
 import Solidity.Yul.Compilation.NormalControlControls
+import Solidity.Yul.Compilation.NormalFramedTransport
+import Solidity.Yul.Compilation.NormalFramedTransportControls
 import Solidity.Yul.Compilation.NormalNumericTransport
 import Solidity.Yul.Compilation.NormalNumericTransportControls
 import Solidity.Yul.Compilation.NormalStackControls
@@ -3010,6 +3045,7 @@ import Solidity.Yul.LocalBoolFor
 import Solidity.Yul.LocalBoolIf
 import Solidity.Yul.LocalBoolIfElse
 import Solidity.Yul.LocalBoolInitialization
+import Solidity.Yul.LocalBoolItemRepresentation
 import Solidity.Yul.LocalBoolItemScope
 import Solidity.Yul.LocalBoolItems
 import Solidity.Yul.LocalBoolRepresentation
