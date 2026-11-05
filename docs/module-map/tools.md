@@ -22,3 +22,6 @@ Commands for people; they prove nothing beyond the certificates they check.
 | `Tools/LatexSolkey.lean` | `#latex_derivation` and `#latex_obligation`: a generated derivation, a `solc_import`ed function's obligation (`scripts/latex-sol.sh`). |
 | `Tools/Elementary.lean` | Bounded capture/update traces built from `Calculus/Elementary.lean`'s laws. |
 | `Tools/ProgramTrace.lean` | Checked formula/chain/obligation traces with ordered read continuations: `#latex_program`, `#latex_program_file`, `#program_trace_json_file`, `ProgramTrace.generate`. |
+| `Automation/H28/Chain.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
+| `Automation/H28/Context.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |
+| `Automation/H28/Prove.lean` | Bounded automation-benchmark checkpoint; typed scope and retained obligations are stated in the module. |

@@ -50,3 +50,12 @@
 | `Lowering/V07/UnsignedWidthCasts.lean` | Bounded v07-lowering checkpoint; typed scope and retained premises are in the module. |
 | `Lowering/V07/UnsignedComplement.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V07/UnsignedComplementControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/UnsignedLocalUpdate.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/UnsignedLocalUpdateControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/P12NextInterface.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/FixedBytesAssignment.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/FixedBytesAssignmentControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/IntegerConstantControls.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/IntegerConstants.lean` | Bounded v07-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V07/IntegerConstantAssignment.lean` | Literal assignment uses existing source locations and intrinsic typed writes. |
+| `Lowering/V07/IntegerConstantAssignmentControls.lean` | Scoped proofs and retained obligations for IntegerConstantAssignmentControls. |

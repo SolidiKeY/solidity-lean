@@ -30,3 +30,29 @@
 | `Backend/Selection/LiteralSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/LiteralSelectionControls.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/ScalarSequenceFrameControls.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawUint/Controls.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawUint/Execution.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/FramedLoweringInterface.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/CalldataWordInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationFreshness.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationFreshnessControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/ArithmeticSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/BitwiseSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/ValueGateBodyInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/ValueGateInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationLinkIdentity.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationLinkIdentityControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/OffsetChecksInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/RawTailGuardInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/TailGuardInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationReturnProducer.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationReturnProducerControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/SignedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Selection/UnsignedSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Executable/CreationReturnPartition.lean` | Complete byte observations of actual finite constructor RETURN. |
+| `Backend/Executable/CreationReturnPartitionControls.lean` | Actual constructor return with all three byte classes and adjacent regions. |
+| `Backend/Selection/NumericSequence.lean` | Numeric compiler-IR selection and straight-line composition use the existing instruction and lowering certificates. |
+| `Backend/Selection/StackSelection.lean` | Native stack-family selection and physical frame capacity. |
+| `Backend/AbiEntry/HeadCheck.lean` | Actual short-head predicate in the existing numeric bytecode slice. |
+| `Backend/AbiEntry/HeadCheckInterface.lean` | Ordinary indexed ABI entry's initial selector-inclusive head predicate. |

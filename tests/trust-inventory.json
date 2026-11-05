@@ -1,5 +1,15 @@
 [
   {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "| opaque deriving DecidableEq, Repr, Inhabited"
+  },
+  {
+    "file": "Solidity/Calculus/Assumptions.lean",
+    "kind": "opaque",
+    "code": "hash : HashReading := .opaque zeroAddress : ZeroAddressReading := .noCode"
+  },
+  {
     "file": "Solidity/Calculus/CallFunctionSearch.lean",
     "kind": "override",
     "code": "@[implemented_by subtermsM]"

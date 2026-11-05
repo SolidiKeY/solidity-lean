@@ -40,3 +40,25 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/SourceAdditionValuePins.lean` | Standard-axiom reports for SourceAdditionValue transport and controls. |
 | `Backend/Passes/RelatedMemoryCapture.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Passes/RelatedMemoryCaptureControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveCall.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveSource.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/RelatedStorageCapture.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/RelatedStorageCaptureControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/ReturnedStorageCapture.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/ReturnedStorageCaptureControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheckLaws.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Controls.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Laws.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Pass.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/RoadmapComposition.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameScopedSource.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveScopeCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/BitwiseValueContext.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/BitwiseValueContextControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/ValueReflection.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3FrozenScopeFamily.lean` | The exact frozen recursiveSource constructor family with scoped scalar turns and the UNCHANGED Prog.recBase. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveScopeLaws.lean` | Small construction boundaries for actual scoped recursive quotations. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean` | Successful quotation coherence for actual scalar-result recursion, including callers outside the inhabited successful controls. |
+| `Backend/Passes/MemoryScopeAllocation.lean` | Scoped proofs and retained obligations for MemoryScopeAllocation. |
+| `Backend/Passes/MemoryScopeBoundary.lean` | Scope exit keeps actual emitted code, reached cost and selected map. |
