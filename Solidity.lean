@@ -1646,6 +1646,7 @@ import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Compatibility
+import Solidity.Frontend.OverrideValidation.Extraction
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
 import Solidity.Frontend.OverrideValidation.OverrideFrontier
@@ -1653,6 +1654,7 @@ import Solidity.Frontend.OverrideValidation.OverrideLists
 import Solidity.Frontend.OverrideValidation.Pruning
 import Solidity.Frontend.OverrideValidation.Routes
 import Solidity.Frontend.OverrideValidation.Selection
+import Solidity.Frontend.OverrideValidation.Validator
 import Solidity.Frontend.OverrideValidation.Validity
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
