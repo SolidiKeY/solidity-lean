@@ -9,3 +9,5 @@
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedExecution.lean` | Actual allocating descent history feeds the same-state scalar return loop. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransport.lean` | All-count descent and return execution against the frozen producer, with derived history and allocator transport. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarPairedTransportControls.lean` | Populated actual producer, scalar result and restored pointer controls for paired transport. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreement.lean` | All-count actual native recursive source and paired target scalar observation agreement, with heap identity separate. |
+| `Backend/InternalFlow/RuntimeFrameV3NativeScalarAgreementControls.lean` | Populated source/target scalar result and distinct native exhaustion versus target success controls. |
