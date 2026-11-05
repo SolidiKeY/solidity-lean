@@ -131,8 +131,6 @@
 | `Lowering/V07/UdvtFixedBytesAssignmentControls.lean` | Real nominal metadata, all32 byte widths, mixed references and stale/truncation/nominal-refusal controls with exact guards. |
 | `Lowering/V07/FixedBytesComparisons.lean` | All six fixed-byte comparison clauses with actual assignment/read pipeline order and initial-derived caller transport. |
 | `Lowering/V07/FixedBytesComparisonControls.lean` | All-width/operator ordered observations, live-reference framing and executed uncaptured/reversed-capture negative programs. |
-| `Lowering/V07/IntegerConstantAssignment.lean` | Actual integer literal assignment, typed fresh capture/drop and arbitrary selected-family alias preservation. |
-| `Lowering/V07/IntegerConstantAssignmentControls.lean` | All64 integer types, ordered assignment observations, repeated/equal aliases and executed missing-write/stale/wrong-destination controls. |
 | `Lowering/V07/IntegralRationalConstants.lean` | Arbitrary integral rational meaning, Source conversion/assignment and native capture transport with existing range typing. |
 | `Lowering/V07/IntegralRationalControls.lean` | All64 integer types, four denominator representations, ordered observations and executed numerator/floor/cast negatives. |
 | `Lowering/V07/P12AssignedCondition.lean` | Actual published P12 Condition producer for Boolean local assignment, arbitrary successful horizons and derived caller alignment. |
@@ -141,3 +139,5 @@
 | `Lowering/V07/P12NegatedConditionControls.lean` | Effectful producer composition, source horizons, actual failure bytes and discriminating duplicated-prefix/wrong-write controls. |
 | `Lowering/V07/P12ContextExtension.lean` | Whole P12 condition transport across arbitrary native thinnings with heap-growing background frames |
 | `Lowering/V07/P12ContextExtensionControls.lean` | Inhabited mixed-reference extension/composition, complete caller frames and stale-index negatives |
+| `Lowering/V07/P12AtomicConditions.lean` | Actual Source Boolean literal and local-read producers of the published condition contract |
+| `Lowering/V07/P12AtomicConditionControls.lean` | Mixed caller framing, actual negated Source composition and discriminating wrong atomic clauses |

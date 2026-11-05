@@ -2196,6 +2196,8 @@ import Solidity.Lowering.V07.NumericComparisons
 import Solidity.Lowering.V07.Operands
 import Solidity.Lowering.V07.P12AssignedCondition
 import Solidity.Lowering.V07.P12AssignedConditionControls
+import Solidity.Lowering.V07.P12AtomicConditionControls
+import Solidity.Lowering.V07.P12AtomicConditions
 import Solidity.Lowering.V07.P12ContextExtension
 import Solidity.Lowering.V07.P12ContextExtensionControls
 import Solidity.Lowering.V07.P12Controls
