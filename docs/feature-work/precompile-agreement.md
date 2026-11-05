@@ -360,3 +360,18 @@ Exact commands/timings/results: `evidence/adoption-3ad.json`; handoff and
 checksums: `evidence/HANDOFF-adoption-3ad.md` and
 `evidence/SHA256SUMS-adoption-3ad`. Previous proof seals and raw failures remain
 preserved. No new composition, shared registry write or ship-cache.sh run.
+
+## Requested rebase onto e6849d3b, 2026-11-05
+
+Rebased onto `e6849d3bdf516099d20c33d3581d523449764018` without conflicts,
+producing payload `00582aeac545d9708994deae0ed096d6abaeef2d`. Backup branch
+`codex/solidity-sol-20261103/precompile-agreement-before-e684` preserves
+`e809a8b9b3202bb8f025de9c805aba0bcab5b03c` and original history. All owned
+payload files and 75 pins are unchanged. Separate read-only finder/skeptic
+reviews PASS, no findings or Lean/server/build use. Scope/kernel evidence and
+roots pass. Central axiom inventory EXIT1: 8763 pins, zero errors and 643
+unrecorded changes; these are not all attributed to this lane. Original final
+registration/validation obligations remain pending. Exp remains separate.
+Exact commands/results: `evidence/rebase-e684.json`; handoff and checksums:
+`evidence/HANDOFF-rebase-e684.md` and `evidence/SHA256SUMS-rebase-e684`.
+No whole-goal/runtime completion or cache freshness is claimed.
