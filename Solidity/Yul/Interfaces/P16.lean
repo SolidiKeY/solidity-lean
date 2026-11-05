@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterIfElse
 import Solidity.Yul.RawCheckedAdapterSequence
 import Solidity.Yul.Syntax
 import Solidity.Yul.BlockTyping
@@ -40,4 +41,8 @@ actual Source item syntax. Its concrete cons and block factories compose
 checked producers, preserving short-circuit flow and exact frames. Nested
 inhabitants are checked in Solidity.Yul.Checks.RawCheckedAdapterSequence.
 No arbitrary-statement producer or general assembly admission follows.
+RawCheckedAdapterIfElse.adapter composes actual checked statement producers as
+branches, including nested sequence/block producers. Its Source law retains
+the supplied producer fields, checked-frame and coherence premises. Concrete
+nested witnesses live in Solidity.Yul.Checks.RawCheckedAdapterIfElse.
 -/
