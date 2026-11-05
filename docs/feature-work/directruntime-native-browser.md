@@ -338,3 +338,25 @@ The current versions/KeySort and three per-file MCP checks pass. A new verified
 it is explicitly not a Lake artifact catalog. The previous H35 pack remains
 coordinator-received. No VM ship-cache.sh invocation occurred. Full evidence and
 queue limits: [published f77 inventory](../benchmarks/directruntime-2026-11-04/published-f77/README.md).
+
+## Published 9584 producer adoption
+
+Merged exact published 9584f9e7 as 845abab8 while preserving this lane's work.
+Locally built Shared.Scope and C IntrinsicControls; all17 producer theorem
+signatures/axiom inventories pass with only existing standard axioms. Per-file
+MCP checks report zero errors. Scope bounds and hand-built intrinsic controls
+do not prove compiler/source adequacy or runtime support. D changes no Lean
+declaration, premise, refusal, budget or trust rule.
+
+All336 runtime source pins and all build-input/binary identities remain current;
+the f77 native/WASM binaries are explicitly reused, not fresh9584 builds. Fresh
+C requests still give13unsupported controls plus a separately proved harness
+guard on each backend. No allocation Identity substitute or cached verdict is
+counted. The identical binary's earlier stack failure remains retained evidence;
+no repair was delivered or new benchmark claimed. H40/A, B Identity, C semantic
+acceptance and final full/corpus/post-integration gates remain pending.
+
+The two API modules' verified relative build-cache snapshot remains
+coordinator-pending under H41, not a Lake artifact catalog/full dependency pack.
+No VM shipping was attempted. Evidence, actual commands/resources and boundaries:
+[published9584 adoption](../benchmarks/directruntime-2026-11-04/published-9584/README.md).

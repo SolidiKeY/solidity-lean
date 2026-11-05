@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "theorems": 17,
+  "allowedExistingStandardAxioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "newAxioms": [],
+  "boundary": "Actual #check/#print axioms on adopted producer declarations, not runtime/source adequacy."
+}

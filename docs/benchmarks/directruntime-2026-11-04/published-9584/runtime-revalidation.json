@@ -1,0 +1,41 @@
+{
+  "head": "845abab89073eb11fe2b154b89686940d4f8706a",
+  "published": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "binaryBindings": {
+    "native": {
+      "binary": "/workspace/solidity-lean/.lake/native-browser-f77/native/direct-check",
+      "binarySha256": "e2db9f182d5194aa71a17c7cd2806839bb5fe23dd39abd0064b86d8bc750799d",
+      "manifestSha256": "c4455410292affdec9a1b988bfffd1ce7205120db64829c63d8465b24fd76865",
+      "sourceFilesVerified": 336,
+      "buildInputsVerified": 60,
+      "freshBuildThisTurn": false,
+      "buildEvidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-f77/native-build-gate.json"
+    },
+    "wasm": {
+      "binary": "/workspace/solidity-lean/.lake/native-browser-f77/direct/direct.wasm",
+      "binarySha256": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
+      "manifestSha256": "04e426100b16b9a6118e66808c2fa6f78cbafb2ead3c7f3467562af16f68b7e8",
+      "sourceFilesVerified": 336,
+      "buildInputsVerified": 308,
+      "freshBuildThisTurn": false,
+      "buildEvidence": "/workspace/solidity-lean/docs/benchmarks/directruntime-2026-11-04/published-f77/wasm-build-gate.json"
+    }
+  },
+  "wasmBuildMountAliases": {
+    "/emsdk/": "/workspace/solidity-lean/.lake/native-browser-sdk/",
+    "/work/": "/workspace/solidity-lean/.lake/native-browser-wasm/",
+    "/usr/": "/workspace/solidity-lean/.lake/native-browser-sdk-usr/"
+  },
+  "initialHostPathProbe": "WASM /emsdk alias unavailable directly on host; mapped exactly through original build bind mounts before checking buildInputs. No pin skipped.",
+  "unchangedSinceF77": {
+    "Solidity/Tools/DirectRuntime.lean": "8dc38e58b9179a7894d490fba3e05b05883d41517ff66207eda6c1275370e92d",
+    "Solidity/Calculus/ReadBounds.lean": "f773647a7146f7359480e09ff895546a856325667b49aa00dfaae8593c405af5",
+    "Solidity/Calculus/QueryReadBounds.lean": "4fc05fc31bca87e9e50dbc9ea9f016909e1ec8363281cc1862f8dc49f5b7c5c0",
+    "web/browser/direct-bridge.c": "6f38dac8eb57d2c78309ddd40fe086ad1a19f4de36faae9e1d197914b2d1a46b",
+    "tests/directruntime-20261104/control-tuples/Controls.sol": "11c44271ac2572801215483a7922e984e58b1cd554c289f0bd7bdc679a883ab7"
+  },
+  "workerLeanChanges": [],
+  "freshControlRequests": true,
+  "cachedVerdictsUsed": false,
+  "boundary": "Reuses the explicitly revalidated f77 fresh-built binaries; not a new build or post-A acceptance. New producer scope/model proofs are unconsumed by DirectRuntime. Previous stack failure remains artifact-specific evidence, not a fresh 9584 stack retest."
+}

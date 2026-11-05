@@ -1,0 +1,13 @@
+{
+  "archive": "/workspace/solidity-lean/.lake/native-browser-9584-api-cache/build-cache.tar.zst",
+  "sha256": "7de5d786716f556b829af405d8d2a6b7b2b48becf0b2927ae061f9f76f5ff2d6",
+  "bytes": 1554418,
+  "manifest": "/workspace/solidity-lean/.lake/native-browser-9584-api-cache/manifest.json",
+  "manifestSha256": "1c161a30001903bdcaa6369ef8783c237d06259c71d1d4fe6f38917435e6e273",
+  "modules": 2,
+  "filesVerified": 14,
+  "passed": true,
+  "delivery": "coordinator-pending",
+  "format": "relative build-cache snapshot; no Lake artifact catalog",
+  "boundary": "Scoped relative build-cache snapshot, not a Lake artifact-cache catalog/delta. Build artifacts only; never an ordinary request input. No transport or coordinator adoption is claimed."
+}

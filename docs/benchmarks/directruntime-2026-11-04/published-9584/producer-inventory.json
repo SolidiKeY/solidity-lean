@@ -1,0 +1,56 @@
+{
+  "head": "845abab89073eb11fe2b154b89686940d4f8706a",
+  "publishedBase": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "producerSources": [
+    {
+      "module": "Solidity.Frontend.ExecutableAst.Shared.Scope",
+      "sourceSha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e",
+      "theorems": [
+        "le_foldMax",
+        "member_lt_nextIndex",
+        "reserved_lt_bodySeed"
+      ]
+    },
+    {
+      "module": "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls",
+      "sourceSha256": "a7bbc3b4d4e605bec59b8b5f8fff8878fa79d6b60b60ed359e7d32332dcba59b",
+      "theorems": [
+        "doOnceDiamond",
+        "whileZeroBox",
+        "continueTestsCondition",
+        "breakStopsLoop",
+        "simultaneousSwap",
+        "repeatedPrimitiveWrites",
+        "holePreservesPosition",
+        "tupleDeclaration",
+        "discardedEffectRetained",
+        "discardedFailureBox",
+        "discardedFailureNotDiamond",
+        "wrongSwapBoxRefuted",
+        "earlyReturnEscapes",
+        "tupleReturn"
+      ]
+    }
+  ],
+  "axiomTargets": [
+    "Solidity.Frontend.ExecutableAst.Shared.Scope.le_foldMax",
+    "Solidity.Frontend.ExecutableAst.Shared.Scope.member_lt_nextIndex",
+    "Solidity.Frontend.ExecutableAst.Shared.Scope.reserved_lt_bodySeed",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.doOnceDiamond",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.whileZeroBox",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.continueTestsCondition",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.breakStopsLoop",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.simultaneousSwap",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.repeatedPrimitiveWrites",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.holePreservesPosition",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleDeclaration",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedEffectRetained",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureBox",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.discardedFailureNotDiamond",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.wrongSwapBoxRefuted",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.earlyReturnEscapes",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls.tupleReturn"
+  ],
+  "workerLeanChanges": [],
+  "boundary": "Consumer audit of adopted producer model/scope theorems; no D theorem edits. Intrinsic controls do not prove compiler/source equivalence or runtime support."
+}
