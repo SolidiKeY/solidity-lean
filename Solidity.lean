@@ -1605,6 +1605,8 @@ import Solidity.Frontend.ExpressionUniqueness.Fragments
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
+import Solidity.Frontend.LiteralGrammarH28.Body
+import Solidity.Frontend.LiteralGrammarH28.BodyControls
 import Solidity.Frontend.LiteralGrammarH28.Hex
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
