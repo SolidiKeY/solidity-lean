@@ -2473,7 +2473,9 @@ import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
 import Solidity.Source.Calldata
+import Solidity.Source.CalldataAggregates
 import Solidity.Source.CalldataExamples
+import Solidity.Source.CalldataLayout
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor

@@ -59,6 +59,12 @@ inductive STy where
   | tuple (ts : List STy)
   deriving Repr
 
+/-- A one-word value type (an ABI head word): `STy.isValue` without
+function types. -/
+def STy.oneWord : STy → Bool
+  | .int _ | .bool | .address _ | .fixedBytes _ _ | .fixed _ | .enum _ | .udvt _ | .contract _ => true
+  | _ => false
+
 /-! ## Integer and fixed-point ranges -/
 
 /-- `uint256`. -/
