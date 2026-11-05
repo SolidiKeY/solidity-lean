@@ -1793,8 +1793,10 @@ import Solidity.Frontend.Testing
 import Solidity.Frontend.TypeGrammarH28.Composition
 import Solidity.Frontend.TypeGrammarH28.Counterexamples
 import Solidity.Frontend.TypeGrammarH28.Layouts
+import Solidity.Frontend.TypeGrammarH28.ParserArrays
 import Solidity.Frontend.TypeGrammarH28.ParserBasics
 import Solidity.Frontend.TypeGrammarH28.ParserChecks
+import Solidity.Frontend.TypeGrammarH28.ParserPaths
 import Solidity.Frontend.WorldImport
 import Solidity.Frontend.Yul.Checks.ClosedSyntax
 import Solidity.Frontend.Yul.Checks.DeclarationParsing
