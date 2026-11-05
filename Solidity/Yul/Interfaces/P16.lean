@@ -1,3 +1,4 @@
+import Solidity.Yul.RawCheckedGrowingAbsent
 import Solidity.Yul.RawU8ForPost
 import Solidity.Yul.RawU8GrowingBlock
 import Solidity.Yul.RawU8GrowingSequence
@@ -236,3 +237,10 @@ Its concrete Source.forLoop law retains checked-frame and input-coherence
 premises. Checks cover a new-local copy body, break/continue/false guards,
 partial post errors, dirty older words and per-pipeline initializer timeouts.
 General loop admission and dirty ordinary Source readback remain separate. -/
+
+/-! RawCheckedGrowingAbsent.adapter transports a genuine literal-true checked
+for producer to an omitted guard across intrinsic growing initializer/body
+contexts, preserving runtime verbatim and checked/coherent premises. It uses
+the existing Source omission equality. Checks instantiate actual uint8 producers
+with mutation/break, dirty frames and pipeline-specific initializer failures.
+The generic transport alone supplies no new initializer or loop admission. -/
