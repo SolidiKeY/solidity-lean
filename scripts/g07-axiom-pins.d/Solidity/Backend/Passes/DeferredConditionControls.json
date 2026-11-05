@@ -1,0 +1,53 @@
+{
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.code_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.correlated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.corrupt_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.observations": [],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.skipped_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/DeferredConditionControls.lean:Solidity.Backend.Passes.DeferredCondition.Controls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

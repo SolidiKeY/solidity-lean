@@ -1,0 +1,20 @@
+{
+ "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.abiEncode_of_abiDecodeV2": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.decodeV2_eq_none_iff": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.decodeV2_isSome_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Language/FixedPoint/Abi.lean:Solidity.Language.FixedPoint.Fx.ofPackedBytes_encodePacked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

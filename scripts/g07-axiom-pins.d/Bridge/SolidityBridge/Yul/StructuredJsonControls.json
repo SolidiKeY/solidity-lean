@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/Yul/StructuredJsonControls.lean:SolidityBridge.Yul.StructuredJson.Controls.conditional_compiles": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

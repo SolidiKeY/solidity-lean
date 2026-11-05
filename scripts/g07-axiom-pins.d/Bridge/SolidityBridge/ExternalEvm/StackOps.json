@@ -1,0 +1,12 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/StackOps.lean:Solidity.Evm.External.dup_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/StackOps.lean:Solidity.Evm.External.swap_agrees": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

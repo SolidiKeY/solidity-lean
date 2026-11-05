@@ -1,0 +1,22 @@
+{
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.checkCompile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.Compiled.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/StructuredJson.lean:SolidityBridge.Yul.StructuredJson.Compiled.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

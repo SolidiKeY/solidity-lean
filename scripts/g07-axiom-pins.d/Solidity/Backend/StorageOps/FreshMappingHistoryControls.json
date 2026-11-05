@@ -1,0 +1,81 @@
+{
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.actual_history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.actual_target_history": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.alias_observations": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.combined_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.dirty_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.dirty_counterexample": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.dirty_evidence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.failed_other_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.fresh_target_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.target_dirty_history_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.target_failed_read_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.target_history_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.target_history_context": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshMappingHistoryControls.lean:Solidity.Backend.StorageOps.FreshMappingHistoryControls.target_readbacks": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

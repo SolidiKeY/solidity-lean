@@ -1,0 +1,71 @@
+{
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.full_width_maximum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.initial_vector": [],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.insufficient_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.low_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.numeric_bytes": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.out_of_width_is_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.read_captured": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.sign_bit_stays_unsigned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.stale_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.wider_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.wrong_native_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.wrong_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/UnsignedWidthCaptureControls.lean:Solidity.Backend.Passes.UnsignedWidthCaptureControls.wrong_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

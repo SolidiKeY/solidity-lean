@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Compilation/WordBlockExecution.lean:Solidity.Yul.Compilation.WordBlockExecution.execute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "Solidity/Backend/StorageOps/FreshArrayHistory.lean:Solidity.Backend.StorageOps.FreshArrayHistory.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistory.lean:Solidity.Backend.StorageOps.FreshArrayHistory.default_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistory.lean:Solidity.Backend.StorageOps.FreshArrayHistory.fresh_find": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistory.lean:Solidity.Backend.StorageOps.FreshArrayHistory.inner_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshArrayHistory.lean:Solidity.Backend.StorageOps.FreshArrayHistory.outer_header": [
+  "Quot.sound",
+  "propext"
+ ]
+}

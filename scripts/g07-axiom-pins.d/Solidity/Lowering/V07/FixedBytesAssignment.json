@@ -1,0 +1,32 @@
+{
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.contents_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.decode_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.read_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/FixedBytesAssignment.lean:Solidity.Lowering.V07.FixedBytesAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "Solidity/Lowering/StorageOps/SourceArrayWrite.lean:Solidity.Lowering.StorageOps.SourceArrayWrite.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceArrayWrite.lean:Solidity.Lowering.StorageOps.SourceArrayWrite.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

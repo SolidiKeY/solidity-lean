@@ -1,0 +1,58 @@
+{
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.aligned": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.corrupted_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.initial_vector": [],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.skipped_capture_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.source_heap_live": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.wrong_reference_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.wrong_relation_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.Controls.wrong_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/RelatedMemoryCapturePins.lean:Solidity.Backend.Passes.RelatedMemoryCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

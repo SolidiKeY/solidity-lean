@@ -1,0 +1,83 @@
+{
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.alias_source_target_reads": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.captured_alias_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.empty_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.explicit_failed_restore": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.generic_index_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.index_panic_bytes": [],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.live_alias_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.observation_boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.ordered_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.retained_alias_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.same_slot_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.second_failure_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.selected_correspondences": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.selected_headers": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.wrong_capture_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceTwoArrayDeleteControls.lean:Solidity.Backend.StorageOps.SourceTwoArrayDeleteControls.wrong_old_header_control": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
