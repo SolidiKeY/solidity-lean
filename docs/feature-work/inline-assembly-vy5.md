@@ -3134,3 +3134,20 @@ Every later commit changes only docs or the held test driver, and none of them
 is in the library. The lane touches no Calculus, Syntax or Semantics module,
 so the examples gate does not apply. The 29 lane modules are now default-build
 roots.
+
+**Full gate.** `./run-lean.sh` ran at `3c38c924`. The Lean part passed with
+`Build completed successfully (4090 jobs)`, which covers every default target
+plus the TestSuite. The script then exited 1 at its final SolKey drift check:
+"57 mismatch(es); parsed 392 taclets". The VM's sibling `../solkey` checkout is
+at `69e251f`, not at the repository pin `473da8944ca7…`
+(`tests/migration/solkey.pin.json`), and that commit is not in its history.
+
+Rerun against the pinned snapshot `tests/migration/solkey`, every check passes:
+- `solkeycheck --key …/solidityProgramRules.key`: OK, 377 taclets and 131 read
+  annotations.
+- `check-testsuite.sh` with `SOLKEY_EXAMPLES` set to the snapshot: ok, 552
+  derived, 11 refuted and 0 pending.
+- `check-corpus.sh`: ok.
+- `check-automatic.mjs --strict`: 491 automatic, 0 manual and 0 pending.
+
+The raw run that used the unpinned sibling checkout is kept as a failure.
