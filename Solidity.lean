@@ -4,6 +4,9 @@
 -- (with `Solidity/Solkey/TestSuite.lean`) belong to their own libraries, and
 -- `Solidity/Scratch/` to none.
 import Solidity.AST
+import Solidity.Automation.H28.Chain
+import Solidity.Automation.H28.Context
+import Solidity.Automation.H28.Prove
 import Solidity.Backend.AbiEntry.CalldataWordInterface
 import Solidity.Backend.AbiEntry.CompositionInterface
 import Solidity.Backend.AbiEntry.Consumers
@@ -11,11 +14,14 @@ import Solidity.Backend.AbiEntry.EntryComposition
 import Solidity.Backend.AbiEntry.EntryTransport
 import Solidity.Backend.AbiEntry.EnumEntry
 import Solidity.Backend.AbiEntry.Interface
+import Solidity.Backend.AbiEntry.OffsetChecksInterface
 import Solidity.Backend.AbiEntry.Premises
 import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
 import Solidity.Backend.AbiEntry.Premises.CalldataViews
 import Solidity.Backend.AbiEntry.RawFreeTransport
+import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
+import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
 import Solidity.Backend.AbiEntry.ValueGateInterface
 import Solidity.Backend.AbiEntry.WordValidation
@@ -104,6 +110,8 @@ import Solidity.Backend.Executable.CreationPatchOrder
 import Solidity.Backend.Executable.CreationPatchOrderControls
 import Solidity.Backend.Executable.CreationReturnInterfaceV1
 import Solidity.Backend.Executable.CreationReturnInterfaceV1Controls
+import Solidity.Backend.Executable.CreationReturnProducer
+import Solidity.Backend.Executable.CreationReturnProducerControls
 import Solidity.Backend.Failure.Checkpoint
 import Solidity.Backend.Failure.Composition
 import Solidity.Backend.Failure.CompositionChecks
@@ -121,6 +129,8 @@ import Solidity.Backend.Failure.UnwindChecks
 import Solidity.Backend.FailurePaths.BooleanReturn
 import Solidity.Backend.FailurePaths.BooleanReturnControls
 import Solidity.Backend.FailurePaths.Controls
+import Solidity.Backend.FailurePaths.FramedEmission
+import Solidity.Backend.FailurePaths.FramedEmissionControls
 import Solidity.Backend.FailurePaths.Interface
 import Solidity.Backend.FailurePaths.Parametric
 import Solidity.Backend.FailurePaths.ParametricControls
@@ -177,6 +187,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation
 import Solidity.Backend.InternalFlow.RuntimeFrameResult
 import Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameSaved
+import Solidity.Backend.InternalFlow.RuntimeFrameScopedSource
 import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
 import Solidity.Backend.InternalFlow.RuntimeFrameStack
 import Solidity.Backend.InternalFlow.RuntimeFrameTarget
@@ -241,6 +252,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveIngress
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveResult
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
@@ -267,12 +279,14 @@ import Solidity.Backend.LabelExec.Packets
 import Solidity.Backend.LabelExec.Placement
 import Solidity.Backend.LabelExec.ScalarTransfer
 import Solidity.Backend.LabelExec.Step
+import Solidity.Backend.MemoryCopies.CheckedDefaultInterface
 import Solidity.Backend.MemoryCopies.ControlsV2
 import Solidity.Backend.MemoryCopies.Interface
 import Solidity.Backend.MemoryCopies.InterfaceV2
 import Solidity.Backend.MemoryCopies.InterfaceV2Laws
 import Solidity.Backend.MemoryCopies.InterfaceV2Roots
 import Solidity.Backend.MemoryCopies.NestedDefaultInterface
+import Solidity.Backend.MemoryCopies.NestedDefaults
 import Solidity.Backend.MemoryCopies.Premises
 import Solidity.Backend.MemoryCopies.RuntimeArrayInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
@@ -313,6 +327,10 @@ import Solidity.Backend.MemoryOps.OverwriteAgreementExact
 import Solidity.Backend.MemoryOps.OverwriteRestoration
 import Solidity.Backend.MemoryOps.PhysicalArrayReframe
 import Solidity.Backend.MemoryOps.PhysicalByteJournal
+import Solidity.Backend.MemoryOps.PhysicalByteMaterialize
+import Solidity.Backend.MemoryOps.PhysicalByteMaterializeControls
+import Solidity.Backend.MemoryOps.PhysicalByteStack
+import Solidity.Backend.MemoryOps.PhysicalByteStackExact
 import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
 import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface
@@ -431,6 +449,8 @@ import Solidity.Backend.Passes.AssignmentSubtractionControls
 import Solidity.Backend.Passes.AssignmentSubtractionPass
 import Solidity.Backend.Passes.AssignmentSubtractionPins
 import Solidity.Backend.Passes.AxiomPins
+import Solidity.Backend.Passes.BitwiseValueContext
+import Solidity.Backend.Passes.BitwiseValueContextControls
 import Solidity.Backend.Passes.Boundary
 import Solidity.Backend.Passes.CaptureAliases
 import Solidity.Backend.Passes.CaptureCases
@@ -637,6 +657,7 @@ import Solidity.Backend.Passes.ValueContextAllocation
 import Solidity.Backend.Passes.ValueContextCode
 import Solidity.Backend.Passes.ValueContextControls
 import Solidity.Backend.Passes.ValueContextPins
+import Solidity.Backend.Passes.ValueReflection
 import Solidity.Backend.Passes.ValueSequence
 import Solidity.Backend.Passes.ValueSequenceControls
 import Solidity.Backend.Passes.ValueSequencePins
@@ -730,6 +751,8 @@ import Solidity.Backend.Selection.ScalarSequenceControls
 import Solidity.Backend.Selection.ScalarSequenceFrameControls
 import Solidity.Backend.Selection.ScalarSequenceFrames
 import Solidity.Backend.Selection.ScalarSequenceResources
+import Solidity.Backend.Selection.SignedSelection
+import Solidity.Backend.Selection.UnsignedSelection
 import Solidity.Backend.StorageOps.AbsentRootQueries
 import Solidity.Backend.StorageOps.AggregatePop
 import Solidity.Backend.StorageOps.AggregatePopControls
@@ -1589,6 +1612,7 @@ import Solidity.Frontend.Admission.TypedExpressionPolicy
 import Solidity.Frontend.Admission.TypedObservationPolicy
 import Solidity.Frontend.Admission.TypedStatementPolicy
 import Solidity.Frontend.C3Exactness.Admission
+import Solidity.Frontend.C3Exactness.Audit
 import Solidity.Frontend.C3Exactness.Controls
 import Solidity.Frontend.C3Exactness.GraphControls
 import Solidity.Frontend.C3Exactness.Identity
@@ -1635,11 +1659,14 @@ import Solidity.Frontend.ConstantDepth.Rank
 import Solidity.Frontend.CreationTryImport
 import Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
 import Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
+import Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls
 import Solidity.Frontend.ExecutableAst.Memory.Reader
 import Solidity.Frontend.ExecutableAst.Shared.Boundary
 import Solidity.Frontend.ExecutableAst.Shared.Intrinsic
+import Solidity.Frontend.ExecutableAst.Shared.Scope
 import Solidity.Frontend.ExecutableAst.Shared.Translate
 import Solidity.Frontend.ExpressionUniqueness.Families
+import Solidity.Frontend.ExpressionUniqueness.Fixtures
 import Solidity.Frontend.ExpressionUniqueness.Fragments
 import Solidity.Frontend.ExpressionUniqueness.Refusals
 import Solidity.Frontend.ExpressionUniqueness.Statement
@@ -1647,15 +1674,21 @@ import Solidity.Frontend.Import
 import Solidity.Frontend.LibraryTryImport
 import Solidity.Frontend.LiteralGrammarH28.Body
 import Solidity.Frontend.LiteralGrammarH28.BodyControls
+import Solidity.Frontend.LiteralGrammarH28.BoundaryControls
 import Solidity.Frontend.LiteralGrammarH28.Hex
 import Solidity.Frontend.LiteralGrammarH28.HexEncoding
+import Solidity.Frontend.LiteralGrammarH28.Quoted
+import Solidity.Frontend.LiteralGrammarH28.Scanner
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part00
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part01
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part02
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part03
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part04
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part05
+import Solidity.Frontend.NumericLiteralProofs.WordTable.Part06
 import Solidity.Frontend.OverrideValidation.Attributes
 import Solidity.Frontend.OverrideValidation.Compatibility
+import Solidity.Frontend.OverrideValidation.Extraction
 import Solidity.Frontend.OverrideValidation.Graph
 import Solidity.Frontend.OverrideValidation.Identity
 import Solidity.Frontend.OverrideValidation.OverrideFrontier
@@ -1663,6 +1696,7 @@ import Solidity.Frontend.OverrideValidation.OverrideLists
 import Solidity.Frontend.OverrideValidation.Pruning
 import Solidity.Frontend.OverrideValidation.Routes
 import Solidity.Frontend.OverrideValidation.Selection
+import Solidity.Frontend.OverrideValidation.Validator
 import Solidity.Frontend.OverrideValidation.Validity
 import Solidity.Frontend.PaymentImport
 import Solidity.Frontend.PaymentPlan
@@ -1673,11 +1707,15 @@ import Solidity.Frontend.QualifiedUnits.Controls
 import Solidity.Frontend.QualifiedUnits.DifferentialControls
 import Solidity.Frontend.QualifiedUnits.Inheritance
 import Solidity.Frontend.QualifiedUnits.Lookup
+import Solidity.Frontend.QualifiedUnits.NormalizationControls
 import Solidity.Frontend.QualifiedUnits.ReferenceControls
 import Solidity.Frontend.QualifiedUnits.References
 import Solidity.Frontend.QualifiedUnits.Relation
 import Solidity.Frontend.QualifiedUnits.SignatureGap
+import Solidity.Frontend.QualifiedUnits.SignatureHiding
+import Solidity.Frontend.QualifiedUnits.SignatureNormalization
 import Solidity.Frontend.QualifiedUnits.Specification
+import Solidity.Frontend.QualifiedUnits.TypePaths
 import Solidity.Frontend.QualifiedUnits.UnitPaths
 import Solidity.Frontend.SolcJson
 import Solidity.Frontend.SolcJson.Admission
@@ -1690,6 +1728,7 @@ import Solidity.Frontend.SolcJson.CallMetadataPathControls
 import Solidity.Frontend.SolcJson.CallMetadataSound
 import Solidity.Frontend.SolcJson.Contract
 import Solidity.Frontend.SolcJson.Getters
+import Solidity.Frontend.SolcJson.TryPanicCallMetadata
 import Solidity.Frontend.SolcJson.TryPanicSourceCaller
 import Solidity.Frontend.SolcJson.TryPanicSourceData
 import Solidity.Frontend.SolcJson.TryPanicSourcePlan
@@ -1735,6 +1774,9 @@ import Solidity.Frontend.SolcJson.YulWords
 import Solidity.Frontend.Source
 import Solidity.Frontend.SourceUnits
 import Solidity.Frontend.StatementGrammarH28.ElsePosition
+import Solidity.Frontend.StatementGrammarH28.FixtureControls.Case00
+import Solidity.Frontend.StatementGrammarH28.FixtureData
+import Solidity.Frontend.StatementGrammarH28.G0List
 import Solidity.Frontend.StatementGrammarH28.NearestElse
 import Solidity.Frontend.Static.C3
 import Solidity.Frontend.Static.Certificates
@@ -1754,6 +1796,7 @@ import Solidity.Frontend.Static.UnitsExamples
 import Solidity.Frontend.Static.UserOps
 import Solidity.Frontend.Static.WellFormedCheck
 import Solidity.Frontend.Testing
+import Solidity.Frontend.TypeGrammarH28.Composition
 import Solidity.Frontend.TypeGrammarH28.Counterexamples
 import Solidity.Frontend.TypeGrammarH28.Layouts
 import Solidity.Frontend.TypeGrammarH28.ParserBasics
@@ -1855,6 +1898,7 @@ import Solidity.Lowering.P8.SourcePrograms
 import Solidity.Lowering.P8.SourceRealization
 import Solidity.Lowering.P8.SourceResolutionControls
 import Solidity.Lowering.P8.SourceResolutions
+import Solidity.Lowering.P8.SourceSize
 import Solidity.Lowering.P8b.Controls
 import Solidity.Lowering.P8b.Domain
 import Solidity.Lowering.P8b.Frozen
@@ -2012,6 +2056,8 @@ import Solidity.Lowering.StorageOps.SourceStorageCopy
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrier
 import Solidity.Lowering.StorageOps.SourceStorageCopyBarrierControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyControls
+import Solidity.Lowering.StorageOps.SourceStorageCopyEmpty
+import Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyPayload
 import Solidity.Lowering.StorageOps.SourceStorageCopyPayloadControls
 import Solidity.Lowering.StorageOps.SourceStorageCopyPrefix
@@ -2062,6 +2108,8 @@ import Solidity.Lowering.V07.GraphControls
 import Solidity.Lowering.V07.GraphIdentityControls
 import Solidity.Lowering.V07.GraphRanks
 import Solidity.Lowering.V07.IntegerAssignmentPrefixes
+import Solidity.Lowering.V07.IntegerConstantControls
+import Solidity.Lowering.V07.IntegerConstants
 import Solidity.Lowering.V07.IntegerLocalFamily
 import Solidity.Lowering.V07.IntegerSubtraction
 import Solidity.Lowering.V07.LocalFamilyControls
@@ -2152,6 +2200,8 @@ import Solidity.Lowering.V08.LibraryFrameTransport
 import Solidity.Lowering.V08.LibraryHandlerControls
 import Solidity.Lowering.V08.LibraryIntegerTransport
 import Solidity.Lowering.V08.LibraryPremises
+import Solidity.Lowering.V08.LiteralFailureArithmeticReason
+import Solidity.Lowering.V08.LiteralFailureArithmeticReasonControls
 import Solidity.Lowering.V08.LiteralFailureBoolStatement
 import Solidity.Lowering.V08.LiteralFailureBoolStatementControls
 import Solidity.Lowering.V08.LiteralFailureBytesReadback
@@ -2299,8 +2349,10 @@ import Solidity.Roadmap.TypedRun
 import Solidity.Roadmap.V16.CreationReturnConsumer
 import Solidity.Roadmap.V16.H24Input
 import Solidity.Roadmap.V16.NativeParentConsumer
+import Solidity.Roadmap.V16.NativeRevertConsumer
 import Solidity.Roadmap.V16.SSCP2.NewAllocation
 import Solidity.Roadmap.V16.SSCP2.NewAllocationControls
+import Solidity.Roadmap.V16.SourceSizeControls
 import Solidity.Roadmap.V16.SourceTransactionConsumer
 import Solidity.Scope
 import Solidity.Secp256k1
@@ -2311,6 +2363,7 @@ import Solidity.Semantics.AbiEntry
 import Solidity.Semantics.AbiEntryChecks
 import Solidity.Semantics.AbiEntryProofs
 import Solidity.Semantics.AllocBytes
+import Solidity.Semantics.CallResume
 import Solidity.Semantics.Callback
 import Solidity.Semantics.CallbackCapture
 import Solidity.Semantics.CallbackFrame
@@ -2386,6 +2439,7 @@ import Solidity.Semantics.TryConditions
 import Solidity.Semantics.TryCreateConditions
 import Solidity.Semantics.Value
 import Solidity.Signature
+import Solidity.SolcValidation.Dialect
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors
 import Solidity.Solkey.QuantifiedDiamond
@@ -2683,6 +2737,7 @@ import Solidity.Yul.Checks.LocalBoolInitialization
 import Solidity.Yul.Checks.LocalBoolItemScope
 import Solidity.Yul.Checks.LocalBoolItems
 import Solidity.Yul.Checks.LocalBoolScope
+import Solidity.Yul.Checks.LocalBoolUnchecked
 import Solidity.Yul.Checks.LocalBoolWhile
 import Solidity.Yul.Checks.LocalCompareControl
 import Solidity.Yul.Checks.LocalExprStatement
@@ -2779,6 +2834,8 @@ import Solidity.Yul.Compilation.ExponentMachine
 import Solidity.Yul.Compilation.ExponentMachineControls
 import Solidity.Yul.Compilation.ExpressionShapes
 import Solidity.Yul.Compilation.ExpressionShapesControls
+import Solidity.Yul.Compilation.FramedControl
+import Solidity.Yul.Compilation.FramedControlControls
 import Solidity.Yul.Compilation.FramedWordLowering
 import Solidity.Yul.Compilation.FramedWordLoweringControls
 import Solidity.Yul.Compilation.LocalScopeLowering
@@ -2924,6 +2981,7 @@ import Solidity.Yul.LocalBoolInitialization
 import Solidity.Yul.LocalBoolItemScope
 import Solidity.Yul.LocalBoolItems
 import Solidity.Yul.LocalBoolScope
+import Solidity.Yul.LocalBoolUnchecked
 import Solidity.Yul.LocalBoolWhile
 import Solidity.Yul.LocalCompareControl
 import Solidity.Yul.LocalCoordinates
@@ -3467,6 +3525,8 @@ import Solidity.Yul.Views.RetainedEntryRun
 import Solidity.Yul.Views.RetainedExpressionCapture
 import Solidity.Yul.Views.RetainedHeapAllocation
 import Solidity.Yul.Views.RetainedIndices
+import Solidity.Yul.Views.RetainedLiveCoverage
+import Solidity.Yul.Views.RetainedLiveCoverageControls
 import Solidity.Yul.Views.RetainedLocalAlias
 import Solidity.Yul.Views.RetainedLocalAliasControls
 import Solidity.Yul.Views.RetainedLocalAliasImage
@@ -3651,6 +3711,8 @@ import Solidity.Yul.World.SelfDestructControls
 import Solidity.Yul.World.TargetCallControls
 import Solidity.Yul.World.TargetCallMemory
 import Solidity.Yul.World.TargetCallRules
+import Solidity.Yul.World.TerminalBuiltin
+import Solidity.Yul.World.TerminalBuiltinControls
 import Solidity.Yul.World.TransientTargetControls
 import Solidity.Yul.World.TransientTargetPort
 import Solidity.Yul.World.TransientTargetRollback
