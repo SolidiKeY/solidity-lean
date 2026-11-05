@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceUintFixedRefsDelete
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
@@ -356,5 +356,72 @@ theorem nested_delete_zero_horizon (pipeline : Roadmap.Pipeline) (y : Source.EMS
 #guard_msgs (whitespace := lax) in #print axioms nested_mutation_delete
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_delete_zero_horizon' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_delete_zero_horizon
+
+
+private def CT : Contract := {vars := []}
+private abbrev ΔT : Ctx := [.val .uint,.val .uint,.val .uint,.mem P]
+private def ti : Idx ΔT (.val .uint) := .here
+private def tj : Idx ΔT (.val .uint) := .there .here
+private def tv : Idx ΔT (.val .uint) := .there (.there .here)
+private def tr : Idx ΔT (.mem P) := .there (.there (.there .here))
+private def st : State CT ΔT := {storage := Storage.init CT,H := H,heap := hp,env := (u 1,u 1,u 42,some root,())}
+private def writeStmt : Stmt CT ΔT ΔT :=
+  .assignMem (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj))) (.val (.simple (.local tv)))
+private def deleteStmt : Stmt CT ΔT ΔT :=
+  .deleteMem (.loc (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj)))) rfl
+
+/-- The actual Source Items output heaps also drive one existing intrinsic Prog;
+this is not a replacement evaluator or a supplied second successful run. -/
+theorem nested_typed_program (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid out : Heap H) (ym z : Source.EMState E0 ΓW),
+      (Source.execS (G0 pipeline) F0 (horizon+6) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wj wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wj wv)) (.stmt (.expr (sourceUintFixedNestedDelete wr wi wj)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Stmt.run st writeStmt=.ok ⟨st.withHeap mid,List.prefix_refl _⟩ ∧
+      Stmt.run (st.withHeap mid) deleteStmt=.ok ⟨st.withHeap out,List.prefix_refl _⟩ ∧
+      Prog.run st (.cons writeStmt (.cons deleteStmt .nil))=.ok ⟨st.withHeap out,List.prefix_refl _⟩ ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ SourceUintFixedRefsAt z 2 out root address ∧
+      MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] ∧
+      MObj.elems .fixed (out.get left)=[u 7,u 0,u (W-1)] ∧ out.get right=hp.get right := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,out,ym,z,tw,td,first,items,rm,rz,mm,mz,cm,cz,diff,om,oz,tablem,tablez,lm,lz,nm,nz,bounded,wm,wz,em,ez,lgm,lgz,fm,fz⟩ := nested_mutation_delete pipeline horizon nps
+    have parent : mid.get root=hp.get root := by
+      have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+        have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+        simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+      rw [Option.some.inj (tw.symm.trans canonical)]
+      exact Heap.get_set_ne hp left root (by decide) _
+    have selected0 : (uintFixedChildPath (C := CT) tr ti).mvalT st=.ok left := by
+      change TRes.ofOpt (hp.index root .dyn (u 1))=.ok left
+      rw [selectLeft];rfl
+    have firstRun : Stmt.run st writeStmt=.ok ⟨st.withHeap mid,List.prefix_refl _⟩ := by
+      change TRun.assignMem (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj))) (.val (.simple (.local tv))) st=_
+      simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,selected0,Val.evalT,Simple.evalT,
+        show TEnv.get tv st.env=u 42 from rfl,show TEnv.get tj st.env=u 1 from rfl,
+        bind,Except.bind,TRes.ofOpt,pure,Except.pure]
+      change (TRes.ofOpt (hp.writeAddr (.index left .fixed (u 1)) (u 42)) >>= fun hp' => pure (⟨st.withHeap hp',List.prefix_refl _⟩ : Solidity.Out CT H ΔT))=_
+      rw [tw];rfl
+    have selected : mid.index root .dyn (u 1)=some left := by
+      change (MObj.elems .dyn (mid.get root))[1]?=some left
+      rw [parent];exact selectLeft
+    have selected1 : (uintFixedChildPath (C := CT) tr ti).mvalT (st.withHeap mid)=.ok left := by
+      change TRes.ofOpt (mid.index root .dyn (u 1))=.ok left
+      rw [selected];rfl
+    have secondRun : Stmt.run (st.withHeap mid) deleteStmt=.ok ⟨st.withHeap out,List.prefix_refl _⟩ := by
+      change TRun.deleteMem (.loc (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj)))) (st.withHeap mid)=_
+      rw [Evm.Memory.deleteMem_primitive_eq_assign]
+      simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,selected1,Evm.Memory.deleteDefaultValue_eval,
+        Val.evalT,Simple.evalT,show TEnv.get tj (st.withHeap mid).env=u 1 from rfl,
+        bind,Except.bind,TRes.ofOpt,pure,Except.pure]
+      change (TRes.ofOpt (mid.writeAddr (.index left .fixed (u 1)) (PrimTy.dflt .uint)) >>= fun hp' => pure (⟨st.withHeap hp',List.prefix_refl _⟩ : Solidity.Out CT H ΔT))=_
+      rw [td];rfl
+    exact ⟨mid,out,ym,z,first,items,firstRun,secondRun,intrinsic_heap_pair_run st writeStmt deleteStmt mid out firstRun secondRun,rm,rz,cm,cz,oz⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_typed_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_typed_program
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls

@@ -285,3 +285,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/SourceUintFixedRefsWrite.lean` | Actual fixed-child nested Source assignment, derived reached reference-parent observer, MemOK and precise alias/address/world frames under local selected-footprint separation. |
 
 | `Solidity/Backend/MemoryOps/SourceUintFixedRefsDelete.lean` | Actual nested fixed-child primitive deletion and initial-to-reached write/delete Source Items composition with MemOK and object/address/world frames. |
+
+| `Solidity/Backend/MemoryOps/SourceUintFixedRefsTarget.lean` | Actual nested fixed-child Source/intrinsic/whole symbolic-word assignment joined through the published Objects pointer/store certificate, with strong representation, allocator and source frames. |
