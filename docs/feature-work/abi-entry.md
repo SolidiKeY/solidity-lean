@@ -1307,3 +1307,36 @@ both typed branches and exact selector dispatch including the compiler join.
 The matched branch retains its trailing jump over the miss branch; no normal
 return, desired body execution or poststate is assumed. Generic join removal,
 Source association, short special routing and native loading remain separate.
+
+
+`SelectorBranches.lean` selects the actual typed conditional, both branch
+artifacts and the joined output fragment through the existing public compiler.
+Exact dispatch reuses the proved selector test at the chosen local. The match
+executes the selected left code followed by the compiler's jump over the right
+code; a miss executes the right code directly. The real left outcome feeds that
+join, preserving its skip instead of assuming a normal return. Generic join
+removal for arbitrary core bodies remains open; no body run/poststate or new
+normal-return premise appears in the certificate.
+
+Controls weaken the existing primitive entry/body program with a distinct
+selector local, retaining definitionally identical decoder code at the shifted
+base. Both branches and the whole are publicly selected. The matched raw enum
+entry validates, binds and allocates its Boolean result, then provably skips the
+miss continuation. A miss executes a different value-checked write. Dirty
+matched input reverts even though the miss branch would succeed, ruling out
+fallthrough after validation failure. Non-payable miss rejection, malformed
+unused entry locals, raw typed-value agreement, distinct branch writes and
+saved state are explicit. These are represented-local compiler controls; the
+miss continuation does not authenticate Source fallback declarations/parameters.
+
+Focused compilation and scoped standard-only axiom guards pass. Repairs and
+bounded bridge trial timeouts remain in the handoff. Diagnostic containers are
+restarted and worker absence verified before builds; no concurrent diagnostic
+worker/build is claimed for this checkpoint. General dispatch trees, generic
+join removal, receive/fallback Source association, native loaders, aggregate
+input decoding and full G40/G46.02 remain open, as do fixture replay and final
+assignment gates.
+
+Independent read-only finder and skeptic reviews found no semantic issues.
+Final guarded per-file diagnostics report zero errors; exact checkpoint gates
+and retained failures accompany the sealed handoff.

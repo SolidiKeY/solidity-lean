@@ -57,6 +57,8 @@ import Solidity.Backend.AbiEntry.RawTailGuardInterface
 import Solidity.Backend.AbiEntry.RejectionInterface
 import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.ValueGateBodyInterface
+import Solidity.Backend.AbiEntry.SelectorBranches
+import Solidity.Backend.AbiEntry.SelectorBranchesControls
 import Solidity.Backend.AbiEntry.SelectorBranchesInterface
 import Solidity.Backend.AbiEntry.SelectorGateBody
 import Solidity.Backend.AbiEntry.SelectorGateBodyControls
