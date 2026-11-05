@@ -837,3 +837,32 @@ no warnings in the changed modules.
 `UnsignedGateInterface.lean` specifies actual public-compiler word validation
 against an unbounded unsigned bound; wide bounds are not truncated. Raw loading
 and full argument decoding remain explicit separate obligations.
+
+`UnsignedGate.lean` emits actual typed/public-compiler unsigned word guards.
+A represented bound uses a conditional revert; a bound at least the word modulus
+writes the continuation directly, preserving all represented words without
+truncating the bound. General admission/selection/execution preserves the input
+local, full saved stack and all machine state except the result cell, with zero
+pending skip. Exact rejection iff covers arbitrary natural bounds. For uint
+widths (including address), bool and enum cardinality, raw-word representation
+connects actual compiled rejection iff the existing positive-fuel lazy scalar
+ABI decoder rejects. No decoded value or successful run is supplied. Separate
+failure transports preserve the semantic `.revert` class. Span/head checks,
+native loading/byte failure encoding, signed/fixed-byte compiler guards and
+full argument decoding remain open.
+Controls cover bool/uint8/address boundaries and dirty high bits, enum limits
+and zero cardinality, all uint256 words, oversized bounds accepting every word,
+and a wide-bound wrap counterexample. Raw unaligned prefixed inputs exercise
+actual bool/enum/uint8 decoder failures and successful uint8 value derivation.
+Empty raw access pads zero and passes bool range validation, while enclosing ABI
+entry still rejects its short head; no span or admission narrowing is inferred.
+Malformed input-cell and preserved-state controls are retained. Existing numeric
+validators remain the implementation for their published certificates; these
+modules add intrinsic compiler guard execution rather than replace them.
+
+Independent read-only finder and skeptic reviews passed with no findings.
+They checked strict comparison/zero/wide bounds, actual public selection and
+preserved input/state, exact positive-fuel raw decoder iff and the empty-word
+versus whole-entry distinction. Neither used a build or Lean server. A single
+unused simp argument was removed and the importing consumer rechecked without
+changed-module warnings.

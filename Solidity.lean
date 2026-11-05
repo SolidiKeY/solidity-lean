@@ -70,6 +70,9 @@ import Solidity.Backend.AbiEntry.SpecialRoutesInterface
 import Solidity.Backend.AbiEntry.TailGuard
 import Solidity.Backend.AbiEntry.TailGuardControls
 import Solidity.Backend.AbiEntry.TailGuardInterface
+import Solidity.Backend.AbiEntry.UnsignedGate
+import Solidity.Backend.AbiEntry.UnsignedGateControls
+import Solidity.Backend.AbiEntry.UnsignedGateInterface
 import Solidity.Backend.AbiEntry.ValueGate
 import Solidity.Backend.AbiEntry.ValueGateBody
 import Solidity.Backend.AbiEntry.ValueGateBodyControls

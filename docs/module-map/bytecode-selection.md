@@ -173,3 +173,6 @@
 | `Backend/AbiEntry/HeadGateInterface.lean` | Actual typed/public-compiler ABI head guard certificate. |
 | `Backend/AbiEntry/HeadGate.lean` | Full-extent head-span guard with exact execution and semantic rejection. |
 | `Backend/AbiEntry/HeadGateControls.lean` | Boundary, oversized-no-wrap and passed-head decoder-failure controls. |
+| `Backend/AbiEntry/UnsignedGateInterface.lean` | Actual public compiler unsigned range guard certificate. |
+| `Backend/AbiEntry/UnsignedGate.lean` | Unsigned uint/bool/enum guard execution and raw decoder rejection equivalence. |
+| `Backend/AbiEntry/UnsignedGateControls.lean` | Dirty bits, enum/word boundaries, wide no-wrap and raw decoding controls. |
