@@ -1,0 +1,3 @@
+Independent read-only finder/skeptic; no Lean/server/builds/edits.
+Both verified separate per-reader outputs,each84 model executions/20decode refusals/2type refusals;84real obligations per reader,54standard-only axioms,KeySort377/131;no equivalence/validity/runtime overclaim.
+Both requested wording:84 compiler-AST fixtures representing42 source variants,not84 independent sources. Corrected before commit. No material harness finding.

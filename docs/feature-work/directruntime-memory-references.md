@@ -388,3 +388,39 @@ delivery remains coordinator-pending until receipt. This is not a freshness
 claim for other merged modules. The full merged gate was not rerun here.
 Ordinary native/browser acceptance including positive diamond Identity remains
 blocked on A/D consumer integration; no RUNTIME_GATE_PASS is claimed.
+
+
+## Published composition adoption: b86ae456
+
+Adopted `b86ae4568cef6d6226f4d170360bbb089debe3fb` at merge
+`7ccb1c6a5760d6dd2c307b0b114d158e9346852a`, preserving owned work.
+The producer now supplies the canonical composed reader:
+
+```lean
+import Solidity.Frontend.ExecutableAst.Shared.Compose
+-- Shared.contract Shared.executableReader contractJson
+-- Shared.function Shared.executableReader functionJson contractJson.compress
+```
+
+Runtime integration should use this published composition. Its recursive
+dispatch reuses Memory's strict type/location checks and propagates failures;
+no local composition or shared edit was added. The ordinary DirectRuntime
+consumer is still unchanged and needs A's migration plus D's fresh binaries.
+
+Admission now runs the same fixtures independently through Memory.reader and
+Shared.executableReader. Each constructs84 real shared obligations,executes84
+initial models,refuses two incompatible initializers and20 malformed ASTs.
+Separate `model-results.json` and `model-results.composed.json` preserve reader
+provenance; these are84 compiler-AST fixtures representing42 source variants,
+checked by each reader. Pipeline duplicates are not independent sources.
+It does not prove reader equivalence,source adequacy,or ordinary runtime
+acceptance. The existing54 kernel controls remain unchanged and standard-only.
+
+Fresh bounded VM build,MCP zero-error diagnostics,and setup-aware per-file
+controls pass. The doubled development harness takes10.009 s versus6.295 s
+for the prior single-reader per-file run; these are separate wall observations,
+not a controlled performance comparison. KeySort377/131 passes. Commands,
+exits,wall/RSS and proof reports are in `evidence/published-b86`. The new
+Admission/Compose artifacts require an updated H41 pickup pack; delivery is
+coordinator-pending. Full merged gates and native/browser positive diamond
+Identity and all modality controls remain open; no RUNTIME_GATE_PASS.
