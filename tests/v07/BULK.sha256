@@ -1,0 +1,5 @@
+7b6d7d340134c3b838fb3781561b05aeb91b42bbe79d93b14cd7017cf7652f69  tests/v07/Axioms.lean
+b1327113906488f9b0a429665303049c5d11cc6cbadc996fc4ca88da7793b167  tests/v07/axiom-pins.json
+4ef1b3b5dc86a37220be0360561d253d0749fddfffd31aae5aa9b479a3ae17fa  tests/v07/proof-clients.json
+8a99f31686a1344eb32c930419fc41accac3892f22b22951b94c1faed754d01f  tests/v07/check-pins.mjs
+6cf59e16bb412b93922c3874f5f2a14c3fa56e2b097ce6fdc912946ccb514703  tests/v07/check-pins.test.mjs
