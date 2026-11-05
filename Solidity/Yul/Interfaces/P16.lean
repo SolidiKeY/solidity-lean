@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterAbsent
 import Solidity.Yul.RawCheckedAdapterFor
 import Solidity.Yul.RawCheckedAdapterDoWhile
 import Solidity.Yul.RawCheckedAdapterLoop
@@ -62,3 +63,9 @@ effects, errors and Source control rejection before iteration. This does not
 cover context-growing initialization, omitted conditions or post clauses.
 Concrete composition/refusal controls live in Solidity.Yul.Checks.RawCheckedAdapterFor.
 -/
+
+/-! RawCheckedAdapterAbsent.adapter transports a supplied concrete literal-true
+for producer to the omitted-condition Source index, retaining runtime and the
+checked/coherence premises verbatim. Any post clause still requires the actual
+matching producer. Concrete initializer-write/break and refusal witnesses are
+in Solidity.Yul.Checks.RawCheckedAdapterAbsent. -/
