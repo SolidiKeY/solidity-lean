@@ -1,0 +1,3 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.38;
+import * as N from "B.sol"; import * as N from "C.sol"; contract Use { N.T value; }

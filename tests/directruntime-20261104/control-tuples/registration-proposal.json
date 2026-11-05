@@ -1,0 +1,23 @@
+{
+  "status": "all three modules registered; canonical composition published and checked; DirectRuntime migration pending",
+  "dependency_commit": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
+  "interface_commit": "b92fc3a1d170be29180f521c0fb9c959d5aa74cc",
+  "modules": [
+    "Solidity.Frontend.ExecutableAst.ControlTuple.Adapter",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls"
+  ],
+  "root": "Solidity.lean",
+  "central_registration_command": "scripts/coord-tools/register.sh",
+  "module_map": "docs/module-map/frontend.md",
+  "module_map_rows_proposal": "tests/directruntime-20261104/control-tuples/module-map-proposal.md",
+  "producer_packet": "Shared.executableReader composes the exported control steps with producer-owned memory callbacks; two-reader controls pass. DirectRuntime still uses its private readers.",
+  "runtime_probe": "test-only RuntimeProbe executable via temporary lakefile.runtime.toml; never register as production verifier",
+  "adopted_checkpoint": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "already_registered_modules": [
+    "Solidity.Frontend.ExecutableAst.ControlTuple.Adapter",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls",
+    "Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls"
+  ],
+  "remaining_registration_modules": []
+}

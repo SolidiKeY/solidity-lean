@@ -59,6 +59,61 @@ theorem ReferenceArrayAt.set_primitive {H : HTy} {R : RefTy} {p : PrimTy}
       · rw [word_bytes_length]
         omega
 
+/-- Fixed primitive children are headerless: cell=base+i. This transports
+initial parent representations through the actual typed set and byte/word
+writes; checked bounds are supplied by the following execution adapter. -/
+theorem ReferenceArrayAt.set_fixed_primitive {H : HTy} {R : RefTy} {p : PrimTy} {n : Nat}
+    {hp : Heap H} {root : HRef H (.array (.ref R))}
+    {base : Nat → Fin Evm.W} {m : Evm.Machine} {bytes : Environment.Memory}
+    (h : ReferenceArrayAt hp root base m bytes)
+    (child : HRef H (.fixed (.prim p) n)) (i : Nat) (v : p.Denote)
+    (w : Fin Evm.W)
+    (headerNe : (base root.id).val≠(base child.id).val+i)
+    (slotsNe : ∀ c, ReferenceSlots hp root base c → c≠(base child.id).val+i) :
+    ReferenceArrayAt (hp.set child (MObj.setElem .fixed (hp.get child) i v)) root base
+      (Evm.Memory.writeMachine m ((base child.id).val+i) (.val w))
+      (Environment.writeBytes bytes (32*((base child.id).val+i))
+        (Semantics.wordBytes w.val)) := by
+  first
+  | solve | simp only [] | omega
+  | have objectNe : child.id≠root.id := by
+      intro he
+      cases (HRef.heq_of_id child root he).1
+    have getRoot : (hp.set child (MObj.setElem .fixed (hp.get child) i v)).get root=hp.get root :=
+      Heap.get_set_ne hp child root objectNe _
+    have lenRoot : (hp.set child (MObj.setElem .fixed (hp.get child) i v)).len root .dyn=
+        hp.len root .dyn := by
+      simp only [Heap.len,getRoot]
+    refine ⟨?_,h.headerFits,cell_write_other m bytes _ _ w headerNe h.header,?_⟩
+    · constructor
+      · simpa only [lenRoot] using h.word.space
+      · change Evm.upd m.mem _ _ _= _
+        rw [Evm.upd_other _ _ headerNe,lenRoot]
+        exact h.word.length
+      · intro j q hq
+        rw [getRoot] at hq
+        have hj : j<hp.len root .dyn := (List.getElem?_eq_some_iff.mp hq).1
+        change Evm.upd m.mem _ _ _= _
+        rw [Evm.upd_other _ _ (slotsNe _ ⟨j,hj,rfl⟩)]
+        exact h.word.elements j q hq
+    · constructor
+      · intro c hc
+        obtain ⟨j,hj,he⟩ := hc
+        rw [lenRoot] at hj
+        exact h.pointers.fits c ⟨j,hj,he⟩
+      · intro c hc
+        obtain ⟨j,hj,he⟩ := hc
+        rw [lenRoot] at hj
+        have hc : ReferenceSlots hp root base c := ⟨j,hj,he⟩
+        have hne : c≠(base child.id).val+i := slotsNe c hc
+        obtain ⟨b,hw,hfit,hbytes⟩ := h.pointers.cells c hc
+        refine ⟨b,(Evm.upd_other _ _ hne).trans hw,hfit,?_⟩
+        rw [readMemory_write_frame]
+        · exact hbytes
+        · rw [word_bytes_length]
+          omega
+
+
 /-- A concrete unsafe overlap: storing numeric8 into a logical-pointer cell
 encodes8, whereas that cell's pointer value8 requires physical address256.
 This refutes unconditional parent preservation, not universal necessity of the
@@ -82,4 +137,6 @@ theorem numeric_eight_breaks_pointer (m : Evm.Machine) (bytes : Environment.Memo
 #guard_msgs (whitespace := lax) in #print axioms ReferenceArrayAt.set_primitive
 /-- info: 'Solidity.Backend.MemoryOps.Physical.numeric_eight_breaks_pointer' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms numeric_eight_breaks_pointer
+/-- info: 'Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.set_fixed_primitive' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms ReferenceArrayAt.set_fixed_primitive
 end Solidity.Backend.MemoryOps.Physical

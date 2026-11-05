@@ -1,0 +1,123 @@
+{
+  "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea",
+  "phases": [
+    {
+      "name": "owned-build",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.LiteralGrammarH28.Body",
+        "Solidity.Frontend.LiteralGrammarH28.BodyControls",
+        "Solidity.Frontend.LiteralGrammarH28.BodyPins",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryControls",
+        "Solidity.Frontend.LiteralGrammarH28.BoundaryPins",
+        "Solidity.Frontend.LiteralGrammarH28.Classification",
+        "Solidity.Frontend.LiteralGrammarH28.EncodingValue",
+        "Solidity.Frontend.LiteralGrammarH28.FragmentCompleteness",
+        "Solidity.Frontend.LiteralGrammarH28.Fragments",
+        "Solidity.Frontend.LiteralGrammarH28.FullControls",
+        "Solidity.Frontend.LiteralGrammarH28.FullPins",
+        "Solidity.Frontend.LiteralGrammarH28.Global",
+        "Solidity.Frontend.LiteralGrammarH28.Hex",
+        "Solidity.Frontend.LiteralGrammarH28.HexControls",
+        "Solidity.Frontend.LiteralGrammarH28.HexEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.HexPins",
+        "Solidity.Frontend.LiteralGrammarH28.ModeGrammar",
+        "Solidity.Frontend.LiteralGrammarH28.ProofSafety",
+        "Solidity.Frontend.LiteralGrammarH28.Quoted",
+        "Solidity.Frontend.LiteralGrammarH28.Roundtrips",
+        "Solidity.Frontend.LiteralGrammarH28.Scanner",
+        "Solidity.Frontend.LiteralGrammarH28.Split",
+        "Solidity.Frontend.LiteralGrammarH28.TaggedEncoding",
+        "Solidity.Frontend.LiteralGrammarH28.WordTable"
+      ],
+      "exit": 0,
+      "seconds": 5.060247431996686,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/owned-build.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "axioms",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullPins.lean"
+      ],
+      "exit": 0,
+      "seconds": 4.041672072002257,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/axioms.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "HexControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/HexControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.3320239419990685,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/HexControls.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "BodyControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BodyControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.6785123939989717,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/BodyControls.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "BoundaryControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/BoundaryControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 0.594207815003756,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/BoundaryControls.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "FullControls",
+      "command": [
+        "lake",
+        "env",
+        "lean",
+        "--tstack=131072",
+        "Solidity/Frontend/LiteralGrammarH28/FullControls.lean"
+      ],
+      "exit": 0,
+      "seconds": 2.8395342900039395,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/FullControls.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    },
+    {
+      "name": "inventory-audit",
+      "command": [
+        "python3",
+        "-B",
+        "tests/h28-sol/literal-grammar/audit.py",
+        "tests/h28-sol/literal-grammar/evidence/full-pins-build-02.log"
+      ],
+      "exit": 0,
+      "seconds": 0.08530843799962895,
+      "evidence": "/workspace/scratch/h28-runtime/h35-e7cf5143/inventory-audit.log",
+      "head": "e7cf51439e0831c64b58bd9f268bc0dbcf3ae4ea"
+    }
+  ]
+}

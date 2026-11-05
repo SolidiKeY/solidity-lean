@@ -1,0 +1,1055 @@
+{
+  "status": "conditional proof/fixture scope accepted; whole assignment blocked on reserved central registration",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "source_inputs": {
+    "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+    "Solidity/Frontend/Checked/Print.lean": "df481269236679b9934ee1cb60e00a980ff5a1f13bbb2407c1e9859af7b5b660",
+    "Solidity/Frontend/Checked/Parser.lean": "e7f3df06490946870a43712ecbd93f6f0a6140bbdb561665e665935158c745c3",
+    "Solidity/Frontend/Checked/Check.lean": "080f2cf13448d87033e9454f460663a155975ea412050077f629819dae7f19cf",
+    "Solidity/Frontend/Checked/Prec.lean": "1ba7dd728814ee45008755c139701560565f0fbb6557b8e68930f373e45f5bdf",
+    "Solidity/Frontend/Checked/Token.lean": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a",
+    "tests/upstream/grammar-0.8.38/SolidityParser.g4": "663afb0d91d482a886a6879c801ba6b6f83f34e250d3e8d9406b1ab198272b6a",
+    "tests/upstream/grammar-0.8.38/SolidityLexer.g4": "b6eb8ffcb358b8a854b22ed0e3df6ced8c42760a3da4f77899ba9c65a6dd7132"
+  },
+  "all_original_constructor_clauses": {
+    "elem": [
+      "address",
+      "addressPayable",
+      "bool",
+      "string",
+      "bytes",
+      "int",
+      "fixedBytes",
+      "fixed"
+    ],
+    "userType": [
+      "IdPath.head",
+      "arbitrary-depth IdPath.tail",
+      "no SOL-QN resolution"
+    ],
+    "array": [
+      "strict base",
+      "none",
+      "some original Syn.expr read-only atom",
+      "arbitrary array depth/interleavings"
+    ],
+    "mapping": [
+      "MapKey.elem with unchanged intrinsic non-addressPayable proof",
+      "MapKey.path",
+      "optional key name",
+      "strict value",
+      "optional value name"
+    ],
+    "fnType": [
+      "arbitrary parameter list",
+      "optional visibility internal/external/priv/pub",
+      "optional mutability pure/view/payable",
+      "all five original attribute layout shapes",
+      "arbitrary return list; empty means absent returns",
+      "explicit returns() refusal"
+    ],
+    "param": [
+      "strict type",
+      "none/memory/storage/calldata location",
+      "optional arbitrary name"
+    ],
+    "list-param": [
+      "nil",
+      "cons, arbitrary length; actual comma separators and parentheses"
+    ]
+  },
+  "proof_modules": [
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Boundaries.lean",
+      "sha256": "66724d8f22cb2bd3dade3c2bc6d8a3ae4209b30a48ef389e9c7cb26e8217d971",
+      "theorem_count": 28,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.Boundary.arbitrary_nested_boundary",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.balanced_append",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.balanced_cut",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.boundary_unique",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_boundary",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_close",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_open",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_plain",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_open",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_plain",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.cut_suffix",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.inner_comma_preserved",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.mark_close",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.mark_open",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.mismatched_close_refused",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.nest_balanced",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.nest_region",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.prefix_append",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.prefix_cons",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.prefix_head_inv",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.prefix_nil",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.region_append",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.region_balanced",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.region_cut",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.region_cut_boundary",
+        "Solidity.Frontend.TypeGrammarH28.Boundary.unterminated_group_refused"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Composition.lean",
+      "sha256": "a4221306ef32b0be942e508d52d962c0d5b1e8bbe02a71cb614dcf033650299a",
+      "theorem_count": 16,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.exact_array",
+        "Solidity.Frontend.TypeGrammarH28.exact_dynamic_depth",
+        "Solidity.Frontend.TypeGrammarH28.exact_elem",
+        "Solidity.Frontend.TypeGrammarH28.exact_empty_function",
+        "Solidity.Frontend.TypeGrammarH28.exact_fnType",
+        "Solidity.Frontend.TypeGrammarH28.exact_layout_equivalent",
+        "Solidity.Frontend.TypeGrammarH28.exact_mapping",
+        "Solidity.Frontend.TypeGrammarH28.exact_nested_layout",
+        "Solidity.Frontend.TypeGrammarH28.exact_no_length",
+        "Solidity.Frontend.TypeGrammarH28.exact_param",
+        "Solidity.Frontend.TypeGrammarH28.exact_params_cons",
+        "Solidity.Frontend.TypeGrammarH28.exact_params_nil",
+        "Solidity.Frontend.TypeGrammarH28.exact_some_length",
+        "Solidity.Frontend.TypeGrammarH28.exact_toks",
+        "Solidity.Frontend.TypeGrammarH28.exact_userType",
+        "Solidity.Frontend.TypeGrammarH28.params_cons_decompose"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Counterexamples.lean",
+      "sha256": "19f2e110beeeacf6a9d9896a0d313707120547b67e2b0de0cad56ca9bba19d9d",
+      "theorem_count": 2,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.raw_counterexample_precedence",
+        "Solidity.Frontend.TypeGrammarH28.raw_yield_not_unique"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Exactness.lean",
+      "sha256": "58765322178ba2e8bd951d1460ee01cba3ee93e47c48123ff1e4b61ccd9d6562",
+      "theorem_count": 32,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.Exactness.all_constructor_coverage",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.atom_length_balance",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.checked_type_complete",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.cons_precedence",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.deps_balanced",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.deps_sound",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.elem_params_deps",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_atom_dependencies",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_boundary_exactness",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_source_type_iff",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_type_completeness",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_type_exactness",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.finite_type_prefix",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.fn_precedence",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.frozen_type_complete",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.mixed_checked",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.mixed_deps",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.mixed_exact",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.mixed_prec",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.mixed_source_iff",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.param_certified",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.param_precedence",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.params_certified",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.source_type_complete",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.source_type_iff",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.source_type_sound",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_atoms_balanced",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_boundary_decomposition",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_boundary_exactness",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_certified",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_prefix",
+        "Solidity.Frontend.TypeGrammarH28.Exactness.type_yield_unique"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/Layouts.lean",
+      "sha256": "bbad6065ac81a1f2bda430776824e03adf352674eae6b3116d51a1019080c590",
+      "theorem_count": 8,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout",
+        "Solidity.Frontend.TypeGrammarH28.elem_toks",
+        "Solidity.Frontend.TypeGrammarH28.elem_yield",
+        "Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm",
+        "Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans",
+        "Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout",
+        "Solidity.Frontend.TypeGrammarH28.userType_toks",
+        "Solidity.Frontend.TypeGrammarH28.userType_yield"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserArrays.lean",
+      "sha256": "762b89814e72994c0b2b24a6a57755dc0884dec47e9eb1d2f38e64b11cdf832e",
+      "theorem_count": 32,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.brackets_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.brackets_no_payable",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.brackets_path_stop",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_checked_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_insufficient",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_layout",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_user_yield_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_elem_yield_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_frozen_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_toks",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_checked_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_insufficient",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_layout",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_user_yield_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.dynamic_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.elem_dispatch",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.elem_name_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.elem_name_payable",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.elem_name_token",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.elem_then_suffix",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.frozen_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.parseType_dynamic_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.parseType_dynamic_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.suffix_dynamic_insufficient",
+        "Solidity.Frontend.TypeGrammarH28.ParserArray.user_then_suffix"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserBasics.lean",
+      "sha256": "931f56f7bad2b381515116adf288dbfad826a718ba388dc5d7d808483b93508e",
+      "theorem_count": 18,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_single_projection",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_token_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.elem_yield_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.elementary_one_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.located_append",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.located_cons",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.located_nil",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.located_one",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.payable_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.payable_projection",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.raw_payable_no_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_dynamic_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_dynamic_step",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_stop",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.suffix_zero_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserBasic.type_zero_refused"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserChecks.lean",
+      "sha256": "804b474d15c68525233b22c7898c0d75e908bfd06f975f29d052b7ccb4aeca52",
+      "theorem_count": 10,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.artificial_payable_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.checked_category_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.checked_category_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_located_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_parseCat_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_tokens_injective",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.elem_yield_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.parseType_elem_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.parseType_elem_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserCheck.witness_locations_tokens"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserContexts.lean",
+      "sha256": "8ab669999ed030a7d2cef6e8586128ecc2d78057cae40441ce344e1d16b04371",
+      "theorem_count": 19,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_excludes_array_continuation",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_excludes_mutability_continuation",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_excludes_returns_continuation",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_excludes_visibility_continuation",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_no_attrs",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_no_path",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_no_payable",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_no_returns",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.boundary_no_suffix",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.brackets_boundary_no_path",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.brackets_boundary_no_payable",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.complete_dynamic_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.complete_dynamic_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.complete_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.complete_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.dynamic_elem_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.dynamic_user_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.elem_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserContext.user_prefix"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserDynamicClosure.lean",
+      "sha256": "71b7f2f83fd530632426a76e875cee17a946981c42948cc463cfd5d3f127e3e2",
+      "theorem_count": 20,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.array_none_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.array_none_toks",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.array_none_toks_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.array_none_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.brackets_snoc",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.certified_dynamic_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.complete_dynamic_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_mapping_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_mapping_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_succ",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_toks_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.dynamic_toks_from_base",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_checked_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_no_unused_layout",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_parseType_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_yield_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserDynamicClosure.grammar_yield_unique"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserFnAttrs.lean",
+      "sha256": "4171d25788dbcd017a21525ea8985b53fefbfd684765b38667cc0712f2d9bebc",
+      "theorem_count": 24,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_both_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_empty_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_layout",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_layout_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_mut_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arrange_vis_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arranged_attrs_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.arranged_fields_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.attrs_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.attrs_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.attrs_stop",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.layout_arrange",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.layout_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.map_append_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.mut_first_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.mut_step",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.overlong_order_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.repeated_mut_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.repeated_vis_stops",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.singles_both",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.singles_empty",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.singles_mut",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.singles_vis",
+        "Solidity.Frontend.TypeGrammarH28.ParserFnAttrs.vis_step"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserFunctions.lean",
+      "sha256": "a9cf3f1d2cb40f0bc583166b933b5eeb84b2d01c675816af0aa014ff8a59a1c6",
+      "theorem_count": 32,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.capture_paren_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.certified_fn",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.empty_returns_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_arrays_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_body_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_body_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_elem_checked_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_elem_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_elem_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_elem_tokens",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_params_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_parseType_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_returns_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_yield_attrs",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fn_yield_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.fuel_slack",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.function_two_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.nested_fn_elem_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.nested_fn_exact",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.nested_fn_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.nested_fn_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.params_prec_node",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.paren_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.parens_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.prefix_fn",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.ready_fn",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.returns_attr_boundary",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.returns_cons",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.returns_from_list",
+        "Solidity.Frontend.TypeGrammarH28.ParserFunction.returns_nil"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserLengths.lean",
+      "sha256": "414106275e03eb2af39b7c9ef48cfb989491c5172087c1a52529b306744ad09b",
+      "theorem_count": 26,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.all_node",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.array_some_parseType_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.array_some_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.array_some_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.array_some_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.array_some_yield_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.balanced_front_no_close",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.certified_array_some",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.expr_ident_before_close",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.expr_num_before_close",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.expr_zero_not_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.ident_expr_at",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.ident_expr_four_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.ident_length_atom",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.num_expr_at",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.num_length_atom",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.prefix_array_some",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.ready_array_some",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_ident_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_num_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_tokens_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_tower_exact",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_tower_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.static_tower_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserLength.suffix_static_step"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserMapping.lean",
+      "sha256": "f24ef81c6df5030eeb2a9525ad6fa9eaeffde396cfe9436881a487bddf7cea43",
+      "theorem_count": 44,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.artificial_payable_key_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.budget_lift",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_dynamic_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_dynamic_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_nested_mappings",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_parseType",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_parseType_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.certified_yield_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.complete_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.dynamic_tokens_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.key_elem_spelling",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_body_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_checked",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_dispatch",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_elem_tail",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_path_tail",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_tokens_cons",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_toks",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_toks_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.mapping_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.middle_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.name_boundary",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_dynamic_elem_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_dynamic_elem_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_dynamic_user_inhabited",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_dynamic_user_unique",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_mappings_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.nested_mappings_toks",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.opt_ident_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.parseType_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.parseType_mapping_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.payable_key_spelling_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.tail_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.toks_yield_decompose",
+        "Solidity.Frontend.TypeGrammarH28.ParserMapping.type_prec_node"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserParams.lean",
+      "sha256": "d729236599a907ec89eac239f3d0e17c376dcc557d5694e60a9d963877f86d97",
+      "theorem_count": 39,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.commaSep_head",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.comma_sep_tail_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.duplicate_comma_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.elem_params_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.elem_params_exact",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.elem_params_parse",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.elem_params_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.elem_params_ready",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_boundary_no_ident",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_boundary_type",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_end_boundary",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_end_no_comma",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_ready_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_ready_exact",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_ready_positive",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.list_ready_to_syn",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.missing_close_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_length",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_list_inverse",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_prec_converse",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_rparen_no_success",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_success_no_close",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_tail_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_values_to_syn",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.param_yield",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.params_cons_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.params_cons_prec",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.params_nil_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.params_paren_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.sep_aux_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.sep_aux_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.sep_aux_step",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.sep_one_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.tail_tokens_boundary",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.tail_tokens_count",
+        "Solidity.Frontend.TypeGrammarH28.ParserParams.trailer_type_boundary"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserPaths.lean",
+      "sha256": "dcd685799be0e7c3837fa9703394e528de1932e4c19f0095464b4eeeb7df8789",
+      "theorem_count": 21,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.many_step",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.many_stop",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.parseType_user_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.parseType_user_iff",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_step_empty",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_step_lone_period",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_step_pair",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_step_period_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_tail_budget",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_tail_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.path_tail_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_complete_ge",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_located_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_parseCat_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_tokens_injective",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_trailing_period_refused",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_type_complete",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_yield_eof",
+        "Solidity.Frontend.TypeGrammarH28.ParserPath.user_yield_unique"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/ParserReady.lean",
+      "sha256": "8fb3756765d5639f27750d7313e9045eed16112b9068a5026d5e89825224f02a",
+      "theorem_count": 19,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.continuation_no_attrs",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.continuation_no_path",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.continuation_no_payable",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.continuation_no_returns",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.grammar_prefix",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.not_complete_elem_one",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_array_none",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_dynamic",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_to_certified",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.prefix_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_array_none",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_completeAt",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_elem",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_elem_zero",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_mapping",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.ready_user",
+        "Solidity.Frontend.TypeGrammarH28.ParserReady.unconsumed_layout_control"
+      ]
+    },
+    {
+      "file": "Solidity/Frontend/TypeGrammarH28/TypeRegions.lean",
+      "sha256": "6af64706d53c975a897435f97beb21063cd029359ded26632720c0dd9669cea4",
+      "theorem_count": 54,
+      "theorems": [
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.afterFirst_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_cons_nil",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.array_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_array_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_elem_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_fnType_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_mapping_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_param_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_cons_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_nil_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_userType_iff",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.brackets_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_balanced",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_split",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_atoms_balanced",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_type_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.elem_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.every_close_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.fn_attrs_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.function_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.key_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.loc_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.malformed_layouts_refused",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.mapping_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.mut_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.name_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_atoms_balanced",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_type_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.no_length_balance",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.numeric_length_balance",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.param_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.param_yield_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.params_first_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.params_yield_regions",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.parens_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.path_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.path_tail_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.region_all_closes",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.single_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.some_length_balance",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.type_token_boundary_unique",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_boundary",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.type_yield_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.vis_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_array_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_elem_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_fnType_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_mapping_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_param_region",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_cons",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_nil",
+        "Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_userType_region"
+      ]
+    }
+  ],
+  "statement_count": 444,
+  "headline_endpoints": [
+    "Exactness.finite_atom_dependencies",
+    "Exactness.finite_type_completeness",
+    "Exactness.frozen_type_complete",
+    "Exactness.source_type_sound",
+    "Exactness.source_type_iff",
+    "Exactness.finite_source_type_iff",
+    "Exactness.finite_type_exactness",
+    "Exactness.type_boundary_decomposition",
+    "Exactness.type_boundary_exactness",
+    "Exactness.finite_boundary_exactness"
+  ],
+  "explicit_atom_contract": "ParserLength.LengthAtom; actual expr before real bracket, canonical suffix-stable yield, positive constructive token-bound budget, balanced nonempty yield; final finite results require only listed original array-some payloads",
+  "independent_atom_instances": [
+    "arbitrary identifier",
+    "every NumLit"
+  ],
+  "inhabited_kernel_controls": [
+    "all elementary families",
+    "qualified paths and malformed path boundaries",
+    "arbitrary-depth dynamic arrays",
+    "all mapping key/name cases and arbitrary mapping-array interleavings",
+    "all32 function attribute layouts",
+    "arbitrary elementary parameter/return lists with all optional locations/names",
+    "arbitrary-depth nested functions, child duplicated in parameter and return",
+    "arbitrary-depth static numeric/identifier arrays",
+    "Exactness.mixed_checked: every type constructor, both array branches, every field family"
+  ],
+  "preserved_false_claims": [
+    {
+      "claim": "Unrestricted raw type-name yield implies AST identity",
+      "counterexample": "Counterexamples.raw_yield_not_unique",
+      "precedence_control": "Counterexamples.raw_counterexample_precedence"
+    }
+  ],
+  "external_fixtures": [
+    {
+      "id": "elementary-all-dimensions",
+      "file": "fixtures/positive/elementary-all-dimensions.sol",
+      "expect_accept": true,
+      "clauses": [
+        "elem:all8families",
+        "integer:all64widths",
+        "fixedBytes:all32lengths",
+        "fixed:all5184dimensions+2aliases",
+        "integer:2aliases"
+      ],
+      "sha256": "a26840e71b0de429d9a6adef9681d24b026f25e7194db0a19914511e29caf485",
+      "type_position_count": 5289
+    },
+    {
+      "id": "mapping-all-elementary-keys",
+      "file": "fixtures/positive/mapping-all-elementary-keys.sol",
+      "expect_accept": true,
+      "clauses": [
+        "mapping:key.elem:notPayable:all5286spellings"
+      ],
+      "sha256": "3bf9ef9def423a8947b875262897556ec8309df6a3cefeeee285b56520ce9911",
+      "type_position_count": 5286
+    },
+    {
+      "id": "qualified-paths",
+      "file": "fixtures/positive/qualified-paths.sol",
+      "expect_accept": true,
+      "clauses": [
+        "userType:head",
+        "userType:tail:multiple",
+        "SOL-QN:unresolved-is-parsing-only"
+      ],
+      "sha256": "bc320377d303ec7454348d9589b95fe2854c6e34f1f904281b31ebc29b5f19d9",
+      "type_position_count": 3
+    },
+    {
+      "id": "mapping-names-values",
+      "file": "fixtures/positive/mapping-names-values.sol",
+      "expect_accept": true,
+      "clauses": [
+        "mapping:key.elem",
+        "mapping:key.path",
+        "mapping:keyName:none+some",
+        "mapping:valueName:none+some",
+        "mapping:value:all5constructors",
+        "mapping:nested-boundary"
+      ],
+      "sha256": "57237bd40354d54367ea694b260c86af262442b28471e531b1ceedc6dbf55f48",
+      "type_position_count": 40
+    },
+    {
+      "id": "function-layouts-params-returns",
+      "file": "fixtures/positive/function-layouts-params-returns.sol",
+      "expect_accept": true,
+      "clauses": [
+        "fnType:all32attributevalues+orders",
+        "params:nil+cons",
+        "param:location:none+all3",
+        "param:name:none+some",
+        "returns:nil+cons",
+        "return:location:none+all3",
+        "return:name:none+some"
+      ],
+      "sha256": "7ed95e1aea6a060351786833306c67f1d3c552da8e33d8d6c191433d7a9b88a7",
+      "type_position_count": 2592
+    },
+    {
+      "id": "nested-arrays-functions-mappings",
+      "file": "fixtures/positive/nested-arrays-functions-mappings.sol",
+      "expect_accept": true,
+      "clauses": [
+        "array:dynamic",
+        "array:static:readOnlyAtoms",
+        "array:base:all5constructors",
+        "param:list:multiple",
+        "return:list:multiple",
+        "boundary:nestedMappingFunctionArray",
+        "boundary:atom-call-comma",
+        "boundary:depth32"
+      ],
+      "sha256": "b569f7595afe60b6101a17d87fd7f9119e6f2ddd9dd0b4e388b14b9552dccecb",
+      "type_position_count": 9
+    },
+    {
+      "id": "payable-mapping-key",
+      "file": "fixtures/negative/payable-mapping-key.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:payable-mapping-key"
+      ],
+      "sha256": "2ec916789ec97db081084a61a0166601c568545baec801699bd27b58a16e7981",
+      "type_source": "mapping(address payable=>bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "array-mapping-key",
+      "file": "fixtures/negative/array-mapping-key.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:array-mapping-key"
+      ],
+      "sha256": "cf592a8eb43794310eaee37e36c9f4b2f706045fc8126432c9ee108a30db3ff9",
+      "type_source": "mapping(uint[]=>bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-mapping-key",
+      "file": "fixtures/negative/function-mapping-key.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-mapping-key"
+      ],
+      "sha256": "e7d7acffbd82bfdc5640f98f26fe07b99e5561722d1787111533fc09bf14c3f5",
+      "type_source": "mapping(function()=>bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "mapping-mapping-key",
+      "file": "fixtures/negative/mapping-mapping-key.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:mapping-mapping-key"
+      ],
+      "sha256": "bf706ab8e90841125f0ae61c525fbf9086a2cf4c0145f321cd81d9b81d6fd66f",
+      "type_source": "mapping(mapping(uint=>bool)=>bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "mapping-missing-arrow",
+      "file": "fixtures/negative/mapping-missing-arrow.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:mapping-missing-arrow"
+      ],
+      "sha256": "30e39b96be60757578150be851b0cf11ce6cd7ef9d4ce6f726244c341ccdbe17",
+      "type_source": "mapping(uint bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "mapping-two-key-names",
+      "file": "fixtures/negative/mapping-two-key-names.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:mapping-two-key-names"
+      ],
+      "sha256": "f79a197b0e128995a0afe1746ed66470f1b3220faac4fb15d99fdbdf3a16f0a9",
+      "type_source": "mapping(uint a b=>bool)",
+      "type_position_count": 0
+    },
+    {
+      "id": "mapping-two-value-names",
+      "file": "fixtures/negative/mapping-two-value-names.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:mapping-two-value-names"
+      ],
+      "sha256": "4afa7b1407ccba42c886cedda5750bbd2bcb3d96829a838d13b74ee1f8d6b2e3",
+      "type_source": "mapping(uint=>bool a b)",
+      "type_position_count": 0
+    },
+    {
+      "id": "mapping-missing-close",
+      "file": "fixtures/negative/mapping-missing-close.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:mapping-missing-close"
+      ],
+      "sha256": "ac0574f9fe39aedb0cba629d759bcc9d9b416ed7c62b78aff4ba77ae9f3bbab2",
+      "type_source": "mapping(uint=>bool",
+      "type_position_count": 0
+    },
+    {
+      "id": "array-missing-close",
+      "file": "fixtures/negative/array-missing-close.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:array-missing-close"
+      ],
+      "sha256": "3b4e420905afe019f120d4a6e0d3358b6225c5f72bacf153de6c59728f708ea8",
+      "type_source": "uint[1",
+      "type_position_count": 0
+    },
+    {
+      "id": "array-length-comma",
+      "file": "fixtures/negative/array-length-comma.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:array-length-comma"
+      ],
+      "sha256": "7261503e0ff927805ab9bddbeb8ad37f0beebb8f514beb0f5128265176e9d5ba",
+      "type_source": "uint[1,2]",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-trailing-param-comma",
+      "file": "fixtures/negative/function-trailing-param-comma.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-trailing-param-comma"
+      ],
+      "sha256": "e237340689b4d4cb438b7d34409671086a608d70e042e9a5bab26d6402aaed53",
+      "type_source": "function(uint,) internal",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-leading-param-comma",
+      "file": "fixtures/negative/function-leading-param-comma.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-leading-param-comma"
+      ],
+      "sha256": "1e58c69e11edeb67abe9649beadae64f8fbdfc60d5b5b0fce1be5ecfbd2117dc",
+      "type_source": "function(,uint) internal",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-empty-returns",
+      "file": "fixtures/negative/function-empty-returns.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-empty-returns"
+      ],
+      "sha256": "b5815e63fed3b56cb2dce24e5f9ba7c496213b342ce93acc08b43eb330c1d586",
+      "type_source": "function() returns()",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-repeat-mutability",
+      "file": "fixtures/negative/function-repeat-mutability.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-repeat-mutability"
+      ],
+      "sha256": "563278d0f73991ca3cdea6e71225ba5604321ab8d4a4dbfc9907e10721b34f6f",
+      "type_source": "function() view pure",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-repeat-visibility",
+      "file": "fixtures/negative/function-repeat-visibility.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-repeat-visibility"
+      ],
+      "sha256": "5e17525ab256ca93fdb67c7e916a550be09c1d62c3a6e94372d73a7216a9e75e",
+      "type_source": "function() internal external",
+      "type_position_count": 0
+    },
+    {
+      "id": "parameter-repeat-location",
+      "file": "fixtures/negative/parameter-repeat-location.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:parameter-repeat-location"
+      ],
+      "sha256": "694a4503acbeb78fc8a5b7b4688c91226565eb8ab9703e948f9bf6a30da58ef9",
+      "type_source": "function(uint memory storage p) internal",
+      "type_position_count": 0
+    },
+    {
+      "id": "return-trailing-comma",
+      "file": "fixtures/negative/return-trailing-comma.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:return-trailing-comma"
+      ],
+      "sha256": "365fe0e969b0a81c5f33ba0be2e33d2ab35f96fb41129f83e9c2f1065d81fa89",
+      "type_source": "function() returns(uint,)",
+      "type_position_count": 0
+    },
+    {
+      "id": "qualified-trailing-period",
+      "file": "fixtures/negative/qualified-trailing-period.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:qualified-trailing-period"
+      ],
+      "sha256": "fb7ac43ce87ca3a5924d7b5291b34d6100f5c032fe0ce4874ff2d626ec7d565e",
+      "type_source": "A.",
+      "type_position_count": 0
+    },
+    {
+      "id": "qualified-double-period",
+      "file": "fixtures/negative/qualified-double-period.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:qualified-double-period"
+      ],
+      "sha256": "f1bc470c12ba25e7ba6d0a231fe1b894c57dfd22727d0382b9db88f2a702ba23",
+      "type_source": "A..B",
+      "type_position_count": 0
+    },
+    {
+      "id": "qualified-keyword-part",
+      "file": "fixtures/negative/qualified-keyword-part.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:qualified-keyword-part"
+      ],
+      "sha256": "4801f3aa4be5ae8267b6f248016206a35d5f788f4b477812592729174bcaef7b",
+      "type_source": "A.bool",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-missing-close",
+      "file": "fixtures/negative/function-missing-close.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-missing-close"
+      ],
+      "sha256": "e6165ba8fd93dd6db39262a5b76ec6e249364fdba1f2cc10db3c1ecaa532cf47",
+      "type_source": "function(uint",
+      "type_position_count": 0
+    },
+    {
+      "id": "array-wrong-close",
+      "file": "fixtures/negative/array-wrong-close.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:array-wrong-close"
+      ],
+      "sha256": "12d8f128e33e9664e7de99a0a80d16a1af522fe7741400125d9a94dfed637090",
+      "type_source": "uint[1)",
+      "type_position_count": 0
+    },
+    {
+      "id": "function-wrong-close",
+      "file": "fixtures/negative/function-wrong-close.sol",
+      "expect_accept": false,
+      "clauses": [
+        "negative:function-wrong-close"
+      ],
+      "sha256": "d002bcf2f3bfd52ac654802aa8639f908686b6472db1858937744247608c3505",
+      "type_source": "function(uint}",
+      "type_position_count": 0
+    }
+  ],
+  "external_enumeration": {
+    "elementary_spellings": 5287,
+    "mapping_elementary_keys": 5286,
+    "function_attribute_variants": 32,
+    "function_parameter_variants": 9,
+    "function_return_variants": 9,
+    "function_cross_product": 2592
+  },
+  "compiler": {
+    "version": "0.8.38+commit.1835d247.Emscripten.clang",
+    "filename": "soljson-v0.8.38+commit.1835d247.js",
+    "sha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390"
+  },
+  "phase": "parsing",
+  "external_boundary": "External solc syntax fixtures only; no Lean proof, name resolution, constant evaluation, type admission, lowering or compiler equivalence.",
+  "case_counts": {
+    "positive_distinct": 13218,
+    "negative": 23,
+    "all": 13241
+  },
+  "trust": {
+    "gate": "h28-type-1a6754c4e28f.json",
+    "allowed_axioms": [
+      [],
+      [
+        "propext"
+      ]
+    ],
+    "signature_manifest": "local-axiom-signatures.json",
+    "all_sources_bound": true,
+    "initial_global_gate": "h28-type-9f3538c8bd3b.json"
+  },
+  "outstanding": [
+    "central owner registers pending modules without changing task premises/exclusions/budgets",
+    "required full run-lean/roots/orphans gates pass at integrated head"
+  ],
+  "not_claimed": [
+    "arbitrary-expression LengthAtom proof",
+    "SOL-QN resolution",
+    "SOL-CB constant evaluation",
+    "operational admission/lowering",
+    "whole-expression/unit uniqueness",
+    "full external AST equivalence",
+    "whole compiler correctness"
+  ],
+  "final_validation": "final-validation-summary.json",
+  "handoff_status": "final committed/sealed handoff being prepared; actual archive contains follow-up receipts"
+}

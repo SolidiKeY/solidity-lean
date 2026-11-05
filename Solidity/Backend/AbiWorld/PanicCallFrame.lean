@@ -35,5 +35,7 @@ theorem selected (σ : State C Γ) (c : ExtCall C Γ)
     simpa only [encodePanic,panicSelector,List.cons_append,THalt.ofData] using call_data σ (encodePanic n ++ suffix)
   simp only [TRun.tryCall,if_neg hnz,hc,Bool.and_self,ite_true,Binders.toRet,actual,error_reject,PanicReadWindow.decode n hn suffix]
 end Solidity.Backend.AbiWorld.PanicCallFrame
-#print axioms Solidity.Backend.AbiWorld.PanicCallFrame.call_data
-#print axioms Solidity.Backend.AbiWorld.PanicCallFrame.selected
+/-- info: 'Solidity.Backend.AbiWorld.PanicCallFrame.call_data' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.PanicCallFrame.call_data
+/-- info: 'Solidity.Backend.AbiWorld.PanicCallFrame.selected' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.AbiWorld.PanicCallFrame.selected

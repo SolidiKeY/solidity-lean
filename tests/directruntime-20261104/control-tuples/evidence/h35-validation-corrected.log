@@ -1,0 +1,21 @@
+PASS build-touched 1s /workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/h35-build-corrected/1.log
+PASS lean:Solidity/Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean 1s /workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/h35-audit-controls-corrected/1.log
+PASS lean:Solidity/Frontend/ExecutableAst/ControlTuple/IntrinsicControls.lean 15s /workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/h35-audit-controls-corrected/2.log
+PASS lean:tests/directruntime-20261104/control-tuples/ProofAudit.lean 11s /workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/h35-audit-controls-corrected/3.log
+MODEL_PASS executeFirst: ["1"]
+MODEL_PASS whileZero: ["0"]
+MODEL_PASS continueTest: ["2"]
+MODEL_PASS breakTest: ["1"]
+MODEL_PASS earlyReturn: ["7"]
+MODEL_PASS swap: ["2", "1"]
+MODEL_PASS declaration: ["3", "true"]
+MODEL_PASS skipped: ["5"]
+MODEL_PASS repeated: ["1"]
+UNKNOWN aliased: reference declaration
+UNKNOWN sideEffect: unary operator
+UNKNOWN inlineArray: compact verifier: unsupported type uint8
+UNKNOWN callTuple: expected explicit tuple
+MODEL_PASS stableAlias: repeated literal-index target returns 1
+INTRINSIC_UNKNOWN dynamicAlias after reader admission: a tuple assignment to two targets that are not stack locals
+MODEL_FAIL_PRESERVED discardedFailure(0): model halted: revert
+MODEL_PASS discardedFailure(1): returns 2
