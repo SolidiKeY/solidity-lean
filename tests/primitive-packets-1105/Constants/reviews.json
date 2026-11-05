@@ -22,12 +22,16 @@
     "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
     "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
   },
-  "checker_sha256": "088c459f17ff2e7015c9e2b93706d183b372b700fda13d40006d5c00ef71d8a1",
-  "manifest_sha256": "1b166921a80567859a5903c419cd9498d5c4176d0aaae03eefbab4330678a1d3",
+  "checker_sha256": "7410d4c50c816ba3c512b50086c9427d6b93d9513158675e665b5734924cd7f0",
+  "manifest_sha256": "e2612e4c2952b7297168e6c0b5691032962a658e0fc69d3287312f4957792f94",
   "checkpoint": "Unfinished: exit137,resource_stop=true,763.437s,minH1=4276592640 bytes; no passing checkpoint asserted.",
   "publication_review": {
     "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
     "finder": "PASS: actual published tree exactly4modules, Controls absent; hashes/rootimports/ancestry/13APIpins; forged complete delivery rejected. Read-only/noLeanserver.",
     "skeptic": "PASS: exact published four-module set and byte pins; remaining Controls absent; provenance clear, scope safeguards retained. Read-only/noLeanserver."
+  },
+  "rebase_review": {
+    "finder": "PASS: conflict-free rebase,47proof/10untracked hashes preserved, backupref, ancestry/protectedbaseline guards; original/fresh46axiomprintmaps independently checked. Read-only/noLeanserver.",
+    "skeptic": "PASS: target/baseline/HEAD graph, zeroConstantsdelta beforebaseline, protected proof/APIpins, freshAudit27.09s complete and independentprintmap checks. Read-only/noLeanserver."
   }
 }
