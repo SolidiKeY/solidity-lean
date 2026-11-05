@@ -1898,3 +1898,20 @@ the count modulo 256. Low-gas empty-stack cases prove gas-before-arity priority;
 fuel failure remains separate. Eight new axiom reports have exact guarded
 expectations. These consumers preserve each model's own complete frame and close
 no full opcode, world, whole-program resource or Osaka adequacy obligation.
+
+
+## Selected equality and zero-test correspondence
+
+The actual bitwise/comparison selector's EQ/ISZERO certificates connect numeric
+IR and scalar execution to charged fetched steps and native continuations.
+Inputs remain full words; results use the existing canonical flag encoding.
+Numeric initial-stack correspondence, legal capacity, gas and fuel stay explicit.
+Arbitrary numeric ISZERO inputs do not extend Source Boolean admission.
+
+Populated clients distinguish `1` from `257` despite their equal low byte, true
+full-word equality, zero from the nonzero word `256`, incorrect flag/tail outputs
+and exact gas/stack/fuel priority. Both opcodes include simultaneous low-gas and
+empty-stack refusals. Complete native records retain ordered code, stack, buffers,
+calldata, accounts and initial accounts; each model preserves its own frame.
+Eight new axiom reports have exact guarded expectations. No full opcode,
+Source-origin, physical, world or Osaka adequacy obligation is closed.
