@@ -1,6 +1,7 @@
 import Solidity.Backend.CalldataPackets.RawInt.Controls
 
-/-! Exact axiom pins for G35-INT-RAW-1105 (Execution and Controls). -/
+/-! Exact axiom pins for G35-INT-RAW-1105 (Execution and Controls); the same
+pins close `Controls.lean`, so the library build enforces them too. -/
 
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_range' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_range
@@ -18,6 +19,8 @@ import Solidity.Backend.CalldataPackets.RawInt.Controls
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.accepted_value' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.accepted_value
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_accepted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_accepted
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_dirty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -82,6 +85,10 @@ import Solidity.Backend.CalldataPackets.RawInt.Controls
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters' does not depend on any axioms -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters
 /-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values' depends on axioms: [propext,
@@ -132,3 +139,23 @@ import Solidity.Backend.CalldataPackets.RawInt.Controls
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy

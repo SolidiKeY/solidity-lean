@@ -45,7 +45,9 @@ theorem copy_run {E : Source.Env} {Γ : Source.RCtx}
   unfold values
   cases (List.range len).mapM (fun j => Source.decodeWord E.layout (Source.cdWordAt F (off+32*j)) (.int t)) <;> rfl
 
-/-- Expose the actual sign-extension test for every declared signed width. -/
+/-- The decoder's signed branch unfolded: the 256-bit two's-complement reading
+followed by the declared range test (the width-specific sign-extension test
+itself is `accepted`/`accepted_sign_bits` below). -/
 theorem signed_decode_range (D : Source.Layout) (t : Source.IntTy) (signed : t.signed=true) (w : Nat) :
     Source.decodeWord D w (.int t) =
       let v : Int := if 2^255 ≤ (Source.toWord w).val then
@@ -158,6 +160,25 @@ theorem accepted_sign_bits (t : Source.IntTy) (signed : t.signed=true) (w : Nat)
   have hq : (Q-1)*P = 2^256-P := by rw [Nat.sub_one_mul, Nat.mul_comm, hPQ]
   rw [hq] at hm
   omega
+
+/-- The value of an accepted word, stated without `wordInt`: a signed word in
+the low band is itself, one in the high band is `w - 2^256`; an unsigned word
+is itself. -/
+theorem accepted_value (t : Source.IntTy) (w : Solidity.Roadmap.Word) (h : accepted t w.val) :
+    Source.wordInt t w =
+      if t.signed ∧ 2^(t.bits-1) ≤ w.val then (w.val : Int)-((2^256 : Nat) : Int) else (w.val : Int) := by
+  obtain ⟨s,b,_,h8,h256⟩ := t
+  have hw : w.val < 2^256 := w.isLt
+  cases s with
+  | true =>
+    have hP : 2^(b-1) ≤ 2^255 := Nat.pow_le_pow_right (by decide) (by omega)
+    have h1 : 1 ≤ 2^(b-1) := Nat.one_le_two_pow
+    simp only [accepted,if_true] at h
+    simp only [Source.wordInt,true_and]
+    generalize 2^(b-1) = P at *
+    split <;> split <;> omega
+  | false =>
+    simp only [Source.wordInt,Bool.false_eq_true,false_and,if_false]
 
 /-- An accepted word decodes to its two's-complement (or zero-extended) value. -/
 theorem decode_accepted (D : Source.Layout) (t : Source.IntTy) (w : Nat)

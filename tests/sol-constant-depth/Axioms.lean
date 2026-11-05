@@ -1,7 +1,7 @@
 import Solidity.Frontend.ConstantDepth.Controls
-import Solidity.Frontend.ConstantDepth.Correspondence
 
-/-! Exact axiom pins for every theorem in `Solidity.Frontend.ConstantDepth` (SOL-CB). -/
+/-! Exact axiom pins for every theorem in `Solidity.Frontend.ConstantDepth` (SOL-CB);
+the same pins close `Controls.lean`, so the library build enforces them too. -/
 
 /-- info: 'Solidity.Frontend.ConstantDepth.mem_constDeps_iff' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.mem_constDeps_iff
@@ -85,8 +85,8 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.constDeps_declared_iff
 /-- info: 'Solidity.Frontend.ConstantDepth.rank_declared_dependency_lt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.rank_declared_dependency_lt
-/-- info: 'Solidity.Frontend.ConstantDepth.rank_reach_antisymm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.rank_reach_antisymm
+/-- info: 'Solidity.Frontend.ConstantDepth.depPath_rank_no_return' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.depPath_rank_no_return
 /-- info: 'Solidity.Frontend.ConstantDepth.teval_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.teval_unique
 /-- info: 'Solidity.Frontend.ConstantDepth.nconst_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -107,10 +107,16 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.chain_value
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.chain_rank_tight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.chain_rank_tight
-/-- info: 'Solidity.Frontend.ConstantDepth.Controls.chain_levels' does not depend on any axioms -/
-#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.chain_levels
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.chain_teval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.chain_teval
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.near_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.near_contract
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.near_rank' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.near_rank
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.near_rank_tight' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.near_rank_tight
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.near_teval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.near_teval
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.diamond_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.diamond_contract
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.diamond_rank' depends on axioms: [propext] -/
@@ -141,6 +147,14 @@ import Solidity.Frontend.ConstantDepth.Correspondence
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.cyclic_values
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.unused_cycle_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.unused_cycle_value
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.unused_cycle_teval
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_contract
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_no_edge
+/-- info: 'Solidity.Frontend.ConstantDepth.Controls.qualified_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.qualified_refused
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.overflow_contract' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Frontend.ConstantDepth.Controls.overflow_contract
 /-- info: 'Solidity.Frontend.ConstantDepth.Controls.overflow_values' depends on axioms: [propext, Classical.choice, Quot.sound] -/

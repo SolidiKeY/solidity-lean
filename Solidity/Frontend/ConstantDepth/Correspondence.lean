@@ -38,8 +38,10 @@ theorem constDeps_declared_iff {E : Env} {d : Decl} {e : Syn .expr} {b : Node}
   · rintro ⟨p, d', hp, hd', hc', rfl⟩
     exact ⟨d, e, p, d', hl, hc, he, hp, hd', hc', rfl⟩
 
-/-- Rank decreases along every resolved path of a declared constant's initializer,
-qualified paths included. -/
+/-- Rank decreases along every resolved path of a declared constant's
+initializer that names a constant. (In expressions `Syn.paths` yields only
+plain identifiers: a member access `K.X` contributes the path `K`, so a
+qualified constant reference is no graph edge; see `Controls.qualified_no_edge`.) -/
 theorem rank_declared_dependency_lt {E : Env} {d d' : Decl} {e : Syn .expr} {p : IdPath}
     (hw : E.decls.Pairwise fun a b => a.clash E b = false) (ha : ConstsAcyclic E)
     (hd : d ∈ E.decls) (hc : d.isConst = true) (hn : d.name ≠ "") (he : d.init? = some e)
@@ -48,19 +50,21 @@ theorem rank_declared_dependency_lt {E : Env} {d d' : Decl} {e : Syn .expr} {p :
   rank_lt ha (mem_constNodes_iff.mpr ⟨d, hd, hc, rfl⟩)
     ((constDeps_declared_iff hw hd hc hn he).mpr ⟨p, d', hp, hd', hc', rfl⟩)
 
-/-- Reachability and rank: a node strictly below another in the graph has a
-strictly smaller rank, and reaching back is impossible. -/
-theorem rank_reach_antisymm {E : Env} (ha : ConstsAcyclic E) {a b : Node}
-    (hA : a ∈ constNodes E) (hab : DepPath E a b) : ¬ Reach E.constDeps b a := by
-  intro hba
+/-- Along a nonempty dependency path the rank strictly drops, so no path
+leads back (a corollary of `rank_lt_path` and `rank_mono`). -/
+theorem depPath_rank_no_return {E : Env} (ha : ConstsAcyclic E) {a b : Node}
+    (hA : a ∈ constNodes E) (hab : DepPath E a b) :
+    rank E b < rank E a ∧ ¬ Reach E.constDeps b a := by
+  have h1 := rank_lt_path ha hA hab
+  refine ⟨h1, fun hba => ?_⟩
   have hb : b ∈ constNodes E := by
     obtain ⟨c, hc, hcb⟩ := depPath_iff.mp hab
     exact Closed.reach (fun _ _ _ h => constDeps_sub h) hcb (constDeps_sub hc)
-  have h1 := rank_lt_path ha hA hab
   have h2 := rank_mono hb hba
   omega
 
-/-- Typed evaluation is functional under the unchanged contract. -/
+/-- Typed evaluation is functional under the unchanged contract (derived from
+completeness; determinism without the contract is not stated here). -/
 theorem teval_unique {E : Env} {scope : Option String} {e : Syn .expr} {v w : TVal}
     (hw : E.decls.Pairwise fun a b => a.clash E b = false) (ha : ConstsAcyclic E)
     (hv : TEval E scope e v) (hw' : TEval E scope e w) : v = w := by

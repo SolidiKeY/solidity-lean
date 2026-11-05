@@ -42,6 +42,8 @@ theorem empty_copy {E : Source.Env} {Γ : Source.RCtx} (F : Source.Fr)
   rw [copy_run]
   rfl
 
+/-- The standalone copy reads past the end of calldata as zero words; at entry
+`cdTail` refuses such spans first (`entry_truncated_copy`, `entry_short_head`). -/
 theorem eof_padding {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
     (Source.cdToMem (frame []) (ArrayTy int8) 123 1).run y=
       (.ok (.val (.memRef rfl y.2.heap.next)),
@@ -60,7 +62,7 @@ theorem one_horizon {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E)
     (y : Source.EMState E Γ) :
     (Source.evalE G F 1 (copyExpr t i)).run y=(.error .timeout,y) := rfl
 
-/-! ## Width-specific acceptance at and near every boundary -/
+/-! ## Width-specific acceptance at and near the signed boundaries, and unsigned contrasts -/
 
 def int16 : Source.IntTy := ⟨true,16,by decide⟩
 def int248 : Source.IntTy := ⟨true,248,by decide⟩
@@ -82,6 +84,9 @@ theorem int248_near_width :
 theorem int256_all (w : Nat) (hw : w < 2^256) : accepted int256 w := by
   show w < 2^255 ∨ 2^256-2^255 ≤ w
   omega
+theorem uint8_near_width : accepted uint8 255 ∧ ¬accepted uint8 256 := by decide
+/-- At 256 bits every unsigned word is accepted too. -/
+theorem uint256_all (w : Nat) (hw : w < 2^256) : accepted ⟨false,256,by decide⟩ w := hw
 /-- The same word is clean as `uint8` and dirty as `int8`. -/
 theorem sign_matters : accepted uint8 200 ∧ ¬accepted int8 200 := by decide
 
@@ -267,4 +272,236 @@ theorem entry_truncated_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMS
   rw [truncated_entry.1,truncated_entry.2.1,truncated_entry.2.2,if_neg (by decide),if_neg (by decide),
     if_neg (by decide)]
 
+/-- Short head: no complete offset word for argument 0 (`data.length < off+32`). -/
+theorem entry_short_head_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    ((Source.EM.lift (Source.cdTail (Source.natBytes 31 0) 0 32)) >>= fun p =>
+      Source.cdToMem (frame (selectorBytes++Source.natBytes 31 0)) (ArrayTy int8) p.1 p.2).run y=
+      (.error (.revert []),y) := by
+  rw [guarded_frame_run int8 _ selectorBytes _ rfl rfl]
+  dsimp only
+  rw [if_pos (by decide +kernel)]
+
+def largeArgs : List UInt8 := Source.natBytes 32 32++Source.natBytes 32 (2^64)
+
+private theorem large_head : Source.wordAt largeArgs 0=32 := by decide
+private theorem large_len : Source.wordAt (largeArgs.drop 32) 0=2^64 := by decide
+private theorem large_bytes : largeArgs.length=64 := by
+  simp only [largeArgs,Source.natBytes,List.length_append,Source.beBytes_length]
+
+theorem large_entry : Source.cdTail largeArgs 0 32=.error (.revert []) := by
+  unfold Source.cdTail
+  rw [large_head,large_bytes]
+  dsimp only
+  rw [large_len]
+  rfl
+
+/-- Oversized length: `2^64 ≤ len` is refused before any word is read. -/
+theorem entry_large_length_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    ((Source.EM.lift (Source.cdTail largeArgs 0 32)) >>= fun p =>
+      Source.cdToMem (frame (selectorBytes++largeArgs)) (ArrayTy int8) p.1 p.2).run y=
+      (.error (.revert []),y) := by
+  rw [guarded_run,large_entry]
+
+private theorem unshifted64 : Source.cdWordAt (frame (selectorBytes++args)) 64=2*256^28+(256^28-1) := by
+  decide +kernel
+
+/-- Without the selector shift (offset 64 instead of 68) the window mixes the
+length word and the first element: dirty, so the copy reverts. -/
+theorem unshifted_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    (Source.cdToMem (frame (selectorBytes++args)) (ArrayTy int8) 64 2).run y=(.error (.revert []),y) := by
+  rw [copy_run,values_succ,unshifted64,dirty (by decide +kernel)]
+  rfl
+
+/-- The selector bytes do not affect the copy: another selector, same values. -/
+theorem selector_independent {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    ((Source.EM.lift (Source.cdTail args 0 32)) >>= fun p =>
+      Source.cdToMem (frame ([0,0,0,0]++args)) (ArrayTy int8) p.1 p.2).run y=
+    ((Source.EM.lift (Source.cdTail args 0 32)) >>= fun p =>
+      Source.cdToMem (frame (selectorBytes++args)) (ArrayTy int8) p.1 p.2).run y := by
+  rw [guarded_frame_run int8 _ [0,0,0,0] args rfl rfl,guarded_frame_run int8 _ selectorBytes args rfl rfl]
+
+private theorem i16word : Source.cdWordAt (frame (Source.natBytes 32 (2^256-2^15)++
+    Source.natBytes 32 (2^15))) 0=2^256-2^15 := by decide +kernel
+private theorem i16word32 : Source.cdWordAt (frame (Source.natBytes 32 (2^256-2^15)++
+    Source.natBytes 32 (2^15))) 32=2^15 := by decide +kernel
+
+/-- A middle width: `int16` copies its minimum `-2^15` from raw bytes and then
+reverts on `2^15`, one past its maximum. -/
+theorem int16_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    (Source.cdToMem (frame (Source.natBytes 32 (2^256-2^15)++Source.natBytes 32 (2^15)))
+      (ArrayTy int16) 0 1).run y=
+      (.ok (.val (.memRef rfl y.2.heap.next)),
+        (y.1,{y.2 with heap := (y.2.heap.alloc
+          ⟨ArrayTy int16,memory [Source.Val.int (-32768) (by decide)]⟩).1})) ∧
+    (Source.cdToMem (frame (Source.natBytes 32 (2^256-2^15)++Source.natBytes 32 (2^15)))
+      (ArrayTy int16) 0 2).run y=(.error (.revert []),y) := by
+  constructor
+  · rw [copy_run]
+    simp only [values_succ,values_zero,i16word]
+    rw [dec (-32768) (by decide +kernel) (by decide)]
+    rfl
+  · rw [copy_run]
+    simp only [values_succ,values_zero,Nat.reduceAdd,i16word,i16word32]
+    rw [dec (-32768) (by decide +kernel) (by decide),dirty (by decide +kernel)]
+    rfl
+
 end Solidity.Backend.CalldataPackets.RawInt.Controls
+
+/-! Exact axiom pins (mirrored in `tests/calldata-packets-1105/RawInt/Axioms.lean`). -/
+
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_range' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_range
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.copy_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.copy_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.signed_decode_range' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.signed_decode_range
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.eval_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.eval_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.guarded_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.guarded_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.copy_observations' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.copy_observations
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.range_iff_accepted
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.accepted_sign_bits
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.accepted_value' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.accepted_value
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_accepted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_accepted
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_dirty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.decode_ok_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.decode_ok_iff
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.values_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.values_zero
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.values_succ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.values_succ
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.values_ok_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.values_ok_iff
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.values_dirty' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.values_dirty
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.values_frame' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.values_frame
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.guarded_frame_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.guarded_frame_run
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.negative_one
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.positive_max' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.positive_max
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_min' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.negative_min
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_positive' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_positive
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_negative' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_negative
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.dirty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.positive_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.positive_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.late_dirty_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.late_dirty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.empty_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.empty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.eof_padding' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.eof_padding
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.zero_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.zero_horizon
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.one_horizon' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.one_horizon
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int8_near_width' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int8_near_width
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int16_near_width' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int16_near_width
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int248_near_width
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int256_all
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.uint8_near_width
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.uint256_all
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters' does not depend on any axioms -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.sign_matters
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.negative_values
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.near_width_decode' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.near_width_decode
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.negative_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.negative_suffix_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.negative_suffix_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.misaligned_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.misaligned_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.unsigned_rejects_negative' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.unsigned_rejects_negative
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.partial_dirty_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.partial_dirty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.partial_int256_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.partial_int256_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.partial_zero_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.partial_zero_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_frame_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_frame_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_dirty_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_dirty_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_truncated_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_short_head_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry' depends on axioms: [propext] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.large_entry
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.entry_large_length_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.unshifted_copy
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.selector_independent
+/-- info: 'Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Backend.CalldataPackets.RawInt.Controls.int16_copy
