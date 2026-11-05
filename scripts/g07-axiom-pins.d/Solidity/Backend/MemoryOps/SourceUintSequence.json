@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_delete_reject": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_assign_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintSequence.lean:Solidity.Backend.MemoryOps.resolved_uint_delete_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

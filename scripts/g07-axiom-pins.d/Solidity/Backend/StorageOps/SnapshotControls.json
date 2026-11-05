@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/StorageOps/SnapshotControls.lean:Solidity.Backend.StorageOps.actual_mapping_copies_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotControls.lean:Solidity.Backend.StorageOps.SnapshotControls.all_depth_actual_success": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotControls.lean:Solidity.Backend.StorageOps.SnapshotControls.all_depth_commutes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/SnapshotControls.lean:Solidity.Backend.StorageOps.SnapshotControls.shared_source_ordered": [
+  "Quot.sound",
+  "propext"
+ ]
+}

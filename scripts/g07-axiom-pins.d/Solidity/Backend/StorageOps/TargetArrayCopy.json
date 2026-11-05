@@ -1,0 +1,68 @@
+{
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.body_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.condition_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.iterations_finish": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.iterations_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.prefix_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.prefix_source_future": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.prefix_unvisited": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.prefix_visited": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.run_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.run_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.run_loop_from": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.run_setup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.turn_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetArrayCopy.lean:Solidity.Backend.StorageOps.TargetArrayCopy.turn_more": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

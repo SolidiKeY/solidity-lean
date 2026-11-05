@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.clearBody": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.clearOperands": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.code": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.copyBody": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.copyOperands": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.increment": [],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_clear_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_clear_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_clear_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_copy_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_copy_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_copy_operands": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetNestedArrayCopy.lean:Solidity.Backend.StorageOps.TargetNestedArrayCopy.run_increment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

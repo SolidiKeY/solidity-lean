@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/TargetCopyWrite.lean:Solidity.Backend.StorageOps.TargetCopyWrite.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyWrite.lean:Solidity.Backend.StorageOps.TargetCopyWrite.failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyWrite.lean:Solidity.Backend.StorageOps.TargetCopyWrite.numeric_failure_matches": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyWrite.lean:Solidity.Backend.StorageOps.TargetCopyWrite.run_current": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetCopyWrite.lean:Solidity.Backend.StorageOps.TargetCopyWrite.run_failed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

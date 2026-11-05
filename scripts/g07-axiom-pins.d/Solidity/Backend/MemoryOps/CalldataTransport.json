@@ -1,0 +1,10 @@
+{
+ "Solidity/Backend/MemoryOps/CalldataTransport.lean:Solidity.Backend.MemoryOps.decodedArray_overwrite_read": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/CalldataTransport.lean:Solidity.Backend.MemoryOps.decodedArray_overwrite_transport": [
+  "Quot.sound",
+  "propext"
+ ]
+}

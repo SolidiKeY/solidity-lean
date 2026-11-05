@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/StorageOps/CopyHeaderControls.lean:Solidity.Backend.StorageOps.CopyHeaderControls.actual_header_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaderControls.lean:Solidity.Backend.StorageOps.CopyHeaderControls.bad_header_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaderControls.lean:Solidity.Backend.StorageOps.CopyHeaderControls.complete_header_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaderControls.lean:Solidity.Backend.StorageOps.CopyHeaderControls.graph_headers": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyHeaderControls.lean:Solidity.Backend.StorageOps.CopyHeaderControls.header_only_payload_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

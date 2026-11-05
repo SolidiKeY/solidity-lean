@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/StorageOps/SourceByteStoragePrepared.lean:Solidity.Lowering.StorageOps.SourceByteStoragePrepared.store_prepared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

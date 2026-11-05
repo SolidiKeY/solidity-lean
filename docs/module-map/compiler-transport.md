@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/compiler-transport.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Compiler transport proof components
 
 Scoped intrinsic-program and abstract-machine results; see [their boundary](../feature-work/compiler-transport-proofs.md).

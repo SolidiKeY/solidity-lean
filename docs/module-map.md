@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Module map
 
 One line per module: what it defines, in its area's file under

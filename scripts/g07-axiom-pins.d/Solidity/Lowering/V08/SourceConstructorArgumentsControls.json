@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.already_given_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.argument_effect_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.collect_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.construct_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.explicit_end": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.missing_base_arguments": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.payload_clients": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.static_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.wrong_priority_effect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceConstructorArgumentsControls.lean:Solidity.Lowering.V08.SourceConstructorArgumentsControls.zero_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

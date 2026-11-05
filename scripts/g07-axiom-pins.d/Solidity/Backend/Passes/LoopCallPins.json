@@ -1,0 +1,196 @@
+{
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.loop_scopes_budgeted_memoryCalls_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallApplication.after_scope": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallApplication.correlated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallApplication.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.checkedCall": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.expanded_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.public_recognizer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.receiving": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallControls.whole_recognizer_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.argument_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.argument_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.argument_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.costs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.source_unreachable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.stale": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.stale_free": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.stale_reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.stale_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallFailures.wrong_failure_stage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.complete_source_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.complete_target_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.corrupt_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.final_stack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.return_identity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.selected_return_base": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.skipped_call": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.stale_return_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.target_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.whole_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.LoopCallObservations.whole_target_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/LoopCallPins.lean:Solidity.Backend.Passes.loops_budgeted_memoryCalls_link": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

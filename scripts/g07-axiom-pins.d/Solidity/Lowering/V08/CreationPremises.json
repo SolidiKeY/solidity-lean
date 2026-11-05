@@ -1,0 +1,57 @@
+{
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.actual_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.creation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.installed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.meaning_origin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.negative_components": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.populated_components": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.reached_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.runtime_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.settlement_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.try_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/CreationPremises.lean:Solidity.Lowering.V08.CreationPremises.try_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

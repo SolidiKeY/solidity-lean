@@ -1,0 +1,18 @@
+{
+ "Bridge/SolidityBridge/Arith/LoweringObstructions.lean:Solidity.Bridge.Arith.LoweringObstructions.actual_guard": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/LoweringObstructions.lean:Solidity.Bridge.Arith.LoweringObstructions.not_old_narrow_guard": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/LoweringObstructions.lean:Solidity.Bridge.Arith.LoweringObstructions.retained_data_counterexample": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Arith/LoweringObstructions.lean:Solidity.Bridge.Arith.LoweringObstructions.setup": [
+  "Quot.sound",
+  "propext"
+ ]
+}

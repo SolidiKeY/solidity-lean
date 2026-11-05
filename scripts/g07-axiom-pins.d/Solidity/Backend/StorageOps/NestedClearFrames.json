@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/StorageOps/NestedClearFrames.lean:Solidity.Backend.StorageOps.NestedClearFrames.clear_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedClearFrames.lean:Solidity.Backend.StorageOps.NestedClearFrames.clear_child_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedClearFrames.lean:Solidity.Backend.StorageOps.NestedClearFrames.header_child_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

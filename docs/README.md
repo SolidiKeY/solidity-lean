@@ -1,3 +1,4 @@
+<!-- Generated from docs/README.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The documents
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
