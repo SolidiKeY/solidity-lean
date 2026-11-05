@@ -1,4 +1,5 @@
-import Solidity.Backend.MemoryOps.SourceUintFixedRefsMemory
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsWrite
+import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
 /-! Independent Source objects with repeated fixed-child references. These are
@@ -160,4 +161,117 @@ theorem empty_parent (pipeline : Roadmap.Pipeline) (horizon : Nat) :
 #guard_msgs (whitespace := lax) in #print axioms rejecting_reads
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.wrong_child_and_type' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms wrong_child_and_type
+private abbrev ΓW : Source.RCtx := [.int .u256,.int .u256,.int .u256,SourceUintFixedRefsTy 3]
+private def wi : Source.Idx ΓW (.int .u256) := .here
+private def wj : Source.Idx ΓW (.int .u256) := .there .here
+private def wv : Source.Idx ΓW (.int .u256) := .there (.there .here)
+private def wr : Source.Idx ΓW (SourceUintFixedRefsTy 3) := .there (.there (.there .here))
+private def sw (i j v : Nat) : Source.EMState E0 ΓW :=
+  (.cons (sourceUint (u i)) (.cons (sourceUint (u j)) (.cons (sourceUint (u v)) (.cons (.memRef rfl 2) .nil))),(sy 0 0).2)
+private abbrev SH := (Source.Heap.empty (D := E0.layout)).ty
+private def b0 : Source.EMState E0 [] := (.nil,s0)
+private def b1 : Source.EMState E0 [] := (.nil,{s0 with heap := h1})
+private def b2 : Source.EMState E0 [] := (.nil,{s0 with heap := h2})
+private theorem graphW (i j v : Nat) : SourceUintFixedRefsAt (sw i j v) 2 hp root address := (graph 0 0).same_heap rfl
+private theorem memOKW (i j v : Nat) : Source.MemOK E0 SH (sw i j v) := by
+  have initial : Source.MemOK E0 SH b0 :=
+    ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩
+  have first := source_uint_fixed_alloc_memOK (E := E0) (Γ := []) SH (hp.get left) b0 initial
+  change Source.MemOK E0 SH b1 ∧ _ at first
+  have second := source_uint_fixed_alloc_memOK (E := E0) (Γ := []) SH (hp.get right) b1 first.1
+  change Source.MemOK E0 SH b2 ∧ _ at second
+  have dataOK : Source.DataOK E0 h2.ty (sourceUintFixedRefMemory address [left,left,right]) := by
+    apply Source.DataOK.array
+    intro index
+    apply Source.DataOK.val
+    refine ⟨.array .memory (.int .u256) (some 3),?_,rfl⟩
+    rcases index with ⟨index,hi⟩
+    cases index with
+    | zero => rfl
+    | succ index => cases index with
+      | zero => rfl
+      | succ index => cases index with
+        | zero => rfl
+        | succ index => simp only [List.length_cons,List.length_nil] at hi;omega
+  have third := Source.allocRef_mem' (E := E0) (Γ := []) (H := SH)
+    (sourceUintFixedRefMemory address [left,left,right]) (by trivial)
+    (by change ∀ index : Fin 3,∃ value,_=Source.Data.val value;intro index;exact ⟨_,rfl⟩)
+    b2 ⟨second.1,dataOK⟩
+  change Source.MemOK E0 SH ((.nil,(sy 0 0).2) : Source.EMState E0 []) ∧ _ at third
+  exact ⟨⟨third.1.1.1,⟨trivial,⟨trivial,⟨trivial,⟨⟨SourceUintFixedRefsTy 3,rfl,rfl⟩,trivial⟩⟩⟩⟩⟩,third.1.2⟩
+private theorem selectedSeparation : ∀ t∈MObj.elems .dyn (hp.get root),t.id≠left.id → address t.id≠address left.id := by
+  intro t member different
+  rw [parentElements] at member
+  simp only [List.mem_cons,List.not_mem_nil,or_false] at member
+  rcases member with rfl|rfl|rfl
+  · exact (different rfl).elim
+  · exact (different rfl).elim
+  · decide
+
+/-- INITIAL graph, locals and MemOK are independently inhabited. -/
+theorem mutation_initial : SourceUintFixedRefsAt (sw 1 1 42) 2 hp root address ∧
+    Source.MemOK E0 SH (sw 1 1 42) ∧
+    (∀ t∈MObj.elems .dyn (hp.get root),t.id≠left.id → address t.id≠address left.id) :=
+  ⟨graphW 1 1 42,memOKW 1 1 42,selectedSeparation⟩
+
+/-- Real nested assignment mutates0 to42, retains both parent aliases and the
+other child, and feeds a genuine reached nested read. Whole Source objects,
+locals, heap bound and world fields remain explicit. -/
+theorem nested_mutation (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (out : Heap H) (z : Source.EMState E0 ΓW),
+      hp.writeAddr (.index left .fixed (u 1)) (u 42)=some out ∧
+      (Source.evalE (G0 pipeline) F0 (horizon+4) (sourceUintFixedNestedAssign wr wi wj wv)).run (sw 1 1 42)=
+        (.ok (.val (sourceUint (u 42))),z) ∧
+      (Source.execS (G0 pipeline) F0 (horizon+5) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wj wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      SourceUintFixedRefsAt z 2 out root address ∧ Source.MemOK E0 SH z ∧
+      (Source.evalE (G0 pipeline) F0 (horizon+3)
+        (.indexArray (.indexArray (.local wr) (.local wi) rfl) (.local wj) rfl)).run z=(.ok (.val (sourceUint (u 42))),z) ∧
+      MObj.elems .fixed (out.get left)=[u 7,u 42,u (W-1)] ∧ out.get right=hp.get right ∧
+      [z.2.heap.get 0,z.2.heap.get 1,z.2.heap.get 2]=
+        [some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (out.get left)⟩,
+         some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩,
+         some ⟨SourceUintFixedRefsTy 3,sourceUintFixedRefMemory address [left,left,right]⟩] ∧
+      z.1=(sw 1 1 42).1 ∧ z.2.heap.next=3 ∧ (∀ a,3≤a → z.2.heap.get a=none) ∧
+      z.2.ex=(sw 1 1 42).2.ex ∧ z.2.events=(sw 1 1 42).2.events ∧ z.2.logs=(sw 1 1 42).2.logs ∧ z.2.fnLocals=(sw 1 1 42).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨out,z,typed,expr,stmt,reached,preserved,locals,next,parent,objects,addresses,world,events,logs,fnLocals⟩ :=
+      (graphW 1 1 42).resolved_write (G0 pipeline) F0 horizon nps wr wi wj wv (u 1) (u 1) (u 42) left
+        rfl rfl rfl rfl selectLeft selectedSeparation (by decide) SH (memOKW 1 1 42)
+    have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=
+        some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte]
+      rfl
+    have outEq := Option.some.inj (typed.symm.trans canonical)
+    have contents : MObj.elems .fixed (out.get left)=[u 7,u 42,u (W-1)] := by
+      rw [outEq,Heap.get_set_same,MObj.elems_setElem,MObj.elems_fixed]
+      rfl
+    have afterIndex : out.index root .dyn (u 1)=some left := by
+      change (MObj.elems .dyn (out.get root))[1]?=some left
+      rw [parent,parentElements];rfl
+    have read := (reached.eval_nested_read (G0 pipeline) F0 horizon wr wi wj (u 1) (u 1) left
+      (by rw [locals];rfl) (by rw [locals];rfl) (by rw [locals];rfl) afterIndex (by decide)).2
+    have read42 : (Source.evalE (G0 pipeline) F0 (horizon+3)
+        (.indexArray (.indexArray (.local wr) (.local wi) rfl) (.local wj) rfl)).run z=(.ok (.val (sourceUint (u 42))),z) := by
+      simpa only [outEq,Heap.get_set_same,MObj.setElem_fixed,List.getElem_set_self] using read
+    have leftNow := reached.children left (by rw [parent,parentElements];exact List.mem_cons_self)
+    change z.2.heap.get 0=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (out.get left)⟩ at leftNow
+    have rightNow := (addresses 1 (by decide)).trans (show (sw 1 1 42).2.heap.get 1=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩ from rfl)
+    have parentNow := reached.parent
+    rw [parent,parentElements] at parentNow
+    refine ⟨out,z,typed,expr,stmt,reached,preserved,read42,contents,objects right (by decide),?_,locals,next,?_,world,events,logs,fnLocals⟩
+    · rw [leftNow,rightNow,parentNow]
+    · intro a ha
+      apply z.2.heap.bounded
+      rw [next]
+      exact ha
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.mutation_initial' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mutation_initial
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_mutation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_mutation
+
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
