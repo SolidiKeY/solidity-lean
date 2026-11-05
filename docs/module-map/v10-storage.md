@@ -77,3 +77,5 @@
 | `Backend/StorageOps/ProducerInterfaceControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/StorageOps/SourceStorageCopyBarrier.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/StorageOps/SourceStorageCopyBarrierControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/StorageOps/SourceStorageCopyPayload.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/StorageOps/SourceStorageCopyPayloadControls.lean` | Bounded v10-storage-operations checkpoint; typed scope and retained obligations are stated in the module. |
