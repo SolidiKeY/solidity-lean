@@ -220,3 +220,4 @@
 | `Backend/AbiEntry/SelectorBranchesInterface.lean` | Actual selector branch compilation contract retaining exact compiler join behavior. |
 | `Backend/AbiEntry/SelectorBranches.lean` | Actual public compiler selector branching with exact branch join/outcome behavior. |
 | `Backend/AbiEntry/SelectorBranchesControls.lean` | Existing entry versus value-checked miss branch, jump skipping, terminal validation failures and saved state. |
+| `Backend/AbiEntry/CoreJoinInterface.lean` | Actual core join-removal contract under existing input representation and allocation bounds. |

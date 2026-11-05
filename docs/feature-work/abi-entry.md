@@ -1340,3 +1340,9 @@ assignment gates.
 Independent read-only finder and skeptic reviews found no semantic issues.
 Final guarded per-file diagnostics report zero errors; exact checkpoint gates
 and retained failures accompany the sealed handoff.
+
+`CoreJoinInterface.lean` specifies actual compiler join removal from an existing
+represented typed input and the unchanged compiler allocation bound. It assumes
+neither a normal return nor a body execution/result. Source/native construction
+of that input representation remains separate; earlier arbitrary-machine exact
+join statements remain unchanged.
