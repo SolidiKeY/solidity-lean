@@ -690,3 +690,60 @@ without raising any limit. This is Source progress and preservation, not
 termination, general allocating-call graph admission, physical resource
 adequacy, compiler/EVM correspondence or universal coverage. Historical
 full-build and published documentation-path failures remain open.
+
+
+## Finite aggregate defaults and returned allocation parents
+
+`Progress.AggregateDefaults` adds the proof certificate `FiniteDefault`
+without changing `ZeroReady`, Source types or the default evaluator. It
+includes existing ready defaults, fixed memory arrays with certified element
+defaults, and memory structs whose actual layout fields have certified
+defaults. The finite certificate is supplied explicitly; it is not an
+automatic whole-program admission checker or recursive-type migration.
+`finite_defaults_at` follows the actual `zeroVal`, `zeroElems` and
+`zeroFields` evaluators by horizon induction. Joint default memory validity
+reuses the existing `zeroOK`; timeout and already allocated children remain
+observable.
+
+`Progress.AllocationReturns` composes these defaults with allocating
+inline-array or struct parents and the existing `singleReturningBody`.
+The proofs execute the actual return-slot write, body, internal call,
+return extraction and caller substitution. They derive parent progress and
+memory admission syntactically rather than assuming a body run or poststate.
+The checked-elaboration adapters derive `CallsOK`; actual selected-body
+identity, layout through the reused body constructor, parent admission,
+plain result extraction and finite defaults retain explicit premises.
+Existing `ReadyExpr`, `ReadyItems` and `ZeroReady` are unchanged.
+
+`AggregateReturnControls` proves frontend inference, elaboration, program-body
+identity and dispatch for a private function returning `[true, false]` as
+`bool[2] memory`. Its bytes parameter points at a live nonempty object 0.
+The default result occupies object 1 and the returned inline array occupies
+object 2. Both contain the expected Boolean elements; they are distinct
+allocations. Inhabited call and caller-expression consumers prove memory and
+returned-reference validity, retained heap growth, saved function locals/logs
+and restored caller locals. The declaration unit uses the legacy frontend;
+execution quantifies over both evaluator pipelines and arbitrary fixed
+parameters. The caller node is intrinsic, not claimed frontend-elaborated.
+Zero horizon retains timeout and the unchanged state. The old default and
+expression certificates still refuse this family, and storage bytes remain
+outside the finite-default certificate.
+
+`AggregateDefaultControls` separately consumes the general default theorem
+on a struct with two bytes-reference fields. Horizon six allocates both empty
+byte children and the parent, preserving the pre-existing object. Horizon five
+times out after the first child, retains that allocation, and preserves memory
+validity. This default evaluator has no pipeline parameter. No struct-returning
+frontend control or override-dispatch control is claimed here.
+
+The focused combined controls passed in 15.451 seconds with 551,280,640 bytes
+peak aggregate RSS. All 51 printed reports use only `propext`,
+`Classical.choice` and `Quot.sound` or subsets. Independent read-only finder
+and skeptic reviews found no confirmed soundness or scope defect. Extensional
+equality proves the default array's constant-false contents before the actual
+call run is composed; the expected heap observations are unchanged. Source
+semantics, allocation/halt policies and proof limits are unchanged. These
+results do not establish termination, general allocating call graphs,
+physical resource adequacy, compiler/EVM correspondence or universal coverage.
+The retained full-build timeout and exact published documentation/pin baseline
+failures are not passed by these focused checks.

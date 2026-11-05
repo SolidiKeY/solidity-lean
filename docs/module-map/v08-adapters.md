@@ -551,3 +551,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Source/Progress/AllocationBodyCalls.lean` | Syntactic allocation-parent body prefixes, actual modifier-free internal-call progress, joint memory preservation and checked-elaboration adaptation. |
 | `Source/Progress/AllocationBodyCallControls.lean` | Source-inferred callee body, inhabited old-reference returns, persistent default/child/struct allocations, propagated panic and caller restoration in both evaluator pipelines. |
+
+| `Source/Progress/AggregateDefaults.lean` | Finite memory-array/struct default certificates, actual all-horizon default progress and joint memory preservation. |
+| `Source/Progress/AllocationReturns.lean` | Allocating-parent return statements, modifier-free body/internal-call progress, memory preservation and checked-elaboration adapters. |
+| `Source/Progress/AggregateReturnControls.lean` | Actual elaborated fixed-array return, distinct default/fresh references, inhabited caller restoration and unchanged default/readiness refusals in both pipelines. |
+| `Source/Progress/AggregateDefaultControls.lean` | Inhabited reference-field struct defaults, retained earlier allocation on timeout and old default-certificate refusal. |

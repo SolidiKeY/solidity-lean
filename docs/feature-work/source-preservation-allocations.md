@@ -271,3 +271,11 @@ proofs; see
 Body selection, layout, defaults, argument readiness and input-reference
 validity retain their explicit premises. This is not general memory-call
 graph or compiler coverage.
+
+Finite aggregate default certificates now give actual default progress jointly
+with the existing zeroing preservation theorem. Returning inline-array/struct
+parents can use them through the existing single-return body/call frames;
+[source-progress-checked.md](source-progress-checked.md#finite-aggregate-defaults-and-returned-allocation-parents)
+states the explicit admission premises and inhabited fixed-array return control.
+This is Source-only preservation/progress, not a general call graph or compiler
+result, and leaves the existing default/readiness certificates unchanged.
