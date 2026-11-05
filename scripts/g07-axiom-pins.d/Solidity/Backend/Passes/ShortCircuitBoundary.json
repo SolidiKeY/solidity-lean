@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Passes/ShortCircuitBoundary.lean:Solidity.Backend.Passes.ShortCircuitBoundary.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShortCircuitBoundary.lean:Solidity.Backend.Passes.ShortCircuitBoundary.revert_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShortCircuitBoundary.lean:Solidity.Backend.Passes.ShortCircuitBoundary.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

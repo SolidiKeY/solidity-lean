@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/ModelTheory.lean:Solidity.FO.finite_storage_support": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

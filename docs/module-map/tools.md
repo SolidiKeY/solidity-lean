@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/tools.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Tools
 
 Commands for people; they prove nothing beyond the certificates they check.

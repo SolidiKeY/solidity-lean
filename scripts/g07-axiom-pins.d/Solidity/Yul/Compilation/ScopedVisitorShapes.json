@@ -1,0 +1,30 @@
+{
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.packet": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.pop_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.push_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.scope_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedVisitorShapes.lean:Solidity.Yul.Compilation.ScopedVisitorShapes.visit_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

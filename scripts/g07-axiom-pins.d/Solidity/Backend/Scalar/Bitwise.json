@@ -1,0 +1,14 @@
+{
+ "Solidity/Backend/Scalar/Bitwise.lean:Solidity.Backend.Scalar.uintAnd": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Bitwise.lean:Solidity.Backend.Scalar.uintOr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Bitwise.lean:Solidity.Backend.Scalar.uintXor": [
+  "Quot.sound",
+  "propext"
+ ]
+}

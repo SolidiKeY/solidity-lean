@@ -1,0 +1,7 @@
+{
+ "Solidity/Lowering/P8/SourceObservationControls.lean:Solidity.Lowering.P8.SourceObservationControls.controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

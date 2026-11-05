@@ -1,0 +1,27 @@
+{
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_at_start_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_empty_reverts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notDerivable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_notValid": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/upstream/DeclarationSourceValidation.lean:Solidity.Tests.Upstream.DeclarationSourceValidation.sliceHashed_one_byte_returns": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

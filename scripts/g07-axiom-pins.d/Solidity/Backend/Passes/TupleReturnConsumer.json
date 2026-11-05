@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.automatic_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.expanded_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.reached_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.reader_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/TupleReturnConsumer.lean:Solidity.Backend.Passes.TupleReturnConsumer.shared": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,97 @@
+{
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.public_selection": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.Range": [],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.result_saturated": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.result_zero_count": [
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.resultWord": [
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.runtime_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.saturated_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.selected": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.selected_code": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.selected_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.source_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.source_saturated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.source_value_saturated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.source_word_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.SourceCtx": [],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.sourceOp": [],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.target": [
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.target_value_saturated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.TargetCtx": [],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.targetOp": [],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.word_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.wrapped_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/PrimitivePackets/Shifts/Transport.lean:Solidity.Backend.PrimitivePackets.Shifts.zero": []
+}

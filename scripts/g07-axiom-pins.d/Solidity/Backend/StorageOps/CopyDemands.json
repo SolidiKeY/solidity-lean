@@ -1,0 +1,90 @@
+{
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.absent_absent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.absent_outside_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.absent_present": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.array_progress": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.array_restart": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.arrayPrefix": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.arrayStep": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.copyAt_outside_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.demands": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.mapping_barrier": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.outside_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.outside_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.outside_slot_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.prefix_indices": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.prefix_none": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.present_absent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.present_present": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.read_none_compatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.represented_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/CopyDemands.lean:Solidity.Backend.StorageOps.CopyDemands.slotDemands": [
+  "Quot.sound",
+  "propext"
+ ]
+}

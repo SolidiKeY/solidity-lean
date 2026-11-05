@@ -1,0 +1,17 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.array_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.copy_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyBarrier.lean:Solidity.Lowering.StorageOps.SourceStorageCopyBarrier.load_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

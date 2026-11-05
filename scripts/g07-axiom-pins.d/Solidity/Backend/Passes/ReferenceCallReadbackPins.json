@@ -1,0 +1,67 @@
+{
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.call_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.body_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.evaluated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.private_frame_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.returned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.stale_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.Controls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReferenceCallReadbackPins.lean:Solidity.Backend.Passes.ReferenceCallReadback.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

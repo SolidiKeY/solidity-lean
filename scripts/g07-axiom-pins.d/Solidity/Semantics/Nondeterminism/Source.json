@@ -1,0 +1,12 @@
+{
+ "Solidity/Semantics/Nondeterminism/Source.lean:Solidity.Semantics.Nondeterminism.sourceForked_blind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/Source.lean:Solidity.Semantics.Nondeterminism.sourceSplit_confined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

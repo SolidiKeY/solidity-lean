@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.admitted_reception": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.decoded_repr": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.dirty_two_before_body": [
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.dirty_two_cannot_be_handed_off": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.one_actual_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.one_admitted": [],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.provisioned_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.zero_actual_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReception.zero_admitted": [],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReceptionControls.admitted_complete_vectors": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReceptionControls.corrupted_saved_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReceptionControls.short_calldata_entry_failure": [],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReceptionControls.wrong_order_after_admission": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/EntryReceptionPins.lean:Solidity.Backend.Passes.EntryReceptionControls.wrong_projection": []
+}

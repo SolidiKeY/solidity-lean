@@ -1,0 +1,87 @@
+{
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.copy_empty_endpoint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.copy_expanding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.expansion_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.gas_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.load_expanding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.p6_size": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.reserve_unbounded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.size_capacity_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.size_not_buffer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.size_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.stack_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.store_expanding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.store8_expanding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.store8_low_byte": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.wrong_active_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean:SolidityBridge.AccessBridge.MemoryControls.wrong_byte_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
