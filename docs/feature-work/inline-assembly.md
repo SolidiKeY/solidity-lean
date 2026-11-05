@@ -807,6 +807,6 @@ pending. Remaining ready-input audit is blocked on explicit producer contracts,
 not whole-lane publication. See [lane handoff](inline-assembly-vy5.md#vy5-indexed-write-and-emit-2026-11-02)
 and `/workspace/vy5-composition/indexed-write-20261102/final/`.
 VY5 moved to a Claude VM (2026-11-05, H37). The lane was merged with master.
-MonetaryLifecycleControls and `Monetary.wide` were never pushed, so they stay
+MonetaryLifecycleControls and `Monetary.wide` are in no ref on origin (checked 2026-11-05), so they stay
 out of this checkpoint. Three modules that import unpublished VY4 producers are
 held outside the library. See [the lane handoff](inline-assembly-vy5.md#move-to-a-claude-vm-2026-11-05-h37).

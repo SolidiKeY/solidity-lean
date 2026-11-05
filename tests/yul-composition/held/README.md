@@ -14,5 +14,11 @@ dependency tree (`/workspace/vy5-dependencies-20261101`) and in no pushed ref:
 | `IndexedWritePhysical.lean` | `Solidity.Yul.World.IndexedEmitHeap` |
 | `ReturningPhysical.lean` | `Solidity.Yul.World.GeneralReturningOutput` |
 
+The test driver `FailureDriver.lean` (moved from `tests/yul-composition/`)
+imports `FailurePhysical` and is held with it. The ledgers and validators for
+these modules under `tests/yul-composition/` and `scripts/yul-composition/`
+still name the pre-move paths; their hashes bind provenance, so they are left
+unchanged.
+
 They return to `Solidity/Yul/Composition/` once VY4 publishes those producers
 on master; until then their kernel facts are not part of the checked tree.

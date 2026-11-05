@@ -35,7 +35,6 @@ a real assembly instance.
 
 The H16 Source edits (immutables, funds) are not on master.
 
-
 ### Claude-VM move (2026-11-05)
 
 `MonetaryLifecycleControls` and `Monetary.wide` exist on no pushed ref, so they

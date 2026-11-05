@@ -2252,6 +2252,8 @@ patch/bundles/interface/full signatures/request references/evidence/checksums:
 
 ## Actual selected returning CALL/STATICCALL decoder (2026-11-02)
 
+> Held since the 2026-11-05 move: this module is outside the checked tree; the results below are Codex-VM results. See [the move section](#move-to-a-claude-vm-2026-11-05-h37).
+
 VY5 consumes the immutable VY4 private producer
 `fd3da385f5e4ada7aa889821d3ae59a34833d235` from
 `/workspace/shared/parallel-vy4-general-returning-4d6b5b8d`.
@@ -2554,6 +2556,8 @@ Reviewed incremental patch/bundles/exact source/signatures/evidence/checksums:
 
 
 ### VY5 selected ordinary failure consumer (2026-11-02)
+
+> Held since the 2026-11-05 move: this module is outside the checked tree; the results below are Codex-VM results. See [the move section](#move-to-a-claude-vm-2026-11-05-h37).
 
 The immutable VY4 private checkpoint `5a4678a0733702d5b74abffce9c7c6a2c3e45c28`
 resolves the selected ordinary nonempty-revert producer request. Its actual
@@ -2937,6 +2941,8 @@ Exact source/signatures/patch/bundles/raw diagnostics/receipts/reviews/checksums
 
 ## VY5 indexed write and emit (2026-11-02)
 
+> Held since the 2026-11-05 move: this module is outside the checked tree; the results below are Codex-VM results. See [the move section](#move-to-a-claude-vm-2026-11-05-h37).
+
 Consumed four previously unused, immutable VY4 modules from private producer
 `5a4678a0733702d5b74abffce9c7c6a2c3e45c28`, delivered in
 `/workspace/shared/parallel-vy4-indexed-emit-dce09d8e`. The recursively checked
@@ -2945,7 +2951,8 @@ Consumed four previously unused, immutable VY4 modules from private producer
 private commit `621cb8fa4eb7de45961d26dac243719bde1599c3`; the main assigned
 checkpoint contains only VY5 code, ledger/validator and documentation. Foreign
 producer modules and the `Solidity.lean` import registration remain in the
-provenance-bound private tree. No owner source body or master was changed.
+provenance-bound private tree. No owner source body or master was changed. (Since the 2026-11-05 move, the main `Solidity.lean` registers the lane's other
+`Yul/Composition` modules; this module is held.)
 
 [IndexedWritePhysical.lean](../../tests/yul-composition/held/IndexedWritePhysical.lean)
 adds 31 kernel component facts. The actual representedSourceStep writes
@@ -3073,10 +3080,9 @@ only in the Codex VM's private dependency tree (`/workspace/vy5-dependencies-202
 | `IndexedWritePhysical` | `Solidity.Yul.World.IndexedEmitHeap` (`ScalarEmitPort`, `PhysicalCompletion`) |
 | `ReturningPhysical` | `Solidity.Yul.World.GeneralReturningOutput` |
 
-The first touched gate failed only on these six modules (log retained: three
-`no such file` errors and three `bad import` errors). The three lane modules
+The first touched gate (`gate.sh touched` at `2a322d1e`) failed only on six modules: the three missing producers (`no such file`) and the three lane modules importing them (`bad import`). Its log is on this VM only, not in the repository. The three lane modules
 were moved unchanged to [tests/yul-composition/held/](../../tests/yul-composition/held/README.md).
-They import nothing else in the library, and no library module imports them.
+Apart from each other and the library modules `RuntimeBlockPhysical` and `PhysicalFrames`, their only imports are the missing producers. No library module imports them; the test driver `FailureDriver.lean` imports `FailurePhysical` and is now held with it, moved from `tests/yul-composition/` to `tests/yul-composition/held/FailureDriver.lean`. (Separately, and unchanged since `5209dc72`, `tests/yul-composition/V16Signatures.lean` imports `Solidity.Roadmap.V16.Relational`, which is in no ref either.)
 Their kernel facts (the indexed write/emit, selected returning-call and
 ordinary-failure checkpoints above) are therefore NOT in the checked tree. The
 sections above describe them as they were on the Codex VM.
@@ -3087,9 +3093,8 @@ reported 322 tests: 291 passed and 31 failed. Every failure opens a Codex-VM
 path (`/workspace/vy5-composition/...` reports, the private producer tree
 `/workspace/vy5-dependencies-20261101` or the `/workspace/.setup` toolchain),
 and none of them was moved. These tests are not part of any repository gate.
-They remain failures and are not relabelled as passes. Making them portable
-requires the original evidence.
+They remain failures and are not relabelled as passes. The run happened before the modules were held. The ledgers and validators for the held modules (`returning-ledger.json`, `indexed-write-ledger.json`, `indexed-write-inputs.json`, `returning-source.mjs`, `indexed-write-kernel.mjs`, `failure-source.mjs` and their tests) still name the pre-move `Solidity/Yul/Composition/` paths. They are left unchanged, because their hashes bind provenance, and are valid again only once the modules return. Making the other tests portable requires the original evidence.
 
 Queue status is unchanged. Work 1 and Work 3 remain blocked on actual
 V16/VY3/VY4 assembly correctness interfaces. Work 2 and Backfill A/B remain
-partial. Master now also lacks the three held producers listed above.
+partial. Neither master nor any ref on origin has the three producers listed above.
