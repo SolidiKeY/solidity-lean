@@ -8,6 +8,7 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261105T1200Z.md](feature-work/integration-20261105T1200Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105T0840Z.md](feature-work/integration-20261105T0840Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
 | [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
