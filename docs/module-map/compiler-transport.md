@@ -52,3 +52,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Optimizer/Laws.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Optimizer/Pass.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Optimizer/RoadmapComposition.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameScopedSource.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveScopeCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |

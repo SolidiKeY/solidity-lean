@@ -180,6 +180,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameRestoredRepresentation
 import Solidity.Backend.InternalFlow.RuntimeFrameResult
 import Solidity.Backend.InternalFlow.RuntimeFrameResultAgreement
 import Solidity.Backend.InternalFlow.RuntimeFrameSaved
+import Solidity.Backend.InternalFlow.RuntimeFrameScopedSource
 import Solidity.Backend.InternalFlow.RuntimeFrameSemantics
 import Solidity.Backend.InternalFlow.RuntimeFrameStack
 import Solidity.Backend.InternalFlow.RuntimeFrameTarget
@@ -244,6 +245,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveIngress
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveProducer
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveResult
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveReturn
+import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveScopeCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveSource
 import Solidity.Backend.InternalFlow.RuntimeFrameV3RecursiveUnwind
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarArgument
