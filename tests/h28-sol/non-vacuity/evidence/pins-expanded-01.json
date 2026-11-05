@@ -1,0 +1,321 @@
+{
+  "wrapper_command": [
+    "python3",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/runtime/measure.py",
+    "/workspace/solidity-lean/tests/h28-sol/non-vacuity/evidence/pins-expanded-01.rusage.json",
+    "lake",
+    "build",
+    "+Solidity.Assurance.NonVacuityH28.Pins:olean"
+  ],
+  "rusage": {
+    "command": [
+      "lake",
+      "build",
+      "+Solidity.Assurance.NonVacuityH28.Pins:olean"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 89.88448482500098,
+    "children_user_seconds": 88.844323,
+    "children_system_seconds": 0.99445,
+    "children_max_rss_kib": 1413740,
+    "children_major_faults": 0,
+    "children_minor_faults": 452268
+  },
+  "rusage_file": "tests/h28-sol/non-vacuity/evidence/pins-expanded-01.rusage.json",
+  "rusage_sha256": "8205d324a7e612088b1e225c3e4296b6c29f144dbb0b737fdb6fc3bc23351d6f",
+  "runner_sha256": "5b1903db9c4f76b8de9590bed143fae2a8d9ce2b2e56626e95934331e37b6d2d",
+  "initial_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "final_memory_events": {
+    "low": 0,
+    "high": 0,
+    "max": 0,
+    "oom": 0,
+    "oom_kill": 0,
+    "oom_group_kill": 0
+  },
+  "headroom_method": "estimated min(host MemAvailable, cgroup max-current+max(0,inactive_file-dirty-writeback))",
+  "initial_vm_headroom": {
+    "limit": 17179869184,
+    "current": 9318932480,
+    "inactive_file": 6006304768,
+    "file_dirty": 192512,
+    "file_writeback": 0,
+    "reclaimable_file_estimate": 6006112256,
+    "host_available": 17911279616,
+    "cgroup_available": 13867048960,
+    "available": 13867048960
+  },
+  "minimum_vm_available_bytes": 13645549568,
+  "input_sha256": {
+    "Solidity/Assurance/NonVacuityH28/Pins.lean": "a0022c919b70fb1f217375a86fd45f5d00a100a1feac52db6477d4f334170f5a",
+    "tests/h28-sol/non-vacuity/runtime/measure.py": "f1620c519d318b39e1d43dc0396c387ec9423e7e79c6841396e908e724892bfa"
+  },
+  "log_sha256": "0e7b671d26d2cd0921b1313a4e35ba70168f87b41a410f266ed0f3b36f5cf2c3",
+  "command": [
+    "lake",
+    "build",
+    "+Solidity.Assurance.NonVacuityH28.Pins:olean"
+  ],
+  "container": "h28-non-vacuity-runtime",
+  "exit": 0,
+  "elapsed_seconds": 90.06506999699923,
+  "sampled_peak_aggregate_rss_bytes": 1523789824,
+  "cgroup_memory_peak_bytes": 3665883136,
+  "limits": [
+    "12884901888",
+    "0"
+  ],
+  "stop": null,
+  "worker_snapshots": [
+    [
+      "1054732 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1131376 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1191284 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1188648 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1205208 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1194352 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1206856 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1226168 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1220824 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1225256 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1217932 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1218508 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1231700 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1264400 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1273432 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1266384 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1275580 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1271024 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285156 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285264 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1281504 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1295876 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276972 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1293572 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1287820 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1284340 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1296184 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285260 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285596 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285332 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1288056 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285212 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285292 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1283396 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285304 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285308 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1293568 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285712 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285784 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285440 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285248 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1293584 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1296200 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1296064 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1293592 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1293312 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276608 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1279108 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285412 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285480 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285488 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1296272 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1279316 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285392 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285472 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1283236 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285648 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1285656 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1279220 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1281716 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1281720 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276036 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1298256 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1299000 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1291032 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1280308 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1286468 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1280364 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1288600 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1288644 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1275276 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276380 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276572 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276616 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276768 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1276904 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1301464 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1410264 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1410280 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1411704 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ],
+    [
+      "1411752 /workspace/.setup/tools/lean-4.24.0-linux/bin/lean -j1 --tstack=131072 /workspace/solidity-lean/Solidity/Assurance/NonVacuityH28/Pins.lean -o /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.olean -i /workspace/solidity-lean/.lake/build/lib/lean/Solidity/Assurance/NonVacuityH28/Pins.ilean -c /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.c --setup /workspace/solidity-lean/.lake/build/ir/Solidity/Assurance/NonVacuityH28/Pins.setup.json --json"
+    ]
+  ]
+}

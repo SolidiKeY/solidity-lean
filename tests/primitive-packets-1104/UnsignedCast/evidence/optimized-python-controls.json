@@ -1,0 +1,22 @@
+[
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-O",
+      "tests/primitive-packets-1104/UnsignedCast/check.py"
+    ],
+    "exit": 1,
+    "output": "Optimized Python disables required checks\n"
+  },
+  {
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-O",
+      "tests/primitive-packets-1104/UnsignedCast/run.py",
+      "tools",
+      "versions"
+    ],
+    "exit": 1,
+    "output": "Optimization disables gate assertions\n"
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "area": "exact function attribute layouts",
+  "source": "Solidity/Frontend/TypeGrammarH28/ParserFnAttrs.lean",
+  "sha256": "4171d25788dbcd017a21525ea8985b53fefbfd684765b38667cc0712f2d9bebc",
+  "theorems": 24,
+  "audit": "h28-type-6b447f4a973d.json",
+  "axioms": {
+    "empty": 12,
+    "propext": 12
+  },
+  "finder": {
+    "agent": "/root/inventory_finder",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted",
+    "result": "All24 source statements and currenthash-bound354 trust manifest accepted; no semantic finding"
+  },
+  "skeptic": {
+    "agent": "/root/inventory_skeptic",
+    "mode": "read-only; no Lean server",
+    "verdict": "accepted checkpoint only",
+    "result": "Allsuccessoriginalarrangements covered, actualindependentparsecompleteness/field-orderuniqueness andinhabitedcontrols accepted"
+  },
+  "bookkeeping_correction": "Initial informal25 corrected to exact24 by both reviewers; no theorem removed",
+  "fresh_mcp": [
+    "mcp-fresh-fn-attrs-ParserFnAttrs.json",
+    "mcp-fresh-fn-attrs-AxiomAudit.json"
+  ],
+  "pending": "Full function/return/static/global proofs and final project gates"
+}

@@ -1,0 +1,4 @@
+ORPHAN   Solidity.Frontend.ExecutableAst.ControlTuple.Adapter
+ORPHAN   Solidity.Frontend.ExecutableAst.ControlTuple.AdmissionControls
+ORPHAN   Solidity.Frontend.ExecutableAst.ControlTuple.IntrinsicControls
+3781 reachable, 3 orphaned, 3 not allowed
