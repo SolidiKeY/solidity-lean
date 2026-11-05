@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8ForPost
 import Solidity.Yul.RawU8GrowingBlock
 import Solidity.Yul.RawU8GrowingSequence
 import Solidity.Yul.RawU8Declaration
@@ -228,3 +229,10 @@ retains checked-frame and input-coherence premises. Checks exercise retained
 older arithmetic mutation, nested checked blocks, control restoration, dirty
 words and per-pipeline partial initializer errors. General initializer admission
 and dirty ordinary Source readback remain separate obligations. -/
+
+/-! RawU8ForPost.adapter composes the actual supported uint8 initializer,
+existing Boolean guard/post and checked body with typed scope restoration.
+Its concrete Source.forLoop law retains checked-frame and input-coherence
+premises. Checks cover a new-local copy body, break/continue/false guards,
+partial post errors, dirty older words and per-pipeline initializer timeouts.
+General loop admission and dirty ordinary Source readback remain separate. -/
