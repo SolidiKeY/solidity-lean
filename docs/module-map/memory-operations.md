@@ -353,3 +353,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/EmptyReferenceStorageInterface.lean` | Existing runtime/checked storage code contracts for empty live arrays with arbitrary map-free elements and shadows. |
 | `Backend/MemoryCopies/EmptyReferenceStorage.lean` | Actual zero-header runtime/checked storage copying for arbitrary map-free elements with full allocator and fresh empty-object guarantees. |
 | `Backend/MemoryCopies/EmptyReferenceStorageControls.lean` | Reference/shadow/unread-store and unused-child runtime witnesses, complete saturated inputs and wrong-header negatives. |
+| `Backend/MemoryCopies/EmptyReferenceMemoryInterface.lean` | Existing runtime/checked empty memory-array deep-copy contracts at arbitrary map-free elements, with complete ownership and freshness. |
