@@ -74,4 +74,125 @@ their owner as requests. Register new modules with
 
 ## Handoffs
 
-None yet.
+### VS2 — mutability soundness (S3.1, S3.2, S3.3)
+
+Branch `cloud/semantics-20261105/mutability`. Modules
+`Solidity/Theory/Mutability/{View,Pure,Payable,Assignable,Closer}.lean`;
+witnesses, negative controls and axiom pins in
+`Solidity/Examples/Tactics/Mutability.lean`.
+
+**Step 0, inventory.** Reused, not restated:
+
+- `Prog.within μ` (`Calculus/Blocks.lean`) is the mutability classifier on the
+  intrinsic syntax (`Val.readsState`, `OpLoc.writableIn`, `ARhs.pathIn`):
+  the premise of every theorem here. Nothing in `Bridge/` or `Solidity/Tools/`
+  defines another one.
+- `Prog.run_frame` / `TGFrame` (`Semantics/RunFrame.lean`) and
+  `ExecP.frame` (`Semantics/CallbackFrame.lean`): a body within `μ` keeps the
+  heap, transaction and, unless `μ` is `nonpayable`, storage, ledger and
+  balance on success.  `Prog.run_keeps` / `FrameKeeps` / `Prog.storeAt`: the
+  root-granular modifies set; `Storage.Framed.find_eq` reads it per word.
+- Transient storage has two models: transient roots inside the one typed
+  `Storage` (`Storage.RegionRoot`, `resetTransient`, `Semantics/Storage/Anon.lean`),
+  so "storage kept" covers them; and the explicit layer
+  `Semantics/Transient.lean` (`Transient.Program`, typed cells beside a state),
+  which had `static_preserves` (cells only, success only).
+- `Examples/Tactics/TransientStorage.lean` checked the read-only and static
+  restrictions per example (`rfl`/`decide` on one state).
+- `assignable` (`docs/function-specs.md`): clauses are `SpecLoc` data;
+  `assignableFml` (`Calculus/SurfaceSpec.lean`, a `partial def`) builds the
+  formula `A`; no semantic counterpart existed.
+- Payable: every entry point guards `!payable && msg.value ≠ 0`
+  (`Lifetime.System.run`, `Contract.deployT`, `ContractWorld.World.enter`,
+  `Transient.Program.transact`); `Lowering/V08/Payable*` prove the compiled
+  side.  The H16 source semantics (`Solidity/Source/**`, owned by VY5) has
+  `Source.Mutability` with `payable` but no mutability check of bodies; it was
+  not touched.
+
+**S3.1.**
+- View: `Prog.committed_view` / `Prog.committed_readOnly` — what a run commits
+  (`committed`: the end state's `Globals`, the entry's on a halt) is the
+  entry's storage (both regions), ledger and balance; with callbacks
+  `ExecP.committed_readOnly`; on the transient layer
+  `Transient.Program.static_preserves_all` (static or read-only context: cells
+  and globals) with `readOnly_preserves`, `write_readOnly`, `write_static`,
+  `read_pure`, `selfCall_nonpayable_readOnly`, `ordinary_static`.
+- Pure: `Prog.run_withOutside` — replacing a state's `Outside` (storage,
+  ledger, balance, transaction) commutes with a pure run, by structural
+  recursion over `Stmt`/`Prog` (loops through `TLoop.run_map`); corollaries
+  `Prog.pure_independent`, `pure_halt_independent`, `pure_local_independent`,
+  `pure_outside`; on the transient layer `Transient.Program.run_withOutsideCells`
+  and `Transient.Program.pure_independent` (outside and transient cells).
+- Payable: `System.run_nonpayable`, `deployT_nonpayable`,
+  `transact_nonpayable`, `ContractWorld.World.enter_nonpayable`,
+  `World.enter_static`, `World.callFrame_nonpayable`.
+
+**S3.2.** `Frames L σ τ` (every word of a root outside `L` unchanged, ledger
+and balance kept), `assignableRoots`, the decidable `assignableCheck`
+(read-only body, or modifies set inside the clause's roots) and
+`assignableCheck_sound`; from S3.1, `Prog.frames_readOnly` (every clause,
+`\nothing` included) and `Prog.storage_readOnly`; from the modifies set
+`Prog.frames_of_storeAt`; every outcome `committed_frames`.
+
+**S3.3.** `Closer.lean`: `holds_modal_readOnly` (scoped `holds` of a box or
+diamond), `Spec.box_readOnly`, `Transient.holds_readOnly`,
+`Transient.holds_frame` add the frame to a proved modal fact.
+`Examples/Tactics/TransientStorage.lean` now proves `static_write`,
+`view_write`, `pure_read`, `view_mutable_call` by the theorems (for every
+cell, value and state where they take one), adds `static_ordinary_write_all`
+and `view_reentry_frame` (frame from `holds_frame`); its remaining run checks
+are unchanged and still pass.
+
+**Evidence.** Each theorem has a decided premise on a concrete program and a
+negative control in `Examples/Tactics/Mutability.lean` (`put5_changes`,
+`peek_depends`, payable/value-free entries that commit, `setA_check_b`,
+`setA_changes_a`); axiom pins: only `propext`, `Classical.choice`,
+`Quot.sound`.
+
+**Gates.** Lean MCP diagnostics clean on every touched file;
+`./run-lean.sh` (2026-11-05): `Build completed successfully (3841 jobs)`
+(default targets, examples, `SolkeyTestSuite`), then `check-solkey.sh` fails
+with `57 mismatch(es)` against `../solkey` at `69e251f`, not the pinned
+`473da8944c` (`docs/solkey-migration.md`): environmental, and this lane
+touches no rule, taclet or sort annotation. Layers, roots and axiom pins
+passed in the earlier `gate.sh` run.
+
+**Reviews** (read-only finder and skeptic, no Lean server). Fixed:
+static frames were uncovered (now `static_preserves_all`,
+`ordinary_static`, `enter_static`); the payable docstring overclaimed
+coverage (narrowed, gaps listed below); misleading names
+(`readOnly_view` → `view_ne_nonpayable`); missing witnesses and controls for
+`assignable` and the transient payable entry; missing docstrings.  Recorded
+as limitations:
+
+- "Every outcome" is proved content only for successful runs; a halt commits
+  the entry state by construction (`TRes` carries no state), which is the
+  semantics' rollback, not a theorem about it.  Covered runs: `Prog.run`,
+  `ExecP`, `Transient.Program.run`; not the `Lifetime`/`ContractWorld` drivers.
+- The premise is `Prog.within`, not a declared `view`/`pure`: the elaborator
+  does not check declared mutability, and no theorem says a solc-accepted
+  `view` body passes `within .view`.  `within` is stricter than solc: no
+  memory locals or writes, no external `view` call (`callReceiver`), no
+  `catchData`/`new`; `pure` also rejects memory reads, memory `.length` and
+  hashing, which solc allows.  Independence is over storage, ledger, balance
+  and transaction (and, on the transient layer, the transient cells); heap
+  and locals are inputs.
+- Payable: the theorems state each entry point's guard.  Not covered:
+  `World.create` (its frame is private; it enters through `World.enter`),
+  `World.deployLibrary`, and ABI dispatch (`Semantics/Dispatch.lean`,
+  `AbiEntry*`), which models no `callvalue` check.  The `payable` flag of a
+  `Lifetime.System` action or `ContractWorld.Entry` is the model's; it is not
+  proved to equal `FunDecl.payable` (the constructor's is read directly).
+- S3.2 is root-granular: `s.f`, `m[e]` coarsen to their root; transient roots
+  are framed too.  That `Frames` implies the formula `A` (`assignableFml`, a
+  `partial def`) is argued, not proved.  `assignableCheck` rejects bodies
+  whose modifies set is `none` (payments, memory, aliases).
+- S3.3 gives lemmas for proofs; `sol_close` itself does not use them.
+
+**Interfaces requested from other owners.** To close the payable gap at the
+source level: VY5 (`Solidity/Source/**`) or the ABI dispatch owner — a
+`callvalue` check in dispatch keyed by the declared mutability, and a
+function-to-entry constructor carrying `FunDecl.payable`.  To lift the
+`within` gaps: the Calculus owner of `Calculus/Blocks.lean` — admitting memory
+reads in `Val.readsIn .pure` (the heap is already fixed by
+`Prog.run_withOutside`'s statement, so the pure proof would extend).

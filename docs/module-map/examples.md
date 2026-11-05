@@ -136,3 +136,4 @@ At the root, the notation's own tests:
 | `Examples/Benchmark/*.lean` | solkey's benchmark contracts with their `@custom:key` clauses proved (`Counter`, `SimpleStorage`, `Mapping`, `Purchase`, `Coin`, `EtherWallet`, `ERC20`), and `Syntax`, which pins what elaborates away (units, casts, events, errors, enums, struct constructors, modifiers). |
 | `Examples/Tactics/SignedNumericImport.lean` | Both-pipeline signed numeric source controls, negative assertions and checked/unchecked width/parity regressions. |
 | `Syntax/Numeric.lean` | Typed value composition for checked signed power, with distinct signed base and unsigned exponent. |
+| `Examples/Tactics/Mutability.lean` | Witnesses and negative controls of the mutability metatheorems (`Theory/Mutability/`): decided `view`/`pure` premises, a write and a state read outside them breaking the conclusions, payable and value-free entries that commit. |
