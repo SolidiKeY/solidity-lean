@@ -218,6 +218,7 @@ import Solidity.Examples.Tactics.Recursion
 import Solidity.Examples.Tactics.ReferenceParameters
 import Solidity.Examples.Tactics.Revert
 import Solidity.Examples.Tactics.RevertData
+import Solidity.Examples.Tactics.RevertFormulas
 import Solidity.Examples.Tactics.Rigid
 import Solidity.Examples.Tactics.Rules
 import Solidity.Examples.Tactics.RunnerAudit
