@@ -758,3 +758,28 @@ The final guarded general module passed in 18.468 seconds and its control module
 in 2.854 seconds, with 1,220,100,096 bytes peak aggregate RSS. Neither owned
 module exceeded 60 seconds. The checks use one Lean thread and unchanged proof
 budgets; these focused results do not assert that the full lane gates pass.
+
+## Nonhalting encoder prefixes and terminal failure
+
+`PrefixFailure` derives checked execution of a REVERT suffix from an actual
+nonhalting checked prefix, its offset/length stack layout, payload readback,
+and existing capacity bounds. It preserves reached memory and restores the
+saved stack; later instructions are absorbed by the terminal outcome.
+`source_terminal` combines this with the local Source error evaluation under
+the existing explicit encoding premise. It does not assume the completed
+terminal run. The public writes/PUSH emitter supplies an inhabited prefix
+witness, and `public_emitter` identifies its code with the existing emitter.
+
+The G41/V11 adapter must supply a runtime encoder's actual prefix execution,
+layout and readback; G41 supplies Source encoding. Automatic runtime compiler
+selection, initial Source/target representation, dirty-prefix world coherence,
+bytecode adequacy and internal-frame failure transport remain open. These
+results do not construct those producers.
+
+Both-pipeline controls retain populated Source state, a saved stack and a
+disjoint live word. They reject early terminal prefixes, unsupported instructions
+and swapped offset/length operands, and preserve timeout and compiler refusals.
+All 21 theorem axiom reports are guarded; only the existing standard axioms occur.
+Independent read-only finder and skeptic reviews found no confirmed defect.
+The final general and control checks passed in 1.94 and 1.42 seconds respectively
+under the unchanged serial resource/proof limits; full-lane completion is not claimed.
