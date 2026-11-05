@@ -1756,3 +1756,63 @@ association/uniqueness independently of SOL-EU, remaining true structural-fuel
 coverage, full repository final gates and whole-scope acceptance/reviews.
 SG-CEX-01/02 remain OPEN/REFUTED. This repair does not complete the full lane
 or reset/complete the persistent objective.
+
+
+## Checkpoint U: recursive Boolean loop coverage
+
+Adopted published master `9584f9e7df09f638d9e0cb8930501d1660aa4b2f`
+with merge `3e0ea4659da07306967e7dad2ea193ee5e13a2fc`, preserving all
+owned files and seven pinned inputs byte for byte. The adoption receipt is
+`/workspace/h28-statement-grammar-evidence/adopt-9584f9e7-1793871795805005608/receipt.json`.
+The integration packet includes three prior statement-grammar modules; this
+adoption does not claim completion of G11 or cache freshness.
+
+`LoopCoverage.lean` adds the intrinsic `BooleanLoops` relation, with exactly
+four constructors: block over any existing `NestedItems` witness; Boolean
+while; empty-header for; and Boolean do-while. The last three recurse on a
+statement in the existing loop-enabled context. Its Nat budget is inherited
+from the block witness and increases by one per loop, independently of width.
+`boolean_loops_coverage` proves actual Checked.stmt success at every
+`n + d + 6`, preserving arbitrary suffix, layout and EOF state. No successful
+parse is a premise. `boolean_loops_yield` computes the actual printer for
+arbitrary layout lists, and `boolean_loops_token_unique`,
+`boolean_loops_derives_iff` and `boolean_loops_yield_unique` connect the
+printer to equality through a common sufficient structural fuel budget.
+These five public theorems are unconditional inside the inhabited indexed
+fragment, with no expression uniqueness assumption. Expressions are fixed
+Boolean atoms. No general expression, conditional, compound framing or
+whole-language uniqueness result is asserted.
+
+`LoopCoverageControls.lean` covers every relation constructor: an arbitrary
+Nat-depth while tower in either unchecked context; mixed while/do/for nesting
+over a block with break, continue and empty return; arbitrary excess fuel and
+suffix; actual yield and uniqueness; and negative controls for excluded
+conditionals, zero fuel, and a do-while missing its final semicolon. The
+parameter-only Except result observation does not match on Syn. The two
+computational tower functions recurse on Nat, not an indexed syntax family.
+No existing implementation, theorem, proof budget or producer API changed.
+
+Source diagnostic passes: run-1793872298011108453; importing controls pass:
+run-1793872331106793398. Initial failures are retained in
+run-1793872066056059064 (explicit fuel normalization and yield equations),
+run-1793872133975162949 (one final pure equation), and
+run-1793872264803787016 (controls used unavailable Except.isError and an
+unavailable Decidable syntax equality). All were repaired without changing
+the statements or heartbeat limit. The owned container stopped on failures
+and was restarted unchanged. No failed check is counted as a pass.
+
+Separate read-only finder and skeptic reviews pass with no findings; neither
+used Lean, servers, builds or solc. Final committed-head evidence is retained
+in `/workspace/h28-statement-grammar-evidence/checkpoint-u-validation.json`,
+with commands, process exits, timings, RSS and source identities linked to
+individual immutable runtime records. The source signature/axiom audit is
+`LoopPublicAxioms.lean`; controls also print their nine theorem axioms.
+H41 cache packs remain on this VM, delivery coordinator-pending; no
+ship-cache.sh invocation is authorized or performed.
+
+Original queue remains partial. General compound/item framing, conditional
+token association, remaining true structural-fuel coverage, whole-scope
+acceptance and repository final gates/reviews remain open. SG-CEX-01 and
+SG-CEX-02 remain OPEN/REFUTED. This checkpoint neither weakens those targets
+nor completes or resets the persistent objective. Local registration alone
+is added; shared generated roots and module maps remain coordinator-owned.
