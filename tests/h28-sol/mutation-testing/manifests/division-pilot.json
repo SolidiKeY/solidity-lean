@@ -1,0 +1,98 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "One conditional division helper mutation with signed minimum/-1 and zero-divisor inhabited semantic witnesses, plus independent known-kill. Pilot only; full division/operator/family and nine-family coverage pending. Helper inventory affected-use list is partial; see inventory.extended.errata.json.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+  "inventory_sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/cache-bootstrap/manifest.json",
+  "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec",
+  "cache_root": "/workspace/h28-runtime/prepared-base-6f3eedf0",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "division.div-sub-helper-min-and-zero",
+      "kind": "mutant",
+      "family": "division-minimum",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "new": "  if op = .div then\n    .app2 (.binop .sub (BinOp.compound_accepts (op := .sub) rfl hp)) a b\n  else\n    Tm.castV (BinOp.compound_ret hop p) (.app2 (.binop op (BinOp.compound_accepts hop hp)) a b)",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/DivisionBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/DivisionSubtractKill.lean",
+      "oracle_sha256": "fd1ec9bd8200c51823ea1ccb93dd92f5faef1ecd52cd993385cf4b4b77d369e6",
+      "witness_sha256": "1a70933ed6443f1c5554496d4b4b9f23656cca64485e3876d1dba5e04f8437d5",
+      "oracle_declarations": [
+        "H28.DivisionBaseline.source_link",
+        "H28.DivisionBaseline.input_inhabited",
+        "H28.DivisionBaseline.rejecting_run"
+      ],
+      "witness_declarations": [
+        "H28.DivisionSubtractKill.source_link",
+        "H28.DivisionSubtractKill.input_inhabited",
+        "H28.DivisionSubtractKill.checked_kill",
+        "H28.DivisionSubtractKill.checked_zero_kill",
+        "H28.DivisionSubtractKill.typed_landing"
+      ],
+      "source_symbol": "Tms.Term.binopC",
+      "constructor_id": "Tms.Term.binopC",
+      "mutant_sha256": "c7d7a379aafa101ac3b4ae60e9206f8b53490b0c9973771e414a5819b1a591bd",
+      "oracle_signature_sha256": {
+        "H28.DivisionBaseline.source_link": "ea1f0f82018966b5a14fa9181c8dc38313f1979ced962834da3c07588f806430",
+        "H28.DivisionBaseline.input_inhabited": "d44426e3fb45ba1807881add55b63d4a6636fe8db39533f92ba2e5a2598461f2",
+        "H28.DivisionBaseline.rejecting_run": "046d8569893f557f748a0bb6fc464400493deda781deda471806632b33466ad8"
+      },
+      "witness_signature_sha256": {
+        "H28.DivisionSubtractKill.source_link": "c9700934b46fce593d50f0d774185db0e55aca4914f4df3700ce01c7ffe1e55c",
+        "H28.DivisionSubtractKill.input_inhabited": "d8ee5c332e4b4b7d9019faea043384b08768565385d8f46a91cf815873cbde0d",
+        "H28.DivisionSubtractKill.checked_kill": "b50a69a5f67de958b13d482c764c7383dcfe76268b156b7d6187f6a500d805ba",
+        "H28.DivisionSubtractKill.checked_zero_kill": "11d53f1cce31f3d3cf05f1b037ede4d9ada3001e80f2b410863382f62f547453",
+        "H28.DivisionSubtractKill.typed_landing": "2ff2b79cf5284531f22cba7e831a7a4e5b86419897cb8363f6dcfc9b20f0bfd7"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ]
+}
