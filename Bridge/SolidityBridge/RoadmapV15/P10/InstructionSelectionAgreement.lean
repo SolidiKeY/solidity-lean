@@ -1,3 +1,5 @@
+import Solidity.Backend.Selection.SignedSelection
+import SolidityBridge.RoadmapV15.P10.SignedGeConsumer
 import SolidityBridge.RoadmapV15.P10.UintNotConsumer
 import SolidityBridge.RoadmapV15.P10.BitwiseConsumer
 import SolidityBridge.RoadmapV15.P10.UnsignedOrderConsumer
@@ -583,4 +585,41 @@ theorem bitNot (valid : Array UInt256) (site : Site .NOT) (a : Scalar.Word) (tai
  Quot.sound] -/
 #guard_msgs in
 #print axioms bitNot
+theorem selected_slt : Selection.selectSigned .slt=some Selection.sltCertificate := by
+  rfl
+
+theorem slt (valid : Array UInt256) (site : Site .SLT) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := Scalar.flag (decide (a.toInt < b.toInt))
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .slt m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.sltCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.sltCertificate.code (a::b::tail)=some (Scalar.flag (decide (a.toInt < b.toInt))::tail) := by rfl
+    have ir := (Selection.sltCertificate.success _ _ m represented).mpr scalar
+    have native := signed_lt_agreement valid site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_slt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_slt
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.slt' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms slt
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement

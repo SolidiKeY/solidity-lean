@@ -1931,3 +1931,7 @@ The published numeric XOR certificate now composes with the charged fetched refe
 ### Selected bitwise NOT
 
 The numeric NOT certificate now composes with the charged fetched reference law, retaining explicit stack representation, capacity, gas and fuel premises. Controls cover zero, the maximum word and the complement of256; they distinguish full-word complement from Boolean negation, preserve complete separate frames and check wrong results, ordered tails and gas-before-arity/fuel priority. No physical input origin, Source, account-world or full Osaka adequacy follows.
+
+### Selected signed LT
+
+The numeric SLT certificate now composes with the charged fetched reference theorem, retaining explicit stack representation, capacity, gas and fuel premises. Controls distinguish signed from unsigned order using negative one and the minimum signed word, check equality and reversed operands, preserve populated separate frames, and establish gas-before-arity and fuel priority. This is raw numeric selection agreement; checked Source behavior, physical input origin and account-world adequacy remain separate.
