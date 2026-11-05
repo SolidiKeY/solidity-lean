@@ -1983,3 +1983,7 @@ The POP empty-stack consumer connects actual certificate refusal with the charge
 ### Indexed DUP refusals
 
 DUP1 through DUP16 short-stack consumers connect the actual indexed certificates with the charged gate, fetched driver and native execution under explicit representation, depth and adequate-gas premises. Existing opcode facts are reused read-only. Populated boundary controls show DUP16 refusing fifteen words while DUP15 succeeds on the same input; all-depth controls retain gas-before-underflow and native/driver fuel distinctions. A uniform opcode-fact proof replaces finite case expansion without changing the claims. Exceptions supply no final-state, rollback or account-world conclusion.
+
+### Indexed SWAP refusal
+
+`InstructionSelectionRefusal` proves insufficient-stack refusal for all sixteen SWAP depths against IR, selected Scalar code, the fetched driver and native reference execution. The clauses retain the input representation, three-gas admission and distinct driver/native fuel indices. Controls distinguish SWAP15 success from SWAP16 refusal on sixteen populated words, gas-before-stack ordering, permission flags and insufficient driver fuel. The populated observation retains account, memory, calldata and return-byte fields. These instruction-local results do not establish source frame origin, CALL/world composition or complete opcode-row adequacy.
