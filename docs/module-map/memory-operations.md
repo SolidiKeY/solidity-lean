@@ -536,3 +536,6 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedMemoryParentControls.lean` | Inhabited alias, copied-word, empty/long, explicit refusal and negative parent-entry controls. |
 | `Backend/MemoryCopies/NestedMemoryParentMixedControls.lean` | Actual mixed 2/0/64 producer composed with compiled parent entry and complete copy certificate. |
 | `Backend/MemoryCopies/NestedLocationPipelineInterface.lean` | Actual nested storage-to-memory-to-memory execution, allocator and phase-refusal obligations; word-machine scope. |
+| `Backend/MemoryCopies/NestedLocationPipeline.lean` | Two actual nested copy phases, retained heaps and separate capacity refusals. |
+| `Backend/MemoryCopies/NestedLocationPipelineObservations.lean` | Observable returned root, both parent headers, free cursor and machine framing. |
+| `Backend/MemoryCopies/NestedLocationPipelineControls.lean` | Inhabited empty/mixed 2/0/64 executions and distinct first/second allocation refusals. |
