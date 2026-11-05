@@ -342,3 +342,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/TraversalWords.lean` | Actual object reservation sum, exact generic copy growth and preservation of old cell counts. |
 | `Backend/MemoryCopies/TraversalWordsControls.lean` | Nested/repeated/shadow/empty/long demand witnesses distinguishing words from identities and root size. |
 | `Backend/MemoryCopies/DefaultDemandInterface.lean` | Existing finite-plan cost agreement and unconditional intrinsic default-allocation demand obligations. |
+| `Backend/MemoryCopies/DefaultDemand.lean` | Actual default-cell demand agrees with successful existing finite planners and their plans. |
+| `Backend/MemoryCopies/DefaultDemandControls.lean` | Actual finite plans, nested/long defaults, unused huge children and distinct selector/capacity boundaries. |
