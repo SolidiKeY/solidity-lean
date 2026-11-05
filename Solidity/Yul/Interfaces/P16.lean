@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterFor
 import Solidity.Yul.RawCheckedAdapterDoWhile
 import Solidity.Yul.RawCheckedAdapterLoop
 import Solidity.Yul.RawCheckedAdapterIfElse
@@ -55,4 +56,9 @@ RawCheckedAdapterDoWhile.adapter composes an actual checked body producer as
 a body-first loop. Its real fuel induction preserves Source guard ordering,
 control consumption, exact frames and checked/coherent premises. Nested,
 body-order and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterDoWhile.
+RawCheckedAdapterFor.adapter composes a same-context checked initializer and
+body with a present condition and no post statement. It preserves initializer
+effects, errors and Source control rejection before iteration. This does not
+cover context-growing initialization, omitted conditions or post clauses.
+Concrete composition/refusal controls live in Solidity.Yul.Checks.RawCheckedAdapterFor.
 -/
