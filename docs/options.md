@@ -727,8 +727,8 @@ SolKey test suite reads nothing new.
 | Model | A callee that calls back may | Reading |
 |---|---|---|
 | `none` | not call back at all; it answers by the transaction's oracle | `Fml.Valid` (`validM_none`); `ValidT (.noCallback I)` with no `try` or value call (`validM_none_iff_noCallback`) |
-| `staticOnly` | call back by `STATICCALL` only (`CallMode.static`, `Mode.readOnly`): answer anything, change nothing | resumption leaves storage, ledger, balance as they were |
-| `nonReentrant R` | call back only into the entries `R` does not guard by its reentrancy lock, in sequence (`Reentry.Reach`), each a callback run of its body | resumption reachable by those calls |
+| `staticOnly` | call back by `STATICCALL` only (`CallMode.static`, `Mode.readOnly`): answer anything, change nothing | resumption leaves storage, ledger, balance as they were (no value arrives, forced or not) |
+| `nonReentrant R` | call back into `R`'s entries, in sequence (`Reentry.Reach`), but into one its reentrancy lock guards only while the lock is not held (`Reentry.Step`); each call a callback run of its body, whose own callees may leave any state keeping the invariant | resumption reachable by those calls |
 | `any` | leave any state keeping the invariant | `ValidT ts` (`validM_any`) |
 
 The runs `ExecSM M J` are `ExecS J` with `CallerModel.Allows` a premise
@@ -743,8 +743,11 @@ every model (`Prog.execM_run`).
 (`body : Entry → Prog C [] []`), the ones the lock guards (`guarded`), and
 when the lock is held (`held`, of the storage). `Reentry.Guards` states
 that a guarded entry never completes while the lock is held;
-`Reentry.reachAny_iff` proves that then, the lock held and kept, a callee
-calling back into *any* entry reaches exactly what `nonReentrant` allows.
+`Reentry.reachAny_iff` proves that then, the lock held and no unguarded
+entry releasing it (`KeepsHeld`), a callee calling back into *any* entry
+reaches exactly what `nonReentrant` allows. `ValidM` does not ask for
+`Guards`: `R` states which entries carry the modifier, and `Guards` is
+what makes that claim true of their bodies (`setX_guards`).
 
 **Weakening** (`ValidM.weaken`, `Calculus/CallerModelValid.lean`): `M ≤ M'`
 and `φ` with its modalities in positive positions (`Fml.posModal true`,
@@ -755,13 +758,21 @@ position turns the inclusion of runs around, so such formulas are excluded.
 
 **Strictness** (`Examples/Tactics/CallerModel.lean`): one formula per
 adjacent pair, valid under the weaker model and refuted by a typed run
-under the stronger.
+under the stronger, the two `nonReentrant` pairs with one `R` (a guarded
+`setX()`): refuted with the lock free, valid with it taken. `none <
+staticOnly` separates by the invariant every calling-back model owes on
+exit, not by the callee's power; the sharper witness (two equal calls
+answered alike only under `none`, by the oracle) is true but `sol_close`
+does not prove it, as the calculus forgets the oracle's correlation.
 
 **Not done.** No calculus reads `ValidM` at `staticOnly` or `nonReentrant`:
 a proof there goes through `ValidT` (`ValidM.of_validT`), through `Fml.Valid`
 when no callback is left, or by the runs (`Theory/CallerModel/Static.lean`,
 a model that changes nothing). A re-entrant call carries no value, and its
-own callees call back as under `any`. `staticOnly` is a model of the callee,
+own callees call back as under `any`, so an entry whose body pays or calls
+out lets `nonReentrant` reach any state keeping the invariant.
+`ExecSM .none` is not `none`'s reading (its `try` answers any data); read
+`none` by `Prog.run`. `staticOnly` is a model of the callee,
 not a reading of `ExtCall.mode` (H22): a `static` call still gets the
 reading the model gives every call.
 

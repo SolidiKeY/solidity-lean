@@ -69,13 +69,17 @@ the caller model what a callee that does may do.
 `Calculus/CallerModelValid.lean` (`validM_any`, `validM_none`,
 `validM_none_iff_noCallback`, `ValidM.weaken`, `ValidM.of_validT`,
 `Reentry.reachAny_iff`). For O12, a reachable-states mode under model `M`
-should read callbacks inside its transaction sequence by `ExecPM M`.
+should read callbacks inside its transaction sequence by `ExecPM M` for
+`M ≠ none`, and by `Prog.run` for `none`: `ExecSM .none` is not `none`'s
+reading (its `try` answers any data, and the invariant is owed on exit).
 
-**Done.** Lattice and lock judgment; `any`/`none` coincide with today's
+**Done.** Lattice and lock judgment (`nonReentrant` is lock-aware: a
+guarded entry is turned away only while the lock is held); `any`/`none` coincide with today's
 readings (`validM_any` exact; `validM_none` is `Fml.Valid`, equal to
 `ValidT .noCallback` without `try`/value call); weakening theorem; one
 separating example per adjacent pair (`Examples/Tactics/CallerModel.lean`),
-each with its `#print axioms` pinned. Docs: options.md O11, correctness.md
+the two `nonReentrant` pairs with one `R` (`setX`), each with its
+`#print axioms` pinned. Docs: options.md O11, correctness.md
 "Caller models (O11)", module-map rows.
 
 **Design note.** `ExecSM` is a model-indexed copy of `ExecS` (41
@@ -84,6 +88,16 @@ an extra premise on `ExecS` would change the arity of `transferResume`,
 `sendResume` and `tryOk` in about twenty modules outside this lane
 (`CallbackWk`, `CallbackUnwk`, `CallbackFrame`, `CapturePayments`, …). The
 copy's agreement with `ExecS` is proved both ways (`toExecS`, `ofExecSM`).
+
+**Reviews.** Finder and skeptic (read-only, no Lean server). Fixed:
+`nonReentrant` ignored the lock (`Reentry.Step` now lets a guarded entry
+through while the lock is free; `Static.lean`'s inertness is relative to a
+storage predicate, `Prog.LockedAt`); the `nonReentrant` separations used two
+`R`s and the lock played no part (now one `R`, `open_setX`/`lock_setX`);
+docs overstated `none`'s coincidence with `noCallback`, the `none <
+staticOnly` example's reason, and `ExecSM .none`; stale name
+`holdsR_modal_inert`; missing docstrings. Kept, documented: re-entry with
+no value, nested callbacks under `any`.
 
 **Limitations.** No `ProvesC`-style calculus for `staticOnly` or
 `nonReentrant`: a proof there is a `ValidT` proof weakened, a `Fml.Valid`

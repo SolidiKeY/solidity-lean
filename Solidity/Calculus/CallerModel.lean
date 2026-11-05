@@ -11,18 +11,25 @@ transfer semantics; never a global setting.
 * `none`: no callee calls back.  The reading is `Fml.Valid`, the
   deterministic run: every callee keeps the contract's state, and answers by
   the transaction's oracle, a function of the call (`ExtCall.keyT`), since
-  it cannot observe the contract either.
+  it cannot observe the contract either; nothing is owed on exit, so the
+  transfer semantics is not read.  It equals `ValidT .noCallback` on a
+  formula with no `try` and no value call (`validM_none_iff_noCallback`).
+  `ExecSM .none` is *not* this reading (its `try` answers any data): read
+  `none` by `Prog.run`.
 * `staticOnly`: a callee may call back by `STATICCALL` only (EIP-214,
   `CallMode.static`; `Mode.readOnly` frames): it may read the contract, so
   its answers are any, but it leaves the storage, the ledger and the balance
-  as they were.
-* `nonReentrant R`: a callee may call back only into the entries `R` does
-  not guard by the contract's reentrancy lock (`Reentry`), each such call a
-  callback run of its body (`ExecP`, nested callbacks read as `any`), in
-  sequence (`Reentry.Reach`).  `Reentry.Guards` is the lock judgment:
-  a guarded entry never completes while the lock is held, and
-  `Reentry.reachAny_iff` proves that then a callee calling any entry reaches
-  exactly what `nonReentrant` allows.
+  as they were (no value arrives either, forced or not).
+* `nonReentrant R`: a callee may call back into the contract's entries
+  (`Reentry`), but into one the reentrancy lock guards only while the lock
+  is not held (`Reentry.Step`); each call a callback run of its body
+  (`ExecP`, nested callbacks read as `any`: an entry whose body pays or
+  calls out lets its callee leave any state keeping the invariant), in
+  sequence (`Reentry.Reach`).  `Reentry.Guards` is the lock judgment: a
+  guarded entry never completes while the lock is held, and
+  `Reentry.reachAny_iff` proves that then, from a held lock that no
+  unguarded entry releases, a callee calling any entry reaches exactly what
+  `nonReentrant` allows.
 * `any`: the callee leaves any state in which the invariant holds; today's
   callback reading, `ValidT` (`validM_any`).
 
@@ -74,9 +81,10 @@ def Call (R : Reentry C) (J : StateInv C) (f : R.Entry) (g g' : State C []) : Pr
     tx.msgValue.1 = 0 ∧ ExecP J (frame g tx) (R.body f) (.ok o) ∧
     g' = g.havoc o.st.storage o.st.net o.st.selfBalance
 
-/-- A re-entrant call into an entry the lock does not guard. -/
+/-- A re-entrant call the lock lets through: into an entry it does not
+guard, or into any while it is not held. -/
 def Step (R : Reentry C) (J : StateInv C) (g g' : State C []) : Prop :=
-  ∃ f, R.guarded f = false ∧ R.Call J f g g'
+  ∃ f, (R.guarded f = false ∨ ¬ R.held g.storage) ∧ R.Call J f g g'
 
 /-- A re-entrant call into any entry. -/
 def StepAny (R : Reentry C) (J : StateInv C) (g g' : State C []) : Prop :=
@@ -87,7 +95,7 @@ inductive Chain {α : Type} (r : α → α → Prop) : α → α → Prop where
   | refl (a : α) : Chain r a a
   | tail {a b c : α} : Chain r a b → r b c → Chain r a c
 
-/-- What a callee calling back only into unguarded entries may leave. -/
+/-- What a callee calling back as the lock lets it may leave. -/
 def Reach (R : Reentry C) (J : StateInv C) : State C [] → State C [] → Prop :=
   Chain (R.Step J)
 

@@ -49,6 +49,7 @@ theorem Le.allows {M M' : CallerModel C} (h : M.Le M') (J : StateInv C) {Γ : Ct
     subst hs hn hb
     exact Reentry.Chain.refl _
 
+/-- The order is transitive. -/
 theorem Le.trans {M₁ M₂ M₃ : CallerModel C} (h₁ : M₁.Le M₂) (h₂ : M₂.Le M₃) : M₁.Le M₃ := by
   cases h₁ with
   | refl => exact h₂
@@ -68,6 +69,7 @@ namespace Reentry
 
 variable {R : Reentry C} {J : StateInv C}
 
+/-- What the lock lets a callee reach, a callee calling any entry reaches. -/
 theorem Reach.toAny {g g' : State C []} (h : R.Reach J g g') : R.ReachAny J g g' := by
   induction h with
   | refl => exact .refl _
@@ -76,7 +78,7 @@ theorem Reach.toAny {g g' : State C []} (h : R.Reach J g g') : R.ReachAny J g g'
 /-- **What the lock gives**: from a state in which the lock is held, when
 every guarded entry is guarded (`Guards`, the lock judgment) and no unguarded
 one releases the lock (`KeepsHeld`), a callee calling back into any entry
-reaches exactly what one calling back only into unguarded entries does. -/
+reaches exactly what the lock lets one reach (`Reach`). -/
 theorem reachAny_iff (hG : R.Guards J) (hK : R.KeepsHeld J) {g g' : State C []}
     (hh : R.held g.storage) : R.ReachAny J g g' ↔ R.Reach J g g' := by
   refine ⟨fun h => ?_, Reach.toAny⟩
@@ -88,7 +90,7 @@ theorem reachAny_iff (hG : R.Guards J) (hK : R.KeepsHeld J) {g g' : State C []}
       obtain ⟨f, hc⟩ := hs
       cases hf : R.guarded f with
       | true => exact absurd hc (hG f hf _ _ hb)
-      | false => exact ⟨.tail hr ⟨f, hf, hc⟩, hK f hf _ _ hb hc⟩
+      | false => exact ⟨.tail hr ⟨f, .inl hf, hc⟩, hK f hf _ _ hb hc⟩
   exact key.1
 
 end Reentry
@@ -99,12 +101,14 @@ section Any
 
 variable {J : StateInv C}
 
+/-- `COut.after` is monotone in its postcondition. -/
 theorem COut.after_imp {H : HTy} {Γ : Ctx} {m : Modality} {p q : State C Γ → Prop}
     (hpq : ∀ τ, p τ → q τ) : (o : COut C H Γ) → o.after m p → o.after m q
   | .ok _, h => hpq _ h
   | .halt _, h => h
   | .violated, h => h
 
+/-- Under `any`, `thenFM` is `thenF`. -/
 theorem COut.thenFM_any_iff {H : HTy} {Γ₁ Γ₀ : Ctx} (κ : Frames C Γ₁ Γ₀) (m : Modality)
     (p : State C Γ₀ → Prop) : (o : COut C H Γ₁) → (o.thenFM .any J κ m p ↔ o.thenF J κ m p)
   | .ok _ => ⟨fun h o' hf => h o' (ExecF.ofExecFM hf), fun h o' hf => h o' (ExecFM.toExecF hf)⟩
@@ -179,29 +183,34 @@ def Polar : Bool → Prop → Prop → Prop
   | true, a, b => a → b
   | false, a, b => b → a
 
+/-- Polarity through a negation: flipped. -/
 theorem Polar.not {p : Bool} {a b : Prop} (h : Polar (!p) a b) : Polar p (¬ a) (¬ b) := by
   cases p with
   | true => exact fun ha hb => ha (h hb)
   | false => exact fun hb ha => hb (h ha)
 
+/-- Polarity through a conjunction. -/
 theorem Polar.and {p : Bool} {a b c d : Prop} (h₁ : Polar p a b) (h₂ : Polar p c d) :
     Polar p (a ∧ c) (b ∧ d) := by
   cases p with
   | true => exact fun h => ⟨h₁ h.1, h₂ h.2⟩
   | false => exact fun h => ⟨h₁ h.1, h₂ h.2⟩
 
+/-- Polarity through an implication: flipped on the left. -/
 theorem Polar.imp {p : Bool} {a b c d : Prop} (h₁ : Polar (!p) a b) (h₂ : Polar p c d) :
     Polar p (a → c) (b → d) := by
   cases p with
   | true => exact fun h hb => h₂ (h (h₁ hb))
   | false => exact fun h ha => h₂ (h (h₁ ha))
 
+/-- Polarity through a quantifier. -/
 theorem Polar.forall {p : Bool} {α : Sort _} {a b : α → Prop} (h : ∀ x, Polar p (a x) (b x)) :
     Polar p (∀ x, a x) (∀ x, b x) := by
   cases p with
   | true => exact fun ha x => h x (ha x)
   | false => exact fun hb x => h x (hb x)
 
+/-- Polarity through an update. -/
 theorem Polar.afterT {p : Bool} {Γ Δ : Ctx} {m : Modality} {σ : State C Γ} {U : Upd C Γ Δ}
     {a b : State C Δ → Prop} (h : ∀ τ, Polar p (a τ) (b τ)) :
     Polar p (U.afterT m σ a) (U.afterT m σ b) := by
@@ -215,6 +224,7 @@ section Mono
 
 variable {M M' : CallerModel C} {I : Fml C []} {pay : Bool}
 
+/-- `thenFM` falls as the model grows and rises with its postcondition. -/
 theorem COut.thenFM_mono
     (hA : ∀ {Γ : Ctx} (σ : State C Γ) st nt sb,
       M.Allows (I.stateInv pay) σ st nt sb → M'.Allows (I.stateInv pay) σ st nt sb)

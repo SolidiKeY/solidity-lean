@@ -77,10 +77,12 @@ static-call restrictions are outside the proved fragment.
 `ValidM M ts φ` (`⊨ᶠₘ[M; ts] φ`, `Calculus/CallerModel.lean`) reads `φ`
 with callees that call back as the caller model `M` allows: `none` (no
 callback: `Fml.Valid`), `staticOnly` (read, change nothing),
-`nonReentrant R` (call back only into entries `R`'s lock does not guard) or
+`nonReentrant R` (call back into `R`'s entries, a guarded one only while the
+lock is free) or
 `any` (`ValidT ts`, `validM_any`). It is an internal formula validity like
 `ValidT`; no `Spec` statement reads it yet. A box proved under a stronger
 model holds under a weaker one (`ValidM.weaken`, positive modalities only),
 so a `ValidT` proof is one under every model (`ValidM.of_validT`); the
-converse fails at each level (`Examples/Tactics/CallerModel.lean`). See
+converse fails at each level, `none < staticOnly` by the invariant owed on
+exit (`Examples/Tactics/CallerModel.lean`). See
 [options.md](options.md#o11-caller-models-lean-only).

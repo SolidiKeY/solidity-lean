@@ -6,24 +6,32 @@ import Solidity.Theory.CallerModel.Static
 /-!
 # The caller-model lattice is strict
 
-One example per adjacent pair of `none < staticOnly < nonReentrant R < any`
-(`Calculus/CallerModel.lean`): a formula valid under the weaker model and
-refuted under the stronger, by a typed run under it, in the style of
-`Examples/Tactics/Callback.lean`.  The lock's examples read the transfer
-semantics `withCallback` with the trivial invariant, so what separates those
-levels is what the callee may do, not what it must keep.
+One example per adjacent pair of `none < staticOnly < nonReentrant setX <
+any` (`Calculus/CallerModel.lean`): a formula valid under the weaker model
+and refuted under the stronger, by a typed run under it, in the style of
+`Examples/Tactics/Callback.lean`.  The lock's examples read one `Reentry`,
+`setX()` (`require(!locked); x = 2;`) guarded by the lock `locked`, and the
+transfer semantics `withCallback` with the trivial invariant, so what
+separates those levels is what the callee may do, not what it must keep.
 
 * **`none < staticOnly`**: `x = 1; to.transfer(0); x = 0;` breaks the
-  invariant `x == 0` while control is away.  No callee calls back, so
-  nothing is owed (`exit_none`); a callee that may call back, if only to
-  read, may observe it (`exit_staticOnly`, KeY's "invariant on exit").
-* **`staticOnly < nonReentrant bump`**: `x = 1; to.transfer(0);` keeps
-  `x == 1` when the callee cannot write (`lock_staticOnly`), not when it may
-  call the unguarded `bump()` (`x = x + 1`, `lock_bump`).
-* **`nonReentrant setX < any`**: with `setX()` guarded by the lock
-  (`require(!locked); x = 2;`), a callee calling back only into unguarded
-  entries keeps `x == 1` (`lock_setX`); one that may leave any state does
-  not (`lock_any`).  `setX_guards` proves the lock judgment of `setX`.
+  invariant `x == 0` while control is away.  Under `none` nothing calls
+  back and nothing is owed on exit (`ValidM .none` is `Fml.Valid`, which
+  reads no invariant: `exit_none`); under every model that calls back, the
+  invariant is owed when control leaves (KeY's "invariant on exit",
+  `exit_staticOnly`), whatever the callee then does.  So this pair separates
+  by the obligation calling back brings, not by the callee's power; the
+  sharper witness (two equal calls answered alike only under `none`) is
+  true but not proved here.
+* **`staticOnly < nonReentrant setX`**: `x = 1; to.transfer(0);`, the lock
+  not taken, keeps `x == 1` when the callee cannot write (`open_staticOnly`),
+  not when it may call `setX()`, which the free lock lets through
+  (`open_setX`).
+* **`nonReentrant setX < any`**: `locked = true; x = 1; to.transfer(0);
+  locked = false;` keeps `x == 1` when the lock turns `setX()` away
+  (`lock_setX`); a callee that may leave any state breaks it (`lock_any`).
+  `setX_guards` proves the lock judgment of `setX`, and `setX_reachAny` that
+  a callee calling any entry reaches no more while the lock is held.
 -/
 
 namespace Solidity.Examples.Tactics.CallerModel
@@ -75,13 +83,6 @@ def lockedF : Fml Locked [] := dl!{ locked == true }
 def lockHeld (st : Storage Locked) : Prop :=
   holds ({ storage := st, H := [], heap := Heap.empty, env := () } : State Locked []) lockedF
 
-/-- `bump()`: `x = x + 1`, unguarded. -/
-def bump : Reentry Locked where
-  Entry := Unit
-  body := fun _ => sol{ x = x + 1; }
-  guarded := fun _ => false
-  held := lockHeld
-
 /-- `setX()`: `require(!locked); x = 2;`, guarded by the lock. -/
 def setX : Reentry Locked where
   Entry := Unit
@@ -97,34 +98,58 @@ def lockSt (x : Int) (b : Bool) (hx : PrimTy.uint.inRange x = true := by decide)
 def before : State Locked [] :=
   { storage := lockSt 0 false, H := [], heap := Heap.empty, env := (), selfBalance := u 10 }
 
+/-- `x = 1; to.transfer(0);`, the lock not taken, then `x == 1`. -/
+def openF : Fml Locked [] := dl!{ [ x = 1; to.transfer(0); ] x == 1 }
+
+/-- Without callbacks, `x` is `1`. -/
+theorem open_valid : ⊨ᶠ dl!{ [ x = 1; to.transfer(0); ] x == 1 } := by
+  sol_symex
+  sol_close
+
 /-- **A callee that cannot write keeps `x`.** -/
-theorem lock_staticOnly : ValidM .staticOnly (.withCallback .top) lockF :=
-  fun σ v => holdsR_box_inert (I := .top) (CallerModel.inert_staticOnly _) (fun _ => by simp only [Invariant.top, holds]) rfl
-    (fun _ => Iff.rfl) (lock_valid σ v)
+theorem open_staticOnly : ValidM .staticOnly (.withCallback .top) openF :=
+  fun σ v => holdsR_box_inert (I := .top) (CallerModel.inert_staticOnly _ fun _ => True)
+    (fun _ => by simp only [Invariant.top, holds]) rfl (Prog.lockedAt_true _ _)
+    (fun _ => Iff.rfl) (open_valid σ v)
 
-/-- **A callee calling back only into unguarded entries keeps `x`**: `setX`
-is guarded. -/
-theorem lock_setX : ValidM (.nonReentrant setX) (.withCallback .top) lockF :=
-  fun σ v => holdsR_box_inert (I := .top) (Reentry.inert fun _ => rfl) (fun _ => by simp only [Invariant.top, holds]) rfl
-    (fun _ => Iff.rfl) (lock_valid σ v)
-
-/-- `lock_staticOnly` again, weakened from `lock_setX` (`ValidM.weaken`). -/
-theorem lock_staticOnly' : ValidM .staticOnly (.withCallback .top) lockF :=
-  ValidM.weaken (.staticNr setX) rfl lock_setX
-
-/-- **A callee that may call `bump()` breaks `x == 1`**: from `before`, with
-`to` the address `7`, the callee calls back into `bump()` once. -/
-theorem lock_bump : ¬ ValidM (.nonReentrant bump) (.withCallback .top) lockF := by
+/-- **With the lock not taken, a callee may call `setX()`**: from `before`,
+with `to` the address `7`, it calls back into `setX()`, which the lock lets
+through, and `x` is `2`. -/
+theorem open_setX : ¬ ValidM (.nonReentrant setX) (.withCallback .top) openF := by
   intro h
   have H := h before (u 7) _
     (.cons (execOfRun rfl rfl)
-      (.cons (execOfRun rfl rfl)
-        (.cons (ExecSM.transferResume (st := lockSt 2 true) rfl rfl trivial trivial
-            (.tail (.refl _) ⟨(), rfl, {}, _, rfl, rfl, .cons (execOfRunC rfl rfl) .nil, rfl⟩))
-          (.cons (execOfRun rfl rfl) .nil))))
+      (.cons (ExecSM.transferResume (st := lockSt 2 false) rfl rfl trivial trivial
+          (.tail (.refl _) ⟨(), .inr ?free, {}, _, rfl, rfl, ExecP.of_run rfl, rfl⟩)) .nil))
+  case free => exact fun hh => absurd hh (by with_unfolding_all exact fun h => nomatch h)
   have H2 := H _ ExecFM.nil
   simp only [COut.after, holdsR, holds] at H2
   exact absurd H2 (by with_unfolding_all decide)
+
+/-- **The lock taken, a callee calling back as the lock lets it keeps `x`**:
+the only entry, `setX()`, is guarded. -/
+theorem lock_setX : ValidM (.nonReentrant setX) (.withCallback .top) lockF := by
+  intro σ v
+  refine holdsR_box_inert (I := .top) (Reentry.inertAt fun _ => rfl)
+    (fun _ => by simp only [Invariant.top, holds]) rfl ?_ (fun _ => Iff.rfl) (lock_valid σ v)
+  -- the lock is held before the transfer: `locked = true` ran
+  obtain ⟨st, H, heap, env, net, sb, tx⟩ := σ
+  cases st with
+  | cons a rest =>
+    cases rest with
+    | cons b rest =>
+      cases rest
+      refine ⟨fun h => (nomatch h), fun o₁ h₁ => ⟨fun h => (nomatch h), fun o₂ h₂ =>
+        ⟨fun _ => ?_, fun _ _ => ⟨fun h => (nomatch h), fun _ _ => trivial⟩⟩⟩⟩
+      injection h₁ with h₁
+      subst h₁
+      injection h₂ with h₂
+      subst h₂
+      with_unfolding_all exact rfl
+
+/-- `lock_setX` read under `staticOnly` (`ValidM.weaken`). -/
+theorem lock_staticOnly : ValidM .staticOnly (.withCallback .top) lockF :=
+  ValidM.weaken (.staticNr setX) rfl lock_setX
 
 /-- **A callee that may leave any state breaks `x == 1`.** -/
 theorem lock_any : ¬ ValidM .any (.withCallback .top) lockF := by
@@ -156,10 +181,13 @@ theorem exit_valid : ⊨ᶠ dl!{ x == 0 → [ x = 1; to.transfer(0); x = 0; ] x 
   sol_symex
   sol_close
 
+/-- `exit_valid` read under `none`: `x = 1; to.transfer(0); x = 0;`, no
+callee calling back. -/
 theorem exit_none : ValidM .none (.withCallback zeroInv) exitF := exit_valid
 
-/-- **A callee that may only read still observes the broken invariant**: the
-transfer leaves with `x == 1`. -/
+/-- **Under a model that calls back the invariant is owed on exit**: the
+transfer leaves with `x == 1` (`transferViolated`, whatever the callee
+does). -/
 theorem exit_staticOnly : ¬ ValidM .staticOnly (.withCallback zeroInv) exitF := by
   intro h
   have H := h before (u 7) (by with_unfolding_all exact rfl) _
@@ -201,8 +229,8 @@ end Lock
 
 end Solidity.Examples.Tactics.CallerModel
 
-/-- info: 'Solidity.Examples.Tactics.CallerModel.lock_bump' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_bump
+/-- info: 'Solidity.Examples.Tactics.CallerModel.open_setX' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.open_setX
 /-- info: 'Solidity.Examples.Tactics.CallerModel.lock_any' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_any
 /-- info: 'Solidity.Examples.Tactics.CallerModel.lock_setX' depends on axioms: [propext, Classical.choice, Quot.sound] -/
