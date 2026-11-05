@@ -15,3 +15,11 @@
 | `Roadmap/V16/CreationReturnConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainder.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/PublishedRemainderControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Bounded v15-evm-agreement checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/P8/SourceSize.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/SourceSizeControls.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Roadmap/V16/NativeRevertConsumer.lean` | Bounded v16-correctness-transfer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityConsumer.lean` | G46.01 fetched EQ consumer of actual Scalar and pinned native definitions. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/EqualityControls.lean` | Populated exact native EQ states and typed equality clients. |
+| `Examples/Roadmap/V16/FramedReasonConsumer.lean` | Literal source Error(string) specification consumer. |

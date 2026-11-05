@@ -174,3 +174,18 @@
 | `Yul/Compilation/FramedWordLoweringControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/World/ReturndataByteLoad.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/World/ReturndataByteLoadControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLiveCoverage.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Views/RetainedLiveCoverageControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedControl.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedControlControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/TerminalBuiltin.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/World/TerminalBuiltinControls.lean` | Bounded vy4-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Checks/LocalBoolUnchecked.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/LocalBoolUnchecked.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Checks/LocalBoolRepresentation.lean` | Scoped proofs and retained obligations for LocalBoolRepresentation. |
+| `Yul/LocalBoolRepresentation.lean` | Proof-only exact-word relation for Boolean constructor differences. |
+| `Evm/MemoryLoopHorizonRestriction.lean` | A finite capacity certificate can be restricted to any smaller requested horizon. |
+| `Evm/MemoryLoopHorizonRestrictionControls.lean` | Both stopping and pending loops on the populated aliased-memory fixture consume the published counted relation at every horizon below a certified limit. |
+| `Yul/Compilation/FramedBranch.lean` | Transport through the existing relative-skip conditional tail. |
+| `Yul/Compilation/FramedBranchControls.lean` | Concrete branch-tail controls. |
+| `Yul/World/PendingCoupling.lean` | H26 pending P19 producer interface. |

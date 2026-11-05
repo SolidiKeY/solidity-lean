@@ -39,8 +39,16 @@ import Solidity.Examples.DecisionArrays
 import Solidity.Examples.DecisionFeatures
 import Solidity.Examples.DecisionGapOperators
 import Solidity.Examples.DecisionGaps
+import Solidity.Examples.DecisionHashCore
+import Solidity.Examples.DecisionHashFamilies
 import Solidity.Examples.DecisionHashFamilyCheck
 import Solidity.Examples.DecisionHashFiveChain
+import Solidity.Examples.DecisionHashKeys
+import Solidity.Examples.DecisionHashKinds
+import Solidity.Examples.DecisionHashMixed
+import Solidity.Examples.DecisionHashQuantifiers
+import Solidity.Examples.DecisionHashThreeKinds
+import Solidity.Examples.DecisionHashUpdates
 import Solidity.Examples.DecisionHashes
 import Solidity.Examples.DecisionHashesChecks
 import Solidity.Examples.DecisionKInt
@@ -76,6 +84,7 @@ import Solidity.Examples.ReadRealization
 import Solidity.Examples.ReadTrace
 import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.Roadmap.V16.FramedReasonConsumer
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample

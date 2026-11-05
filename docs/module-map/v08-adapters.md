@@ -460,6 +460,15 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureStatementReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/WordCastCallable.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureArithmeticReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureArithmeticReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/FramedEmission.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/FramedEmissionControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LocalCallableTransport.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureOverflowReason.lean` | Actual typed addition at the checked/unchecked range boundary. |
+| `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Scoped proofs and retained obligations for LiteralFailureOverflowReasonControls. |
+| `Backend/FailurePaths/LocalGuardSelection.lean` | Executable selection from actual indexed Source statements for a bare require of a Boolean local. |
+| `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Both pipelines consume the executable selector correctness theorem with inhabited memory and saved77. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
