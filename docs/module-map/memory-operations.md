@@ -362,3 +362,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedStorageTurn.lean` | Actual checked dynamic primitive storage-child copying composes with reserved-parent pointer writes and complete allocator framing. |
 | `Backend/MemoryCopies/NestedStorageTurnControls.lean` | Represented parent reservations, child lengths 0/2/64, last index, fresh roots, wrong slot/pointer/payload and saturated refusal controls. |
 | `Backend/MemoryCopies/NestedStorageLoopInterface.lean` | Intrinsic dynamic-child vectors, exact aggregate demand and complete checked traversal contract over a reserved parent. |
+| `Backend/MemoryCopies/NestedStorageLoop.lean` | Actual complete variable-length child traversal, final-base pointer/frame preservation and bounded checked refusal. |
+| `Backend/MemoryCopies/NestedStorageLoopControls.lean` | Mixed final sibling pointers/payloads, fresh repeated children, suffix framing, saturation and later-refusal controls. |

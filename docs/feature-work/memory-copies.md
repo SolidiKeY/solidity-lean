@@ -1128,3 +1128,26 @@ reviews confirmed these boundaries and required final-base weakening, unchanged
 storage transport and empty/later-refusal controls. Typed parent adoption,
 outer-header compilation and the original Source/physical/producer obligations
 remain open. Signature-only interface precedes proofs and controls.
+
+Traversal implementation/handoff (interface `7012eb346a32371bd748586f5659dacea32397d7`):
+`nested_storage_loop_success`, `nested_storage_loop_refusal` and
+`nestedStorageLoop` prove the fixed loop against actual variable-length child
+copies, preserving complete ownership, final-base pointers, framing and prior
+gaps. Both outcomes terminate within `rows.length + 1` turns; the public total
+contract assumes no capacity predicate. Controls cover mixed lengths 2/0/64
+(cursor 113), repeated fresh identities, suffix framing, empty saturation and
+a represented successful prefix followed by refusal.
+
+Finder identified a concrete control gap: cursor/frame observations alone did
+not observe sibling contents after the full loop. The added control proves
+pointers 41/42/43 → 44/47/48, headers 2/0/64, retained payloads 11/23 and long
+child endpoints 1/64; a negative control rejects erasure of the earlier payload.
+Independent finder and skeptic re-reviews passed. Final three MCP diagnostics
+have zero errors/empty warnings; standalone bounded demand simplification
+passed without budget changes. Eight main and sixteen control scoped targets
+bring the checkpoint to 1,236 reports over 211 owned modules, preserving all
+208 previous modules. Exact-head library/import-closure, policy, per-file,
+axiom and KeySort gates, patch-tree verification and reviewed seal remain
+required before acceptance. Typed parent adoption, full outer-header compiler
+integration and all original Source/physical/producer obligations remain open;
+this is not whole G33/G35 completion.
