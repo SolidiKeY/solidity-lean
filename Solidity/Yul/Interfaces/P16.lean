@@ -273,4 +273,10 @@ General program divergence, admission and compiler adequacy remain separate. -/
 /-! RawContinueLoop.all_fuel_clean additionally preserves the existing typed
 LOCAL values and coherence at every horizon under its genuine coherent-input
 premise. The dirty-one-horizon refusal control prevents treating refresh as a
-cleaning operation. The initialized raw word-view projection remains open. -/
+cleaning operation. The arbitrary dirty initialized raw word-view projection remains open. -/
+
+/-! RawContinueLoop.initialized_clean and initialized_view_coherent close the
+concrete read-uint8 initializer/continue-loop/binder-close path at every horizon
+for genuinely coherent inputs. Controls use both clean frames and explicitly
+populated coherent overlays. Arbitrary dirty initialized-view preservation
+and general initializer/admission/Source-readback remain separate obligations. -/

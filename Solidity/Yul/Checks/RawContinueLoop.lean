@@ -93,6 +93,43 @@ theorem dirtyOneRefuses : ∀ (pipeline : Solidity.Roadmap.Pipeline)
   intro pipeline world
   rfl
 
+theorem initializedCleanAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let state := Solidity.Yul.RawFrame.ofClean Solidity.Yul.Checks.RawContinueLoop.Old.clean world
+ let actual := Solidity.Yul.RawU8ForAbsent.run (.local Solidity.Yul.Checks.RawContinueLoop.argument)
+   (Solidity.Yul.RawContinueLoop.body Solidity.Yul.Checks.RawContinueLoop.Old.unsignedCtx [] false false)
+   pipeline fuel state
+ actual.2.clean = Solidity.Yul.Checks.RawContinueLoop.Old.clean ∧
+ Solidity.Yul.RawCoherent.coherent actual.2 = true ∧
+ Solidity.Yul.RawFrame.view actual.2 = Solidity.Yul.RawFrame.view state := by
+  intro pipeline fuel world
+  have invariant := RawContinueLoop.initialized_clean Old.ctx "n" [] false false argument
+    pipeline fuel (RawFrame.ofClean Old.clean world) (RawCoherent.coherent_ofClean Old.clean world)
+  exact ⟨invariant.1,invariant.2,RawContinueLoop.initialized_view_coherent
+    Old.ctx "n" [] false false argument pipeline fuel (RawFrame.ofClean Old.clean world)
+      (RawCoherent.coherent_ofClean Old.clean world)⟩
+
+theorem initializedOverlayAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let state := Solidity.Yul.RawFrame.capture
+   (Solidity.Yul.RawFrame.ofClean Solidity.Yul.Checks.RawContinueLoop.Old.clean world)
+   (Solidity.Yul.localWordCells Solidity.Yul.Checks.RawContinueLoop.Old.ctx
+     (Solidity.Yul.LocalValues.ofClean Solidity.Yul.Checks.RawContinueLoop.Old.clean))
+ let actual := Solidity.Yul.RawU8ForAbsent.run (.local Solidity.Yul.Checks.RawContinueLoop.argument)
+   (Solidity.Yul.RawContinueLoop.body Solidity.Yul.Checks.RawContinueLoop.Old.unsignedCtx [] false false)
+   pipeline fuel state
+ actual.2.clean = Solidity.Yul.Checks.RawContinueLoop.Old.clean ∧
+ Solidity.Yul.RawCoherent.coherent actual.2 = true ∧
+ Solidity.Yul.RawFrame.view actual.2 = Solidity.Yul.RawFrame.view state := by
+  intro pipeline fuel world
+  let state : RawFrame.State Old.ctx := RawFrame.capture (RawFrame.ofClean Old.clean world)
+    (localWordCells Old.ctx (LocalValues.ofClean Old.clean))
+  have same : RawCoherent.coherent state = true := (RawCoherent.coherent_iff state).mpr rfl
+  have invariant := RawContinueLoop.initialized_clean Old.ctx "n" [] false false argument
+    pipeline fuel state same
+  exact ⟨invariant.1,invariant.2,RawContinueLoop.initialized_view_coherent
+    Old.ctx "n" [] false false argument pipeline fuel state same⟩
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -114,3 +151,8 @@ end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.all_fuel_clean
 #print axioms Solidity.Yul.Checks.RawContinueLoop.coherentAll
 #print axioms Solidity.Yul.Checks.RawContinueLoop.dirtyOneRefuses
+
+#print axioms Solidity.Yul.RawContinueLoop.initialized_clean
+#print axioms Solidity.Yul.RawContinueLoop.initialized_view_coherent
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializedCleanAll
+#print axioms Solidity.Yul.Checks.RawContinueLoop.initializedOverlayAll

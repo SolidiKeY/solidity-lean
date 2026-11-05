@@ -177,4 +177,69 @@ theorem all_fuel_clean : ∀ (ctx : Solidity.Source.Ctx)
       dsimp only
       exact ⟨next.1.trans refreshed.1,next.2⟩
 
+/-- A concrete initializer and binder close retain coherent outer locals at every horizon. -/
+theorem initialized_clean : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawCoherent.coherent state = true →
+ let actual := Solidity.Yul.RawU8ForAbsent.run (.local index)
+   (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+   pipeline fuel state
+ actual.2.clean = state.clean ∧ Solidity.Yul.RawCoherent.coherent actual.2 = true := by
+
+  intro ctx name returns modifier u index pipeline fuel state same
+  cases fuel with
+  | zero => exact ⟨rfl,same⟩
+  | succ fuel =>
+    cases fuel with
+    | zero => exact ⟨rfl,same⟩
+    | succ fuel =>
+      cases fuel with
+      | zero => exact refresh_clean ctx state same
+      | succ fuel =>
+        let reached : RawFrame.State (ctx.push name LocalU8Expr.Ty) :=
+          RawCoherent.capture
+            (RawFrame.ofClean (.cons (.int 0 (by decide)) state.clean) state.world)
+            (((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1),
+              (RawCoherent.prepare state).2)
+        have reached_clean : reached.clean = .cons (state.clean.get index) state.clean := by
+          dsimp only [reached]
+          rw [RawCoherent.prepare_coherent state same]
+          simp only [LocalState.ofClean,LocalValues.get_ofClean]
+          change (RawCoherent.capture (ctx := ctx.push name LocalU8Expr.Ty) _
+            (LocalState.ofClean (.cons (state.clean.get index) state.clean,state.world))).clean = _
+          rw [RawCoherent.capture_ofClean]
+          rfl
+        have reached_coherent : RawCoherent.coherent reached = true := by
+          dsimp only [reached]
+          rw [RawCoherent.prepare_coherent state same]
+          simp only [LocalState.ofClean,LocalValues.get_ofClean]
+          exact RawCoherent.capture_coherent (ctx := ctx.push name LocalU8Expr.Ty) _ (.cons (state.clean.get index) state.clean) state.world
+        have invariant := all_fuel_clean (ctx.push name LocalU8Expr.Ty)
+          returns modifier u pipeline (fuel+2) reached reached_coherent
+        change (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2.clean.drop 1 = state.clean ∧
+          RawCoherent.coherent (RawTypedScope.drop
+            (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2) = true
+        constructor
+        · rw [invariant.1,reached_clean]
+          rfl
+        · exact RawTypedScope.drop_coherent ctx name LocalU8Expr.Ty _ invariant.2
+
+/-- Word-view preservation through initialization and binder close for coherent inputs. -/
+theorem initialized_view_coherent : ∀ (ctx : Solidity.Source.Ctx) (name : String)
+ (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawCoherent.coherent state = true →
+ Solidity.Yul.RawFrame.view (Solidity.Yul.RawU8ForAbsent.run (.local index)
+   (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+   pipeline fuel state).2 = Solidity.Yul.RawFrame.view state := by
+  intro ctx name returns modifier u index pipeline fuel state same
+  have invariant := initialized_clean ctx name returns modifier u index pipeline fuel state same
+  rw [(RawCoherent.coherent_iff _).mp invariant.2,invariant.1]
+  exact ((RawCoherent.coherent_iff state).mp same).symm
+
 end Solidity.Yul.RawContinueLoop
