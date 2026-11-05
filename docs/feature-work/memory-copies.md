@@ -1278,3 +1278,23 @@ remain explicit. Independent design finder/skeptic reviews required repeated
 source-alias controls, successful source selection before capacity refusal and
 source refusal even at saturation. This is one child turn, with whole traversal,
 typed parent adoption, Source/physical adequacy and original queue still open.
+
+Memory-turn implementation/handoff (interface `ae336a240611922f698a8b7f2d72e693a570394e`):
+`nestedMemoryTurn` derives the actual child pointer through the existing checked
+array reader, then reuses checked copying and the gap store. A concrete dynamic
+parent at160 has two aliases to child16. The separate parent reservation
+192..196 receives fresh pointer196; both original alias words and variable
+0/2/64 payloads remain unchanged, with copied nonzero payloads at197 onward.
+Source index2 is absent despite target validity; index0 exists at saturation
+but refuses capacity. Source-bounds refusal also holds at saturation. Negative
+controls reject storing old pointer16 or erasing old/new payload23.
+
+Independent semantic finder/skeptic reviews passed without findings. Explicit
+option/fixture equations and concrete constructor/address normalization repaired
+direct proof attempts without premise or budget changes. All three final
+diagnostics have zero errors/empty warnings. Standalone address normalization
+passed; six basic alternatives failed. Five main and twelve control targets
+bring the checkpoint to 1,319 scoped reports across223 modules, preserving220
+predecessors. Exact-head gates, axiom audit, canonical patch reconstruction and
+seal remain required before acceptance. This is one child turn; whole traversal,
+parent adoption, Source/physical adequacy and full original G33/G35 remain open.
