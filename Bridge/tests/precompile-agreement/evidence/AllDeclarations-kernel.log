@@ -227,4 +227,4 @@ AXIOM SolidityBridge.PrecompileAgreement.Controls.blake_controls._proof_1_8: [pr
 AXIOM SolidityBridge.PrecompileAgreement.identity_gas: [propext, Quot.sound]
 AXIOM SolidityBridge.PrecompileAgreement.Controls.point_controls._proof_1_2: [propext, Quot.sound, Classical.choice]
 ALL_DECLARATIONS_PASS count=204
-EXIT=0 SECONDS=5.324 PEAK_RSS=391598080 MIN_AVAILABLE=17651961856 RESOURCE_STOP=False
+EXIT=0 SECONDS=5.325 PEAK_RSS=391680000 MIN_AVAILABLE=17664471040 RESOURCE_STOP=False

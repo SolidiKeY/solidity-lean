@@ -444,4 +444,4 @@ SolidityBridge.PrecompileAgreement.identity_unaffordable (σ : EvmYul.AccountMap
   (g : EvmYul.UInt256) (A : EvmYul.Substate) (I : EvmYul.ExecutionEnv EvmYul.OperationType.EVM)
   (huge : EvmYul.UInt256.size ≤ Solidity.Precompiles.identityGas I.calldata.toList) :
   Ξ_ID σ g A I = (false, ∅, { val := 0 }, A, ByteArray.empty)
-EXIT=0 SECONDS=1.909 PEAK_RSS=391680000 MIN_AVAILABLE=17623400448 RESOURCE_STOP=False
+EXIT=0 SECONDS=2.117 PEAK_RSS=391974912 MIN_AVAILABLE=17608105984 RESOURCE_STOP=False

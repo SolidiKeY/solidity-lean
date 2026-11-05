@@ -104,4 +104,4 @@ COMMAND: /workspace/.setup/tools/lean-4.24.0-linux/bin/lake env lean -j1 -M11264
 'SolidityBridge.PrecompileAgreement.identity_exact' depends on axioms: [propext, Classical.choice, Quot.sound]
 'SolidityBridge.PrecompileAgreement.identity_one_short' depends on axioms: [propext, Classical.choice, Quot.sound]
 'SolidityBridge.PrecompileAgreement.identity_unaffordable' depends on axioms: [propext, Classical.choice, Quot.sound]
-EXIT=0 SECONDS=3.324 PEAK_RSS=389922816 MIN_AVAILABLE=17676533760 RESOURCE_STOP=False
+EXIT=0 SECONDS=3.316 PEAK_RSS=389980160 MIN_AVAILABLE=17666637824 RESOURCE_STOP=False

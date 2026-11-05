@@ -1,0 +1,6 @@
+CWD: /workspace/solidity-lean
+COMMAND: python3 scripts/check-precompile-agreement.py
+PASS scope map: 18 addresses, actual vendor definitions, fixed input hashes and required theorems/fixtures
+PASS bounded kernel evidence: IDENTITY, common gas rows, header domains, mismatch/negative controls, standard axiom pins
+OPEN: native crypto/FFI output equality, MODEXP fork, unsupported addresses, central registration/full repository gate
+EXIT=0 SECONDS=0.195

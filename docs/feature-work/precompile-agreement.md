@@ -6,9 +6,9 @@ RUNTIME_GATE_PASS claim. Original base
 `b6ba0696102a7a038afe2ed333c09dff397cc5b2`; assigned branch
 `codex/solidity-sol-20261103/precompile-agreement`, repository
 `/workspace/solidity-lean`. Published dependency `8495f1deb0a95dd6b9301822d8649ab76b217681`
-was adopted in `095dfb1fdb69ec5dbff4adcee18aac7438b48232`. The newly announced
-`f77cf60d3cea8f7f1db8db29cc027532b0cd3fce` will be inspected/adopted after
-saving this checkpoint; its adoption receipt will be appended below.
+was adopted in `095dfb1fdb69ec5dbff4adcee18aac7438b48232`. The proof checkpoint is
+`b25eb32497033bac6c4085872df21e8de9c4baa1`; publication `f77cf60d3cea8f7f1db8db29cc027532b0cd3fce`
+is now adopted in merge `8c93d6ed6e9270aa19d965b857559c37c08fb3d8`.
 
 ## Current queue and acceptance
 
@@ -304,3 +304,30 @@ without findings or Lean/server use. No new composition or local full-build
 claim. Original Mathlib transport and all unfinished precompile proof/final
 obligations remain pending. Receipt: `evidence/dependency-adoption-182351.md`;
 commands/results: `evidence/dependency-adoption-182351-gates.log`.
+
+## Published dependency adoption and sealed proof handoff, 2026-11-05
+
+The proof payload was committed before fetching/adopting the next publication.
+The merge has exact parents `b25eb32497033bac6c4085872df21e8de9c4baa1` and
+`f77cf60d3cea8f7f1db8db29cc027532b0cd3fce`. All 75 pinned inputs, repository instructions
+and owned payload bytes are unchanged; master contains no competing precompile
+implementation. Both independent read-only adoption reviews pass without
+findings or Lean/server use. No global cache freshness follows from adoption.
+
+Post-adoption serial kernel/consumer/vector/pin gates pass again, as do all
+32 mutations, scope evidence, trust scan (3938 sources, 0 findings), document
+paths and fresh KeySort. Central gates remain held: five root imports/five
+area rows, and 82 unrecorded axiom entries with zero axiom errors. The actual
+full gate stops before its build at stale generated roots. No protected shared
+registration edit, full Bridge build or RUNTIME_GATE_PASS is claimed.
+
+Current commands/timings/outcomes: `evidence/post-adoption-gates.json` and
+`evidence/verify-post-adoption.log`. Handoff: `evidence/HANDOFF-proof.md`.
+The committed original patch is `evidence/original-proof.patch.log`; its target
+is the proof payload, relative to the original assignment base, restricted to
+the four owned paths. Metadata added by this seal is separately committed.
+`evidence/SHA256SUMS` is the current canonical file manifest;
+`evidence/SHA256SUMS-inventory` preserves the historical source-only manifest
+(which applies to its historical committed snapshot, not the revised files).
+The final seal head is recorded in the result report and generated artifact
+receipt; the handoff records the exact proof and adoption heads.

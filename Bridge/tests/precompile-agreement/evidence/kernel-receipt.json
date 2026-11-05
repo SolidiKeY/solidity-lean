@@ -80,18 +80,18 @@
   "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
   "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
   "logs": {
-    "Acceptance-kernel.log": "1acaed05f395a0af53f2a74d35ad387518ca65caa3aa8eae7caacda73f8a14c6",
-    "ActualAxioms-kernel.log": "8d8aff88bf6e0d48b99cc0dda99f6374561ccd453626b518b499f38fea407e51",
-    "AllDeclarations-kernel.log": "9f083a91f5e58bf3087b54bf29bc11d39e71e14f499eeaabe2ed093338ad100b",
-    "Axioms-kernel.log": "0e9d0f0a608908fcf6f8227ef6e263161bb5bdb15d52f66c4ba38f74114452be",
-    "BoundaryVectors-kernel.log": "47a600492d04234d5e2c986e0546aa4885a54277558993558ec71e9e6d7ec2a7",
-    "Bytes-kernel.log": "a94d616f8e17478ebccae0f4cbfc9a5d8978e04ab396ecb12fa48fd88eea0c40",
-    "Controls-kernel.log": "30aefdebc159f221f175a174f0c3bd925eb2f2b4d89597285bbb79c484faa6f0",
-    "Gas-kernel.log": "2720e5530a69aef697e0c7a1ac0569c43cb6ad053326900cc42a69607e465d04",
-    "Header-kernel.log": "51cce2d54c5f5a1ecaea680b2d9282406cce21eef7f3a9dfa8c9e2577d50354f",
-    "Identity-kernel.log": "3c7dd71b4c6112e5f9eab9ec60a6d57ed2af0eb1dfaf911227d1241ffbb8218a"
+    "Acceptance-kernel.log": "e2e345567481e5e7c36ba0db99167efe8193942df9bba163a725286463db79e6",
+    "ActualAxioms-kernel.log": "88683f0b85ff5af637288846cdf2b767e033d1bbdfa0e2940a66f1c880639ddb",
+    "AllDeclarations-kernel.log": "d15c70a7759492a022aa1bec0e68a6945aaa619219d4aeb1b887a1f1036a72d6",
+    "Axioms-kernel.log": "58bcab21c10575795c611b5382985e41b3f618ddf1416af33cf5a3fa3030db5e",
+    "BoundaryVectors-kernel.log": "4264cee1feb40d39f8519a564ad9e32bae76f1b5cd7be78bc866d970d1a4d643",
+    "Bytes-kernel.log": "9a60af65df35f5ad90ad26f79a8754eaa785a1a5e98f8cbb314aadf896ba8cb2",
+    "Controls-kernel.log": "00a0bc583fca23bd07c9a7ea345851c0950b8089e1f2200b477484f64ad1dfb0",
+    "Gas-kernel.log": "6c977a7e62b16ec84171eb255c76d5bb55553142092ad49c18374624101cb17b",
+    "Header-kernel.log": "320f391f7b3039749002d9a6b45de8dd729b5eb9ef946405ae49b32ddc397fd6",
+    "Identity-kernel.log": "3a80a85815e555a7ee66f1fb26e58d97b20f4508afc2bd69fe9320bf405712f1"
   },
-  "pre_commit_head": "095dfb1fdb69ec5dbff4adcee18aac7438b48232",
+  "pre_commit_head": "8c93d6ed6e9270aa19d965b857559c37c08fb3d8",
   "sources": {
     "Bridge/SolidityBridge/PrecompileAgreement/Bytes.lean": "fc0372bc130a9bb9139bee4572ea7a9dced16e908f8cb7a49cea3a325d5d7afe",
     "Bridge/SolidityBridge/PrecompileAgreement/Controls.lean": "31684e1a1e3a57c0a6b194601960dc112d8cfe865b0da7d5bcc466f3705c09ac",
@@ -112,5 +112,5 @@
     "scripts/check-precompile-agreement.py": "932a0987c34a50a0fb9b22f1dfd8057e16418ae0e84b9316441568f2a1e88e95"
   },
   "status": "pass",
-  "time_utc": "2026-11-05T04:41:56Z"
+  "time_utc": "2026-11-05T04:45:43Z"
 }
