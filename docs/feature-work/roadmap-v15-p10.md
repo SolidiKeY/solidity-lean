@@ -1987,3 +1987,5 @@ DUP1 through DUP16 short-stack consumers connect the actual indexed certificates
 ### Indexed SWAP refusal
 
 `InstructionSelectionRefusal` proves insufficient-stack refusal for all sixteen SWAP depths against IR, selected Scalar code, the fetched driver and native reference execution. The clauses retain the input representation, three-gas admission and distinct driver/native fuel indices. Controls distinguish SWAP15 success from SWAP16 refusal on sixteen populated words, gas-before-stack ordering, permission flags and insufficient driver fuel. The populated observation retains account, memory, calldata and return-byte fields. These instruction-local results do not establish source frame origin, CALL/world composition or complete opcode-row adequacy.
+
+`IndexedRefusalInterfaceV1` (`DupClaim`, `SwapClaim`, `Producer`) still has no inhabitant: the separately proved DUP and SWAP refusal theorems have not yet been connected to its fields.

@@ -608,7 +608,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean` | Populated ADD/MUL certificate consumers, complete ordered observations, modular boundaries and resource/frame separation controls. |
 
-| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete ADD/MUL selection-certificate short-stack refusal against charged fetched execution, with gas/fuel priority controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete short-stack selection-certificate refusals (ADD/MUL, SUB, DIV/MOD, SDIV/SMOD, NOT/ISZERO, SHL/SHR, AND/OR/XOR, comparisons, POP, DUP1–DUP16) against charged fetched execution, with gas/fuel priority controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalInterfaceV1.lean` | Frozen V1 indexed DUP/SWAP refusal claims and explicit producer fields; no inhabitant or broader adequacy. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` | Concrete ADD/MUL certificate sequence, two charged fetched steps, native continuation and populated order/wrap/resource controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` | Exact STOP decoding, actual arithmetic-sequence termination and populated buffer/PC/fuel controls against the pinned reference. |
