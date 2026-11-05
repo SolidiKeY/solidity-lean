@@ -54,3 +54,5 @@
 | `Backend/Executable/CreationReturnPartitionControls.lean` | Bounded v14-payments-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/NumericSequence.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Selection/StackSelection.lean` | Bounded executable-bytecode checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/HeadCheck.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/AbiEntry/HeadCheckInterface.lean` | Bounded abi-entry checkpoint; typed scope and retained obligations are stated in the module. |

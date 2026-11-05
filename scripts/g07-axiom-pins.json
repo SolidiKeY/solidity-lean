@@ -3271,6 +3271,34 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.early_revert": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadCheck.lean:Solidity.Backend.AbiEntry.HeadCheck.frameCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/AbiEntry/RawFreeTransport.lean:Solidity.Backend.AbiEntry.RawFreeTransport.calldata_step": [
   "propext"
  ],
