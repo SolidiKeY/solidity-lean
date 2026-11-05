@@ -3151,3 +3151,40 @@ Rerun against the pinned snapshot `tests/migration/solkey`, every check passes:
 - `check-automatic.mjs --strict`: 491 automatic, 0 manual and 0 pending.
 
 The raw run that used the unpinned sibling checkout is kept as a failure.
+
+**Backfill A rerun on the Claude VM.** The pinned compiler came from
+`raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/soljson-v0.8.38+commit.1835d247.js`,
+SHA-256 `6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390`,
+which equals the pin. The npm `solc@0.8.38` `soljson.js` reports the same
+version but has different bytes (`0b15fcb2…`), so it was not used. The
+upstream archive `tests/upstream/solidity-0.8.38.tar.gz` matches `9200f2a2…`.
+`inventory.py` verified the 80 pinned fixtures, and `inventory_test.py` passed.
+
+The first harness run exited 1 with "stale recognizer dependency": master
+changed `Solidity/Frontend/SolcJson/Body.lean` (ABI enum and reference-parameter
+printing; `memoryRethrow?` untouched). Per-file Lean MCP diagnostics on
+`tests/yul-composition/RethrowControls.lean` against the merged file passed,
+with `success`, `partial=false`, no errors and the same three axiom sets.
+Only then was the dependency hash in `tests/yul-composition/proof-controls.json`
+re-pinned, from `5cec4f4e…` to `c4a0d8b4…`. The control's own source hash is
+unchanged.
+
+The four-way run (`harness.mjs --execute-reference --optimizer-also`) then
+exited 0 in 75 s with 416 rows:
+
+| Class | Rows |
+|---|---|
+| match | 72 |
+| deliberate corrupted-target mismatch | 8 |
+| reference-rejection match | 4 |
+| pending | 304 |
+| blocked (all "compiler rejected probe") | 28 |
+
+These counts reproduce the Codex VM's later recorded 304/28. The raw report
+`/workspace/vy5-composition/reviewed-reference/report.json` (SHA-256 `7193a0f717d176a31b33bb13ae6d6f255517e0632a0cfaab40166213ae591f0e`)
+and its 2011 files exist on this ephemeral VM only. Pending and blocked rows
+are not passes, and none of this evidence is Lean correspondence.
+
+With this local root, the JS suite reports 322 tests: 293 pass and 29 fail.
+Every remaining failure needs a Codex-VM report directory, the private
+producer tree or a held-module path.
