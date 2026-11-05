@@ -1094,3 +1094,7 @@ composition and physical failure bytes remain open. G46.02, its writer
 counterexample, fixture replay and full assignment gates remain pending.
 Published master was adopted before this increment; prior failure evidence is
 retained rather than relabeled.
+
+`ValueCheckedBodiesInterface.lean` specifies value checking before uint/Boolean
+decoding, binding and typed body execution, including early rejection without
+any calldata-local representation premise.
