@@ -1,3 +1,4 @@
+import Solidity.Yul.RawHorizon
 import Solidity.Yul.RawContinueLoop
 import Solidity.Yul.RawU8ForAbsent
 import Solidity.Yul.RawU8For
@@ -314,3 +315,25 @@ preserves Source.St and cannot succeed; exact Source error/world equality
 retains checked/coherent input and existential actual halt. Controls use a new
 binder in x:=x+n and distinguish per-pipeline initialization failures.
 This supplies no arbitrary dirty Source readback or general loop admission. -/
+
+/-! RawTypedScope.scalarRead/liftScalar and their capture/drop laws preserve
+existing scalar occurrence words without coherence or cleaning premises.
+RawContinueLoop.initialized_scalar_read concretely preserves every old scalar
+through the read-local uint8 initializer/continue loop at every fuel and raw
+input. The proof uses actual grown-loop view equality and typed binder close.
+Controls retain uint8 word257 and Boolean word2, refuse normalization to word1,
+and preserve a changed outer word513 through drop. Function address/selector
+projection, full WordCells equality and ordinary Solidity readback remain
+separate; no raw-frame metadata identity or general admission is inferred. -/
+
+/-! Function address/selector projection is now concrete too. Actual
+sourceFunctionAt_surjective supplies typed occurrences; RawTypedScope
+functionRead/liftFunction and capture/drop laws preserve both full words.
+drop_view_agrees covers every WordCell constructor. RawContinueLoop
+initialized_function_read/initialized_view prove the complete authoritative
+word view unchanged for the read-local uint8 initializer/continue family at
+every fuel and arbitrary raw input, without coherence/cleanup premises.
+Controls retain non-canonical max-width address and high-bit selector words.
+This closes the previously recorded projection gap for this family; general
+ordinary Solidity readback, arbitrary loop admission and adequacy remain open.
+No raw-frame metadata identity, physical pointer or ABI-boundary claim follows. -/

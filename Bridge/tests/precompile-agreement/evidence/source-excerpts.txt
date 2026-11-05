@@ -1,0 +1,134 @@
+Source-reading evidence only, not kernel proof or executable test.
+
+Solidity/Precompiles/Modexp.lean
+25:
+26: def baseLen (d : Bytes) : Nat := readNat d 0 32
+27: def expLen (d : Bytes) : Nat := readNat d 32 32
+28: def modLen (d : Bytes) : Nat := readNat d 64 32
+29:
+30: /-- EIP-7823's bound: a length above 1024 bytes halts exceptionally. -/
+31: def Malformed (d : Bytes) : Prop := 1024 < baseLen d ∨ 1024 < expLen d ∨ 1024 < modLen d
+32:
+33: instance (d : Bytes) : Decidable (Malformed d) := by unfold Malformed; infer_instance
+34:
+35: /-- The exponent's first `min 32 Le` bytes. -/
+36: def expHead (d : Bytes) : Nat := readNat d (96 + baseLen d) (min 32 (expLen d))
+37:
+38: /-- EIP-7883's multiplication complexity. -/
+39: def complexity (b m : Nat) : Nat :=
+40:   let l := max b m
+41:   if l ≤ 32 then 16 else 2 * ((l + 7) / 8) ^ 2
+42:
+43: /-- EIP-7883's iteration count. -/
+44: def iterations (e head : Nat) : Nat :=
+45:   max 1 (if e ≤ 32 then bitLength head - 1 else 16 * (e - 32) + (bitLength head - 1))
+46:
+47: def gas (d : Bytes) : Nat :=
+48:   if Malformed d then 0
+49:   else max 500 (complexity (baseLen d) (modLen d) * iterations (expLen d) (expHead d))
+50:
+
+Bridge/vendor/EvmYul/EVM/PrecompiledContracts.lean
+142: def Ξ_EXPMOD
+143:   (σ : AccountMap .EVM)
+144:   (g : UInt256)
+145:   (A : Substate)
+146:   (I : ExecutionEnv .EVM)
+147:     :
+148:   (Bool × AccountMap .EVM × UInt256 × Substate × ByteArray)
+149: :=
+150:   let data := I.calldata
+151:   let base_length := nat_of_slice data 0 32
+152:   let exp_length := nat_of_slice data 32 32
+153:   let modulus_length := nat_of_slice data 64 32
+154:   -- Pseudo laziness
+155:   -- We don't want to call `nat_of_slice` unless we need it
+156:   let exp := λ () ↦ nat_of_slice data (96 + base_length) exp_length
+157:
+158:   let gᵣ :=
+159:     let multiplication_complexity x y := ((max x y + 7) / 8) ^ 2
+160:     let adjusted_exp_length :=
+161:       if exp_length ≤ 32 && exp () == 0 then
+162:         0
+163:       else
+164:         if exp_length ≤ 32 then
+165:           Nat.log 2 (exp ())
+166:         else
+167:           let length_part := 8 * (exp_length - 32)
+168:           let bits_part :=
+169:             let exp_head := nat_of_slice data (96 + base_length) 32
+170:             if 32 < exp_length ∧ exp_head != 0 then
+171:               Nat.log 2 exp_head
+172:             else
+173:               0
+174:           length_part + bits_part
+175:     let iterations := max adjusted_exp_length 1
+176:     let G_quaddivisor := 3
+177:
+178:     max 200 (multiplication_complexity base_length modulus_length * iterations / G_quaddivisor)
+179:
+180:   if g.toNat < gᵣ then
+181:     (false, ∅, ⟨0⟩, A, .empty)
+182:   else
+183:     let modulus := nat_of_slice data (96 + base_length + exp_length) modulus_length
+184:     let o : ByteArray :=
+185:       if modulus_length == 0 || modulus == 0 then
+186:         ffi.ByteArray.zeroes ⟨modulus_length⟩
+187:       else
+188:         let base := nat_of_slice data 96 base_length
+189:         let exp := nat_of_slice data (96 + base_length) exp_length
+190:         let expmod_base := BE (expMod modulus (.ofNat base) exp)
+191:         let expmod_zeroes :=
+192:           if modulus_length ≥ expmod_base.size then
+193:             ffi.ByteArray.zeroes ⟨modulus_length - expmod_base.size⟩
+194:           else
+195:             ByteArray.empty
+196:         expmod_zeroes ++ expmod_base
+197:     (true, σ, g - .ofNat gᵣ, A, o)
+
+Solidity/Precompiles/Blake2f.lean
+83: def rounds (d : Bytes) : Nat := readNat d 0 4
+84:
+85: def gas (d : Bytes) : Nat := rounds d
+86:
+87: /-- The flag byte, the input's last. -/
+88: def flag (d : Bytes) : Nat := readNat d 212 1
+89:
+90: /-- `BLAKE2F` (0x09). -/
+91: def blake2f (d : Bytes) : Option Bytes :=
+92:   if d.length ≠ 213 ∨ 1 < flag d then none
+93:   else
+94:     let b := d.map UInt8.toNat
+
+Bridge/vendor/EvmYul/EVM/PrecompiledContracts.lean
+346: def Ξ_BLAKE2_F
+347:   (σ : AccountMap .EVM)
+348:   (g : UInt256)
+349:   (A : Substate)
+350:   (I : ExecutionEnv .EVM)
+351:     :
+352:   (Bool × AccountMap .EVM × UInt256 × Substate × ByteArray)
+353: :=
+354:   let d := I.calldata
+355:   let gᵣ : ℕ := fromByteArrayBigEndian (d.extract 0 4)
+356:
+357:   if g.toNat < gᵣ then
+358:     dbg_trace "failed"
+359:     (false, ∅, ⟨0⟩, A, .empty)
+360:   else
+361:     let o := ffi.BLAKE2 d
+362:     match o with
+363:       | .ok o => (true, σ, g - .ofNat gᵣ, A, o)
+364:       | .error e =>
+365:         dbg_trace s!"Ξ_BLAKE2_F failed: {e}"
+366:         (false, ∅, ⟨0⟩, A, .empty)
+367:
+
+Bridge/vendor/EvmYul/PerformIO.lean
+1: unsafe def unsafePerformIO {τ} [Inhabited τ] (io : IO τ) : τ :=
+2:   match unsafeIO io with
+3:     | Except.ok    a => a
+4:     | Except.error e => panic! s!"unsafePerformIO was a not great idea after all: {e}"
+5:
+6: @[implemented_by unsafePerformIO]
+7: def totallySafePerformIO {τ} [Inhabited τ] (io : IO τ) : τ := Inhabited.default

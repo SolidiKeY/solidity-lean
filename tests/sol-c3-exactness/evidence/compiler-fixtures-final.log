@@ -11,20 +11,20 @@ PASS illegal-interface 6536: Interfaces can only inherit from other interfaces.
 FIXTURE_PACKET_SHA256 faf0a83680269f9aa2ebab76a3aca6f6d90421444be8556d9e3bb3b0ba70f977
 SOL_C3_COMPILER_FIXTURES_PASS 9
 	Command being timed: "node tests/sol-c3-exactness/check-fixtures.mjs /workspace/solidity-lean/tests/sol-c3-exactness/.artifacts/compiler/soljson-v0.8.38+commit.1835d247.js tests/sol-c3-exactness/evidence/compiler-fixtures.json"
-	User time (seconds): 2.05
-	System time (seconds): 0.13
+	User time (seconds): 1.84
+	System time (seconds): 0.29
 	Percent of CPU this job got: 70%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.12
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:03.04
 	Average shared text size (kbytes): 0
 	Average unshared data size (kbytes): 0
 	Average stack size (kbytes): 0
 	Average total size (kbytes): 0
-	Maximum resident set size (kbytes): 315284
+	Maximum resident set size (kbytes): 311108
 	Average resident set size (kbytes): 0
 	Major (requiring I/O) page faults: 0
-	Minor (reclaiming a frame) page faults: 93520
-	Voluntary context switches: 164
-	Involuntary context switches: 354
+	Minor (reclaiming a frame) page faults: 92471
+	Voluntary context switches: 195
+	Involuntary context switches: 398
 	Swaps: 0
 	File system inputs: 0
 	File system outputs: 48

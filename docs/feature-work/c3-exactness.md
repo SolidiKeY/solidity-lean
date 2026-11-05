@@ -412,3 +412,18 @@ supersession in tests/sol-c3-exactness/evidence/b86-artifact-relocation.json.
 No shared scanner/registry change. Historical OpenLoops/full-driver H1 stops
 remain unwaived;277project source imports unchanged, no new cache verified,
 full runtime and readiness remain blocked. See tests/sol-c3-exactness/B86-HANDOFF.md.
+
+
+## Requested e684 rebase (2026-11-05)
+
+Rebased onto e6849d3bdf516099d20c33d3581d523449764018 before this checkpoint
+commit. Integrated C3 proofs were not replayed. Olda005 head/ref/bundle and334
+pruned evidence files remain exactly preserved externally; pruning retained.
+Owned exact-upstream guard and artifact ignore carried forward, no Lean edits.
+Fresh owned kernel/axiom/control/fixture/KeySort/corpus gates pass. Shared source
+inventory fails on479 rows in four tracked published files outside C3; seven
+other source gates pass. Exact ledger and scope boundaries are in
+tests/sol-c3-exactness/E684-HANDOFF.md and evidence/e684-inventory-gap.json.
+Historical full-driver H1 failures also remain unwaived; full acceptance fails
+explicitly. H41 delivery stays coordinator-pending, no shipping or freshness
+claim. No premise/budget/registry change, default merge, push, PR or goal reset.

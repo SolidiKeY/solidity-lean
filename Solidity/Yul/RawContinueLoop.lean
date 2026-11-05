@@ -613,4 +613,115 @@ theorem source_uint8_for_error : ∀ (ctx : Solidity.Source.Ctx) (name : String)
     rw [actual] at rejected
     cases rejected
 
+/-- Every old scalar retains its raw word through this concrete initialized loop, even for incoherent input. -/
+theorem initialized_scalar_read : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx)
+ (cell : Solidity.Yul.SourceScalarCell ctx),
+ Solidity.Yul.RawTypedScope.scalarRead
+   (Solidity.Yul.RawU8ForAbsent.run (.local index)
+     (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+     pipeline fuel state).2 cell =
+ Solidity.Yul.RawTypedScope.scalarRead state cell := by
+  intro ctx name returns modifier u index pipeline fuel state cell
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      cases fuel with
+      | zero =>
+        exact RawTypedScope.scalarRead_agrees ctx (refresh state) state (refresh_view ctx state) cell
+      | succ fuel =>
+        let reached : RawFrame.State (ctx.push name LocalU8Expr.Ty) :=
+          RawCoherent.capture
+            (RawFrame.ofClean (.cons (.int 0 (by decide)) state.clean) state.world)
+            (((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1),
+              (RawCoherent.prepare state).2)
+        have stayed := (all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u
+          pipeline (fuel+2) reached).2.1
+        have projected := RawTypedScope.drop_scalar_agrees ctx name LocalU8Expr.Ty
+          (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2
+          reached stayed cell
+        change RawTypedScope.scalarRead
+          (RawTypedScope.drop (run (ctx.push name LocalU8Expr.Ty) returns modifier u
+            pipeline (fuel+2) reached).2) cell = _
+        rw [projected,RawTypedScope.drop_scalar_read]
+        dsimp only [reached]
+        rw [RawTypedScope.scalarRead_capture]
+        exact RawTypedScope.lift_scalar_read ctx name LocalU8Expr.Ty cell
+          ((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1)
+
+/-- Both raw function words survive this read-local initialized continue loop at every fuel. -/
+theorem initialized_function_read : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx)
+ (cell : Solidity.Yul.SourceFunctionCell ctx),
+ Solidity.Yul.RawTypedScope.functionRead
+   (Solidity.Yul.RawU8ForAbsent.run (.local index)
+     (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+     pipeline fuel state).2 cell =
+ Solidity.Yul.RawTypedScope.functionRead state cell := by
+  intro ctx name returns modifier u index pipeline fuel state cell
+  cases fuel with
+  | zero => rfl
+  | succ fuel =>
+    cases fuel with
+    | zero => rfl
+    | succ fuel =>
+      cases fuel with
+      | zero =>
+        exact RawTypedScope.functionRead_agrees ctx (refresh state) state (refresh_view ctx state) cell
+      | succ fuel =>
+        let reached : RawFrame.State (ctx.push name LocalU8Expr.Ty) :=
+          RawCoherent.capture
+            (RawFrame.ofClean (.cons (.int 0 (by decide)) state.clean) state.world)
+            (((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1),
+              (RawCoherent.prepare state).2)
+        have stayed := (all_fuel (ctx.push name LocalU8Expr.Ty) returns modifier u
+          pipeline (fuel+2) reached).2.1
+        have projected := RawTypedScope.drop_function_agrees ctx name LocalU8Expr.Ty
+          (run (ctx.push name LocalU8Expr.Ty) returns modifier u pipeline (fuel+2) reached).2
+          reached stayed cell
+        change RawTypedScope.functionRead
+          (RawTypedScope.drop (run (ctx.push name LocalU8Expr.Ty) returns modifier u
+            pipeline (fuel+2) reached).2) cell = _
+        rw [projected,RawTypedScope.drop_function_read]
+        dsimp only [reached]
+        rw [RawTypedScope.functionRead_capture]
+        exact RawTypedScope.lift_function_fields ctx name LocalU8Expr.Ty cell
+          ((RawCoherent.prepare state).1.get index,(RawCoherent.prepare state).1)
+
+/-- Complete raw word-view preservation for the concrete read-local/continue family.
+No input coherence or cleanup assumption is needed. -/
+theorem initialized_view : ∀ (ctx : Solidity.Source.Ctx) (name : String) (returns : List Solidity.Source.STy) (modifier u : Bool)
+ (index : Solidity.Source.Idx ctx.tys Solidity.Yul.LocalU8Expr.Ty)
+ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat) (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.view (Solidity.Yul.RawU8ForAbsent.run (.local index)
+     (Solidity.Yul.RawContinueLoop.body (ctx.push name Solidity.Yul.LocalU8Expr.Ty) returns modifier u)
+     pipeline fuel state).2 = Solidity.Yul.RawFrame.view state := by
+  intro ctx name returns modifier u index pipeline fuel state
+  funext cell
+  cases cell with
+  | scalar ref =>
+    have projected := initialized_scalar_read ctx name returns modifier u index pipeline fuel
+      state (sourceScalarAt ctx ref)
+    change localWordCells ctx (RawCoherent.prepare
+      (RawU8ForAbsent.run (.local index) (body (ctx.push name LocalU8Expr.Ty) returns modifier u)
+        pipeline fuel state).2).1 (.scalar ref) =
+      localWordCells ctx (RawCoherent.prepare state).1 (.scalar ref) at projected
+    rw [RawCoherent.prepare_view,RawCoherent.prepare_view] at projected
+    exact projected
+  | address functionIndex =>
+    have projected := initialized_function_read ctx name returns modifier u index pipeline fuel
+      state (sourceFunctionAt ctx functionIndex)
+    rw [RawTypedScope.functionRead_at,RawTypedScope.functionRead_at] at projected
+    exact congrArg Prod.fst projected
+  | selector functionIndex =>
+    have projected := initialized_function_read ctx name returns modifier u index pipeline fuel
+      state (sourceFunctionAt ctx functionIndex)
+    rw [RawTypedScope.functionRead_at,RawTypedScope.functionRead_at] at projected
+    exact congrArg Prod.snd projected
+
 end Solidity.Yul.RawContinueLoop

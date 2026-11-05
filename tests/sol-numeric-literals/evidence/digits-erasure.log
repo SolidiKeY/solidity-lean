@@ -1,0 +1,13 @@
+ERROR 133:7 No goals to be solved
+ERROR 140:9 Type mismatch
+  not_not_intro hu
+has type
+  ¬¬b.toNat = 95
+but is expected to have type
+  (b.toNat != 95) = false
+ERROR 143:7 No goals to be solved
+ERROR 157:7 No goals to be solved
+ERROR 163:28 Unknown constant `Bool.and_eq_true.mpr`
+ERROR 164:36 Unknown constant `Bool.and_eq_true.mpr`
+ERROR 172:26 Unknown constant `Bool.and_eq_true.mpr`
+diag: 7 errors

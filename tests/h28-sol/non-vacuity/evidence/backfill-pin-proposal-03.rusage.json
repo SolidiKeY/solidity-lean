@@ -1,0 +1,14 @@
+{
+  "command": [
+    "node",
+    "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+    "tests/h28-sol/non-vacuity/sealed/backfill-proposal-precommit-03"
+  ],
+  "exit": 0,
+  "elapsed_seconds": 14.485415443006787,
+  "children_user_seconds": 13.751439,
+  "children_system_seconds": 1.085132,
+  "children_max_rss_kib": 311608,
+  "children_major_faults": 0,
+  "children_minor_faults": 580768
+}

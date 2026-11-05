@@ -1323,6 +1323,91 @@
       "Classical.choice",
       "Quot.sound"
     ],
+    "Solidity.Assurance.NonVacuityH28.false_loop_stmt_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_body_reverts": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_input": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.zero_condition_target": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_target": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_demand": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_cost": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_checked": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_joint": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.entered_revert_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.entered_revert_target": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.entered_revert_input": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.entered_revert_demand": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "Solidity.Assurance.NonVacuityH28.entered_revert_joint": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
     "Solidity.Assurance.NonVacuityH28.near_end_state": [
       "propext",
       "Classical.choice",
@@ -1770,7 +1855,7 @@
       "Quot.sound"
     ]
   },
-  "measurement_log": "evidence/signatures-contracts-03.log",
-  "measurement_sha256": "9f3e8b144b88871bcf62019298221e4dc4d165816aa4b22e72d1bf797ed1d30d",
-  "status": "guard kernel check pending"
+  "measurement_log": "evidence/backfill-signatures-final.log",
+  "measurement_sha256": "c673b7a0e94a16213fe7969e49e38e3360e9aafb4eaf1486095908b65e19316c",
+  "status": "431 exact axiom guards kernel checked; no nonstandard axioms"
 }

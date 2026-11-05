@@ -1,0 +1,29 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "Census.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity 0.8.38;\nlibrary LinkedMath {\n    function twice(uint x) external pure returns (uint) { return x * 2; }\n}\ncontract Census {\n    uint public immutable seed;\n    uint[] private values;\n    constructor(uint initial) payable { seed = initial; values.push(initial); }\n    function arithmetic(uint a, uint b) external pure returns (uint, uint) {\n        return (a + b, a ** b);\n    }\n    function signed(int a, int b) external pure returns (int) { return a / b; }\n    function push(uint value) external returns (uint) {\n        values.push(value); return values[values.length - 1];\n    }\n    function pop() external { values.pop(); }\n    function echo(bytes calldata input) external pure returns (bytes memory) { return input; }\n    function linked(uint x) external view returns (uint) { return LinkedMath.twice(x) + seed; }\n    function assemblyWord(uint x) external pure returns (uint r) {\n        assembly (\"memory-safe\") { r := clz(x) }\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "viaIR": true,
+    "evmVersion": "osaka",
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "ir",
+          "irOptimized",
+          "evm.bytecode.object",
+          "evm.deployedBytecode.object"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    }
+  }
+}

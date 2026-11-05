@@ -744,6 +744,9 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Maximum-word overflow, retained scalar operands, raw wrapping and positive boundary controls. |
 | `Lowering/V08/LiteralFailureStatementReason.lean` | Actual Source statement endpoints for effectful heap-backed require/revert reasons. |
 | `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Populated require/revert success and failure states, static-frame variants and stale-pointer negatives. |
+| `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |
 | `Source/Progress/InitializedLocals` | Composed initialized-local progress and reference preservation. |
 | `Source/Progress/InitializedPrefixes` | Finite initialized-local prefixes ending in one return. |
 | `Source/Progress/InitializedCalls` | Actual internal-call frames for initialized-return bodies. |

@@ -1,0 +1,16 @@
+{
+  "partial": false,
+  "still_elaborating_lines": null,
+  "success": true,
+  "timed_out": false,
+  "items": [
+    {
+      "severity": "warning",
+      "message": "`List.length_pos` has been deprecated: Use `List.length_pos_iff` instead",
+      "line": 77,
+      "column": 5,
+      "lean_tags": null
+    }
+  ],
+  "failed_dependencies": []
+}

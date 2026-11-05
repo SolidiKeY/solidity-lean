@@ -1,0 +1,10 @@
+{
+  "oldHead": "1d8e6c30d6df164cc85fd0a2cf8255c23be2f6a0",
+  "target": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "headAfterRebase": "70845978ab616a63b13d0dee8b31b28893ccf591",
+  "oldHeadAncestor": true,
+  "ownedFilesByteIdentical": true,
+  "cleanBeforeAndAfter": true,
+  "recoveryRef": "refs/codex-recovery/shared-translator/pre-70845978",
+  "boundary": "Mandated rebase onto published integration;not original-goal completion or new dependency delivery."
+}
