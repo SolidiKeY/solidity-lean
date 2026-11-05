@@ -8,6 +8,9 @@ import Solidity.Automation.H28.Chain
 import Solidity.Automation.H28.Context
 import Solidity.Automation.H28.Prove
 import Solidity.Backend.AbiEntry.BoolBinding
+import Solidity.Backend.AbiEntry.BoolBindingBody
+import Solidity.Backend.AbiEntry.BoolBindingBodyControls
+import Solidity.Backend.AbiEntry.BoolBindingBodyInterface
 import Solidity.Backend.AbiEntry.BoolBindingControls
 import Solidity.Backend.AbiEntry.BoolBindingInterface
 import Solidity.Backend.AbiEntry.BytesGate

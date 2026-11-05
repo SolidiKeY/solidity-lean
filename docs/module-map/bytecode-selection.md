@@ -196,3 +196,6 @@
 | `Backend/AbiEntry/BoolBindingInterface.lean` | Actual compiler contract for validated typed Boolean parameter binding. |
 | `Backend/AbiEntry/BoolBinding.lean` | Typed Boolean declaration with exact execution, accepted-bit preservation and raw entry agreement. |
 | `Backend/AbiEntry/BoolBindingControls.lean` | True/false binding, dirty-value rejection and compiled typed Boolean branch controls. |
+| `Backend/AbiEntry/BoolBindingBodyInterface.lean` | One-artifact Boolean validation, binding and typed-body compiler contract. |
+| `Backend/AbiEntry/BoolBindingBody.lean` | Actual whole/body selection and ordered raw Boolean entry/body execution. |
+| `Backend/AbiEntry/BoolBindingBodyControls.lean` | Both-bit allocating bodies, decoder/body failure distinction and saved-state controls. |

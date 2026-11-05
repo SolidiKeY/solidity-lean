@@ -1066,3 +1066,31 @@ existing shared metadata gate failures remain outside this lane.
 `BoolBindingBodyInterface.lean` specifies one public compilation of Boolean
 validation, typed binding and a core-admitted body, preserving ordered failures
 and the actual body outcome. Native/Source adequacy remains separate.
+
+`BoolBindingBody.lean` selects one typed program containing the exact Boolean
+head/word validator, typed parameter declaration and body. The body family is
+the existing core classifier at the extended Boolean frame. Whole and body
+artifacts are both selected through the public compiler, with exact code
+factorization and execution. No target run or body result is assumed. Head and
+word rejection stop execution; successful validation/binding runs the actual
+body on the proved state, retaining its entire outcome. Raw semantic success
+at `fuel + 2` constructs the typed bit from bytes and identifies the actual
+argument local that the body reads. Short input prevents both malformed word
+access and body execution.
+
+Controls execute the complete selected program with a context-growing typed
+negation body for true and false inputs, writing the opposite bit into a fresh
+local and preserving the argument and saved state. A real reverting body after
+successful decoding distinguishes body failure from decoder rejection. Dirty
+two, short malformed input, low semantic fuel, arbitrary selectors/trailing
+bytes and protected storage/balance/stack are explicit controls. Focused builds,
+per-file diagnostics and standard-only scoped axiom guards pass. Independent
+read-only finder and skeptic reviews found no semantic issues.
+
+This composes singleton Boolean validation/binding with supported intrinsic
+bodies. Source body/label association, native loading/frame realization, signed
+and aggregate bindings, multiparameter decoding, full profile/dispatch-entry
+composition and physical failure bytes remain open. G46.02, its writer
+counterexample, fixture replay and full assignment gates remain pending.
+Published master was adopted before this increment; prior failure evidence is
+retained rather than relabeled.
