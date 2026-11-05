@@ -58,6 +58,26 @@
       ]
     },
     {
+      "path": "tests/h28-sol/mutation-testing/oracles/CallbackTacletBaseline.lean",
+      "namespace": "H28.CallbackTacletBaseline",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.CallbackRules",
+        "Solidity.Calculus.PremiseSound",
+        "Solidity.Calculus.CallbackHolds"
+      ]
+    },
+    {
+      "path": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
+      "namespace": "H28.CallbackTacletFailureKill",
+      "kind": "standalone per-file checked oracle",
+      "imports": [
+        "Solidity.Calculus.CallbackRules",
+        "Solidity.Calculus.PremiseSound",
+        "Solidity.Calculus.CallbackHolds"
+      ]
+    },
+    {
       "path": "tests/h28-sol/mutation-testing/oracles/DeleteBaseline.lean",
       "namespace": "H28.DeleteBaseline",
       "kind": "standalone per-file checked oracle",
@@ -275,5 +295,5 @@
     }
   ],
   "shared_roots_changed": false,
-  "integration": "Local registration only: these standalone test oracles are invoked by probe_cases.py; shared roots/module maps remain frozen."
+  "integration": "Local registration only: these standalone test oracles are not library modules; tools/mcprun.py inlines each into a scratch file with its (possibly mutated) target table. Shared roots and module maps are unchanged."
 }

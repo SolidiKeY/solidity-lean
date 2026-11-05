@@ -33,6 +33,17 @@ def main():
                              "old": c["old"], "new": c["new"], "oracle": c["oracle"],
                              "oracle_sha256": sha(c["oracle"]), "witness": witness,
                              "witness_sha256": sha(witness), "from_pilot": Path(f).name})
+    cbr = (ROOT / "Solidity/Calculus/CallbackRules.lean").read_text()
+    old = '        ; "send failed": { pv := false } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond'
+    assert cbr.count(old) == 1
+    semantic.append({"id": "callback-table.failed-send-flag-true", "kind": "mutant", "family": "callback-frames",
+                     "constructor": "CallbackTaclet.sendWithCallbackBox", "target": "Solidity/Calculus/CallbackRules.lean",
+                     "old": old, "new": old.replace("pv := false", "pv := true"),
+                     "oracle": "tests/h28-sol/mutation-testing/oracles/CallbackTacletBaseline.lean",
+                     "oracle_sha256": sha("tests/h28-sol/mutation-testing/oracles/CallbackTacletBaseline.lean"),
+                     "witness": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
+                     "witness_sha256": sha("tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean"),
+                     "from_pilot": None, "note": "separate callback table (H28 queue item 4)"})
     guard = next(c for c in semantic if c["id"] == "guard.require-success-false")
     pop = next(c for c in semantic if c["id"] == "pop.empty-skipped")
     # Runner self-test: a real witness of another constructor must never kill.
@@ -56,16 +67,19 @@ def main():
     for c in controls:
         assert c["old"] != c["new"]
     data.update(schema=3, state="frozen", scope="whole-declared-manifest",
-                proof_baselines=[{"id": "rules-taclet", "target": "Solidity/Calculus/Rules.lean",
+                proof_baselines=[{"id": "rules-taclet", "mode": "full", "target": "Solidity/Calculus/Rules.lean",
                                   "oracle": "Solidity/Calculus/Taclet.lean"},
-                                 {"id": "callback-totaclet", "target": "Solidity/Calculus/CallbackRules.lean",
+                                 {"id": "rules-taclet-rows", "mode": "rows", "target": "Solidity/Calculus/Rules.lean",
+                                  "oracle": "Solidity/Calculus/Taclet.lean, every row by #h28_toStep_row"},
+                                 {"id": "callback-totaclet", "mode": "callback",
+                                  "target": "Solidity/Calculus/CallbackRules.lean",
                                   "oracle": "CallbackTaclet.toTaclet (in the target)"}],
                 oracle_sha256={"Solidity/Calculus/Taclet.lean": sha("Solidity/Calculus/Taclet.lean")},
                 controls=[c["id"] for c in controls] + ["control.cross-witness-survivor"],
                 semantic_cases=semantic)
     pilots = [{"id": "pilot." + c["id"], "constructor": c["constructor"], "operator": "pilot-hand-selected",
                "family": c["family"], "target": c["target"], "old": c["old"], "new": c["new"],
-               "affected": [c["constructor"]] if c["constructor"].split(".")[0] in ("Taclet", "LeanTaclet") else ["*"]}
+               "affected": [c["constructor"]] if c["constructor"].split(".")[0] in ("Taclet", "LeanTaclet", "CallbackTaclet") else ["*"]}
               for c in semantic if c["kind"] in ("mutant", "negative-control", "known-kill", "equivalent-control")]
     data["mutants"] = data["mutants"] + pilots + controls
     out = LANE / "manifests/h28-full.json"

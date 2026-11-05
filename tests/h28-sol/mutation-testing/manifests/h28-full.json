@@ -1858,10 +1858,10 @@
    "replacement": "if se == 0 then"
   },
   {
-   "id": "push-length-not-advanced",
+   "id": "push-length-advanced-twice",
    "family": "push-tail-length",
    "pattern": "re:(\\w+)\\.length \\+ 1\\)",
-   "replacement": "\\1.length)"
+   "replacement": "\\1.length + 2)"
   },
   {
    "id": "push-slot-is-last-old",
@@ -1876,10 +1876,10 @@
    "replacement": "\\1[\\1.length]"
   },
   {
-   "id": "pop-length-not-reduced",
+   "id": "pop-length-reduced-twice",
    "family": "pop-delete",
    "pattern": "re:(\\w+)\\.length - 1\\) \\}",
-   "replacement": "\\1.length) }"
+   "replacement": "\\1.length - 2) }"
   },
   {
    "id": "delete-dropped",
@@ -2342,14 +2342,14 @@
    ]
   },
   {
-   "id": "storagePushAddAssign.push-length-not-advanced.1",
+   "id": "storagePushAddAssign.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushAddAssign",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 108,
    "old": "  | storagePushAddAssign :\n      dl{ ⟨[ sp.push() += se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushAddAssign :\n      dl{ ⟨[ sp.push() += se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushAddAssign :\n      dl{ ⟨[ sp.push() += se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + se) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushAddAssign"
    ]
@@ -2394,14 +2394,14 @@
    ]
   },
   {
-   "id": "storagePushSubAssign.push-length-not-advanced.1",
+   "id": "storagePushSubAssign.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushSubAssign",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 108,
    "old": "  | storagePushSubAssign :\n      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushSubAssign :\n      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushSubAssign :\n      dl{ ⟨[ sp.push() -= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - se) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushSubAssign"
    ]
@@ -2446,14 +2446,14 @@
    ]
   },
   {
-   "id": "storagePushMulAssign.push-length-not-advanced.1",
+   "id": "storagePushMulAssign.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushMulAssign",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 108,
    "old": "  | storagePushMulAssign :\n      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushMulAssign :\n      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushMulAssign :\n      dl{ ⟨[ sp.push() *= se; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) * se) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushMulAssign"
    ]
@@ -2511,14 +2511,14 @@
    ]
   },
   {
-   "id": "storagePushDivAssign.push-length-not-advanced.1",
+   "id": "storagePushDivAssign.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushDivAssign",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 125,
    "old": "  | storagePushDivAssign :\n      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
-   "new": "  | storagePushDivAssign :\n      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
+   "new": "  | storagePushDivAssign :\n      dl{ ⟨[ sp.push() /= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 2) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) / se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
    "affected": [
     "Taclet.storagePushDivAssign"
    ]
@@ -2576,14 +2576,14 @@
    ]
   },
   {
-   "id": "storagePushModAssign.push-length-not-advanced.1",
+   "id": "storagePushModAssign.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushModAssign",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 125,
    "old": "  | storagePushModAssign :\n      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 1) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
-   "new": "  | storagePushModAssign :\n      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
+   "new": "  | storagePushModAssign :\n      dl{ ⟨[ sp.push() %= se; ]⟩ ⇝\n        if se != 0 then ({ storage := save(storage, sp.length, sp.length + 2) }\n          { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) % se) } ⟨[ ]⟩) else (⟨[ revert(); ]⟩) }\n",
    "affected": [
     "Taclet.storagePushModAssign"
    ]
@@ -2628,14 +2628,14 @@
    ]
   },
   {
-   "id": "storagePushPreincrement.push-length-not-advanced.1",
+   "id": "storagePushPreincrement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushPreincrement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 107,
    "old": "  | storagePushPreincrement :\n      dl{ ⟨[ ++sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushPreincrement :\n      dl{ ⟨[ ++sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushPreincrement :\n      dl{ ⟨[ ++sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushPreincrement"
    ]
@@ -2680,14 +2680,14 @@
    ]
   },
   {
-   "id": "storagePushPostincrement.push-length-not-advanced.1",
+   "id": "storagePushPostincrement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushPostincrement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 110,
    "old": "  | storagePushPostincrement :\n      dl{ ⟨[ (sp.push())++; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushPostincrement :\n      dl{ ⟨[ (sp.push())++; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushPostincrement :\n      dl{ ⟨[ (sp.push())++; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) + 1) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushPostincrement"
    ]
@@ -2732,14 +2732,14 @@
    ]
   },
   {
-   "id": "storagePushPredecrement.push-length-not-advanced.1",
+   "id": "storagePushPredecrement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushPredecrement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 107,
    "old": "  | storagePushPredecrement :\n      dl{ ⟨[ −−sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushPredecrement :\n      dl{ ⟨[ −−sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushPredecrement :\n      dl{ ⟨[ −−sp.push(); ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushPredecrement"
    ]
@@ -2784,27 +2784,27 @@
    ]
   },
   {
-   "id": "storagePushPostdecrement.push-length-not-advanced.1",
+   "id": "storagePushPostdecrement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushPostdecrement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 110,
    "old": "  | storagePushPostdecrement :\n      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 1) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushPostdecrement :\n      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushPostdecrement :\n      dl{ ⟨[ (sp.push())−−; ]⟩ ⇝\n        { storage := save(storage, sp.length, sp.length + 2) }\n        { storage := save(storage, sp[sp.length - 1], find(storage, sp[sp.length - 1]) - 1) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushPostdecrement"
    ]
   },
   {
-   "id": "storagePushValueSave.push-length-not-advanced.1",
+   "id": "storagePushValueSave.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushValueSave",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 131,
    "old": "  | storagePushValueSave :\n      dl{ ⟨[ sp.push(se); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushValueSave :\n      dl{ ⟨[ sp.push(se); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushValueSave :\n      dl{ ⟨[ sp.push(se); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], se), sp.length, sp.length + 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushValueSave"
    ]
@@ -2823,14 +2823,14 @@
    ]
   },
   {
-   "id": "storagePushValueCopySource.push-length-not-advanced.1",
+   "id": "storagePushValueCopySource.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushValueCopySource",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 172,
    "old": "  | storagePushValueCopySource :\n      dl{ ⟨[ sp1.push(sp2); ]⟩ ⇝\n          { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length,\n              sp1.length + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushValueCopySource :\n      dl{ ⟨[ sp1.push(sp2); ]⟩ ⇝\n          { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length,\n              sp1.length) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushValueCopySource :\n      dl{ ⟨[ sp1.push(sp2); ]⟩ ⇝\n          { storage := save(save(storage, sp1[sp1.length], find(storage, sp2)), sp1.length,\n              sp1.length + 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushValueCopySource"
    ]
@@ -2849,14 +2849,14 @@
    ]
   },
   {
-   "id": "storagePushMemoryCopySource.push-length-not-advanced.1",
+   "id": "storagePushMemoryCopySource.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushMemoryCopySource",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 175,
    "old": "  | storagePushMemoryCopySource :\n      dl{ ⟨[ sp.push(mv); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], copyMem(mtSt, memory, mv)), sp.length,\n              sp.length + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushMemoryCopySource :\n      dl{ ⟨[ sp.push(mv); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], copyMem(mtSt, memory, mv)), sp.length,\n              sp.length) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushMemoryCopySource :\n      dl{ ⟨[ sp.push(mv); ]⟩ ⇝\n          { storage := save(save(storage, sp[sp.length], copyMem(mtSt, memory, mv)), sp.length,\n              sp.length + 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushMemoryCopySource"
    ]
@@ -2875,40 +2875,40 @@
    ]
   },
   {
-   "id": "storagePushLengthSave.push-length-not-advanced.1",
+   "id": "storagePushLengthSave.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushLengthSave",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 109,
    "old": "  | storagePushLengthSave :\n      dl{ ⟨[ parr.push(); ]⟩ ⇝\n          { storage := save(storage, parr.length, parr.length + 1) }\n          ⟨[ ]⟩ }\n",
-   "new": "  | storagePushLengthSave :\n      dl{ ⟨[ parr.push(); ]⟩ ⇝\n          { storage := save(storage, parr.length, parr.length) }\n          ⟨[ ]⟩ }\n",
+   "new": "  | storagePushLengthSave :\n      dl{ ⟨[ parr.push(); ]⟩ ⇝\n          { storage := save(storage, parr.length, parr.length + 2) }\n          ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushLengthSave"
    ]
   },
   {
-   "id": "storagePushLengthSaveReferenceElement.push-length-not-advanced.1",
+   "id": "storagePushLengthSaveReferenceElement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushLengthSaveReferenceElement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 125,
    "old": "  | storagePushLengthSaveReferenceElement :\n      dl{ ⟨[ rarr.push(); ]⟩ ⇝\n          { storage := save(storage, rarr.length, rarr.length + 1) }\n          ⟨[ ]⟩ }\n",
-   "new": "  | storagePushLengthSaveReferenceElement :\n      dl{ ⟨[ rarr.push(); ]⟩ ⇝\n          { storage := save(storage, rarr.length, rarr.length) }\n          ⟨[ ]⟩ }\n",
+   "new": "  | storagePushLengthSaveReferenceElement :\n      dl{ ⟨[ rarr.push(); ]⟩ ⇝\n          { storage := save(storage, rarr.length, rarr.length + 2) }\n          ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushLengthSaveReferenceElement"
    ]
   },
   {
-   "id": "storagePushLengthSaveMappingElement.push-length-not-advanced.1",
+   "id": "storagePushLengthSaveMappingElement.push-length-advanced-twice.1",
    "constructor": "Taclet.storagePushLengthSaveMappingElement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 113,
    "old": "  | storagePushLengthSaveMappingElement :\n      dl{ ⟨[ marr.push(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePushLengthSaveMappingElement :\n      dl{ ⟨[ marr.push(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePushLengthSaveMappingElement :\n      dl{ ⟨[ marr.push(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length + 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePushLengthSaveMappingElement"
    ]
@@ -3018,27 +3018,27 @@
    ]
   },
   {
-   "id": "storagePopSave.pop-length-not-reduced.1",
+   "id": "storagePopSave.pop-length-reduced-twice.1",
    "constructor": "Taclet.storagePopSave",
-   "operator": "pop-length-not-reduced",
+   "operator": "pop-length-reduced-twice",
    "family": "pop-delete",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 131,
    "old": "  | storagePopSave :\n      dl{ ⟨[ darr.pop(); ]⟩ ⇝\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 1) }\n          ⟨[ ]⟩ }\n",
-   "new": "  | storagePopSave :\n      dl{ ⟨[ darr.pop(); ]⟩ ⇝\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length) }\n          ⟨[ ]⟩ }\n",
+   "new": "  | storagePopSave :\n      dl{ ⟨[ darr.pop(); ]⟩ ⇝\n          { storage := save(delAt(storage, darr[darr.length - 1]), darr.length, darr.length - 2) }\n          ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePopSave"
    ]
   },
   {
-   "id": "storagePopSaveMappingElement.pop-length-not-reduced.1",
+   "id": "storagePopSaveMappingElement.pop-length-reduced-twice.1",
    "constructor": "Taclet.storagePopSaveMappingElement",
-   "operator": "pop-length-not-reduced",
+   "operator": "pop-length-reduced-twice",
    "family": "pop-delete",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 105,
    "old": "  | storagePopSaveMappingElement :\n      dl{ ⟨[ marr.pop(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length - 1) } ⟨[ ]⟩ }\n",
-   "new": "  | storagePopSaveMappingElement :\n      dl{ ⟨[ marr.pop(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length) } ⟨[ ]⟩ }\n",
+   "new": "  | storagePopSaveMappingElement :\n      dl{ ⟨[ marr.pop(); ]⟩ ⇝ { storage := save(storage, marr.length, marr.length - 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storagePopSaveMappingElement"
    ]
@@ -3057,14 +3057,14 @@
    ]
   },
   {
-   "id": "storageLocalRootPushBind.push-length-not-advanced.1",
+   "id": "storageLocalRootPushBind.push-length-advanced-twice.1",
    "constructor": "Taclet.storageLocalRootPushBind",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 118,
    "old": "  | storageLocalRootPushBind :\n      dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝\n          { storage := save(storage, darr.length, darr.length + 1)\n            ‖ lsv := darr[darr.length] }\n          ⟨[ ]⟩ }\n",
-   "new": "  | storageLocalRootPushBind :\n      dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝\n          { storage := save(storage, darr.length, darr.length)\n            ‖ lsv := darr[darr.length] }\n          ⟨[ ]⟩ }\n",
+   "new": "  | storageLocalRootPushBind :\n      dl{ ⟨[ lsv = darr.push(); ]⟩ ⇝\n          { storage := save(storage, darr.length, darr.length + 2)\n            ‖ lsv := darr[darr.length] }\n          ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storageLocalRootPushBind"
    ]
@@ -3083,14 +3083,14 @@
    ]
   },
   {
-   "id": "storageLocalPrimitivePushBind.push-length-not-advanced.1",
+   "id": "storageLocalPrimitivePushBind.push-length-advanced-twice.1",
    "constructor": "Taclet.storageLocalPrimitivePushBind",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 117,
    "old": "  | storageLocalPrimitivePushBind :\n      dl{ ⟨[ v = sp.push(); ]⟩ ⇝\n          { storage := save(storage, sp.length, sp.length + 1)\n            ‖ v := defVal(T) } ⟨[ ]⟩ }\n",
-   "new": "  | storageLocalPrimitivePushBind :\n      dl{ ⟨[ v = sp.push(); ]⟩ ⇝\n          { storage := save(storage, sp.length, sp.length)\n            ‖ v := defVal(T) } ⟨[ ]⟩ }\n",
+   "new": "  | storageLocalPrimitivePushBind :\n      dl{ ⟨[ v = sp.push(); ]⟩ ⇝\n          { storage := save(storage, sp.length, sp.length + 2)\n            ‖ v := defVal(T) } ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storageLocalPrimitivePushBind"
    ]
@@ -3109,14 +3109,14 @@
    ]
   },
   {
-   "id": "storageLocalRootPushBindMappingElement.push-length-not-advanced.1",
+   "id": "storageLocalRootPushBindMappingElement.push-length-advanced-twice.1",
    "constructor": "Taclet.storageLocalRootPushBindMappingElement",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 132,
    "old": "  | storageLocalRootPushBindMappingElement :\n      dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝\n          { storage := save(storage, marr.length, marr.length + 1) ‖ lsv := marr[marr.length] }\n          ⟨[ ]⟩ }\n",
-   "new": "  | storageLocalRootPushBindMappingElement :\n      dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝\n          { storage := save(storage, marr.length, marr.length) ‖ lsv := marr[marr.length] }\n          ⟨[ ]⟩ }\n",
+   "new": "  | storageLocalRootPushBindMappingElement :\n      dl{ ⟨[ lsv = marr.push(); ]⟩ ⇝\n          { storage := save(storage, marr.length, marr.length + 2) ‖ lsv := marr[marr.length] }\n          ⟨[ ]⟩ }\n",
    "affected": [
     "Taclet.storageLocalRootPushBindMappingElement"
    ]
@@ -3642,14 +3642,14 @@
    ]
   },
   {
-   "id": "pushFixedCopySave.push-length-not-advanced.1",
+   "id": "pushFixedCopySave.push-length-advanced-twice.1",
    "constructor": "LeanTaclet.pushFixedCopySave",
-   "operator": "push-length-not-advanced",
+   "operator": "push-length-advanced-twice",
    "family": "push-tail-length",
    "target": "Solidity/Calculus/Rules.lean",
    "offset_in_span": 261,
    "old": "  | pushFixedCopySave {Γ : Ctx} {E : Ty} {sp : SPath C Γ (.array E)} {src : Src C Γ E}\n      (hshape : src.isFixedCopy = true) :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(src); ]⟩ ⇝\n        { storage := save(save(storage, sp[sp.length], src), sp.length,\n            sp.length + 1) } ⟨[ ]⟩ }\n",
-   "new": "  | pushFixedCopySave {Γ : Ctx} {E : Ty} {sp : SPath C Γ (.array E)} {src : Src C Γ E}\n      (hshape : src.isFixedCopy = true) :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(src); ]⟩ ⇝\n        { storage := save(save(storage, sp[sp.length], src), sp.length,\n            sp.length) } ⟨[ ]⟩ }\n",
+   "new": "  | pushFixedCopySave {Γ : Ctx} {E : Ty} {sp : SPath C Γ (.array E)} {src : Src C Γ E}\n      (hshape : src.isFixedCopy = true) :\n      dl[LeanTaclet C k]{ ⟨[ sp.push(src); ]⟩ ⇝\n        { storage := save(save(storage, sp[sp.length], src), sp.length,\n            sp.length + 2) } ⟨[ ]⟩ }\n",
    "affected": [
     "LeanTaclet.pushFixedCopySave"
    ]
@@ -4130,6 +4130,18 @@
    ]
   },
   {
+   "id": "pilot.callback-table.failed-send-flag-true",
+   "constructor": "CallbackTaclet.sendWithCallbackBox",
+   "operator": "pilot-hand-selected",
+   "family": "callback-frames",
+   "target": "Solidity/Calculus/CallbackRules.lean",
+   "old": "        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
+   "new": "        ; \"send failed\": { pv := true } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
+   "affected": [
+    "CallbackTaclet.sendWithCallbackBox"
+   ]
+  },
+  {
    "id": "control.proof-invalid-syntax",
    "constructor": "Taclet.requireSimple",
    "operator": "control",
@@ -4162,11 +4174,19 @@
  "proof_baselines": [
   {
    "id": "rules-taclet",
+   "mode": "full",
    "target": "Solidity/Calculus/Rules.lean",
    "oracle": "Solidity/Calculus/Taclet.lean"
   },
   {
+   "id": "rules-taclet-rows",
+   "mode": "rows",
+   "target": "Solidity/Calculus/Rules.lean",
+   "oracle": "Solidity/Calculus/Taclet.lean, every row by #h28_toStep_row"
+  },
+  {
    "id": "callback-totaclet",
+   "mode": "callback",
    "target": "Solidity/Calculus/CallbackRules.lean",
    "oracle": "CallbackTaclet.toTaclet (in the target)"
   }
@@ -4389,6 +4409,21 @@
    "witness": "tests/h28-sol/mutation-testing/oracles/GuardEquivalent.lean",
    "witness_sha256": "e438c64b429a282756b24e32894588214f8e2990622d97b1e675fbce072cd32f",
    "from_pilot": "runner-pilot.json"
+  },
+  {
+   "id": "callback-table.failed-send-flag-true",
+   "kind": "mutant",
+   "family": "callback-frames",
+   "constructor": "CallbackTaclet.sendWithCallbackBox",
+   "target": "Solidity/Calculus/CallbackRules.lean",
+   "old": "        ; \"send failed\": { pv := false } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
+   "new": "        ; \"send failed\": { pv := true } ⟨[ ]⟩ }\n  | sendWithCallbackDiamond",
+   "oracle": "tests/h28-sol/mutation-testing/oracles/CallbackTacletBaseline.lean",
+   "oracle_sha256": "9ff50822d441812d8a9a4615b22e6eef5f62c1c198376e1ba4c9e4dc1def813f",
+   "witness": "tests/h28-sol/mutation-testing/oracles/CallbackTacletFailureKill.lean",
+   "witness_sha256": "7f060e567140215088e5f4a52d2cdab0b2848ea1236f6df9c722b8927ca5c2ac",
+   "from_pilot": null,
+   "note": "separate callback table (H28 queue item 4)"
   },
   {
    "id": "control.cross-witness-survivor",

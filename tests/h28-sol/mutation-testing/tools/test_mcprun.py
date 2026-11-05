@@ -97,6 +97,10 @@ class Semantic(unittest.TestCase):
         self.assertTrue(mcprun.semantic_success(axioms("propext"), REG, ORACLE, ["checked_kill"])["ok"])
         self.assertFalse(mcprun.semantic_success([], REG, ORACLE, ["checked_kill"])["ok"])
 
+    def test_wrapped_axiom_line(self):
+        items = [dict(x, message=x["message"].replace(", ", ",\n ")) for x in axioms("propext", "Quot.sound")]
+        self.assertTrue(mcprun.semantic_success(items, REG, ORACLE, ["checked_kill"])["ok"])
+
     def test_forbidden_axiom(self):
         self.assertFalse(mcprun.semantic_success(axioms("sorryAx"), REG, ORACLE, ["checked_kill"])["ok"])
         self.assertFalse(mcprun.semantic_success(axioms("Lean.ofReduceBool"), REG, ORACLE, ["checked_kill"])["ok"])

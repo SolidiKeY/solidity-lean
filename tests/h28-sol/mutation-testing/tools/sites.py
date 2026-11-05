@@ -45,10 +45,10 @@ OPERATORS = [
     ("division-div-to-mul", "division-minimum", ") / se)", ") * se)"),
     ("division-mod-to-div", "division-minimum", ") % se)", ") / se)"),
     ("division-zero-guard-negated", "division-minimum", "if se != 0 then", "if se == 0 then"),
-    ("push-length-not-advanced", "push-tail-length", "re:(\\w+)\\.length \\+ 1\\)", "\\1.length)"),
+    ("push-length-advanced-twice", "push-tail-length", "re:(\\w+)\\.length \\+ 1\\)", "\\1.length + 2)"),
     ("push-slot-is-last-old", "index-bounds", "re:(\\w+)\\[\\1\\.length\\]", "\\1[\\1.length - 1]"),
     ("index-last-is-length", "index-bounds", "re:(\\w+)\\[\\1\\.length - 1\\]", "\\1[\\1.length]"),
-    ("pop-length-not-reduced", "pop-delete", "re:(\\w+)\\.length - 1\\) \\}", "\\1.length) }"),
+    ("pop-length-reduced-twice", "pop-delete", "re:(\\w+)\\.length - 1\\) \\}", "\\1.length - 2) }"),
     ("delete-dropped", "pop-delete", "re:delAt\\(storage, [^()]*(?:\\([^()]*\\))?[^()]*\\)", "storage"),
 ]
 

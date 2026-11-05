@@ -134,6 +134,70 @@ def region(items, regions, name):
 
 # ---------------------------------------------------------------- proof oracle
 
+ROW_COMMAND = """
+open Lean Elab Command in
+/-- H28 runner: one row of a `#replay_toStep` table checked alone (rows are
+independent declarations, `Calculus/Taclet.lean`); no completeness check. -/
+elab "#h28_toStep_row " j:ident c:ident p:str : command => do
+  let J ← liftCoreM <| realizeGlobalConstNoOverload j
+  discard <| addToStep (J ++ c.getId) (toStepReplay p.getString)
+
+open Lean Elab Command Tactic in
+/-- H28 runner: a hand-proved lemma `J.c.toStep` states its premise itself, so
+its link to the constructor is the closing `cases h <;> apply_toStep J`.  This
+checks that link for one constructor: the constructor's own `toStepType`,
+proved as `apply_toStep` proves its case. -/
+elab "#h28_toStep_link " j:ident c:ident : command => do
+  let J ← liftCoreM <| realizeGlobalConstNoOverload j
+  let n := J ++ c.getId
+  let lemma := mkIdent (n ++ `toStep)
+  discard <| addCtorLemma n `h28link (toStepType n)
+    (do evalTactic (← `(tactic| (intros; apply $lemma <;> assumption))))
+    m!"no proof that `{n}` is `Stmt.step`'s rule"
+"""
+
+
+def taclet_parts(text):
+    """Split `Calculus/Taclet.lean`: the text outside the two replay tables and
+    the closing section (tactics and every hand-proved lemma), and the rows."""
+    lines = text.splitlines(keepends=True)
+    keep, rows, table = [], [], None
+    for line in lines:
+        if line.startswith("/-! ## The rule `Stmt.step` fires"):
+            break
+        m = re.match(r"#replay_toStep (\w+)\s*$", line)
+        if m:
+            table = m[1]
+            continue
+        if table:
+            r = re.match(r"  (\w+) (\"[^\"]*\")\s*$", line)
+            if r:
+                rows.append((table, r[1], r[2]))
+                continue
+            table = None
+        keep.append(line)
+    return "".join(keep), rows
+
+
+def row_oracle(taclet_text, affected):
+    """The tactics and hand lemmas, then for each affected constructor its own
+    check: its replay row, or the link of its hand lemma to the constructor.
+    A helper mutant (`*`) may reach any constructor: every row and link."""
+    prefix, rows = taclet_parts(taclet_text)
+    hand = re.findall(r"^theorem (Taclet|LeanTaclet)\.(\w+)\.toStep\b", prefix, re.M)
+    names = {f"{t}.{c}" for t, c, _ in rows} | {f"{t}.{c}" for t, c in hand}
+    for c in affected:
+        if c != "*" and c not in names:
+            raise ValueError("no toStep lemma or row for " + c)
+    pick = (lambda n: True) if "*" in affected else (lambda n: n in affected)
+    checks = [f"\n#h28_toStep_row {t} {c} {p}" for t, c, p in rows if pick(f"{t}.{c}")]
+    checks += [f"\n#h28_toStep_link {t} {c}" for t, c in hand if pick(f"{t}.{c}")]
+    return prefix.rstrip() + "\n" + ROW_COMMAND + "".join(checks) + "\n\nend Solidity\n"
+
+
+def all_rows_oracle(taclet_text):
+    return row_oracle(taclet_text, ["*"])
+
 CASCADE = [r"Unknown constant `Solidity\.(?:Taclet|LeanTaclet)\.\w+\.toStep`",
            r"fail to show termination for\s+Solidity\.(?:Taclet|LeanTaclet)\.toStep\b"]
 
@@ -227,7 +291,8 @@ def semantic_success(items, regions, oracle_text, require):
     axioms = {}
     for n in names:
         q = ns + "." + n
-        hits = [x["message"] for x in region(items, regions, "oracle") if x["message"].startswith("'" + q + "' ")]
+        hits = [re.sub(r"\s+", " ", x["message"]).strip() for x in region(items, regions, "oracle")
+                if x["message"].startswith("'" + q + "' ")]
         if len(hits) != 1:
             return {"ok": False, "reason": "missing axiom export " + q}
         m = re.fullmatch(re.escape("'" + q + "' depends on axioms: ") + r"\[(.*)\]", hits[0])
@@ -295,19 +360,29 @@ def run(args):
     scratch = repo / LANE / ".scratch"
     scratch.mkdir(exist_ok=True)
 
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
     jobs = []  # (key, target, target_text, oracle_text, finisher)
     taclet_body = texts[TACLET]
     for b in manifest["proof_baselines"]:
-        jobs.append(("baseline." + b["id"], b["target"], texts[b["target"]],
-                     taclet_body if b["target"] == RULES else "", ("baseline", b)))
+        oracle = {"full": taclet_body, "rows": all_rows_oracle(taclet_body), "callback": ""}[b["mode"]]
+        jobs.append(("baseline." + b["id"], b["target"], texts[b["target"]], oracle, ("baseline", b)))
     for m in manifest["mutants"]:
         mt = mutate(texts[m["target"]], m["old"], m["new"])
-        oracle = taclet_body if m["target"] == RULES else ""
+        oracle = row_oracle(taclet_body, m["affected"]) if m["target"] == RULES else ""
         jobs.append(("proof." + m["id"], m["target"], mt, oracle, ("proof", m)))
+    def table_only(path, text):
+        """A semantic check reads the callback table, not its toTaclet proof
+        oracle (which a callback mutant breaks by design)."""
+        if path != CALLBACK:
+            return text
+        a = text.index("/-- A callback taclet is its no-callback twin")
+        return text[:a] + "end Solidity\n"
+
     for c in manifest.get("semantic_cases", []):
-        mt = mutate(texts[c["target"]], c["old"], c["new"])
-        for phase, ttext, ofile in (("normal-oracle", texts[c["target"]], c.get("oracle")),
-                                    ("normal-witness", texts[c["target"]], c.get("witness")),
+        mt = table_only(c["target"], mutate(texts[c["target"]], c["old"], c["new"]))
+        nt = table_only(c["target"], texts[c["target"]])
+        for phase, ttext, ofile in (("normal-oracle", nt, c.get("oracle")),
+                                    ("normal-witness", nt, c.get("witness")),
                                     ("mutant-witness", mt, c.get("witness")),
                                     ("mutant-oracle", mt, c.get("oracle"))):
             if ofile:
@@ -321,7 +396,7 @@ def run(args):
     jobs = [j for j in jobs if j[0] not in done]
     print(f"{len(jobs)} checks to run", flush=True)
 
-    bridges = [Bridge(repo, i, scratch) for i in range(args.jobs)]
+    bridges = [Bridge(repo, args.bridge_base + i, scratch) for i in range(args.jobs)]
     free = list(bridges)
     lock = threading.Lock()
 
@@ -361,11 +436,11 @@ def run(args):
             elif phase == "proof":
                 record["result"] = proof_classify(items, regs, entry["affected"], obody,
                                                   "callback" if target == CALLBACK else "rules")
+            elif phase in ("normal-witness", "mutant-witness") and entry["kind"] == "equivalent-control":
+                record["result"] = semantic_success(items, regs, otext, ["source_link_all", "equivalence_all"])
             elif phase in ("normal-oracle", "mutant-witness"):
                 record["result"] = semantic_success(items, regs, otext,
                                                     ["checked_kill"] if phase == "mutant-witness" and entry["kind"] not in ("equivalent-control",) else ["source_link"])
-            elif phase in ("normal-witness", "mutant-witness") and entry["kind"] == "equivalent-control":
-                record["result"] = semantic_success(items, regs, otext, ["source_link_all", "equivalence_all"])
             elif phase == "normal-witness":
                 record["result"] = source_link_rejection(items, regs, otext)
             else:  # mutant-oracle: recorded, not decisive
@@ -383,7 +458,7 @@ def run(args):
             b.stop()
     summary = summarize(manifest, out)
     summary.update(manifest=str(rel), manifest_sha256=sha(manifest_path.read_bytes()),
-                   head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip())
+                   head=head, dirty_development_run=bool(dirty))
     (out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(json.dumps({k: v for k, v in summary.items() if k not in ("mutants", "semantic")}, indent=1))
 
@@ -468,6 +543,7 @@ if __name__ == "__main__":
     r.add_argument("--jobs", type=int, default=2)
     r.add_argument("--only", nargs="*")
     r.add_argument("--resume", action="store_true")
+    r.add_argument("--bridge-base", type=int, default=0, help="first daemon index (concurrent runs)")
     r.add_argument("--allow-dirty", action="store_true", help="development only; never for recorded runs")
     s = sub.add_parser("summarize")
     s.add_argument("manifest")
