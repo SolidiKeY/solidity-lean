@@ -89,6 +89,16 @@ theorem body_witness {α : Type} {I : Input} {fuel : Nat} {ps : List Param}
   obtain ⟨es, he, hb⟩ := verdict_run_entry accepted
   exact ⟨es, he, hb, body_from_entry I fuel ps es vs body he hb⟩
 
+/-- An actual eager result transports to the actual lazy reference/read.
+The input-size and original one-step fuel difference remain explicit. -/
+theorem eager_lazy_body {α : Type} (I : Input) (fuel : Nat) (s : Shape) (pos : Nat)
+    (v : Val s) (body : Val s → α) (size : I.size ≤ lim)
+    (eagerValue : eager I (fuel + 1) s pos = .ok v) :
+    ∃ addr len, cref I s 4 pos = .ok (addr,len) ∧
+      (cval I fuel s addr len).map body = .ok (body v) := by
+  obtain ⟨addr,len,hr,hv⟩ := eager_cref size eagerValue
+  exact ⟨addr,len,hr,by rw [hv]; rfl⟩
+
 /-- One calldata parameter links its real entry reference and eager body value
 to the same actual lazy read, retaining the complete typed aggregate value. -/
 theorem calldata_handoff {α : Type} (I : Input) (fuel : Nat) (s : Shape)
@@ -130,6 +140,8 @@ theorem single_calldata_entry (I : Input) (fuel : Nat) (s : Shape) (addr len : N
 #guard_msgs (whitespace := lax) in #print axioms entry_revert_exec
 /-- info: 'Solidity.Backend.AbiEntry.EntryTransport.body_witness' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in #print axioms body_witness
+/-- info: 'Solidity.Backend.AbiEntry.EntryTransport.eager_lazy_body' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms eager_lazy_body
 /-- info: 'Solidity.Backend.AbiEntry.EntryTransport.calldata_handoff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms calldata_handoff
 /-- info: 'Solidity.Backend.AbiEntry.EntryTransport.verdict_revert_exec' depends on axioms: [propext, Classical.choice, Quot.sound] -/

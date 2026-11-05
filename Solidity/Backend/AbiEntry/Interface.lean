@@ -76,27 +76,33 @@ structure SourceEntryAgreement {E : Source.Env} (global : Source.Glob E)
   exact_result : ∀ frame horizon input initial result,
     relation frame horizon input initial result ↔
       (Source.dispatch global frame horizon input).run (.nil, initial) = result
+  coverage : ∀ frame horizon input initial,
+    ∃ result, relation frame horizon input initial result
 
 namespace SourceEntryAgreement
 
-/-- Coverage follows from exact graph agreement; consumers do not supply it
-as a separate premise. The complete actual source result is the witness. -/
-theorem coverage {E : Source.Env} {global : Source.Glob E}
-    {relation : SourceEntryRelation E} (agreement : SourceEntryAgreement global relation)
-    (frame : Source.Fr) (horizon : Nat) (input : Roadmap.Bytes) (initial : Source.St E) :
-    ∃ result, relation frame horizon input initial result := by
-  refine ⟨(Source.dispatch global frame horizon input).run (.nil, initial), ?_⟩
-  exact (agreement.exact_result frame horizon input initial _).mpr rfl
+/-- Exact graph agreement constructs the complete record, including its
+coverage field, without an additional coverage premise. -/
+theorem of_exact_result {E : Source.Env} {global : Source.Glob E}
+    {relation : SourceEntryRelation E}
+    (exact_result : ∀ frame horizon input initial result,
+      relation frame horizon input initial result ↔
+        (Source.dispatch global frame horizon input).run (.nil, initial) = result) :
+    SourceEntryAgreement global relation where
+  exact_result := exact_result
+  coverage := fun frame horizon input initial =>
+    ⟨(Source.dispatch global frame horizon input).run (.nil, initial),
+      (exact_result frame horizon input initial _).mpr rfl⟩
 
 /-- The actual source graph inhabits this source-only agreement. This is not
 an emitted runtime or representation certificate. -/
 theorem graph {E : Source.Env} (global : Source.Glob E) :
     SourceEntryAgreement global (fun frame horizon input initial result =>
-      (Source.dispatch global frame horizon input).run (.nil, initial) = result) where
-  exact_result := fun _ _ _ _ _ => Iff.rfl
+      (Source.dispatch global frame horizon input).run (.nil, initial) = result) :=
+  of_exact_result (fun _ _ _ _ _ => Iff.rfl)
 
 /-- Empty relations cannot satisfy exact graph agreement, even at horizon zero.
-Coverage is enforced by exact_result rather than an independent assumption. -/
+The original coverage field remains available to consumers. -/
 theorem empty_refused {E : Source.Env} (global : Source.Glob E)
     (frame : Source.Fr) (initial : Source.St E) :
     ¬ SourceEntryAgreement global (fun _ _ _ _ _ => False) := by
@@ -106,6 +112,8 @@ theorem empty_refused {E : Source.Env} (global : Source.Glob E)
 
 /-- info: 'Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.coverage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms coverage
+/-- info: 'Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.of_exact_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms of_exact_result
 /-- info: 'Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.graph' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms graph
 /-- info: 'Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.empty_refused' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -10,8 +10,9 @@ need no new decoder.
   `WordValidationInterface.lean` (emitted primitive validators). They are
   narrow contracts with source-only graph controls, not runtime, decoder or
   admission instances.
-  Source coverage is derived from exact graph agreement, with inhabited graph
-  and empty-relation controls. Dispatch helper equalities are bookkeeping and
+  The original source-coverage field remains part of the record.
+  `of_exact_result` constructs both fields from exact graph agreement, with
+  inhabited graph and empty-relation controls. Dispatch helper equalities are bookkeeping and
   may be definitional; they do not establish runtime dispatch.
 - **Proofs.** `WordValidation.lean` gives actual numeric bytecode for
   every semantic word kind: uint/address, signed integer, bool, enum and
@@ -22,7 +23,8 @@ need no new decoder.
   `EntryComposition.lean` and `EnumEntry.lean` hold the entry-only part of the
   V13 ABI-world work over the existing indexed decoder; the codec and window
   proofs stay in `Backend/AbiWorld`. Eager/lazy correspondence reuses
-  `Semantics/AbiEntryProofs.eager_cref` directly, without a duplicate wrapper.
+  `Semantics/AbiEntryProofs.eager_cref`; the public
+  `EntryTransport.eager_lazy_body` theorem and its axiom guard are retained.
   `Consumers.lean` inhabits the rejection and composition interfaces.
 - **Premises.** `Premises.lean` and `Premises/CalldataViews.lean` (with its
   additive extension `CalldataViewExtensions.lean`) retain the typed G34,
@@ -158,9 +160,9 @@ representation remain open.
 Numeric checkpoint validation: per-file diagnostics reported zero errors; the
 selected Bridge closure passed 1223 jobs (4 seconds), and the core checkpoint
 library passed 3410 jobs (3 seconds). Trust, orphans, layers, generated roots
-and doc paths passed. The central axiom inventory still fails: 6553 standard-only
-pins, one removed duplicate wrapper and 45 unrecorded changes. Its refresh is
-proposed separately, outside lane ownership; no gate pass is claimed. Independent
+and doc paths passed. That historical checkpoint reported 6553 standard-only pins and a missing
+public wrapper pin. The public theorem and guard are now restored; current
+exact-head gate outcomes are recorded in the latest sealed handoff. Independent
 read-only finder and skeptic reviews passed with no findings. The full original
 queue and its producer, physical-store/copy and provenance obligations remain open.
 
@@ -1521,3 +1523,18 @@ helper checks fail as expected. This is not a fresh rebuild of the entire
 194-source closure. Repair trials and earlier failed attempts remain in the
 handoff. Full G40 Source/native composition, fixture replay, G46.02 and ordered
 G46.03 remain open; checkpoint gate results accompany the sealed evidence.
+
+The public eager/lazy transport theorem and its complete statement are preserved
+with the original one-step fuel difference and size premise. SourceEntryAgreement
+retains its original two-field structure and coverage projection; its exact
+record declaration matches the published interface. `of_exact_result` keeps
+coverage derivable without adding a premise for record construction. Existing
+projection calls and the two-field constructor remain available. These are API
+preservation changes; they add no source-to-runtime correspondence claim.
+
+Independent read-only finder and skeptic reviews passed the API restoration
+without findings. A compiled compatibility check exercises the original eager/
+lazy theorem signature, coverage projection, two-field constructor and exact-
+result constructor. Per-file diagnostics pass; the restored theorem, projection,
+constructor and source graph controls have standard-only axiom reports. These
+checks preserve the public API and do not establish native entry adequacy.
