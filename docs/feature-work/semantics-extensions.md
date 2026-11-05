@@ -1,6 +1,6 @@
 # Semantics extensions
 
-Status (2026-11-05): **VS2, VS3 and VS4 done and integrated; VS1 running; VS5 waits** (see Handoffs). Six structural
+Status (2026-11-05): **VS1, VS2, VS3 and VS4 done and integrated; VS5 waits** (see Handoffs). Six structural
 additions beside [full-scope.md](full-scope.md), which covers the language (X),
 the optimizer (O) and solc validation (T). These groups add metatheory that
 X, O and T state separately today. Every lane starts with an inventory of
@@ -675,3 +675,8 @@ logs unobserved, final-state limits (own balances and code hash not
 observed), `Cert.ctxEquiv` needs no forward restriction, `transfer'` uses
 `envAbs_eq`, StorageObs is a restatement, Source stuck/divergent prefixes
 coincide; missing axiom guards (Source, transfer lemmas).
+
+**Integration review (2026-11-05).** Finder and skeptic on the merged tree:
+one confirmed finding, fixed: the `docs/module-map/language.md` Unify row
+claimed non-vacuity of the guarded side; `ctx_succeeds` covers the unguarded
+bytes and guarded non-vacuity stays open. No other defects.
