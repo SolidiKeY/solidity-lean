@@ -1,5 +1,6 @@
 import Solidity.Lowering.V07.LocationGraphCompleteness
 import Solidity.Lowering.V07.LocationProducerControls
+import Solidity.Lowering.V07.LocationGraphCompletenessControls
 import Solidity.Lowering.V07.SourceRefusal
 import Solidity.Lowering.P8.DeclarationGraphAdmission
 
@@ -101,7 +102,7 @@ end Producer
 
 /-! ## Controls -/
 
-/-- A mapping-free three-struct chain: certificates at all three locations by
+/-- A mapping-free chain of three structs (plus a non-struct declaration): certificates at all three locations by
 the actual producer, and refusal on the current Source typing. -/
 def chainEnv : Source.Env := RecursiveGraphControls.chain
 
@@ -125,6 +126,22 @@ theorem mixed_produces : ∀ loc, (produce "h24-mixed" mixedEnv loc).isSome = tr
 theorem mixed_memory_excludes_mapping : (choices mixedEnv .memory).length = 3 ∧
     (choices mixedEnv .storage).length = 4 := by
   decide
+
+/-- The premise route is inhabited: the existing completeness client's
+structural inputs (memory, comparison rank 30/20/10) are `GraphPremises`. -/
+def mixed_memory_premises : GraphPremises mixedEnv .memory where
+  selected := by decide
+  fs := LocationGraphCompletenessControls.fs
+  related := LocationGraphCompletenessControls.related
+  supported := LocationGraphCompletenessControls.support
+  nonempty := by decide
+  distinct := by decide
+  rank := LocationGraphCompletenessControls.r
+  valid := by decide
+
+theorem mixed_memory_graph :
+    ∃ n, ∃ G : TypeGraph.Schema n, Nonempty (LocationDeclarationGraph mixedEnv .memory G) :=
+  graph_of_premises mixedEnv .memory mixed_memory_premises
 
 theorem mixed_not_admitted : ¬ EnvAdmission mixedEnv := by
   intro h
@@ -150,5 +167,16 @@ theorem mixed_graphs : ∀ loc : Source.DataLoc,
 #guard_msgs (whitespace := lax) in #print axioms mixed_not_admitted
 /-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_graphs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms mixed_graphs
+
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.chain_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms chain_produces
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_produces' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mixed_produces
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_excludes_mapping' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mixed_memory_excludes_mapping
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_premises' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mixed_memory_premises
+/-- info: 'Solidity.Lowering.V07.GraphAdmissionAssembly.mixed_memory_graph' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms mixed_memory_graph
 
 end Solidity.Lowering.V07.GraphAdmissionAssembly

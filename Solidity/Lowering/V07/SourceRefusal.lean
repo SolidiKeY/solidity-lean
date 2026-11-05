@@ -18,12 +18,20 @@ struct, which `Source.locOK` (environment-free) does not inspect.
 
 `envLocOK` is the environment-aware check a Source repair would use in
 `StmtD.declVar`/`declInit` (`Solidity/Source/**` is VY5-owned, H16; the patch
-is recorded in `docs/feature-work/roadmap-v07-lowering.md`, "Source
-refusal"). It refuses exactly the non-admissible locations (`envLocOK_sound`)
-and agrees with `locOK` elsewhere (`envLocOK_conservative`), so the repair
-removes no solc-admissible program. `decl_inversion` is the current-Source
+is recorded in `docs/feature-work/roadmap-v07-lowering.md`, CP75;
+`envLocOK_eq_patch` equates it with the patch formula). It admits only
+H15-admissible explicit locations (`envLocOK_sound`), refuses every
+non-admissible one (`envLocOK_refuses`) and equals `locOK` wherever the
+location is admissible (`envLocOK_conservative`), so the repair removes
+nothing the H15 policy `AdmissibleLocation` admits (agreement of that policy
+with solc is a separate obligation). `decl_inversion` is the current-Source
 fact the repaired proof would strengthen: a local declaration's derivation
-carries `locOK` of its declared type and location.
+carries `locOK τ (some loc) b` for some initialization flag `b`.
+
+Refusal is quantified per context (`∀ C, C.env = E`, every scope), as in the
+interface, not per program. After the repair, the forward witnesses here
+(`not_refuses_of_mapping_struct`, the forward half of `refuses_iff`, and
+`LocationGraphLaws.refusal_missing`) no longer hold and are to be retired.
 
 Local declarations only: parameters, returns and state variables are
 separate obligations, as in the interface.
@@ -93,7 +101,9 @@ theorem tys_maps_free (E : Source.Env) (scope : Option String) (g : Source.DeclN
       exact tys_maps_free E scope g hg loc hloc t [τ'] ht τ' (List.mem_singleton.mpr rfl)
     · cases h
 
-/-- Reverse direction: mapping-free nameable structs give actual refusal. -/
+/-- Reverse direction: mapping-free nameable structs give actual refusal.
+The `StmtD` derivation is not used: refusal is decided by `Syn.ty` alone;
+`locOK` matters only for the forward witness. -/
 theorem refuses_of_mapping_free (E : Source.Env) (h : NameableStructsMappingFree E) :
     SourceRefusesNonAdmissible E := by
   intro C hC k L L' t τ loc x init ht _
@@ -184,6 +194,20 @@ def envLocOK (E : Source.Env) (τ : Source.STy) (l : Option Source.DataLoc) (ini
     | some loc => decide (AdmissibleLocation E τ loc)
     | none => true
 
+/-- `envLocOK` is exactly the Boolean formula of the recorded Source patch
+(`Ctx.locOK` in the feature document), so the patch's premise is this check. -/
+theorem envLocOK_eq_patch (E : Source.Env) (τ : Source.STy) (l : Option Source.DataLoc) (init : Bool) :
+    envLocOK E τ l init = (Source.locOK τ l init &&
+      (l.isNone || l == some .storage || !E.hasMapping (E.structCount + 1) τ)) := by
+  cases l with
+  | none => simp only [envLocOK, Option.isNone_none, Bool.true_or]
+  | some loc =>
+    cases loc <;> cases h : E.hasMapping (E.structCount + 1) τ <;>
+      simp only [envLocOK, AdmissibleLocation, h, Option.isNone_some, Bool.false_or, Bool.not_true,
+        Bool.not_false, Bool.or_false, Bool.or_true, decide_eq_true_eq, decide_eq_false_iff_not,
+        reduceCtorEq, false_or, true_or, or_false, or_true, decide_true, decide_false,
+        beq_self_eq_true, Option.some.injEq] <;> rfl
+
 /-- The repaired check admits only solc-admissible locations. -/
 theorem envLocOK_sound (E : Source.Env) (τ : Source.STy) (loc : Source.DataLoc) (init : Bool)
     (h : envLocOK E τ (some loc) init = true) : AdmissibleLocation E τ loc := by
@@ -262,6 +286,8 @@ theorem plain_env_refuses :
 #guard_msgs (whitespace := lax) in #print axioms refuses_of_decls
 /-- info: 'Solidity.Lowering.V07.SourceRefusal.envLocOK_sound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms envLocOK_sound
+/-- info: 'Solidity.Lowering.V07.SourceRefusal.envLocOK_eq_patch' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms envLocOK_eq_patch
 /-- info: 'Solidity.Lowering.V07.SourceRefusal.envLocOK_conservative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms envLocOK_conservative
 /-- info: 'Solidity.Lowering.V07.SourceRefusal.envLocOK_refuses' depends on axioms: [propext, Classical.choice, Quot.sound] -/

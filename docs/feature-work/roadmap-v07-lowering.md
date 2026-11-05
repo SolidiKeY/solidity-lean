@@ -1091,8 +1091,10 @@ declaration's derivation carries `locOK` of its type.
 **Repair (VY5-owned, H16; not applied).** `envLocOK E τ l init` is
 `locOK τ l init` plus the H15 policy for an explicit location.
 `envLocOK_sound` (it implies `AdmissibleLocation`), `envLocOK_conservative`
-(equal to `locOK` wherever the location is admissible, so no
-solc-admissible program is removed) and `envLocOK_refuses`. Integration
+(equal to `locOK` wherever the location is admissible, so nothing the H15
+policy admits is removed; the policy's agreement with solc is separate) and
+`envLocOK_refuses`. `envLocOK_eq_patch` proves `envLocOK E` equal to the
+patch formula below, so `C.locOK = envLocOK C.env`. Integration
 patch for the Source owner: add to `Source/Typing.lean`
 
     def Ctx.locOK (C : Ctx) (τ : STy) (l : Option DataLoc) (init : Bool) : Bool :=
@@ -1104,19 +1106,28 @@ and use `C.locOK` in place of `locOK` in `StmtD.declVar`, `StmtD.declInit`,
 the interface's `declVar` scope), `Source/Infer.lean` (two sites) and
 `Frontend/Static/InferStmt.lean` (two sites). After it, refusal for every
 environment is `decl_inversion` (with `C.locOK`) followed by
-`envLocOK_sound`.
+`envLocOK_sound`. Tuple declarations are patched too, but no refusal
+statement covers them yet. The patch falsifies the current-Source witnesses,
+which are then to be retired or restated: `not_refuses_of_mapping_struct`,
+the forward half of `refuses_iff`, `mapping_env_not_nameable_free`,
+`GraphAdmissionAssembly.mixed_not_admitted` and
+`LocationGraphLaws.refusal_missing`. Refusal is quantified per context (every
+scope), as in the interface, and is decided by `Syn.ty` alone.
 
 `GraphAdmissionAssembly` reduces the H24 field to per-environment premises:
 `graph_of_premises` (the computed producer certificate from the structural
 inputs of `producer_success`), `EnvAdmission` (certificates at every location
 plus refusal), `env_admission_iff` (on current Source: certificates plus
 `NameableStructsMappingFree`), and `admission`/`declarationGraphProducer`
-(the `Admission` field and the additive `P8.DeclarationGraphAdmission.Producer`
-record). Existing P8 statements, premises and exclusions are unchanged.
-Controls: the mapping-free three-struct chain is admitted at all three
+(repackaging `EnvAdmission` as the `Admission` field and the additive
+`P8.DeclarationGraphAdmission.Producer` record; the reductions are
+`graph_of_premises`, `env_admission_iff` and `env_admission_of_premises`). Existing P8 statements, premises and exclusions are unchanged.
+Controls: a mapping-free chain of three structs (beside one non-struct
+declaration) is admitted at all three
 locations (`chain_admitted`); the same chain beside the mapping struct `Loop`
 has certificates at every location (`mixed_graphs`; memory selects 3
-structs, storage 4) but is not admitted, on refusal alone
+structs, storage 4, `mixed_memory_excludes_mapping`), also through the
+premise route (`mixed_memory_premises`, `mixed_memory_graph`) but is not admitted, on refusal alone
 (`mixed_not_admitted`).
 
 Still open for G18.01: an inhabited `P8a.Producer` (P8-SPEC-LAW1, so every
@@ -1135,8 +1146,11 @@ relations satisfying, at `worlds`-related states only:
 `StorageNonnull`/`MemoryNonnull` (a related reference binding is `some`) and
 `StorageFaithful`/`MemoryFaithful` (two related references are equal, by
 `HRef.id` across native reference types for memory, iff their Source paths
-or addresses are). These are relation properties, with no run, postrelation
-or desired-result premise. Source local execution is inverted at every
+or addresses are), plus the interface's `initial_nonempty` input passed
+through. These are relation properties, with no run, postrelation or
+desired-result premise; faithfulness is a sufficient condition for the
+interface's alias-reflection clause, stronger in that it covers every
+related path rather than only bound slots. Source local execution is inverted at every
 horizon (`local_success`; horizon zero times out, outside the contract; a
 local read never reverts, `local_not_revert`); the code is the published
 `storageCapture`/`memoryCapture`; alias reflection follows from faithfulness
@@ -1147,10 +1161,29 @@ fixture (`storage_faithful`, `memory_faithful`, …; memory uses the world
 relation's heap anchoring), instantiates both producers, shows they emit the
 fixture producers' exact code (`same_code`), exercises their success fields
 through actual Source execution for both pipelines and checked flags
-(`storage_success_client`, `memory_success_client`), and refutes
-faithfulness for a collapsing relation that maps two distinct paths to one
-reference (`collapse_not_faithful`). This replaces fixture-only CP72/CP73
+(`storage_success_client`, `memory_success_client`), and refutes the
+premises for a collapsing relation: two storage paths (`collapse_not_faithful`)
+or two memory addresses (`collapse_not_memory_faithful`) at one reference, and
+an absent binding (`collapse_not_nonnull`). The fixture relates a single
+reference per location, so faithfulness holds there trivially; the
+distinct-paths-distinct-references direction is not exercised positively. This replaces fixture-only CP72/CP73
 evidence by a producer V17/V16/V14 can instantiate at their own relations;
 selecting the local from admitted syntax, effectful reference paths
 (index/member), allocation, copies, delete, lifetimes and physical
 correspondence remain open.
+
+### CP75/CP76 reviews
+
+Separate read-only finder and skeptic reviews (no Lean server) found no
+false theorem. Confirmed and fixed: the patch formula lacked a proved link to
+`envLocOK` (added `envLocOK_eq_patch`); the docs did not say the patch retires
+the current-Source forward witnesses or that tuple declarations stay outside
+the refusal statement; "refuses exactly" and "no solc-admissible program"
+overstated `envLocOK_sound` and the H15 policy; the premise route
+(`GraphPremises`) had no control (added `mixed_memory_premises`); the P12
+docs omitted the passed-through `initial_nonempty` input and the
+"sufficient condition" status of faithfulness; P12 negatives covered storage
+faithfulness only (added memory-faithfulness and nonnull negatives); a fact
+was credited to the wrong theorem and two controls lacked pins. Remaining,
+recorded: the P12 fixture relates one reference per location, so the
+positive distinct-references direction is unexercised.

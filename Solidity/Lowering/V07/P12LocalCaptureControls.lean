@@ -163,4 +163,23 @@ theorem collapse_not_faithful :
 /-- info: 'Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_faithful' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms collapse_not_faithful
 
+/-- Memory: one reference at two distinct addresses violates faithfulness. -/
+theorem collapse_not_memory_faithful :
+    ¬ MemoryFaithful collapse (fun _ _ => True) bytesR := by
+  intro h
+  have := (h source.2 target.glob trivial (.bytes .memory) (.bytes .memory) bytesR rfl rfl 0 1
+    memoryRef memoryRef trivial trivial).mpr rfl
+  exact absurd this (by decide)
+
+/-- A relation admitting an absent storage binding violates `StorageNonnull`. -/
+theorem collapse_not_nonnull : ¬ StorageNonnull collapse (fun _ _ => True) bytesR := by
+  intro h
+  obtain ⟨r, hr⟩ := h source.2 target.glob trivial (.bytes .storage) rfl path none trivial
+  cases hr
+
+/-- info: 'Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_memory_faithful' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms collapse_not_memory_faithful
+/-- info: 'Solidity.Lowering.V07.P12LocalCaptureControls.collapse_not_nonnull' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms collapse_not_nonnull
+
 end Solidity.Lowering.V07.P12LocalCaptureControls

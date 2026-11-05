@@ -14,7 +14,10 @@ given two explicit relation properties:
   their Source paths (addresses) are equal. Memory compares `HRef.id` across
   native reference types, as the interface does.
 
-Both are required only at worlds related by `worlds`. They are properties
+Both are required only at worlds related by `worlds`, plus the interface's
+own `initial_nonempty` input (`inhabited`), passed through. Faithfulness is a
+sufficient condition for the interface's alias-reflection clause (it covers
+every related path, not only bound slots). They are properties
 of the relations alone (no run, no postrelation, no
 desired preservation result); the fixtures' relations satisfy them
 (`P12LocalCaptureControls`). The producers do the rest: Source local

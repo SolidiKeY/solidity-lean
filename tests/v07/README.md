@@ -13,7 +13,7 @@ the generated 1598-guard pin file `Axioms.lean`, its registry
 `check-pins.mjs` (+ test). They were never registered in a library; tracking
 `Axioms.lean` would add 1598 duplicate entries to the global axiom-pin gate,
 whose inline `#guard_msgs` pins in `Solidity/Lowering/V07/` already cover the
-headline theorems. Restore and verify with
+headline theorems. Restore and verify, from the repository root, with
 
     git checkout 9af754b1 -- tests/v07/{Axioms.lean,axiom-pins.json,proof-clients.json,check-pins.mjs,check-pins.test.mjs}
     sha256sum -c tests/v07/BULK.sha256
