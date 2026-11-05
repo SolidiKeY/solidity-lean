@@ -5450,6 +5450,98 @@
   "propext"
  ],
  "Solidity/Backend/MemoryOps/PhysicalByteJournal.lean:Solidity.Backend.MemoryOps.Physical.writeBytes_eq_putBytes": [],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.byteCode_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.materialize_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.pushed_toBytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.materialize_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterialize.lean:Solidity.Backend.MemoryOps.Physical.WordFrame.materialize_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.all_stack_classified": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.boundaries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.empty_stack_boundary": [
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.overlap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.populated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteMaterializeControls.lean:Solidity.Backend.MemoryOps.Physical.MaterializeControls.stack_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.byteCode_stackSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_checked_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_stack_1023": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStack.lean:Solidity.Backend.MemoryOps.Physical.materialize_stackSafe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean:Solidity.Backend.MemoryOps.Physical.byteCode_stackSafe_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean:Solidity.Backend.MemoryOps.Physical.materialize_checked_revert_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean:Solidity.Backend.MemoryOps.Physical.materialize_checked_suffix_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalByteStackExact.lean:Solidity.Backend.MemoryOps.Physical.materialize_stackSafe_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryOps/PhysicalByteStore.lean:Solidity.Backend.MemoryOps.Physical.mstore8_revert_checked": [
   "Quot.sound",
   "propext"
