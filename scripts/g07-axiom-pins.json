@@ -30413,6 +30413,92 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.aligned_lift": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.aligned_thin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.operand_thin": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.out_lift_frame": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.out_lift_glob": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtension.lean:Solidity.Lowering.V07.P12ContextExtension.weaken": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.composition_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.directProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.extended_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.extension_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.identity_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.mixed_initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.mixed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.mixed_success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.mixedProducer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.producer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.projection_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/P12ContextExtensionControls.lean:Solidity.Lowering.V07.P12ContextExtensionControls.success_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/UnsignedComplement.lean:Solidity.Lowering.V07.UnsignedComplement.local_transport": [
   "Classical.choice",
   "Quot.sound",
