@@ -1481,3 +1481,17 @@ unchanged, so that gate is not rerun or treated as passing. The original full
 G33/G35 queue and validation obligations remain open. The repaired snapshot
 interface/proof commits are `1d1a2e56` / `d54911c0`; old committed heads and
 sealed evidence remain available for audit.
+
+## Checked nested-memory parent entry
+
+`NestedMemoryParentInterface` extends the existing word-target code family:
+load the actual represented source header, check the parent reservation, run
+the existing checked child loop and adopt the typed parent through the existing
+allocator API. Count/rows/demand derive from the actual heap. Its public
+contract has no caller-supplied count, row, selection or capacity premise.
+Success represents the complete existing source-snapshot copy, preserving old
+heap contents, source snapshot, cells and gaps, with a fresh parent rooted at
+the old free pointer. Natural total-size refusal remains explicit. The scope
+is this intrinsic nested dynamic primitive-array type; Source authority/entry,
+Panic 0x41 correspondence, general recursive compiler selection and gas/physical
+adequacy remain separate existing obligations. No existing proof is refactored.

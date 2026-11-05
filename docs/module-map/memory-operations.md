@@ -530,3 +530,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/MemoryParentSnapshotInterface.lean` | Complete parent snapshot signature from actual heap-derived primitive child rows. |
 | `Backend/MemoryCopies/MemoryParentSnapshot.lean` | Complete parent snapshot and copied-heap agreement from actual heap-derived child rows. |
 | `Backend/MemoryCopies/MemoryParentSnapshotControls.lean` | Mixed, empty and aliased snapshot contents, exact word growth and rejected incorrect snapshots. |
+| `Backend/MemoryCopies/NestedMemoryParentInterface.lean` | Actual source-header load, checked nested-memory parent copy and complete allocator/snapshot contract. |
