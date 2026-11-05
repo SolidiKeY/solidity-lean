@@ -119,3 +119,14 @@ Full-library cache/admission is checked separately at the saved handoff HEAD;
 publication alone establishes neither this VM's cache freshness nor full readiness.
 H41 partial owned packet remains preserved at the earlier handoff with its verified
 SHA; no new delivery receipt and no on-VM ship-cache. No goal/VM reset, push or PR.
+
+## Subsequent 1608Z prerequisite adoption
+
+Published3ad22f66d8fc6431378c22e71823436c79dede7f was adopted by merge
+2600ba7046d53a41c24046991ec04c59673a3074 from74d7e69c888f28f9f31c9128a964c8dbcd61d79d.
+RawAddress source/controls, audit and direct dependencies are unchanged; no new
+packet implementation was needed. Separate read-only finder/skeptic confirm
+preservation and no new H38/X01/X02 producer interface. Runtime/KeySort/all37
+inventories passed3.844s. Saved-head checkpoint/cache results are retained in
+evidence/publication-3ad22f66; upstream full-gate reports are separate coordinator
+evidence. Original partial cache packet and previous seals remain preserved.

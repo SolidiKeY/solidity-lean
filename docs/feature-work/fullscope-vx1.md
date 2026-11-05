@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: published `b86ae4568cef6d6226f4d170360bbb089debe3fb`, adopted by preservation merge `35ea02206c0880f0be535854c39f64d11b628a45`; previous publications and original assigned base retained. H38 producer review remains pending; no full readiness/cache freshness inferred.
+Current integrated prerequisite: published `3ad22f66d8fc6431378c22e71823436c79dede7f`, adopted by preservation merge `2600ba7046d53a41c24046991ec04c59673a3074`; includes 8bf83218 and earlier publications. Original assigned base remains unchanged. H38 producer review/full freeze remains pending; no full readiness/cache freshness inferred.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -720,3 +720,39 @@ leave verified partial owned cache packet for coordinator pull, delivery pending
 never on-VM ship-cache. Upstream gate/cache notices do not establish local full
 readiness/freshness. Prior packs and checksums retained. Manual blocked-goal
 transition rejected for missing trusted CCA context; no goal create/reset/complete.
+
+## Checkpoint 08: current published prerequisites and rebalance accounting
+
+The original branch has adopted published 8bf8321873befa3f35ca31e97e5339a1baee93e6
+and now 3ad22f66d8fc6431378c22e71823436c79dede7f, preserving the original assigned
+base and all prior owned commits. Latest merge 2600ba7046d53a41c24046991ec04c59673a3074
+has owned parent74d7e69c888f28f9f31c9128a964c8dbcd61d79d. Exact disjoint union;
+all15 owned files, Source/Scoped and direct proof dependencies unchanged.
+
+The separately authorized G35-ADDR-RAW-1105 rebalance is source/kernel checked,
+reviewed and published byte-identically in 8bf83218; its root/map registration
+is verified. Its standalone37-theorem audit is separate from guarded G07 pins
+(no RawAddress guarded entries). See calldata-packets-1105-RawAddress.md and its
+sealed handoffs. This does not complete X01 or X02.
+
+The latest18 increments add bounded length-check, call-scope, memory-cost growth,
+shift and other supporting results. No Source/EVM H38 owner review/approval,
+RunIndexed adapter, environment-field integration or catalog-generator change
+arrived. X01 full D1-D6/public freeze and all30 exclusion rescope remain open;
+X02 source/admission/lowering/compiler and production controls remain blocked.
+Completed census/schema backfill and RawAddress do not substitute for those goals.
+
+Actual adoption-head runtime/KeySort and unchanged37-theorem RawAddress inventory
+passed in3.844s (Lean4.24.0/Lake5.0.0-src+797c613). Separate read-only finder and
+skeptic verified preservation and retained boundaries; neither used Lean/server.
+No new implementation or cold foundation build was undertaken. Existing G07
+failures and historical missing evidence are not waived or reconstructed.
+
+Coordinator reports full/core/Bridge/TestSuite/corpus/automatic/axiom/review PASS
+under host receipt sched-20261105T1608Z; that receipt was not read on this VM.
+Integration leaf prospective review language is not itself a completion receipt.
+Current own-branch full-library/cache admission is a separate gate; no freshness
+or readiness is inferred from publication. H41 prior partial packs and all seals
+remain preserved with their original checksums; no ship-cache on VM or new delivery
+claim. No goal/VM creation/reset, push or PR. Exact saved-head gate results are in
+tests/calldata-packets-1105/RawAddress/evidence/publication-3ad22f66 and its handoff.
