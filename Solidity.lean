@@ -970,6 +970,8 @@ import Solidity.Backend.StructuredFlow.CoreSequence
 import Solidity.Backend.StructuredFlow.CoreSequenceControls
 import Solidity.Backend.StructuredFlow.ExitControls
 import Solidity.Backend.StructuredFlow.ExitSelector
+import Solidity.Backend.StructuredFlow.MappedBranch
+import Solidity.Backend.StructuredFlow.MappedBranchControls
 import Solidity.Backend.StructuredFlow.MappedCondition
 import Solidity.Backend.StructuredFlow.MappedConditionControls
 import Solidity.Backend.Transient.CallbackObservation
