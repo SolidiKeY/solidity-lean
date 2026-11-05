@@ -50,4 +50,6 @@ theorem signextend_source (w : Fin 32) (valid : Valid (Backend.Scalar.widthBits 
     split <;> split <;> omega
   rw [same]
 
+#print axioms target_success
+#print axioms signextend_source
 end Solidity.Backend.PrimitivePackets.SignedCast
