@@ -1375,3 +1375,10 @@ Independent read-only finder and skeptic reviews found no semantic issues.
 Both confirmed unchanged representation/resource premises, coverage of every
 compiler-correctness outcome and nonvacuous divergence/negative controls. Final
 guarded diagnostics report zero errors; exact gate outcomes are in the handoff.
+
+`CoreDispatchInterface.lean` specifies finite first-match dispatch over existing
+intrinsic bodies with actual core-classifier witnesses. Neither selected target
+artifacts nor body executions/results are metadata premises. Whole and target
+selection use the public compiler; execution retains the existing represented
+input and per-row allocation bounds. Source table/body authenticity, short
+special routing and native frame construction remain separate obligations.
