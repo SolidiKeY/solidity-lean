@@ -41,4 +41,26 @@ theorem nestedFixedFloor_find {E U : Ty} {m n : Nat} (outer inner : List Int)
   | none => rfl
   | some row => exact fixedFloorValue_find inner row hm j q
 
+/-- Retained index pairs suffice to reconstruct an entire bounded rectangle.
+The predicate observes optional reads, without imposing definedness or changing it. -/
+theorem nestedFixedFloor_block {E U : Ty} {m n : Nat} (outer inner : List Int)
+    (v : SVec (.ref (.fixed E m)) n) (hn : (n : Int) ∈ outer)
+    (hm : (m : Int) ∈ inner) (q : Path E U) (P : Option (SVal U) → Prop)
+    (points : ∀ i j : PrimTy.uint.Denote,
+      (i.1.toNat = 0 ∨ (i.1.toNat : Int) ∈ outer) →
+      (j.1.toNat = 0 ∨ (j.1.toNat : Int) ∈ inner) →
+      i.1.toNat < n → j.1.toNat < m →
+      P ((SVal.fixed v).findM (.atF i (.atF j q)))) :
+    ∀ i j : PrimTy.uint.Denote, i.1.toNat < n → j.1.toNat < m →
+      P ((nestedFixedFloor outer inner v).findM (.atF i (.atF j q))) := by
+  intro i j hi hj
+  rw [nestedFixedFloor_find outer inner v hn hm]
+  apply points
+  · simpa only [fixedFloorIndex_toNat] using mxFloorIndex_point outer i.1.toNat
+  · simpa only [fixedFloorIndex_toNat] using mxFloorIndex_point inner j.1.toNat
+  · rw [fixedFloorIndex_toNat]
+    exact (mxFloorIndex_bounds outer hn).2 hi
+  · rw [fixedFloorIndex_toNat]
+    exact (mxFloorIndex_bounds inner hm).2 hj
+
 end Solidity.Decide
