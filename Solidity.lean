@@ -1762,6 +1762,7 @@ import Solidity.Frontend.SolcJson.CallMetadataPathControls
 import Solidity.Frontend.SolcJson.CallMetadataSound
 import Solidity.Frontend.SolcJson.Contract
 import Solidity.Frontend.SolcJson.Getters
+import Solidity.Frontend.SolcJson.IrImport
 import Solidity.Frontend.SolcJson.TryPanicCallMetadata
 import Solidity.Frontend.SolcJson.TryPanicSourceCaller
 import Solidity.Frontend.SolcJson.TryPanicSourceData

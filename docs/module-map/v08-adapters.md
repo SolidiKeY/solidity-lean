@@ -485,6 +485,7 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Calculus/DecisionGivenHeapReason.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawAddress/Controls.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/CalldataPackets/RawAddress/Execution.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/IrImport.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
