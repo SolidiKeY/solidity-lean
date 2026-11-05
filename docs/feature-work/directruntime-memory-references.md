@@ -478,3 +478,27 @@ All six cache identities match the b86 pickup pack,and a fresh archive SHA256
 check passes. No replacement pack is required; delivery remains coordinator-
 pending until receipt. No full-tree cache freshness,ordinary runtime verdict
 or RUNTIME_GATE_PASS is claimed.
+
+
+## Requested rebase onto e6849d3b
+
+Rebased the assigned branch onto `e6849d3bdf516099d20c33d3581d523449764018`
+before the next commit,as requested. All13 lane commits replayed without
+conflicts. Pre-rebase head `9b0c48430787af55fe1ba54a1a3633a8ea3fb75e`
+remains reachable at `refs/backup/memory-references-pre-e684`; immediate
+rebased head is `4343d04e4938fb4e5b2f37ba50467489b4ba38dd`. All owned
+source,tests and handoff bytes were identical across that rebase. Historical
+receipts and cache HEADs remain historical facts; their commits stay reachable
+through the recovery ref. No goal was created or reset and nothing was pushed.
+
+Fresh bounded serial VM build,both-reader controls,54 standard-only theorem
+reports and KeySort377/131 pass on the rebased tree. Registration and650-module
+layer checks pass. Same84 AST fixtures/42 source variants are checked per reader.
+All six cache identities and a fresh archive hash match the existing b86 pickup
+pack;no new pack is needed and delivery remains coordinator-pending. Evidence
+including rebase preservation and range-diff is in `evidence/published-e684`.
+
+The publication changes no DirectRuntime/executable-AST interface. Ordinary
+consumer integration,fresh native/browser positive diamond Identity and all
+modality controls,and the full merged VM gate remain open. No ordinary proof
+closure,full-tree cache freshness or RUNTIME_GATE_PASS is claimed.
