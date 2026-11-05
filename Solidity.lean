@@ -3619,6 +3619,8 @@ import Solidity.Yul.World.SelfDestructControls
 import Solidity.Yul.World.TargetCallControls
 import Solidity.Yul.World.TargetCallMemory
 import Solidity.Yul.World.TargetCallRules
+import Solidity.Yul.World.TerminalBuiltin
+import Solidity.Yul.World.TerminalBuiltinControls
 import Solidity.Yul.World.TransientTargetControls
 import Solidity.Yul.World.TransientTargetPort
 import Solidity.Yul.World.TransientTargetRollback
