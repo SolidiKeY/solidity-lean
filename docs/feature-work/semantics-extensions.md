@@ -139,6 +139,34 @@ outside a self-call frame is less than solc's (recorded in
 `solc-alignment.md`, "Revert data read in formulas"), and logs are not
 modelled (X07).
 
+**Gates.**  Lean server diagnostics clean on every touched file; axiom
+guards (`#guard_msgs in #print axioms`) on each main theorem, all within
+`propext`, `Classical.choice`, `Quot.sound`; no `sorry`, axiom or
+`maxHeartbeats`.  `./run-lean.sh`: `node scripts/check-layers.mjs` (0 core
+modules reach the elaborator), `register.sh --check`, and `lake build`
+of the default targets and `SolkeyTestSuite` ("Build completed
+successfully (3845 jobs)") pass.  Its last step, `scripts/check-solkey.sh`,
+reports 57 sort/read drifts against the sibling `../solkey` checkout, which
+is at `69e251f`, not the pin `473da8944c` (`docs/solkey-migration.md`; the
+pinned commit is not in this container); this branch changes nothing that
+check reads (`SortCheck/**`, `Calculus/Rules.lean`, `Calculus/KeyTaclets.lean`).
+One earlier full run was stopped by the session's 2-hour limit and one
+OOM-killed `Examples/Tactics/OpenLoops.lean` (code 137) beside the Lean
+server; the resumed run built it.  Checking time: the `PrintStmt` printer
+case rebuilds the printer layer and examples once; it adds no measurable
+cost to any file.
+
+**Second review (S6.2 and fixes).**  Fixed: `↯` on a non-modal formula is
+now refused; the false notation example; byte literals ≥ 256 in the
+printer; `revModal_not_panic` with negative controls (top-level `assert`,
+`↯ none` stronger than the box, `↯ _` weaker than the diamond, read-back);
+adversary controls for a two-transaction read and an event-only difference;
+docs narrowed: the `semantic-gaps.md` row is partly closed, the model's
+reduced revert data is a `solc-alignment.md` row, `ctx_succeeds` is about
+the unguarded bytes, D6's stub is restricted and not compositional,
+`Faithful` is a check on instances, the ABI link is not a theorem, VY3
+block equivalences remain open.
+
 **Interfaces requested.**
 - X01 (`Roadmap/Contracts.lean`): restate `PublicCorrectness.transfer` as
   `transfer'` (old name a corollary); add `hashed_consistent` to `EvmSpec`
