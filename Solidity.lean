@@ -451,6 +451,8 @@ import Solidity.Backend.MemoryCopies.TraversalFootprintControls
 import Solidity.Backend.MemoryCopies.TraversalFootprintInterface
 import Solidity.Backend.MemoryCopies.TraversalFresh
 import Solidity.Backend.MemoryCopies.TraversalInterface
+import Solidity.Backend.MemoryCopies.TraversalWords
+import Solidity.Backend.MemoryCopies.TraversalWordsControls
 import Solidity.Backend.MemoryCopies.TraversalWordsInterface
 import Solidity.Backend.MemoryCopies.TypedCapture
 import Solidity.Backend.MemoryCopies.TypedCaptureControls

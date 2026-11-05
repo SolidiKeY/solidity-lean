@@ -339,3 +339,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedFixedStoragePath.lean` | Actual storage-path checked execution, complete prior Source success transport and distinct path/capacity refusal laws. |
 | `Backend/MemoryCopies/CheckedFixedStoragePathControls.lean` | Nested fixed-child storage paths, empty/pair/long fresh bindings, old aliases and represented saturation/path-refusal witnesses. |
 | `Backend/MemoryCopies/TraversalWordsInterface.lean` | Unconditional intrinsic copy cell-sum growth and old-object reservation obligations. |
+| `Backend/MemoryCopies/TraversalWords.lean` | Actual object reservation sum, exact generic copy growth and preservation of old cell counts. |
+| `Backend/MemoryCopies/TraversalWordsControls.lean` | Nested/repeated/shadow/empty/long demand witnesses distinguishing words from identities and root size. |
