@@ -696,3 +696,12 @@ peak aggregate RSS and no new source warnings. All twenty-six printed theorem
 axiom reports use only `propext`, `Classical.choice` and `Quot.sound` or subsets.
 Earlier full-build timeout and the published calculus-plan doc-path failure
 remain open; this result does not turn either failed gate into a pass.
+
+
+The RelationalGuard pair now guards all fifteen existing axiom reports with
+exact expected messages. Every report retains only propext, Classical.choice
+and Quot.sound. The theorem statements, proof terms and existing controls are
+unchanged. A deliberately incorrect empty expected inventory is rejected;
+both guarded modules pass. Independent read-only finder and skeptic reviews
+found no confirmed defect. This inventory follow-up changes no correspondence
+claim or failure boundary.
