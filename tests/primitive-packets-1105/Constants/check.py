@@ -1,0 +1,62 @@
+#!/usr/bin/env python3
+"""Exact Constants scope, source, diagnostics, kernel and control acceptance."""
+import copy,hashlib,json,pathlib,re,subprocess
+ROOT=pathlib.Path(__file__).resolve().parents[3]
+F=pathlib.Path(__file__).resolve().parent
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+M=json.loads((F/'manifest.json').read_text())
+def validate_inventory(rows):
+ assert len(rows)==46 and len({r['name'] for r in rows})==46,'kernel cardinality'
+ names={r['name']:r for r in rows}
+ for d in M['declarations']: assert d['name'] in names and names[d['name']]['module']==d['module'],'authored declaration absent'
+ for family in M['coverage'].values():
+  if isinstance(family,list):
+   for name in family: assert 'Solidity.Backend.PrimitivePackets.Constants.'+name in names,'control absent'
+ for r in rows:
+  assert r['signature'] and r['kind'] not in ('axiom','opaque'),'invalid kernel declaration'
+  assert not r['isUnsafe'] and not r['isPartial'],'unsafe or partial'
+  assert set(r['axioms']) <= {'propext','Classical.choice','Quot.sound'},'unapproved axiom'
+def main():
+ subprocess.run(['git','merge-base','--is-ancestor',M['published_base'],'HEAD'],cwd=ROOT,check=True)
+ for group in ('modules','inputs'):
+  for p,h in M[group].items():assert sha(ROOT/p)==h,'source pin '+p
+ assert sha(F/'kernel-inventory.json')==M['kernel_inventory_sha256']
+ expected=json.loads((F/'kernel-inventory.json').read_text());actual=json.loads((F/'evidence/kernel-inventory.actual.json').read_text())
+ assert sorted(actual,key=lambda x:x['name'])==expected,'fresh kernel inventory drift'
+ validate_inventory(actual)
+ # Both the frozen signatures and the generated namespace-outside sword.eq_1
+ # belong to their actual defining modules, rather than a name-prefix filter.
+ printed={}
+ for label in ['source-diagnostics','selected-diagnostics','target-diagnostics','agreement-diagnostics','controls-final-diagnostics','axioms-diagnostics']:
+  row=json.loads((F/'evidence'/ (label+'.json')).read_text());diag=json.loads((F/'evidence'/ (label+'.log')).read_text())
+  assert row['exit']==0 and not row['resource_stop']
+  assert diag['success'] and not diag['partial'] and not diag['timed_out'] and not diag['failed_dependencies']
+  assert not [x for x in diag['items'] if x['severity'] in ('error','warning')],label
+  for item in diag['items']:
+   match=re.fullmatch(r"'([^']+)' depends on axioms: \[(.*?)\]",item['message'],re.S)
+   if match: printed[match[1]]=set(x.strip() for x in match[2].split(',') if x.strip())
+   match=re.fullmatch(r"'([^']+)' does not depend on any axioms",item['message'])
+   if match: printed[match[1]]=set()
+ assert printed=={r['name']:set(r['axioms']) for r in actual},'actual axiom prints differ'
+ for label,module in [('source-build-corrected','Source'),('selected-build','Selected'),('target-build','Target'),('agreement-build','Agreement'),('controls-build','Controls')]:
+  row=json.loads((F/'evidence'/ (label+'.json')).read_text());p='Solidity/Backend/PrimitivePackets/Constants/'+module+'.lean'
+  assert row['exit']==0 and not row['resource_stop'] and row['proof_sources'][p]==M['modules'][p]
+  assert row['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1)
+  assert row['minimum_parent_headroom_bytes']>=4*1024**3
+ final=json.loads((F/'evidence/controls-build.json').read_text());assert final['proof_sources']==M['modules']
+ # Distinct mutation controls verify that inventory omissions and forged trust
+ # are rejected. They do not replace the Lean refusal/control proofs.
+ for kind in ['missing','axiom','unsafe']:
+  bad=copy.deepcopy(actual)
+  if kind=='missing':bad.pop()
+  elif kind=='axiom':bad[0]['axioms'].append('sorryAx')
+  else:bad[0]['isUnsafe']=True
+  try:validate_inventory(bad)
+  except AssertionError:pass
+  else:raise AssertionError('mutation accepted '+kind)
+ changed=subprocess.check_output(['git','diff','--name-only',M['owned_start'],'--'],cwd=ROOT,text=True).splitlines()
+ for p in changed:assert p.startswith(('Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or p=='docs/feature-work/primitive-packets-1105-Constants.md','foreign write '+p
+ for p in M['modules']:
+  text=(ROOT/p).read_text();assert not re.search(r'\b(sorry|admit|axiom|unsafe|native_decide|maxHeartbeats)\b',text),'forbidden proof token'
+ print('PASS: five modules, 34 authored and46 kernel declarations, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and three mutation controls')
+if __name__=='__main__':main()
