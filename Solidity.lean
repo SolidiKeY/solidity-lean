@@ -1721,6 +1721,8 @@ import Solidity.Frontend.Static.WellFormedCheck
 import Solidity.Frontend.Testing
 import Solidity.Frontend.TypeGrammarH28.Counterexamples
 import Solidity.Frontend.TypeGrammarH28.Layouts
+import Solidity.Frontend.TypeGrammarH28.ParserBasics
+import Solidity.Frontend.TypeGrammarH28.ParserChecks
 import Solidity.Frontend.WorldImport
 import Solidity.Frontend.Yul.Checks.ClosedSyntax
 import Solidity.Frontend.Yul.Checks.DeclarationParsing
