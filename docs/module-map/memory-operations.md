@@ -535,3 +535,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedMemoryParentDemand.lean` | Exact natural parent/child demand equals existing source snapshot word growth. |
 | `Backend/MemoryCopies/NestedMemoryParentControls.lean` | Inhabited alias, copied-word, empty/long, explicit refusal and negative parent-entry controls. |
 | `Backend/MemoryCopies/NestedMemoryParentMixedControls.lean` | Actual mixed 2/0/64 producer composed with compiled parent entry and complete copy certificate. |
+| `Backend/MemoryCopies/NestedLocationPipelineInterface.lean` | Actual nested storage-to-memory-to-memory execution, allocator and phase-refusal obligations; word-machine scope. |
