@@ -23,7 +23,7 @@
   "runtimeGuards": 7,
   "dependency": {
     "file": "Solidity/Frontend/SolcJson/Body.lean",
-    "sha256": "5cec4f4e367d697899fca3f9adcb989cf92c744e50d0a7be2904f3a6f3389a76"
+    "sha256": "c4a0d8b40edb961c048db203ae4ffc16ce8b8187cdf167988a9289783ac8a884"
   },
   "assemblyObligationsClosed": []
 }
