@@ -28848,6 +28848,112 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.allowed_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.fits_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.not_allowed_client": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.pass_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.refused_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.source_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstantControls.lean:Solidity.Lowering.V07.IntegerConstantControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.allowed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.code_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.fits": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.not_allowed": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.source_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/IntegerConstants.lean:Solidity.Lowering.V07.IntegerConstants.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Lowering/V07/UnsignedComplement.lean:Solidity.Lowering.V07.UnsignedComplement.local_transport": [
   "Classical.choice",
   "Quot.sound",
