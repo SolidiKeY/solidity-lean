@@ -791,3 +791,14 @@ source changed, no new implementation or cold prerequisite rebuild was performed
 Saved-head checkpoint and G07 outcomes are separately retained under
  tests/calldata-packets-1105/RawAddress/evidence/rebase-e6849d3b.
 H41 packs/seals remain unchanged; no VM/goal replacement/reset, push or PR.
+
+Saved checkpoint at29588eb314e0ebc16c5c895139543ead1ff50a73 failed43.355s:
+full-library cache admission failed; trust/orphans/layers/roots/doc-paths passed.
+Pin inventory reports8599 theorems, zero axiom-set errors and479 unrecorded changes.
+Read-only published-base equivalence confirms all479 are inherited frome6849d3b,
+not this lane:58 V08,7 V16,414 test pins. No shared pin file was edited.
+G07 rerun failed30.196s:4812 modules,89 Source modules,24 violations. Four new
+reported paths are Source.Agreement.{Locals,NormalStatement,Primitive,PrimitiveTypes}
+to Semantics.Run;20 earlier violations remain. Resolution belongs to the Source/
+G07 owners under existing policy, not an automatic whitelist expansion. Exact
+logs and pin-origin.json are preserved. These findings do not change any proof.
