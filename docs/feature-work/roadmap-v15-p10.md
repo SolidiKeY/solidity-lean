@@ -1793,3 +1793,11 @@ Independent read-only finder/skeptic reviews confirmed the seven laws, distinct 
 ### Bounded validation lifecycle
 
 The validation monitor now handles an executable-link disappearance after a process was already bound. It accepts terminal retirement only through the existing bounded pidfd check, unchanged snapshot arguments and matching birth/command/terminal identity. Unknown, live, reused and permission-error observations still refuse execution. Independent finder/skeptic reviews and lifecycle controls cover the change; real-pidfd probes simulate the metadata error rather than claiming to reproduce the original kernel race. The original failed build receipt remains failed evidence, and runtime tests do not establish proof or lane completion.
+
+### Thread-group terminal-readiness regression
+
+A controlled native lifecycle regression exits a process leader while its worker remains alive. Actual process observations show `Zl`, zero RSS and two tasks. The unchanged terminal verifier refuses the group after its fifty-millisecond poll; after worker release and real group exit, pidfd readiness permits retirement. Explicit startup, observation and cleanup deadlines bound the test. Independent finder/skeptic reviews confirmed this behavior after the initial deadline finding was fixed.
+
+This reproduces the lifecycle class and preserves the fail-closed guard. The surviving thread and exact cause in the earlier Lean failure remain unobserved, and no supported safe runtime repair has been established. The failed four-target gate remains failed; its wait budget, toolchain and allocator configuration remain unchanged.
+
+The remaining world bridge requires concrete producer evidence. `Solidity/Backend/WorldCalls/Premises.lean` leaves `Returndata` unconstrained and allows an empty `Step`; the legacy CALL in `Solidity/Evm/Machine.lean` models payment acceptance without recipient execution. These declarations supply neither actual account execution nor transaction correspondence. Native/source representation, approved coverage and inhabited call/returndata transport remain explicit dependencies.
