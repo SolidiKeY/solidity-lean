@@ -455,6 +455,10 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Frontend/ExpressionUniqueness/Refusals.lean` | Bounded expression-uniqueness checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/RuntimeGuard.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/RuntimeGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/GraphControls.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Identity.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/OrderObstruction.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/C3Exactness/Renaming.lean` | Bounded c3-exactness checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 

@@ -1548,7 +1548,11 @@ import Solidity.Frontend.Admission.TypedObservationPolicy
 import Solidity.Frontend.Admission.TypedStatementPolicy
 import Solidity.Frontend.C3Exactness.Admission
 import Solidity.Frontend.C3Exactness.Controls
+import Solidity.Frontend.C3Exactness.GraphControls
+import Solidity.Frontend.C3Exactness.Identity
 import Solidity.Frontend.C3Exactness.Linearization
+import Solidity.Frontend.C3Exactness.OrderObstruction
+import Solidity.Frontend.C3Exactness.Renaming
 import Solidity.Frontend.C3Exactness.Trace
 import Solidity.Frontend.Checked.Certificate
 import Solidity.Frontend.Checked.Check
