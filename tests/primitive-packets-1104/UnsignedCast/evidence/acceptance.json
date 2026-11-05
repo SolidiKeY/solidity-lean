@@ -22,8 +22,8 @@
   },
   "gates": [
     {
-      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/Solidity_Backend_PrimitivePackets_UnsignedCast_Controls-build-1793781826058299399.log",
-      "log_sha256": "193fc2ce7b997fa9f906f03ed98968c6aeb695ffc70f4f6dbf9f91dc33337254",
+      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/Solidity_Backend_PrimitivePackets_UnsignedCast_Controls-build-1793894381536015694.log",
+      "log_sha256": "bca2c03d190c78819b9b951bfd6616a2408bf8bc0ed5a76b298916ed0bca5b0b",
       "mode": "build",
       "target": "Solidity.Backend.PrimitivePackets.UnsignedCast.Controls",
       "command": [
@@ -32,7 +32,7 @@
         "run",
         "--rm",
         "--name",
-        "ucast-100917",
+        "ucast-38579",
         "--memory=12g",
         "--memory-swap=12g",
         "--network=none",
@@ -66,13 +66,13 @@
         "tests/primitive-packets-1104/UnsignedCast/Audit.lean": "b9aa9df33569177028e23fbafd4a72306f7efb7224289902dcc29f544a1d6c6d"
       },
       "process_started": true,
-      "seconds": 1.0019506680037011,
+      "seconds": 3.002947442000732,
       "error": null,
-      "minimum_available_bytes": 5623459840
+      "minimum_available_bytes": 12763779072
     },
     {
-      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Matrix_lean-check-1793781827088901117.log",
-      "log_sha256": "8d09399fa7f87f7a860aef9b3da9847caa63d83aeee801cb41eaa78e619f9ae9",
+      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Matrix_lean-check-1793894384570603799.log",
+      "log_sha256": "4d52e715e343445eeea734d25b33765b5bf06556f6f5d3e47e20056e2c28250e",
       "mode": "check",
       "target": "tests/primitive-packets-1104/UnsignedCast/Matrix.lean",
       "command": [
@@ -81,7 +81,7 @@
         "run",
         "--rm",
         "--name",
-        "ucast-100995",
+        "ucast-38658",
         "--memory=12g",
         "--memory-swap=12g",
         "--network=none",
@@ -116,13 +116,13 @@
         "tests/primitive-packets-1104/UnsignedCast/Audit.lean": "b9aa9df33569177028e23fbafd4a72306f7efb7224289902dcc29f544a1d6c6d"
       },
       "process_started": true,
-      "seconds": 2.002309867006261,
+      "seconds": 3.0031440169987036,
       "error": null,
-      "minimum_available_bytes": 5377294336
+      "minimum_available_bytes": 13015977984
     },
     {
-      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Audit_lean-check-1793781829120574613.log",
-      "log_sha256": "598d112123f45f2b36942900add9250d075b6400aab43108765a29d6227b99fd",
+      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/tests_primitive-packets-1104_UnsignedCast_Audit_lean-check-1793894387603971353.log",
+      "log_sha256": "5a28bd588a9c8111dfea5094c3ed032d5ec5926e502be6ae6ff69db63d2b0259",
       "mode": "check",
       "target": "tests/primitive-packets-1104/UnsignedCast/Audit.lean",
       "command": [
@@ -131,7 +131,7 @@
         "run",
         "--rm",
         "--name",
-        "ucast-101072",
+        "ucast-38735",
         "--memory=12g",
         "--memory-swap=12g",
         "--network=none",
@@ -166,13 +166,13 @@
         "tests/primitive-packets-1104/UnsignedCast/Audit.lean": "b9aa9df33569177028e23fbafd4a72306f7efb7224289902dcc29f544a1d6c6d"
       },
       "process_started": true,
-      "seconds": 8.004874543999904,
+      "seconds": 8.005699062996428,
       "error": null,
-      "minimum_available_bytes": 5263192064
+      "minimum_available_bytes": 13005025280
     },
     {
-      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/versions-tools-1793781837155920505.log",
-      "log_sha256": "83cf0305fbeb8bb7d5bc592fad2d246753cf75c23eaeb7306fc3061bcd3cd76b",
+      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/versions-tools-1793894395640954106.log",
+      "log_sha256": "c552595b4905781c75d6a9317d4a41a8958a5f4a56ab387fe9d87c49496d21fc",
       "mode": "tools",
       "target": "versions",
       "command": [
@@ -181,7 +181,7 @@
         "run",
         "--rm",
         "--name",
-        "ucast-101149",
+        "ucast-38824",
         "--memory=12g",
         "--memory-swap=12g",
         "--network=none",
@@ -213,13 +213,13 @@
         "tests/primitive-packets-1104/UnsignedCast/Audit.lean": "b9aa9df33569177028e23fbafd4a72306f7efb7224289902dcc29f544a1d6c6d"
       },
       "process_started": true,
-      "seconds": 2.0021210920021986,
+      "seconds": 1.0023982240018086,
       "error": null,
-      "minimum_available_bytes": 5392556032
+      "minimum_available_bytes": 13358931968
     },
     {
-      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/keysort-keysort-1793781839186240036.log",
-      "log_sha256": "0c3b41d7f5d3b5cedc52741dd9fa1cbd4c571b3584b4ec81f54b061fbb7d3374",
+      "log": "tests/primitive-packets-1104/UnsignedCast/evidence/keysort-keysort-1793894396670806772.log",
+      "log_sha256": "2bec200ac58484e8ab55b88c8778f08800e00f178ecb4ceddd46a416e5748c91",
       "mode": "keysort",
       "target": "keysort",
       "command": [
@@ -228,7 +228,7 @@
         "run",
         "--rm",
         "--name",
-        "ucast-101228",
+        "ucast-38903",
         "--memory=12g",
         "--memory-swap=12g",
         "--network=none",
@@ -260,9 +260,9 @@
         "tests/primitive-packets-1104/UnsignedCast/Audit.lean": "b9aa9df33569177028e23fbafd4a72306f7efb7224289902dcc29f544a1d6c6d"
       },
       "process_started": true,
-      "seconds": 2.002356320997933,
+      "seconds": 1.0015581699990435,
       "error": null,
-      "minimum_available_bytes": 5344890880
+      "minimum_available_bytes": 13359390720
     }
   ],
   "boundary": "Actual Source and selected symbolic Instr semantics; no physical bytecode/external EVM equivalence claim."
