@@ -1071,3 +1071,32 @@ Independent read-only design reviews found no semantic blocker. Skeptic
 required exact stack restoration, real child-slot representation and no claim
 that an ownership gap is an adopted parent; those are explicit in the contract.
 Proofs and inhabited empty/nonempty/long/last-index/refusal controls are pending.
+
+## Nested storage child turn: implementation and controls
+
+Interface commit: `b63f26cc01ba90f41c2eee7800e865a23f4f2c8c`.
+`nested_storage_turn_success` now proves the fixed code's actual child copy
+and pointer write with complete grown allocator, old-object keeps, child root
+at the input cursor, exact dynamic length, base extension, parent ownership
+gap and framing outside the selected parent slot. `nested_storage_turn_correct`
+and `nestedStorageTurn` provide success-or-target-revert without an input
+capacity premise. The source child is read from its represented computed slot;
+its arbitrary primitive payload is copied rather than replaced with defaults.
+
+Controls reserve a two-slot parent at 40 over the existing represented heap
+(cursor 43), then copy children with lengths 0, 2 and 64. They observe fresh
+pointer 43, nonzero child words, exact final cursor, untouched parent header,
+old payload and caller stack/storage, including the last index advancing to 2.
+Negative controls reject wrong child-slot representation, a stale parent
+pointer and erased nonzero payload. Complete saturated allocators demonstrate
+actual target refusal, including empty children. Strict child freshness holds
+against every old heap reference.
+
+Independent read-only finder and skeptic implementation reviews passed with
+no semantic findings. The one failed direct heap-length reduction was repaired
+with an explicit map-length simplification after MCP goal/tactic inspection;
+no proof budget or public premise changed. Diagnostics, checkpoint gates,
+scoped axiom audit and sealed handoff are required before checkpoint acceptance.
+Outer traversal induction, typed parent adoption, generic recursive compiler
+closure and Source/physical adequacy remain open. This adds no producer
+premise and discharges none of the VY5/V11/V10/P1 producer obligations.

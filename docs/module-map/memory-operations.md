@@ -359,3 +359,5 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/EmptyReferenceMemory.lean` | Actual empty snapshots and ownership-derived source bounds yield fresh runtime/checked copies with complete framing. |
 | `Backend/MemoryCopies/EmptyReferenceMemoryControls.lean` | Represented adjacent-source copying, strict freshness, old caller aliases, unused children and saturated refusal controls. |
 | `Backend/MemoryCopies/NestedStorageTurnInterface.lean` | Concrete checked storage-child turn and reserved-parent ownership contract; outer traversal/adoption remain open. |
+| `Backend/MemoryCopies/NestedStorageTurn.lean` | Actual checked dynamic primitive storage-child copying composes with reserved-parent pointer writes and complete allocator framing. |
+| `Backend/MemoryCopies/NestedStorageTurnControls.lean` | Represented parent reservations, child lengths 0/2/64, last index, fresh roots, wrong slot/pointer/payload and saturated refusal controls. |
