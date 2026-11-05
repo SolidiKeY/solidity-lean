@@ -1,4 +1,4 @@
-import Solidity.Backend.MemoryOps.SourceUintFixedRefsTarget
+import Solidity.Backend.MemoryOps.SourceUintFixedRefsBounds
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
@@ -423,5 +423,81 @@ theorem nested_typed_program (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
 
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_typed_program' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_typed_program
+
+
+private def stEnd : State CT ΔT := {st with env := (u 1,u 3,u 42,some root,())}
+
+/-- The actual changed prefix survives a late fixed endpoint failure. Source
+retains its reached state; intrinsic failure supplies no returned state. -/
+theorem nested_late_endpoint (pipeline : Roadmap.Pipeline) (horizon nps : Nat) :
+    ∃ (mid : Heap H) (ym : Source.EMState E0 ΓW),
+      hp.writeAddr (.index left .fixed (u 1)) (u 42)=some mid ∧
+      (Source.execS (G0 pipeline) F0 (horizon+6) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wi wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 3 42).1).run (.nil,(sw 1 3 42).2)=
+          (.ok (.normal ym.1),(.nil,ym.2)) ∧
+      (Source.evalE (G0 pipeline) F0 (horizon+4) (sourceUintFixedNestedAssign wr wi wj wv)).run ym=
+        (.error (.revert (Source.panicData .index)),ym) ∧
+      (Source.execItems (G0 pipeline) F0 (horizon+7) nps none
+        (.stmt (.expr (sourceUintFixedNestedAssign wr wi wi wv)) (.stmt (.expr (sourceUintFixedNestedAssign wr wi wj wv)) .nil) : Source.RItems E0 [] false .body ΓW ΓW) (sw 1 3 42).1).run (.nil,(sw 1 3 42).2)=
+          (.error (.revert (Source.panicData .index)),(.nil,ym.2)) ∧
+      Stmt.run (stEnd.withHeap mid) writeStmt=.error .revert ∧
+      SourceUintFixedRefsAt ym 2 mid root address ∧ Source.MemOK E0 SH ym ∧
+      MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] ∧
+      MObj.elems .fixed (mid.get left)≠MObj.elems .fixed (hp.get left) ∧ mid.get right=hp.get right ∧
+      [ym.2.heap.get 0,ym.2.heap.get 1,ym.2.heap.get 2]=
+        [some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (mid.get left)⟩,
+         some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩,
+         some ⟨SourceUintFixedRefsTy 3,sourceUintFixedRefMemory address [left,left,right]⟩] ∧
+      ym.1=(sw 1 3 42).1 ∧ ym.2.heap.next=3 ∧ (∀ a,3≤a → ym.2.heap.get a=none) ∧
+      ym.2.ex=(sw 1 3 42).2.ex ∧ ym.2.events=(sw 1 3 42).2.events ∧
+      ym.2.logs=(sw 1 3 42).2.logs ∧ ym.2.fnLocals=(sw 1 3 42).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | obtain ⟨mid,ym,tw,ew,first,rm,mm,lm,nm,parent,objects,addresses,wm,em,lgm,fm⟩ :=
+      (graphW 1 3 42).resolved_write (G0 pipeline) F0 (horizon+1) nps wr wi wi wv
+        (u 1) (u 1) (u 42) left rfl rfl rfl rfl selectLeft selectedSeparation (by decide) SH (memOKW 1 3 42)
+    have selected : mid.index root .dyn (u 1)=some left := by
+      change (MObj.elems .dyn (mid.get root))[1]?=some left
+      rw [parent];exact selectLeft
+    have loc := rm.eval_nested_loc_bounds (G0 pipeline) F0 horizon wr wi wj (u 1) (u 3) left
+      (by rw [lm];rfl) (by rw [lm];rfl) (by rw [lm];rfl) selected (by decide)
+    have failed : (Source.evalE (G0 pipeline) F0 (horizon+4) (sourceUintFixedNestedAssign wr wi wj wv)).run ym=
+        (.error (.revert (Source.panicData .index)),ym) := by
+      rw [sourceUintFixedNestedAssign,Source.evalE,Source.Hoare.run_bind,
+        source_local_value_run (G0 pipeline) F0 (horizon+2) ym wv (sourceUint (u 42)) (by rw [lm];rfl)]
+      change ((Source.evalLoc (G0 pipeline) F0 (horizon+3) (sourceUintFixedNestedLoc wr wi wj)) >>= fun loc =>
+        Source.writeLoc F0 (horizon+3) loc (sourceUint (u 42)) >>= fun _ => pure (Source.RVal.val (sourceUint (u 42)))).run ym=_
+      rw [Source.Hoare.run_bind,loc]
+    have second := source_expr_statement_error (G0 pipeline) F0 (horizon+4) nps _ ym ym _ failed
+    have typedSelected : (uintFixedChildPath (C := CT) tr ti).mvalT (stEnd.withHeap mid)=.ok left := by
+      change TRes.ofOpt (mid.index root .dyn (u 1))=.ok left
+      rw [selected];rfl
+    have rejected : mid.writeAddr (.index left .fixed (u 3)) (u 42)=none := by
+      have length : (MObj.elems .fixed (mid.get left)).length=3 := by rw [MObj.elems_fixed];exact (mid.get left).2
+      simp only [Heap.writeAddr,Heap.setIndex,length,show ¬(u 3).1.toNat<3 from by decide,↓reduceIte]
+    have intrinsic : Stmt.run (stEnd.withHeap mid) writeStmt=.error .revert := by
+      change TRun.assignMem (.index .fixed (uintFixedChildPath tr ti) (.simple (.local tj))) (.val (.simple (.local tv))) (stEnd.withHeap mid)=_
+      simp only [TRun.assignMem,MSrc.mvalT,MLoc.addrT,typedSelected,Val.evalT,Simple.evalT,
+        show TEnv.get tv (stEnd.withHeap mid).env=u 42 from rfl,show TEnv.get tj (stEnd.withHeap mid).env=u 3 from rfl,
+        bind,Except.bind,TRes.ofOpt,pure,Except.pure]
+      change TRes.ofOpt (mid.writeAddr (.index left .fixed (u 3)) (u 42)) >>= _ = _
+      rw [rejected];rfl
+    have canonical : hp.writeAddr (.index left .fixed (u 1)) (u 42)=some (hp.set left (MObj.setElem .fixed (hp.get left) 1 (u 42))) := by
+      have valid : (u 1).1.toNat<(MObj.elems .fixed (hp.get left)).length := by rw [MObj.elems_fixed,(hp.get left).2];decide
+      simp only [Heap.writeAddr,Heap.setIndex,valid,↓reduceIte];rfl
+    have contents : MObj.elems .fixed (mid.get left)=[u 7,u 42,u (W-1)] := by
+      rw [Option.some.inj (tw.symm.trans canonical),Heap.get_set_same,MObj.elems_setElem,MObj.elems_fixed];rfl
+    have leftNow := rm.children left (by rw [parent,parentElements];exact List.mem_cons_self)
+    change ym.2.heap.get 0=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (mid.get left)⟩ at leftNow
+    have rightNow := (addresses 1 (by decide)).trans (show (sw 1 3 42).2.heap.get 1=some ⟨.array .memory (.int .u256) (some 3),sourceUintFixedObject (hp.get right)⟩ from rfl)
+    have parentNow := rm.parent
+    rw [parent,parentElements] at parentNow
+    refine ⟨mid,ym,tw,first,failed,source_items_pair_error (G0 pipeline) F0 (horizon+1) nps _ _ (sw 1 3 42) ym ym _ first second,
+      intrinsic,rm,mm,contents,(by rw [contents,MObj.elems_fixed];decide),objects right (by decide),?_,lm,nm,?_,wm,em,lgm,fm⟩
+    · rw [leftNow,rightNow,parentNow]
+    · intro a ha;exact ym.2.heap.bounded a (by rw [nm];exact ha)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_late_endpoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_late_endpoint
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
