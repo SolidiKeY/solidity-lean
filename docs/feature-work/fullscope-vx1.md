@@ -4,6 +4,8 @@ Base: `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`.
 Branch: `codex/solidity-fullscope-20261104/vx1-contracts-environment`.
 Repository: `/workspace/solidity-lean`.
 
+Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
+
 ## X01 interface checkpoint (in progress)
 
 `Solidity/Roadmap/Contracts.lean`, namespace `Solidity.Roadmap.FullScope`,
@@ -241,3 +243,194 @@ Producer requests additionally include resolution of the 20 G07 violations by
 the exact Source owners, preserving the non-circularity gate; and coordinator
 cache-helper transfer/receipt. `/home/agent/.local/share/cloudvm-coord/vmexec.py`
 is absent. No push, merge, PR, VM replacement or goal reset occurred.
+
+## Checkpoint 03: H38 run-indexed producer-review stub
+
+**Human authorization (verbatim):**
+
+> Coordinator decision H38 (user) on Q-ORACLE-01: take option 2. Write a VX1 run-indexed contract proposal that binds artifact, oracle and resources per run, so differing gas supplies are expressible. D1–D6 and both refinement directions stay binding. Submit it for producer review (VY5 Source, EVM/resource owners) as a stub before freezing; continue the X01 freeze on that stub and report it as a checkpoint.
+
+Q-ORACLE-01 is therefore resolved; no new scope decision is requested. The
+producer-review submission is **not** approval to freeze, an implementation of
+producer semantics, a full G01 public theorem or H35 checkpoint readiness.
+
+### Proposed interfaces and quantifiers
+
+All declarations are in `Solidity/Roadmap/Contracts.lean`, namespace
+`Solidity.Roadmap.FullScope.RunIndexed`, without new imports.
+
+- `SourceIndex (source : FullScope.Source) (resolved : source.Resolved)
+  (art : Artifact)` stores its source environment, `source.lang.Res`, and
+  `Oracle art`. These are fixed before any target resource witness is selected.
+  `SourceIndex.program` interprets the same indexed artifact/oracle;
+  `SourceIndex.execution` uses that fixed environment/resource.
+- `TargetIndex (target : FullScope.Target) (art : Artifact)` stores target
+  environment/resource; `execution` loads that same indexed artifact.
+- `SourceRuns source` has independently specified `Admitted`/`Specified`
+  judgments, candidate `Legal` runs, typed query transcripts, and proofs that
+  transcript kind/value observations and oracle reads agree with source runs.
+  `Specified` must be the independently characterized source judgment, never
+  the subset a compiler/target happens to match.
+- `TargetRuns target` supplies actual-execution query transcripts, equality to
+  scalar observations and agreement with `target.read art env resource`.
+  Source/EVM owners must prove code/occurrence provenance from their operational
+  semantics; kind/value projection alone does not establish that provenance.
+- `Bound environment Aligned sourceRun targetRun` binds shared environment and
+  the producer's operational resource/oracle plan relation. It is unconditional
+  on Forward/hash guards; `Aligned` cannot contain desired refinement or a
+  language restriction. Its operational characterization remains owner work.
+- `Coupled domain machine environment Aligned direction sourceRun targetRun`
+  extends `Bound` with ordered typed query transcripts. Forward has source
+  transcript as a prefix of target transcript; backward reverses this prefix
+  direction, permitting a source extension beyond a finite target cut.
+- `Coupled.forward_oracle_agrees` assumes forward coupling, source legality and
+  membership of `(query,value)` in the source transcript. It concludes
+  `sourceRun.oracle query = target.read art targetRun.environment
+  targetRun.resource query`. `Coupled.backward_oracle_agrees` has backward
+  coupling and target-transcript membership instead. Neither theorem assumes
+  equality on arbitrary unused queries; both kernel inventories have no axioms.
+- `Mode.exact` retains every observation. `Mode.optimizer` applies only the
+  existing D6 `eraseGas` projection. Public compilation must use `.exact`;
+  optimizer certificates do not substitute for the exact public endpoint.
+
+The data-carrying certificate signature is:
+
+```lean
+Certificate (source : Source) (target : Target)
+  (domain : SourceRuns source) (machine : TargetRuns target)
+  (compiler : source.Resolved → Option Artifact)
+  (environment : target.lang.Env → source.lang.Env)
+  (Aligned : (resolved : source.Resolved) → (art : Artifact) →
+    SourceIndex source resolved art → TargetIndex target art → Prop)
+  (mode : Mode) : Type
+```
+
+Its mandatory fields preserve both directions and expose, rather than assume,
+the missing producer proofs:
+
+1. `admission` is exactly `Admitted resolved ↔ (compiler resolved).isSome`;
+   environments are sound and surjective.
+2. `legality` requires `Legal resolved art run ↔ Specified resolved art run`
+   for **every** run of the actual compiler output, without Forward/Guard
+   antecedents. A candidate legality filter cannot remove a specified positive
+   source run. Source-owner/G07 characterization of Specified is still required.
+3. `sourceResourceCoverage` covers every allowed source environment/admissible
+   source resource by a legal oracle instance, with no Forward/Guard antecedent.
+   This is resource-totality only; the preceding legality equivalence is
+   separately necessary to prevent selection of only Forward-false oracles.
+4. Constructive `need` receives the fixed eligible source index, actual compiled
+   artifact and universally fixed target environment before Forward/Guard.
+   `sourceCoverage` proves target eligibility and `Bound` for this result,
+   unconditionally. `targetCoverage` similarly covers every admissible target
+   index by an eligible source index and `Bound`, without target Guard.
+5. `forward` uses the original source Forward/Guard on that fixed run. It proves
+   target Forward/Guard, forward `Coupled`, and source-prefix ≤ target-prefix
+   after the explicitly selected mode observation map.
+6. `backward` quantifies every eligible target run under its own Guard, and
+   proves existence of an eligible source run, backward `Coupled`, its own
+   source Guard, and target-prefix ≤ source-prefix.
+
+No source/target `Allowed`, `Admissible`, `Forward` or `Guard` function was
+rewritten by the proposal. Legacy G01 declarations are unchanged. Preservation
+of the original SourceSpec admission, pipelines, whole source/Forward domain,
+nonempty success/hashing/revert/divergence witnesses, world decoding and public
+exact correctness still requires producer adapters/proofs. Abstract fields and
+successful schema controls do not discharge those obligations.
+
+### Checked inhabitation and adversarial controls
+
+The existing owned `ContractsControls.lean` now includes namespace
+`Solidity.FullScope.VX1Controls.RunIndexedToy`:
+
+- `certificate` is an inhabited `.exact` certificate over every `Word` supply.
+  Source and target resources are fixed supplies; `need` preserves the source
+  supply. Independent source oracle/resource law and actual toy query lists are
+  proved, not assumed. The shared execution helper makes this an interface
+  inhabitation control, not independent production Source/EVM correctness.
+- `gas_supplies_distinct` produces nonempty outcomes `[5]` and `[6]` at supplies
+  5 and 6. `source_run_forward` witnesses their positive source obligations.
+- `swapped_supply_refused` and `swapped_reader_refused` reject changing the
+  resource or observed reader after fixing the source run.
+- `backward_cut_allowed` and `forward_cut_refused` regress ordered transcripts
+  with a one-query target cut and two-query source extension. They are transcript
+  order controls, not a proof of production source-step granularity.
+- `filtered_resource_coverage` covers every resource using a zero-valued oracle;
+  `filtered_forward_false` shows why that alone could hide adequacy.
+  `specified_run_cannot_be_filtered` refutes such a certificate using its required
+  unconditional equality with the independent source judgment.
+- `always_reverting_refused` refutes an exact certificate for a target preserving
+  reads/resources but reverting rather than returning the positive source result.
+- `wrong_artifact_refused` rejects substituting an artifact with equal table
+  length and different bytes for the actual compiler output.
+
+`Certificate` contains the constructive `need` function and lives in `Type`;
+negative controls correctly refute `Nonempty (Certificate ...)`.
+
+### Gates, reviews and evidence
+
+Same VM/branch and original base are preserved. Runtime refresh: Lean 4.24.0,
+Lake 5.0.0-src+797c613 and retained KeySort toolkit PASS, 1.616s. All new Lean/MCP
+work was serial with explicit `-j1`, LEAN_NUM_THREADS=1, verified 12GiB cap,
+zero swap and continuous 4GiB parent-reserve monitoring.
+
+Final per-file diagnostics: zero errors in both files, 17.590s, sampled peak
+aggregate RSS 1031836 KiB. The proposal/control kernel group exited 0 in 5.741s,
+sampled peak aggregate RSS 402112 KiB, cgroup peak 242761728 bytes, and parent
+available memory at least 16376463360 bytes. These are separate metrics.
+
+There are 21 new actual axiom-inventory outputs (39 including previous controls):
+only `propext`, `Quot.sound` or no axioms; the two operational reader-agreement
+lemmas require no axioms. No trust pin or heartbeat limit was changed.
+Failed intermediate type/proof diagnostics are retained, not counted as passes.
+
+Separate read-only finder/skeptic reviews found and fixed: source legality could
+filter Forward-positive instances despite resource-totality; backward query
+coupling over-constrained finite prefix cuts; unconditional query coupling added
+an unnecessary obligation when hash guards fail. The final schema uses legality
+equivalence, directional transcripts, and unconditional Bound separated from
+original guarded semantic correspondence. Final reviews report no new schema
+or control defect. Neither reviewer used Lean/server or edited files; these are
+local reviews, not VY5/EVM producer approval.
+
+Evidence is under `/workspace/vx1-evidence/checkpoint-03/`. Committed-head replay,
+sealed source hashes, cache packet and checksum manifest are recorded by the
+external handoff. Previous checkpoint seals remain intact. Full integrated
+build, complete production axiom inventory and ship-cache receipt remain pending;
+no H35 readiness is claimed. Preinstalled historical cache provenance remains
+UNVERIFIABLE rather than reconstructed.
+
+### Immediate coordinator relay / producer review request
+
+Relay the committed H38 stub path/signatures to **VY5 Source and EVM/resource
+owners** for review before freeze; notify original X/O/T consumers that it is a
+proposal and is not yet usable as a frozen final-check dependency. Retain this
+relay request until receipt. Review must answer:
+
+- Source: characterize Specified independently; prove legality equality and all
+  source/Forward/resource coverage without a language exclusion, oracle
+  cherry-picking, guard weakening or an assumed producer theorem.
+- EVM/resources: derive actual query code/occurrence labels and `target.read`
+  from the pinned execution; characterize Aligned as operational run/failure/
+  horizon facts, not desired refinement; assess all coverage obligations.
+- Both: check source/target prefix granularity and extension/oracle compatibility,
+  exact public mode and optimizer mode, then provide approved adapter paths and
+  commits. No producer-owned file was edited here.
+
+No new module/import was added, so generated roots/maps remain unchanged. The
+central map proposal is to extend the existing Roadmap/Contracts row with the
+H38 RunIndexed contract namespace after producer approval; no central file was
+co-edited.
+
+### Remaining queue after H38 proposal submission
+
+- X01: producer review and receipt, freeze on the approved stub, remaining
+  D2/D3/D4/D5/public-contract fields and adapters, all-30 manifest/diagnostic/
+  upstream-ledger/catalog rescope and final integrated gates remain open.
+- X02: remains sequentially dependent on X01. Source/admission/lowering/compiler
+  integration and production environment witnesses/negative/combination proofs
+  remain open; the completed census/fixtures are not those implementations.
+- Existing generator-owner adapter, 20 G07 Source closure violations and cache
+  helper transfer/receipt requests remain outstanding. No relaxation is proposed.
+- No push, merge, PR, VM replacement or goal reset occurred. H38 resolves the
+  prior human question; subsequent review is requested from producers, not
+  treated as already approved.

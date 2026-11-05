@@ -1349,4 +1349,240 @@ def CreationSizeFailures (attempt : Bytes → Bytes → Evm.Halt) : Prop :=
   ∀ initcode runtime, ¬ creationFits initcode runtime →
     (attempt initcode runtime).observe = (false, [])
 
+
+/-! ## H38 run-indexed proposal (producer review required)
+
+Source oracle/resource indices are fixed before constructing a target witness.
+Legality belongs to the independent source semantics; it must not be defined as
+"the runs a target can match". The certificate proves coverage and both prefix
+directions. These declarations do not supply any producer proof or replace the
+six G01 public contracts. Source/EVM owners must review legality, operational
+query provenance and resource alignment before this proposal can be frozen.
+-/
+namespace RunIndexed
+
+/-- One source run: actual artifact is a type index, with oracle and source
+resources fixed together. A target witness cannot retrospectively change them. -/
+structure SourceIndex (source : Source) (resolved : source.Resolved) (art : Artifact) where
+  environment : source.lang.Env
+  resource : source.lang.Res
+  oracle : Oracle art
+
+/-- One target execution bound of the same actual artifact. -/
+structure TargetIndex (target : Target) (art : Artifact) where
+  environment : target.lang.Env
+  resource : target.lang.Res
+
+def SourceIndex.program {source : Source} {resolved : source.Resolved} {art : Artifact}
+    (run : SourceIndex source resolved art) : source.lang.Prog :=
+  source.meaning resolved ⟨art, run.oracle⟩
+
+def SourceIndex.execution {source : Source} {resolved : source.Resolved} {art : Artifact}
+    (run : SourceIndex source resolved art) : Prefix Observation Outcome :=
+  source.lang.sem run.program run.environment run.resource
+
+def TargetIndex.execution {target : Target} {art : Artifact}
+    (run : TargetIndex target art) : Prefix Observation Outcome :=
+  target.lang.sem (target.load art) run.environment run.resource
+
+/-- Only executed scalar reads are in the operational query transcript. A
+missing query is not interpreted as an executed read of zero. -/
+def scalarRead : Observation → Option (ScalarQuery × Word)
+  | .scalar kind value => some (kind, value)
+  | _ => none
+
+/-- Producer-facing source judgments. `Legal` must be characterized by the
+independent source resource/oracle semantics and audited by G07, not by target
+coverage or refinement. No certificate may assume its coverage as a premise. -/
+structure SourceRuns (source : Source) where
+  Admitted : source.Resolved → Prop
+  /-- The authoritative run judgment of the independent source semantics,
+  fixed before the compiler/coupling. Its characterization is a source-owner
+  review obligation; it must not be defined by matching target executions. -/
+  Specified : (resolved : source.Resolved) → (art : Artifact) →
+    SourceIndex source resolved art → Prop
+  Legal : (resolved : source.Resolved) → (art : Artifact) →
+    SourceIndex source resolved art → Prop
+  queries : (resolved : source.Resolved) → (art : Artifact) →
+    SourceIndex source resolved art → List (Query art × Word)
+  observations : ∀ resolved art run, Legal resolved art run →
+    (queries resolved art run).map (fun entry => (entry.1.kind, entry.2)) =
+      run.execution.events.filterMap scalarRead
+  reads : ∀ resolved art run, Legal resolved art run → ∀ query value,
+    (query, value) ∈ queries resolved art run → run.oracle query = value
+
+/-- The target owner supplies a transcript from the actual pinned execution,
+with observed-value and reader proofs. Its definition and query provenance need
+producer review; setting a free reader equal to the source oracle is not a proof. -/
+structure TargetRuns (target : Target) where
+  queries : (art : Artifact) → TargetIndex target art → List (Query art × Word)
+  observations : ∀ art run,
+    (queries art run).map (fun entry => (entry.1.kind, entry.2)) =
+      run.execution.events.filterMap scalarRead
+  reads : ∀ art run query value, (query, value) ∈ queries art run →
+    target.read art run.environment run.resource query = value
+
+/-- Source legality adds no replacement for the existing allowed-environment,
+admissibility, Forward or hash judgments. Every one is read from `source.lang`. -/
+def SourceRuns.Eligible {source : Source} (domain : SourceRuns source)
+    {resolved : source.Resolved} {art : Artifact}
+    (run : SourceIndex source resolved art) : Prop :=
+  domain.Legal resolved art run ∧ source.lang.Allowed run.environment ∧
+    source.lang.Admissible run.resource
+
+def TargetIndex.Eligible {target : Target} {art : Artifact}
+    (run : TargetIndex target art) : Prop :=
+  target.lang.Allowed run.environment ∧ target.lang.Admissible run.resource
+
+/-- Finite-prefix query order follows the direction of refinement. A target
+cut between two atomic source observations is allowed in the backward direction. -/
+inductive Direction where
+  | forward | backward
+  deriving DecidableEq, Repr
+
+def Direction.Ordered {α : Type} : Direction → List α → List α → Prop
+  | .forward, sourceQueries, targetQueries => sourceQueries <+: targetQueries
+  | .backward, sourceQueries, targetQueries => targetQueries <+: sourceQueries
+
+/-- Unguarded binding of artifact, shared environment and physical run/resource
+plan. The producer's Aligned relation must characterize those operational facts,
+not prefix refinement. It may not filter source behavior using a hash guard. -/
+structure Bound {source : Source} {target : Target}
+    (environment : target.lang.Env → source.lang.Env)
+    (Aligned : (resolved : source.Resolved) → (art : Artifact) →
+      SourceIndex source resolved art → TargetIndex target art → Prop)
+    {resolved : source.Resolved} {art : Artifact}
+    (sourceRun : SourceIndex source resolved art) (targetRun : TargetIndex target art) : Prop where
+  environment_agrees : sourceRun.environment = environment targetRun.environment
+  resources : Aligned resolved art sourceRun targetRun
+
+/-- Artifact identity is enforced by the shared index. Resource alignment is a
+producer-defined operational relation (failure points/horizons), which must not
+contain desired prefix refinement or a new language restriction. Query occurrence
+and code labels remain in the ordered transcripts; their operational provenance
+must be proved by the source/EVM owners before freeze. -/
+structure Coupled {source : Source} {target : Target}
+    (domain : SourceRuns source) (machine : TargetRuns target)
+    (environment : target.lang.Env → source.lang.Env)
+    (Aligned : (resolved : source.Resolved) → (art : Artifact) →
+      SourceIndex source resolved art → TargetIndex target art → Prop)
+    (direction : Direction)
+    {resolved : source.Resolved} {art : Artifact}
+    (sourceRun : SourceIndex source resolved art) (targetRun : TargetIndex target art) : Prop extends Bound environment Aligned sourceRun targetRun where
+  queries_ordered : direction.Ordered (domain.queries resolved art sourceRun)
+    (machine.queries art targetRun)
+
+/-- Forward source readings agree with the fixed target execution. Unexecuted
+queries outside the source prefix acquire no arbitrary default value. -/
+theorem Coupled.forward_oracle_agrees {source : Source} {target : Target}
+    {domain : SourceRuns source} {machine : TargetRuns target}
+    {environment : target.lang.Env → source.lang.Env}
+    {Aligned : (resolved : source.Resolved) → (art : Artifact) →
+      SourceIndex source resolved art → TargetIndex target art → Prop}
+    {resolved : source.Resolved} {art : Artifact}
+    {sourceRun : SourceIndex source resolved art} {targetRun : TargetIndex target art}
+    (coupled : Coupled domain machine environment Aligned .forward sourceRun targetRun)
+    (legal : domain.Legal resolved art sourceRun) {query : Query art} {value : Word}
+    (observed : (query, value) ∈ domain.queries resolved art sourceRun) :
+    sourceRun.oracle query = target.read art targetRun.environment targetRun.resource query :=
+  (domain.reads resolved art sourceRun legal query value observed).trans
+    (machine.reads art targetRun query value
+      (List.IsPrefix.subset coupled.queries_ordered observed)).symm
+
+/-- Backward target readings agree with the matching source extension. Source
+queries beyond this target horizon need not already occur in the target prefix. -/
+theorem Coupled.backward_oracle_agrees {source : Source} {target : Target}
+    {domain : SourceRuns source} {machine : TargetRuns target}
+    {environment : target.lang.Env → source.lang.Env}
+    {Aligned : (resolved : source.Resolved) → (art : Artifact) →
+      SourceIndex source resolved art → TargetIndex target art → Prop}
+    {resolved : source.Resolved} {art : Artifact}
+    {sourceRun : SourceIndex source resolved art} {targetRun : TargetIndex target art}
+    (coupled : Coupled domain machine environment Aligned .backward sourceRun targetRun)
+    (legal : domain.Legal resolved art sourceRun) {query : Query art} {value : Word}
+    (observed : (query, value) ∈ machine.queries art targetRun) :
+    sourceRun.oracle query = target.read art targetRun.environment targetRun.resource query :=
+  (domain.reads resolved art sourceRun legal query value
+    (List.IsPrefix.subset coupled.queries_ordered observed)).trans
+    (machine.reads art targetRun query value observed).symm
+
+/-- Public compilation is exact. Only optimizer certificates select the D6
+normalization, which retains event occurrences and all final outcome bytes. -/
+inductive Mode where
+  | exact | optimizer
+  deriving DecidableEq, Repr
+
+def Mode.observe : Mode → Prefix Observation Outcome → Prefix Observation Outcome
+  | .exact, execution => execution
+  | .optimizer, execution => eraseGas execution
+
+/-- H38's two-sided run-indexed proposal. `need` sees a fixed eligible source
+index before any Forward/Guard check. Unconditional source and target coverage
+are theorem fields, not new public assumptions. All resources and observations
+remain explicit. Existing admission, environment and guard obligations remain.
+
+The full X01 freeze additionally needs producer approval of the independent
+Legal/Aligned definitions, preservation of G01 source/Forward coverage and
+non-vacuity, and all remaining D2–D5/public-contract obligations. -/
+structure Certificate (source : Source) (target : Target)
+    (domain : SourceRuns source) (machine : TargetRuns target)
+    (compiler : source.Resolved → Option Artifact)
+    (environment : target.lang.Env → source.lang.Env)
+    (Aligned : (resolved : source.Resolved) → (art : Artifact) →
+      SourceIndex source resolved art → TargetIndex target art → Prop)
+    (mode : Mode) where
+  admission : ∀ resolved, domain.Admitted resolved ↔ (compiler resolved).isSome
+  envSound : ∀ env, target.lang.Allowed env → source.lang.Allowed (environment env)
+  envOnto : ∀ env, source.lang.Allowed env →
+    ∃ targetEnv, target.lang.Allowed targetEnv ∧ environment targetEnv = env
+  /-- The candidate legality predicate cannot filter any independently
+  specified source run, including its positive Forward obligations. This is a
+  required proof, not an assumed public premise. G07 must audit Specified's
+  independent source definition; resource-totality alone is insufficient. -/
+  legality : ∀ resolved art, compiler resolved = some art →
+    ∀ run : SourceIndex source resolved art,
+      domain.Legal resolved art run ↔ domain.Specified resolved art run
+  /-- Every original admissible source resource has a legal oracle instance,
+  independently of Forward/Guard and before a target witness is selected. -/
+  sourceResourceCoverage : ∀ resolved art, compiler resolved = some art →
+    ∀ env resource, source.lang.Allowed env → source.lang.Admissible resource →
+      ∃ oracle, domain.Legal resolved art ⟨env, resource, oracle⟩
+  need : ∀ resolved art, compiler resolved = some art →
+    (run : SourceIndex source resolved art) → domain.Eligible run →
+    (env : target.lang.Env) → target.lang.Allowed env →
+      run.environment = environment env → target.lang.Res
+  /-- No Forward or hash antecedent can hide an eligible source run. Binding
+  is unconditional; semantic query correspondence, like prefix refinement,
+  belongs to the guarded forward/backward fields below. -/
+  sourceCoverage : ∀ resolved art (compiled : compiler resolved = some art)
+    (run : SourceIndex source resolved art) (eligible : domain.Eligible run)
+    env (allowed : target.lang.Allowed env) (sameEnv : run.environment = environment env),
+    let targetRun : TargetIndex target art :=
+      ⟨env, need resolved art compiled run eligible env allowed sameEnv⟩
+    targetRun.Eligible ∧ Bound environment Aligned run targetRun
+  targetCoverage : ∀ resolved art, compiler resolved = some art →
+    ∀ run : TargetIndex target art, run.Eligible →
+      ∃ sourceRun : SourceIndex source resolved art, domain.Eligible sourceRun ∧
+        Bound environment Aligned sourceRun run
+  forward : ∀ resolved art (compiled : compiler resolved = some art)
+    (run : SourceIndex source resolved art) (eligible : domain.Eligible run)
+    env (allowed : target.lang.Allowed env) (sameEnv : run.environment = environment env),
+    source.lang.Forward run.program run.environment run.resource →
+    source.lang.Guard run.program run.environment run.resource →
+    let targetRun : TargetIndex target art :=
+      ⟨env, need resolved art compiled run eligible env allowed sameEnv⟩
+    target.lang.Forward (target.load art) env targetRun.resource ∧
+      target.lang.Guard (target.load art) env targetRun.resource ∧
+      Coupled domain machine environment Aligned .forward run targetRun ∧
+      (mode.observe run.execution).Le (mode.observe targetRun.execution)
+  backward : ∀ resolved art, compiler resolved = some art →
+    ∀ run : TargetIndex target art, run.Eligible →
+      target.lang.Guard (target.load art) run.environment run.resource →
+      ∃ sourceRun : SourceIndex source resolved art, domain.Eligible sourceRun ∧
+        Coupled domain machine environment Aligned .backward sourceRun run ∧
+        source.lang.Guard sourceRun.program sourceRun.environment sourceRun.resource ∧
+        (mode.observe run.execution).Le (mode.observe sourceRun.execution)
+
+end RunIndexed
+
 end Solidity.Roadmap.FullScope
