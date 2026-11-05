@@ -55,3 +55,7 @@ SourceWorld/ABI unwind/byte-origin, full original gates and final Source/V10/
 target/world/compiler/EVM adequacy remain open. G32/P6b/G34/G35.02 reference
 remainder/G35.03/Backfills A/B stay partial; G33 and G35.01/.04/.05/.06 remain
 delegated/open. Goal remains unchanged BLOCKED; no publication claim.
+
+Prepared two-terminal-store runSlice composition is now proved in
+PhysicalByteStoreSequence.lean; see nested-fixed-byte-write-delete.md. The
+missing byte-load/emission prefix boundary is unchanged.

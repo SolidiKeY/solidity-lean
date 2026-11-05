@@ -368,6 +368,7 @@ import Solidity.Backend.MemoryOps.PhysicalByteStack
 import Solidity.Backend.MemoryOps.PhysicalByteStackExact
 import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
+import Solidity.Backend.MemoryOps.PhysicalByteStoreSequence
 import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface
 import Solidity.Backend.MemoryOps.PhysicalFixedChildControls
 import Solidity.Backend.MemoryOps.PhysicalFixedChildProgram
