@@ -866,3 +866,7 @@ preserved input/state, exact positive-fuel raw decoder iff and the empty-word
 versus whole-entry distinction. Neither used a build or Lean server. A single
 unused simp argument was removed and the importing consumer rechecked without
 changed-module warnings.
+
+`SignedGateInterface.lean` specifies actual public-compiler signed word cleanup
+validation for every semantic width, preserving accepted sign-extended words.
+Raw loading, native execution and full decoding remain separate.
