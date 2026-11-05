@@ -48,3 +48,7 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/ReturnedStorageCaptureControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/InternalFlow/RuntimeFrameV3ScalarSourceCheckLaws.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Controls.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Laws.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/Pass.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Optimizer/RoadmapComposition.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
