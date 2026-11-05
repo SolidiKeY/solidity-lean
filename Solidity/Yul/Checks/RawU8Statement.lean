@@ -116,4 +116,23 @@ def addSnapshot (pipeline : Solidity.Roadmap.Pipeline) (state : RawFrame.State c
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.uncheckedU8Add_agrees
 
+
+/- Operand locality permits remapped indices and an unrelated changed word. -/
+def relocatedAddFrame : RawFrame.State ctx :=
+  RawFrame.write (RawFrame.write (RawFrame.write alternateAddFrame flagCell (word 0))
+    xCell (word 255)) argCell (word 257)
+def relocatedSnapshot (pipeline : Solidity.Roadmap.Pipeline) : Option Nat :=
+  match RawFrame.uncheckedU8Add pipeline relocatedAddFrame (.there .here) .here with
+  | .ok value => some (LocalOperations.scalarWord value (LocalOperations.u8Shape ctx.env)).val
+  | .error _ => none
+#guard RawFrame.u8Word addFrame .here = RawFrame.u8Word relocatedAddFrame (.there .here)
+#guard RawFrame.u8Word addFrame (.there .here) = RawFrame.u8Word relocatedAddFrame .here
+#guard (RawFrame.view addFrame flagCell).val = 2
+#guard (RawFrame.view relocatedAddFrame flagCell).val = 0
+#guard relocatedSnapshot .legacy = some 512
+#guard relocatedSnapshot .viaIR = some 0
+/-- info: 'Solidity.Yul.RawFrame.uncheckedU8Add_word_congr' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.uncheckedU8Add_word_congr
+
 end Solidity.Yul.Checks.RawU8Statement

@@ -301,4 +301,36 @@ theorem uncheckedU8Add_agrees : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Soli
     rw [returnU8_agrees ctx .viaIR first second same left,
       returnU8_agrees ctx .viaIR first second same right]
 
+/-- Exact unchecked arithmetic locality for arbitrary pairs of intrinsic operand indices.
+Only the two read words agree; unrelated words, worlds and clean backups may differ. -/
+theorem uncheckedU8Add_word_congr : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
+ (first second : Solidity.Yul.RawFrame.State ctx)
+ (leftFirst rightFirst leftSecond rightSecond : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8)),
+ Solidity.Yul.RawFrame.u8Word first leftFirst = Solidity.Yul.RawFrame.u8Word second leftSecond →
+ Solidity.Yul.RawFrame.u8Word first rightFirst = Solidity.Yul.RawFrame.u8Word second rightSecond →
+ Solidity.Yul.RawFrame.uncheckedU8Add pipeline first leftFirst rightFirst =
+ Solidity.Yul.RawFrame.uncheckedU8Add pipeline second leftSecond rightSecond := by
+  intro ctx pipeline first second leftFirst rightFirst leftSecond rightSecond leftWords rightWords
+  cases pipeline with
+  | legacy =>
+    change (Except.ok (LocalValue.scalar (LocalOperations.u8Shape ctx.env)
+      (word ((u8Word first leftFirst).val + (u8Word first rightFirst).val))) :
+      Solidity.Source.R (LocalValue ctx.env (.int Solidity.Source.IntTy.u8))) =
+      .ok (.scalar (LocalOperations.u8Shape ctx.env)
+        (word ((u8Word second leftSecond).val + (u8Word second rightSecond).val)))
+    rw [leftWords,rightWords]
+  | viaIR =>
+    have cleaned : ∀ one two, u8Word first one = u8Word second two →
+        returnU8 .viaIR first one = returnU8 .viaIR second two := by
+      intro one two words
+      apply (returnU8_complete ctx .viaIR second two (returnU8 .viaIR first one)).mp
+      change (returnU8 .viaIR first one).key = some (((u8Word second two).val % 256 : Nat) : Int)
+      rw [← words]
+      exact returnU8_sound .viaIR first one
+    change (Solidity.Source.binVal false .add (returnU8 .viaIR first leftFirst)
+      (returnU8 .viaIR first rightFirst)).map LocalValue.clean =
+      (Solidity.Source.binVal false .add (returnU8 .viaIR second leftSecond)
+        (returnU8 .viaIR second rightSecond)).map LocalValue.clean
+    rw [cleaned leftFirst leftSecond leftWords,cleaned rightFirst rightSecond rightWords]
+
 end Solidity.Yul.RawFrame
