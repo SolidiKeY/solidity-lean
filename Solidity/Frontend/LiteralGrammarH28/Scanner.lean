@@ -270,3 +270,5 @@ theorem encodePlain_scan (q : UInt8) (quote : IsQuote q) (bytes suffix : Bytes) 
     encodePlain_roundtrip q quote bytes⟩
 
 end Solidity.Frontend.LiteralGrammarH28
+
+
