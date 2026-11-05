@@ -34,4 +34,30 @@ theorem late_dirty_copy {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState 
   rw [copy_run]
   rfl
 
+theorem empty_copy {E : Source.Env} {Γ : Source.RCtx} (F : Source.Fr)
+    (off : Nat) (y : Source.EMState E Γ) :
+    (Source.cdToMem F (ArrayTy int8) off 0).run y=
+      (.ok (.val (.memRef rfl y.2.heap.next)),
+        (y.1,{y.2 with heap := (y.2.heap.alloc ⟨ArrayTy int8,memory []⟩).1})) := by
+  rw [copy_run]
+  rfl
+
+theorem eof_padding {E : Source.Env} {Γ : Source.RCtx} (y : Source.EMState E Γ) :
+    (Source.cdToMem (frame []) (ArrayTy int8) 123 1).run y=
+      (.ok (.val (.memRef rfl y.2.heap.next)),
+        (y.1,{y.2 with heap := (y.2.heap.alloc
+          ⟨ArrayTy int8,memory [Source.Val.int 0 (by decide)]⟩).1})) := by
+  rw [copy_run]
+  rfl
+
+theorem zero_horizon {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E)
+    (F : Source.Fr) (t : Source.IntTy) (i : Source.Idx Γ (.array .calldata (.int t) none))
+    (y : Source.EMState E Γ) :
+    (Source.evalE G F 0 (copyExpr t i)).run y=(.error .timeout,y) := rfl
+
+theorem one_horizon {E : Source.Env} {Γ : Source.RCtx} (G : Source.Glob E)
+    (F : Source.Fr) (t : Source.IntTy) (i : Source.Idx Γ (.array .calldata (.int t) none))
+    (y : Source.EMState E Γ) :
+    (Source.evalE G F 1 (copyExpr t i)).run y=(.error .timeout,y) := rfl
+
 end Solidity.Backend.CalldataPackets.RawInt.Controls

@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eu
+real=/workspace/.setup/tools/lean-4.24.0-linux/bin/lake
+case "${1:-}" in
+--version|--help|-h) exec "$real" "$@" ;;
+serve) exec "$real" -f tests/calldata-packets-1105/RawInt/lakefile.worker.toml "$@" -j1 --tstack=131072 ;;
+*)
+  # Corpus probes are launched concurrently by the shared generator. Serialize
+  # its direct Lean commands without changing its statements or budgets.
+  for arg in "$@"; do
+    if [ "$arg" = lean ]; then
+      exec flock /tmp/raw-int-1105-probes.lock "$real" -f tests/calldata-packets-1105/RawInt/lakefile.worker.toml "$@" -j1
+    fi
+  done
+  exec "$real" -f tests/calldata-packets-1105/RawInt/lakefile.worker.toml "$@" ;;
+
+esac
