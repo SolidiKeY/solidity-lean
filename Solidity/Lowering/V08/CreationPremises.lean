@@ -1,4 +1,4 @@
-import Solidity.Lowering.P8.FrozenInterface
+import Solidity.Lowering.P8.DeclarationGraphAdmission
 import Solidity.Lowering.V08.ConstructorContinuations
 import Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1
 
@@ -10,7 +10,7 @@ operation is an existing typed Source computation, NOT a replacement evaluator
 or an assertion that resolved new/try-new exists. Until V17 binds this parameter
 to its actual resolved syntax, this is only a constructor-phase consumer.
 No V1 RealizableEntry fact is used or inferred.
-The `admission : P8a.Producer …` field makes these inputs uninhabited until
+The `admission : DeclarationGraphAdmission.Producer …` field makes these inputs uninhabited until
 P8-SPEC-LAW1 is resolved (`Lowering/P8/ResourceContractLaw1.lean`), so the
 results here are vacuous for now. -/
 namespace Solidity.Lowering.V08.CreationPremises
@@ -31,7 +31,7 @@ structure Inputs (S : P8a.Spec) (reference : P8a.OperationalReference)
     (w : World cs) (kind : K) (address : Address)
     (ctor : Prog (cs kind) [] []) (ctx : Context)
     (relation : Source.St E → State (cs kind) [] → Prop) where
-  admission : P8a.Producer S reference origins roots
+  admission : DeclarationGraphAdmission.Producer S reference origins roots
   origin : origins.meaning resolved wf profile artifact = ⟨E,program⟩
   environment : Roadmap.SessionEnv
   sourceFrame : Source.Fr
@@ -74,8 +74,8 @@ omit [DecidableEq K] in
 SourceSpec carrier equality or invented admission/profile bound. -/
 theorem meaning_origin (p : Inputs S reference origins roots resolved wf profile artifact program
     operation before after w kind address ctor ctx relation) :
-    p.admission.realization.program (S.meaning resolved wf profile artifact) = ⟨E,program⟩ :=
-  (p.admission.realization.meaning_origin resolved wf profile artifact).trans p.origin
+    p.admission.base.realization.program (S.meaning resolved wf profile artifact) = ⟨E,program⟩ :=
+  (p.admission.base.realization.meaning_origin resolved wf profile artifact).trans p.origin
 
 omit [DecidableEq K] in
 /-- The source action is the actual published constructor invocation of the
