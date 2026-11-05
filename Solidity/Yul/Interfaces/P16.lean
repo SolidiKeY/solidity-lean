@@ -1,3 +1,4 @@
+import Solidity.Yul.RawU8For
 import Solidity.Yul.RawCheckedGrowingAbsent
 import Solidity.Yul.RawU8ForPost
 import Solidity.Yul.RawU8GrowingBlock
@@ -244,3 +245,10 @@ contexts, preserving runtime verbatim and checked/coherent premises. It uses
 the existing Source omission equality. Checks instantiate actual uint8 producers
 with mutation/break, dirty frames and pipeline-specific initializer failures.
 The generic transport alone supplies no new initializer or loop admission. -/
+
+/-! RawU8For.adapter composes the actual supported uint8 initializer with an
+existing checked no-post iteration/body and typed scope restoration. The real
+Source.forLoop law reuses the existing forIter/while equality and retains
+checked/coherent premises. Checks cover guard-changing bodies, break/continue,
+partial body writes, dirty words and per-pipeline initializer errors.
+General loop admission and dirty ordinary Source readback remain separate. -/
