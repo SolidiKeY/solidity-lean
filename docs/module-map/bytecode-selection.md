@@ -230,3 +230,6 @@
 | `Backend/AbiEntry/CoreSpecial.lean` | Public compiler receive/fallback body routing with terminal value guards and absent-endpoint rejection. |
 | `Backend/AbiEntry/CoreSpecialControls.lean` | Inhabited receive/fallback execution, typed argument reads, terminal rejection and saved-state controls. |
 | `Backend/AbiEntry/SizeBranchesInterface.lean` | Actual short/full typed-body compiler selection and exact branch outcome contracts at size four. |
+| `Backend/AbiEntry/CoreJoin/Shared.lean` | Existing represented join proof shared independently of selector/decoder imports. |
+| `Backend/AbiEntry/SizeBranches.lean` | Public short/full typed-body compilation and exact raw/represented branch outcomes. |
+| `Backend/AbiEntry/SizeBranchesControls.lean` | Inhabited size boundaries, heterogeneous body execution, malformed input, terminal failure and escaping skip controls. |

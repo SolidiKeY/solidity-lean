@@ -1489,3 +1489,35 @@ complete represented body outcomes are retained in the contract. It uses the
 existing compiler, core classifier, input simulation and allocation bounds;
 no desired run or body result is supplied. Native size loading, Source metadata
 and full runtime-entry composition remain open.
+
+`SizeBranches.lean` constructs the intrinsic size-less-than-four conditional and
+proves actual public selection of the whole program and both core bodies. The
+raw execution theorem retains the compiler's real join and escaping skip. From
+the existing input simulation and unchanged left-body allocation bound, the
+shared core join proof supplies the complete selected body outcome; no expected
+body run or poststate is a premise. Different branch output contexts stay typed.
+
+Controls construct a represented uint input with a saved stack, execute a short
+assignment or a full-input bool allocation reading the size, and cover zero,
+three, four and the largest word. They also cover a terminal reverting short
+body, malformed size-cell fault, unchanged protected state and a raw escaping
+skip whose remaining count is retained. Native calldata-size representation and
+Source body/signature authority are separate obligations.
+
+The existing core join proof now lives in `CoreJoin/Shared.lean`, retaining its
+public names, statements and premises. An unused simp argument is removed;
+CoreJoin's existing branch consumers remain available and checked. Its interface
+explicitly imports Compiler. This removes selector/decoder imports from the new
+size packet without reproducing the join proof or adding another compiler.
+The packet's complete unpublished dependency closure is supplied in its handoff.
+
+Independent read-only finder and skeptic reviews passed the new implementation,
+controls and proof split without findings. Six final per-file diagnostics and
+seventeen new scoped standard-only axiom guards pass. The importing-consumer
+build also checks the existing finite-dispatch controls after extraction.
+An isolated seven-source packet check passes against published master using 187
+source-verified reused common artifacts; both unpublished selector and decoder
+helper checks fail as expected. This is not a fresh rebuild of the entire
+194-source closure. Repair trials and earlier failed attempts remain in the
+handoff. Full G40 Source/native composition, fixture replay, G46.02 and ordered
+G46.03 remain open; checkpoint gate results accompany the sealed evidence.

@@ -1,4 +1,4 @@
-import Solidity.Backend.AbiEntry.SelectorBranches
+import Solidity.Evm.Compiler
 import Solidity.Evm.Correct
 
 /-! Join removal for actual core compilations from represented typed inputs,

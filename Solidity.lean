@@ -23,6 +23,7 @@ import Solidity.Backend.AbiEntry.CoreDispatch
 import Solidity.Backend.AbiEntry.CoreDispatchControls
 import Solidity.Backend.AbiEntry.CoreDispatchInterface
 import Solidity.Backend.AbiEntry.CoreJoin
+import Solidity.Backend.AbiEntry.CoreJoin.Shared
 import Solidity.Backend.AbiEntry.CoreJoinControls
 import Solidity.Backend.AbiEntry.CoreJoinInterface
 import Solidity.Backend.AbiEntry.CoreSpecial
@@ -93,6 +94,8 @@ import Solidity.Backend.AbiEntry.SignedGateInterface
 import Solidity.Backend.AbiEntry.SingleWordGate
 import Solidity.Backend.AbiEntry.SingleWordGateControls
 import Solidity.Backend.AbiEntry.SingleWordGateInterface
+import Solidity.Backend.AbiEntry.SizeBranches
+import Solidity.Backend.AbiEntry.SizeBranchesControls
 import Solidity.Backend.AbiEntry.SizeBranchesInterface
 import Solidity.Backend.AbiEntry.SourcePayable
 import Solidity.Backend.AbiEntry.SourcePayableControls

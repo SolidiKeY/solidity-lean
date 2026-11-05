@@ -1,4 +1,4 @@
-import Solidity.Backend.AbiEntry.CoreJoin
+import Solidity.Backend.AbiEntry.CoreJoin.Shared
 
 /-! Actual short/full input branching at size four through the existing typed
 compiler. Exact raw join behavior and represented core body outcomes are both
@@ -30,12 +30,12 @@ structure SizeBranchesCertificate
   body_outcome : ∀ {C : Contract} {Γ ΔT ΔF : Ctx} (L base : Nat) (frag : Evm.Frag Γ)
     (index : Idx Γ (.val .uint)) (yes : Prog C Γ ΔT) (no : Prog C Γ ΔF)
     (yesFrag : Evm.Frag ΔT) (noFrag : Evm.Frag ΔF)
-    (yesCore : Evm.inFragP frag yes=some yesFrag) (noCore : Evm.inFragP frag no=some noFrag)
+    (_yesCore : Evm.inFragP frag yes=some yesFrag) (_noCore : Evm.inFragP frag no=some noFrag)
     (whole : Evm.Compiler.Compilation base frag (program index yes no))
     (left : Evm.Compiler.Compilation base frag yes) (right : Evm.Compiler.Compilation base frag no)
-    (wholeFound : Evm.Compiler.compile base frag (program index yes no)=some whole)
-    (leftFound : Evm.Compiler.compile base frag yes=some left) (rightFound : Evm.Compiler.compile base frag no=some right)
-    (state : State C Γ) (machine : Evm.Machine) (represented : Evm.Sim C L base frag state machine)
-    (room : L+Evm.Prog.pushes yes≤Evm.Lmax) (size : Fin Evm.W) (initial : machine.mem (Evm.cellOf base index)=.val size),
+    (_wholeFound : Evm.Compiler.compile base frag (program index yes no)=some whole)
+    (_leftFound : Evm.Compiler.compile base frag yes=some left) (_rightFound : Evm.Compiler.compile base frag no=some right)
+    (state : State C Γ) (machine : Evm.Machine) (_represented : Evm.Sim C L base frag state machine)
+    (_room : L+Evm.Prog.pushes yes≤Evm.Lmax) (size : Fin Evm.W) (_initial : machine.mem (Evm.cellOf base index)=.val size),
     Evm.run whole.code machine=if size.val<4 then Evm.run left.code machine else Evm.run right.code machine
 end Solidity.Backend.AbiEntry.Interface
