@@ -1125,3 +1125,7 @@ signature or body association. Native loading/frame realization, signed and
 aggregate bindings, multiparameter decoding, full profile/dispatch-entry
 composition and physical failure bytes remain open. G46.02, the writer
 counterexample, fixture replay and full assignment gates remain pending.
+
+`SignedBindingInterface.lean` specifies actual signed validation followed by
+typed `.int` parameter binding with exact word/state and raw entry agreement.
+The existing typed `toInt` cast preserves the accepted representation.
