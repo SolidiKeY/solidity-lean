@@ -1,3 +1,5 @@
+import SolidityBridge.RoadmapV15.P10.EqualityConsumer
+import SolidityBridge.RoadmapV15.P10.BooleanNotConsumer
 import SolidityBridge.RoadmapV15.P10.LogicalShiftConsumer
 import Solidity.Backend.Selection.UnsignedSelection
 import SolidityBridge.RoadmapV15.P10.UnsignedDivisionConsumer
@@ -298,4 +300,73 @@ theorem shr (site : Site .SHR) (count value : Scalar.Word) (tail : Scalar.Stack)
  Quot.sound] -/
 #guard_msgs in
 #print axioms shr
+
+theorem selected_flags :
+    Selection.selectBitwiseComparison .eq=some Selection.eqCertificate ∧
+    Selection.selectBitwiseComparison .iszero=some Selection.iszeroCertificate := by
+  first | decide | exact ⟨rfl,rfl⟩
+
+theorem eq (valid : Array UInt256) (site : Site .EQ) (a b : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::b::tail))
+    (room : tail.length+2≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::b::tail)).state
+    let result := Scalar.flag (a == b)
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .eq m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.eqCertificate.code (a::b::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.eqCertificate.code (a::b::tail)=some (Scalar.flag (a == b)::tail) := by rfl
+    have ir := (Selection.eqCertificate.success _ _ m represented).mpr scalar
+    have native := equality_agreement valid site a b tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+theorem iszero (valid : Array UInt256) (site : Site .ISZERO) (a : Scalar.Word) (tail : Scalar.Stack)
+    (m : Solidity.Evm.Machine) (represented : m.stack=Selection.irStack (a::tail))
+    (room : tail.length+1≤1024) (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    let input := (modularSite site (a::tail)).state
+    let result := Scalar.flag (a == 0)
+    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
+      ((result::tail).map (fun w=>UInt256.mk w.toFin))
+    Solidity.Evm.Instr.step .iszero m=.ok {m with stack:=Selection.irStack (result::tail)} 0 ∧
+    Scalar.run Selection.iszeroCertificate.code (a::tail)=some (result::tail) ∧
+    Assembly.driverSteps 1 (fuel+2) valid input=.ok next ∧
+    EVM.X (fuel+2) valid input=EVM.X (fuel+1) valid next ∧
+    next.toState=input.toState ∧ next.memory=input.memory ∧
+    next.returnData=input.returnData ∧ next.H_return=input.H_return := by
+  first
+  | solve | rfl
+  | solve | simp only
+  | solve | decide
+  | solve | omega
+  | dsimp only
+    have scalar : Scalar.run Selection.iszeroCertificate.code (a::tail)=some (Scalar.flag (a == 0)::tail) := by rfl
+    have ir := (Selection.iszeroCertificate.success _ _ m represented).mpr scalar
+    have native := iszero_agreement valid site a tail room gas fuel
+    exact ⟨ir,scalar,native.2.1,native.2.2,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_flags' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms selected_flags
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.eq' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms eq
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.iszero' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms iszero
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
