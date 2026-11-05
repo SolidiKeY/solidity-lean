@@ -1,0 +1,40 @@
+{
+  "scope": "Initial inventory, exact atomic layout contracts and preserved raw type-name counterexample only",
+  "finder": {
+    "agent": "/root/inventory_finder",
+    "mode": "read-only, no Lean server",
+    "initial_verdict": "changes required",
+    "findings": [
+      "Axiom report incorrectly claimed all signatures empty",
+      "Host availability did not enforce enclosing-VM headroom",
+      "Heavy build/MCP overlap not excluded",
+      "Inventory layout check asserted count only"
+    ],
+    "final_verdict": "initial checkpoint content accepted; whole assignment acceptance open"
+  },
+  "skeptic": {
+    "agent": "/root/inventory_skeptic",
+    "mode": "read-only, no Lean server",
+    "initial_verdict": "changes required",
+    "findings": [
+      "Incorrect empty axiom report for two [propext] lemmas",
+      "Enclosing-VM cgroup headroom missing",
+      "Guarded MCP resource record not yet saved"
+    ],
+    "final_verdict": "initial checkpoint accepted only after saved guarded MCP resource record"
+  },
+  "fixes": [
+    "Documentation records eight empty axiom signatures and two [propext]",
+    "Both runtime paths use min(host availability, enclosing-VM cgroup max-current)",
+    "Shared heavy-runtime lifetime lock and live-MCP build preflight",
+    "Exact distinct five attribute-layout shapes checked",
+    "Shutdown grace shortened to save resource evidence within bridge termination window"
+  ],
+  "evidence": [
+    "guard-controls.json",
+    "h28-type-7aa885314df1.json",
+    "mcp-reviewed-shutdown.json",
+    "mcp-resource-88dacac6c284.json"
+  ],
+  "remaining": "All universal decomposition/uniqueness/completeness proofs, all-constructor/solc controls, final full gates and whole-assignment reviews remain open"
+}

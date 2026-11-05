@@ -1,0 +1,7 @@
+{
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "implementationHead": "713a061286b467f1016d7d7a58e3dee9bd52c2e0",
+  "newOrChangedNamedTheorems": [],
+  "boundary": "Source declaration census: shared modules introduce definitions, not named theorems; unchanged private proof-bearing runtime block checked byte-identical by audit.py. Axiom commands additionally inspect public builder/entrypoint closure.",
+  "baseValidationCopy": "Immutable exact git-show source prefix, with only appended #check/#print axioms commands. Never used as a production translator."
+}

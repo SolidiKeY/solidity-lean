@@ -1,0 +1,15 @@
+# H28 pin-registration checkpoint handoff
+
+Frozen base6f3eedf0788ee1f8a3bcf230558c712ecdca04d5; repository/worktree /workspace/solidity-lean; assigned branch codex/solidity-h28-sol-20261104/non-vacuity. The commit containing this file owns the integration proposal. No push/merge/shared edits.
+
+The actual toolkit full retry on49af79545eaef77678e7c6d32041c278a311ece4 exits1 in133.375689s: all stages PASS except axiom-pins, whose decisive output is0 errors/414 unrecorded changes. run-lean and TestSuite/corpus/strict automatic all PASS. Source KeySort on the same head also PASS, actual Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Lake5.0.0-src+797c613. The earlier long full build passed3672 jobs; its missing-SolKey-pin setup failures remain historical failures. Raw commands/exits/timing/RSS are in evidence/pin-registration, with original absolute evidence paths preserved. Same12GiB/no-swap/4GiBestimated reserve/serial-j1 policy remains enforced.
+
+The shared checker scans tests and hardcodes scripts/g07-axiom-pins.json. Current H28 prohibits that shared registry write. No semantic defect or nonstandard axiom is reported. This is a real registration/scope dependency, not permission to hide the pins or bypass the required gate.
+
+The pin-proposal/comparison.json read-only result preserves6343 old entries and adds exactly414 records matching actual local kernel guard sets. Candidate comparison0 errors/0 notes is preparation only. pin-delta.json is the minimal central integration manifest; central-registration.patch targets the pinned-base registry only. Preserve any newer integration-owner records when using this delta on another head. shared-registry.candidate.json must never replace a newer registry wholesale.
+
+The alternative authorized-exception.patch adds the same414 registrations and only the corresponding exact shared-file path allowance to the owned checker. It remains UNAPPLIED and requires explicit authorization under Q-H28-PINS. No theorem, premise, exclusion, refusal, observation, resource limit or axiom set is weakened by either data proposal. The worker has not written any protected/shared file.
+
+All26 Lean proof files and the54-input reviewed runtime/proof/accounting snapshot are unchanged. Final fresh private kernel checks must follow the now-passing baseline build, and final evidence acceptance must continue to reject the failed full gate. Independent finder/skeptic review the proposal without Lean/server. No whole-goal completion or RUNTIME_GATE_PASS until all required validation, including the full gate, actually passes. The final sealed handoff will record exact committed head, original patch/bundle, raw evidence, hashes, scope question and remaining dependency.
+
+The committed captured gates table is gates.tsv.base64, with decoded hash/length in gates.tsv.encoding.json. Its original raw path is preserved and remains unchanged for toolkit handoff. Decode the copy to obtain the exact raw bytes; generated trailing spaces were not normalized.

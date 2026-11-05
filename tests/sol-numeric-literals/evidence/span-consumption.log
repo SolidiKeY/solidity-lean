@@ -1,0 +1,11 @@
+ERROR 164:5 unsolved goals
+case neg
+p : UInt8 → Bool
+b : UInt8
+r : List UInt8
+ih : List.takeWhile p r ++ List.drop (List.takeWhile p r).length r = r
+hb : ¬p b = true
+⊢ (if false = true then b :: List.takeWhile p r else []) ++
+      List.drop (if false = true then b :: List.takeWhile p r else []).length (b :: r) =
+    b :: r
+diag: 1 errors

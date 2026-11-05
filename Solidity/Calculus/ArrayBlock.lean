@@ -1,5 +1,6 @@
 import Solidity.Calculus.ArrayReduction
 import Solidity.Calculus.ArrayProperty
+import Solidity.Calculus.DecisionBoundedUInt
 
 /-!
 # Leaves with blocks over storage arrays (M7, feature 32)
@@ -383,10 +384,9 @@ def lenPrep (B : LFml C) : Prep B where
 def lenKeys (B : LFml C) : List (LTm C (.val .uint)) :=
   (lenAtoms B.atomBound (lenRoots B)).map fun d => .var d.2
 
-/-- **The preparation of a body with blocks over arrays**: the lengths as
-atoms (`lenPrep`), then the blocks instantiated with them in the index set
-(`apfPrepWith`). -/
-@[irreducible] def blockPrep (B : LFml C) : Prep B := (lenPrep B).trans (apfPrepWith (lenKeys B) (lenPrep B).body)
+/-- The original length/APF preparation, retained for every already handled body. -/
+@[irreducible] def baseBlockPrep (B : LFml C) : Prep B :=
+  (lenPrep B).trans (apfPrepWith (lenKeys B) (lenPrep B).body)
 
 /-! ## The Theory's slot reads folded
 
@@ -544,6 +544,42 @@ theorem LFml.slotFold_holds (g : State C []) : ∀ (φ : LFml C) (ν : AEnv), φ
   | .and φ ψ, ν => and_congr (LFml.slotFold_holds g φ ν) (LFml.slotFold_holds g ψ ν)
   | .imp φ ψ, ν => imp_congr (LFml.slotFold_holds g φ ν) (LFml.slotFold_holds g ψ ν)
   | .all k p φ, ν => forall_congr' fun v => LFml.slotFold_holds g φ _
+
+/-- Preserve the original preparation whenever it is quantifier-free or its
+original guarded array parser succeeds. Only unsupported shapes try exact bounded
+instances before the unchanged length/APF stages. The original OR guard precedes
+its fallback lifting; all downstream whole-result budgets remain unchanged. -/
+@[irreducible] def blockPrep (B : LFml C) : Prep B :=
+  let base := baseBlockPrep B
+  if base.body.qfB then base
+  else
+    let folded := base.body.slotFold.litFold
+    if folded.ors ≤ orBudget then
+      let old := (folded.hasFold.orLift orFuel).litFold
+      if (old.aCut? old.atomBound).isSome then base
+      else
+        let P := boundedUIntPrep B
+        P.trans ((lenPrep P.body).trans (apfPrepWith (lenKeys P.body) (lenPrep P.body).body))
+    else
+      let P := boundedUIntPrep B
+      P.trans ((lenPrep P.body).trans (apfPrepWith (lenKeys P.body) (lenPrep P.body).body))
+
+/-- Existing quantifier-free preparations are preserved exactly, including their
+normal forms and original countermodel/replay interfaces. -/
+theorem blockPrep_preserves_qf (B : LFml C) (h : (baseBlockPrep B).body.qfB = true) :
+    blockPrep B = baseBlockPrep B := by
+  unfold blockPrep
+  rw [if_pos h]
+
+/-- Existing guarded-parser successes retain the original preparation as well. -/
+theorem blockPrep_preserves_parsed (B : LFml C)
+    (hOr : (baseBlockPrep B).body.slotFold.litFold.ors ≤ orBudget)
+    (hParsed : let old := ((baseBlockPrep B).body.slotFold.litFold.hasFold.orLift orFuel).litFold
+      (old.aCut? old.atomBound).isSome = true) : blockPrep B = baseBlockPrep B := by
+  unfold blockPrep
+  by_cases hQ : (baseBlockPrep B).body.qfB = true
+  · rw [if_pos hQ]
+  · rw [if_neg hQ, if_pos hOr, if_pos hParsed]
 
 /-- The body prepared (`blockPrep`: the lengths as atoms, the blocks
 instantiated), the Theory's slot reads and comparisons of literals folded,

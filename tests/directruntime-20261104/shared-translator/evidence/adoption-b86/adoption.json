@@ -1,0 +1,17 @@
+{
+  "publishedMaster": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "preservedOwnedHead": "69fa8c1f36ca88a0db11ec453ba1cae317f21638",
+  "resolution": "Retain published reviewer correction to Compose docstring; executable source otherwise byte-identical.",
+  "oursSha256": "0b90b4b5ce3fc3e42b77c3f43223496f9e11b78ff775e8fb271fcb6f7fcf188f",
+  "publishedSha256": "0c55d2dda8f700efd314b98ee9a284fd3ad73a17ae68ae4decf7d6eab15ccee5",
+  "CRMigrationDelivered": false,
+  "cacheReceipt": {
+    "status": "coordinator-reported byte delivery verified",
+    "bytes": 965584,
+    "sha256": "047cfd99894d0943e9cdd728122ac48db0b2103652a97444944efbcc2325f167",
+    "hostArchive": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-translator-owned-delta.tar.zst",
+    "hostReceipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1200Z/shared-cache-received.json",
+    "hostReceiptReadLocally": false,
+    "boundary": "User-reported verified byte delivery; not installation,entrypoint migration,parity or native/WASM closure."
+  }
+}

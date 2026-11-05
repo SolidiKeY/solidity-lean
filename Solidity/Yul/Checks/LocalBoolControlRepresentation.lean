@@ -1,6 +1,8 @@
 import Solidity.Yul.LocalBoolControlRepresentation
 import Solidity.Yul.Checks.LocalBoolRepresentation
 
+/-! Concrete raw Boolean controls for short-circuiting, conditional updates,
+partial evaluation and the typed representation relation. -/
 namespace Solidity.Yul.Checks.LocalBoolControlRepresentation
 export Solidity.Yul.Checks.LocalBoolRepresentation (env raw cleanTrue cleanFalse)
 def state (value : LocalValue env .bool) (world : Solidity.Source.St env) :

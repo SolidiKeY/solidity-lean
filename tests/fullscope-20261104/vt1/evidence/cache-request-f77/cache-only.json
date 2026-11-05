@@ -1,0 +1,25 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--memory=12g",
+    "--memory-swap=12g",
+    "--cpus=1",
+    "--user=1000:1000",
+    "-v",
+    "/workspace:/workspace",
+    "-v",
+    "/opt:/opt:ro",
+    "-v",
+    "/usr:/usr:ro",
+    "-w",
+    "/workspace/solidity-lean",
+    "ubuntu:24.04",
+    "bash",
+    "-c",
+    "set -eu; source /workspace/.setup/activate.sh; export LEAN_NUM_THREADS=1; timeout 180 lake --no-build build +Solidity.Backend.Environment.ByteConstants:olean"
+  ],
+  "exit": 3,
+  "wall_seconds": 1.0211934660001134
+}

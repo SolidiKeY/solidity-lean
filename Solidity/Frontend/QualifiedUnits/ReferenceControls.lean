@@ -5,16 +5,16 @@ namespace Solidity.Frontend.QualifiedUnits.ReferenceControls
 open Solidity.Source Controls
 
 theorem member_chain : expressionPath (.member (.member (.ident "N") "M") "T") = some ⟨"N", ["M", "T"]⟩ := by
-  simp only [expressionPath, Option.map, List.nil_append, List.cons_append]
+  simp only [expressionPath,expressionPathAny, Option.map, List.nil_append, List.cons_append]
 
 theorem member_chain_references :
     references (.member (.member (.ident "N") "M") "T") =
       [⟨"N", ["M", "T"]⟩, ⟨"N", ["M"]⟩, ⟨"N", []⟩] := by
-  simp only [references, expressionPath, Option.map, Option.toList, List.nil_append, List.cons_append]
+  simp only [references, expressionPath, expressionPathAny, Option.map, Option.toList, List.nil_append, List.cons_append]
 
 theorem nonpath_receiver :
     references (.member (.call (.ident "f") (.positional .nil)) "field") = [⟨"f", []⟩] := by
-  simp only [references, expressionPath, Option.map, Option.toList, List.nil_append, List.append_nil]
+  simp only [references, expressionPath, expressionPathAny, Option.map, Option.toList, List.nil_append, List.append_nil]
 
 theorem mapping_key_path :
     references (.mapping (.path ⟨"N", ["T"]⟩) none (.elem .bool) none) = [⟨"N", ["T"]⟩] := by

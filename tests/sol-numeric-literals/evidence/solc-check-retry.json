@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+    "tests/sol-numeric-literals/run-fixtures.mjs"
+  ],
+  "exit": 0,
+  "seconds": 1.067,
+  "container_memory_peak_bytes": 1284853760,
+  "minimum_parent_headroom_bytes": 15521939456,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/solc-check-retry.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

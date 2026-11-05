@@ -1,0 +1,81 @@
+{
+  "status": "partial; final exact-head gates follow",
+  "upstream": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "merge": "da9d39bad42f9e0fd996866bf0cde5caa32fe2ef",
+  "source_count": 63,
+  "source_mismatches": [],
+  "owned_Lean_files_unchanged": 26,
+  "controls": 39,
+  "gates": {
+    "follow-on-accounting": {
+      "git_head": "da9d39bad42f9e0fd996866bf0cde5caa32fe2ef",
+      "command": [
+        "tests/h28-sol/non-vacuity/runtime/accounting"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 18.217993376994855,
+      "rusage": {
+        "command": [
+          "tests/h28-sol/non-vacuity/runtime/accounting"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 17.326383266001358,
+        "children_user_seconds": 12.949388,
+        "children_system_seconds": 4.654017,
+        "children_max_rss_kib": 23532,
+        "children_major_faults": 0,
+        "children_minor_faults": 3930483
+      },
+      "log_sha256": "1061bb7941204defc053af10cc7d43e06f68d3f564dc2b1608969cae5454e2f1",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 9053237248
+    },
+    "follow-on-pin-proposal": {
+      "git_head": "da9d39bad42f9e0fd996866bf0cde5caa32fe2ef",
+      "command": [
+        "node",
+        "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+        "tests/h28-sol/non-vacuity/pin-proposal-f77c"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 13.871556263002276,
+      "rusage": {
+        "command": [
+          "node",
+          "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+          "tests/h28-sol/non-vacuity/pin-proposal-f77c"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 13.02660495100281,
+        "children_user_seconds": 12.579544,
+        "children_system_seconds": 0.8254119999999999,
+        "children_max_rss_kib": 330440,
+        "children_major_faults": 0,
+        "children_minor_faults": 526624
+      },
+      "log_sha256": "75d792718d8ea59b699de5b30b4c6e73a869a6fa0894c3ff2e6c22320c323b38",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 8779800576
+    }
+  },
+  "proposal": {
+    "old_count": 7590,
+    "added_count": 414,
+    "candidate_count": 8004,
+    "applied": false
+  },
+  "reviews": "Separate read-only finder/skeptic all4sourceareasPASS; snapshot rebind/final evidence next",
+  "cache_receipt": null,
+  "blockers": [
+    "Q-H28-PINS",
+    "Q-H35-CACHE"
+  ]
+}
