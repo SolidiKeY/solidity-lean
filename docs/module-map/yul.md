@@ -184,3 +184,5 @@
 | `Yul/LocalBoolUnchecked.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Checks/LocalBoolRepresentation.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/LocalBoolRepresentation.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
+| `Evm/MemoryLoopHorizonRestriction.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Evm/MemoryLoopHorizonRestrictionControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
