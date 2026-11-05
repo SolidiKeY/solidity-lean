@@ -288,3 +288,12 @@ with its own world preserved. The exact Source error/world equation retains
 checked/coherent premises. Controls include mutating initialization at every
 horizon and distinct legacy/viaIR partial initializer words.
 This supplies no arbitrary dirty Source readback or general initializer admission. -/
+
+/-! RawContinueLoop.uint8Body/uint8Run execute the existing checked uint8
+expression-block producer under a literal-true guard. uint8_body_result proves
+normal/error outcomes for this concrete body; uint8_no_success uses actual
+postbody states in its fuel induction, with no supplied no-break assumption.
+source_uint8_no_success retains checked/coherent input. Body errors and partial
+mutations remain observable; no-success does not mean every error is timeout.
+Controls retain dirty mutation and per-pipeline partial words. General dirty
+Source readback, arbitrary loop admission and full adequacy remain separate. -/

@@ -193,6 +193,121 @@ theorem initializerViaIRPartial : ∀ (world : Solidity.Source.St Solidity.Yul.C
   intro world
   exact ⟨rfl,rfl,rfl,rfl⟩
 
+theorem expressionAll : ∀ (pipeline : Solidity.Roadmap.Pipeline) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State Solidity.Yul.Checks.RawContinueLoop.Old.ctx),
+ (Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.assign pipeline fuel state).1.isOk = false := by
+  intro pipeline fuel state
+  exact RawContinueLoop.uint8_no_success Old.ctx [] false false _ Init.assign pipeline fuel state
+
+theorem expressionLegacyPartial : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.timeout Solidity.Roadmap.Pipeline.legacy 8
+   (Solidity.Yul.Checks.RawContinueLoop.Old.initial 257 2 1 world)
+ actual.1 = .error .timeout ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.xCell).val = 257 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.flagCell).val = 1 ∧
+ actual.2.world = world := by
+  intro world
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
+theorem expressionViaIRPartial : ∀ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.timeout Solidity.Roadmap.Pipeline.viaIR 8
+   (Solidity.Yul.Checks.RawContinueLoop.Old.initial 257 2 1 world)
+ actual.1 = .error .timeout ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.xCell).val = 2 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.flagCell).val = 1 ∧
+ actual.2.world = world := by
+  intro world
+  exact ⟨rfl,rfl,rfl,rfl⟩
+
+theorem expressionSourceAll : ∀ (glob : Solidity.Source.Glob Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env)
+ (frame : Solidity.Source.Fr), frame.checked = true →
+ ∀ (fuel nps : Nat) (ph : Option (Solidity.Source.Ph Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env))
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ ((Solidity.Source.execS glob frame fuel nps ph
+   (Solidity.Source.RStmt.whileLoop (R := []) (M := false) (l := true) (u := false)
+     (.bool true) (.block (.stmt (.expr (.assign (.local .here) (.local (.there .here)))) .nil)))
+   Solidity.Yul.Checks.RawContinueLoop.Old.clean).run
+   (Solidity.Source.L0 Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env,world)).1.isOk = false := by
+  intro glob frame checked fuel nps ph world
+  exact RawContinueLoop.source_uint8_no_success Old.ctx [] false false _ Init.assign
+    glob frame checked fuel nps ph (RawFrame.ofClean Old.clean world)
+    (RawCoherent.coherent_ofClean Old.clean world)
+
+
+def expressionValues : LocalValues Old.ctx.env Old.ctx.tys :=
+ (.scalar (LocalOperations.u8Shape Old.ctx.env) (word 257),
+  (.scalar (LocalOperations.u8Shape Old.ctx.env) (word 257),
+   (.scalar (LocalOperations.boolShape Old.ctx.env) (word 2),())))
+def expressionState (world : Solidity.Source.St Old.ctx.env) : RawFrame.State Old.ctx :=
+ RawCoherent.capture (Old.initial 2 257 2 world) (expressionValues,world)
+
+theorem expressionPrepare : ∀ (world : Solidity.Source.St Old.ctx.env),
+ RawCoherent.prepare (expressionState world) = (expressionValues,world) := by
+  intro world
+  rfl
+
+theorem expressionRefresh : ∀ (world : Solidity.Source.St Old.ctx.env),
+ RawContinueLoop.refresh (expressionState world) = expressionState world := by
+  intro world
+  unfold RawContinueLoop.refresh
+  rw [expressionPrepare]
+  rfl
+
+theorem expressionMutation : ∀ (pipeline : Solidity.Roadmap.Pipeline)
+ (world : Solidity.Source.St Solidity.Yul.Checks.RawContinueLoop.Old.ctx.env),
+ let actual := Solidity.Yul.RawContinueLoop.uint8Run Solidity.Yul.Checks.RawContinueLoop.Old.ctx [] false false
+   Solidity.Yul.Checks.RawContinueLoop.Init.assign pipeline 6
+   (Solidity.Yul.Checks.RawContinueLoop.Old.initial 2 257 2 world)
+ actual.1 = .error .timeout ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.xCell).val = 257 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.argCell).val = 257 ∧
+ (Solidity.Yul.RawFrame.view actual.2 Solidity.Yul.Checks.RawContinueLoop.Old.flagCell).val = 2 ∧
+ Solidity.Yul.RawCoherent.coherent actual.2 = false ∧ actual.2.world = world := by
+  intro pipeline world
+  have guardOne : RawCondition.eval (RawContinueLoop.test Old.ctx) 5
+      (Old.initial 2 257 2 world) =
+      (.ok true,RawContinueLoop.refresh (Old.initial 2 257 2 world)) := by rfl
+  have first : (RawContinueLoop.uint8Body Old.ctx [] false false Init.assign).run pipeline 5
+      (RawContinueLoop.refresh (Old.initial 2 257 2 world)) =
+      (.ok .normal,expressionState world) := by rfl
+  have guardTwo : RawCondition.eval (RawContinueLoop.test Old.ctx) 4 (expressionState world) =
+      (.ok true,expressionState world) := by
+    change ((.ok true : Solidity.Source.R Bool),RawContinueLoop.refresh (expressionState world)) =
+      (.ok true,expressionState world)
+    rw [expressionRefresh]
+  have step : RawU8Statement.run Init.assign pipeline 2 (expressionState world) =
+      (.error .timeout,expressionState world) := by
+    unfold RawU8Statement.run RawU8Statement.localRun
+    rw [expressionPrepare]
+    rfl
+  have second : (RawContinueLoop.uint8Body Old.ctx [] false false Init.assign).run pipeline 4
+      (expressionState world) = (.error .timeout,expressionState world) := by
+    change RawCheckedControlSequence.run (ctx := Old.ctx) (returns := [])
+      (modifier := false) (u := false) (.uint8 Init.assign .nil) pipeline 3
+      (expressionState world) = _
+    rw [RawCheckedControlSequence.run_uint8,step]
+  have start : RawContinueLoop.uint8Run Old.ctx [] false false Init.assign pipeline 6
+      (Old.initial 2 257 2 world) =
+      RawContinueLoop.uint8Run Old.ctx [] false false Init.assign pipeline 5
+        (expressionState world) := by
+    unfold RawContinueLoop.uint8Run
+    rw [RawCheckedAdapterLoop.run,guardOne]
+    dsimp only
+    rw [first]
+    rfl
+  have finish : RawContinueLoop.uint8Run Old.ctx [] false false Init.assign pipeline 5
+      (expressionState world) = (.error .timeout,expressionState world) := by
+    unfold RawContinueLoop.uint8Run
+    rw [RawCheckedAdapterLoop.run,guardTwo]
+    dsimp only
+    rw [second]
+    rfl
+  rw [start,finish]
+  exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
 end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.RawContinueLoop.refresh_view
 #print axioms Solidity.Yul.RawContinueLoop.refresh_world
@@ -227,3 +342,15 @@ end Solidity.Yul.Checks.RawContinueLoop
 #print axioms Solidity.Yul.Checks.RawContinueLoop.mutatingInitializerAll
 #print axioms Solidity.Yul.Checks.RawContinueLoop.initializerLegacyPartial
 #print axioms Solidity.Yul.Checks.RawContinueLoop.initializerViaIRPartial
+
+#print axioms Solidity.Yul.RawContinueLoop.uint8_body_result
+#print axioms Solidity.Yul.RawContinueLoop.uint8_no_success
+#print axioms Solidity.Yul.RawContinueLoop.source_uint8_no_success
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionAll
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionLegacyPartial
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionViaIRPartial
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionSourceAll
+
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionPrepare
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionRefresh
+#print axioms Solidity.Yul.Checks.RawContinueLoop.expressionMutation
