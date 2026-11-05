@@ -450,4 +450,167 @@ theorem unsigned_input_observation (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms unsigned_input_observation
+private theorem unary_short_scalar (words : Scalar.Stack) (short : words.length<1) :
+    Scalar.run Selection.notCertificate.code words=none ∧
+    Scalar.run Selection.iszeroCertificate.code words=none := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | cases words with
+    | nil => exact ⟨rfl,rfl⟩
+    | cons a tail => simp only [List.length_cons] at short;omega
+
+private theorem unary_short_gate (valid : Array UInt256) (s : EVM.State)
+    (op : Operation .EVM) (cost : Nat) (allowed : op=.NOT ∨ op=.ISZERO)
+    (chargeCost : EVM.C' s op=cost) (gas : cost≤s.gasAvailable.toNat)
+    (short : s.stack.length<1) :
+    Assembly.driverGate valid s op=.error .StackUnderflow := by
+  first
+  | solve | rfl
+  | solve | decide
+  | solve | omega
+  | solve | simp only []
+  | have expansion : EVM.memoryExpansionCost s op=0 := by
+      rcases allowed with rfl|rfl <;>
+        simp only [EVM.memoryExpansionCost,EVM.memoryExpansionCost.μᵢ',Nat.sub_self]
+    have delta : EVM.δ op=some 1 := by rcases allowed with rfl|rfl <;> rfl
+    have charge : s.gasAvailable-UInt256.ofNat 0=s.gasAvailable := by
+      change UInt256.mk (s.gasAvailable.val-0)=s.gasAvailable
+      rw [sub_zero]
+    simp only [Assembly.driverGate]
+    rw [expansion,charge]
+    simp only [chargeCost,delta,Option.getD_some,if_neg (Nat.not_lt_zero _),
+      if_neg (Nat.not_lt_of_ge gas),reduceCtorEq,if_false,if_pos short,bind,Except.bind,pure,Except.pure]
+
+theorem not_refusal (valid : Array UInt256) (site : Site .NOT)
+    (words : Scalar.Stack) (m : Solidity.Evm.Machine)
+    (represented : m.stack=Selection.irStack words) (short : words.length<1)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    Solidity.Evm.Instr.step .not m=.fault ∧
+    Scalar.run Selection.notCertificate.code words=none ∧
+    Assembly.driverSteps 1 (fuel+2) valid (modularSite site words).state=.error .StackUnderflow := by
+  have scalar := (unary_short_scalar words short).1
+  refine ⟨(Selection.notCertificate.refusal words m represented).mpr scalar,scalar,?_⟩
+  have gate := unary_short_gate valid (modularSite site words).state .NOT 3 (Or.inl rfl) rfl gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind,DecoderAgreement.referenceOp,gate]
+
+theorem not_native_refusal (valid : Array UInt256) (site : Site .NOT)
+    (words : Scalar.Stack) (short : words.length<1)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    EVM.X (fuel+1) valid (modularSite site words).state=.error .StackUnderflow := by
+  have gate := unary_short_gate valid (modularSite site words).state .NOT 3 (Or.inl rfl) rfl gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.X_unfold,decoded,Option.getD_some,DecoderAgreement.referenceOp,gate]
+
+theorem iszero_refusal (valid : Array UInt256) (site : Site .ISZERO)
+    (words : Scalar.Stack) (m : Solidity.Evm.Machine)
+    (represented : m.stack=Selection.irStack words) (short : words.length<1)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    Solidity.Evm.Instr.step .iszero m=.fault ∧
+    Scalar.run Selection.iszeroCertificate.code words=none ∧
+    Assembly.driverSteps 1 (fuel+2) valid (modularSite site words).state=.error .StackUnderflow := by
+  have scalar := (unary_short_scalar words short).2
+  refine ⟨(Selection.iszeroCertificate.refusal words m represented).mpr scalar,scalar,?_⟩
+  have gate := unary_short_gate valid (modularSite site words).state .ISZERO 3 (Or.inr rfl) rfl gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind,DecoderAgreement.referenceOp,gate]
+
+theorem iszero_native_refusal (valid : Array UInt256) (site : Site .ISZERO)
+    (words : Scalar.Stack) (short : words.length<1)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    EVM.X (fuel+1) valid (modularSite site words).state=.error .StackUnderflow := by
+  have gate := unary_short_gate valid (modularSite site words).state .ISZERO 3 (Or.inr rfl) rfl gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.X_unfold,decoded,Option.getD_some,DecoderAgreement.referenceOp,gate]
+
+theorem unary_empty_clients (perm : Bool) :
+    let m := {InstructionSelectionControls.ir 7 3 with stack:=Selection.irStack []}
+    (Solidity.Evm.Instr.step .not m=.fault ∧
+      Scalar.run Selection.notCertificate.code []=none ∧
+      Assembly.driverSteps 1 2 #[u 37,u 99]
+        (modularSite (WrappingArithmeticFixtures.site .NOT 12 perm) []).state=.error .StackUnderflow) ∧
+    (Solidity.Evm.Instr.step .iszero m=.fault ∧
+      Scalar.run Selection.iszeroCertificate.code []=none ∧
+      Assembly.driverSteps 1 2 #[u 37,u 99]
+        (modularSite (WrappingArithmeticFixtures.site .ISZERO 12 perm) []).state=.error .StackUnderflow) := by
+  exact ⟨not_refusal _ _ _ _ rfl (by decide) (by change 3≤12;decide) 0,
+    iszero_refusal _ _ _ _ rfl (by decide) (by change 3≤12;decide) 0⟩
+
+theorem unary_priority_controls (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .NOT 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .ISZERO 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .NOT 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input .ISZERO 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (WrappingArithmeticFixtures.input .NOT 0 perm [])=.error .OutOfFuel ∧
+    Assembly.driverSteps 1 1 #[] (WrappingArithmeticFixtures.input .ISZERO 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+theorem unary_native_fuel_boundary (perm : Bool) :
+    EVM.X 1 #[] (modularSite (WrappingArithmeticFixtures.site .NOT 12 perm) []).state=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (modularSite (WrappingArithmeticFixtures.site .NOT 12 perm) []).state=.error .OutOfFuel ∧
+    EVM.X 1 #[] (modularSite (WrappingArithmeticFixtures.site .ISZERO 12 perm) []).state=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (modularSite (WrappingArithmeticFixtures.site .ISZERO 12 perm) []).state=.error .OutOfFuel := by
+  exact ⟨not_native_refusal _ _ _ (by decide) (by change 3≤12;decide) 0,rfl,
+    iszero_native_refusal _ _ _ (by decide) (by change 3≤12;decide) 0,rfl⟩
+
+theorem unary_input_observation (perm : Bool) :
+    let input := WrappingArithmeticFixtures.input .NOT 12 perm []
+    input.stack=[] ∧ input.executionEnv.perm=perm ∧
+    input.executionEnv.code.data.toList=[0x60,0x7f,0x50,0x19,0] ∧
+    input.pc=u 3 ∧ input.gasAvailable=u 12 ∧ input.execLength=41 ∧
+    input.memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    input.returnData.data.toList=[0xcc,0xdd] ∧ input.H_return.data.toList=[0xee,0xff] ∧
+    input.executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    input.accountMap=WordPushFixtures.accounts ∧ input.σ₀=WordPushFixtures.accounts := by
+  first | rfl | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.not_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.iszero_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms iszero_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.not_native_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms not_native_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.iszero_native_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms iszero_native_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_empty_clients' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms unary_empty_clients
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_priority_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms unary_priority_controls
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_native_fuel_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms unary_native_fuel_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.unary_input_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms unary_input_observation
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal
