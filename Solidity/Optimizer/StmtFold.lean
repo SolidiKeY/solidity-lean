@@ -99,6 +99,14 @@ end Congr
 
 /-! ## The pass -/
 
+/-- An expression pass with its proof: equal results in every typed state. -/
+structure ValPass (C : Contract) where
+  run : {Γ : Ctx} → {p : PrimTy} → Val C Γ p → Val C Γ p
+  sound : ∀ {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (v : Val C Γ p), (run v).evalT σ = v.evalT σ
+
+/-- Constant folding as an expression pass. -/
+def cfoldPass : ValPass C := ⟨Val.cfold, fun σ v => Val.cfold_evalT σ v⟩
+
 /-- `if` on a literal: the branch it takes, as a block (the branch is a scope). -/
 def foldIte {Γ Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
     Stmt C Γ Γ :=
@@ -152,17 +160,17 @@ def consDrop : {Γ Γ₁ Γ₂ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Γ₂
   | _, _, _, s@(.catchData ..), P => .cons s P
 
 mutual
-/-- Constant folding and dead-branch elimination of a statement. -/
-def _root_.Solidity.Stmt.cfold : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
-  | _, _, .assignLocal i r => .assignLocal i r.cfold
-  | _, _, .declLocal p x init => .declLocal p x (init.map Val.cfold)
-  | _, _, .require c => .require c.cfold
-  | _, _, .assert c => .assert c.cfold
-  | _, _, .transfer r a => .transfer r.cfold a.cfold
-  | _, _, .send pv r a full => .send pv r.cfold a.cfold full
-  | _, _, .ite c thn els => foldIte c.cfold (Prog.cfold thn) (Prog.cfold els)
-  | _, _, .block body => .block (Prog.cfold body)
-  | _, _, .loop a c body => .loop a c.cfold (Prog.cfold body)
+/-- An expression pass on every handled position, and dead-branch elimination. -/
+def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ Γ'
+  | _, _, .assignLocal i r => .assignLocal i (V.run r)
+  | _, _, .declLocal p x init => .declLocal p x (init.map V.run)
+  | _, _, .require c => .require (V.run c)
+  | _, _, .assert c => .assert (V.run c)
+  | _, _, .transfer r a => .transfer (V.run r) (V.run a)
+  | _, _, .send pv r a full => .send pv (V.run r) (V.run a) full
+  | _, _, .ite c thn els => foldIte (V.run c) (Prog.vopt V thn) (Prog.vopt V els)
+  | _, _, .block body => .block (Prog.vopt V body)
+  | _, _, .loop a c body => .loop a (V.run c) (Prog.vopt V body)
   | _, _, s@(.assign ..) => s
   | _, _, s@(.rebind ..) => s
   | _, _, s@(.declStorage ..) => s
@@ -191,11 +199,15 @@ def _root_.Solidity.Stmt.cfold : {Γ Γ' : Ctx} → Stmt C Γ Γ' → Stmt C Γ 
   | _, _, s@(.revertData ..) => s
   | _, _, s@(.catchData ..) => s
 
-/-- Constant folding and dead-code elimination of a sequence. -/
-def _root_.Solidity.Prog.cfold : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
+/-- An expression pass and dead-code elimination of a sequence. -/
+def _root_.Solidity.Prog.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Prog C Γ Γ' → Prog C Γ Γ'
   | _, _, .nil => .nil
-  | _, _, .cons s P => consDrop (Stmt.cfold s) (Prog.cfold P)
+  | _, _, .cons s P => consDrop (Stmt.vopt V s) (Prog.vopt V P)
 end
+
+/-- Constant folding and dead-code elimination. -/
+abbrev _root_.Solidity.Prog.cfold {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' :=
+  Prog.vopt cfoldPass P
 
 /-! ## Preservation -/
 
@@ -261,40 +273,40 @@ theorem consDrop_runC : {Γ Γ₁ Γ₂ : Ctx} → (s : Stmt C Γ Γ₁) → (P 
   | _, _, _, .revertData .., _ | _, _, _, .catchData .., _ => rfl
 
 mutual
-/-- **Statement folding preserves the typed run.** -/
-theorem _root_.Solidity.Stmt.cfold_runC : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
-    Stmt.runC (Stmt.cfold s) = Stmt.runC s
+/-- **An expression pass lifted to a statement preserves the typed run.** -/
+theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') →
+    Stmt.runC (Stmt.vopt V s) = Stmt.runC s
   | _, _, .assignLocal i r => by
-    simp only [Stmt.cfold, Stmt.runC]
-    exact TRun.assignLocal_congr i (Val.cfold_evalT · r)
+    simp only [Stmt.vopt, Stmt.runC]
+    exact TRun.assignLocal_congr i (V.sound · r)
   | _, _, .declLocal p x init => by
-    simp only [Stmt.cfold, Stmt.runC]
+    simp only [Stmt.vopt, Stmt.runC]
     exact TRun.declLocal_congr p fun σ => by
-      cases init <;> simp only [Option.map, Val.cfold_evalT]
+      cases init <;> simp only [Option.map, V.sound]
   | _, _, .require c => by
-    simp only [Stmt.cfold, Stmt.runC]
-    exact TRun.require_congr (Val.cfold_evalT · c)
+    simp only [Stmt.vopt, Stmt.runC]
+    exact TRun.require_congr (V.sound · c)
   | _, _, .assert c => by
-    simp only [Stmt.cfold, Stmt.runC]
-    exact TRun.assert_congr (Val.cfold_evalT · c)
+    simp only [Stmt.vopt, Stmt.runC]
+    exact TRun.assert_congr (V.sound · c)
   | _, _, .transfer r a => by
-    simp only [Stmt.cfold, Stmt.runC]
-    exact TRun.transfer_congr (Val.cfold_evalT · r) (Val.cfold_evalT · a)
+    simp only [Stmt.vopt, Stmt.runC]
+    exact TRun.transfer_congr (V.sound · r) (V.sound · a)
   | _, _, .send pv r a full => by
-    simp only [Stmt.cfold, Stmt.runC]
-    exact TRun.send_congr pv (Val.cfold_evalT · r) (Val.cfold_evalT · a)
+    simp only [Stmt.vopt, Stmt.runC]
+    exact TRun.send_congr pv (V.sound · r) (V.sound · a)
   | _, _, .ite c thn els => by
-    rw [Stmt.cfold, foldIte_runC]
-    simp only [Stmt.runC, Prog.cfold_runC thn, Prog.cfold_runC els]
-    exact TRun.ite_congr (Val.cfold_evalT · c) _ _ _ _ _ _
+    rw [Stmt.vopt, foldIte_runC]
+    simp only [Stmt.runC, Prog.vopt_runC V thn, Prog.vopt_runC V els]
+    exact TRun.ite_congr (V.sound · c) _ _ _ _ _ _
   | _, _, .block body => by
-    simp only [Stmt.cfold, Stmt.runC]
-    rw [Prog.cfold_runC body]
+    simp only [Stmt.vopt, Stmt.runC]
+    rw [Prog.vopt_runC V body]
     exact TRun.block_congr _ _ _
   | _, _, .loop a c body => by
-    simp only [Stmt.cfold, Stmt.runC]
-    rw [Prog.cfold_runC body]
-    exact TRun.loop_congr (Val.cfold_evalT · c) _ _ _
+    simp only [Stmt.vopt, Stmt.runC]
+    rw [Prog.vopt_runC V body]
+    exact TRun.loop_congr (V.sound · c) _ _ _
   | _, _, .assign .. | _, _, .rebind .. | _, _, .declStorage .. | _, _, .opAssign ..
   | _, _, .incDec .. | _, _, .assignIncDec .. | _, _, .assignLocalPush .. | _, _, .push ..
   | _, _, .pop .. | _, _, .declMem .. | _, _, .rebindMem .. | _, _, .assignFromMem ..
@@ -304,17 +316,27 @@ theorem _root_.Solidity.Stmt.cfold_runC : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ')
   | _, _, .callReceiverPush .. | _, _, .callRec .. | _, _, .revertData ..
   | _, _, .catchData .. => rfl
 
-/-- **Program folding preserves the typed run.** -/
-theorem _root_.Solidity.Prog.cfold_runC : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
-    Prog.runC (Prog.cfold P) = Prog.runC P
+/-- **An expression pass lifted to a program preserves the typed run.** -/
+theorem _root_.Solidity.Prog.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
+    Prog.runC (Prog.vopt V P) = Prog.runC P
   | _, _, .nil => rfl
   | _, _, .cons s P => by
-    rw [Prog.cfold, consDrop_runC, Stmt.cfold_runC s, Prog.cfold_runC P]
+    rw [Prog.vopt, consDrop_runC, Stmt.vopt_runC V s, Prog.vopt_runC V P]
     rfl
 end
 
+/-- **Constant folding and dead-code elimination preserve the typed run.** -/
+theorem _root_.Solidity.Prog.cfold_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
+    Prog.runC (Prog.cfold P) = Prog.runC P :=
+  Prog.vopt_runC cfoldPass P
+
 /-- The pass in the O01 interface: preservation of the exact typed run. -/
 def SameRun {Γ Γ' : Ctx} (P Q : Prog C Γ Γ') : Prop := Prog.runC P = Prog.runC Q
+
+theorem vopt_preserves (V : ValPass C) (Γ Γ' : Ctx) :
+    Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
+      (Prog.vopt V : Lowering.Pass C Γ Γ') :=
+  fun P => (Prog.vopt_runC V P).symm
 
 theorem cfold_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
