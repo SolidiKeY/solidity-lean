@@ -1,10 +1,12 @@
 """Fresh syscall audit plus exact allocated-section comparison; external evidence."""
-import hashlib,json,pathlib,re,struct,subprocess,sys
-root=pathlib.Path.cwd();out=root/'docs/benchmarks/directruntime-2026-11-04/hardening'
+import hashlib,json,pathlib,re,struct,subprocess,sys,os
+root=pathlib.Path.cwd();out=root/os.environ.get('NATIVE_BROWSER_CHECK_OUTPUT','docs/benchmarks/directruntime-2026-11-04/hardening')
 name=sys.argv[1] if len(sys.argv)>1 else 'native-audit'
 assert re.fullmatch(r'[a-z0-9-]+',name)
 destination=out/(name+'.json')
 if destination.exists():raise SystemExit('refusing audit overwrite')
+for suffix in ['-runtime.strace','-trace-results.jsonl','-trace-stderr.txt']:
+ if (out/(name+suffix)).exists():raise SystemExit('refusing raw audit overwrite')
 sha=lambda b:hashlib.sha256(b).hexdigest()
 def file_sha(p):
  h=hashlib.sha256()
@@ -21,7 +23,7 @@ def elf(p):
    name=strings[s[0]:].split(b'\0')[0].decode()
    sections[name]=dict(type=s[1],flags=s[2],address=s[3],size=s[5],sha256=None if s[1]==8 else sha(b[s[4]:s[4]+s[5]]))
  return dict(machine=h[2],entry=h[4],flags=h[7],programHeaders=[list(struct.unpack_from('<IIQQQQQQ',b,h[5]+i*h[9])) for i in range(h[10])],allocatedSections=sections)
-binary=root/'.lake/native-browser-hardening/native/direct-check';old=root/'.lake/direct-native/direct-check'
+binary=root/os.environ.get('NATIVE_BROWSER_NATIVE_OUTPUT','.lake/native-browser-hardening/native')/'direct-check';old=root/'.lake/direct-native/direct-check'
 manifest=json.loads((binary.parent/'build.json').read_text());assert file_sha(binary)==manifest['executable']
 for path,digest in manifest['buildInputs'].items():assert file_sha(path)==digest,path
 for entry in manifest['sourceFiles']:

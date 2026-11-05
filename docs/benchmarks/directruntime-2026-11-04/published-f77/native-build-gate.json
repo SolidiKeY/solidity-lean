@@ -1,0 +1,21 @@
+{
+  "command": [
+    "bash",
+    "tests/directruntime-20261104/native-browser/published-f77-native-build.sh"
+  ],
+  "exitCode": 0,
+  "wallSeconds": 403.90126400200097,
+  "scope": {
+    "memoryMaxBytes": 12884901888,
+    "memorySwapMaxBytes": 0
+  },
+  "requiredOuterHeadroomBytes": 4294967296,
+  "minimumOuterHeadroomBytes": 6681100288,
+  "resourceStop": false,
+  "sampledContainerProcessRssPeakBytes": 1801474048,
+  "rssSamplingSeconds": 0.1,
+  "childRusageMaxRssKiB": 1228632,
+  "cgroupPeakBytes": 3444899840,
+  "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+  "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+}

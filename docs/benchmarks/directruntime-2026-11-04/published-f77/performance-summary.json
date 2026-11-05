@@ -1,0 +1,128 @@
+{
+  "comparisons": {
+    "nativeAst": {
+      "before": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 0.8389050000000111,
+        "p95Ms": 4.069481999999994,
+        "startupMs": 7.561709000000008
+      },
+      "freshF77": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 0.7930479999999989,
+        "p95Ms": 3.8031590000000506,
+        "startupMs": 6.532364000000143
+      },
+      "ratios": {
+        "medianMs": 0.9453370763077922,
+        "p95Ms": 0.9345560442336535,
+        "startupMs": 0.8638740263609902
+      },
+      "overTenPercent": false
+    },
+    "browser": {
+      "before": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 185.92237800000294,
+        "p95Ms": 224.38692400000218,
+        "startupMs": 3428.200938
+      },
+      "freshF77": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 188.2652190000008,
+        "p95Ms": 238.79759999999806,
+        "startupMs": 3234.918311
+      },
+      "ratios": {
+        "medianMs": 1.0126011781109954,
+        "p95Ms": 1.064222441054523,
+        "startupMs": 0.943619808028884
+      },
+      "overTenPercent": false
+    },
+    "nativeSourceLsp": {
+      "before": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 62.25192600000082,
+        "p95Ms": 75.86627799999951,
+        "startupMs": 127.573555
+      },
+      "freshF77": {
+        "functions": 83,
+        "rounds": 3,
+        "requests": 249,
+        "medianMs": 59.03218399999969,
+        "p95Ms": 74.59352000000035,
+        "startupMs": 124.78477600000001
+      },
+      "ratios": {
+        "medianMs": 0.9482788371880881,
+        "p95Ms": 0.9832236662513064,
+        "startupMs": 0.9781398347016356
+      },
+      "overTenPercent": false
+    }
+  },
+  "method": "Median and nearest-rank p95 of 83 per-function medians across three rounds. Startup is one process/page observation; not machine-cold. Native AST excludes Solidity compile; source LSP/browser include live compilation.",
+  "builds": {
+    "native": {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/published-f77-native-build.sh"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 403.90126400200097,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      },
+      "requiredOuterHeadroomBytes": 4294967296,
+      "minimumOuterHeadroomBytes": 6681100288,
+      "resourceStop": false,
+      "sampledContainerProcessRssPeakBytes": 1801474048,
+      "rssSamplingSeconds": 0.1,
+      "childRusageMaxRssKiB": 1228632,
+      "cgroupPeakBytes": 3444899840,
+      "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+    },
+    "wasm": {
+      "command": [
+        "bash",
+        "tests/directruntime-20261104/native-browser/published-f77-wasm-build.sh"
+      ],
+      "exitCode": 0,
+      "wallSeconds": 263.31982530799723,
+      "scope": {
+        "memoryMaxBytes": 12884901888,
+        "memorySwapMaxBytes": 0
+      },
+      "requiredOuterHeadroomBytes": 4294967296,
+      "minimumOuterHeadroomBytes": 8309321728,
+      "resourceStop": false,
+      "sampledContainerProcessRssPeakBytes": 1430298624,
+      "rssSamplingSeconds": 0.1,
+      "childRusageMaxRssKiB": 1334392,
+      "cgroupPeakBytes": 1787232256,
+      "cgroupEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+      "runnerSha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041"
+    }
+  },
+  "artifactBytes": {
+    "native": 20738864,
+    "wasm": 16378154,
+    "html": 41533199
+  },
+  "buildComparisonLimit": "Native f77 build includes PrintStmt-invalidated Lean jobs plus empty C/object/link output. Earlier cold-C run replayed warm Lean artifacts; whole build wall times are not matched. No full cold-before measurement exists.",
+  "postTranslatorIntegration": false
+}

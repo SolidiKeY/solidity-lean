@@ -314,3 +314,27 @@ with output guards ran in a new verified-controls directory; its14-request
 native trace/browser evidence is intact. Both reviewers accepted the scoped
 inventory and disclosure. All original full/corpus, Identity/B-C, A-repair and
 matched post-integration gates remain required.
+
+## Follow-on f77 adoption and fresh binaries
+
+Adopted exact published f77cf60d by merge 506cf233, preserving this lane. The
+PrintStmt dependency changed, so old manifest freshness was rejected and both
+backends rebuilt into fresh output directories. Native and WASM build gates
+pass; all three 83-function benchmark modalities pass 249/249, with no recorded
+latency/startup comparison over the unchanged 10% threshold. Whole native build
+timing is not matched to the warm-Lean earlier build. Current package bytes,
+benchmark runtime.build and worker boots are pinned to the freshly built WASM.
+
+Fresh existing browser controls still fail on the same traversal stack overflow;
+13/14 verdicts complete. H40 repair remains lane A's responsibility. All13 C
+controls remain unsupported on both fresh backends; the independent positive
+harness guard is not Identity non-vacuity. Shared.Intrinsic's relative callbacks
+are not wired into DirectRuntime and establish no source adequacy. Exact B
+Identity/control delivery, semantic integration and final full/corpus gates remain
+pending. D adds no Lean declaration, axiom, budget or premise change.
+
+The current versions/KeySort and three per-file MCP checks pass. A new verified
+337-module relative build-cache snapshot remains coordinator-pending under H41;
+it is explicitly not a Lake artifact catalog. The previous H35 pack remains
+coordinator-received. No VM ship-cache.sh invocation occurred. Full evidence and
+queue limits: [published f77 inventory](../benchmarks/directruntime-2026-11-04/published-f77/README.md).

@@ -1,0 +1,229 @@
+{
+  "startedAt": "2026-11-05T04:56:09.834Z",
+  "singleFile": true,
+  "calldataProofs": false,
+  "trials": [
+    {
+      "label": "cold proof including library preparation",
+      "elapsedMs": 1051.5474379999996,
+      "statuses": [
+        [
+          "increment",
+          "proved"
+        ],
+        [
+          "reset",
+          "proved"
+        ],
+        [
+          "one",
+          "proved"
+        ],
+        [
+          "openGoal",
+          "refuted"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 1,
+            "checkMs": 950.179999999702,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    },
+    {
+      "label": "unchanged cached result",
+      "elapsedMs": 93.006711,
+      "statuses": [
+        [
+          "increment",
+          "proved"
+        ],
+        [
+          "reset",
+          "proved"
+        ],
+        [
+          "one",
+          "proved"
+        ],
+        [
+          "openGoal",
+          "refuted"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 1,
+            "checkMs": 950.179999999702,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    },
+    {
+      "label": "real proof after comment edit",
+      "elapsedMs": 96.36198199999944,
+      "statuses": [
+        [
+          "increment",
+          "proved"
+        ],
+        [
+          "reset",
+          "proved"
+        ],
+        [
+          "one",
+          "proved"
+        ],
+        [
+          "openGoal",
+          "refuted"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 2,
+            "checkMs": 9.530000001192093,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    },
+    {
+      "label": "real proof after false-result edit",
+      "elapsedMs": 193.9239459999999,
+      "statuses": [
+        [
+          "increment",
+          "proved"
+        ],
+        [
+          "reset",
+          "proved"
+        ],
+        [
+          "one",
+          "refuted"
+        ],
+        [
+          "openGoal",
+          "refuted"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 3,
+            "checkMs": 175.75999999791384,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    },
+    {
+      "label": "real proof after updating the changed result specification",
+      "elapsedMs": 111.24678900000072,
+      "statuses": [
+        [
+          "increment",
+          "proved"
+        ],
+        [
+          "reset",
+          "proved"
+        ],
+        [
+          "one",
+          "proved"
+        ],
+        [
+          "openGoal",
+          "refuted"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "Counter",
+            "checkSequence": 4,
+            "checkMs": 90.42499999701977,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    },
+    {
+      "label": "unsupported calldata remains unknown without starting Lean",
+      "elapsedMs": 9.226251000000047,
+      "statuses": [
+        [
+          "localAlias",
+          "unsupported"
+        ],
+        [
+          "sliceRead",
+          "unsupported"
+        ],
+        [
+          "writesCopy",
+          "unsupported"
+        ]
+      ],
+      "timings": {
+        "kernelChecks": [],
+        "directChecks": [
+          {
+            "contract": "CalldataViews",
+            "checkSequence": 5,
+            "checkMs": 1.3350000008940697,
+            "environmentImports": 0,
+            "backend": "generated-c-wasm"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "external": [],
+  "runtime": {
+    "mode": "browser",
+    "proofReady": true,
+    "compilerReady": true,
+    "error": null,
+    "message": "The verifier and Solidity compiler run entirely in this browser.",
+    "lean": "4.24.0",
+    "verifier": "generated-c-wasm",
+    "wasmBytes": 16378154,
+    "build": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef"
+  },
+  "startupMs": 3219.9647110000005,
+  "embedded": {
+    "build": "e053e684bffe295eff387ad60be68c6600f767a76f35a153ec42010a74c04cf5",
+    "preparationMs": 1305.2,
+    "reused": false
+  },
+  "firstResultMs": 4584.74347,
+  "serializedLibraryBytes": 0,
+  "passed": true
+}

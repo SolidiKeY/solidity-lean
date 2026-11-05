@@ -1,0 +1,8 @@
+{
+  "publishedBase": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "workerLeanChanges": [],
+  "newOrChangedWorkerTheorems": [],
+  "printAxiomsCommands": [],
+  "status": "not applicable: no new or changed worker Lean declarations",
+  "boundary": "Producer APIs retain their exact declarations/premises; no claim of producer source adequacy or completed runtime integration."
+}
