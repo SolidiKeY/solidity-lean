@@ -792,7 +792,8 @@ profile when its order is the pipeline's (`OrderReading.ofPipeline`,
 pipeline's order (`evalOrder_of_fits`), and a record that does not fit is
 valid of nothing there (`not_validA_of_not_fits`).  `TargetProfile.pinned`
 is solkey's compiler at its current pin (0.8.34), legacy, `ForkSpec.osaka`
-(`pinned_pin`: the pinned EVM's); it is a constant and does not follow a
+(`pinned_pin`: G06's Osaka pin `Roadmap.Evm.osaka`, not the idealized
+`Evm.pinned`); it is a constant and does not follow a
 re-pin.  Only the pipeline is tied to `ValidA`: the version and the fork are
 data no formula reads (the intrinsic run has no fork argument).
 

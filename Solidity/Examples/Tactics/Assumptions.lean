@@ -101,10 +101,15 @@ example : TargetProfile.pinned.fork.fork = .osaka := rfl
 theorem withdrawUnsafe_pinned : Vault.evalOrder = TargetProfile.pinned.pipeline.order :=
   TargetProfile.evalOrder_of_fits (by decide) withdrawUnsafe_validA
 
-/-- Negative control: under the pinned profile, the via-IR record of the
-vault holds of no formula. -/
-theorem withdrawUnsafe_not_viaIR_pinned : ¬ ValidA .top { order := .viaIR } withdrawUnsafe :=
-  TargetProfile.not_validA_of_not_fits (p := .pinned) (by decide) rfl
+/-- Negative control: a via-IR profile does not fit the vault's proof
+(its record is legacy), and a contract in the via-IR order has no valid
+legacy record (`not_validA_of_not_fits`). -/
+theorem viaIR_profile_not_fits :
+    ({ solc := ⟨0, 8, 38⟩, pipeline := .viaIR } : TargetProfile).fits {} = false := by decide
+
+theorem legacy_record_not_valid_viaIR {C : Contract} (hC : C.evalOrder = EvalOrder.viaIR)
+    (φ : Fml C []) : ¬ ValidA .top {} φ :=
+  TargetProfile.not_validA_of_not_fits (p := { solc := ⟨0, 8, 38⟩, pipeline := .viaIR }) (by decide) hC
 
 /-- A proved row as the report states it, under a policy denying via-IR. -/
 def withdrawUnsafe_row : ProvedRow .top { deny := [.order .viaIR] } withdrawUnsafe :=

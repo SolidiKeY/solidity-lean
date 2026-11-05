@@ -185,8 +185,9 @@ progress and diagnostics use stderr. The schema is:
 
 Source results retain absolute `source`, `contract`, `function`, `signature`,
 `tag`, `status`, `reason`, `reading`, and `elapsedMs`, and add
-`profile` and, on `verify` rows that stated an obligation, `assumptions` (`{solc, pipeline, evmFork}`: the compiler
-version solkey's build pins or `null`, `legacy`, `osaka`; O13). Under a
+`profile` (`{solc, pipeline, evmFork}`: the compiler version solkey's
+build pins or `null`, `legacy`, `osaka`; O13) and, on `verify` rows that
+stated an obligation, `assumptions`. Under a
 policy, `verify` rows add `policy` and the document adds
 `policy: {require, deny}`; `summary` may count `refused`. Inspection and runs
 also include `text`; tree inspection adds `tree`. Rule audit rows include

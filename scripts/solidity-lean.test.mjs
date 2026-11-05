@@ -122,6 +122,8 @@ test('verify rows that state an obligation carry their record; every source row 
   assert.deepEqual(out.results[1].assumptions, {callback:'noCallback', overflow:'default', tails:'clean',
     order:'legacy', hash:'opaque', zeroAddress:'noCode'});
   assert.equal(out.results[0].assumptions.tails, 'solc');
+  // TargetProfile.fits: the profile's pipeline is the record's order.
+  for (const row of out.results) if (row.assumptions) assert.equal(row.profile.pipeline, row.assumptions.order);
   assert.equal(out.results[0].policy, undefined);
   // Negative controls: no record without an obligation, nor on listing/inspection rows.
   assert.equal(out.results[2].assumptions, undefined);

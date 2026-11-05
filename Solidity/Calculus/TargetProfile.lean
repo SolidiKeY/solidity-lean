@@ -55,7 +55,8 @@ structure TargetProfile where
 Osaka. -/
 def TargetProfile.pinned : TargetProfile := { solc := ⟨0, 8, 34⟩ }
 
-/-- The pinned profile's fork is the pinned EVM's (`ForkSpec.osaka_pin`). -/
+/-- The pinned profile's fork has G06's Osaka pin, `Roadmap.Evm.osaka`
+(`ForkSpec.osaka_pin`; not the idealized `Evm.pinned`). -/
 theorem TargetProfile.pinned_pin : TargetProfile.pinned.fork.pin? = some Roadmap.Evm.osaka :=
   ForkSpec.osaka_pin
 

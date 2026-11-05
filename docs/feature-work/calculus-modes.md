@@ -31,13 +31,13 @@ where needed, never an axiom), more overflow modes.
 
 | Lane | Checkpoints | Owned files |
 |---|---|---|
-| VC1 | inventory, O10, O13 | `Calculus/Assumptions.lean`, `scripts/solidity-lean*.mjs`, docs/cli.md |
+| VC1 | inventory, O10, O13 | `Calculus/Assumptions.lean`, `Calculus/TargetProfile.lean`, `scripts/solidity-lean*.mjs`, docs/cli.md |
 | VC2 | inventory, O11 | new `Calculus/CallerModel*.lean`, `Theory/CallerModel/**`; sole editor of `Semantics/Callback.lean` and `Calculus/CallbackHolds.lean` in this batch |
 | VC3 | inventory, O12 | new `Theory/Reachable/**`; sole editor of `Calculus/TailMode.lean`, `Calculus/CleanTailBoundary.lean` |
 
 All three run in parallel; each adds only its own section to options.md and
 correctness.md. VC3 states its O11 needs against a stub and adapts after VC2
-lands; VC1's O13 waits for VS4's S5.1/S6.1 and otherwise backfills.
+lands; VC1's O13 waited for VS4's S5.1/S6.1 (built over them once pushed).
 
 ## Handoffs
 
@@ -78,7 +78,10 @@ over G01's `Roadmap.Pipeline`/`Pipeline.order` (on master; missed by the
 first inventory, which defined a duplicate `Pipeline`, now removed) and
 VS4's `ForkSpec` (S6.1), with `fits`, `evalOrder_of_fits`,
 `not_validA_of_not_fits`, `pinned_pin`. VS4's branch was merged into this
-lane to build on it; no second fork or pipeline type remains. Rows carry
+lane to build on it; no second fork type, and the duplicate `Pipeline` is
+gone (`OrderReading`, the record's O9 reading, is bridged to `Pipeline` by
+`ofPipeline`; making `Assumptions.order` a `Pipeline` is a possible
+follow-up). Rows carry
 `profile`.
 
 **Reviews.** Finder and skeptic (read-only, no Lean server) on O10/O13.
@@ -96,6 +99,16 @@ obligation-free rows carried records they were not stated under (now only
 and the CLI example. Documented, not fixed: the callee invariant and
 `--self-address` premise are not record fields; a mixed `EvalOrder` has no
 reading; the CLI's `solc` is the pin, not the compile's.
+
+**O13 review** (finder and skeptic in one read-only pass). Fixed: the
+"no second pipeline type" claim (reworded: `OrderReading` is bridged),
+cli.md attaching `profile`'s shape to `assumptions`, a redundant control
+(replaced by `viaIR_profile_not_fits`, `legacy_record_not_valid_viaIR`),
+stale lane lines, `pinned_pin`'s naming against `Evm.pinned`, and a CLI test
+that `profile.pipeline` is the record's order. Documented: the version and
+fork are data `fits` ignores; the CLI's `solc` string is the pin read at
+run time, Lean's `pinned` a constant; no lemma links a profile to S5.1's
+`CompilerChoice` beyond the shared `Pipeline`.
 
 **Requests to other owners.**
 - `Frontend/Testing.lean` / `scripts/test-solidity.mjs` owner: emit the row's
