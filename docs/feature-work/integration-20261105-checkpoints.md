@@ -46,3 +46,6 @@ unverifiable; no evidence or seal is reconstructed.
 The initial planned-path documentation repair was superseded when VC1 landed.
 The combined tree retains upstream’s published assumption/profile documentation.
 No declaration or proof was changed by that documentation resolution.
+
+The [VC1 inventory reconciliation](integration-vc1-trust-20261105.md) records
+the two reviewed lexical data-token fingerprints; scanner policy is unchanged.
