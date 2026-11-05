@@ -170,3 +170,5 @@
 | `Yul/LocalBoolDoDivergence.lean` | Bounded vy1-words checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedCallerHeaders.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
 | `Yul/Views/RetainedCallerHeadersControls.lean` | Bounded vy2-physical checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLowering.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Yul/Compilation/FramedWordLoweringControls.lean` | Bounded vy3-compilation checkpoint; typed scope and retained obligations are stated in the module. |
