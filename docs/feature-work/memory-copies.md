@@ -1298,3 +1298,14 @@ bring the checkpoint to 1,319 scoped reports across223 modules, preserving220
 predecessors. Exact-head gates, axiom audit, canonical patch reconstruction and
 seal remain required before acceptance. This is one child turn; whole traversal,
 parent adoption, Source/physical adequacy and full original G33/G35 remain open.
+
+## Snapshot transport through heap extension
+
+`SnapshotTransportInterface` specifies a G35.05 traversal prerequisite:
+existing typed snapshots and indexed children are invariant under an explicit
+`Heap.Keeps` extension, with successful indices weakened into the extended heap.
+The existing rank/fuel definitions remain unchanged. No map-free, source-shape,
+capacity or per-child snapshot premise is added. Independent design reviews
+confirmed the gap beyond mirror-specific laws and required changed-old-object
+negative controls. This is observation invariance for the existing intrinsic
+operation, not recursive Source admission or compiled graph coverage.

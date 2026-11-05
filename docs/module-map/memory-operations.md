@@ -380,3 +380,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedMemoryTurnInterface.lean` | Actual checked nested-memory child selection, deep copying and reserved-parent pointer store. |
 | `Backend/MemoryCopies/NestedMemoryTurn.lean` | Actual checked child access, fresh copy, reserved-parent store and separate refusal reasons. |
 | `Backend/MemoryCopies/NestedMemoryTurnControls.lean` | Repeated source aliases, empty/pair/long retained payloads and bounds/capacity/negative controls. |
+| `Backend/MemoryCopies/SnapshotTransportInterface.lean` | Generic typed snapshots and indexed observations under an explicit kept heap extension. |
