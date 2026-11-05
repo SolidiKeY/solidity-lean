@@ -397,3 +397,27 @@ logs and check guard liveness; no resource stop occurred. Independent
 read-only finder/skeptic reviews pass the adoption; final gate evidence is
 recorded in the sealed handoff. No Source, Core ExtCall, proof budget,
 premise, exclusion or owned theorem changes are made by this adoption.
+
+
+## Follow-on f77cf60d adoption
+
+Published masterf77cf60d3cea8f7f1db8db29cc027532b0cd3fce is preserved in
+merge15c194e98d6487177fcd83a3502da176be4da910. All46Selection sources and
+the blocking DecisionHashesChecks source are unchanged from6846894a.
+Generated roots are current. Deferred frontend and storage-havoc increments
+retain their explicit proof/producer limits; none supplies the VA1 split or
+this fragment's compiler/Bridge/resource producer.
+
+The guarded checkpoint passes all eight gates: library3631jobs/282s,
+KeySort2jobs, and483 exact source-bound Selection axiom reports using only
+standard axioms. Lean4.24.0 commit797c613eb9b6d4ec95db23e3e00af9ac6657f24b
+andLake5.0.0-src+797c613 are printed. The guard completes normally with
+sampled parent-memory peak5421596672 bytes under unchanged limits. No
+Source/Core edit or proof/premise/exclusion/budget change is made.
+
+The separate bounded metadata query still computes8990275316855339899;
+the exact no-build lookup exits3. No failed-target build is retried. Full
+validation remains blocked on the existing VA1 reviewed published split or
+exact artifact, with H30/H33 receipts intact. Independent read-only finder
+and skeptic review this adoption and its gate evidence; this checkpoint is
+not RUNTIME_GATE_PASS or whole-lane closure.
