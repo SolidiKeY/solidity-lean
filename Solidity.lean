@@ -320,6 +320,8 @@ import Solidity.Backend.MemoryOps.PhysicalByteStackExact
 import Solidity.Backend.MemoryOps.PhysicalByteStore
 import Solidity.Backend.MemoryOps.PhysicalByteStoreControls
 import Solidity.Backend.MemoryOps.PhysicalByteWorldInterface
+import Solidity.Backend.MemoryOps.PhysicalFixedChildControls
+import Solidity.Backend.MemoryOps.PhysicalFixedChildWrite
 import Solidity.Backend.MemoryOps.PhysicalFrameImage
 import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
 import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
