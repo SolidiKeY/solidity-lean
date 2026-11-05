@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawControlDeclaration
 import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingBlock
 import Solidity.Yul.RawGrowingSequence
@@ -131,3 +132,12 @@ joins actual declaration/iteration/restoration proofs with checked/coherent
 premises; it is not a preparation-only interface. Mutation/control/post-error
 witnesses are in Solidity.Yul.Checks.RawGrowingForPost. General initializers,
 declaration groups and frontend admission remain separate obligations. -/
+
+/-! RawControlDeclaration.run/correct supplies actual context-growing Boolean
+initialization for every existing LocalBoolControl.Supported expression.
+The result distinguishes old-context errors from grown success; real partial
+expression state is captured in either branch. The complete Source.execS
+declaration law requires input coherence and retains actual result/world.
+No arbitrary initializer, frontend admission or dirty-read cleanup follows.
+Mutation-before-timeout, raw Boolean/narrow-word and scope controls are in
+Solidity.Yul.Checks.RawControlDeclaration. -/
