@@ -2508,6 +2508,10 @@ import Solidity.Solkey.ScopedFlip
 import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
+import Solidity.Source.Agreement.Locals
+import Solidity.Source.Agreement.NormalStatement
+import Solidity.Source.Agreement.Primitive
+import Solidity.Source.Agreement.PrimitiveTypes
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples
 import Solidity.Source.Const
