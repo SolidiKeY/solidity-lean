@@ -1847,3 +1847,19 @@ inferred. Controls retain a populated full-state client, modular `3 - 5`
 wraparound, reversed-operand and caller-tail-order negatives, and exact
 insufficient-gas, empty-stack and fuel-first refusals. This closes no complete
 opcode row or general Osaka/driver/resource obligation.
+
+
+## Selected exponentiation correspondence
+
+The actual arithmetic selector chooses the published EXP certificate. The
+consumer connects its IR and scalar results to charged fetched execution with
+the exact exponent-byte cost on the same input. A separate uniform consequence
+discharges that cost bound using the existing intrinsic 256-bit exponent bound;
+at least 1610 initial gas units remain explicit, alongside capacity and numeric
+input correspondence. Each model retains its own complete frame.
+
+Populated clients cover `7^3 = 343`, `0^0 = 1`, exact 60/10 gas exhaustion,
+the 255/256 exponent-byte cost boundary (60/110), wrong operand/tail order and
+insufficient gas/fuel. The new axiom reports are exact guarded expectations.
+This establishes no Solidity exponent guard, source-loading or whole-program
+resource relation, and closes no full opcode or Osaka adequacy obligation.

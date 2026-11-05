@@ -164,6 +164,123 @@ theorem sub_resource_order (perm : Bool) :
   have h := (sub_client 7 3 perm).1
   cases perm <;> exact ⟨h,rfl,rfl,rfl,rfl⟩
 
+
+private theorem exp_three_cost (budget : Nat) (perm : Bool) :
+    EVM.C' (F.input .EXP budget perm (7::3::spill)) .EXP=60 := by
+  change EVM.C' (modularSite (F.site .EXP budget perm) (7::3::spill)).state .EXP=60
+  rw [power_cost]
+  change 10+50*(1+Nat.log 256 3)=60
+  rw [Nat.log_of_lt (by decide : 3<256)]
+
+theorem exp_nonzero_client (perm : Bool) :
+    Solidity.Evm.Instr.step .exp (ir 7 3)=.ok (irExpected 7 3 343) 0 ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EXP 60 perm (7::3::spill))=
+      .ok (F.observed .EXP 60 perm 60 7 3 spill 343) ∧
+    EVM.X 2 #[] (F.input .EXP 60 perm (7::3::spill))=
+      EVM.X 1 #[] (F.observed .EXP 60 perm 60 7 3 spill 343) := by
+  have h := InstructionSelectionAgreement.exp (F.site .EXP 60 perm) 7 3 spill (ir 7 3)
+    rfl (by decide) (by
+      change EVM.C' (F.input .EXP 60 perm (7::3::spill)) .EXP≤60
+      rw [exp_three_cost]) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (F.input .EXP 60 perm (7::3::spill)) 60).replaceStackAndIncrPC
+      ((343::spill).map (fun w=>UInt256.mk w.toFin))=F.observed .EXP 60 perm 60 7 3 spill 343 := by
+    first | rfl | (simp only [F.input,F.observed,WrappingArithmeticFixtures.input,
+      WrappingArithmeticFixtures.observed,WrappingArithmeticFixtures.site,modularSite,
+      Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+      EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+  have cost : EVM.C' (modularSite (F.site .EXP 60 perm) (7::3::spill)).state .EXP=60 := exp_three_cost 60 perm
+  have value : BitVec.ofNat 256 ((7:Scalar.Word).toNat^(3:Scalar.Word).toNat)=(343:Scalar.Word) := by rfl
+  rw [cost,value] at h
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.2.1,h.2.2.2.1⟩
+
+theorem exp_zero_client (perm : Bool) :
+    Solidity.Evm.Instr.step .exp (ir 0 0)=.ok (irExpected 0 0 1) 0 ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EXP 10 perm (0::0::spill))=
+      .ok (F.observed .EXP 10 perm 10 0 0 spill 1) := by
+  have h := InstructionSelectionAgreement.exp (F.site .EXP 10 perm) 0 0 spill (ir 0 0)
+    rfl (by decide) (by change 10≤10;decide) 0
+  dsimp only at h
+  have shape : (Assembly.chargedPrepare (F.input .EXP 10 perm (0::0::spill)) 10).replaceStackAndIncrPC
+      ((1::spill).map (fun w=>UInt256.mk w.toFin))=F.observed .EXP 10 perm 10 0 0 spill 1 := by
+    first | rfl | (simp only [F.input,F.observed,WrappingArithmeticFixtures.input,
+      WrappingArithmeticFixtures.observed,WrappingArithmeticFixtures.site,modularSite,
+      Site.state,Assembly.chargedPrepare,EVM.State.replaceStackAndIncrPC,
+      EVM.State.incrPC,WordPushFixtures.seed,WordPushFixtures.u,WordPushFixtures.before];rfl)
+  have value : BitVec.ofNat 256 ((0:Scalar.Word).toNat^(0:Scalar.Word).toNat)=(1:Scalar.Word) := by rfl
+  rw [show EVM.C' (modularSite (F.site .EXP 10 perm) (0::0::spill)).state .EXP=10 from rfl,value] at h
+  simp only [WrappingArithmeticFixtures.input] at shape
+  rw [shape] at h
+  exact ⟨h.1,h.2.2.1⟩
+
+theorem exp_resource_boundary (perm : Bool) :
+    EVM.C' (F.input .EXP 60 perm (7::255::spill)) .EXP=60 ∧
+    EVM.C' (F.input .EXP 110 perm (7::256::spill)) .EXP=110 ∧
+    Assembly.driverSteps 1 2 #[] (F.input .EXP 59 perm (7::3::spill))=.error .OutOfGass ∧
+    Assembly.driverSteps 1 1 #[] (F.input .EXP 60 perm (7::3::spill))=.error .OutOfFuel := by
+  refine ⟨?_,?_,?_,rfl⟩
+  · change EVM.C' (modularSite (F.site .EXP 60 perm) (7::255::spill)).state .EXP=60
+    rw [power_cost]
+    change 10+50*(1+Nat.log 256 255)=60
+    rw [Nat.log_of_lt (by decide : 255<256)]
+  · change EVM.C' (modularSite (F.site .EXP 110 perm) (7::256::spill)).state .EXP=110
+    rw [power_cost]
+    change 10+50*(1+Nat.log 256 256)=110
+    rw [show Nat.log 256 256=1 by
+      simpa only [Nat.pow_one] using Nat.log_pow (by decide : 1<256) 1]
+  · let image := modularSite (F.site .EXP 59 perm) (7::3::spill)
+    have expansion : EVM.memoryExpansionCost image.state .EXP=0 := by
+      simp only [EVM.memoryExpansionCost,EVM.memoryExpansionCost.μᵢ',Nat.sub_self]
+    have charge : image.state.gasAvailable-UInt256.ofNat 0=image.state.gasAvailable := by
+      change UInt256.mk (image.state.gasAvailable.val-0)=_
+      rw [sub_zero]
+    have cost : EVM.C' image.state .EXP=60 := exp_three_cost 59 perm
+    have gate : Assembly.driverGate #[] image.state .EXP=.error .OutOfGass := by
+      simp only [Assembly.driverGate]
+      rw [expansion,charge,cost]
+      rfl
+    change Assembly.driverSteps 1 2 #[] image.state=_
+    simp only [Assembly.driverSteps]
+    rw [decode_exp image]
+    dsimp only [Option.option,bind,Except.bind]
+    rw [gate]
+
+theorem exp_complete_observation (perm : Bool) :
+    let next := F.observed .EXP 60 perm 60 7 3 spill 343
+    next.stack=[u 343,u 258,u 513] ∧ next.stack≠[u 2187,u 258,u 513] ∧
+    next.stack≠[u 343,u 513,u 258] ∧
+    next.executionEnv.code.data.toList=[0x60,0x7f,0x50,0x0a,0] ∧
+    next.pc=u 4 ∧ next.gasAvailable=u 0 ∧ next.execLength=42 ∧
+    next.memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    next.returnData.data.toList=[0xcc,0xdd] ∧ next.H_return.data.toList=[0xee,0xff] ∧
+    next.executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧ next.accountMap=accounts ∧ next.σ₀=accounts := by
+  refine ⟨rfl,?_,?_,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+  · change [u 343,u 258,u 513]≠[u 2187,u 258,u 513];decide
+  · change [u 343,u 258,u 513]≠[u 343,u 513,u 258];decide
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_nonzero_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exp_nonzero_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_zero_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exp_zero_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_resource_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exp_resource_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_complete_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms exp_complete_observation
+
 #print axioms sub_client
 #print axioms sub_wrap_client
 #print axioms sub_complete_observation
