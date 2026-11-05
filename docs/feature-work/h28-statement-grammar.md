@@ -2119,12 +2119,16 @@ is the old observation.
 Residual, not repaired: an `assembly` node's exclusion still calls Source's
 `isRethrow`, an indexed `match` with string-literal patterns. Lean 4.24
 cannot generate equation lemmas for its matcher ("failed to generate
-equality theorems for `match` expression `isRethrow.match_1`"), so a twin
-could not be linked to it; an unlinked twin was written, proved sound, and
+equality theorems for `match` expression `isRethrow.match_1`"), and a twin
+could not be linked to it here (a link by exhaustive case analysis on the
+string tests was attempted and abandoned); an unlinked twin was written, proved sound, and
 removed rather than kept without its link. It is evaluated only on
-`assembly` nodes. The producer's `parse` (the system under test, read-only
-here) also matches on indexed syntax; neither is a Gate G0 exemption, and
-the held finding is closed for the lane's observers only.
+`assembly` nodes, i.e. on the four accepted assembly fixtures
+(`statementFixture` sources at FixtureData lines ~179–199, one of them the
+canonical rethrow). The producer's `parse` (the system under test,
+read-only here) also matches on indexed syntax. Neither is a Gate G0
+exemption: the held finding is closed for the lane's observers except
+`isRethrow` on those four fixtures.
 
 Checks (Lean MCP, severity error, fresh on this VM): `G0Nodes`,
 `G0Rejections`, `FixtureData`, all 45 `FixtureControls/Case00..44` (each

@@ -5,16 +5,17 @@ import Solidity.Frontend.StatementGrammarH28.G0List
 (`Source/Ctor.lean`), which the fixture controls evaluate by `decide +kernel`:
 `Syn.nodes`, `Syn.excl`, `Syn.placeholders` and `isLiteralBase` match on the
 indexed family. Their twins read syntax only through `Syn.casesOn` with
-category-generalising motives and structural recursion; `match` remains only
-on the parameter-free `Option`, `Lit`, `ShiftOp`, `AssignOp` and `Denom`.
-Each twin is linked to its Source counterpart (`…_eq`), and
-`g0Rejections_eq` links the whole.
+category-generalising motives and structural recursion; apart from the
+`isRethrow` call below, `match` remains only on the parameter-free `Option`,
+`Lit`, `ShiftOp`, `AssignOp` and `Denom`. The twins are linked to their
+Source counterparts (`…_eq`; the views `identAt`/`litAt` only through
+them), and `g0Rejections_eq` links the whole.
 
 One residual: an `assembly` node's exclusion still calls Source's
 `isRethrow`, an indexed `match` with string-literal patterns for which Lean
 4.24 cannot generate equation lemmas ("failed to generate equality theorems
-for `match` expression `isRethrow.match_1`"), so no twin of it can be linked.
-It runs only on `assembly` nodes. -/
+for `match` expression `isRethrow.match_1`"), and no twin of it could be linked
+here. It runs only on `assembly` nodes (four accepted fixtures). -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source
 
