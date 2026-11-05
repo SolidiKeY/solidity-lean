@@ -326,3 +326,4 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/CheckedStoragePathInterface.lean` | Checked compiled storage paths, declarations/rebinding and explicit capacity refusal contracts. |
 | `Backend/MemoryCopies/CheckedStoragePath.lean` | Actual compiled storage-path guarded execution, complete success transport and separate capacity/path refusals. |
 | `Backend/MemoryCopies/CheckedStoragePathControls.lean` | Populated/empty/long declarations and rebinding, old aliases, saturated capacity and path-refusal controls. |
+| `Backend/MemoryCopies/CheckedFixedStorageInterface.lean` | Guarded fixed storage-copy contracts retaining complete success clauses and explicit target capacity refusal. |
