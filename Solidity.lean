@@ -523,6 +523,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarUnwindFacts
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarClient
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarCompiler
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScopedScalarControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTarget
 import Solidity.Backend.Jumpdest
 import Solidity.Backend.LabelExec.Assembly
 import Solidity.Backend.LabelExec.Boundaries
@@ -1932,6 +1933,7 @@ import Solidity.Evm.MemoryLoopHorizonObjectScope
 import Solidity.Evm.MemoryLoopHorizonObjectScopeControls
 import Solidity.Evm.MemoryLoopHorizonObjectStability
 import Solidity.Evm.MemoryLoopHorizonObjectStatement
+import Solidity.Evm.MemoryLoopHorizonObjectStatementControls
 import Solidity.Evm.MemoryLoopHorizonObjectStep
 import Solidity.Evm.MemoryLoopHorizonObjectTurnBound
 import Solidity.Evm.MemoryLoopHorizonObservedRoom
