@@ -767,7 +767,18 @@ scope wording were made exact; no defect found.
 shifts. `MachineSar.sarCode_simT` is now that fragment theorem at `.shr`;
 `shr_int_inFrag` records the admission. Other bitwise operators and `<<` stay
 `uint`-only. `>>=` has no compound form (`hasCompoundAssign`), so
-`compound_frag` is unchanged.
+`compound_frag` is unchanged. solc requires an unsigned shift count; the
+model's `int` count reads a negative value as `0` (`arithInt .shr`), and
+`sarCode` preserves that existing source semantics rather than solc's typing.
+
+Second-round reviews (finder/skeptic, read-only) found no proof or soundness
+defect in this change or the TF repair. They confirmed stale wording elsewhere:
+this lane's module-map row was fixed. Proposed for their owners, not edited
+here: R12 in [G04 restrictions](roadmap-g04-restrictions.md) should drop `>>`
+(signed `&`, `|`, `^` stay uint-only); the generated
+[G03 ledger](roadmap-g03-ledger.md) lines calling signed `>>` refused by the
+compiler should be regenerated; the `Evm/Signed.lean` row of
+[evm-compiler](../module-map/evm-compiler.md) can mention the SAR lemmas.
 
 ## Lane-module registration (G25 packet integration, 2026-11-05)
 
@@ -800,11 +811,15 @@ Gates (cold cache, one build at a time):
 - TF-gate: `test_cases.py` (15) and `test_targets.py` (8) pass in the merged
   tree; `accept_repaired.py --head 1b7b365f…` passes all 33 cases at its frozen
   head. `test_contract.py` is bound to that exact head and is not run elsewhere.
-- doc-paths: `tests/terra-20261103/gate/test_cases.py` cites two deliberately absent
-  fixture modules (A and MissingFixture under Solidity/). They come from the TF-gate
-  head itself, where the check also fails; master passes. Both that file and
-  `scripts/check-doc-paths.sh` are hash-frozen by the TF-gate snapshot, so this is
-  left for a decision.
+- doc-paths (user decision Q1): `tests/terra-20261103/gate/test_cases.py` cites two
+  deliberately absent fixture modules (A and MissingFixture under Solidity/).
+  `check-doc-paths.sh` exempts exactly those two names when cited from that file
+  only; a global allowlist would defeat the fixture's own missing-reference
+  negative control. The repair (04bac54e) and re-freeze (b880a894) sit on a line
+  rooted at the frozen head 1b7b365f, because the acceptor binds `HEAD^` to the
+  source commit and limits `diff BASE..source` to owned paths. Its ownership rule
+  now admits exactly `scripts/check-doc-paths.sh`. `accept_repaired.py --head
+  b880a894…` passes 33/33, and the line is merged here with identical bytes.
 
 ## Open
 

@@ -118,5 +118,5 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/UnsignedDependentFailure.lean` | Immediate versus actually reached zero-divisor failure. |
 | `Backend/Passes/UnsignedDependentScope.lean` | Scope exit after dependent quotient/remainder capture, followed by real slot reuse. |
 | `Backend/Passes/UnsignedWidthCapture.lean` | Publicly selected low-bit cleanup, captured before clearing its operand. |
-| `Backend/Passes/MachineSar.lean` | Memory-machine `SAR` (`Evm.Instr.sar`, `Evm.sarCode`): exact run, typed agreement with `BinOp.evalT .shr` at `int`, agreement with the Scalar endpoint `intShr`, unclamped-`SAR` negative control and saturated positive witness. |
+| `Backend/Passes/MachineSar.lean` | Signed `>>` in the memory compiler (`shr_int_inFrag`, `sarCode_simT` via `Evm.tail_simT`; machine lemmas in `Evm/Signed.lean`), agreement with the Scalar endpoint `intShr`, unclamped-`SAR` negative control and saturated positive witness. |
 | `Backend/Passes/MachineSarPins.lean` | `#guard_msgs` axiom guards for the MachineSar results. |
