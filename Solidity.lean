@@ -110,6 +110,8 @@ import Solidity.Backend.Executable.CreationPatchOrder
 import Solidity.Backend.Executable.CreationPatchOrderControls
 import Solidity.Backend.Executable.CreationReturnInterfaceV1
 import Solidity.Backend.Executable.CreationReturnInterfaceV1Controls
+import Solidity.Backend.Executable.CreationReturnPartition
+import Solidity.Backend.Executable.CreationReturnPartitionControls
 import Solidity.Backend.Executable.CreationReturnProducer
 import Solidity.Backend.Executable.CreationReturnProducerControls
 import Solidity.Backend.Failure.Checkpoint
