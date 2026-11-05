@@ -1,9 +1,0 @@
-{
-  "passed": true,
-  "binarySha256": "4a5a55fef0cebd89fb85eb7ada60d4479bd6674656678b334fd28ea250328bef",
-  "moduleRecordsEqual": true,
-  "modules": 200,
-  "closureEqual": true,
-  "javascriptEqual": true,
-  "boundary": "Exact compiled artifact/module equality; fresh browser observations remain separate and the required negative control still fails."
-}

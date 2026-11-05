@@ -383,3 +383,17 @@ was applied and validated independently without rewriting prior evidence. The
 one-module verified build-cache snapshot remains coordinator-pending under H41,
 not a Lake catalog/full dependency pack. Evidence and queue boundaries:
 [publishedb86a inventory](../benchmarks/directruntime-2026-11-04/published-b86a/README.md).
+
+## H44 reviewable split
+
+Bulk generated fixtures, evidence dumps, logs and historical executed-script copies
+are removed from the merge diff and retained on this VM. The committed
+[H44 manifest](../benchmarks/directruntime-2026-11-04/H44-bulk-manifest.json) records
+the absolute archive path, byte size, SHA256 and coverage. All1530 archived files
+were verified against preserved originals;1404 tracked bulk paths were untracked.
+The review diff contains80 scripts/docs/manifest files,2816 added lines before
+this handoff paragraph, versus533911 before splitting. No code, theorem, gate or
+budget changed in the split. Existing reproduction scripts require the archived
+evidence at its original relative paths; extract the archive at repository root
+when reproducing elsewhere. Earlier artifact receipts retain their original heads.
+Required runtime/Identity/semantic/full-gate obligations remain open.

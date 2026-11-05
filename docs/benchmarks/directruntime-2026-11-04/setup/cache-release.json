@@ -1,8 +1,0 @@
-{
-  "beforeOuterCurrentBytes": 12131725312,
-  "afterOuterCurrentBytes": 10252636160,
-  "filesAdvised": 26931,
-  "fileBytesAdvised": 3189919979,
-  "errors": [],
-  "boundary": "POSIX_FADV_DONTNEED on owned generated artifacts only; no deletion, content change, global cache drop, guard change or budget change."
-}

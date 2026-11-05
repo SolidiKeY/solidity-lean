@@ -1,5 +1,0 @@
-{
-  "executedWrapperSha256": "41e5c2bfb364adef32e1cd0d74b149c4eeec511ea5b18224b3dd21a97d86be72",
-  "executedWrapperArchive": "api-executed-wrapper-v1.sh.gz",
-  "change": "After read-only review, final wrapper additionally asserts exact qualified axiom target set. Original execution is preserved; stronger assertion validated against original log separately. No Lean/model/reader change or in-place rerun."
-}

@@ -1,6 +1,0 @@
-{
-  "v1Sha256": "9daa503202124afe9f392662669944643fd7e8ecb3b2f5adb2b41e6163cc314f",
-  "v1Archive": "tests/directruntime-20261104/native-browser/history/bounded-command-v1.py",
-  "v2Sha256": "8618123cc3a7149e411d586ad39ea315511b55c0fbc2fb284acb748e367d9041",
-  "change": "Atomic no-overwrite receipts and measured preflight refusals; limit/reserve/thread constraints unchanged. Prior successful receipts used v1."
-}

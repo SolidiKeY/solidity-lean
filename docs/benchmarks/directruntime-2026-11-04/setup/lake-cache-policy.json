@@ -1,7 +1,0 @@
-{
-  "LAKE_CACHE_DIR": "",
-  "policy": "Disable optional cross-checkout artifact fetch/export only; normal local source/trace checks and generated-C freshness checks remain. No theorem/options/budgets changed.",
-  "history": "5c8a15ad Lake artifact cache; lanes as worktrees",
-  "reason": "Optional export created 971 MiB cache plus source-read cache and triggered 4 GiB reserve stop",
-  "matchedMeasurements": "Use this same cache policy in both before and after successful cold-C-build measurements."
-}
