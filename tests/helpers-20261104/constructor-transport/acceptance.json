@@ -14,7 +14,7 @@
     }
   },
   "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
   "theorem_count": 28,
   "modules": [
     {
@@ -75,8 +75,8 @@
         }
       ],
       "kernel_command": "lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls",
-      "kernel_log": "adoption-f77cf60d/owned-build.log",
-      "mcp_log": "adoption-f77cf60d/mcp-Controls.log",
+      "kernel_log": "adoption-9584f9e7/owned-build.log",
+      "mcp_log": "adoption-9584f9e7/mcp-Controls.log",
       "status": "pass"
     },
     {
@@ -113,8 +113,8 @@
         }
       ],
       "kernel_command": "lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls",
-      "kernel_log": "adoption-f77cf60d/owned-build.log",
-      "mcp_log": "adoption-f77cf60d/mcp-Producer.log",
+      "kernel_log": "adoption-9584f9e7/owned-build.log",
+      "mcp_log": "adoption-9584f9e7/mcp-Producer.log",
       "status": "pass"
     },
     {
@@ -223,8 +223,8 @@
         }
       ],
       "kernel_command": "lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls",
-      "kernel_log": "adoption-f77cf60d/owned-build.log",
-      "mcp_log": "adoption-f77cf60d/mcp-Source.log",
+      "kernel_log": "adoption-9584f9e7/owned-build.log",
+      "mcp_log": "adoption-9584f9e7/mcp-Source.log",
       "status": "pass"
     },
     {
@@ -313,8 +313,8 @@
         }
       ],
       "kernel_command": "lake -f tests/helpers-20261104/constructor-transport/serial.toml build Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Source Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Target Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Producer Solidity.Lowering.V08.HelperPackets.ConstructorTransport.Controls",
-      "kernel_log": "adoption-f77cf60d/owned-build.log",
-      "mcp_log": "adoption-f77cf60d/mcp-Target.log",
+      "kernel_log": "adoption-9584f9e7/owned-build.log",
+      "mcp_log": "adoption-9584f9e7/mcp-Target.log",
       "status": "pass"
     }
   ],

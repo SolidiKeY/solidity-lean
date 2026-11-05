@@ -1,6 +1,6 @@
 # H26 constructor initialization/capture packet
 
-Current status (H41 plus adopted master f77cf60d, 2026-11-05): worker components and VM gates are ready; delivery is **coordinator-pending**. The coordinator reports receipt/hash verification of the retained cache pack. QREG/H35CACHE are resolved; full validation is **pending coordinator merge**. Historical blocked statuses below describe earlier attempts and are superseded by h41/coordinator-receipt.json and HANDOFF-CURRENT.md. Shared roots remain read-only; never run ship-cache.sh on this VM again. No full validation pass is claimed.
+Current status (H41 plus adopted master 9584f9e7, 2026-11-05): worker components and VM gates are ready; delivery is **coordinator-pending**. The coordinator reports receipt/hash verification of the retained cache pack. QREG/H35CACHE are resolved; full validation is **pending coordinator merge**. Historical blocked statuses below describe earlier attempts and are superseded by h41/coordinator-receipt.json and HANDOFF-CURRENT.md. Shared roots remain read-only; never run ship-cache.sh on this VM again. No full validation pass is claimed.
 
 ## Identity and scope
 
@@ -148,3 +148,15 @@ Fresh 195-job build, four kernel checks, four MCP diagnostics with 0 errors,28 g
 Post-build cache comparison independently verifies that the unchanged H35 archive still matches all 12 owned artifact files/four mappings. No notice-based global cache freshness, complete dependency transfer or recipient import is inferred. Delivery remains coordinator-pending; no ship-cache invocation occurs. Original work/backfill statuses and pending external producer duties remain unchanged; no whole-lane completion is claimed.
 
 Separate read-only finder and skeptic accepted the f77 adoption without findings; see adoption-f77cf60d/reviews.md. Documentation references resolve. The current worker-only handoff is sealed against integration base f77, with original base and prior packets preserved and all coordinator-pending statuses retained.
+
+## Coordinator integration adoption 9584f9e7
+
+Fetched exact master 9584f9e7df09f638d9e0cb8930501d1660aa4b2f (base f77), then adopted it in merge a27493c642ef5369ef680991ac319dbeec385d8d with prior owned 3a628a9d45cd2e0035f9becc02d4f231943c1e43 as first parent. Original base and all prior work/seals remain preserved. Worker-only scope now compares against 9584; shared roots/configuration are imported exactly from upstream, not authored here. Protected constructor inputs, Source/Scoped and all four helper proofs remain unchanged.
+
+Read the published integration scope and relevant V08/V12 lane docs. The new local-call/scoped native-call additions do not discharge this reserved constructor packet's retained external obligations. Standalone call resumption changes no opaque callback execution; integrated VA1/C3/fragments are not redone and H16/Monetary.wide/H38 ownership holds remain untouched. No producer duplicate or helper proof edit is introduced.
+
+Fresh owned build (195 jobs), four kernel checks, four MCP0 diagnostics, 28 exact axiom guards/explicit inventories, actual runtime/KeySort and both compiler controls pass under unchanged serial-j1/12GiB/no-swap/reserve bounds. Trust reports zero findings. Evidence and acceptance mapping are under adoption-9584f9e7. Root4 and global-pin28 registration checks remain actual exit1, with full validation pending coordinator merge under H41/QREG.
+
+Actual current owned cache bytes and four input mappings still match the retained coordinator-received H35 archive. No cache freshness or recipient-import conclusion is drawn from the coordinator's shipment notice. Delivery remains coordinator-pending; no ship-cache.sh invocation occurs. Original controls/backfill/limitations are preserved; full lane completion is not claimed.
+
+Separate read-only finder and skeptic accepted the 9584 adoption without findings; see adoption-9584f9e7/reviews.md. Documentation references resolve. The current worker-only handoff is sealed against 9584, preserving all prior packets, original base and coordinator-pending statuses.
