@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawCheckedAdapterLoop
 import Solidity.Yul.RawCheckedAdapterIfElse
 import Solidity.Yul.RawCheckedAdapterSequence
 import Solidity.Yul.Syntax
@@ -45,4 +46,8 @@ RawCheckedAdapterIfElse.adapter composes actual checked statement producers as
 branches, including nested sequence/block producers. Its Source law retains
 the supplied producer fields, checked-frame and coherence premises. Concrete
 nested witnesses live in Solidity.Yul.Checks.RawCheckedAdapterIfElse.
+RawCheckedAdapterLoop.loop composes an actual checked body producer as a
+fuelled while statement. Its real fuel induction preserves checked/coherent
+Source agreement and consumes body break/continue exactly as Source does.
+Nested execution and all-fuel controls live in Solidity.Yul.Checks.RawCheckedAdapterLoop.
 -/
