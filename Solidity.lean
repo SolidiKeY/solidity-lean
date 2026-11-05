@@ -79,6 +79,9 @@ import Solidity.Backend.AbiEntry.TailGuard
 import Solidity.Backend.AbiEntry.TailGuardControls
 import Solidity.Backend.AbiEntry.TailGuardInterface
 import Solidity.Backend.AbiEntry.UIntBinding
+import Solidity.Backend.AbiEntry.UIntBindingBody
+import Solidity.Backend.AbiEntry.UIntBindingBodyControls
+import Solidity.Backend.AbiEntry.UIntBindingBodyInterface
 import Solidity.Backend.AbiEntry.UIntBindingControls
 import Solidity.Backend.AbiEntry.UIntBindingInterface
 import Solidity.Backend.AbiEntry.UnsignedGate

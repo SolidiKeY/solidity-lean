@@ -190,3 +190,6 @@
 | `Backend/AbiEntry/UIntBindingInterface.lean` | Actual compiler contract for a validated singleton uint parameter local. |
 | `Backend/AbiEntry/UIntBinding.lean` | Typed uint declaration with exact compiler execution and raw semantic value agreement. |
 | `Backend/AbiEntry/UIntBindingControls.lean` | Raw bound frame, dirty/width/head/fuel controls and compiled typed argument read. |
+| `Backend/AbiEntry/UIntBindingBodyInterface.lean` | One-artifact uint validation, binding and core-admitted typed body contract. |
+| `Backend/AbiEntry/UIntBindingBody.lean` | Public whole/body selection and exact ordered raw uint entry/body execution. |
+| `Backend/AbiEntry/UIntBindingBodyControls.lean` | Checked allocating body, decoder/body failure distinction, short/fuel and saved-state controls. |

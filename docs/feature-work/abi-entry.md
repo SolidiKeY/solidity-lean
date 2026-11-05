@@ -1000,3 +1000,34 @@ ownership, and the full assignment gates and fixture replay remain pending.
 `UIntBindingBodyInterface.lean` specifies one public compilation of validation,
 uint binding and an existing core-admitted typed body, with exact ordered
 execution. Body failures remain distinct from decoder rejection obligations.
+
+`UIntBindingBody.lean` selects one typed compiler program containing validation,
+uint parameter declaration and the body. Its supported body family is the
+existing core classifier at the extended uint frame. Both the whole program
+and body are selected through the public compiler; no target run or body result
+is a premise. Exact execution checks the head, then word validity, then runs
+the actual selected body on the proved bound state. It retains the complete
+body outcome, rather than assuming body success. Raw semantic success at
+`fuel + 2` derives the typed word from bytes and identifies the same new local
+that the body reads. A short head prevents the word read and body, even if the
+word cell is malformed.
+
+Controls select and execute the complete program with a context-growing body
+that reads raw 255, performs the compiler checked increment and stores 256 in
+a new local. The arithmetic control reuses the existing `add_tail` proof.
+An actual reverting body after successful raw decoding demonstrates why whole
+program rejection cannot imply decoder rejection. Dirty input and short heads
+stop body execution; semantic low-fuel controls, arbitrary selector/trailing
+bytes and exact saved state remain explicit. Direct control reduction and
+bounded automation timed out during development; factoring the actual checked
+code and reusing its proof resolves checking without raising budgets. Focused
+compilation, final per-file checks and standard-only scoped axiom guards pass.
+Independent read-only finder and skeptic reviews found no semantic issues.
+
+This composes singleton uint validation/binding with supported intrinsic typed
+bodies. It does not supply Source body/label association, general profile
+admission, native loading/frame realization, other argument families,
+aggregate decoding, full dispatch/entry composition or physical failure bytes.
+Those G40 obligations, G46.02, the writer counterexample, fixture replay and
+full assignment gates remain open. Published master was adopted before this
+increment; prior checkpoint evidence is retained without relabeling failures.
