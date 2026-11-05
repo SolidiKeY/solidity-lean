@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.complete_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.stale_initial_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.Controls.whole_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.joined_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/MemoryJoinedAllocationPins.lean:Solidity.Backend.Passes.MemoryJoinedAllocation.suffix_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

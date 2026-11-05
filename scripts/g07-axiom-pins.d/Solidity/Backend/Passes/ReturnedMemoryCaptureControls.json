@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.application": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.complete_pointer_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.saved_tail_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ReturnedMemoryCaptureControls.lean:Solidity.Backend.Passes.ReturnedMemoryCapture.Controls.stale_readback_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

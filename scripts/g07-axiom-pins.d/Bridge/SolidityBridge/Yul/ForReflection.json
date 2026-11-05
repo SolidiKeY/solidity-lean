@@ -1,0 +1,15 @@
+{
+ "Bridge/SolidityBridge/Yul/ForReflection.lean:SolidityBridge.Yul.ForReflection.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflection.lean:SolidityBridge.Yul.ForReflection.source_of_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForReflection.lean:SolidityBridge.Yul.ForReflection.source_of_structured": [
+  "Quot.sound",
+  "propext"
+ ]
+}

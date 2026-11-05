@@ -1,0 +1,46 @@
+{
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.live_caller": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.local_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.operand_source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.range_client": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.repeated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.value_source_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.value_target_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedComplementControls.lean:Solidity.Lowering.V07.UnsignedComplementControls.word_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

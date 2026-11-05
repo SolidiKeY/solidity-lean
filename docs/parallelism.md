@@ -231,10 +231,44 @@ moving or deleting a module and commits the result; the integrator drops the
 lanes' root hunks and regenerates.
 
 `docs/module-map.md` is an index; the rows are in one file per area under
-`docs/module-map/` (its former `##` sections, contents unchanged).  A lane
-adds rows only to its area's file; `scripts/coord-tools/module-map.py BASE`
-lists the modules added since BASE without a row and proposes the area file
-and a row (the integrator's former `mmrows`/`mmplace`).
+`docs/module-map/` (its former `##` sections, contents unchanged).
+`scripts/coord-tools/module-map.py BASE` lists the modules added since BASE
+without a row and proposes the fragment and a row (the integrator's former
+`mmrows`/`mmplace`).
+
+The other shared bookkeeping files are generated too, from a fragment
+directory next to each: `docs/module-map.md` from `docs/module-map.d/`, each
+`docs/module-map/<area>.md` from `docs/module-map/<area>.d/`,
+`docs/README.md` from `docs/README.d/`, `TERRA-TODO.md` from `TERRA-TODO.d/`
+and `scripts/g07-axiom-pins.json` from `scripts/g07-axiom-pins.d/`.
+`scripts/coord-tools/fragments.sh` writes them; the combined files stay
+committed (scripts and `git show REV:path` read them).  A Markdown file is a
+marker line followed by its fragments concatenated in bytewise path order:
+`00-base.md` holds the migrated text, a lane adds `<lane>.md` (lower-case
+branch name), `~tail.md` sorts last, and a subdirectory such as
+`docs/README.d/10-language/` is a slot inside the file (the language table).
+The pin inventory has one fragment per Lean file,
+`scripts/g07-axiom-pins.d/<path without .lean>.json`;
+`check-axiom-pins.mjs --write` rewrites them with the combined file.  A lane
+edits only its own fragments and runs `fragments.sh`, so two lanes never touch
+the same lines.  `fragments.sh --check` (run by `gate.sh`, `run-lean.sh` and
+CI) fails on a stale combined file; the write refuses lines in a combined file
+that no fragment produces (a direct edit) unless `--force`.  The Markdown
+combined files merge with `merge=union` (the pin inventory does not: a union
+of JSON is not JSON); after any merge or rebase run `fragments.sh`.
+`fragments.sh --resolve [--lane NAME]`, during a conflicted two-parent merge
+or right after a merge commit, regenerates every combined file and the roots
+and stages the result; it exits 1 while a path stays conflicted.  A side that
+has fragments is taken from its fragments (its combined file may be stale);
+only lines none of the merged fragments has are adopted, into
+`<slot>/<lane>.md`.  A side that predates the fragments has its direct edits
+adopted: a replaced block found once is edited in place in the fragment that
+holds it, a deleted line found once is removed, inserted lines go to
+`<slot>/<lane>.md` (so they land at the end of their slot), and pins merge by
+key.  After a rebase or a fast-forward there is no merge to read; run
+`fragments.sh` and move the lines it refuses into a fragment.  The pre-gate
+service runs `--resolve` on merges whose only conflicts are in these files,
+their fragments or the roots, and records them as `auto_resolved`.
 
 Measured on the history since 2026-10-27 (non-merge commits): 214 touched
 `Solidity.lean`, whose hunks are now regenerated instead of merged.  269

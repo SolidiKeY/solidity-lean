@@ -1,0 +1,18 @@
+{
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.enter_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.heads_append": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.heads_cons": [],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.prefix_failure": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/EntryComposition.lean:Solidity.Backend.AbiEntry.EntryComposition.tail_failure": [
+  "Quot.sound",
+  "propext"
+ ]
+}

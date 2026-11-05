@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/StorageOps/LoopLaws.lean:Solidity.Backend.StorageOps.LoopLaws.run_single_loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LoopLaws.lean:Solidity.Backend.StorageOps.LoopLaws.turn_exit": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/LoopLaws.lean:Solidity.Backend.StorageOps.LoopLaws.turn_step": [
+  "propext"
+ ]
+}

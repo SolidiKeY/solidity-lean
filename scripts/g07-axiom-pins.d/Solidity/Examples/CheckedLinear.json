@@ -1,0 +1,7 @@
+{
+ "Solidity/Examples/CheckedLinear.lean:Solidity.Linear.CheckedScalar.arith_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

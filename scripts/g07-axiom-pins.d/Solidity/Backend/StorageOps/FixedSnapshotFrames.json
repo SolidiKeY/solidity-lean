@@ -1,0 +1,38 @@
+{
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.fold_outside": [],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.prefix_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.represented_prefix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.represented_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.snapshot_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.stores_append": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FixedSnapshotFrames.lean:Solidity.Backend.StorageOps.FixedSnapshotFrames.stores_log": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

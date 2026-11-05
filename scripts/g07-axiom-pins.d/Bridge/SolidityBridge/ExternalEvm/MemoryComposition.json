@@ -1,0 +1,27 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean:Solidity.Evm.External.Memory.composed_memory": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean:Solidity.Evm.External.Memory.populated_composition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean:Solidity.Evm.External.Memory.populated_composition_values": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean:Solidity.Evm.External.Memory.populated_lookup": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/MemoryComposition.lean:Solidity.Evm.External.Memory.populated_represents": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

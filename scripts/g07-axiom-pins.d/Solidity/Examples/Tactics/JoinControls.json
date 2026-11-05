@@ -1,0 +1,17 @@
+{
+ "Solidity/Examples/Tactics/JoinControls.lean:Solidity.Examples.Tactics.JoinControls.conditionalFailure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/JoinControls.lean:Solidity.Examples.Tactics.JoinControls.conditionalJoined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/JoinControls.lean:Solidity.Examples.Tactics.JoinControls.conditionalLazy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

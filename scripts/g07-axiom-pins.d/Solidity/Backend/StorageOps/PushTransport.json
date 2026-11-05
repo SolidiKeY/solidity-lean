@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/PushTransport.lean:Solidity.Backend.StorageOps.PushTransport.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushTransport.lean:Solidity.Backend.StorageOps.PushTransport.element_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushTransport.lean:Solidity.Backend.StorageOps.PushTransport.push_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushTransport.lean:Solidity.Backend.StorageOps.PushTransport.represented_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/PushTransport.lean:Solidity.Backend.StorageOps.PushTransport.selected_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

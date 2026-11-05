@@ -1,0 +1,26 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.reference_assign_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.reference_slot_allocator": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_reference_loc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.reference_assign_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceReferenceAssignment.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_reference_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

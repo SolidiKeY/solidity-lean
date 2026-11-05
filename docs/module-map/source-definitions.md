@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/source-definitions.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Independent source definitions
 
 | Module | What it defines |
