@@ -1,4 +1,5 @@
 import Solidity.Yul.RawCheckedAdapter
+import Solidity.Yul.RawControlForPost
 import Solidity.Yul.RawControlDeclaration
 import Solidity.Yul.RawGrowingForPost
 import Solidity.Yul.RawGrowingBlock
@@ -141,3 +142,11 @@ declaration law requires input coherence and retains actual result/world.
 No arbitrary initializer, frontend admission or dirty-read cleanup follows.
 Mutation-before-timeout, raw Boolean/narrow-word and scope controls are in
 Solidity.Yul.Checks.RawControlDeclaration. -/
+
+/-! RawControlForPost.adapter composes the actual supported Boolean expression
+initializer with grown-context supported condition/post and an actual checked
+body. Its full Source.execS forLoop law joins initializer partial errors,
+iteration and restoration under genuine checked/coherent premises.
+Mutation/continue/break/false-guard and initializer/post timeout witnesses are
+in Solidity.Yul.Checks.RawControlForPost. Other initializer types, declaration
+groups, dirty Source readback and general admission remain separate. -/
