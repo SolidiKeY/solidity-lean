@@ -1,0 +1,67 @@
+{
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.construct_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.deployment_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.installed_other_account": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.installed_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.nonpayable_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.old_objects_and_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.overflow_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.overflow_keeps_objects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.refused_restores_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.timeout_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.wrong_installed_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.wrong_pipeline_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/SourceDeploymentControls.lean:Solidity.Lowering.V08.SourceDeploymentControls.wrong_timeout_rollback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

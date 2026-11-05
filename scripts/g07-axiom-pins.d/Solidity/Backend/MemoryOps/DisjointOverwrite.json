@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteSlice_empty": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteTwo_comm": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/DisjointOverwrite.lean:Solidity.Backend.MemoryOps.overwriteTwo_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.dirty_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.dirty_value": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.empty_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.exact_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.last_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.missing_operand": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.native_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.next_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.packet_instructions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.scan_two": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.step_first": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.step_last": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapesControls.lean:Solidity.Yul.Compilation.ClzShapes.Controls.zero_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

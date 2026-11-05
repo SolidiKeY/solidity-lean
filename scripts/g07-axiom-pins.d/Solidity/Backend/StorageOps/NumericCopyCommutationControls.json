@@ -1,0 +1,83 @@
+{
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.a_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.a_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.b_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.b_root_bridge": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.cross_conditions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.cross_different": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.cross_graph_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.cross_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.exact_numeric_alias": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.generated_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.graph_commutes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.graph_ordered": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.malformed_orders": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.numeric_ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.represented_inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.shared_read_inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCopyCommutationControls.lean:Solidity.Backend.StorageOps.NumericCopyCommutationControls.shared_source_commutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

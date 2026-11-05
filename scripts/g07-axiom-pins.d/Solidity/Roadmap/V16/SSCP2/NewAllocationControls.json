@@ -1,0 +1,47 @@
+{
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.frame_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.initial_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.low_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.preserved": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.refusals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.refused_mem": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.runs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.wrong_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Roadmap/V16/SSCP2/NewAllocationControls.lean:Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.wrong_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

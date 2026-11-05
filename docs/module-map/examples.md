@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/examples.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # Examples
 
 Two directories, by proof style (`.claude/rules/derivations.md`).

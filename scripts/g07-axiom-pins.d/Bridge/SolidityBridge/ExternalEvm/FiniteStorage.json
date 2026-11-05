@@ -1,0 +1,9 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/FiniteStorage.lean:Solidity.Evm.StorageSlots.nonzero_alias_write_refused": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/ExternalEvm/FiniteStorage.lean:Solidity.Evm.StorageSlots.write_iff": [
+  "propext"
+ ]
+}

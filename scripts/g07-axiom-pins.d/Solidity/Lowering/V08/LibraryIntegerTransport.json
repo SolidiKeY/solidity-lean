@@ -1,0 +1,47 @@
+{
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.all_accounts_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.finish_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.library_actual": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.no_second_payment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.populated_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.source_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.static_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/LibraryIntegerTransport.lean:Solidity.Lowering.V08.LibraryIntegerTransport.wrong_signed_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

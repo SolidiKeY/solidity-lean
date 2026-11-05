@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/theories.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The data-structure theories
 
 solkey's `find`/`save`/`read`/`write` are uninterpreted symbols whose meaning is

@@ -1,3 +1,4 @@
+<!-- Generated from docs/module-map/g25-scalar-lowering.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # G25 scalar lowering preparation
 
 | Module | What it defines |

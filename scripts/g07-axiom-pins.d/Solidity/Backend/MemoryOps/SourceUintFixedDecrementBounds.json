@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedDecrementBounds.lean:Solidity.Backend.MemoryOps.resolved_uint_fixed_decrement_bounds_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

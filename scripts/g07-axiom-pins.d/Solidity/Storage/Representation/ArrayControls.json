@@ -1,0 +1,51 @@
+{
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.array_live_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.array_path_save": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.array_repartition": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.beyond_extent": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.empty_default_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.fixed_update_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.nested_array_save_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.shadow_write_combination": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.ArrayControls.update_preserves_shadow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Storage/Representation/ArrayControls.lean:Solidity.Storage.Representation.fixed_path_save": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

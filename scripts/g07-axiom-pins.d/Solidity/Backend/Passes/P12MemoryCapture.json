@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/Passes/P12MemoryCapture.lean:Solidity.Backend.Passes.P12MemoryCapture.empty_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/P12MemoryCapture.lean:Solidity.Backend.Passes.P12MemoryCapture.execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/P12MemoryCapture.lean:Solidity.Backend.Passes.P12MemoryCapture.nonempty_revert_incompatible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

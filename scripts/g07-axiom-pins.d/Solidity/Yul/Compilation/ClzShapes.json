@@ -1,0 +1,65 @@
+{
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.bound_append": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.expansion_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.expansion_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.expansion_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.expansionCode": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.lowering_shape": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.scan_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.scan_delta": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.scan_length": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.scan_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.step_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.step_delta": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.step_length": [],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.step_shape": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ClzShapes.lean:Solidity.Yul.Compilation.ClzShapes.step_trace": [
+  "Quot.sound",
+  "propext"
+ ]
+}

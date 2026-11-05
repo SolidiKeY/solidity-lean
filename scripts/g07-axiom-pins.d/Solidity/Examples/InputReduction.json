@@ -1,0 +1,21 @@
+{
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.InputReduction.not_valid_of_codes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.InputReduction.valid_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/InputReduction.lean:Solidity.Decide.Inputs.observe_realize": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/InputReduction.lean:Solidity.Examples.InputReduction.setter_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

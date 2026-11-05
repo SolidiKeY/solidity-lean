@@ -1,0 +1,78 @@
+{
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.corrupted_tail": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.inhabited": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.input_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.insufficient_frame": [],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.left_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.right_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.saturated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.source_expression": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.wrong_order_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.wrong_order_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.wrong_public": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.wrong_recapture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Passes/ShiftCaptureControls.lean:Solidity.Backend.Passes.ShiftCaptureControls.wrong_saturated_modulo": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
