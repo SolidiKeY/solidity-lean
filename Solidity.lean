@@ -327,6 +327,7 @@ import Solidity.Backend.MemoryOps.PhysicalFrameImage
 import Solidity.Backend.MemoryOps.PhysicalFrameImageControls
 import Solidity.Backend.MemoryOps.PhysicalLocalDeleteGoal
 import Solidity.Backend.MemoryOps.PhysicalMemoryControls
+import Solidity.Backend.MemoryOps.PhysicalNestedFixedWrite
 import Solidity.Backend.MemoryOps.PhysicalPointerFrame
 import Solidity.Backend.MemoryOps.PhysicalPointerImage
 import Solidity.Backend.MemoryOps.PhysicalPointerMaterialize

@@ -2,6 +2,7 @@ import Solidity.Backend.MemoryOps.SourceUintFixedRefsLate
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsDeleteTarget
 import Solidity.Backend.MemoryOps.SourceUintFixedRefsExact
 import Solidity.Evm.Correct
+import Solidity.Backend.MemoryOps.PhysicalNestedFixedWrite
 import Solidity.Backend.MemoryOps.SourceUintFixedDeclaration
 import Solidity.Source.SemanticsExamples
 
@@ -845,5 +846,164 @@ theorem nested_word_late_tables (pipeline : Roadmap.Pipeline) (horizon nps : Nat
 #guard_msgs (whitespace := lax) in #print axioms nested_word_late_initial
 /-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_word_late_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms nested_word_late_tables
+
+
+open Physical
+private def byteImage : List (Nat×Nat) := [(0,1024),(1,512),(2,42),(3,1),(4,1),(8,7),(9,0),(10,(W-1)),(11,0),(16,3),(17,256),(18,256),(19,768),(24,8),(25,9),(26,10)]
+private def physicalBytes : Environment.Memory := byteImage.foldl
+  (fun memory cell => Environment.writeBytes memory (32*cell.1) (Semantics.wordBytes cell.2)) (fun _ => 0)
+private def numericCells : List Nat := [2,3,4,8,9,10,11,16,24,25,26]
+private def pointerCells : List Nat := [0,1,17,18,19]
+private theorem byteImage_read (c value : Nat) (hit : (c,value)∈byteImage) :
+    Environment.readMemory physicalBytes (32*c) 32=Semantics.wordBytes value := by
+  simp only [byteImage,List.mem_cons,List.not_mem_nil,or_false,Prod.mk.injEq] at hit
+  rcases hit with ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩ | ⟨rfl,rfl⟩
+  all_goals
+    simp only [physicalBytes,byteImage,List.foldl_cons,List.foldl_nil]
+    repeat (rw [readMemory_write_frame]; case sep => simp only [Environment.wordBytes_length];omega)
+    simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes _) _ _
+private theorem byteNumbers : WordFrame wordMachine physicalBytes (fun c => c∈numericCells) := by
+  refine ⟨?_,?_⟩
+  · intro c hc
+    simp only [numericCells,List.mem_cons,List.not_mem_nil,or_false] at hc
+    rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl <;> decide
+  · intro c hc
+    simp only [numericCells,List.mem_cons,List.not_mem_nil,or_false] at hc
+    rcases hc with rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl
+    · exact ⟨wmod 42,rfl,byteImage_read 2 42 (by decide)⟩
+    · exact ⟨wmod 1,rfl,byteImage_read 3 1 (by decide)⟩
+    · exact ⟨wmod 1,rfl,byteImage_read 4 1 (by decide)⟩
+    · exact ⟨wmod 7,rfl,byteImage_read 8 7 (by decide)⟩
+    · exact ⟨wmod 0,rfl,byteImage_read 9 0 (by decide)⟩
+    · exact ⟨wmod (W-1),rfl,byteImage_read 10 (W-1) (by decide)⟩
+    · exact ⟨wmod 0,rfl,byteImage_read 11 0 (by decide)⟩
+    · exact ⟨wmod 3,rfl,byteImage_read 16 3 (by decide)⟩
+    · exact ⟨wmod 8,rfl,byteImage_read 24 8 (by decide)⟩
+    · exact ⟨wmod 9,rfl,byteImage_read 25 9 (by decide)⟩
+    · exact ⟨wmod 10,rfl,byteImage_read 26 10 (by decide)⟩
+
+private theorem bytePointers : PointerFrame wordMachine physicalBytes (fun c => c∈pointerCells) := by
+  refine ⟨?_,?_⟩
+  · intro c hc
+    simp only [pointerCells,List.mem_cons,List.not_mem_nil,or_false] at hc
+    rcases hc with rfl | rfl | rfl | rfl | rfl <;> decide
+  · intro c hc
+    simp only [pointerCells,List.mem_cons,List.not_mem_nil,or_false] at hc
+    rcases hc with rfl | rfl | rfl | rfl | rfl
+    · exact ⟨wmod 32,rfl,by decide,byteImage_read 0 1024 (by decide)⟩
+    · exact ⟨wmod 16,rfl,by decide,byteImage_read 1 512 (by decide)⟩
+    · exact ⟨wmod 8,rfl,by decide,byteImage_read 17 256 (by decide)⟩
+    · exact ⟨wmod 8,rfl,by decide,byteImage_read 18 256 (by decide)⟩
+    · exact ⟨wmod 24,rfl,by decide,byteImage_read 19 768 (by decide)⟩
+
+/-- Pointer cells are not silently treated as numeric bytes. -/
+theorem nested_byte_initial : WordFrame wordMachine physicalBytes (fun c => c∈numericCells) ∧
+    PointerFrame wordMachine physicalBytes (fun c => c∈pointerCells) ∧
+    ¬CellAt wordMachine physicalBytes 1 := by
+  refine ⟨byteNumbers,bytePointers,?_⟩
+  intro numeric
+  obtain ⟨v,word,bytes⟩ := numeric
+  change (Word.val (wmod 16))=Word.val v at word
+  have same : v=wmod 16 := (Word.val.inj word).symm
+  rw [same] at bytes
+  have different : Semantics.wordBytes 512≠Semantics.wordBytes 16 := by decide
+  exact different ((byteImage_read 1 512 (by decide)).symm.trans bytes)
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_byte_initial' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_byte_initial
+
+
+/-- Actual nested Source/word write joined to terminal byte MSTORE and the
+REVERT observer of its reached bytes. This does not emit the byte-load prefix. -/
+theorem nested_physical_prefix (pipeline : Roadmap.Pipeline) (horizon nps : Nat)
+    (tail : List Environment.Word) (faultTail : List Roadmap.Word) (suffix : Backend.Program) :
+    let next := writeMachine wordMachine 9 w[42]
+    let byteNext := Environment.writeBytes physicalBytes 288 (Semantics.wordBytes 42)
+    ∃ (out : Heap H) (z : Source.EMState E0 ΓW) (logical offset : Fin W),
+      logical.val=9 ∧ offset.val=288 ∧
+      (Source.evalE (G0 pipeline) F0 (horizon+4) (sourceUintFixedNestedAssign wr wi wi wv)).run (sw 1 1 42)=
+        (.ok (.val (sourceUint (u 42))),z) ∧
+      (Source.execS (G0 pipeline) F0 (horizon+5) nps none
+        (.expr (sourceUintFixedNestedAssign wr wi wi wv) : Source.RStmt E0 [] false .body ΓW ΓW) (sw 1 1 42).1).run (.nil,(sw 1 1 42).2)=
+          (.ok (.normal z.1),(.nil,z.2)) ∧
+      Evm.run (uintFixedChildWriteCode (C := CT) 1 tr ti ti tv) wordMachine=.ok next 0 ∧
+      Environment.cryptoStep (.op .MSTORE) ⟨lenU offset.val offset.isLt::lenU 42 (by decide)::tail,physicalBytes⟩=
+        some ⟨tail,byteNext⟩ ∧
+      WordFrame next byteNext (fun c => c∈numericCells ∨ c=9) ∧ PointerFrame next byteNext (fun c => c∈pointerCells) ∧
+      (∀ a,a<288 ∨ 320≤a → byteNext a=physicalBytes a) ∧
+      Failure.Slice.run (.op .REVERT::suffix)
+        ⟨(⟨offset.val,offset.isLt⟩ : Roadmap.Word)::(⟨32,by decide⟩ : Roadmap.Word)::faultTail,byteNext⟩=
+        some (⟨faultTail,byteNext⟩,some (.revert (Semantics.wordBytes 42))) ∧
+      SourceUintFixedRefsAt z 2 out root address ∧ Source.MemOK E0 SH z ∧
+      Objects.StateRepr 1 1 5 (Frag.init ΔT) (st.withHeap out) wordBase next ∧
+      Objects.AllocatorRepr out wordBase 5 ⟨32,by decide⟩ next ∧
+      z.1=(sw 1 1 42).1 ∧ z.2.heap.next=3 ∧ out.get root=hp.get root ∧
+      (∀ {Q : RefTy} (r : HRef H Q),left.id≠r.id → out.get r=hp.get r) ∧
+      (∀ a,a≠0 → z.2.heap.get a=(sw 1 1 42).2.heap.get a) ∧
+      z.2.ex=(sw 1 1 42).2.ex ∧ z.2.events=(sw 1 1 42).2.events ∧
+      z.2.logs=(sw 1 1 42).2.logs ∧ z.2.fnLocals=(sw 1 1 42).2.fnLocals := by
+  first
+  | solve | simp only [] | omega
+  | dsimp only
+    obtain ⟨out,z,target,typed,expr,stmt,intrinsic,code,reached,memOK,repr,locals,next,parent,objects,addresses,world,events,logs,fnLocals,stack,allocator⟩ :=
+      (graphW 1 1 42).resolved_write_word (G0 pipeline) F0 horizon nps st root address wr wi wi wv tr ti ti tv
+        (u 1) (u 1) (u 42) left rfl rfl rfl rfl rfl rfl rfl rfl selectLeft selectedSeparation
+        (by decide) SH (memOKW 1 1 42) wordRepr
+    obtain ⟨logical,offset,lc,oc,word,byte,numbers,pointers,frame,revert⟩ :=
+      nested_fixed_word_byte_store wordRepr tr ti ti (.simple (.local tv)) rfl root left
+        (wmod 1) (wmod 1) (wmod 42) rfl rfl rfl rfl selectLeft (by decide)
+        physicalBytes (fun c => c∈numericCells) (fun c => c∈pointerCells) byteNumbers bytePointers (by decide)
+        (by intro c hc;simp only [pointerCells,List.mem_cons,List.not_mem_nil,or_false] at hc;rcases hc with rfl|rfl|rfl|rfl|rfl <;> decide)
+        tail faultTail suffix
+    have same : target=writeMachine wordMachine 9 w[42] := (Evm.Out.ok.inj (code.symm.trans word)).1
+    rw [same] at repr allocator
+    exact ⟨out,z,logical,offset,lc,oc,expr,stmt,word,byte,numbers,pointers,frame,revert,reached,memOK,repr,
+      allocator ⟨32,by decide⟩ (by decide) wordAllocator,locals,next,parent,objects,addresses,world,events,logs,fnLocals⟩
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_prefix' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_physical_prefix
+
+
+private def byteTable (bytes : Environment.Memory) : List (List UInt8) :=
+  byteImage.map (fun cv => Environment.readMemory bytes (32*cv.1) 32)
+
+/-- Complete sixteen physical 32-byte rows use scaled pointer values, with
+only the actual selected numeric row changed by terminal MSTORE. -/
+theorem nested_physical_byte_tables (tail : List Environment.Word) :
+    let after := Environment.writeBytes physicalBytes 288 (Semantics.wordBytes 42)
+    Environment.cryptoStep (.op .MSTORE)
+      ⟨lenU 288 (by decide)::lenU 42 (by decide)::tail,physicalBytes⟩=some ⟨tail,after⟩ ∧
+    byteTable physicalBytes=byteImage.map (fun cv => Semantics.wordBytes cv.2) ∧
+    byteTable after=byteImage.map (fun cv => Semantics.wordBytes (if cv.1=9 then 42 else cv.2)) ∧
+    byteTable after≠byteTable physicalBytes := by
+  first
+  | solve | simp only [] | omega
+  | dsimp only
+    refine ⟨byte_mstore physicalBytes tail (⟨9,by decide⟩ : Fin W) (⟨42,by decide⟩ : Fin W) (by decide),?_,?_,?_⟩
+    · apply List.map_congr_left
+      intro cv member
+      exact byteImage_read cv.1 cv.2 member
+    · apply List.map_congr_left
+      intro cv member
+      rcases cv with ⟨c,v⟩
+      by_cases selected : c=9
+      · subst c
+        simp only [↓reduceIte]
+        simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes 42) 288 physicalBytes
+      · simp only [if_neg selected]
+        rw [readMemory_write_frame]
+        · exact byteImage_read c v member
+        · rw [Environment.wordBytes_length];omega
+    · intro equal
+      have eq := congrArg (fun rows : List (List UInt8) => rows[6]!) equal
+      change Environment.readMemory (Environment.writeBytes physicalBytes 288 (Semantics.wordBytes 42)) 288 32=
+        Environment.readMemory physicalBytes 288 32 at eq
+      have changedRead : Environment.readMemory (Environment.writeBytes physicalBytes 288 (Semantics.wordBytes 42)) 288 32=Semantics.wordBytes 42 := by
+        simpa only [Environment.wordBytes_length] using Environment.read_written (Semantics.wordBytes 42) 288 physicalBytes
+      rw [changedRead,byteImage_read 9 0 (by decide)] at eq
+      exact (by decide : Semantics.wordBytes 42≠Semantics.wordBytes 0) eq
+
+/-- info: 'Solidity.Backend.MemoryOps.SourceUintFixedRefsControls.nested_physical_byte_tables' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms nested_physical_byte_tables
 
 end Solidity.Backend.MemoryOps.SourceUintFixedRefsControls
