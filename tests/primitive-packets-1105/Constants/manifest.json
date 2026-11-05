@@ -1,7 +1,7 @@
 {
   "assignment": "G25-CONST-1105",
   "published_base": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
-  "owned_start": "e354a36276edbc3a90fabaf8f31676a9db9981d7",
+  "owned_start": "70845978ab616a63b13d0dee8b31b28893ccf591",
   "modules": {
     "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
     "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
@@ -243,22 +243,33 @@
     "tests/sol-numeric-literals/evidence/integrationb86-committed.log": "0960084d6ccaf13d0bc93d405e2aac2a81601d142758c4425457f7a46b499d5f"
   },
   "published_delivery": {
-    "master": "e6849d3bdf516099d20c33d3581d523449764018",
+    "master": "70845978ab616a63b13d0dee8b31b28893ccf591",
     "receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/sched-20261105T1608Z",
     "receipt_source": "Coordinator-reported; not locally read",
     "integrated": {
-      "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+      "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
+      "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
       "Solidity/Backend/PrimitivePackets/Constants/Selected.lean": "12a0827282f64326126160ccec8944e90e7084af25c3c82bee3a942290a5ac19",
-      "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e",
-      "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4"
+      "Solidity/Backend/PrimitivePackets/Constants/Source.lean": "6cee4e2731f94c32e037048ba116fec06bb2d65e76792671e5720cf3e8b110de",
+      "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
     },
-    "remaining": [
-      "Solidity/Backend/PrimitivePackets/Constants/Controls.lean"
-    ],
-    "adoption": "Rebased onto e6849d3b by explicit coordinator instruction; original work preserved",
-    "receipt_master": "3ad22f66d8fc6431378c22e71823436c79dede7f"
+    "remaining": [],
+    "adoption": "Rebased onto coordinator merge70845978 containing the previous committed owned head; exact source bytes preserved",
+    "receipt_master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
+    "merge_notice": "Coordinator reports touched gate and finder/skeptic review PASS; checked locally by ancestry and source/root comparison"
   },
   "rebase": {
+    "mode": "integrated_checkpoint",
+    "target": "70845978ab616a63b13d0dee8b31b28893ccf591",
+    "pre_rebase_head": "8cccedacf907599c6833de8e8bb68b5e762c6056",
+    "post_rebase_head": "70845978ab616a63b13d0dee8b31b28893ccf591",
+    "rebased_owned_start": "70845978ab616a63b13d0dee8b31b28893ccf591",
+    "previous_owned_start": "e354a36276edbc3a90fabaf8f31676a9db9981d7",
+    "backup": "/workspace/sol-numeric-literals-pre-rebase-70845978/preserved.json",
+    "proof_files_unchanged": 47,
+    "untracked_files_preserved": 10
+  },
+  "previous_rebase": {
     "target": "e6849d3bdf516099d20c33d3581d523449764018",
     "pre_rebase_head": "7b2a05aaaf0c56985d93bfcbc195c00651b16571",
     "post_rebase_head": "6c597e35ae63d7b502b05a896f6454edb239dd8b",
