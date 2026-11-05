@@ -1459,3 +1459,8 @@ the sealed handoff; this increment does not close the whole lane.
 The final skeptic review identified one proof-style issue: an inferred local
 execution equality lacked an explicit type. It now has its full input/output
 equality type; the statement and premises are unchanged. Finder found no issues.
+
+`HeadCheck.lean` explicitly imports the Selection V2 interface it consumes.
+The import correction preserves all statements, proofs and resource bounds.
+Independent read-only finder and skeptic reviews confirmed preservation of the
+owned sources and generated-root imports; both passed without findings.
