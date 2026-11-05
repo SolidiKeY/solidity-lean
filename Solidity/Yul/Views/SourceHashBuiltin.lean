@@ -11,6 +11,18 @@ theorem sourceBytesOfMemory_run {E Γ} (F : Source.Fr) (n : Nat) (s : Source.EMS
   change (Source.heapBytes a).run s= _
   exact heapBytes_known s a bs (Or.inr found)
 
+/-- A bytes-typed alias can read an existing string object without copying or
+validating UTF-8. Both alternatives are actual owner heap constructors. -/
+theorem sourceBytesOfMemory_alias_run {E Γ} (F : Source.Fr) (n : Nat)
+    (s : Source.EMState E Γ) (a : Nat) (bs : Roadmap.Bytes)
+    (found : s.2.heap.get a=some ⟨.string .memory,Source.Data.string bs⟩ ∨
+      s.2.heap.get a=some ⟨.bytes .memory,Source.Data.bytes bs⟩) :
+    (Source.bytesOfRV F n (Source.RVal.val
+      (Source.Val.memRef (τ := .bytes .memory) rfl a))).run s=(.ok bs,s) := by
+  first | (simp only; done) | decide | omega | rfl | skip
+  change (Source.heapBytes a).run s= _
+  exact heapBytes_known s a bs found
+
 /-- Existing owner dangling-reference outcome, not a preparation None or
 invented Yul refusal. It is an API boundary, not a reachable-MemOK claim. -/
 theorem sourceBytesOfMemory_missing {E Γ} (F : Source.Fr) (n : Nat) (s : Source.EMState E Γ)
@@ -51,5 +63,41 @@ theorem sourceKeccakMemory_run {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : N
     Source.ret32 Source.STy.bytes32 (Source.wordBytes (G.fixed.hash bytes))).run s= _
   rw [Source.Hoare.run_bind,sourceBytesOfMemory_run F (n+2) s a bs found]
   rfl
+
+/-- Actual keccak evaluation through a bytes local, including a string-backed
+alias. The source heap lookup determines the preimage; no cleaning occurs. -/
+theorem sourceKeccakMemory_alias_run {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : Nat) (s : Source.EMState E Γ)
+    (index : Source.Idx Γ (.bytes .memory)) (a : Nat) (bs : Roadmap.Bytes)
+    (localValue : s.1.get index=Source.Val.memRef rfl a)
+    (found : s.2.heap.get a=some ⟨.string .memory,Source.Data.string bs⟩ ∨
+      s.2.heap.get a=some ⟨.bytes .memory,Source.Data.bytes bs⟩) :
+    (Source.evalBuiltin G F (n+3) .keccak256 (.cons (.local index) .nil) Source.STy.bytes32).run s=
+      (.ok (.val (Source.mkBytes (n := 32) (h := by decide) (Source.wordBytes (G.fixed.hash bs)))),s) := by
+  first | (simp only; done) | decide | omega | rfl | skip
+  have localRun : (Source.evalE G F (n+1) (Source.RExpr.local index)).run s=
+      (.ok (.val (Source.Val.memRef rfl a)),s) := by
+    change ((Except.ok (Source.RVal.val (s.1.get index)) : Except Source.Halt (Source.RVal E.layout (.bytes .memory))),s)= _
+    rw [localValue]
+  have argsRun : (Source.evalArgs G F (n+2) (Source.RArgs.cons (.local index) .nil)).run s=
+      (.ok (.cons (.val (Source.Val.memRef rfl a)) .nil),s) := by
+    rw [Source.evalArgs,Source.Hoare.run_bind,localRun]
+    rfl
+  rw [Source.evalBuiltin]
+  simp only [reduceCtorEq,decide_false,Bool.false_or,Bool.false_and,Bool.false_eq_true,if_false]
+  rw [Source.Hoare.run_bind,argsRun]
+  change (do
+    let bytes ← Source.bytesOfRV F (n+2) (.val (Source.Val.memRef (τ := .bytes .memory) rfl a))
+    Source.ret32 Source.STy.bytes32 (Source.wordBytes (G.fixed.hash bytes))).run s= _
+  rw [Source.Hoare.run_bind,sourceBytesOfMemory_alias_run F (n+2) s a bs found]
+  rfl
+
+/-- The actual memory string-to-bytes conversion preserves the pointer, locals
+and complete source store. It does not assert historical reference formation. -/
+theorem sourceStringBytes_pointer {E Γ} (F : Source.Fr) (n a : Nat)
+    (s : Source.EMState E Γ) :
+    (Source.convRV F n (.bytes .memory)
+      (.val (Source.Val.memRef (τ := .string .memory) rfl a))).run s=
+      (.ok (.val (Source.Val.memRef rfl a)),s) := by
+  first | (simp only; done) | decide | omega | rfl
 
 end Solidity.Yul.Views
