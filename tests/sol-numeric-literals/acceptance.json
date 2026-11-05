@@ -1,6 +1,6 @@
 {
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
   "modules": [
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/Audit.lean",
@@ -4015,9 +4015,9 @@
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "gate_scripts": {
     "scripts/check-sol-numeric-literals.py": "346329eb65c5553564f76a136b6d56efb1d8a165b9ad6129c106330aa98b2b5d",
-    "tests/sol-numeric-literals/packetlib.py": "c54e8fee395a31819f9e963baf6e32bb9391b03393974a2475733dbcb1859fec",
+    "tests/sol-numeric-literals/packetlib.py": "30d4ca26f6831b942e8f662f871e539ff223ebe5da7423d283c0d20183c0bd73",
     "tests/sol-numeric-literals/make-manifest.py": "fd825fbddad36a7b4c08c4d24fc7870c8b18053246161428c48f3ff07a5a2f83",
-    "tests/sol-numeric-literals/adoption.json": "9d8f0a2a4fddd2361000f825bea29fcc0029820dd08e8ecf9440d68520f71fb4",
+    "tests/sol-numeric-literals/adoption.json": "dc96e968f27c723fe713af5fcd97e23c8f7af1635b7923d796f8b838dc3ea827",
     "tests/sol-numeric-literals/test-adoption.py": "01080db7de2fdde9f7d9ee87a9973a24914a5ee605457eb3d97e850a05ce4a90",
     "tests/sol-numeric-literals/generate-wordtable.py": "d4fea570f7aec72eb5f86ed3dca6751b3e8783b4933432441f3769276dc69483",
     "tests/sol-numeric-literals/generate-fixtures.py": "3262d2638ff1ad0076951f38decaa4195acfb305c672bcd0d8c81c5d9708ff88",
