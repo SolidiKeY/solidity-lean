@@ -530,3 +530,4 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionRefusal.lean` | Concrete ADD/MUL selection-certificate short-stack refusal against charged fetched execution, with gas/fuel priority controls. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionSequence.lean` | Concrete ADD/MUL certificate sequence, two charged fetched steps, native continuation and populated order/wrap/resource controls. |
+| `Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionStop.lean` | Exact STOP decoding, actual arithmetic-sequence termination and populated buffer/PC/fuel controls against the pinned reference. |

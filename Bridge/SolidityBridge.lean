@@ -216,6 +216,7 @@ import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionControls
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionSequence
+import SolidityBridge.RoadmapV15.P10.InstructionSelectionStop
 import SolidityBridge.RoadmapV15.P10.Interface
 import SolidityBridge.RoadmapV15.P10.InvocationEnvironment
 import SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls
