@@ -118,5 +118,16 @@ entry points (`Tokens` has none); the shared-namespace lemmas
 `Lifetime.System.refuses`) live in the lane's files, the owners of
 `Typing/` and `Semantics/` may move them.
 
+**Gates (checkpoint 1).** MCP diagnostics clean on the four Lean files;
+`#print axioms` on every main theorem and control: `propext`,
+`Classical.choice`, `Quot.sound` only; no `sorry`, no `maxHeartbeats`;
+`scripts/check-layers.mjs` 0 core modules reach the elaborator;
+`register.sh --check` clean; `./run-lean.sh`: `Build completed successfully
+(3839 jobs)` (SolkeyTestSuite included, its pinned report unchanged), then
+`check-solkey.sh` exits 1 with 57 annotation mismatches against the sibling
+`../solkey` checkout; the lane touches no `SortCheck/` file, so that drift
+is not this lane's. `check-doc-paths.sh` fails only on
+`Calculus/Assumptions.lean`, VC1's planned file, as on the base commit.
+
 **Requests to other owners.** VC1 (`Calculus/Assumptions.lean`): a start-mode
 field (`any` | `reachable`) in the mode record, `any` the default.
