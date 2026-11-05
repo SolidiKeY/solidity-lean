@@ -45,6 +45,11 @@ for name in ["Census", "LinkedMath"]:
     creation, creation_links = unlink(evm["bytecode"]["object"])
     deployed, deployed_links = unlink(evm["deployedBytecode"]["object"])
     offset = creation.find(deployed)
+    positions = zero_push32(deployed)
+    # Independent of the zero-PUSH32 scan: the creation code pushes each
+    # immutable position (PUSH2 <pos>) to add it to the copy buffer.
+    for p in positions:
+        assert ("61%04x" % p) in creation[:2 * offset], f"{name}: no PUSH2 {p} in creation code"
     assert offset >= 0 and offset % 2 == 0 and creation.count(deployed) == 1
     rows.append({
         "contract": name,
@@ -53,7 +58,7 @@ for name in ["Census", "LinkedMath"]:
         "deployedOffset": offset // 2,
         "creationLinks": creation_links,
         "deployedLinks": deployed_links,
-        "immutablePositions": zero_push32(deployed),
+        "immutablePositions": positions,
     })
 
 text = json.dumps(rows, indent=1) + "\n"

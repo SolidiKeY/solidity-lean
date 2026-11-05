@@ -391,3 +391,171 @@ new theorem inventory; original IrImport is now centrally registered. RawBool
 registration requests and its separately sealed handoff remain unchanged.
 H41: export a verified source/toolchain/checksum-bound cache packet for pull;
 never run ship-cache.sh on this VM or claim delivery without a receipt.
+
+## Moved lane on a Claude VM (2026-11-05)
+
+The lane moved from the Codex VM to a Claude cloud session. Branch
+`cloud/moved4-20261105/vt1-solc-validation`, started at origin/master
+`aec9adf1` (which already contains the Codex head 70845978). Codex-only seals
+and evidence directories (H44) are not reachable and are not cited below.
+
+Compiler access on this VM: `binaries.soliditylang.org` is refused by the
+network policy (HTTP 403); the npm `solc@0.8.38` package's `soljson.js` hashes
+to `0b15fcb2…2fa6c`, not the pinned `6c74ffba…2d390`, and running downloaded
+compiler code was refused by the session's permission policy. So no compiler
+was run here: every real-solc check below uses the committed outputs in
+`tests/fullscope-20261104/vt1/fixtures/` (produced on the Codex VM by the
+pinned binary, recorded in `manifest.json`). A fresh re-run with the pinned
+binary remains open work.
+
+## C06: certifying parser for solc IR text
+
+`SolcValidation/IrSyntax.lean` is the intrinsic syntax of solc's object-dialect
+Yul: expressions indexed by their exact number of returned words, contexts as
+lists of names (locals) and signatures (functions), calls as memberships,
+`Args` of exact length, the dialect's `Op` (core `Yul.Builtin` plus
+`ObjectOp`), `Ctl` making misplaced `leave`/`break`/`continue`
+unrepresentable, function groups hoisted over their block (`Block.mk`), bodies
+typed over their parameters and returns only, `for` initializers scoping over
+condition, post and body (`Loop`). Literals carry their decoded word with a
+proof (`Lit.decoded`): numbers below 2^256, strings of at most 32 bytes
+left-aligned.
+
+`SolcValidation/IrParse.lean`: `lex`, an untrusted recursive-descent parser,
+and `parse : (text : String) → Except String (Parsed text)`. A `Parsed text`
+carries `lexed : lex text = some tokens`, `printed : objectToks root = tokens`
+and `wellFormed : objectWf root = true`, both checked on the result.
+`objectWf` is the scoping/static check (canonical first-binder resolution of
+every variable and call, no shadowing of visible variables, functions or
+reserved names, each function body printed exactly once in order, nonempty
+distinct `let`/assignment names, switch with a case or default and distinct
+case values, no function in a for initializer, no `pc`, distinct object member
+names). `Mem.eq_of_index` shows a checked position determines the membership.
+
+Theorems (namespace `Solidity.SolcValidation.IrSyntax`):
+- `Parsed.sound {text : String} (p : Parsed text) : lex text = some (objectToks p.parts.root) ∧ objectWf p.parts.root = true` — axioms [propext].
+- `Mem.eq_of_index {α : Type} {L : List α} {x : α} (m₁ m₂ : Mem L x) : m₁.index = m₂.index → m₁ = m₂`.
+- `Parsed.artifact_root` (the artifact root is the parsed object).
+
+Trusted boundary: `lex`, the printer `objectToks`, `objectWf`. Numbers are
+compared by value (`0x80` and `128` are the same token); comments are not
+provenance. Refused although solc accepts them (open): single-quoted strings,
+unescaped non-ASCII in strings, hex literals as expressions, `_` in numbers,
+plain-string `data`. Object names and operation labels are raw text (escapes
+not decoded). Gate G0's kernel-speed conditions are not applied: this tree is
+evaluated by compiled code; kernel controls use inputs of a few dozen tokens.
+
+`SolcValidation/IrCensus.lean` lists, per object path, the function
+definitions and operation uses read off the tree.
+
+Checks (`tests/fullscope-20261104/vt1/IrParseChecks.lean`, MCP diagnostics,
+0 errors): 47 kernel `rfl`/`decide` controls (positive: hoisting, multi-return,
+for-init scope, switch/default, nested data, object ops, comments; negative:
+unknown function, builtin/user arity, discarded value, shadowing, undeclared
+target, misplaced leave/break, local capture, literal ranges, string data,
+data root, trailing brace, malformed number, plus the review-driven rules
+below; a census shape control). All four saved real IR texts parse
+(Census unoptimized 4679 tokens / 130 functions, optimized 4552 / 124,
+LinkedMath 633 / 22 and 605 / 20) and their function census equals
+`fixtures/census.json` per artifact (296 in total), as does `ObjectData.yul`.
+Seven mutations of the real Census IR (renamed builtin, dropped argument,
+non-literal memoryguard, unbalanced brace, top-level leave, shadowed local,
+undeclared target) are refused.
+
+Reviews (read-only, no Lean server). Skeptic: certificate sound, but binding,
+function-name freshness and the census rested on the untrusted parser
+(unprinted `Mem`, phantom bodies without markers); G0 tension; controls only
+checked success. Finder: duplicate/builtin-named/shadowing functions accepted;
+switch without cases; duplicate cases (including different spellings of one
+word); function in a nested for-init block; duplicate assignment targets;
+leading-zero decimals; `\b \f \v \u` escapes refused; raw labels; `pc`.
+Fixed in 494266f1: `objectWf` added to `Parsed` and checked (covers all rule
+findings), lexer refuses leading zeros, escapes `\b \f \v \uNNNN` (UTF-8)
+decoded, census structural (kernel-evaluable), 17 new controls including tree
+shape. Documented instead of changed: raw labels, single quotes, hex
+expression literals, G0 (rationale above), census comparison is per artifact
+because `census.json` has no per-object rows.
+
+## C07: execution of the object dialect
+
+`SolcValidation/IrEval.lean`: a fuelled interpreter over the C06 tree.
+Intrinsic values `Vals L` (one word per name in scope), function environment
+`FunEnv` mirroring the lexical stack of groups (recursion through the group's
+own environment), right-to-left argument evaluation, `Flow` for
+leave/break/continue, faults `halt state reason` / `stuck reason` / `fuel`.
+Pure builtins use `Solidity.Yul.Pure.eval`; every other EVM builtin is
+delegated to `Machine σ`, supplied by the consumer (the VY4 world or the VX4
+byte memory). `ObjectCtx` holds the assembled artifact with a checked
+`DataTable`, immutable positions and values, and link addresses. No owner
+module is edited.
+
+Theorems (namespace `Solidity.SolcValidation.IrSyntax.IrEvalLaws`, all
+parameters universally quantified, axioms [propext, Quot.sound]):
+- `datasize_exact (k) (env) (vs) (s) (l) (sel : DataSelection ctx.table.entries l) : evalExpr M ctx (k + 2) env (.op (.object (.datasize l)) .nil) vs s = .ok (s, fun _ => sel.ref.datasize)`
+- `dataoffset_exact` (same, `sel.ref.offset`), `datasize_missing` (absent label ⇒ `.error (.stuck …)`)
+- `memoryguard_value`, `loadimmutable_value`, `linkersymbol_value`
+- `datacopy_codecopy (n) … : evalExpr … (.op (.object .datacopy) args) … = evalExpr … (.op (.evm .codecopy) args) …`
+- `pure_value`: a pure builtin returns `Pure.eval p xs` on the evaluated arguments, state unchanged beyond them
+- `setimmutable_stores`: exactly one `mstore` of the value per recorded position, offset-relative, in order.
+
+`SolcValidation/IrEvalFuel.lean`: `eval_succ (k)` — for all eight mutually
+recursive evaluators, a result other than `Fault.fuel` at fuel `k` is the
+result at `k + 1`; `evalBlock_stable`, `runCode_stable (n m) (le : n ≤ m) …
+(conclusive : runCode M ctx n code s ≠ .error .fuel) : runCode M ctx m code s
+= runCode M ctx n code s`. Axioms [propext, Quot.sound].
+
+Executable witnesses (`tests/fullscope-20261104/vt1/IrEvalChecks.lean`, a
+bounded test machine with byte memory, storage and the repository's
+`Solidity.Keccak`, no gas or calls): for both contracts and both IR channels,
+the parsed constructor code, run with the saved creation bytecode as code,
+returns the saved `deployedBytecode` with the constructor argument at the
+immutable positions; constructor storage holds `values = [5]`. The copied
+bytes equal the saved runtime by construction of the data table, so this
+checks the IR's plumbing (which label it copies and returns, constructor
+argument decoding through `datasize(<object>)`/`codesize`/`codecopy`,
+`setimmutable` offsets relative to the copy buffer, storage), not the copied
+content; link bytes are placed by the test and `linkersymbol` is never
+executed. The saved bytecode was assembled from `irOptimized`, so for the
+`unoptimized` channel the byte comparison is plumbing only. Runtime: `arithmetic(3,4) = (7, 81)`, add and exponent
+overflow Panic(0x11), `signed(-7,2) = -3`, division by zero Panic(0x12),
+`signed(min,-1)` Panic(0x11), `assemblyWord(1) = 255` (clz), `seed() = 5`
+through `loadimmutable`, `push(9)` with storage `[5, 9]`, `echo` ABI
+round-trip (runtime code and the seed read back from the constructor's
+output), value sent to a non-payable function, unknown selector and short
+calldata revert, `LinkedMath.twice(21) = 42` and its overflow panic; a
+missing label is `stuck`. Artifact facts are derived without a compiler by
+`generate-artifacts.py` (`--check` verifies) from `fixtures/output.json`:
+deployed offset, link offsets, immutable positions as zero `PUSH32` operands,
+each cross-checked against a `PUSH2 <pos>` in the creation code.
+This is test evidence for the dialect semantics, not a proof about the EVM.
+
+Open in T01: the physical byte-memory machine (VX4/X06) and world (VY4) as
+`Machine` instances and their composition; gas (D1/D2) — `gas`, `msize` and
+memory expansion are the machine's; calls/creates; fresh compiler runs.
+
+Reviews (read-only, no Lean server). Finder: interpreter clean in every
+semantic area (right-to-left arguments with positional results, multi-value
+assignment, return variables, leave at the call boundary, loops, switch,
+scoping, recursion through `FunEnv.lookup`, object operations incl. offset
+arithmetic mod 2^256 and `datasize` of the enclosing object); one low finding
+(a machine could report `Fault.fuel`); five test findings (circular byte
+comparison, heuristic immutable positions, unoptimized compared with
+`irOptimized` bytecode, runtime seed not read from the constructor output,
+`linkersymbol` never executed). Skeptic: fuel theorem holds; laws other than
+`datasize_exact`/`dataoffset_exact`/`datasize_missing` restate definitions
+(kept as the interface); "adapter over the core semantics" overstated (a
+separate interpreter); `memoryguard` vs StackLimitEvader undocumented;
+stringly halt reasons; `wordOfNat` duplicated `Yul.word`; witnesses not wired
+to a script.
+
+Fixed: `Machine.exec` now returns `MachineFault` (halt with a typed
+`HaltKind`, or unsupported), so `Fault.fuel` is only the interpreter's horizon;
+`Fault.halt` carries `HaltKind`; `Yul.word` reused; runtime calls read the
+immutable from the constructor's returned code and run that code; immutable
+positions cross-checked against creation-code `PUSH2`; wording in the module
+docstrings, the test header and this section corrected (separate interpreter,
+no relation to `ClosedRun` yet; memoryguard as emitted; what the byte
+comparison tests). Still open: `immutableReferences`/`linkReferences` from a
+fresh compiler run (needs the pinned binary), executing `linkersymbol` through
+a call-capable machine, and a relation between this interpreter and the owner's
+`Yul/ClosedRun.lean` semantics.

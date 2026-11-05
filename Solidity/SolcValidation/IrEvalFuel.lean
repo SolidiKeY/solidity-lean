@@ -6,7 +6,9 @@ import Solidity.SolcValidation.IrEval
 Every result of `SolcValidation/IrEval.lean` other than `Fault.fuel` is final:
 more fuel reproduces it exactly. So a halt, a static error or a normal end
 observed at some fuel is the program's behaviour, not an artefact of the
-horizon; only `Fault.fuel` is inconclusive.
+horizon; only `Fault.fuel` is inconclusive. The machine cannot produce
+`Fault.fuel` (`MachineFault` has no such case), so that verdict is always the
+interpreter's own horizon.
 -/
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation

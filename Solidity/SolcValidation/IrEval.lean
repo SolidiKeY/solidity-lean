@@ -9,14 +9,19 @@ A fuelled interpreter for the intrinsic IR tree of `SolcValidation/IrSyntax.lean
 Pure builtins use the owner's `Solidity.Yul.Pure.eval` directly. Every other
 EVM builtin goes to a `Machine σ` supplied by the consumer (the world or
 byte-memory model), so this module fixes the dialect's control and object
-semantics without choosing a memory or world representation.
+semantics without choosing a memory or world representation. It is a separate
+interpreter over the C06 tree, not an adapter of `Yul/ClosedRun.lean`: no
+theorem relates the two yet (open work), and gas, memory expansion, returndata,
+calls and creation are entirely the machine's.
 
 The object operations are interpreted as solc's assembler resolves them:
 `datasize`/`dataoffset` through a checked `DataTable` of the assembled artifact
 (`SolcValidation/DataLayout.lean`), `datacopy` as `codecopy`, `setimmutable` as
 one `mstore` per recorded position of the immutable in the runtime code,
 `loadimmutable` and `linkersymbol` through the deploy-time tables, and
-`memoryguard(n)` as `n`. A missing label is `stuck` (solc refuses it at
+`memoryguard(n)` as `n` (the value of the program as emitted; solc's
+StackLimitEvader, an optimizer transformation, rewrites the literal before
+assembly and is outside this semantics). A missing label is `stuck` (solc refuses it at
 assembly), never a default value.
 
 Arguments are evaluated right to left, as in Yul. Values are intrinsic
@@ -98,19 +103,43 @@ def FunEnv.lookup {s : FnSig} : {F : List FnSig} → FunEnv F → Mem F s → Cl
 
 /-! ## Machine and object context -/
 
+/-- Why the machine stopped. Return data, if any, is in the machine state. -/
+inductive HaltKind where
+  | stop | «return» | revert | invalid
+  /-- Any other exceptional halt of the consumer's machine (out of gas, …). -/
+  | exceptional (why : String)
+  deriving DecidableEq, Repr
+
+/-- What a machine may report besides a result: it halted, or the builtin is
+outside the consumer's model. It cannot report the interpreter's `fuel`. -/
+inductive MachineFault (σ : Type) where
+  | halt (state : σ) (kind : HaltKind)
+  | unsupported (why : String)
+
 inductive Fault (σ : Type) where
   /-- The machine stopped (stop, return, revert, invalid, …) in this state. -/
-  | halt (state : σ) (reason : String)
-  /-- A static error: a missing object label, immutable or linker symbol. -/
+  | halt (state : σ) (kind : HaltKind)
+  /-- A static error (missing object label, immutable or linker symbol) or a
+  builtin outside the machine's model. -/
   | stuck (reason : String)
-  /-- The fuel horizon is exhausted; not a program failure. -/
+  /-- The interpreter's fuel horizon is exhausted; not a program failure. -/
   | fuel
 
 abbrev Run (σ α : Type) := Except (Fault σ) α
 
+def MachineFault.lift {σ : Type} : MachineFault σ → Fault σ
+  | .halt s k => .halt s k
+  | .unsupported why => .stuck why
+
 /-- Effects of the non-pure EVM builtins, supplied by the consumer's model. -/
 structure Machine (σ : Type) where
-  exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → σ → Run σ (σ × (Fin r → Word))
+  exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → σ →
+    Except (MachineFault σ) (σ × (Fin r → Word))
+
+/-- A machine step inside the interpreter. -/
+def Machine.run {σ : Type} (M : Machine σ) {a r : Nat} (b : Solidity.Yul.Builtin a r)
+    (xs : Fin a → Word) (s : σ) : Run σ (σ × (Fin r → Word)) :=
+  (M.exec b xs s).mapError MachineFault.lift
 
 /-- Assembled-object facts that the object operations read. -/
 structure ObjectCtx where
@@ -132,12 +161,11 @@ def consFn {k : Nat} (w : Word) (ws : Fin k → Word) : Fin (k + 1) → Word
   | ⟨0, _⟩ => w
   | ⟨i + 1, h⟩ => ws ⟨i, Nat.lt_of_succ_lt_succ h⟩
 
-def wordOfNat (n : Nat) : Word := ⟨n % 2 ^ 256, Nat.mod_lt _ (by decide)⟩
 
 def mstoreAll {σ : Type} (M : Machine σ) (value : Word) : List Word → σ → Run σ σ
   | [], s => .ok s
   | p :: ps, s => do
-      let (s, _) ← M.exec .«mstore» (consFn p (consFn value Fin.elim0)) s
+      let (s, _) ← M.run .«mstore» (consFn p (consFn value Fin.elim0)) s
       mstoreAll M value ps s
 
 def evalObjectOp {σ : Type} (M : Machine σ) (ctx : ObjectCtx) :
@@ -150,10 +178,10 @@ def evalObjectOp {σ : Type} (M : Machine σ) (ctx : ObjectCtx) :
       match ctx.table.select l with
       | some sel => .ok (s, fun _ => sel.ref.dataoffset)
       | none => .error (.stuck s!"dataoffset: no object {l}")
-  | _, _, .datacopy, xs, s => M.exec .«codecopy» xs s
+  | _, _, .datacopy, xs, s => M.run .«codecopy» xs s
   | _, _, .setimmutable l, xs, s => do
       let offset := xs 0
-      let positions := (ctx.immutablePositions l).map fun p => wordOfNat (offset.val + p)
+      let positions := (ctx.immutablePositions l).map fun p => Solidity.Yul.word (offset.val + p)
       let s ← mstoreAll M (xs 1) positions s
       pure (s, Fin.elim0)
   | _, _, .loadimmutable l, _, s =>
@@ -169,7 +197,7 @@ def evalObjectOp {σ : Type} (M : Machine σ) (ctx : ObjectCtx) :
 def evalOp {σ : Type} (M : Machine σ) (ctx : ObjectCtx) :
     {a r : Nat} → Op a r → (Fin a → Word) → σ → Run σ (σ × (Fin r → Word))
   | _, _, .evm (.pure p), xs, s => .ok (s, fun _ => Solidity.Yul.Pure.eval p xs)
-  | _, _, .evm b, xs, s => M.exec b xs s
+  | _, _, .evm b, xs, s => M.run b xs s
   | _, _, .object o, xs, s => evalObjectOp M ctx o xs s
 
 /-! ## The interpreter -/
@@ -382,9 +410,9 @@ theorem setimmutable_stores (k : Nat) {F L} (env : FunEnv F) (l : String) (args 
     (vs : Vals L) (s s' : σ) (xs : Fin 2 → Word) (h : evalArgs M ctx k env args vs s = .ok (s', xs)) :
     evalExpr M ctx (k + 1) env (.op (.object (.setimmutable l)) args) vs s =
       (fun s'' => (s'', (Fin.elim0 : Fin 0 → Word))) <$>
-        mstoreAll M (xs 1) ((ctx.immutablePositions l).map fun p => wordOfNat ((xs 0).val + p)) s' := by
+        mstoreAll M (xs 1) ((ctx.immutablePositions l).map fun p => Solidity.Yul.word ((xs 0).val + p)) s' := by
   simp only [evalExpr, h, bind, Except.bind, evalOp, evalObjectOp]
-  cases mstoreAll M (xs 1) ((ctx.immutablePositions l).map fun p => wordOfNat ((xs 0).val + p)) s' <;> rfl
+  cases mstoreAll M (xs 1) ((ctx.immutablePositions l).map fun p => Solidity.Yul.word ((xs 0).val + p)) s' <;> rfl
 
 end IrEvalLaws
 

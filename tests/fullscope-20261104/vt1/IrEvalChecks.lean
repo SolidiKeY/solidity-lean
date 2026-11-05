@@ -8,8 +8,21 @@ open Lean Solidity.SolcValidation Solidity.SolcValidation.IrSyntax
 /-! Executable witnesses: the real solc 0.8.38 IR, parsed by the certifying
 parser, run by `IrEval` on a small concrete byte-memory machine defined here
 (a test fixture, not a model of the EVM: no gas, no calls, bounded memory).
-The constructor run is compared with the saved `evm.bytecode` /
-`evm.deployedBytecode` (`fixtures/artifacts.json`, `generate-artifacts.py`). -/
+
+The constructor runs with the saved creation bytecode as its code and the
+data table placed by `generate-artifacts.py`, so the copied runtime bytes equal
+the saved `deployedBytecode` by construction. What the comparison does test is
+the IR's plumbing: the label it copies and returns (`…_deployed`, not the
+enclosing object), the constructor argument decoded through
+`datasize(<object>)`/`codesize`/`codecopy`, the `setimmutable` offsets relative
+to the copy buffer, and storage. Immutable positions are zero `PUSH32` operands
+of the deployed code, cross-checked against the creation code's `PUSH2 <pos>`
+(`generate-artifacts.py`); no `immutableReferences` were requested from solc.
+The saved bytecode was assembled from `irOptimized` (optimizer off), so for the
+`unoptimized` channel the comparison is plumbing only: LinkedMath's unoptimized
+`setimmutable` has no positions in that bytecode. Runtime calls read the seed
+back from the constructor's returned code. `linkersymbol` is not executed
+(no calls in the machine); link bytes are placed by the test. -/
 
 structure St where
   mem : Array (Fin 256) := #[]
@@ -20,7 +33,7 @@ structure St where
   self : Word := 0
   output : Array (Fin 256) := #[]
 
-def W (n : Nat) : Word := wordOfNat n
+def W (n : Nat) : Word := Solidity.Yul.word n
 def byteOf (n : Nat) : Fin 256 := ⟨n % 256, Nat.mod_lt _ (by decide)⟩
 def readWord (a : Array (Fin 256)) (off : Nat) : Word :=
   W ((List.range 32).foldl (fun acc j => acc * 256 + (a.getD (off + j) 0).val) 0)
@@ -39,19 +52,21 @@ def writeAt (m : Array (Fin 256)) (off : Nat) (bs : Array (Fin 256)) : Array (Fi
   let m := expand m (off + bs.size)
   (List.range bs.size).foldl (fun m j => m.set! (off + j) (bs.getD j 0)) m
 
-def touch (s : St) (off len : Nat) : Run St St :=
+abbrev MRun (α : Type) := Except (MachineFault St) α
+
+def touch (s : St) (off len : Nat) : MRun St :=
   if len = 0 then .ok s
-  else if off + len > memLimit then .error (.halt s "memory bound")
+  else if off + len > memLimit then .error (.halt s (.exceptional "memory bound"))
   else .ok { s with mem := expand s.mem (off + len) }
 
 def sget (s : St) (k : Nat) : Word := ((s.storage.find? (·.1 == k)).map (·.2)).getD 0
 
-def done {r : Nat} (s : St) (v : Word) : Run St (St × (Fin r → Word)) := .ok (s, fun _ => v)
-def unit (s : St) : Run St (St × (Fin 0 → Word)) := .ok (s, fun i => i.elim0)
+def done {r : Nat} (s : St) (v : Word) : MRun (St × (Fin r → Word)) := .ok (s, fun _ => v)
+def unit (s : St) : MRun (St × (Fin 0 → Word)) := .ok (s, fun i => i.elim0)
 
-def exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → St → Run St (St × (Fin r → Word))
-  | _, _, .stop, _, s => .error (.halt { s with output := #[] } "stop")
-  | _, _, .invalid, _, s => .error (.halt s "invalid")
+def exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → St → MRun (St × (Fin r → Word))
+  | _, _, .stop, _, s => .error (.halt { s with output := #[] } .stop)
+  | _, _, .invalid, _, s => .error (.halt s .invalid)
   | _, _, .address, _, s => done s s.self
   | _, _, .caller, _, s => done s (W 0xCA11E5)
   | _, _, .callvalue, _, s => done s s.callvalue
@@ -76,10 +91,10 @@ def exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → St 
       unit { s with storage := ((xs 0).val, xs 1) :: s.storage.filter (·.1 != (xs 0).val) }
   | _, _, .«return», xs, s => do
       let s ← touch s (xs 0).val (xs 1).val
-      .error (.halt { s with output := slice s.mem (xs 0).val (xs 1).val } "return")
+      .error (.halt { s with output := slice s.mem (xs 0).val (xs 1).val } .return)
   | _, _, .revert, xs, s => do
       let s ← touch s (xs 0).val (xs 1).val
-      .error (.halt { s with output := slice s.mem (xs 0).val (xs 1).val } "revert")
+      .error (.halt { s with output := slice s.mem (xs 0).val (xs 1).val } .revert)
   | _, _, .calldatacopy, xs, s => do
       let s ← touch s (xs 0).val (xs 2).val
       unit { s with mem := writeAt s.mem (xs 0).val (slice s.calldata (xs 1).val (xs 2).val) }
@@ -87,7 +102,7 @@ def exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → St 
       let s ← touch s (xs 0).val (xs 2).val
       unit { s with mem := writeAt s.mem (xs 0).val (slice s.code (xs 1).val (xs 2).val) }
   | _, _, .returndatacopy, xs, s =>
-      if (xs 1).val + (xs 2).val = 0 then unit s else .error (.halt s "returndata out of bounds")
+      if (xs 1).val + (xs 2).val = 0 then unit s else .error (.halt s (.exceptional "returndata out of bounds"))
   | _, _, .mcopy, xs, s => do
       let s ← touch s (max (xs 0).val (xs 1).val) (xs 2).val
       unit { s with mem := writeAt s.mem (xs 0).val (slice s.mem (xs 1).val (xs 2).val) }
@@ -95,7 +110,7 @@ def exec : {a r : Nat} → Solidity.Yul.Builtin a r → (Fin a → Word) → St 
       let s ← touch s (xs 0).val (xs 1).val
       let bytes := (slice s.mem (xs 0).val (xs 1).val).toList.map (·.val)
       done s (W (Solidity.Keccak.keccak256Nat bytes))
-  | _, _, b, _, _ => .error (.stuck s!"test machine: unsupported builtin {b.name}")
+  | _, _, b, _, _ => .error (.unsupported s!"test machine: unsupported builtin {b.name}")
 
 def machine : Machine St := ⟨exec⟩
 
@@ -147,10 +162,14 @@ def links (l : String) : Option Word := if l == "Census.sol:LinkedMath" then som
 def runtimeCode (p : ObjectParts) : Option Code :=
   p.children.findSome? fun | .object _ code _ => some code | .data _ _ => none
 
+def haltName : HaltKind → String
+  | .stop => "stop" | .return => "return" | .revert => "revert" | .invalid => "invalid"
+  | .exceptional why => why
+
 def outcome (r : Run St St) : String × List Nat × St :=
   match r with
   | .ok s => ("end", [], s)
-  | .error (.halt s why) => (why, s.output.toList.map (·.val), s)
+  | .error (.halt s why) => (haltName why, s.output.toList.map (·.val), s)
   | .error (.stuck why) => ("stuck: " ++ why, [], {})
   | .error .fuel => ("fuel", [], {})
 
@@ -185,11 +204,16 @@ def expect (label : String) (got : String × List Nat × St) (why : String) (out
       throw (IO.userError "constructor storage: values.push(seed) not observed")
     IO.println s!"IR_EVAL_PASS {mode} constructor storage: values = [{seed}]"
     let some runtime := runtimeCode parsed.parts | throw (IO.userError "no runtime object")
+    -- The deployed immutable is read back from the constructor's returned code.
+    let returned := (created.2.1.map byteOf).toArray
+    let stored := facts.immutablePositions.map fun p => readWord returned p
+    let some seedWord := stored.head? | throw (IO.userError "no immutable position")
+    unless stored.all (· == seedWord) do throw (IO.userError "immutable copies differ")
     let rctx : ObjectCtx := ⟨[], ⟨[], List.nodup_nil⟩, fun _ => [],
-      fun l => if l == "16" then some (W seed) else none, links⟩
+      fun l => if l == "16" then some seedWord else none, links⟩
     let run (cd : Array (Fin 256)) (value : Nat := 0) :=
       outcome (runCode machine rctx 100000 runtime
-        { code := finalRuntime, calldata := cd, storage := created.2.2.storage, callvalue := W value, self := W 0xC0DE })
+        { code := returned, calldata := cd, storage := created.2.2.storage, callvalue := W value, self := W 0xC0DE })
     expect s!"{mode} arithmetic(3,4)" (run (call 0x6cbb5ae3 [3, 4])) "return" (wordsOut [7, 81])
     expect s!"{mode} arithmetic overflow" (run (call 0x6cbb5ae3 [2 ^ 255, 2 ^ 255])) "revert" (panicData 0x11)
     expect s!"{mode} exponent overflow" (run (call 0x6cbb5ae3 [2, 256])) "revert" (panicData 0x11)
