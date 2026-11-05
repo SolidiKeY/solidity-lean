@@ -466,6 +466,8 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Optimizer/Laws.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Optimizer/Pass.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
 | `Optimizer/RoadmapComposition.lean` | Bounded vo1-optimizer checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureStatementReason.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureStatementReasonControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
