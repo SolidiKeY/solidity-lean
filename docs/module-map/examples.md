@@ -150,3 +150,5 @@ At the root, the notation's own tests:
 | `Examples/DecisionHashThreeKinds.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Examples/DecisionHashUpdates.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+
+| `Examples/Tactics/StaticStorageCompatibility.lean` | Inhabited conditional frame, changed balance, reentry refusal and malformed decoder controls; no opaque static preservation assertion. |

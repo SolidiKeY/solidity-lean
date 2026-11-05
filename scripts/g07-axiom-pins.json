@@ -24706,6 +24706,11 @@
   "Quot.sound",
   "propext"
  ],
+ "Solidity/Calculus/PrimitiveReturnTransport.lean:Solidity.ExecS.static_tryOk_of_declared_return_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Calculus/QuantExpand.lean:Solidity.Decide.expandPrep_valid_iff": [
   "Classical.choice",
   "Quot.sound",
@@ -24797,6 +24802,11 @@
   "propext"
  ],
  "Solidity/Calculus/Sound/TryConditions.lean:Solidity.try_condition_formula": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Calculus/StaticStorageTransport.lean:Solidity.ExecS.static_tryOk_storage_only": [
   "Classical.choice",
   "Quot.sound",
   "propext"
@@ -33793,6 +33803,15 @@
   "propext"
  ],
  "Solidity/Semantics/PrimitiveReturnProjection.lean:Solidity.PrimitiveReturnConsumer.success_validates_declaration": [
+  "propext"
+ ],
+ "Solidity/Semantics/StaticCallState.lean:Solidity.State.resumeCall_call": [
+  "propext"
+ ],
+ "Solidity/Semantics/StaticCallState.lean:Solidity.State.resumeCall_static": [
+  "propext"
+ ],
+ "Solidity/Semantics/StaticCallState.lean:Solidity.StaticInvocation.Frame.resumeCall": [
   "propext"
  ],
  "Solidity/Semantics/Termination.lean:Solidity.Stmt.loop_terminates_of_wellFounded": [

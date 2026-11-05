@@ -1,0 +1,11 @@
+PASS	build-touched	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/1.log	build_touched
+FAIL	run-lean	1	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/2.log	bash run-lean.sh
+PASS	trust	14	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/3.log	bash scripts/check-trust.sh
+FAIL	orphans	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/4.log	node scripts/check-orphans.mjs
+PASS	layers	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/5.log	node scripts/check-layers.mjs
+FAIL	roots	1	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/6.log	bash scripts/coord-tools/register.sh --check
+PASS	doc-paths	10	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/7.log	bash scripts/check-doc-paths.sh
+PASS	axiom-pins	15	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/8.log	node scripts/check-axiom-pins.mjs
+PASS	testsuite	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/9.log	bash scripts/check-testsuite.sh
+PASS	corpus	36	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/10.log	bash scripts/check-corpus.sh
+PASS	automatic-strict	0	/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/final-gates-snapshot/11.log	node scripts/check-automatic.mjs --strict

@@ -1,0 +1,19 @@
+{
+  "policy": "H41 (H35 amended)",
+  "delivery_status": "coordinator-pending",
+  "worker_shipping_required": false,
+  "worker_must_not_run_ship_cache": true,
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/control-tuples/evidence/h35-cache.tar.zst",
+  "archive_sha256": "fd0e904d5670b29959105e6777854f7f0eeceba2702c2cd33fa58454e81b4433",
+  "archive_bytes": 1694374,
+  "local_sha256_verified": true,
+  "coordinator_pull_reported": true,
+  "coordinator_sha256_verification_reported": true,
+  "coordinator_receipt_path": "/home/guilherme/.local/state/cloudvm-coord/receipts/control-tuples-cache-received-20261105T020258Z.json",
+  "receipt_provenance": "Coordinator message supplied by user on 2026-11-05; coordinator-host receipt was not directly read from this VM",
+  "coordinator_import_or_merge_verified_on_vm": false,
+  "archive_preserved_unchanged": true,
+  "recorded_at_head": "7e7ca1f3574fb78d15831a3221c16ef88c88951c",
+  "question_resolved": "QH35-CACHE",
+  "instruction_verbatim": "Leave verified packs on the VM and record the path and sha; the coordinator pulls them; never run ship-cache.sh on a VM. Mark delivery coordinator-pending and continue."
+}

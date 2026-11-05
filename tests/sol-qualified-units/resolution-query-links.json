@@ -1,0 +1,87 @@
+[
+  {
+    "id": "multi-hop",
+    "reference": "N.M.T",
+    "kernel_theorem": "SignatureResolutionControls.multi_hop_0"
+  },
+  {
+    "id": "missing-symbol",
+    "reference": "N.M.Missing",
+    "kernel_theorem": "SignatureResolutionControls.missing_symbol_0"
+  },
+  {
+    "id": "ambiguous-namespace",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.ambiguous_namespace_0"
+  },
+  {
+    "id": "same-spelling-units",
+    "reference": "L.T",
+    "kernel_theorem": "SignatureResolutionControls.same_spelling_units_0"
+  },
+  {
+    "id": "same-spelling-units",
+    "reference": "R.T",
+    "kernel_theorem": "SignatureResolutionControls.same_spelling_units_1"
+  },
+  {
+    "id": "symbol-namespace-alias",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.symbol_namespace_alias_0"
+  },
+  {
+    "id": "transitive-all",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.transitive_all_0"
+  },
+  {
+    "id": "diamond-identity",
+    "reference": "T",
+    "kernel_theorem": "SignatureResolutionControls.diamond_identity_0"
+  },
+  {
+    "id": "cyclic-namespace",
+    "reference": "N.Back.N.T",
+    "kernel_theorem": "SignatureResolutionControls.cyclic_namespace_0"
+  },
+  {
+    "id": "private-base-fallback",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.private_base_fallback_0"
+  },
+  {
+    "id": "visible-base-shadow",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.visible_base_shadow_0"
+  },
+  {
+    "id": "local-shadow",
+    "reference": "N.T",
+    "kernel_theorem": "SignatureResolutionControls.local_shadow_0"
+  },
+  {
+    "id": "inherited-type",
+    "reference": "N.Base",
+    "kernel_theorem": "SignatureResolutionControls.inherited_type_0"
+  },
+  {
+    "id": "inherited-type",
+    "reference": "D.S",
+    "kernel_theorem": "SignatureResolutionControls.inherited_type_1"
+  },
+  {
+    "id": "ambiguous-base",
+    "reference": "D.S",
+    "kernel_theorem": "SignatureResolutionControls.ambiguous_base_0"
+  },
+  {
+    "id": "inherited-overload-gap",
+    "reference": "f",
+    "kernel_theorem": "SignatureResolutionControls.inherited_overload_gap_0"
+  },
+  {
+    "id": "qualified-parameter-overload-gap",
+    "reference": "f",
+    "kernel_theorem": "SignatureResolutionControls.qualified_parameter_overload_gap_0"
+  }
+]

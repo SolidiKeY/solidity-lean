@@ -1,0 +1,80 @@
+{
+  "status": "partial; exact-head final gates follow",
+  "upstream": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "merge": "e98f9b2b7834ee37019e4eac2d81ba187c61a86b",
+  "source_count": 63,
+  "source_mismatches": [],
+  "owned_Lean_files_unchanged": 26,
+  "external_controls": 41,
+  "gates": {
+    "integrationb86a-accounting": {
+      "git_head": "e98f9b2b7834ee37019e4eac2d81ba187c61a86b",
+      "command": [
+        "tests/h28-sol/non-vacuity/runtime/accounting"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 20.42048836700269,
+      "rusage": {
+        "command": [
+          "tests/h28-sol/non-vacuity/runtime/accounting"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 20.14662239899917,
+        "children_user_seconds": 14.397807,
+        "children_system_seconds": 5.995983,
+        "children_max_rss_kib": 23720,
+        "children_major_faults": 0,
+        "children_minor_faults": 4169009
+      },
+      "log_sha256": "cdfe998fb1d8c367c5d3f36143f02912dfec4dd54b01504da4205fa36bd55456",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 11752706048
+    },
+    "integrationb86a-proposal": {
+      "git_head": "e98f9b2b7834ee37019e4eac2d81ba187c61a86b",
+      "command": [
+        "node",
+        "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+        "tests/h28-sol/non-vacuity/pin-proposal-b86a"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 15.601916512998287,
+      "rusage": {
+        "command": [
+          "node",
+          "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+          "tests/h28-sol/non-vacuity/pin-proposal-b86a"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 14.393937082000775,
+        "children_user_seconds": 13.799474,
+        "children_system_seconds": 1.037052,
+        "children_max_rss_kib": 315952,
+        "children_major_faults": 0,
+        "children_minor_faults": 531444
+      },
+      "log_sha256": "4c4007c85d1375fd7537ee9e532ec25ec3678b3078e29f47581880e3561048ef",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 11459502080
+    }
+  },
+  "generated_proposal": {
+    "old_count": 7990,
+    "added_count": 414,
+    "candidate_count": 8404,
+    "applied": false,
+    "central_patch_sha256": "10c7dd063aedb616af8643c905757f3a555e61cce2ccc23f0d97da9dc163839a"
+  },
+  "H41": "Verified packs/path/SHA for coordinator pull; no VM shipping",
+  "shared_registry": "Generated centrally; no worker write or exception requested",
+  "transfer_observed": false,
+  "reviews": "Separate read-only finder/skeptic all4sourceareasPASS; final snapshot/evidence follow"
+}

@@ -1,0 +1,5 @@
+{
+  "integration_only": true,
+  "frozen_shared_roots": true,
+  "modules": [{"module": "Solidity.Calculus.SolkeyAgreementH28.Freshness", "file": "Solidity/Calculus/SolkeyAgreementH28/Freshness.lean", "area": "Calculus", "description": "Exact intrinsic freshness thresholds and arbitrary copy/write sequence consequences for the two selected clauses."}]
+}
