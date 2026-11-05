@@ -1385,6 +1385,16 @@
     "code": "@[implemented_by progallocatesM]"
   },
   {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by expressionPathAnyM]"
+  },
+  {
+    "file": "Solidity/Frontend/QualifiedUnits/References.lean",
+    "kind": "override",
+    "code": "@[implemented_by referencesM]"
+  },
+  {
     "file": "Solidity/Frontend/Testing.lean",
     "kind": "unsafe",
     "code": "unsafe Meta.evalExpr Json (mkConst ``Json) value"
