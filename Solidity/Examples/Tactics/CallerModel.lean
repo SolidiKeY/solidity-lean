@@ -127,7 +127,9 @@ theorem open_setX : ¬ ValidM (.nonReentrant setX) (.withCallback .top) openF :=
   exact absurd H2 (by with_unfolding_all decide)
 
 /-- **The lock taken, a callee calling back as the lock lets it keeps `x`**:
-the only entry, `setX()`, is guarded. -/
+the only entry, `setX()`, is guarded, and the lock turns it away.  The
+proof reads `setX`'s `guarded` flag and the lock, not its body: that the
+body honours the flag is `setX_guards`. -/
 theorem lock_setX : ValidM (.nonReentrant setX) (.withCallback .top) lockF := by
   intro σ v
   refine holdsR_box_inert (I := .top) (Reentry.inertAt fun _ => rfl)
@@ -218,7 +220,7 @@ theorem setX_guards (J : StateInv Locked) : setX.Guards J := by
           with_unfolding_all exact fun h => nomatch h
 
 /-- **What the lock gives `setX`**: from a locked state, a callee calling
-back into any entry reaches what one calling only unguarded entries does
+back into any entry reaches what the lock lets one reach (`Reach`)
 (`Reentry.reachAny_iff`; `setX` has no unguarded entry to release the
 lock). -/
 theorem setX_reachAny (J : StateInv Locked) {g g' : State Locked []}
@@ -243,3 +245,7 @@ end Solidity.Examples.Tactics.CallerModel
 #guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.setX_guards
 /-- info: 'Solidity.Examples.Tactics.CallerModel.setX_reachAny' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.setX_reachAny
+/-- info: 'Solidity.Examples.Tactics.CallerModel.open_staticOnly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.open_staticOnly
+/-- info: 'Solidity.Examples.Tactics.CallerModel.lock_staticOnly' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms Solidity.Examples.Tactics.CallerModel.lock_staticOnly

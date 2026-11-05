@@ -62,7 +62,8 @@ the caller model what a callee that does may do.
 **Interface for VC3 (stable): `Solidity.Calculus.CallerModel`** —
 `CallerModel C` (`none | staticOnly | nonReentrant (R : Reentry C) | any`),
 `CallerModel.Allows`, `CallerModel.Le`, `Reentry` (`Entry`, `body`,
-`guarded`, `held`; `Call`, `Reach`, `Guards`, `KeepsHeld`), the runs
+`guarded`, `held`; `Call`, `Step`, `StepAny`, `Reach`, `ReachAny`, `Guards`,
+`KeepsHeld`), the runs
 `ExecSM M J`/`ExecPM`/`ExecFM`, `holdsR M I pay`, `ValidM M ts φ`
 (`⊨ᶠₘ[M; ts] φ`). Theorems: `Calculus/CallerModelRun.lean`
 (`ExecPM.mono`, `ExecPM.toExecP`, `ExecP.ofExecPM`, `Prog.execM_run`),
@@ -93,7 +94,8 @@ copy's agreement with `ExecS` is proved both ways (`toExecS`, `ofExecSM`).
 `nonReentrant` ignored the lock (`Reentry.Step` now lets a guarded entry
 through while the lock is free; `Static.lean`'s inertness is relative to a
 storage predicate, `Prog.LockedAt`); the `nonReentrant` separations used two
-`R`s and the lock played no part (now one `R`, `open_setX`/`lock_setX`);
+`R`s and the lock state played no part (now one `R`, `open_setX`/`lock_setX`;
+`lock_setX` reads `setX`'s flag and the lock, its body by `setX_guards`);
 docs overstated `none`'s coincidence with `noCallback`, the `none <
 staticOnly` example's reason, and `ExecSM .none`; stale name
 `holdsR_modal_inert`; missing docstrings. Kept, documented: re-entry with

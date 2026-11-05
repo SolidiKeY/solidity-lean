@@ -75,10 +75,11 @@ theorem Reach.toAny {g g' : State C []} (h : R.Reach J g g') : R.ReachAny J g g'
   | refl => exact .refl _
   | tail _ hs ih => exact .tail ih (hs.elim fun f hf => ⟨f, hf.2⟩)
 
-/-- **What the lock gives**: from a state in which the lock is held, when
-every guarded entry is guarded (`Guards`, the lock judgment) and no unguarded
-one releases the lock (`KeepsHeld`), a callee calling back into any entry
-reaches exactly what the lock lets one reach (`Reach`). -/
+/-- **What the lock gives**: from a state in which the lock is held, when a
+guarded entry never completes while the lock is held (`Guards`, the lock
+judgment) and no unguarded one releases the lock (`KeepsHeld`), a callee
+calling back into any entry reaches exactly what the lock lets one reach
+(`Reach`). -/
 theorem reachAny_iff (hG : R.Guards J) (hK : R.KeepsHeld J) {g g' : State C []}
     (hh : R.held g.storage) : R.ReachAny J g g' ↔ R.Reach J g g' := by
   refine ⟨fun h => ?_, Reach.toAny⟩

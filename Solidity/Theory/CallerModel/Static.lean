@@ -78,8 +78,8 @@ section Runs
 
 variable {M : CallerModel C} {J : StateInv C}
 
-/-- **A transfer under a model that changes nothing**, its invariant holding
-everywhere: its deterministic run. -/
+/-- **A transfer under a model that changes nothing where `Q` holds**, from a
+`Q` state, its invariant holding everywhere: its deterministic run. -/
 theorem ExecSM.transfer_inert {Q : Storage C → Prop} (hM : M.InertAt J Q)
     (hJ : ∀ x, J.holds x) {Γ : Ctx} {σ : State C Γ} {r a : Val C Γ .uint} {o : COut C σ.H Γ}
     (hQ : Q σ.storage) (h : ExecSM M J σ (.transfer r a) o) :
@@ -132,7 +132,9 @@ theorem Stmt.eq_run_inert {Q : Storage C → Prop} (hM : M.InertAt J Q) (hJ : �
     exact ExecSM.transfer_inert hM hJ (hQ rfl) h
 
 /-- **A program whose only callbacks are transfers has one run** under a
-model that changes nothing, its invariant holding everywhere. -/
+model that changes nothing where `Q` holds, `Q` holding before each
+transfer of its typed run (`Prog.LockedAt`), its invariant holding
+everywhere. -/
 theorem ExecPM.eq_run_inert {Q : Storage C → Prop} (hM : M.InertAt J Q) (hJ : ∀ x, J.holds x) :
     {Γ Γ' : Ctx} → (P : Prog C Γ Γ') → Prog.inertSafe J.pay P = true →
       ∀ {σ : State C Γ} {o : COut C σ.H Γ'}, Prog.LockedAt Q σ P →
