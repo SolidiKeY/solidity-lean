@@ -56,16 +56,28 @@ def runJson (result : Option Scalar.Stack) : String :=
 #eval IO.println ("SCALAR_RAW_STACK=" ++ runJson (Scalar.run Scalar.checkedUintAdd.body
  (Scalar.encodeValue .uint maximum :: Scalar.encodeValue .uint one :: stack)))
 #eval IO.println ("SCALAR_OVERFLOW_BYTES=[" ++ String.intercalate "," ((panicData .arithmetic).map (fun b=>toString b.toNat)) ++ "]")
-#print axioms source_bound
-#print axioms failure_bytes
-#print axioms range_false
-#print axioms target_failure
-#print axioms test_flag
-#print axioms raw_body
-#print axioms agreement
-#print axioms populated
-#print axioms retained_operands
-#print axioms raw_zero
-#print axioms positive_baseline
-#print axioms no_success_on_overflow
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.source_bound' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms source_bound
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.failure_bytes' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms failure_bytes
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.range_false' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms range_false
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.target_failure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms target_failure
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.test_flag' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms test_flag
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.raw_body' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_body
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflow.agreement' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms agreement
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.populated' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms populated
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.retained_operands' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms retained_operands
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.raw_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms raw_zero
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.positive_baseline' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms positive_baseline
+/-- info: 'Solidity.Lowering.V08.LiteralFailureScalarOverflowControls.no_success_on_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms no_success_on_overflow
 end Solidity.Lowering.V08.LiteralFailureScalarOverflowControls
