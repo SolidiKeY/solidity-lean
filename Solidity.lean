@@ -1753,6 +1753,7 @@ import Solidity.Frontend.Static.UnitsExamples
 import Solidity.Frontend.Static.UserOps
 import Solidity.Frontend.Static.WellFormedCheck
 import Solidity.Frontend.Testing
+import Solidity.Frontend.TypeGrammarH28.Composition
 import Solidity.Frontend.TypeGrammarH28.Counterexamples
 import Solidity.Frontend.TypeGrammarH28.Layouts
 import Solidity.Frontend.TypeGrammarH28.ParserBasics
