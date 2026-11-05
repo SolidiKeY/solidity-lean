@@ -16,6 +16,8 @@ import Solidity.Backend.AbiEntry.Premises.CalldataViewExtensions
 import Solidity.Backend.AbiEntry.Premises.CalldataViews
 import Solidity.Backend.AbiEntry.RawFreeTransport
 import Solidity.Backend.AbiEntry.RejectionInterface
+import Solidity.Backend.AbiEntry.ValueGateBodyInterface
+import Solidity.Backend.AbiEntry.ValueGateInterface
 import Solidity.Backend.AbiEntry.WordValidation
 import Solidity.Backend.AbiEntry.WordValidationInterface
 import Solidity.Backend.AbiWorld.CallerWordBytes
