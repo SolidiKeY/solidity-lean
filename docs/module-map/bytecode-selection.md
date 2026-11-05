@@ -202,3 +202,6 @@
 | `Backend/AbiEntry/ValueCheckedBodiesInterface.lean` | Ordered value-check/uint-or-Boolean entry/body compiler certificates. |
 | `Backend/AbiEntry/ValueCheckedBodies.lean` | Public combined compilation, early value refusal and raw typed-body agreement. |
 | `Backend/AbiEntry/ValueCheckedBodiesControls.lean` | Payable/zero/nonzero ordering, malformed locals, strict decoding and body failure controls. |
+| `Backend/AbiEntry/SignedBindingInterface.lean` | Actual compiler contract for validated typed signed parameter binding. |
+| `Backend/AbiEntry/SignedBinding.lean` | Bit-preserving typed signed declaration, exact execution and raw signed-reading agreement. |
+| `Backend/AbiEntry/SignedBindingControls.lean` | Signed boundaries, raw negative input, wide metadata and typed signed branch controls. |

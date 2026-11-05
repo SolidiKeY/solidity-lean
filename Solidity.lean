@@ -66,6 +66,9 @@ import Solidity.Backend.AbiEntry.SelectorRoutesInterface
 import Solidity.Backend.AbiEntry.ShortRoutes
 import Solidity.Backend.AbiEntry.ShortRoutesControls
 import Solidity.Backend.AbiEntry.ShortRoutesInterface
+import Solidity.Backend.AbiEntry.SignedBinding
+import Solidity.Backend.AbiEntry.SignedBindingControls
+import Solidity.Backend.AbiEntry.SignedBindingInterface
 import Solidity.Backend.AbiEntry.SignedGate
 import Solidity.Backend.AbiEntry.SignedGateControls
 import Solidity.Backend.AbiEntry.SignedGateInterface

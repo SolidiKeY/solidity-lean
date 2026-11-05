@@ -1129,3 +1129,32 @@ counterexample, fixture replay and full assignment gates remain pending.
 `SignedBindingInterface.lean` specifies actual signed validation followed by
 typed `.int` parameter binding with exact word/state and raw entry agreement.
 The existing typed `toInt` cast preserves the accepted representation.
+
+`SignedBinding.lean` selects a typed program that validates a singleton signed
+entry and declares an `.int` parameter using the existing `UnOp.toInt`. The
+compiler cast preserves bits; no new conversion or cleanup is introduced.
+Exact signed validation precedes the declaration, retaining accepted sign
+extension and rejection of dirty words for all semantic widths. General
+execution preserves the input word and every machine component except the
+continuation and fresh parameter cells. Raw decoding constructs the typed
+word directly from bytes, identifies the actual `.int` local and relates its
+signed reading to `Semantics.AbiEntry.toInt`, with explicit representation and
+`fuel + 2`. No decoded payload, desired run or poststate is assumed.
+
+Controls exercise signed-8 positive/negative endpoints and adjacent dirty
+encodings, zero/full/wide metadata without truncation, raw sign-extended -128
+after an arbitrary selector with trailing bytes and nonzero free pointer,
+short malformed input and insufficient semantic fuel. A separately selected
+compiled signed comparison reads the new local and distinguishes negative
+from positive. Exact saved input/storage/balance/stack observations remain
+explicit. Focused builds, per-file diagnostics and individually scoped
+standard-only axiom guards pass. Independent read-only finder and skeptic
+reviews found no semantic issues.
+
+This supplies intrinsic singleton signed binding. Whole signed body/value
+composition, aggregate and multiparameter decoding/binding, native loading/frame
+realization, Source declaration/body/profile association, full dispatch-entry
+composition and physical failure bytes remain open. G46.02, the writer
+counterexample, fixture replay and full assignment gates remain pending.
+Published master was adopted before this increment; existing evidence remains
+separate from new checkpoint outcomes.
