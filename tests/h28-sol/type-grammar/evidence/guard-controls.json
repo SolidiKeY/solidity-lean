@@ -1,0 +1,10 @@
+{
+  "command": [
+    "python3",
+    "tests/h28-sol/type-grammar/test_guards.py"
+  ],
+  "exit": 0,
+  "elapsed_s": 0.052054773000008936,
+  "stdout": "PASS: finite cgroup restricts host headroom; unlimited cgroup uses host; heavy-runtime overlap refused\n",
+  "stderr": ""
+}

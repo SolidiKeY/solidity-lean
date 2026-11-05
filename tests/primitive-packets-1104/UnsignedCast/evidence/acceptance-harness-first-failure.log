@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/check.py", line 55, in <module>
+    gates=[receipt(mode,target)for mode,target in modes]
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/solidity-lean-ucast-1104/tests/primitive-packets-1104/UnsignedCast/check.py", line 24, in receipt
+    assert command[command.index("--memory")+1]=="12g" and command[command.index("--memory-swap")+1]=="12g"
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: '--memory' is not in list

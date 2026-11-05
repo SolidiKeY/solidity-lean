@@ -8,10 +8,13 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261105T1200Z.md](feature-work/integration-20261105T1200Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105T0840Z.md](feature-work/integration-20261105T0840Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
 | [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
 | [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
+| [feature-work/hash-xi-context.md](feature-work/hash-xi-context.md) | Actual Xi/Theta hash-query transport for arbitrary world and context, with explicit fixed-code/gas and native/source limits. |
+| [feature-work/h7-bounded-interfaces.md](feature-work/h7-bounded-interfaces.md) | H7 logical padding/scanner APIs, bounds and native/source limits. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |

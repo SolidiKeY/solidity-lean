@@ -1,0 +1,38 @@
+{
+  "policy": "H41; verified owned pack for coordinator pull; no VM ship-cache invocation",
+  "source_head": "ce5c40983cc0dd1091e02b3f087a0064ac923da2",
+  "adopted_master": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "commands": [
+    [
+      "tar",
+      "-C",
+      "/workspace/scratch/h28-type-grammar/master9584-cache-h41/artifacts",
+      "-cf",
+      "/workspace/scratch/h28-type-grammar/master9584-cache-h41/owned-artifacts.tar",
+      "-T",
+      "/workspace/scratch/h28-type-grammar/master9584-cache-h41/artifact-files.txt"
+    ],
+    [
+      "zstd",
+      "-T1",
+      "-3",
+      "-q",
+      "/workspace/scratch/h28-type-grammar/master9584-cache-h41/owned-artifacts.tar",
+      "-o",
+      "/workspace/scratch/h28-type-grammar/master9584-cache-h41/owned-artifacts.tar.zst"
+    ]
+  ],
+  "exit": 0,
+  "elapsed_s": 0.2252727769955527,
+  "module_mappings": 18,
+  "artifacts": 54,
+  "artifact_bytes": 12779136,
+  "pack": "/workspace/scratch/h28-type-grammar/master9584-cache-h41/owned-artifacts.tar.zst",
+  "pack_bytes": 3733868,
+  "sha256": "da52ab498a74f0760aaa71ab9e8b8eb4386e95776383c1f8c518756f38946981",
+  "verified_archive_members": 54,
+  "input_mappings": "/workspace/scratch/h28-type-grammar/master9584-cache-h41/inputs/solidity-lean.jsonl",
+  "artifact_manifest": "/workspace/scratch/h28-type-grammar/master9584-cache-h41/artifacts.json",
+  "limits": "one CPU;12GiB address-space bound;no host swap;4GiB headroom precheck",
+  "transport_status": "pending coordinator pull; no delivery or freshness claimed"
+}

@@ -57,3 +57,16 @@ Scoped intrinsic-program and abstract-machine results; see [their boundary](../f
 | `Backend/Passes/BitwiseValueContext.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Passes/BitwiseValueContextControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/Passes/ValueReflection.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3FrozenScopeFamily.lean` | The exact frozen recursiveSource constructor family with scoped scalar turns and the UNCHANGED Prog.recBase. |
+| `Backend/InternalFlow/RuntimeFrameV3RecursiveScopeLaws.lean` | Small construction boundaries for actual scoped recursive quotations. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarRecursiveAgreement.lean` | Successful quotation coherence for actual scalar-result recursion, including callers outside the inhabited successful controls. |
+| `Backend/Passes/MemoryScopeAllocation.lean` | Scoped proofs and retained obligations for MemoryScopeAllocation. |
+| `Backend/Passes/MemoryScopeBoundary.lean` | Scope exit keeps actual emitted code, reached cost and selected map. |
+| `Backend/InternalFlow/RuntimeFrameV3EffectfulScalarSource.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/TupleReturnConsumer.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/TupleReturnConsumerControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarParentRestore.lean` | Parent restore for scalar frames where the saved reference equals the live cell; only the counter changes. Not a general reference restore. |
+| `Backend/InternalFlow/RuntimeFrameV3ScalarUnwind.lean` | Bounded v12-flow-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/MemoryCallScopeBoundary.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/Passes/MemoryCallScopeControls.lean` | Bounded v09-compiler-passes checkpoint; typed scope and retained obligations are stated in the module. |

@@ -1,0 +1,100 @@
+{
+  "reviews": [
+    {
+      "area": "rules-calculus",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/finder.md",
+      "sha256": "8b8a4a93524d47ca4f230136de84e02036bb4f1b5c4f24b8f4435334e5cddd83",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "callbacks",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/finder.md",
+      "sha256": "8b8a4a93524d47ca4f230136de84e02036bb4f1b5c4f24b8f4435334e5cddd83",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "compiler",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/finder.md",
+      "sha256": "8b8a4a93524d47ca4f230136de84e02036bb4f1b5c4f24b8f4435334e5cddd83",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "checker-evidence",
+      "role": "finder",
+      "agent": "/root/finder",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/finder.md",
+      "sha256": "8b8a4a93524d47ca4f230136de84e02036bb4f1b5c4f24b8f4435334e5cddd83",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "rules-calculus",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/skeptic.md",
+      "sha256": "9edceba123c053a3333fcc104835c39a98ad979469a91adad559d09712f8c8d2",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "callbacks",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/skeptic.md",
+      "sha256": "9edceba123c053a3333fcc104835c39a98ad979469a91adad559d09712f8c8d2",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "compiler",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/skeptic.md",
+      "sha256": "9edceba123c053a3333fcc104835c39a98ad979469a91adad559d09712f8c8d2",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    },
+    {
+      "area": "checker-evidence",
+      "role": "skeptic",
+      "agent": "/root/skeptic",
+      "verdict": "pass",
+      "read_only": true,
+      "used_lean_server": false,
+      "artifact": "evidence/runtime-v2/skeptic.md",
+      "sha256": "9edceba123c053a3333fcc104835c39a98ad979469a91adad559d09712f8c8d2",
+      "reviewed_inputs_sha256": "986e298ff8a1c00a29339913f23002555abe0162c3606fab7d63d85150caead0",
+      "scope": "Reviewed candidate; required exact-head gates pending."
+    }
+  ]
+}

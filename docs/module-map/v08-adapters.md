@@ -465,6 +465,39 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Backend/FailurePaths/FramedEmission.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/FramedEmissionControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Lowering/V08/LocalCallableTransport.lean` | Bounded v08-world-lowering checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureOverflowReason.lean` | Actual typed addition at the checked/unchecked range boundary. |
+| `Lowering/V08/LiteralFailureOverflowReasonControls.lean` | Scoped proofs and retained obligations for LiteralFailureOverflowReasonControls. |
+| `Backend/FailurePaths/LocalGuardSelection.lean` | Executable selection from actual indexed Source statements for a bare require of a Boolean local. |
+| `Backend/FailurePaths/LocalGuardSelectionControls.lean` | Both pipelines consume the executable selector correctness theorem with inhabited memory and saved77. |
+| `Lowering/V08/LiteralFailureReasonSequence.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/RelationalGuard.lean` | memory-internal-calls checkpoint: bare require over full-width relational comparisons (Source run, public selection, selected run); no lowering/payload relation. |
+| `Backend/FailurePaths/RelationalGuardControls.lean` | memory-internal-calls checkpoint: controls for the relational require guard. |
+| `Backend/PrimitivePackets/CheckedSub/Agreement.lean` | memory-reference-structs checkpoint: checked uint256 subtraction (agreement). |
+| `Backend/PrimitivePackets/CheckedSub/Controls.lean` | memory-reference-structs checkpoint: checked uint256 subtraction (controls). |
+| `Backend/PrimitivePackets/CheckedSub/Selected.lean` | memory-reference-structs checkpoint: checked uint256 subtraction (selected). |
+| `Backend/PrimitivePackets/CheckedSub/Source.lean` | memory-reference-structs checkpoint: checked uint256 subtraction (source). |
+| `Backend/PrimitivePackets/CheckedSub/Target.lean` | memory-reference-structs checkpoint: checked uint256 subtraction (target). |
+| `Backend/CalldataPackets/RawUintN/Execution.lean` | memory-storage-copy checkpoint: calldata uintN[] to memory copy; exact run, dirty-word revert, success iff all words fit. |
+| `Backend/CalldataPackets/RawInt/Controls.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawInt/Execution.lean` | Bounded constant-depth checkpoint; typed scope and retained obligations are stated in the module. |
+| `Calculus/DecisionGivenHeapExtension.lean` | va1-decision checkpoint: extended given-heap decider always produces an answer (isSome); adds only the reflexive literal-read family. |
+| `Calculus/DecisionGivenHeapReason.lean` | va1-decision checkpoint: only the syntactically reflexive single literal read family `box x. read(key) = read(key)`. |
+| `Backend/CalldataPackets/RawAddress/Controls.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawAddress/Execution.lean` | Bounded vx1-contracts-environment checkpoint; typed scope and retained obligations are stated in the module. |
+| `Frontend/SolcJson/IrImport.lean` | vt1-solc-validation checkpoint: extractor reproduces an already-given lookup selection; no completeness of selectContract against lookup. |
+| `Lowering/V08/LiteralFailureScalarOverflow.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Lowering/V08/LiteralFailureScalarOverflowControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/FailurePaths/LogicalGuard.lean` | Source/target agreement for short-circuit and/or guards over shared operand booleans; operand reads explicit, no revert payload. |
+| `Backend/FailurePaths/LogicalGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawUintN/Controls.lean` | Raw uintN[] calldata-to-memory decoding controls (no masking, dirty/truncated entries, uint248 top); delivered by the copy-recovery lane, no storage content. |
+| `Calculus/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/FixedArrayFloor.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawBool/Controls.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/CalldataPackets/RawBool/Execution.lean` | Bounded vt1-solc-validation checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
+| `Lowering/V08/WordCastCallable.lean` | Signed assignment and unsigned-cast argument execution with derived post-state relation. |
+| `Lowering/V08/UnsignedUpdateCallable.lean` | Prefix/postfix argument execution, actual selected Source call and reached caller-local relation. |
+| `Lowering/V08/UnsignedUpdateCallableControls.lean` | Populated wraparound/static/timeout/capture controls and inhabited joint transport. |

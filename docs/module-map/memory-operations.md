@@ -299,3 +299,18 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Solidity/Backend/MemoryOps/PhysicalNestedFixedWrite.lean` | Actual nested whole-word store joined to terminal byte MSTORE and live REVERT bytes, with initial-derived numeric and scaled-pointer footprints; byte-load prefix remains open. |
 | `Backend/MemoryCopies/CheckedDefaultInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/MemoryCopies/NestedDefaults.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteMaterialize.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteMaterializeControls.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteStack.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/PhysicalByteStackExact.lean` | Bounded v11-memory-operations checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryOps/SourceCalldataBoolSlice.lean` | Actual resolved calldata slicing followed by the existing Boolean conversion. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceControls.lean` | Actual Boolean calldata views select or exclude a malformed word. |
+| `Backend/MemoryOps/SourceCalldataBoolSliceSequence.lean` | A real two-statement Source program, with an actual sliced first copy and a later malformed Boolean decoder. |
+| `Backend/MemoryOps/SourceRawBoolSliceSequence.lean` | Discharge the existing two-statement slice program's decoder premises from actual raw words. |
+| `Backend/MemoryCopies/PublishedStorage.lean` | Exact fields of the published storage endpoint discharge the existing local execution premise. |
+| `Backend/MemoryCopies/PublishedStorageInterface.lean` | Consume the published reached-storage endpoint at the unchanged local composition boundary. |
+| `Backend/MemoryCopies/CheckedDefault.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/CheckedReferenceInterface.lean` | memory-copies interface only: capacity guard and checked-reference certificate statement; the certificate is not inhabited here. |
+| `Backend/MemoryCopies/HeapContents.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/HeapContentsInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/MemoryCopies/SingletonCopyInterface.lean` | Bounded memory-copies checkpoint; typed scope and retained obligations are stated in the module. |

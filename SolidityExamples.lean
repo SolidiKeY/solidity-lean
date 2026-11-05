@@ -60,6 +60,7 @@ import Solidity.Examples.DependentReduction
 import Solidity.Examples.ExactReduction
 import Solidity.Examples.ExactUpdates
 import Solidity.Examples.ExampleNames
+import Solidity.Examples.FixedArrayFloor
 import Solidity.Examples.InputReduction
 import Solidity.Examples.LexDiamond
 import Solidity.Examples.LexMetrics
@@ -84,6 +85,7 @@ import Solidity.Examples.ReadRealization
 import Solidity.Examples.ReadTrace
 import Solidity.Examples.RecursiveCopy
 import Solidity.Examples.RecursiveStorage
+import Solidity.Examples.Roadmap.V16.FramedReasonConsumer
 import Solidity.Examples.ScopedRuns
 import Solidity.Examples.SolCases
 import Solidity.Examples.SourceCounterexample
@@ -250,6 +252,7 @@ import Solidity.Examples.Tactics.SourceUnitsImport
 import Solidity.Examples.Tactics.SourceUnitsMetadata
 import Solidity.Examples.Tactics.Spec
 import Solidity.Examples.Tactics.Specs
+import Solidity.Examples.Tactics.StaticStorageCompatibility
 import Solidity.Examples.Tactics.Step
 import Solidity.Examples.Tactics.StorageDangling
 import Solidity.Examples.Tactics.StorageDelete

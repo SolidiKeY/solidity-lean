@@ -1,0 +1,23 @@
+{
+  "scope": "ParserContexts all19theorems;11sufficientcontextconstructors;allvis/mut certificate exclusions;resource-only clean-page release",
+  "finder": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "checkpoint accepted",
+    "findings": []
+  },
+  "skeptic": {
+    "mode": "separate read-only; no Lean server",
+    "verdict": "ParserContexts checkpoint accepted only",
+    "findings": []
+  },
+  "trust": {
+    "audit": "h28-type-8eab89362929.json",
+    "current_statement_count": 208,
+    "new_empty": 11,
+    "new_propext": 8,
+    "allowlist_unchanged": true
+  },
+  "clarification": "The four exclusion theorems concern Boundary certificates, not parser refusal or language exclusions. An elementary type may stop before public elsewhere. Boundary is sufficient, not necessary/exhaustive.",
+  "resource": "POSIX_FADV_DONTNEED under writer/heavy locks changed only clean page cache; file metadata/content and caps/budgets preserved; cold-cache timing not a matched speed claim",
+  "remaining": "Mapping/function/static-length/full array universal proofs; whole-type identity/layout equivalence; final whole-assignment gates/acceptance"
+}
