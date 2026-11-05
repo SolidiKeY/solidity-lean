@@ -4,6 +4,13 @@ Producer `7514c7f55711bea476205c6fd5074ef54a175d05`. Imports only:
 
 - `Solidity/Examples/DecisionHashCore.lean`
 - `Solidity/Examples/DecisionHashFamilies.lean`
+- `Solidity/Examples/DecisionHashKeys.lean`
+- `Solidity/Examples/DecisionHashKinds.lean`
+- `Solidity/Examples/DecisionHashMixed.lean`
+- `Solidity/Examples/DecisionHashQuantifiers.lean`
+- `Solidity/Examples/DecisionHashThreeKinds.lean`
+- `Solidity/Examples/DecisionHashUpdates.lean`
+- `Solidity/Examples/DecisionHashesChecks.lean`
 
 Statements, premises, exclusions and proof budgets are retained. This does not
 establish completion of the lane or discharge its remaining producer obligations.

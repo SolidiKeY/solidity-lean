@@ -143,3 +143,10 @@ At the root, the notation's own tests:
 | `Examples/Tactics/Mutability.lean` | Witnesses and negative controls of the mutability metatheorems (`Theory/Mutability/`): decided `view`/`pure` premises, a write and a state read outside them breaking the conclusions, payable and value-free entries that commit. |
 | `Examples/DecisionHashCore.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
 | `Examples/DecisionHashFamilies.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashKeys.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashKinds.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashMixed.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashQuantifiers.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashThreeKinds.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashUpdates.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
+| `Examples/DecisionHashesChecks.lean` | Bounded va1-decision checkpoint; typed scope and retained obligations are stated in the module. |
