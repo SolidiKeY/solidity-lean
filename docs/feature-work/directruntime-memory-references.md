@@ -1,8 +1,8 @@
 # Executable array memory/reference reader
 
 Implementation and development controls are committed in this lane's packet.
-The whole assignment remains blocked on ordinary A/D integration, central
-registration, and fresh native/browser acceptance. Kernel validation does not
+The whole assignment remains blocked on ordinary A/D integration and fresh native/browser
+acceptance. Central registration is resolved by the adopted published master. Kernel validation does not
 satisfy those gates. No runtime acceptance marker is issued.
 
 Repository: `/workspace/solidity-lean`.
@@ -23,7 +23,7 @@ No push, default-branch merge, PR or publication was performed.
 | Immutable model/interface inventory and waiting backfill | Existing constructors, elaboration, run, calculus and producer boundaries inspected; original compiler fixtures committed before A's interface arrived | Source/Core/physical adequacy gaps remain independent |
 | Location-aware locals and allocation | Owned reader implemented; existing index/assignment recursion reused; all 84 valid fixtures intrinsically typed | A must wire the reader into the ordinary verifier |
 | Controls and intrinsic proofs | 42 exact source-body box/diamond kernel controls, 12 focused controls, 84 initial-model executions, 20 malformed refusals and two intrinsic type refusals pass | These are development checks; ordinary runtime control results remain pending |
-| Source-to-result and handoff | Existing source transport checked; exact API/import and normalization instructions below | Both fresh native and browser binaries, central registration, and the final full gate |
+| Source-to-result and handoff | Existing source transport checked; exact API/import and normalization instructions below | Both fresh native and browser binaries and the final full gate |
 
 The original missing-interface blocker was resolved by fetching and merging
 89373e34. A's published producer is
@@ -282,3 +282,35 @@ resolved. Historical H35 failure logs remain intact. This changes no source,
 theorem, or validation result. Central registration and A/D integration, fresh
 native/browser Identity including the positive diamond twin, and all ordinary
 modality controls remain required before assignment completion.
+
+
+## Published checkpoint adoption: 8495f1de
+
+Merged `8495f1deb0a95dd6b9301822d8649ab76b217681` into the assigned branch at
+`1160a431cb7786e1a96ebe8ecd534c7b64759d15`, preserving all owned commits.
+The Reader is byte-identical to the published module. Central registration is
+now resolved: Solidity.lean imports Memory.Reader, and register.sh --check
+passes. Earlier missing-registration failures above are historical evidence.
+
+Fresh VM owned-module build, 54 standard-only axiom reports and Admission
+controls pass on this merged tree. KeySort passes against the explicit pinned
+SolKey rules: 377 taclets, 131 read-bearing/table entries. Layer checks report
+628 core modules and zero elaborator/checked-parser reaches. Commands, exits,
+wall times and RSS are in `evidence/published-8495/`. All Lean work used the
+existing 12 GiB/no-swap scope and explicit -j1 wrapper. The full merged gate
+was not rerun here; the coordinator's published combined gate report has
+separate provenance. No RUNTIME_GATE_PASS is claimed.
+
+The ordinary DirectRuntime still has private legacy readers and refuses
+reference local declarations; it does not import the Memory/Shared reader.
+A's consumer migration and D's fresh native/browser source-to-result checks
+remain open. New producer/interface modules do not resolve that consumer gap.
+The exact API instructions above remain applicable; no parallel translator or
+unowned runtime edit was introduced. H41's received pack remains preserved;
+this adoption does not assert cache freshness for the newly merged tree.
+
+The three owned module input/output cache hashes match the H41-received
+packet exactly (`owned-cache-reuse.json`); no new owned artifacts need shipping.
+This does not establish cache freshness for other merged modules. Separate
+read-only finder and skeptic adoption reviews found no defects; neither used
+the Lean server. Documentation paths and source whitespace checks pass.
