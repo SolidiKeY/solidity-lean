@@ -1,6 +1,6 @@
 {
   "source_head": "b792dbe2692c0ba06aa1cdb9f5cd0473e4799e20",
-  "master": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
+  "master": "3ad22f66d8fc6431378c22e71823436c79dede7f",
   "mandatory_selection": [
     "Solidity/Backend/MemoryOps/PhysicalReferenceChild.lean",
     "Solidity/Backend/MemoryOps/PhysicalFixedChildWrite.lean",
@@ -1717,5 +1717,6 @@
       "bytes": 2268,
       "master_equal": true
     }
-  ]
+  ],
+  "previous_master": "8bf8321873befa3f35ca31e97e5339a1baee93e6"
 }
