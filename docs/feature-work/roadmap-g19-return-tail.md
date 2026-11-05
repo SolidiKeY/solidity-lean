@@ -1,4 +1,6 @@
-# G19 mapped bare-return selector suppresses a caller assignment
+# G19 context-related bare-return selector suppresses a caller assignment
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [ReturnTail](../../Solidity/Lowering/G19/ReturnTail.lean) consumes AssignmentReturnFlag and the published V07 ContextMap. Its actual Source block evaluates a Boolean local assignment, returns when true, and otherwise executes a caller local-copy assignment. The target uses the existing assignLocalOperand prefix and Prog.join, then guards the real tail with the fresh captured Boolean. Target Prog.run remains normal with a correlated selector: actual function-exit bytecode and arbitrary continuation lowering remain open. No second lowering relation or evaluator is introduced.
 

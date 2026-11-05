@@ -1,4 +1,6 @@
-# G19: mapped Boolean assignment-return control
+# G19: context-related Boolean assignment-return control
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 One Source statement shape is covered: `if (x = y) return;` for Boolean locals,
 with a bare return. This is not whole-function/control-flow/modifier lowering.
