@@ -545,3 +545,6 @@ See [P8 admission](../feature-work/p8-admission.md).
 
 | `Source/Progress/InlineArrayParents.lean` | Ready inline-array allocation expression/statement progress, derived memory preservation and checked-elaboration adaptation. |
 | `Source/Progress/InlineArrayParentControls.lean` | Inhabited inline allocation over live caller memory, exact statement/fuel/panic runs and retained readiness/element exclusions in both pipelines. |
+
+| `Source/Progress/StructParents.lean` | Constructor-derived member layout, actual packing/allocation progress and joint expression/statement preservation with checked-elaboration adaptation. |
+| `Source/Progress/StructParentControls.lean` | Inhabited reference-field constructors, old/fresh heap observations, early/later allocation panic, exact fuel and retained packing/readiness boundaries in both pipelines. |

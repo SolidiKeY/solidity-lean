@@ -2395,6 +2395,8 @@ import Solidity.Source.Progress.ReadyReturns
 import Solidity.Source.Progress.ReadyScopeControls
 import Solidity.Source.Progress.RecoveryBuiltin
 import Solidity.Source.Progress.ScalarBuiltinControls
+import Solidity.Source.Progress.StructParentControls
+import Solidity.Source.Progress.StructParents
 import Solidity.Source.Resolve
 import Solidity.Source.Resolved
 import Solidity.Source.Semantics

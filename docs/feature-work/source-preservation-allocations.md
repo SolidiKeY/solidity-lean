@@ -253,3 +253,12 @@ expression-statement consumer; see
 [source-progress-checked.md](source-progress-checked.md#ready-inline-array-allocation-parents).
 The existing memory-body and readiness certificates are unchanged, so this does
 not admit unrestricted allocation nesting or general memory-body progress.
+
+
+Struct-constructor parents with syntactic `ReadyArgs` also have standalone
+progress and joint expression/statement preservation consumers. Member-layout
+agreement is derived from the intrinsic constructor proof, including for
+reference fields and allocating children; see
+[source-progress-checked.md](source-progress-checked.md#ready-struct-constructor-allocation-parents).
+This does not extend the existing readiness certificate or establish general
+memory-body, compiler or physical-layout coverage.

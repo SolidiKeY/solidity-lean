@@ -603,3 +603,43 @@ finder and skeptic reviews found no confirmed defect. This is Source progress
 and preservation, not termination, physical resource adequacy, compiler/EVM
 refinement or universal source coverage. The historical full-build timeout and
 published documentation-path failure remain open.
+
+
+## Ready struct-constructor allocation parents
+
+`Progress.StructParents` derives the evaluator's exact member-type list from
+the existing intrinsic `structNew` typing proof: `struct_member_types` proves
+agreement with `Env.layout.fields`. `fields_same_ns` then derives progress
+through the actual `fieldsOf` packer. The parent theorem evaluates syntactically
+ready exact arguments, packs them and invokes the existing allocator. Neither
+layout agreement nor child execution is supplied as a semantic oracle.
+
+Expression and expression-statement adapters provide non-stuckness jointly with
+the existing `MemOK`/result-reference preservation rules, including memory
+validity on every halt. The checked-elaboration adapter derives `CallsOK` from
+P9's original checked catalogue. Exact arguments, plain extraction, selected
+contract/frame and initial memory validity retain their existing premises.
+These are standalone adapters; the old readiness and memory-body certificates
+are unchanged.
+
+`StructParentControls` uses an actually elaborated declaration unit with a
+two-reference-field struct. Constructor expressions themselves are built
+directly, so this is not a claim of their frontend elaboration. In both evaluator
+pipelines, one field aliases old object 0 and the other points to freshly
+allocated object 1; the resulting struct occupies object 2. Inhabited expression
+and statement consumers preserve memory validity and the fixture's caller state.
+An early oversized child reverts before allocation. A second oversized child
+after a successful first child retains that first allocation while the parent
+remains unallocated. Exact horizon five succeeds and four or zero times out.
+Malformed raw packing retains `member count` and `member type`; the wrong-type
+packer is explicitly not non-stuck. The old `ReadyExpr` still refuses the parent.
+
+The focused serial check passed in 9.529 seconds with 534,716,416 bytes peak
+aggregate RSS and no new source warnings. All thirty-one printed theorem reports
+use only `propext`, `Classical.choice` and `Quot.sound` or subsets. Independent
+read-only finder and skeptic reviews found no confirmed defect. The elaboration
+proof reuses the published exact inheritance cut; sampled diagnostic success
+alone was not accepted as proof. Source semantics, halt/allocation policies and
+proof limits are unchanged. General body/graph admission, physical resource
+adequacy, compiler/EVM refinement and universal coverage remain outside this
+result, as do the historical failed full/doc gates.
