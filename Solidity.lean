@@ -71,6 +71,7 @@ import Solidity.Backend.Aggregates.G18StorageValues
 import Solidity.Backend.Assembler
 import Solidity.Backend.CalldataPackets.RawUint.Controls
 import Solidity.Backend.CalldataPackets.RawUint.Execution
+import Solidity.Backend.CalldataPackets.RawUintN.Execution
 import Solidity.Backend.Checks
 import Solidity.Backend.Control
 import Solidity.Backend.Creation.Artifact
