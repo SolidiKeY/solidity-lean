@@ -473,6 +473,11 @@ See [p9-checked-callgraphs.md](../feature-work/p9-checked-callgraphs.md), [sourc
 | `Lowering/V08/LiteralFailureReasonSequenceControls.lean` | Bounded v13-abi-world checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/RelationalGuard.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
 | `Backend/FailurePaths/RelationalGuardControls.lean` | Bounded memory-internal-calls checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedSub/Agreement.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedSub/Controls.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedSub/Selected.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedSub/Source.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/CheckedSub/Target.lean` | Bounded memory-reference-structs checkpoint; typed scope and retained obligations are stated in the module. |
 
 See [P8 admission](../feature-work/p8-admission.md).
 
