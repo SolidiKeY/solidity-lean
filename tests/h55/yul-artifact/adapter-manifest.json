@@ -2,6 +2,14 @@
   "schema_version": 1,
   "adapters": [
     {
+      "producer_file": "Solidity/Yul/Compilation/CaseCompilation.lean",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_module": "tests/h55/yul-artifact/CaseAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55Cases",
+      "boundary": "Context-indexed by arbitrary literal selector and real original scoped fallback artifact; exact Artifact.Image recovers the original case producer. Source is actual switch; code prepends selector push to the exact original dispatch. No family migration or inverse on arbitrary common artifacts claimed."
+    },
+    {
       "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
       "declaration_kind": "structure",
       "declaration_name": "Artifact",
