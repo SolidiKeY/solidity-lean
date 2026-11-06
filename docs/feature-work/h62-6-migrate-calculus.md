@@ -19,7 +19,7 @@ No existing Lean file, generated root, central map, pin or lean-toolchain change
 No new theorem/helper, sorry, axiom, native_decide or proof-budget increase.
 
 Generators: `scripts/h62/item6/migrate-calculus/census.py` and `bounded.py`.
-Controls: `tests/h62/item6/migrate-calculus/test_tooling.py` (five passing tests).
+Controls: `tests/h62/item6/migrate-calculus/test_tooling.py` (eight passing tests).
 Bulk evidence is off git at `/workspace/migrate-calculus-evidence`.
 Current census: `base-census-v3/census.json`, `source-sha256.txt` and
 `ordered-modules.txt`. Reproduce with:
@@ -72,7 +72,7 @@ and bind archive to the selected installation. Confirmed findings were fixed.
 Finder accepted the focused census/harness fixes; skeptic accepted the original
 census/monitoring fixes and requested the final archive/install binding, now
 implemented and checked by positive and deliberately mismatched-install controls.
-Focused re-review of that final change is pending. This is no full migration review.
+Both independent reviewers accepted the final archive/install binding and process-guard fixes. This is no full migration review.
 
 ## Ownership and remaining work
 
@@ -87,3 +87,90 @@ Next: final-harness new-toolchain dependency probe, clean old closure measuremen
 owner relay for concrete external failures, scoped acceptance/fixture backfill,
 owner-coordinated Calculus adaptations, full new build and matched timings,
 independent milestone reviews, final patch/bundle/hash handoff to root/gate.
+
+## Backfill checkpoint and explicit STOP
+
+The full new probe (`new-clean-02/result.json`) passed KeySort, AST and SpecSyntax,
+then failed in the out-of-scope `Solidity/Syntax/Raw.lean` at 597, 650, 665, 682
+and 684 (String versus String.Slice, absent Slice.toList, changed dropRight,
+and polymorphic partially applied endsWith). It blocks 374/385 assigned modules.
+All 105/105 external local dependencies have unique migration owners in
+`backfill/cross-directory-owners.json`. The full source and import census remains
+385 assigned modules, 490 closure modules and 1,213 reverse boundary edges.
+
+The independent-subset probe (`new-independent-03/result.json`) checked all 11
+assigned modules not depending on Syntax.Raw: nine pass unchanged,
+LinearCountermodel fails at falseNode_spec line 134, and PresburgerDecision is
+blocked by that failed import. No excluded module is counted as migrated.
+
+`backfill.py` deterministically generates the isolated full-file countermodel
+candidate, preserving every byte except one proof simp-list addition:
+`[Bool.not_eq_true']` becomes `[falseNode, Bool.not_eq_true']`.
+Two appended axiom reports are fixture instrumentation. It does not modify
+`Solidity/Calculus/LinearCountermodel.lean`. The generated test copy is removed
+from the checkout after checking; the preserved source and proposed one-line
+patch are in the off-git `backfill/` directory. The original file and all other
+385 Calculus sources remain unchanged. Owner coordination is still required.
+
+`StringApiCases.lean` contains three test adapters, one bounded test-only tactic,
+and eight fixed theorem statements: ASCII/Unicode slicing, negative identity,
+zero/overrun slicing, character preservation, suffix success and suffix refusal.
+The old suffix implementation needs its private well-founded loop equations;
+the tactic locates that existing definition and unfolds its checked equations
+at most four times. The final proof is checked by Lean, with no native_decide,
+new axiom or budget override. New versions use public standard-library lemmas.
+
+Final byte-identical fixture checks:
+
+| Evidence | Outcome |
+|---|---|
+| `old-candidate-09/result.json` | PASS: four dependency modules plus both fixtures; actual Lean 4.24.0 |
+| `new-candidate-08/result.json` | PASS: same sources and settings; actual official Lean 4.35.0 |
+| Both `StringApiCases.lean.log` files | All eight theorems check. Old slicing axioms empty; old suffix axioms `[propext]`; new sets only the standard three |
+| Both `GeneratedCountermodelCandidate.lean.log` files | falseNode_spec and searchCountermodel use only `[propext, Classical.choice, Quot.sound]` |
+| Python tooling controls | Eight PASS, including stale inventory and live-worker/zombie negative controls |
+
+The matched subset wall time is 21.1943729 s old versus 16.4929547 s new
+(-22.1824 percent), but sampled aggregate peak RSS is 867917824 bytes old versus
+1756893184 bytes new (+102.4262 percent). This is a diagnostic subset, not the
+required full-directory before/after comparison. **ESCALATE: the RSS regression
+triggers STOP on further new-toolchain migration work pending root/gate
+classification.** See `backfill/matched-diagnostic-comparison.json`.
+No attempted production migration change follows this STOP. Completing the
+already-authorized old baseline and preparing read-only handoff evidence remain.
+
+Typed requests are committed at `tests/h62/item6/migrate-calculus/owner-requests.json`
+and preserved off git: `DEP-SYNTAX-RAW-V435` (syntax owner migration dependency)
+and `OWNER-LINEAR-FALSENODE` (live VA1 owner coordination before an exact-file
+proof-only overlay). The delivery field explicitly says saved for coordinator
+pickup; no request was sent and no absent response is treated as approval.
+The RSS STOP is an additional root/gate blocker. No scope or statement exclusion
+is proposed. There are no human scope questions.
+
+Independent finder and skeptic re-reviewed the candidate, eight fixtures,
+source and scope hashes, 105 owners, and recomputed the timing/RSS deltas.
+Both confirmed matching final fixture sources and standard-only axioms; both
+accepted the escalation/STOP and retained the unfinished full-directory gates.
+Neither used Lean or a Lean server.
+
+The first corrected old baseline attempt (`old-clean-02`) passed 176 modules
+then was stopped by the process observer at SoundSummary: 1331.084 s partial,
+1695682560 bytes sampled RSS. It is **not** an accepted baseline. Its rejected
+snapshot was not retained, so the historical process condition is unclassified.
+The observer now records STAT, ignores zombies, retains rejected raw snapshots,
+and still rejects two live Lean processes or missing -j1. Both reviewers accepted
+the fix and the fresh complete old baseline must be repeated (`old-clean-03`).
+
+## Persistent goal and continuation
+
+This remains the original launcher goal for rendered prompt SHA256
+`0992f14182a95808d7e2bf1d1e1610b8677b2b85e79f2c8697c7fb782cd1eb59`.
+No replacement goal or competing continuation was created. get_goal is not
+exposed; coordinator explicitly confirmed that optional absence is not a blocker.
+Original VM environment:
+`ccarenv_b64_Y2NhcmVudl9kODQ1MTc2ZjEzOTg4MTkxOGM0YzMyZmJjYzQ5Y2U4YQ`.
+Coordinator owns the fresh-thread handoff after the completed preparation/backfill
+items; this worker never self-launches a replacement. Whole-goal completion is
+blocked by owner dependencies and the RSS STOP. Full old baseline, full new
+build, semantic interface validation, full comparison and final gates must never
+be inferred from the passing subset or this handoff.

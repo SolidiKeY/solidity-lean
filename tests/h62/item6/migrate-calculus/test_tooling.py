@@ -16,6 +16,13 @@ class Tooling(unittest.TestCase):
         with self.assertRaises(ValueError): census.header_imports("import Foo; malicious")
     def test_unterminated_comment_rejected(self):
         with self.assertRaises(ValueError): census.header_imports("/- unfinished")
+    def test_zombie_lean_does_not_count_as_live_worker(self):
+        snapshot="PID PPID RSS STAT COMMAND COMMAND\n10 1 100 S lean lean -j1 file.lean\n11 1 0 Z lean [lean] <defunct>"
+        self.assertEqual(bounded.observe_processes(snapshot),102400)
+    def test_two_live_lean_workers_rejected(self):
+        with self.assertRaises(RuntimeError): bounded.observe_processes("PID PPID RSS STAT COMMAND COMMAND\n10 1 100 S lean lean -j1 a.lean\n11 1 100 R lean lean -j1 b.lean")
+    def test_missing_j1_rejected(self):
+        with self.assertRaises(RuntimeError): bounded.observe_processes("PID PPID RSS STAT COMMAND COMMAND\n10 1 100 S lean lean a.lean")
     def test_stale_or_truncated_inventory_rejected(self):
         full=dict(closure_sources=[dict(path="x",sha256="abc",base_sha256="abc")])
         bounded.validate_inventory(full,copy.deepcopy(full),True)

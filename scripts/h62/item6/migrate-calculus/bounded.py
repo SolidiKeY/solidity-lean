@@ -44,12 +44,23 @@ def verify_install(archive,install):
         return dict(files=len(rows),manifest_sha256=hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest())
     finally:
         if process.poll() is None: process.kill(); process.wait(timeout=5)
+def observe_processes(top):
+    """Count live processes; exited/zombie tasks cannot perform Lean work."""
+    if top.splitlines()[0].split()!=["PID","PPID","RSS","STAT","COMMAND","COMMAND"]:
+        raise RuntimeError("Unexpected process snapshot header")
+    rows=[line.split(None,5) for line in top.splitlines()[1:]]
+    if not rows or any(len(row)!=6 for row in rows): raise RuntimeError("Invalid process snapshot")
+    active=[row for row in rows if not row[3].startswith("Z")]
+    lean=[row for row in active if row[4]=="lean"]
+    if len(lean)>1: raise RuntimeError("Multiple live Lean processes")
+    if any("-j1" not in row[5].split() for row in lean): raise RuntimeError("Live Lean missing explicit -j1")
+    return sum(int(row[2])*1024 for row in active)
 def validate_inventory(census,fresh,baseline):
     if census!=fresh: raise RuntimeError("Stale, incomplete or modified census; regenerate before running")
     if baseline and any(row["sha256"]!=row["base_sha256"] for row in census["closure_sources"]):
         raise RuntimeError("Baseline source closure differs from pinned base")
 def main():
-    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
+    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--target",action="append",default=[]); a.add_argument("--exclude-dependency"); a.add_argument("--keep-going",action="store_true"); a.add_argument("--fixture",action="append",default=[]); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
     root=Path(args.root).resolve(); toolchain=Path(args.toolchain).resolve(); out=Path(args.out).resolve()
     lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a"); fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     if out.exists(): raise RuntimeError("Output exists; preserve it and use a fresh measurement directory")
@@ -65,6 +76,35 @@ def main():
     if pin and archive_hash!=pin["sha256"]: raise RuntimeError("Toolchain archive differs from coordinator pin")
     if not args.baseline and not pin: raise RuntimeError("New-toolchain run requires coordinator pin")
     modules=["Solidity.KeySort"] if args.keysort_only else census["ordered_local_closure"]
+    imports={r["module"]:census_module.header_imports((root/r["path"]).read_text()) for r in census["closure_sources"]}
+    assigned=[r["module"] for r in census["modules"]]
+    excluded=[]
+    if args.exclude_dependency or args.target:
+        if args.baseline and args.exclude_dependency: raise RuntimeError("A baseline cannot exclude any dependency")
+        if args.exclude_dependency and args.exclude_dependency not in imports: raise RuntimeError("Unknown exclusion dependency")
+        if any(m not in assigned for m in args.target): raise RuntimeError("Explicit target outside assignment")
+        if args.target and (args.exclude_dependency or args.keysort_only): raise RuntimeError("Conflicting target selectors")
+        memo={}
+        def depends(module):
+            if module==args.exclude_dependency: return True
+            if module not in memo: memo[module]=any(depends(d) for d in imports.get(module,[]))
+            return memo[module]
+        excluded=[m for m in assigned if depends(m)] if args.exclude_dependency else []
+        selected=args.target or [m for m in assigned if m not in excluded]
+        ordered=[]; visited=set()
+        def visit(module):
+            if module in visited or module not in imports: return
+            visited.add(module)
+            for d in imports[module]: visit(d)
+            ordered.append(module)
+        for m in ["Solidity.KeySort"]+selected: visit(m)
+        modules=ordered
+    fixture_sources=[]
+    for fixture in args.fixture:
+        path=(root/fixture).resolve()
+        if not path.is_relative_to(root/"tests/h62/item6/migrate-calculus") or path.suffix!=".lean": raise RuntimeError("Fixture is outside assigned tests scope")
+        fixture_sources.append(dict(path=str(path),sha256=hashlib.sha256(path.read_bytes()).hexdigest()))
+        modules.append("fixture:"+str(path))
     installation=verify_install(Path(args.archive),toolchain)
     overlay=out/"toolchain"; (overlay/"bin").mkdir(parents=True)
     for path in toolchain.iterdir():
@@ -85,6 +125,9 @@ def main():
     docker += [args.image,"/bin/sleep","infinity"]
     record=dict(root=str(root),head=command(["git","-C",str(root),"rev-parse","HEAD"]).strip(),toolchain=str(toolchain),image=args.image,command=docker,settings=dict(memory=CAP,swap=0,cpus=1,reserve=RESERVE,threads=1),results=[],status="running")
     def save(): (out/"result.json").write_text(json.dumps(record,indent=2)+"\n")
+    record["invocation"]=[sys.executable]+sys.argv
+    record["scope"]=dict(requested_targets=args.target,assigned_count=len(assigned),excluded_dependency=args.exclude_dependency,excluded_modules=excluded,planned_modules=modules,keysort_only=args.keysort_only)
+    record["fixture_sources"]=fixture_sources
     record["verified_installation"]=installation
     record["archive_sha256"]=archive_hash
     record["coordinator_pin"]=pin
@@ -103,6 +146,8 @@ def main():
         limits=command(DOCKER+["exec",cid,"/bin/cat","/sys/fs/cgroup/memory.max","/sys/fs/cgroup/memory.swap.max"]).splitlines()
         if limits!=[str(CAP),"0"]: raise RuntimeError("Hard cgroup limits not observed: "+repr(limits))
         record["observed_limits"]=limits
+        record["observed_cpu_max"]=command(DOCKER+["exec",cid,"cat","/sys/fs/cgroup/cpu.max"]).strip()
+        if record["observed_cpu_max"]!="100000 100000": raise RuntimeError("One-CPU quota not observed")
         record["lean_version"]=command(DOCKER+["exec",cid,str(toolchain/"bin/lean"),"--version"]).strip()
         record["lake_version"]=command(DOCKER+["exec",cid,str(toolchain/"bin/lake"),"--version"]).strip(); save()
         expected_version="4.24.0" if args.baseline else pin["toolchain"].split(":v",1)[1]
@@ -114,20 +159,26 @@ def main():
             available=min(mem["MemAvailable"],maximum-current)
             if available<RESERVE: raise RuntimeError("4GiB reserve violated")
             return available
+        failed=set()
         for index,module in enumerate(modules):
+            if any(d in failed for d in imports.get(module,[])):
+                failed.add(module)
+                record["results"].append(dict(module=module,exit=None,reason="failed prerequisite",command=None)); save(); continue
             minimum=min(minimum,headroom())
             cmd=DOCKER+["exec",cid,str(toolchain/"bin/lake"),"-f",str(config),"--no-cache","build","+"+module+":olean"]
-            log=out/(module+".log"); began=time.monotonic(); why=None
+            if module.startswith("fixture:"):
+                cmd=DOCKER+["exec",cid,str(toolchain/"bin/lake"),"-f",str(config),"--no-cache","env","lean","--tstack=131072","-j1",module[len("fixture:"):]]
+            log=out/(Path(module[len("fixture:"):]).name+".log" if module.startswith("fixture:") else module+".log"); began=time.monotonic(); why=None
             with log.open("w") as stream:
                 process=subprocess.Popen(cmd,env=ENV,stdout=stream,stderr=subprocess.STDOUT)
                 while process.poll() is None:
                     try:
                         available=headroom(); minimum=min(minimum,available)
-                        top=command(DOCKER+["top",cid,"-eo","pid,rss,comm,args"])
-                        rows=[line.split(None,3) for line in top.splitlines()[1:]]
-                        peak=max(peak,sum(int(row[1])*1024 for row in rows))
-                        lean=[row for row in rows if row[2]=="lean"]
-                        if len(lean)>1 or any("-j1" not in row[3].split() for row in lean): why="Lean concurrency/explicit -j1 violation"
+                        top=command(DOCKER+["top",cid,"-eo","pid,ppid,rss,stat,comm,args"])
+                        try: peak=max(peak,observe_processes(top))
+                        except Exception:
+                            record["rejected_process_snapshot"]=top
+                            raise
                         if available<RESERVE: why="4GiB reserve violated"
                         if time.monotonic()-began>300: why="300s per-module limit reached"
                         if why: break
@@ -140,12 +191,17 @@ def main():
             item=dict(module=module,command=cmd,exit=process.returncode,wall_seconds=time.monotonic()-began,log=str(log),guard=why)
             record["results"].append(item); save()
             print(json.dumps(dict(index=index+1,total=len(modules),**item)),flush=True)
-            if why or process.returncode: raise RuntimeError("Module failed: "+module+(": "+why if why else ""))
+            if why: raise RuntimeError("Module failed: "+module+": "+why)
+            if process.returncode:
+                failed.add(module)
+                if not args.keep_going: raise RuntimeError("Module failed: "+module)
         after=[dict(row,sha256=hashlib.sha256((root/row["path"]).read_bytes()).hexdigest()) for row in record["source_provenance"]]
         record["sources_unchanged_after"]=after==record["source_provenance"]
         if not record["sources_unchanged_after"]: raise RuntimeError("Source closure changed during measurement")
         if hashlib.sha256(config.read_bytes()).hexdigest()!=record["config_sha256"]: raise RuntimeError("Configuration changed during measurement")
-        record["status"]="pass"
+        if any(hashlib.sha256(Path(row["path"]).read_bytes()).hexdigest()!=row["sha256"] for row in fixture_sources): raise RuntimeError("Fixture changed during measurement")
+        record["status"]="blocked" if failed else "pass"
+        if failed: record["error"]="One or more selected modules failed: "+", ".join(sorted(failed))
     except Exception as exc:
         record["status"]="blocked"; record["error"]=str(exc)
     finally:
