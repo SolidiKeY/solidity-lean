@@ -454,3 +454,27 @@ pins and exact original row identities are extended, not replaced.
 The current reference ledger has seventeen mapped bundles and 3264 unmapped
 rows, with five kernel-checked test modules. The earlier counts are historical
 checkpoints; no original census row or failed receipt has been discarded.
+
+## Nonempty finite layout and operation-family witnesses
+
+LayoutWitnesses checks all six LayoutAccess premise bundles using a mapping
+to a fixed two-word array, repeated left requests and a nonempty separate right
+family. Existing fit/placement conditions remain exact. Actual clear/set families
+commute; both selected cells change under the combined families, while the
+left family alone preserves the separately resolved right/outside query. A later invalid offset rejects the complete request list.
+
+The hash is a concrete finite-model function, not Keccak or a globally injective
+function. Its complete stated run contains one repeated preimage; adding a
+different preimage breaks the region premise. No global crypto premise or new
+Source cap is introduced. Request resolution and operation indices are explicit;
+no actual emitted-access, Source/layout, liveness, packing or physical bridge is
+inferred. All original frame/coverage/region premises are retained.
+
+Six more frozen signatures are mapped to checked joint inputs. The original
+conservative census and pending compiler/world/migration obligations remain open.
+
+The current reference ledger maps twenty-three bundles, leaving 3258 original
+rows unmapped. Six kernel-checked test modules supply those references. Both
+layout-family selected cells change in the positive control; left-only execution
+preserves the outside cell. This is a finite layout/operation-family result,
+not physical execution or a general Source storage compiler.
