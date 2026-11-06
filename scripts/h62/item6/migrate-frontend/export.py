@@ -30,8 +30,10 @@ def main():
     patch=out/'branch-preparation.patch';patch.write_bytes(git('format-patch','--stdout',BASE+'..'+head))
     bundle=out/'branch-preparation.bundle'
     if bundle.exists():bundle.unlink()
-    subprocess.run(['git','bundle','create',str(bundle),BASE+'..'+head],cwd=root,check=True)
+    subprocess.run(['git','bundle','create',str(bundle),BASE+'..'+BRANCH],cwd=root,check=True)
     with (out/'bundle-verify.log').open('w') as log:subprocess.run(['git','bundle','verify',str(bundle)],cwd=root,stdout=log,stderr=subprocess.STDOUT,check=True)
+    advertised=git('bundle','list-heads',str(bundle)).decode().splitlines()
+    if not any(line.split()[0]==head for line in advertised):raise SystemExit('Bundle tip mismatch')
     candidates=[e/'token-overlay-v5/token-v435.patch',e/'parser-overlay-v3/parser-v435.patch']
     proposal=out/'migration-proposal.patch';proposal.write_bytes(b''.join(p.read_bytes() for p in candidates))
     subprocess.run(['git','apply','--check',str(proposal)],cwd=root,check=True)
