@@ -906,3 +906,38 @@ Final finder and skeptic independently verified the metadata archive hash,
 all seven members,checker hash and receipt boundaries. No findings. Owned
 document paths,Python syntax and whitespace pass; unchanged global reference
 failures remain with their existing relayed owners.
+
+## H77 exact handoff delivery and H30/H86 historical status
+
+The current native-browser handoff is now physically present at the requested
+owned inbox path. Its7130 bytes match SHAce3b211c7482f7c23761032aef098129c97152578eae9a6cb0484ab7ed594fe0.
+Independent intake checks reconcile its owner/build heads, gate command/exit/
+wall/resources and all decisive fields with the authenticated Git manifests.
+The local metadata gate passes1.807s,15172KiB in12GiB/no-swap scope.
+This verifies the delivered report, not execution of its absent raw evidence.
+
+The replay and reconciliation raw archives remain undelivered. Executed harness
+bytes and original-wire/results inspection remain pending. H71 already routed
+the exact request; H77 fulfills only the handoff file, so no duplicate request
+or runtime/build/STOP rerun is issued. The local status distinguishes verified
+handoff from incomplete raw evidence. browser-h77-intake-receipt.json records
+that boundary and seals the metadata/handoff archive with full member readback.
+
+Repeated H82b notice is source recovery only:618dda88 remains an ancestor,
+its verified bundle/D-HANDOFF and full committed-data H44 split are retained.
+The original untracked direct-check and cache-c9230cc9 bytes are explicitly
+UNVERIFIABLE underH30/H86,not recovery waits. Their old hashes remain reported,
+not locally verified. Regenerated native/cache artifacts have separate actual
+hashes and do not retroactively verify the lost bytes. bulk-manifest.json now
+also labels historical source/gate hash scope rather than treating old rows as
+current-tree pins. No recovered or archived data was discarded.
+
+Finder and skeptic verified these distinctions with no findings; neither used
+Lean/server or reran the browser. No Source/producer/theorem/axiom/budget/trust
+change,source/compiler preservation or RUNTIME_GATE_PASS is inferred. Four
+live storage-diamond certifications and relayed global documentation failures
+remain open alongside the two current raw-archive waits.
+
+Final finder/skeptic packaging review verifies all eight metadata archive
+members and receipt flags. No findings. Owned documentation references,Python
+syntax and whitespace pass; the unchanged global failure remains relayed.

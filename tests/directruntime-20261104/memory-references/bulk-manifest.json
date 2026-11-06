@@ -53,5 +53,37 @@
   "restore": "Verify archive SHA256, then tar --zstd -xf ARCHIVE -C a fresh checkout root; paths remain unchanged. Existing fixtures.cjs and prepare-admission.cjs regenerate fixture/admission files. Gates are not skipped if data is absent.",
   "recovered_worker_head": "618dda88b2096d807508090a81fe54e8b440b96d",
   "retained_config_note": "The newer branch .gitattributes is retained; recovered additions only relaxed whitespace checks on now-untracked bulk and are unnecessary.",
-  "authenticated_metadata_receipt": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/intake-receipt.json"
+  "authenticated_metadata_receipt": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/intake-receipt.json",
+  "historical_untracked_artifacts": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/native-isolated/direct-check",
+      "status": "UNVERIFIABLE",
+      "reportedSha256": "5f642fc5771816bdf756e1158bfea934a8a1ef2b0aaf86ae4bcb4a7428503a01",
+      "bytesLocallyPresent": false,
+      "sha256LocallyVerified": false,
+      "policy": "H30/H86:original untracked bytes not recovered;not a recovery wait."
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/consumer-708/cache-c9230cc9/cache.tar.zst",
+      "status": "UNVERIFIABLE",
+      "reportedSha256": "5a25d13aab46396562e7adcf9a2aa4f0bf6ce5f82ba193b0e1c68d43e6953be5",
+      "bytesLocallyPresent": false,
+      "sha256LocallyVerified": false,
+      "policy": "H30/H86:original untracked bytes not recovered;not a recovery wait."
+    }
+  ],
+  "source_hash_scope": "Historical source fingerprints captured during H44 recovery of618dda88;later reviewed source/helper changes have separate receipts. These are not current-tree trust pins.",
+  "gates_unchanged_scope": "H44 tracking/archival operation only;subsequent owned helper changes are recorded in their checkpoint receipts.",
+  "regenerated_evidence": [
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native/direct-check",
+      "sha256": "a3f920a74d53ea9f5201cbafa166900efd2495c65b1bd98e7c7ef26990bd8c6a",
+      "boundary": "Regenerated independent native evidence;not verification of missing original bytes."
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/directruntime-20261104/memory-references/runtime/master-5f145-validation/native-cache-pickup/cache.tar.zst",
+      "sha256": "a13e6ccdd984c1c150e25564c3df3be5242faa07967da101a6f48ea44c8e2976",
+      "boundary": "Regenerated verified pack retained locally;not the missing original cache and no delivery/new freshness claim."
+    }
+  ]
 }

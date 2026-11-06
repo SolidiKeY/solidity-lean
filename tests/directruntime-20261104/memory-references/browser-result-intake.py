@@ -70,12 +70,29 @@ harness = blob(owner_head, "tests/directruntime-20261104/native-browser/h81-memo
 assert hashlib.sha256(harness).hexdigest() == summary["committedHarnessSha256"]
 (out/"committed-harness.mjs").write_bytes(harness)
 raw = []
-for path, digest in [(".lake/native-browser-b-journal-handoff-cc62220dcf1a/handoff.json", "ce3b211c7482f7c23761032aef098129c97152578eae9a6cb0484ab7ed594fe0"), (".lake/native-browser-b-original-replay/evidence.tar.gz", "da15f10be44a77b18d488ab63312b40b8d0d9978ceb395cce3b446a73001a0ad"), (".lake/native-browser-b-original-reconciliation/evidence.tar.gz", "40436ffb2fb002578dc00da33e3e0a3733a339b82c96f756b44e78a9c2b6859e")]:
-    file = repo/path
+for path, digest, inbox_name in [(".lake/native-browser-b-journal-handoff-cc62220dcf1a/handoff.json", "ce3b211c7482f7c23761032aef098129c97152578eae9a6cb0484ab7ed594fe0", "handoff.json"), (".lake/native-browser-b-original-replay/evidence.tar.gz", "da15f10be44a77b18d488ab63312b40b8d0d9978ceb395cce3b446a73001a0ad", "replay-evidence.tar.gz"), (".lake/native-browser-b-original-reconciliation/evidence.tar.gz", "40436ffb2fb002578dc00da33e3e0a3733a339b82c96f756b44e78a9c2b6859e", "reconciliation-evidence.tar.gz")]:
+    inbox_file = base/"browser-cc622-owner-evidence"/inbox_name
+    file = inbox_file if inbox_file.is_file() else repo/path
     present = file.is_file()
     if present:
         assert sha(file) == digest, path
-    raw.append({"path": str(file), "expectedSha256": digest, "locallyPresentAndVerified": present})
-result = {"ownerHead": owner_head, "runtimeBuildHead": replay["runtimeBuildHead"], "metadataSha256": expected, "originalJournalSha256": replay["originalJournalSha256"], "journalBytes": len(journal), "journalCases": 84, "sourceFingerprintsPerHead": len(native["sourceFiles"]), "headsChecked": 2, "bridgeAndClosureMatch": True, "committedHarnessSha256": summary["committedHarnessSha256"], "executedHarnessSha256Reported": summary["executedHarnessSha256"], "ownerReportedReplay": summary, "ownerReportedGate": replay["gate"], "runtimePolicy": replay["runtimePolicy"], "rawArtifacts": raw, "localRawEvidenceComplete": all(r["locallyPresentAndVerified"] for r in raw), "limitations": ["Local verification covers Git metadata/source compatibility and retained journal, not an independent browser execution.", "Executed harness bytes and actual wire/results archives are not locally verified until raw artifacts arrive.", "Owner used revalidated prior fresh H81 binaries, not a new build for this replay; no unchanged STOP rerun requested.", "Four diamonds pending; no source/compiler preservation, universal machine correctness or RUNTIME_GATE_PASS."]}
+    raw.append({"sourcePath": str(repo/path), "path": str(file), "expectedSha256": digest, "locallyPresentAndVerified": present})
+handoff_verified = False
+if raw[0]["locallyPresentAndVerified"]:
+    handoff = json.loads(pathlib.Path(raw[0]["path"]).read_text())
+    assert handoff["head"] == owner_head
+    assert handoff["sourceBuildHead"] == replay["runtimeBuildHead"]
+    assert handoff["gates"][1]["command"] == replay["gate"]["command"]
+    assert handoff["gates"][1]["exitCode"] == replay["gate"]["exitCode"]
+    assert handoff["gates"][1]["wallSeconds"] == replay["gate"]["wallSeconds"]
+    assert handoff["gates"][1]["scope"] == replay["gate"]["scope"]
+    decisive = handoff["decisiveOutput"]
+    assert decisive["exactRequestObjectsEqual"] == summary["exactRequestObjectsEqual"]
+    assert decisive["statusCountsPerBackend"] == summary["statusCountsPerBackend"]
+    for key in ["casesPerBackend", "exactJournalWireReconstruction", "exactBackendResultObjectParity", "concreteModelHaltExpectationsPerBackend", "mandatoryIdentityDiamondBothModesBothBackends", "statusesEqualPriorNormalizedRun", "noForbiddenLoadsOrAssetsObserved", "executedHarnessSha256", "committedHarnessSha256"]:
+        assert decisive[key] == summary[key]
+    assert handoff["runtimeGatePass"] is False
+    handoff_verified = True
+result = {"ownerHead": owner_head, "runtimeBuildHead": replay["runtimeBuildHead"], "metadataSha256": expected, "originalJournalSha256": replay["originalJournalSha256"], "journalBytes": len(journal), "journalCases": 84, "sourceFingerprintsPerHead": len(native["sourceFiles"]), "headsChecked": 2, "bridgeAndClosureMatch": True, "committedHarnessSha256": summary["committedHarnessSha256"], "executedHarnessSha256Reported": summary["executedHarnessSha256"], "ownerReportedReplay": summary, "ownerReportedGate": replay["gate"], "runtimePolicy": replay["runtimePolicy"], "rawArtifacts": raw, "localRawEvidenceComplete": all(r["locallyPresentAndVerified"] for r in raw), "localHandoffPayloadVerified": handoff_verified, "limitations": ["Local verification covers Git metadata/source compatibility and retained journal, not an independent browser execution.", "A verified handoff payload is not verification of executed harness bytes or actual wire/results inside undelivered archives.", "Owner used revalidated prior fresh H81 binaries, not a new build for this replay; no unchanged STOP rerun requested.", "Four diamonds pending; no source/compiler preservation, universal machine correctness or RUNTIME_GATE_PASS."]}
 (out/"intake.json").write_text(json.dumps(result, indent=2)+"\n")
 print(json.dumps({k:v for k,v in result.items() if k not in ["ownerReportedReplay", "ownerReportedGate"]}))
