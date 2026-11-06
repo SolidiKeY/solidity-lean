@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Conservative lexical duplicate discovery. Results are leads, not Lean proofs."""
+"""Conservative lexical duplicate discovery. Results are leads, not Lean proofs.
+
+The optional live fixture gate guards stale/unbound signature promotion; it
+never accepts a saved receipt or removes candidate ownership/refusal checks.
+"""
 import argparse
 import bisect
 import fnmatch
@@ -371,6 +375,7 @@ def main():
     parser.add_argument("--previous", type=Path, help="previous scanner JSON report")
     parser.add_argument("--previous-sha256", help="caller-supplied SHA256 pin for previous report")
     parser.add_argument("--registry", type=Path, help="coordinator ownership snapshot; references are advisory")
+    parser.add_argument("--fixture-binding-output", type=Path, help="fresh live five-fixture rebuild directory; never accepts an old receipt")
     args = parser.parse_args()
     root = args.root.resolve()
     if (args.previous is None) != (args.previous_sha256 is None):
@@ -378,6 +383,12 @@ def main():
     if any(Path(pat).is_absolute() or ".." in Path(pat).parts for pat in args.paths):
         parser.error("patterns must stay within the root")
     selection = dict(root=str(root), patterns=sorted(set(args.paths)))
+    if args.fixture_binding_output is not None:
+        if root != Path(__file__).resolve().parents[4] or not args.fixture_binding_output.is_absolute():
+            parser.error("fixture binding requires the real checkout root and absolute fresh output")
+        if args.fixture_binding_output.exists() or args.fixture_binding_output.is_symlink():
+            parser.error("fixture binding output must be fresh; saved receipts are not accepted")
+        selection["fixture_binding_contract"] = hashlib.sha256((root/"tests/h62/item1/duplication-scanner/local-rebuild-pins.json").read_bytes()).hexdigest()
     previous = None
     old_inputs, old_statements, old_bodies = {}, {}, {}
     if args.previous is not None:
@@ -468,6 +479,36 @@ def main():
             rows.extend(found)
         except (OSError, ValueError, UnicodeError, RuntimeError) as exc:
             errors.append(dict(path=str(path), reason=str(exc)))
+    fixture_binding = None
+    binder = None
+    if args.fixture_binding_output is not None:
+        try:
+            if errors or unmatched:
+                raise ValueError("cannot bind incomplete selected inputs")
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("h62_local_binder", Path(__file__).with_name("bind_signature_fixture.py"))
+            binder = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(binder)
+            source_path = "tests/h62/item1/duplication-scanner/SignatureFingerprint.lean"
+            expected_names = {"alphaA", "alphaB", "differentType", "indexedOne", "indexedTwo"}
+            selected = [r for r in rows if r["path"] == source_path and r["name"] in expected_names]
+            if len(selected) != 5 or {r["name"] for r in selected} != expected_names:
+                raise ValueError("selected scope must contain each of the five fixture declarations once")
+            with binder.writer_lease():
+                live = binder.rebuild(args.fixture_binding_output)
+            by_name = {binder.observer.name_parts(r["declaration"])[-1]: r for r in live["source_bindings"]}
+            source_hash = next(r["sha256"] for r in inputs if r["path"] == source_path)
+            for row in selected:
+                binding = by_name[row["name"]]
+                if binding["source_sha256"] != source_hash:
+                    raise ValueError("scan source differs from live rebuilt source")
+                row["fixture_signature"] = binding
+            fixture_binding = {"kind": "live-canonical-five-fixture-rebuild", "records": 5,
+                               "raw_environment_binding": "unbound", "compiler_sha256": live["compiler_sha256"],
+                               "pins_sha256": live["pins_sha256"],
+                               "boundary": "Only five pinned fixture rows have local source/artifact linkage; all candidate refusal/ownership checks remain. Execution receipt is external, not accepted as input."}
+        except (OSError, ValueError) as exc:
+            parser.error("live fixture binding: " + str(exc))
     def alias_reasons(group):
         paths = {row["path"] for row in group}
         return (["shared-resolved-source"]
@@ -533,12 +574,23 @@ def main():
     for row in rejected:
         reason = row["reject_reason"]
         rejection_counts[reason] = rejection_counts.get(reason, 0) + 1
-    print(json.dumps(dict(version=2, selection=selection, inputs=inputs, declarations=len(rows), inventory=inventory, candidates=candidates, rejected_declarations=rejected,
+    payload = json.dumps(dict(version=2, selection=selection, inputs=inputs, declarations=len(rows), inventory=inventory, candidates=candidates, rejected_declarations=rejected,
         body_candidates=body_candidates, incremental=incremental, unmatched_patterns=unmatched, input_aliases=aliases,
         owner_config_sha256=digest(owners), registry_sha256=hashlib.sha256(registry_bytes).hexdigest(), scanner_sha256=scanner_sha256,
         rejections=dict(by_reason=rejection_counts,
-                        unknown_ownership=sum(r["owner"] == "unknown" for r in rows)), errors=errors),
-        sort_keys=True, ensure_ascii=False, indent=2))
+                        unknown_ownership=sum(r["owner"] == "unknown" for r in rows)), errors=errors,
+        **({"fixture_binding": fixture_binding} if fixture_binding is not None else {})),
+        sort_keys=True, ensure_ascii=False, indent=2)
+    if fixture_binding is not None:
+        with binder.writer_lease():
+            report_bytes = (payload + "\n").encode()
+            (args.fixture_binding_output/"scan.json").write_bytes(report_bytes)
+            (args.fixture_binding_output/"scan-binding.json").write_text(json.dumps({
+                "canonical_scan_sha256": hashlib.sha256(report_bytes).hexdigest(),
+                "live_rebuild_receipt_sha256": binder.sha(args.fixture_binding_output/"receipt.json"),
+                "scanner_sha256": scanner_sha256,
+                "boundary": "Created by this scanner's live rebuild invocation; not remote attestation or authority for other signatures."}, indent=2)+"\n")
+    print(payload)
     return bool(errors or unmatched)
 
 if __name__ == "__main__":
