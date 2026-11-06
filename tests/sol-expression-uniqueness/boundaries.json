@@ -1,0 +1,150 @@
+[
+  {
+    "level": 0,
+    "constructors": [
+      "assign"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.assignment_left_nested_refused"
+  },
+  {
+    "level": 1,
+    "constructors": [
+      "cond"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.conditional_left_nested_refused"
+  },
+  {
+    "level": 2,
+    "constructors": [
+      "or"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.or_right_nested_refused"
+  },
+  {
+    "level": 3,
+    "constructors": [
+      "and"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.and_right_nested_refused"
+  },
+  {
+    "level": 4,
+    "constructors": [
+      "equality"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.equality_right_nested_refused"
+  },
+  {
+    "level": 5,
+    "constructors": [
+      "order"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.order_right_nested_refused"
+  },
+  {
+    "level": 6,
+    "constructors": [
+      "bitOr"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.bitOr_right_nested_refused"
+  },
+  {
+    "level": 7,
+    "constructors": [
+      "bitXor"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.bitXor_right_nested_refused"
+  },
+  {
+    "level": 8,
+    "constructors": [
+      "bitAnd"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.bitAnd_right_nested_refused"
+  },
+  {
+    "level": 9,
+    "constructors": [
+      "shift"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.shift_right_nested_refused"
+  },
+  {
+    "level": 10,
+    "constructors": [
+      "addSub"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.addSub_right_nested_refused"
+  },
+  {
+    "level": 11,
+    "constructors": [
+      "mulDivMod"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.mulDivMod_right_nested_refused"
+  },
+  {
+    "level": 12,
+    "constructors": [
+      "exp"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.exp_left_nested_refused"
+  },
+  {
+    "level": 13,
+    "constructors": [
+      "unaryPrefix"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.prefix_suffix_refused"
+  },
+  {
+    "level": 14,
+    "constructors": [
+      "unarySuffix"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.suffix_prefix_refused"
+  },
+  {
+    "level": 15,
+    "constructors": [
+      "index",
+      "slice",
+      "member",
+      "callOptions",
+      "call"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.postfix_bases_refused"
+  },
+  {
+    "level": 16,
+    "constructors": [
+      "payableConv",
+      "metaType",
+      "new",
+      "tuple",
+      "inlineArray",
+      "ident",
+      "lit",
+      "litUnit",
+      "elemType"
+    ],
+    "classification": "Solidity.Frontend.ExpressionUniqueness.certified_root_levels_equal",
+    "negative": "Solidity.Frontend.ExpressionUniqueness.new_bases_refused"
+  }
+]
