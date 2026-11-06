@@ -1,0 +1,7 @@
+/-! RawIntegerBlock.adapter closes the actual integer literal/checked Items
+sequence through existing RawTypedScope operations. Its concrete Source.execS
+block law preserves real range, checked-frame and input-coherence premises.
+Checks.RawIntegerBlock witnesses older mutation, nested checked blocks,
+break/continue, signed literals, dirty retained words and timeout boundaries.
+Arbitrary initializer expressions/groups, dirty ordinary Source readback and
+general frontend admission remain separate obligations. -/

@@ -74,6 +74,7 @@ history is in git.
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 
 **The calculus and its proofs**
 
@@ -172,6 +173,8 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
 
 - [Inline assembly VY2 preparation](feature-work/inline-assembly-vy2.md): physical codecs, finite storage/selected byte-heap writeback and retained-allocation resizing/supported byte/mixed aggregate heap views and selected word/dynamic uint256 retained-capacity/simultaneous heterogeneous struct and canonical bool/reference array writeback with retained-capacity resizing and canonical scalar-memory extension with exact legacy compatibility, real alias controls and joint ordinary-memory source/placement composition and arbitrary finite canonical owned-inventory writeback, registered residual journals, actual selected-step MemOK and outstanding concrete integration.
 

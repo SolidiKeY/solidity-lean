@@ -11,8 +11,8 @@ def verified_packet(manifestName,directory):
  packet=json.loads((OWNED/manifestName).read_text())
  source=OWNED/'artifacts'/directory;archive=ROOT/packet['archiveRelative']
  assert archive.resolve().is_relative_to((OWNED/'artifacts').resolve()) and not source.is_symlink()
- assert archive.stat().st_size==packet['archiveBytes'] and sha(archive)==packet['archiveSha256']
- index=source/'files.json';assert sha(index)==packet['filesManifestSha256']
+ assert archive.stat().st_size==packet['archiveBytes'] and sha(archive)==packet['archiveSha256'], 'packet archive integrity mismatch'
+ index=source/'files.json';assert sha(index)==packet['filesManifestSha256'], 'packet files manifest integrity mismatch'
  expected=set();totalBytes=0
  for row in json.loads(index.read_text())['files']:
   totalBytes+=row['bytes']

@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/FixedReferenceMemoryTurnInterface.lean` | Contract only for a headerless fixed-memory parent child read, checked deep copy and header0 reservation store, with distinct access/capacity refusals. |
+| `Backend/MemoryCopies/FixedReferenceMemoryTurn.lean` | Proved actual fixed-parent memory child selection, checked deep child copy and header0 store preserving allocator, source graph, snapshot and reserved gap, with distinct refusals. |
+| `Backend/MemoryCopies/FixedReferenceMemoryTurnControls.lean` | Represented fixed source with shared child aliases; actual empty/pair/64-element copies, distinct access/capacity refusals and header-shift/alias/payload negatives. |
