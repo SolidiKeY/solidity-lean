@@ -290,3 +290,11 @@ Candidate compatibility files still fail to reach diagnostics because of
 Source/Ctor migration failures. Full Hash and language migration, independent
 finder and skeptic reviews, H55 agreement, affected validation, acceptance,
 axiom comparison and before/after timings remain pending.
+
+The shared module additionally checks eight direct witness examples: positive
+mapping, an array containing a mapping (negative top-level test), both address
+flags, contract and Boolean payable cases, bytes/string location preservation,
+and the default array location. Per-file Lean 4.35 MCP diagnostics returned
+`success=true`, `partial=false`, no failed dependencies and the same three
+`[propext]` axiom reports. The patch proposal was regenerated after these
+additions; its applicability check is not a semantic or full-gate pass.
