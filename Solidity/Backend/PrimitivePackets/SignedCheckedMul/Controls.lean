@@ -79,10 +79,7 @@ theorem minimum_minus_not_wrap (p : Roadmap.Pipeline) (tail : List Word) :
  {SignedDiv.Controls.machine minimum minus with stack:=tail}≠
  .ok ({SignedDiv.Controls.machine minimum minus with stack:=tail}.push (.val (sword minimum.val))) 0 := by
  have actual := (minimum_minus p tail).2
- simp only [ti, Bool.false_eq_true, if_false, if_true] at actual
- rw [actual]
- intro wrong
- cases wrong
+ exact fun wrong => nomatch actual.symm.trans wrong
 
 theorem minus_minimum_not_wrap (p : Roadmap.Pipeline) (tail : List Word) :
  run (selected (C:=SignedDiv.Controls.P) 0 SignedDiv.Controls.F
@@ -90,10 +87,7 @@ theorem minus_minimum_not_wrap (p : Roadmap.Pipeline) (tail : List Word) :
  {SignedDiv.Controls.machine minus minimum with stack:=tail}≠
  .ok ({SignedDiv.Controls.machine minus minimum with stack:=tail}.push (.val (sword minimum.val))) 0 := by
  have actual := (minus_minimum p tail).2
- simp only [ti, Bool.false_eq_true, if_false, if_true] at actual
- rw [actual]
- intro wrong
- cases wrong
+ exact fun wrong => nomatch actual.symm.trans wrong
 
 /-- The exact product word is pushed onto the arbitrary saved stack; a wrong word is refused. -/
 theorem regular_exact (p : Roadmap.Pipeline) (tail : List Word) :
@@ -102,7 +96,6 @@ theorem regular_exact (p : Roadmap.Pipeline) (tail : List Word) :
  {SignedDiv.Controls.machine negSeven nine with stack:=tail} =
  .ok ({SignedDiv.Controls.machine negSeven nine with stack:=tail}.push (.val (sword (-63)))) 0 := by
  obtain ⟨word,rep,actual⟩ := (regular p tail).2
- simp only [ti, Bool.false_eq_true, if_false, if_true] at actual
  rw [SignedDiv.Controls.word_unique _ word rep] at actual
  exact actual
 
@@ -122,4 +115,74 @@ theorem low_fuel (p : Roadmap.Pipeline) :
  (.error .timeout,SignedDiv.Controls.source seven two) := by rfl
 
 theorem exact_panic : Source.panicData .arithmetic=[78,72,123,113]++List.replicate 31 0++[17] := by decide
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_success
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.source_overflow
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.public_selection' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.public_selection
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.original_guard' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.original_guard
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_success
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.value_overflow
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_success
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.target_overflow
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.success
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Backend.PrimitivePackets.SignedCheckedMul.overflow_iff
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.family' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms family
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_minus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minimum_minus
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_minimum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minus_minimum
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.upper' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms upper
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.upper_negative' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms upper_negative
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms lower
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower_swapped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms lower_swapped
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.lower_maximum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms lower_maximum
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms regular
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_positive' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms regular_positive
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_swapped' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms regular_swapped
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_one' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minimum_one
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.one_minimum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms one_minimum
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.maximum_minus' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms maximum_minus
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_maximum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minus_maximum
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minimum_zero
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.zero_minimum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms zero_minimum
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.guard_classification' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms guard_classification
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minimum_minus_not_wrap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minimum_minus_not_wrap
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.minus_minimum_not_wrap' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms minus_minimum_not_wrap
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.regular_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms regular_exact
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.wrong_result' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms wrong_result
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.low_fuel' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms low_fuel
+/-- info: 'Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls.exact_panic' does not depend on any axioms -/
+#guard_msgs (whitespace := lax) in #print axioms exact_panic
 end Solidity.Backend.PrimitivePackets.SignedCheckedMul.Controls
