@@ -74,6 +74,7 @@ history is in git.
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 
 **The calculus and its proofs**
 
@@ -178,3 +179,4 @@ G41 result/failure codec and terminal observations: [ABI packet consumers](featu
 The [V14 creation-frame consumer](feature-work/roadmap-v14-executable.md) records published-prerequisite provenance and paid-world/caller-frame boundaries.
 
 The [V14 argument consumer](feature-work/roadmap-v14-executable.md) distinguishes evaluated caller arguments, constructor failure data and selected-tail rollback.
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
