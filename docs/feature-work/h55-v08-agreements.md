@@ -1,0 +1,170 @@
+# H55 v08-agreements migration candidate
+
+Pinned base: `4d3790eadb8a5212233bc7d5e345817476b2f590`.
+Branch: `codex/solidity-h55-sol-20261106/v08-agreements`.
+
+The 2026-11-02 coordination correction makes the four existing source paths
+migration inputs, not exclusive write leases. No existing source file is edited.
+Production adoption requires coordinator notice naming actual current owner,
+accepted handoff and exact transferred file list. This is unfinished work.
+
+## Typed interface published for owner review
+
+`tests/h55/v08-agreements/Agreements.lean` contains standalone candidates in
+`Solidity.Lowering.V08.H55Agreements`, importing existing premises unchanged:
+
+- `FrameAgreement`: exact Int address, sender, value and static inputs.
+- `fromConstructor` / `toConstructor`: preserve the original Nat frame contract.
+- `fromLibrary` / `toLibrary`: preserve Int and caller-address contract.
+- Both directions have round trips and logical equivalence proofs.
+- `OriginWitness` / `SomeOriginWitness`: exact indexed/existential equations
+  using frozen `P8a.SourceOrigins`, with no replacement origin interpretation.
+- `GlobProgramAgreement`: exactly prog/pipeline/fixed equality. Session inputs
+  imply this relation; the relation does not claim all glob fields agree.
+- `ConstructorBodyObligation` / `LibraryBodyObligation`: names for the existing
+  missing body duties, retaining execution antecedents, Out indices and relations.
+- `accepted_origin`: proposed V07 owner adapter, preserving acceptedSource and
+  the actual admission profile. V07/P8Bindings remains read-only.
+
+No owner acceptance, g49 composition or production migration is claimed.
+No canonical frontend/body/layout/runtime producer is supplied. Frozen V1
+P8 producers remain documented as uninhabited until P8-SPEC-LAW1 resolution.
+Component inhabitance is separate from these missing producer obligations.
+
+## Coordinator migration requests
+
+M1 (constructor owner): review exact frame/origin/body adapters against
+`ConstructorScalarTransport` and `CreationPremises`; transfer only named files
+before production adoption. Preserve public FrameInputs construction signatures.
+M2 (library owner): review caller versus code-address identity and metadata/body
+adapters against `LibraryFrameTransport` and `LibraryPremises`; transfer only
+named files. Preserve original three glob equalities and existential origin.
+M3 (V07 owner): review `accepted_origin` for eventual P8Bindings migration;
+this worker must never edit V07/P8Bindings.
+M4 (g49 owner): consume no production interface from this candidate before
+an owner-reviewed checkpoint is recorded by the coordinator.
+
+These are dependency requests, not requests to approve new premises/exclusions.
+Any producer API change outside the approved unification requires ESCALATE.
+H58 HOLD work is untouched. No owner/path lookup is delegated to the human.
+
+## Verification and boundaries
+
+Actual versions: Lean 4.24.0 (797c613eb9b6d4ec95db23e3e00af9ac6657f24b),
+Lake 5.0.0-src+797c613, Python 3.12.14, Node v24.19.0, Git 2.52.0.
+No Lean MCP tool was exposed; per-file checks used direct Lean under the bounded
+executor. Reviews used no Lean server. The existing supplied goal was preserved;
+only stop_goal, not get_goal, was exposed by tool discovery.
+
+The original `baseline-closure` checked the 218-module union import closure of
+all four inputs (Lake's last module job index was 219) in 1054.98 seconds and
+reported `KEYSORT_PASS` and `AFFECTED_CLOSURE_PASS`. Its runner used the OLD
+host-only reserve guard. This is bootstrap evidence, not evidence for the later
+corrected effective-cgroup guard, production adoption, or a full runtime pass.
+The exact command is saved in its external JSON/log; it was:
+
+`python3 scripts/h55/v08-agreements/bounded.py baseline-closure Solidity.Lowering.V08.ConstructorScalarTransport Solidity.Lowering.V08.CreationPremises Solidity.Lowering.V08.LibraryFrameTransport Solidity.Lowering.V08.LibraryPremises`.
+
+The corrected runner records min(host available, every observed finite
+self/ancestor cgroup max minus current), before/after source hashes, head,
+commands, per-file timing, memory samples, inner peak/events and swap use.
+Its hard child cap is 12 GiB, no swap, one CPU; every Lean process uses -j1
+and LEAN_NUM_THREADS=1, one heavy process at a time, with a 4 GiB outer reserve.
+UUID container names and exact nonce-label checks protect stop ownership.
+No maxHeartbeats, source theorem/premise/observation, stack or resource cap is
+increased. The ignored alternate config adds only -j1 to existing library args.
+
+Corrected checks (all evidence under `/workspace/v08-agreements-evidence`):
+
+- `candidate-01`: original four files all passed per-file checks; new helper
+  failed projection, shadowing and layout errors. No pass was claimed for it.
+- `candidate-02`: repaired core helper passed with no diagnostics.
+- `library-fixture-closure`: existing read-only SourceDispatchControls import
+  closure passed in 99.54 seconds under the corrected guard.
+- `candidate-03`: added controls exposed string elimination and nested relation
+  witness elaboration errors; fixed without changing any statement or budget.
+- `candidate-04`: complete latest helper passed with no diagnostics in 2.476 s
+  Lean time (6.29 s wrapper); 158879744-byte inner peak, zero swap/OOM/events,
+  source hashes unchanged and minimum effective reserve 14191054848 bytes.
+- Static census, trust (6277 sources, 0 findings), layers, roots, fragments and
+  doc paths passed. Existing axiom inventory gate failed: 14978 pinned theorems,
+  0 errors, 4140 unrecorded changes. `axiom-baseline-correspondence.json` proves
+  all tracked audit inputs and inventory equal the base and the new helper adds
+  zero pins. This is inherited inventory drift, not a successful gate.
+
+Headline helper axiom output contains only propext, Classical.choice and
+Quot.sound (library_exact has no axioms). No axiom, sorry, native trust shortcut
+or generated axiom-audit change is introduced. H58 HOLD is unchanged.
+The default/full build and RUNTIME_GATE_PASS are not claimed. Before/after
+production timing remains pending because no production refactor is leased or
+performed. Historical source log showed only the original frame integration;
+no speed-motivated source change was reversed. The cold closure wall time is
+not a before/after adoption comparison.
+
+## Controls and correspondence
+
+Frame adapters have both round trips and exact logical equivalences, with the
+unsigned bound proving Nat/toNat/Int correspondence for the full existing word
+range. Controls cover wrong address, sender, value, static and actual library
+code address; a static zero-value frame is inhabited. Metadata controls reject
+changed program contracts, pipeline and fixed root slots while permitting all
+session fields and SrcProg.main to change.
+
+All origin/frame/body projections from the existing creation/library Inputs
+have typed correspondence proofs. Populated constructor and library body
+components include proved actual source antecedents, full post-state relations
+and exact results; false reached postconditions are rejected. The library target
+is explicitly an independent observer entry. These are kernel proofs over the
+existing source/target fixtures, not solc/EVM differential tests, canonical
+lowering producers, runtime bytecode adequacy or full Inputs inhabitants.
+Frozen V1 admission remains uninhabited until P8-SPEC-LAW1 is resolved; no
+replacement SourceOrigins or source interpreter is supplied.
+
+## Independent reviews and fixes
+
+Finder and skeptic independently reviewed the actual saved candidate and runner
+read-only, without Lean/server/build. All confirmed findings listed in external
+`reviews.json` were fixed and confirmed: exact origin quantifiers, full metadata
+boundary, actual address controls, body correspondence, reliable resource
+telemetry and unique owned-container stopping. Their final standalone reviews
+have no remaining findings. These are independent reviews, not owner acceptance.
+
+Terra reviewed the complete original queue, not only the passing helper, and
+returned NOT ACCEPTED for full scope on its first read-only attempt: actual
+production migration, owner checkpoint, performance and full gates are pending.
+No semantic weakening or standalone defect was found. This result is retained;
+no effort was increased and no partial result is called full acceptance.
+
+## Remaining typed dependencies and coordinator action
+
+The full assignment is blocked on the coordinator notice naming actual current
+owners, accepted handoff and exact transferred files for the four migration
+inputs. V07/P8Bindings stays read-only even after those transfers. Required
+missing producer types remain explicitly external: P8a.SourceOrigins and
+DeclarationGraphAdmission.Producer; V17 invocation binding and ssNew_body;
+V07 local/storage/heap relation; P4 dispatch and G42 body/result preservation;
+InterfaceV1.ReturnClaim and InterfaceV1.PendingRestoration. These are named
+obligations, not implementations proved by this helper.
+
+ESCALATE QPIN1 [source: static-6.log; axiom-baseline-correspondence.json]:
+The pinned base's shared axiom inventory gate exits 1 with 4140 unrecorded
+changes and zero forbidden-axiom errors. This lane cannot edit shared pins.
+Coordinator options (no gate waiver or premise/exclusion change proposed):
+
+1. Reconcile the shared inventory centrally on the pinned base and supply an
+   accepted handoff; the lane then reruns the unchanged required gate.
+2. Supply a validated replacement published base plus explicit adoption and
+   ownership instructions; the lane then revalidates all source and gates.
+
+No option is approved or recommended. Owner/base lookup remains coordinator
+work; this record does not request a human lookup. Production adoption, actual
+owner-reviewed checkpoint before g49, comparable speed gate and complete
+production acceptance remain unfinished. The persistent goal is not complete.
+
+## Handoff artifacts
+
+Bulk logs, source fingerprints, reviews and cache packs remain off Git under
+`/workspace/v08-agreements-evidence`. The task-owned committed evidence manifest
+will record their exact paths and SHA256 values. The final external HANDOFF.md,
+original.patch, source.bundle and SHA256SUMS identify the final committed head
+and pinned base. No push, merge, PR, cache shipment or HOLD refactor is performed.
