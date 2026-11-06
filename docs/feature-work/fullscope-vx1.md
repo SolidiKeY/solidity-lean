@@ -1112,3 +1112,24 @@ E1 (generated `inProfile`/`outsideScope` still scope-only), E2 (anchor not
 checked), E3 (`python -O`) and E4 (`Admission/Profile.lean` census) fixed in
 the patch, `adapter.py` and ADAPTERS.md. PowerBounds and registration: no
 defect.
+
+### Gates (VX1 G01, final)
+
+- MCP diagnostics: `EnvironmentFields/{Frozen,FrozenControls}.lean`, `Source/Horizon.lean`,
+  `Frontend/Checked/UnitExamples.lean` and parts, `Backend/Scalar/PowerBounds.lean`:
+  no errors; `tests/fullscope-20261104/vx1/FrozenAxioms.lean`: 24 declarations,
+  only `propext`/`Quot.sound`.
+- `gate.sh touched` (origin/master): PASS, 472 s.
+- `gate.sh checkpoint`: build-touched, library, examples, trust, orphans, layers,
+  roots, fragments PASS; doc-paths FAIL (pre-existing:
+  `after-roadmap-va1.md` cites a missing Mathlib file, another lane's doc);
+  axiom-pins FAIL (pre-existing: 0 errors, 4379 unrecorded changes; pins are
+  coordinator-owned, H67).
+- `./run-lean.sh`: Lean build of all default targets and `SolkeyTestSuite`
+  without errors; `check-solkey.sh` against the unpinned `../solkey`
+  (`5c448df`) FAIL with 167 mismatches (upstream drift); pinned rerun against
+  the `473da8944c` snapshot (`SOLKEY_RULES=tests/migration/solkey/…/solidityProgramRules.key`)
+  PASS: "annotations match", 131 read-bearing.
+- `adapter.py --stage`: identity, 8 mutations rejected, staged hashes stable;
+  `check.py`, `solidity-feature-audit.py --check`,
+  `backend-scalar-thresholds.py --check`: PASS.
