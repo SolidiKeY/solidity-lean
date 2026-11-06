@@ -35,3 +35,28 @@ without the required writer lock; concurrent writer status was not checked. Subs
 changes and commit preparation used the lock.
 
 H70 routing: the host-only relay accepted an owner ticket for V14. Exact revert consumers, first-statement and tail revert cases, nested location cases and owner requests are recorded in `tests/h62/item1/evm-lemmas/case-accounting.md`. This is static source accounting; no owner permission, extraction or passing proof gate is inferred.
+
+
+H70 waiting backfill: `tests/h62/item1/evm-lemmas/LocationFixture.lean` proves
+symbolic child and grandchild inequalities, reverse orientations, and distinct
+siblings under an index inequality; equal indices give a negative control.
+`RevertFixture.lean` proves first-error, revert specialization and tail-error
+sequencing and shows intrinsic revert satisfies the premise for any supplied
+state and tail; it does not construct a closed state. These are isolated,
+unregistered fixtures; no consumer, frozen statement, representation or
+concrete hashed-word injectivity claim changed.
+
+Lean 4.24.0 / Lake 5.0.0-src+797c613: bounded locked `lake -f
+tests/h28-sol/literal-grammar/runtime.toml env lean -j1 --tstack=131072`
+passed for LocationFixture (0.370 s) and RevertFixture (1.122 s after witness).
+Location child/grandchild axioms: `propext`, `Quot.sound`; distinct siblings:
+none. Revert fixture axioms: `propext`, `Classical.choice`, `Quot.sound`.
+The first RevertFixture check failed because Lake's reported fetched KeySort
+object was absent; Hashes, Keccak and RevertBytes objects were also absent.
+Four generated traces were removed and a serial `lake --no-cache ... build
+Solidity.Semantics.Run` with a private cache rebuilt them; the retry passed.
+Independent read-only finder and skeptic reviewed each fixture without a Lean
+server; neither found a material defect. Fixture checking is not affected-file
+validation, extraction acceptance, or a before/after performance comparison.
+Original-file owner agreement, module registration, final gates and timing
+remain pending.
