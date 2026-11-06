@@ -257,7 +257,7 @@ step in `Solidity.Backend.Creation.two_links_commute`: it adds
 offset disjunction. The original statement, premises, imports, remaining
 source and proof budgets are untouched. The original Lean file is unchanged.
 The patch SHA256 is
-`b356c5597014e63afbbd24dcdabd835b44cb61d93240e7d94237142425a40d14`.
+`029b1e07ff623b181ee782f9c6082159ef7433e181a70316b194385e9d01bf4d`.
 
 `generate_linking_fixture.py` deterministically reproduces the proposal copy,
 patch and metadata. Resolved-path guards prevent original-source aliases,
@@ -275,3 +275,11 @@ gates remain pending. No original-file permission is inferred from routing.
 The old clean baseline remains active and no second Lean job has been run.
 The separate MCP-helper generalization remains an uncommitted draft until
 its private-artifact/provenance and no-auto-build behavior are validated.
+
+The proposal packaging was corrected after the first artifact commit: Git's
+optional space on an empty context line is omitted. Both `git apply --check`
+and `git diff --check` now pass; the proposed Lean bytes are identical. The
+first commit's whitespace check failed and is not counted as a passing check.
+Updated proposal metadata and controls are sealed in
+`/workspace/migrate-backend-evidence/checkpoint3-linking-v2/`; the earlier
+evidence directory is retained unchanged.

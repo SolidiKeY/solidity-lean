@@ -25,8 +25,11 @@ def generate():
     if original.count(OLD) != 1:
         raise ValueError("expected unique frozen disjoint proof step")
     proposed = original.replace(OLD,NEW)
+    # Git accepts empty context lines without their optional leading space.
+    # Omit that space so a tracked patch also passes git diff --check.
     patch = "".join(difflib.unified_diff(original.splitlines(keepends=True),proposed.splitlines(keepends=True),
         fromfile="a/Solidity/Backend/Creation/Linking.lean",tofile="b/Solidity/Backend/Creation/Linking.lean"))
+    patch = "".join("\n" if line == " \n" else line for line in patch.splitlines(keepends=True))
     return proposed, patch, {"status":"unverified draft; no original edit or compatible-build claim",
         "source":"Solidity/Backend/Creation/Linking.lean",
         "source_sha256":hashlib.sha256(original.encode()).hexdigest(),
