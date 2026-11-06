@@ -99,8 +99,9 @@ value entries produce test errors, never fabricated semantic fuel failures.
 Validation uses explicit exceptions even under Python optimization.
 
 Remaining waits: V11/P6 concrete physical byte-world production; V09/G24.03
-statement production; memory-reference-structs whole-decoder execution
-integration; V15 canonical H68 P10 execution endpoints. These do not prevent
+statement production; V15 canonical H68 P10 execution endpoints. Whole-decoder
+execution is this lane's open G40 producer work, consumed by memory-reference-structs;
+it is not a wait on that consumer. These do not prevent
 continuing independent G40 controls or G46 branch work. G40 full composition,
 remaining fixture replay, G46.02 and G46.03 stay open. No pending exact-file
 request for these statement-preserving test additions is retained under H82.
@@ -173,3 +174,28 @@ Both reviews were read-only, with no Lean server/build/write. The remaining
 40 fixture files are unreplayed; this is not full body/native correspondence
 or a new kernel theorem. Full checkpoint gates and all original proof queues
 remain open, and the audit-member retirement barrier remains in force.
+
+## Raw-derived uint view packing
+
+RawUint.Execution now constructs every requested dynamic uint256 calldata view
+from the actual frame bytes and proves simultaneous coherence of the finite
+family. Requests may overlap or repeat, with no canonical-offset or length
+cutoff. The published MemoryOps.CalldataViewPacking producer packs these views;
+packedViews_uints derives each logical table lookup, and packedViews_transfer
+feeds those values to the existing checked intrinsic transfer under its original
+slice and destination bounds. No decoded payload, desired run or poststate is
+supplied as a premise.
+
+Controls retain the nonempty-prefix unequal words 7 and 42. Duplicate identities
+share keys; shifted overlapping spans and equal offsets with unequal lengths
+remain distinct. Independent read-only finder and skeptic reviews found no
+semantic issues; their request to scope both control axiom reports was fixed.
+New reports use only standard axioms. The stale G34 premise comment now points
+to its published structural producer.
+
+This is structural packing and intrinsic transfer, not native execution.
+Source raw-reference/logical-key transport, mixed-type and recursive aggregate
+coherence, reached-entry demand/guard composition, emitted decoder selection and
+whole G40 execution remain open. Standalone missing words still zero-pad; this
+does not assert that truncated guarded entries succeed. MRS remains a consumer
+of the open whole-decoder result.
