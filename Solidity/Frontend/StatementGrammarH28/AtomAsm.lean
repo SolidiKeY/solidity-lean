@@ -4,8 +4,8 @@ import Solidity.Frontend.StatementGrammarH28.AtomTry
 
 The Yul body enters through `YulBodyAtom` (the existing `yulBody` parser
 reads exactly `ys` as the body; a body is brace-delimited, so no lookahead
-frame is needed) and the flag list through `FlagsAtom` on `asmFlags`, the
-flag step of the statement dispatcher (definitionally the parser's own code).
+frame is needed) and the flag list through `FlagsAtom` on the parser's own
+flag-list call `sepBy1 (strArg "assembly flag")` before `)`.
 The optional `"evmasm"` dialect token is data. Both premises are proved here
 only for the empty body and the single flag `"memory-safe"`; otherwise they
 are premises (an elaborator `rfl` on the rethrow body exceeds the heartbeat

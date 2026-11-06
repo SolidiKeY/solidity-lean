@@ -1,9 +1,11 @@
 import Solidity.Frontend.StatementGrammarH28.AtomDerives
 
 /-! Controls for yield and `Derives` uniqueness of the mutual atom fragment:
-print witnesses for a block with every new statement form (try with plain
-and signature catches, assembly, contextual revert, unchecked, loops), their
-`Derives` characterisation and uniqueness, and negative controls. -/
+print witnesses for every `AtomStmtP`, `AtomItemsP`, `AtomCatchP` and
+`AtomCatchesP` constructor (blocks, loops, conditionals, `return`, `for`
+headers, try with plain and signature catches, assembly, calls, contextual
+revert, unchecked), the `Derives` characterisation and uniqueness, and
+negative controls. -/
 namespace Solidity.Frontend.StatementGrammarH28
 open Solidity.Source Solidity.Frontend.Checked
 
@@ -85,6 +87,73 @@ theorem call_print_relation :
   .stmtCons (.revertS (ps := []) (ident_prints_to "Err") empty_args_prints_to)
     (.stmtCons (.emitS (ident_prints_to "E") empty_args_prints_to) .nil)
 
+/-- Print witnesses for the loop and conditional constructors and a two-clause
+catch list: `while (c) { if (c) break; else continue; } for (;;) {}
+for (; c; v) {} for (x; c; v) {} do {} while (c); return y;` and
+`try f {} catch {} catch (bool) {}`. -/
+theorem loops_print_relation :
+    AtomItemsP (k := .body)
+      (.cons (.stmtItem (.whileStmt (.ident "c") (.blockStmt (.block (.cons (.stmtItem
+          (.ifStmt (.ident "c") .breakStmt (.some .continueStmt))) .nil)))))
+      (.cons (.stmtItem (.forStmt .none .none .none (.blockStmt (.block .nil))))
+      (.cons (.stmtItem (.forStmt .none (.some (.ident "c")) (.some (.ident "v"))
+          (.blockStmt (.block .nil))))
+      (.cons (.stmtItem (.forStmt (.some (.exprStmt (.ident "x"))) (.some (.ident "c"))
+          (.some (.ident "v")) (.blockStmt (.block .nil))))
+      (.cons (.stmtItem (.doWhile (.blockStmt (.block .nil)) (.ident "c")))
+      (.cons (.stmtItem (.returnStmt (.some (.ident "y"))))
+      (.cons (.stmtItem (.ifStmt (.ident "c") (.returnStmt .none) .none))
+      (.cons (.stmtItem (.tryStmt (.ident "f") .nil (.block .nil) (.catchPlain (.block .nil))
+          (.cons (.catchSig .none (.param (.elem .bool) .none .none) .nil (.block .nil)) .nil)))
+        .nil))))))))
+      [[.kw .while_, .punct .lparen] ++ [.ident "c"] ++ [.punct .rparen] ++
+          braces [[.kw .if_, .punct .lparen] ++ [.ident "c"] ++ [.punct .rparen] ++
+            [.kw .break_, .punct .semi] ++ [.kw .else_] ++ [.kw .continue_, .punct .semi]].flatten,
+       [.kw .for_, .punct .lparen, .punct .semi, .punct .semi, .punct .rparen] ++
+          braces ([] : List (List Tok)).flatten,
+       [.kw .for_, .punct .lparen, .punct .semi] ++ [.ident "c"] ++ [.punct .semi] ++
+          [.ident "v"] ++ [.punct .rparen] ++ braces ([] : List (List Tok)).flatten,
+       [.kw .for_, .punct .lparen] ++ [.ident "x"] ++ [.punct .semi] ++ [.ident "c"] ++
+          [.punct .semi] ++ [.ident "v"] ++ [.punct .rparen] ++ braces ([] : List (List Tok)).flatten,
+       [.kw .do_] ++ braces ([] : List (List Tok)).flatten ++ [.kw .while_, .punct .lparen] ++
+          [.ident "c"] ++ [.punct .rparen, .punct .semi],
+       [.kw .return_] ++ [.ident "y"] ++ [.punct .semi],
+       [.kw .if_, .punct .lparen] ++ [.ident "c"] ++ [.punct .rparen] ++ [.kw .return_, .punct .semi],
+       [.kw .try_] ++ [.ident "f"] ++ braces ([] : List (List Tok)).flatten ++
+          ([.kw .catch_] ++ braces ([] : List (List Tok)).flatten) ++
+          [[.kw .catch_] ++ optToks idt none ++ parens ([.elem .bool] ++ optToks idt none) ++
+            braces ([] : List (List Tok)).flatten].flatten] :=
+  .stmtCons (.whileLoop (ident_prints_to "c")
+      (.block (.stmtCons (.ifSome (ident_prints_to "c") .breakStmt .continueStmt) .nil)))
+    (.stmtCons (.forLoop (.block .nil))
+    (.stmtCons (.forAtom (ident_prints_to "c") (ident_prints_to "v") (.block .nil))
+    (.stmtCons (.forInit (simple_ident_prints_to "x") (ident_prints_to "c")
+        (ident_prints_to "v") (.block .nil))
+    (.stmtCons (.doLoop (ident_prints_to "c") (.block .nil))
+    (.stmtCons (.returnSome (ident_prints_to "y"))
+    (.stmtCons (.ifNone (ident_prints_to "c") .returnNone)
+    (.stmtCons (.tryS (ident_prints_to "f") .nil (.plain .nil)
+        (.cons (.sig (bool_param_prints_to none) nil_prints rfl .nil) .nil))
+      .nil)))))))
+
+/-- Negative: the dangling-else tree with the outer association has a print
+witness (the printer cannot tell the associations apart), but no parse
+witness: the precedence contract refuses it. -/
+theorem outer_else_print_relation :
+    AtomStmtP (k := .body)
+      (.ifStmt (.ident "c") (.ifStmt (.ident "d") (.returnStmt .none) .none)
+        (.some (.returnStmt .none)))
+      ([.kw .if_, .punct .lparen] ++ [.ident "c"] ++ [.punct .rparen] ++
+        ([.kw .if_, .punct .lparen] ++ [.ident "d"] ++ [.punct .rparen] ++
+          [.kw .return_, .punct .semi]) ++ [.kw .else_] ++ [.kw .return_, .punct .semi]) :=
+  .ifSome (ident_prints_to "c") (.ifNone (ident_prints_to "d") .returnNone) .returnNone
+
+theorem outer_else_not_parsed {ts : List Tok} {d : Nat} :
+    ¬ AtomStmt (k := .body)
+      (.ifStmt (.ident "c") (.ifStmt (.ident "d") (.returnStmt .none) .none)
+        (.some (.returnStmt .none))) ts d :=
+  fun h => absurd (atom_stmt_node h) (by decide)
+
 /-- Negative: a tree derives no other word list. -/
 theorem mixed_block_derives_nothing_else :
     ¬ (Syn.blockStmt (k := .body) (.block mixedItems)).Derives [] := by
@@ -113,4 +182,7 @@ theorem prints_to_names_tokens : ¬ Prints (Syn.ident "x") [[.ident "y"]] := by
 #print axioms call_print_relation
 #print axioms mixed_block_derives_nothing_else
 #print axioms prints_to_names_tokens
+#print axioms loops_print_relation
+#print axioms outer_else_print_relation
+#print axioms outer_else_not_parsed
 end Solidity.Frontend.StatementGrammarH28

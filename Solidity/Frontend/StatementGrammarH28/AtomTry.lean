@@ -11,8 +11,8 @@ lookahead of `postLoop`) or, with a `returns` clause, through
 `ExprAtomReturns` (stops at `returns`). The return parameters enter through
 `RetsAtom` on the existing `returnsOpt` parser and catch parameters through
 `ParamsAtom` on the existing `paramsParen` parser, each stopping at the
-following block's `{`. All four are proved here only for single-token or
-empty instances (identifiers; no return parameters; `(bool)` and
+following block's `{`. All four are proved here only for small instances
+(identifiers; no return parameters and `returns (bool)`; `(bool)` and
 `(bool x)`); otherwise they are premises. No expression, type or parameter
 completeness and no expression uniqueness (SOL-EU) is claimed. The composition
 lemmas below are the actual parser equations; the recursive coverage is in

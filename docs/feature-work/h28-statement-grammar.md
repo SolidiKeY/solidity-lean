@@ -2977,7 +2977,8 @@ lookahead proofs are separate from historical external solc fixture evidence.
 ## Moved-lane checkpoint AD: `try` and catch clauses in the mutual fragment
 
 Follow-up item 1 (2026-11-06). Merged master `5af89dce` first. `AtomTry.lean`
-states four sub-parser premises, each stopping at the next block's `{`:
+states four sub-parser premises, each stopping at the next block's `{` (or,
+for `ExprAtomReturns`, at `returns`):
 
 - `ExprAtomBrace e es a`: `expr` reads `es` as `e` before a success block
   whose body is not headed by `ident :` (`NoNamedFrame`, the call-options
@@ -3006,10 +3007,16 @@ list), `+ r` with return parameters; a clause has `b + 2` or `a + b + 2`.
 Changed statements, all in this lane's own moved-lane modules:
 `atom_stmt_coverage` takes the extra `CatchFrame x s`, and
 `atom_stmt_prefix_unique` takes catch frames for both suffixes;
-`atom_stmt_token_unique` is unchanged. Every earlier control closes with
-`Or.inl rfl` for the new frame (no catch-open statement), so no earlier
-result is weakened. `simpleHead` now also excludes `catch`, which is needed
-for the no-catch lemma; the dispatch lemma is unchanged.
+`atom_stmt_token_unique` is unchanged. The general coverage theorem is
+slightly weaker: a tree without `try` must now discharge the new frame too,
+and no lemma does so in general. Every earlier control discharges it by
+computation (`Or.inl rfl`, or `Or.inl (by cases n <;> rfl)` for the
+arbitrary-depth family). `simpleHead` now also excludes `catch`, which is
+needed for the no-catch lemma. The dispatch lemma's statement is unchanged
+in form, but its `simpleHead` premise is stronger by `catch`; the parser
+never reads a `catch`-headed simple statement. `catchOpen` matches on the
+indexed family; it is a proof-level frame, reduced only by `rfl` in
+controls, and is not on the kernel-observer (fixture) path.
 
 Controls (`tests/…/AtomTryControls.lean`): a try with a plain and a signature
 catch at derived budget 37 (coverage at every catch-free suffix, token
@@ -3026,9 +3033,9 @@ a `catch` suffix fails the frame, and a success body starting with `x :` fails
 Follow-up item 2.
 
 **Gate G0 link.** `G0Rejections` now defines `g0IsRethrow`, a twin of
-Source's `isRethrow` reading the Yul body through six `Syn.casesOn` views
-(`listViewAt` with its result family, `yulExprStmtAt`, `yulCallAt`,
-`yulPathAt`, `yulLitAt`). Lean 4.24 still generates no equation lemmas for
+Source's `isRethrow` reading the Yul body through five `Syn.casesOn` views
+(`listViewAt`, `yulExprStmtAt`, `yulCallAt`, `yulPathAt`, `yulLitAt`) and
+the `Cat`-indexed result family `listViewResult`. Lean 4.24 still generates no equation lemmas for
 `isRethrow.match_1`, but the link does not need them. The twin inspects the
 tree in the matcher's own preorder (head statement, call name, arguments,
 `add` arguments, path, literal, `mload`, the remaining tails, the outer
@@ -3036,7 +3043,9 @@ tail), so `g0IsRethrow_eq : g0IsRethrow b = isRethrow b` is proved by case
 analysis in that order: each mismatched constructor reduces both sides
 (`rfl`), and each failed string or number test (`revert`, `add`, `32`,
 `mload`) is discharged by `delta isRethrow isRethrow.match_1` and
-`dif_neg`. Axioms: `propext`, `Quot.sound`. The node twin's assembly
+`dif_neg`. Axioms: `propext`, `Quot.sound`. The proof names the
+auto-generated matcher `isRethrow.match_1`, so a toolchain re-pin must
+recheck it. The node twin's assembly
 exclusion calls `g0IsRethrow` (link `excl_assembly`), so the fixture
 observers no longer reach `isRethrow`. The four accepted assembly fixtures
 (Cases 22, 23, 24, 27) and `FixtureData` re-check by `decide +kernel`. The
@@ -3056,7 +3065,9 @@ the empty body, the single flag `"memory-safe"`. An elaborator `rfl` for the
 rethrow body exceeded the heartbeat budget (not raised), so that body is
 covered by a kernel parse of the whole statement in the controls
 (`rethrow_asm_kernel`, which also checks through the linked twin that it is
-not rejected). `AtomStmt.asm` has budget `a + 1`. A refusal control covers an
+not rejected). `AtomStmt.asm` has budget `a + 1`. The accepted assembly
+fixtures (Cases 22, 23, 24, 27) are therefore not covered by the `AtomStmt`
+relation; their parse is the fixture evidence and the kernel control. A refusal control covers an
 unknown dialect string.
 
 ## Moved-lane checkpoint AF: revert-headed statements
@@ -3073,7 +3084,8 @@ tokens.
 
 ## Moved-lane checkpoint AG: `Derives` uniqueness for the mutual fragment
 
-Follow-up item 4 (G11 completion within the fragment). `AtomDerives.lean`
+Follow-up item 4: yield uniqueness among statements of the mutual fragment
+that carry both a parse and a print witness. `AtomDerives.lean`
 states the printer side of each atom as `Prints t parts` (the existing printer
 yields `parts` and consumes no layout choice) or `PrintsTo t ts` (its yield
 flattens to `ts`). The print relations `AtomStmtP`, `AtomItemsP`,
@@ -3089,10 +3101,45 @@ statements, empty arguments, `bool` parameters, empty lists.
 
 Controls (`tests/…/AtomDerivesControls.lean`): a block holding a try with a
 signature catch, `revert;`, `assembly {}` and an `unchecked` block, with both
-witnesses, its `Derives` set, uniqueness against every fragment tree, and the
-printer's tokens computed by the kernel; print witnesses for `try … returns`,
-flagged assembly, `revert Err();` and `emit E();`; negative controls for
-other words and a wrong print premise.
+witnesses, its `Derives` set, uniqueness against every tree with both
+witnesses, and the printer's tokens computed by the kernel (the printer is
+part of the system under test, like the parser); print witnesses for every
+remaining constructor (loops, conditionals, `return e;`, all `for` headers,
+a two-clause catch list, `try … returns`, flagged assembly, `revert Err();`,
+`emit E();`); negative controls for other words, a wrong print premise, and
+the outer dangling-else association, which has a print witness but no parse
+witness (`outer_else_not_parsed`).
+
+Not claimed: a derivation of `AtomStmtP` from `AtomStmt` plus atom printer
+premises, and item- or clause-level uniqueness corollaries.
 
 Not claimed: printer premises beyond the stated instances, and any
 expression-level printing or parsing fact.
+
+### Reviews of moved-lane checkpoints AD–AG
+
+Read-only finder and skeptic reviews (no Lean server, no builds) of
+`8c78af2a..a1003dd0`. Skeptic verdict: PASS-with-fixes. Neither review found a
+soundness bug. Both confirmed that every new premise sits on a sub-parser or
+sub-printer, that `catchOpen` covers every catch-open statement form, that
+`g0IsRethrow` checks the same shape as `isRethrow` and is Gate-G0-compliant,
+and that no lane observer still reaches `isRethrow`. They also confirmed that
+`AtomStmtP` mirrors all 19 `AtomStmt` constructors and that every new parse
+constructor is inhabited. Fixes:
+
+- Finder: the module-map row for `G0Rejections` still named `isRethrow` as
+  a residual; the `AtomAsm` docstring cited a nonexistent `asmFlags`. Both
+  are fixed. Nits are fixed: view count, the `returns` stop, the
+  `bool_rets_atom` instance, the arbitrary-depth frame.
+- Skeptic 1: most `AtomStmtP` constructors had no control. Added
+  `loops_print_relation` and the dangling-else pair
+  `outer_else_print_relation`/`outer_else_not_parsed`.
+- Skeptic 2: the item-4 claim was too strong. It is reworded to uniqueness
+  among trees with both witnesses, and the non-claims are listed.
+- Skeptic 3 and 4: the coverage theorem's weakening and the stronger
+  `simpleHead` premise are now stated, not denied.
+- Skeptic 5–7: the assembly fixtures are outside the relation; `catchOpen`
+  is not on the observer path; `g0IsRethrow_eq` depends on the generated
+  matcher name. All three are recorded.
+- Skeptic 8, a possible "no goals" after `prints_simp`, was refuted: the file
+  checks clean.
