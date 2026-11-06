@@ -6,8 +6,8 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 DIRECTORY = ROOT / "Solidity/Backend/Passes"
-DECL = re.compile(r"^\s*(?:private\s+|protected\s+|noncomputable\s+)*(def|abbrev|theorem|lemma|example|structure|inductive)\s+([^\s:{(]+)")
-CASE = re.compile(r"^\s*\|\s*(legacy|viaIR)\s*=>")
+DECL = re.compile(r"^\s*(?:@\[[^]]+\]\s*)*(?:private\s+|protected\s+|noncomputable\s+)*(def|abbrev|theorem|lemma|example|structure|inductive)\s+([^\s:{(]+)")
+CASE = re.compile(r"^\s*\|\s*\.?(legacy|viaIR)\s*=>")
 for operation in ("Addition", "Multiplication", "Subtraction"):
     for kind in ("Pass", "Controls"):
         path = DIRECTORY / f"Assignment{operation}{kind}.lean"
