@@ -387,6 +387,187 @@ theorem helper_run (j : Nat) (b e : Nat) (mx : Word) (eW : e < 2 ^ 256) (bW : b 
   rw [← one_word] at h
   exact h
 
+/-! ## `checked_exp_unsigned`, statement by statement -/
+
+abbrev LU : List String := ["base", "exponent", "max", "power"]
+abbrev EU : List FnSig := EF
+
+def u1 : Stmt EU ⟨true, false⟩ LU :=
+  (.if_ (.op (.evm (.pure .«iszero»)) (.cons (.var "exponent" (.there .here)) .nil)) (.mk [] .nil (.stmt (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.lit ⟨.num 1, 1, rfl⟩)) (.stmt .leave .nil))))
+
+def u2 : Stmt EU ⟨true, false⟩ LU :=
+  (.if_ (.op (.evm (.pure .«iszero»)) (.cons (.var "base" .here) .nil)) (.mk [] .nil (.stmt (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.lit ⟨.num 0, 0, rfl⟩)) (.stmt .leave .nil))))
+
+def u3 : Stmt EU ⟨true, false⟩ LU :=
+  (.switch (.var "base" .here) (.cons ⟨.num 1, 1, rfl⟩ (.mk [] .nil (.stmt (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.lit ⟨.num 1, 1, rfl⟩)) (.stmt .leave .nil))) (.cons ⟨.num 2, 2, rfl⟩ (.mk [] .nil (.stmt (.if_ (.op (.evm (.pure .«gt»)) (.cons (.var "exponent" (.there .here)) (.cons (.lit ⟨.num 255, 255, rfl⟩) .nil))) (.mk [] .nil (.stmt (.discard (.call (.there .here) .nil)) .nil))) (.stmt (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.op (.evm (.pure .«exp»)) (.cons (.lit ⟨.num 2, 2, rfl⟩) (.cons (.var "exponent" (.there .here)) .nil)))) (.stmt (.if_ (.op (.evm (.pure .«gt»)) (.cons (.var "power" (.there (.there (.there .here)))) (.cons (.var "max" (.there (.there .here))) .nil))) (.mk [] .nil (.stmt (.discard (.call (.there .here) .nil)) .nil))) (.stmt .leave .nil))))) .nil)))
+
+def u4 : Stmt EU ⟨true, false⟩ LU :=
+  (.if_ (.op (.evm (.pure .«or»)) (.cons (.op (.evm (.pure .«and»)) (.cons (.op (.evm (.pure .«lt»)) (.cons (.var "base" .here) (.cons (.lit ⟨.num 11, 11, rfl⟩) .nil))) (.cons (.op (.evm (.pure .«lt»)) (.cons (.var "exponent" (.there .here)) (.cons (.lit ⟨.num 78, 78, rfl⟩) .nil))) .nil))) (.cons (.op (.evm (.pure .«and»)) (.cons (.op (.evm (.pure .«lt»)) (.cons (.var "base" .here) (.cons (.lit ⟨.num 307, 307, rfl⟩) .nil))) (.cons (.op (.evm (.pure .«lt»)) (.cons (.var "exponent" (.there .here)) (.cons (.lit ⟨.num 32, 32, rfl⟩) .nil))) .nil))) .nil))) (.mk [] .nil (.stmt (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.op (.evm (.pure .«exp»)) (.cons (.var "base" .here) (.cons (.var "exponent" (.there .here)) .nil)))) (.stmt (.if_ (.op (.evm (.pure .«gt»)) (.cons (.var "power" (.there (.there (.there .here)))) (.cons (.var "max" (.there (.there .here))) .nil))) (.mk [] .nil (.stmt (.discard (.call (.there .here) .nil)) .nil))) (.stmt .leave .nil)))))
+
+def u5 : Stmt EU ⟨true, false⟩ LU :=
+  (.assign [⟨"power", (.there (.there (.there .here)))⟩, ⟨"base", .here⟩] (.call (.there (.there (.there .here))) (.cons (.lit ⟨.num 1, 1, rfl⟩) (.cons (.var "base" .here) (.cons (.var "exponent" (.there .here)) (.cons (.var "max" (.there (.there .here))) .nil))))))
+
+def u6 : Stmt EU ⟨true, false⟩ LU :=
+  (.if_ (.op (.evm (.pure .«gt»)) (.cons (.var "power" (.there (.there (.there .here)))) (.cons (.op (.evm (.pure .«div»)) (.cons (.var "max" (.there (.there .here))) (.cons (.var "base" .here) .nil))) .nil))) (.mk [] .nil (.stmt (.discard (.call (.there .here) .nil)) .nil)))
+
+def u7 : Stmt EU ⟨true, false⟩ LU :=
+  (.assign [⟨"power", (.there (.there (.there .here)))⟩] (.op (.evm (.pure .«mul»)) (.cons (.var "power" (.there (.there (.there .here)))) (.cons (.var "base" .here) .nil))))
+
+theorem unsigned_eq : expExpUnsigned =
+    .mk [] .nil (.stmt u1 (.stmt u2 (.stmt u3 (.stmt u4 (.stmt u5 (.stmt u6 (.stmt u7 .nil))))))) := rfl
+
+def uv (b e mx p : Word) : Vals LU := .cons b (.cons e (.cons mx (.cons p .nil)))
+
+theorem block_assign_leave (k : Nat) {F : List FnSig} {l : Bool} {L : List String} (E : FunEnv F) {n : String}
+    (t : Mem L n) (lit : Lit) (vs : Vals L) (s : σ) :
+    evalBlock (c := ⟨true, l⟩) M ctx (k + 5) E (.mk [] .nil (.stmt (.assign [⟨n, t⟩] (.lit lit)) (.stmt .leave .nil))) vs s =
+      .ok (s, vs.set t lit.value, .leave) := by
+  rw [block_empty, items_stmt_normal M ctx (k + 3) _ _ _ _ _ _ _ (assign_of M ctx (k + 2) _ _ _ _ _ _ (lit_gen M ctx _ _ _ _ _)),
+    items_stmt_flow M ctx (k + 2) _ _ _ _ _ _ _ _ (leave_stmt M ctx (k + 1) _ _ _) (by decide)]
+
+theorem switch_of (k : Nat) {F : List FnSig} {c : Ctl} {L : List String} (E : FunEnv F) (e : Expr F L 1)
+    (cs : Cases F c L) (vs : Vals L) (s : σ) (v : Word) (h : evalExpr M ctx k E e vs s = .ok (s, fun _ => v)) :
+    evalStmt M ctx (k + 1) E (.switch e cs) vs s =
+      match cs.select v with
+      | some b => evalBlock M ctx k E b vs s
+      | none => .ok (s, vs, .normal) := by
+  simp only [evalStmt, h, run_ok_bind]
+  rcases cs.select v with _ | b
+  · rfl
+  · rfl
+
+theorem iszero_ne (w : Word) (h : w.val = 0) : Solidity.Yul.Pure.eval .«iszero» (fun _ => w) ≠ 0 := by
+  rw [pure_iszero, h]
+  decide
+
+theorem iszero_eq (w : Word) (h : w.val ≠ 0) : Solidity.Yul.Pure.eval .«iszero» (fun _ => w) = 0 := by
+  rw [pure_iszero, (truth_eq_zero _).mpr (beq_eq_false_iff_ne.mpr h)]
+
+theorem u1_zero (k : Nat) (b e mx p : Word) (s : σ) (h : e.val = 0) :
+    evalStmt M ctx (k + 10) expE1 u1 (uv b e mx p) s = .ok (s, uv b e mx 1, .leave) := by
+  rw [u1, uv, if_of_ne M ctx (k + 9) _ _ _ _ _ _ (op1_gen M ctx _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (k + 5)) _]
+  · rw [block_assign_leave M ctx (k + 4)]
+    rfl
+  · exact iszero_ne _ h
+
+theorem u1_ne (k : Nat) (b e mx p : Word) (s : σ) (h : e.val ≠ 0) :
+    evalStmt M ctx (k + 10) expE1 u1 (uv b e mx p) s = .ok (s, uv b e mx p, .normal) := by
+  rw [u1, uv, if_of_eq M ctx (k + 9) _ _ _ _ _ _ (op1_gen M ctx _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (k + 5)) _]
+  exact iszero_eq _ h
+
+theorem u2_zero (k : Nat) (b e mx p : Word) (s : σ) (h : b.val = 0) :
+    evalStmt M ctx (k + 10) expE1 u2 (uv b e mx p) s = .ok (s, uv b e mx 0, .leave) := by
+  rw [u2, uv, if_of_ne M ctx (k + 9) _ _ _ _ _ _ (op1_gen M ctx _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (k + 5)) _]
+  · rw [block_assign_leave M ctx (k + 4)]
+    rfl
+  · exact iszero_ne _ h
+
+theorem u2_ne (k : Nat) (b e mx p : Word) (s : σ) (h : b.val ≠ 0) :
+    evalStmt M ctx (k + 10) expE1 u2 (uv b e mx p) s = .ok (s, uv b e mx p, .normal) := by
+  rw [u2, uv, if_of_eq M ctx (k + 9) _ _ _ _ _ _ (op1_gen M ctx _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (k + 5)) _]
+  exact iszero_eq _ h
+
+theorem lit_ne (n : Nat) (w : Word) (h : w.val ≠ n) (nW : n < 2 ^ 256) : ¬ ((OfNat.ofNat n : Word) = w) := by
+  intro eq
+  apply h
+  rw [← eq]
+  exact Nat.mod_eq_of_lt nW
+
+theorem u3_one (k : Nat) (b e mx p : Word) (s : σ) (h : b.val = 1) :
+    evalStmt M ctx (k + 10) expE1 u3 (uv b e mx p) s = .ok (s, uv b e mx 1, .leave) := by
+  have hb : b = 1 := Fin.ext h
+  subst hb
+  rw [u3, uv, switch_of M ctx (k + 9) _ _ _ _ _ _ (var_gen M ctx _ _ _ _ (k + 8))]
+  simp only [Vals.get_here, Cases.select, ↓reduceIte]
+  rw [block_assign_leave M ctx (k + 4)]
+  rfl
+
+theorem u3_other (k : Nat) (b e mx p : Word) (s : σ) (h1 : b.val ≠ 1) (h2 : b.val ≠ 2) :
+    evalStmt M ctx (k + 10) expE1 u3 (uv b e mx p) s = .ok (s, uv b e mx p, .normal) := by
+  rw [u3, uv, switch_of M ctx (k + 9) _ _ _ _ _ _ (var_gen M ctx _ _ _ _ (k + 8))]
+  simp only [Vals.get_here, Cases.select, lit_ne 1 b h1 (by decide), lit_ne 2 b h2 (by decide), ↓reduceIte]
+
+theorem lit_val (n : Nat) (h : n < 2 ^ 256) : (OfNat.ofNat n : Word).val = n := Nat.mod_eq_of_lt h
+
+theorem pure_lt (xs : Fin 2 → Word) :
+    Solidity.Yul.Pure.eval .«lt» xs = Solidity.Yul.truth ((xs 0).val < (xs 1).val) := rfl
+
+theorem gt_bne (a b : Word) : (Solidity.Yul.Pure.eval .«gt» (word2 a b) != 0) = decide (b.val < a.val) := by
+  rw [pure_gt, word2_zero, word2_one, truth_bne]
+
+theorem panicIf_false (code : Word) (s : σ) : panicIf M false code s = .ok s := rfl
+theorem panicIf_true (code : Word) (s : σ) : panicIf M true code s = panicRun M code s := rfl
+
+theorem word_le_max (mx w : Word) (hmx : mx.val = maxWord) : decide (mx.val < w.val) = false := by
+  have := w.isLt
+  rw [hmx]
+  exact decide_eq_false (by unfold maxWord; omega)
+
+/-- `case 2` of the switch: `2 ** e`, with the panic for `e > 255`. -/
+theorem u3_two (k : Nat) (b e mx p : Word) (s : σ) (h : b.val = 2) (hmx : mx.val = maxWord) :
+    (255 < e.val → ∃ cont, evalStmt M ctx (k + 45) expE1 u3 (uv b e mx p) s = panicRun M 0x11 s >>= cont) ∧
+    (¬ 255 < e.val → evalStmt M ctx (k + 45) expE1 u3 (uv b e mx p) s =
+      .ok (s, uv b e mx (Solidity.Yul.Pure.eval .«exp» (word2 2 e)), .leave)) := by
+  have hb : b = 2 := Fin.ext h
+  subst hb
+  rw [u3, uv, switch_of M ctx (k + 44) _ _ _ _ _ _ (var_gen M ctx _ _ _ _ (k + 43))]
+  simp only [Vals.get_here, Cases.select, lit_ne 1 2 (by decide) (by decide), ↓reduceIte]
+  rw [block_empty, items_stmt_map M ctx (k + 42) _ _ _ _ _ _ _
+    (exp_if_panic M ctx (k + 25) _ _ _ rfl _ _ _
+      (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (lit_gen M ctx _ _ _ _) (k + 36)))]
+  simp only [Vals.get_here, Vals.get_there, gt_bne, lit_val 255 (by decide)]
+  constructor
+  · intro big
+    rw [decide_eq_true big, panicIf_true]
+    exact ⟨_, rfl⟩
+  · intro le
+    rw [decide_eq_false le, panicIf_false, run_ok_bind,
+      items_stmt_normal M ctx (k + 41) _ _ _ _ _ _ _ (assign_of M ctx (k + 40) _ _ _ _ _ _
+        (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (lit_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _) (k + 35))),
+      items_stmt_map M ctx (k + 40) _ _ _ _ _ _ _
+        (exp_if_panic M ctx (k + 23) _ _ _ rfl _ _ _
+          (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _) (k + 34)))]
+    simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there, gt_bne, word_le_max _ _ hmx,
+      panicIf_false, run_ok_bind]
+    rw [items_stmt_flow M ctx (k + 39) _ _ _ _ _ _ _ _ (leave_stmt M ctx (k + 38) _ _ _) (by decide)]
+    rfl
+
+/-- The small-range shortcut: `exp(base, exponent)` directly. -/
+theorem u4_run (k : Nat) (b e mx p : Word) (s : σ) (hmx : mx.val = maxWord) :
+    let small := (decide (b.val < 11) && decide (e.val < 78)) || (decide (b.val < 307) && decide (e.val < 32))
+    (small = true → evalStmt M ctx (k + 45) expE1 u4 (uv b e mx p) s =
+      .ok (s, uv b e mx (Solidity.Yul.Pure.eval .«exp» (word2 b e)), .leave)) ∧
+    (small = false → evalStmt M ctx (k + 45) expE1 u4 (uv b e mx p) s = .ok (s, uv b e mx p, .normal)) := by
+  intro small
+  have hc := op2_gen M ctx expE1 .«or» _ _ (uv b e mx p) s _ _ 9
+    (op2_gen M ctx _ .«and» _ _ _ _ _ _ 5
+      (op2_gen M ctx _ .«lt» _ _ _ _ _ _ 1 (var_gen M ctx _ (n := "base") .here _ _) (lit_gen M ctx _ ⟨.num 11, 11, rfl⟩ _ _))
+      (op2_gen M ctx _ .«lt» _ _ _ _ _ _ 1 (var_gen M ctx _ (n := "exponent") (.there .here) _ _) (lit_gen M ctx _ ⟨.num 78, 78, rfl⟩ _ _)))
+    (op2_gen M ctx _ .«and» _ _ _ _ _ _ 5
+      (op2_gen M ctx _ .«lt» _ _ _ _ _ _ 1 (var_gen M ctx _ (n := "base") .here _ _) (lit_gen M ctx _ ⟨.num 307, 307, rfl⟩ _ _))
+      (op2_gen M ctx _ .«lt» _ _ _ _ _ _ 1 (var_gen M ctx _ (n := "exponent") (.there .here) _ _) (lit_gen M ctx _ ⟨.num 32, 32, rfl⟩ _ _)))
+    (k + 31)
+  simp only [uv, Vals.get_here, Vals.get_there, pure_or, pure_and, pure_lt, word2_zero, word2_one,
+    lit_val 11 (by decide), lit_val 78 (by decide), lit_val 307 (by decide), lit_val 32 (by decide),
+    truth_and, truth_or] at hc
+  constructor
+  · intro yes
+    rw [u4, uv, if_of_ne M ctx (k + 44) _ _ _ _ _ _ hc _]
+    · rw [block_empty, items_stmt_normal M ctx (k + 42) _ _ _ _ _ _ _ (assign_of M ctx (k + 41) _ _ _ _ _ _
+        (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _) (k + 36))),
+        items_stmt_map M ctx (k + 41) _ _ _ _ _ _ _
+          (exp_if_panic M ctx (k + 24) _ _ _ rfl _ _ _
+            (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _) (k + 35)))]
+      simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there, gt_bne, word_le_max _ _ hmx,
+        panicIf_false, run_ok_bind]
+      rw [items_stmt_flow M ctx (k + 40) _ _ _ _ _ _ _ _ (leave_stmt M ctx (k + 39) _ _ _) (by decide)]
+      rfl
+    · intro z
+      exact absurd ((truth_eq_zero _).mp z) (fun h => Bool.noConfusion (yes.symm.trans h))
+  · intro no
+    rw [u4, uv, if_of_eq M ctx (k + 44) _ _ _ _ _ _ hc _]
+    exact (truth_eq_zero _).mpr no
+
 end
 
 end Solidity.SolcValidation.IrSyntax
