@@ -457,3 +457,26 @@ references in `h62-6-migrate-theory.md`, the audit-abi-world census test,
 `packet-panic/H71-CANDIDATE.md` and generic-structuredflow registration. None
 is in this scanner document. Its log is `postmerge-timing/doc-paths.log` in
 the evidence directory; the repository-wide gate remains open.
+
+## Selected symlink and nonregular input controls
+
+Selected `.lean` paths are now kept as logical paths. A selected symlink,
+symlinked parent, nonregular file or path-escape pattern makes the scan
+incomplete instead of silently collapsing or dropping that path. For
+recursive patterns, a non-following walk checks the literal prefix and
+reports symlinks and walk errors, including dangling links. This is a
+conservative refusal: a symlink under the prefix may be unrelated to the
+actual glob. Incremental added/removed/changed lists remain null on such
+errors. Nonrecursive wildcard traversal can still omit an inaccessible
+subdirectory without a reported error; checks and reads are not race-proof
+against concurrent replacement. Full selection completeness is not claimed.
+
+Finder and skeptic reviews identified the recursive directory, dangling link,
+nonregular-file and parent escape cases; controls cover them. The final Python
+suite passed 35 tests. A same-tree bounded scan took 97.220 seconds before
+and 97.746 seconds after (+0.54%), with 6,932 inputs and no scan errors. The
+complete before/after outputs agreed after normalizing the scanner hash.
+Commands, timing and differential logs are outside Git in
+`/workspace/h62-duplication-scanner-evidence/postmerge-timing/`. The earlier
+repository documentation-path gate remains failed on the five unrelated
+published-tree references recorded above.

@@ -329,6 +329,59 @@ class ScannerControls(unittest.TestCase):
             self.assertIn("previous candidate comparison", errors.getvalue())
             self.assertNotIn("Traceback", errors.getvalue())
 
+    def test_selected_symlinks_fail_without_incremental_removals(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("def a : Nat := 1\n")
+            (root / "B.lean").write_text("def b : Nat := 2\n")
+            command = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]
+            baseline_bytes = subprocess.check_output(command)
+            baseline = root / "baseline.json"
+            baseline.write_bytes(baseline_bytes)
+            (root / "B.lean").unlink()
+            (root / "B.lean").symlink_to("A.lean")
+            (root / "Missing.lean").symlink_to("does-not-exist.lean")
+            result = subprocess.run(command + pinned(baseline), capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertEqual([Path(e["path"]).name for e in report["errors"]], ["B.lean", "Missing.lean"])
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            self.assertIsNone(report["incremental"]["removed"])
+            self.assertEqual([p["path"] for p in report["inputs"]], ["A.lean"])
+            (root / "dir").mkdir()
+            (root / "dir" / "C.lean").write_text("def c : Nat := 3\n")
+            (root / "alias").symlink_to("dir", target_is_directory=True)
+            result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("symlink", json.loads(result.stdout)["errors"][0]["reason"])
+
+    def test_recursive_symlinks_and_nonregular_files_are_incomplete(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "actual").mkdir()
+            (root / "actual" / "A.lean").write_text("def a : Nat := 0\n")
+            (root / "alias").symlink_to("actual", target_is_directory=True)
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "**/*.lean"]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            report = json.loads(result.stdout)
+            self.assertTrue(any("symlink directory" in e["reason"] for e in report["errors"]))
+            self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+            (root / "alias").unlink()
+            (root / "dangling-directory").symlink_to("gone", target_is_directory=True)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(any("symlink" in e["reason"] for e in json.loads(result.stdout)["errors"]))
+            (root / "dangling-directory").unlink()
+            import os
+            os.mkfifo(root / "Pipe.lean")
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertTrue(any("not a regular file" in e["reason"] for e in json.loads(result.stdout)["errors"]))
+            result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "../*.lean"], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("patterns must stay within the root", result.stderr)
+
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

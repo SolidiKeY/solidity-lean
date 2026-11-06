@@ -5,7 +5,9 @@ import fnmatch
 import hashlib
 import hmac
 import json
+import os
 import re
+import stat
 from pathlib import Path
 
 DECL = re.compile(r"(?m)^[ \t]*(?:@\[[^\n]*\][ \t]*)?(?:private[ \t]+|protected[ \t]+|noncomputable[ \t]+|local[ \t]+|partial[ \t]+|unsafe[ \t]+)*(theorem|lemma|def|abbrev|opaque|example|instance|structure|inductive|class|axiom|constant)(?=[\s(:{\[])(?:[ \t]+([^\s(:{\[]+))?")
@@ -299,6 +301,8 @@ def main():
     root = args.root.resolve()
     if (args.previous is None) != (args.previous_sha256 is None):
         parser.error("--previous and --previous-sha256 must be supplied together")
+    if any(Path(pat).is_absolute() or ".." in Path(pat).parts for pat in args.paths):
+        parser.error("patterns must stay within the root")
     selection = dict(root=str(root), patterns=sorted(set(args.paths)))
     previous = None
     old_inputs, old_statements, old_bodies = {}, {}, {}
@@ -338,10 +342,63 @@ def main():
                     raise ValueError("malformed previous " + field)
         except (OSError, UnicodeError, ValueError, RecursionError) as exc:
             parser.error("previous report: " + str(exc))
-    matched = {pat: sorted(f.resolve() for f in root.glob(pat) if f.is_file() and f.suffix == ".lean") for pat in args.paths}
+    # Keep logical selected paths. A leaf or traversed parent symlink would
+    # otherwise collapse aliases and attribute declarations to the target.
+    matched, selection_errors, checked_components = {}, {}, {}
+    for pat in args.paths:
+        selected = []
+        # pathlib's recursive glob does not descend into directory symlinks.
+        # Refuse such directories beneath the literal prefix rather than
+        # silently describing a selection as complete.
+        parts = Path(pat).parts
+        if "**" in parts:
+            prefix = []
+            for part in parts:
+                if any(c in part for c in "*?["):
+                    break
+                prefix.append(part)
+            anchor = root.joinpath(*prefix)
+            for ancestor in (anchor, *anchor.parents):
+                if ancestor == root:
+                    break
+                if ancestor.is_symlink():
+                    selection_errors[str(ancestor)] = "recursive selection traverses a symlink"
+            def walk_error(exc):
+                selection_errors[str(exc.filename)] = str(exc)
+            if anchor.is_dir() and not anchor.is_symlink():
+                for directory, dirs, names in os.walk(anchor, followlinks=False, onerror=walk_error):
+                    for dirname in list(dirs):
+                        child = Path(directory) / dirname
+                        if child.is_symlink():
+                            selection_errors[str(child)] = "recursive selection omits a symlink directory"
+                            dirs.remove(dirname)
+                    # Broken directory links occur in os.walk's files list;
+                    # conservatively refuse every link under the prefix.
+                    for name in names:
+                        child = Path(directory) / name
+                        if child.is_symlink():
+                            selection_errors[str(child)] = "recursive selection encounters a symlink"
+        for path in root.glob(pat):
+            if path.suffix != ".lean":
+                continue
+            try:
+                rel = path.relative_to(root)
+                component = root
+                for part in rel.parts:
+                    component = component / part
+                    if component not in checked_components:
+                        checked_components[component] = component.lstat().st_mode
+                    if stat.S_ISLNK(checked_components[component]):
+                        raise ValueError("selected path traverses a symlink: " + str(component))
+                if not stat.S_ISREG(checked_components[path]):
+                    raise ValueError("selected .lean path is not a regular file")
+                selected.append(path)
+            except (OSError, ValueError) as exc:
+                selection_errors[str(path)] = str(exc)
+        matched[pat] = sorted(selected)
     unmatched = sorted(pat for pat, paths in matched.items() if not paths)
     files = sorted({f for paths in matched.values() for f in paths})
-    rows, errors, inputs = [], [], []
+    rows, errors, inputs = [], [dict(path=p, reason=selection_errors[p]) for p in sorted(selection_errors)], []
     owners = json.loads(args.owners.read_text()) if args.owners else {}
     if not isinstance(owners, dict) or not all(isinstance(k, str) and isinstance(v, str) and v for k, v in owners.items()):
         parser.error("owners must be a path-to-owner JSON object")
