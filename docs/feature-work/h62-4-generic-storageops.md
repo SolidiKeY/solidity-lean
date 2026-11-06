@@ -308,3 +308,19 @@ permission claimed. Deterministic plan reproduction passes. The fixture-plan
 tests check full coverage and reject five corruptions: case omission,
 duplication, changed result, removed fixture and fabricated proved equivalence.
 No Lean validation was run for this planning-only follow-up.
+
+## H82 successor: deterministic frozen plan tests
+
+The authenticated final member head was merged into the surviving storage branch.
+The original plan test read the edited working tree while comparing the frozen
+manifest, so it correctly rejected inventory drift before exercising the plan
+checks. The test now obtains its exact pinned family from Git into a temporary
+tree and binds both inventory and declaration-body reads to that tree. The
+classifier, acceptance commands, manifests and frozen counts are unchanged.
+A corruption test confirms that a changed inventory hash is still rejected.
+
+All 26 generic tooling tests pass; the ten inherited audit tooling tests also
+pass. The earlier live-drift failure and the intermediate mixed-tree failure
+are retained. These are scanner/plan tests, not Lean proofs, witness coverage,
+semantic correspondence or acceptance of the modified live family. All 1623
+claim proof obligations and the original trust/migration holds remain open.
