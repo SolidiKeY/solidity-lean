@@ -2069,3 +2069,544 @@ General compound/item framing, broader true coverage, repository final gates
 and whole-scope acceptance/reviews remain pending. SOL-EU stays excluded and
 SG-CEX-01/02 remain OPEN/REFUTED. Shared generated roots/maps/trust inventories
 remain coordinator-owned.
+
+
+## Checkpoint Y: global atom continuation-token absence
+
+H55-H58 file reservations are honored: all edits stay in the original exclusive
+statement-grammar paths; no reserved Yul file or producer was edited and no HOLD
+was entered. Existing frozen goal and original base are retained. Work starts
+from integrated master `70845978ab616a63b13d0dee8b31b28893ccf591`.
+
+ControlFreePr, ControlFreeAtoms and SyntaxControlFree prove that successful
+expression/type/argument/parameter/declaration/simple yields contain no actual
+else, catch or unchecked keyword tokens anywhere, strengthening the earlier
+head-only fact. The existing boundaryToken predicate and SemiFreeCat footprint
+are reused unchanged. The universal induction covers all 42 atom constructors
+and recursive nil/cons/none/some wrappers over existing Syn. Only successful
+actual yields and the existing category footprint are premises; no successful
+parse, expression uniqueness or new source/precedence restriction is assumed.
+The three keywords are excluded throughout every flattened token segment,
+including arbitrary expression subtrees and successful layout choices.
+
+ControlFree is a token-list Prop relation with inhabited empty/token/append
+constructors, not an untyped AST. Literal fragment guards and function-type
+attribute arrangements are the existing printer computations. The generic
+keyword lemma states its exact boundaryToken=false side condition, discharged
+for every scalar producer keyword. Punctuation is neutral, including semicolon;
+this distinguishes the new property from SemiFree. Existing semicolon proofs,
+producers, interfaces and budgets were not refactored or changed. New indexed
+syntax induction constructs proofs only; new computational controls match only
+on parameter-only yield options, never on Syn.
+
+ControlFreeControls enumerates actual successful nonempty yields for all 42
+constructors with exact Ctor inventories, all 5 literal classes, four generic
+list/option wrappers, both mapping-key forms, optional array/location/name/init
+fields, empty arguments/tuples and both function-attribute orders. Real else,
+catch and unchecked tokens are negative controls. Identifiers with those
+spellings and fragmented literal payload bytes remain data. An actual inhabited
+if/else yield contains a control keyword and is rejected by ControlFree; invalid
+fragment/layout choices remain refused. This proves token absence, not lexical
+validity, general statement segmentation, parser completeness or whole-language
+uniqueness. No new external solc fixture or compiler correctness claim is made.
+
+The committed audit inventory is self-contained:
+
+| Committed source | Explicit audit entries |
+|---|---:|
+| [ControlFreePr.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreePr.lean) | 21 source theorems |
+| [ControlFreeAtoms.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreeAtoms.lean) | 18 source theorems |
+| [SyntaxControlFree.lean](../../Solidity/Frontend/StatementGrammarH28/SyntaxControlFree.lean) | 4 source theorems |
+| `ControlFree.empty`, `.token`, `.append` | 3 relation constructors |
+| `ControlFreeParts` | 1 predicate definition |
+| [ControlFreeControls.lean](../../tests/h28-sol/statement-grammar/ControlFreeControls.lean) | 23 control theorems |
+| Total | 70 constants: 43 source theorems, 3 constructors, 1 definition, 23 control theorems |
+
+[ControlFreePublicAxioms.lean](../../tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean)
+lists every source signature and axiom query. The control file lists its own
+axiom queries and kernel-checked constructor inventories: 29 expression,
+5 type-name, 2 call-argument, 1 named-argument, 1 parameter, 1 variable-declaration
+and 3 simple-statement constructors, totaling 42. Nil, cons, none and some are
+four additional generic closure cases. These committed declarations and tests
+are the inventory; reviewing it does not require a VM-only JSON file.
+
+At checkpoint head `1b1391e3fa6ff56edd3ef8e5fad7ef64eca1c3c5`, all 96 VM checks
+passed (93 owned builds, controls, public audit and KeySort). The complete audit
+reported 56 constants without axioms, 5 using `propext`, and 9 using `propext`
+and `Quot.sound`. Lean was 4.24.0 and Lake 5.0.0-src+797c613. A line-oriented
+evidence collector initially rejected one wrapped axiom printout; the complete
+multiline output was then parsed against all 70 expected names without changing
+source, rerunning passed checks or relabeling a failed Lean gate.
+
+On the prepared task VM, reproduce the focused checks with:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreePr
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.SyntaxControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+The following run IDs and `/workspace` paths locate historical execution
+receipts on that VM. They supplement the committed inventory above.
+Per-file source diagnostics pass: run-1793932818689100266,
+run-1793932857929873010 and run-1793932917015203868. Final controls diagnostics:
+run-1793933442590916776. Builds have no new warnings and maxHeartbeats is unchanged.
+Initial setup run-1793932748629497010 failed before any source edit/check because
+the documented temporary lock directory was absent after restart. The directory
+was recreated; all subsequent writes/checks acquired the same documented lock.
+That failed setup is retained and never counted as a proof pass.
+
+Separate read-only finder and skeptic source reviews pass with no findings;
+neither used Lean, servers, builds, solc or writes. Final acceptance additionally
+requires exact committed-head VM builds/controls/axiom/KeySort gates and evidence
+review. Results, exact commands/exits/timing/RSS, hashes, cache receipt and sealed
+handoff are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-locations.json`.
+New modules have only local registration rows; no generated roots, shared maps
+or trust inventories are authored. H41 packs stay on the VM for coordinator
+pull with path/SHA; never run ship-cache.sh here.
+
+Original G11 remains partial: general compound/item framing and association,
+remaining true parser coverage, full repository gates and whole-scope acceptance
+remain open. SOL-EU remains excluded and SG-CEX-01/02 remain OPEN/REFUTED.
+Existing shared inventory/full-build holds remain separate. No goal was created,
+reset, replaced or marked complete by this checkpoint.
+
+
+## Checkpoint Z — inline-Yul continuation boundaries
+
+Adopted published master `38d38d87e74376d6b95daf9b792fa884333f20b3`
+by verified fast-forward, preserving the owned branch and its original base.
+This checkpoint is additive: no existing implementation or proof was refactored,
+no protected Yul helper file was edited, and no budget or premise changed.
+
+[The source](../../Solidity/Frontend/StatementGrammarH28/YulControlFree.lean)
+proves `yul_yield_controlFree` for every existing `Syn c` whose category is
+Yul statement, expression or case, with arbitrary nested list/option closure.
+`yul_yield_no_continuations` extracts absence of the exact three Solidity
+keyword tokens selected by `boundaryToken` from every actual successful yield.
+`assembly_yield_controlFree` covers arbitrary EVM flags, flag strings and Yul
+bodies under the immutable printer. The result does not require parser success,
+expression uniqueness, lexical validity, valid assembly flags or execution
+adequacy. Identifier/string payload spellings remain data. SG-CEX-01 is retained:
+this token-absence property does not establish flag injectivity or round-trip.
+
+The exhaustive constructor inventory is 11 Yul statements (`yulBlock`, `yulLet`,
+`yulAssign`, `yulExprStmt`, `yulIf`, `yulFor`, `yulSwitch`, `yulLeave`, `yulBreak`,
+`yulContinue`, `yulFun`), three expressions (`yulPath`, `yulCall`, `yulLit`),
+and one `yulCase`, plus `nil`, `cons`, `none`, `some` closure. The scalar literal
+proof covers all five `YulLit` alternatives: decimal, hexadecimal, string,
+hex string and Boolean. No constructor is represented by an empty relation.
+
+[Kernel controls](../../tests/h28-sol/statement-grammar/YulControlFreeControls.lean)
+have 10 theorems: exact constructor inventory; all 15 inhabited successful
+nonempty yields; all five literal alternatives; absent initializer/default and
+empty call/function alternatives; actual four list/option yields; atomic keyword
+payload spellings; all four EVM/nonempty-flag combinations; rejection of real
+Solidity continuation keywords; rejection of the Solidity-statement category;
+and the arbitrary-Yul-tree three-keyword corollary. The public source has four
+theorems and one category definition. [Public audit](../../tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean)
+prints all five source signatures and axiom sets; controls print all 10 theorem
+axiom sets. Only standard `propext`/`Quot.sound` are permitted; no new trust.
+
+Reproduction in the prepared bounded VM, serially:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.YulControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/YulControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Initial per-file diagnostics and build passed. Separate read-only finder and
+skeptic source reviews found no proof defects. Finder caught a premature receipt
+claim in this paragraph; it was corrected before commit. Acceptance still requires
+exact committed-head gates, cache, final review and seal receipts in the checkpoint
+handoff. External solc
+results are unchanged historical fixture evidence, not evidence for this universal
+kernel theorem. Original G11 remains partial: general compound framing, remaining
+parser coverage and final whole-repository acceptance are still outstanding.
+
+
+## Checkpoint AA — universal list measures and iteration budgets
+
+Rebased onto published `c61eac233747385d1b76aff6c9af72eb7923f43b`.
+The coordinator cherry-picked Z as `bc417f403bd7c26b52c0a9dc924e49269302bd24`;
+owned files were verified byte-identical before Git skipped duplicate `dcbe2ebf`.
+The recovery ref `refs/backup/statement-grammar/pre-c61eac233` preserves that head.
+Z's root registration is now integrated. This checkpoint adds a module and local
+registration only; no old proof or implementation was refactored.
+
+[ListMeasures](../../Solidity/Frontend/StatementGrammarH28/ListMeasures.lean)
+contains exactly nine public theorems:
+
+| Theorem | Exact scope |
+| --- | --- |
+| `list_length_values` | Every intrinsic list has the same G0 length and typed-values length. |
+| `list_yield_length` | Every successful list yield has exactly one output chunk per element, for every category. |
+| `list_yield_chunks_nonempty` | Under the explicit universal nonempty-element-yield premise, each actual output chunk is nonempty. |
+| `nonempty_chunks_token_bound` | The number of nonempty token chunks is bounded by flattened token length. |
+| `list_yield_token_bound` | The generic premise yields the intrinsic list-count bound. |
+| `statement_list_yield_token_bound` | The premise is discharged for arbitrary statement syntax in every context. |
+| `item_list_yield_token_bound` | The premise is discharged for arbitrary item syntax, including unchecked blocks. |
+| `item_list_many_iteration_budget` | Token-count bound: item count plus one is at most located-input token length plus one (the `many` counter in Parser.lean); the link to `many` is not stated in Lean. |
+| `statement_list_many_iteration_budget` | The corresponding universal statement-list iteration bound. |
+
+These are universal structural measures, not parser-success assumptions.
+The final inequalities establish the loop counter's capacity only; they do not
+establish the per-element parser's success, nesting fuel or general completeness.
+The exact generic premise is necessary: a present optional expression containing
+`none` yields one empty chunk. The statement/item specializations use existing
+unconditional nonempty-yield theorems, covering all 13 statement constructors and
+both item forms without expression uniqueness or a framed-root restriction.
+Existing G0 list observers supply all computational measures; indexed cases are
+proof-only. Budgets and immutable producers are unchanged.
+
+[Controls](../../tests/h28-sol/statement-grammar/ListMeasuresControls.lean)
+contain exactly 10 theorems. They enumerate and inhabit all 13 statement roots
+in an actual successful list and all 14 corresponding statement/unchecked items;
+exercise attribute and fragment layouts; reject missing layout; prove actual
+yields/count/budget for arbitrary natural-number width; check both empty lists
+and one stopping iteration; and retain the inhabited generic empty-chunk
+counterexample and its failed nonempty check. All four list/option constructors
+occur in controls. The generic arity theorem still applies to that negative
+example; only the nonempty-derived bound is unavailable.
+
+[Public audit](../../tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean)
+prints all nine signatures and axiom sets. Controls print all 10 theorem axiom
+sets. Per-file diagnostics and the initial owned build passed. Separate finder
+and skeptic source reviews found no defects. Exact committed-head gate, final
+review, cache and seal receipts remain acceptance requirements in the handoff;
+this text does not claim they already exist.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ListMeasures
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ListMeasuresPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+This is assigned block/list decomposition and fuel backfill. It does not close
+the remaining general compound framing, structural parser coverage or final
+whole-repository acceptance obligations. SG-CEX-01/02 stay explicit and SOL-EU
+remains excluded. External solc fixture results are separate historical evidence.
+
+Coordinator merge review (2026-11-06): finder and skeptic found no blocker.
+The `#print axioms` lines in ListMeasures* are unpinned (no `#guard_msgs`), and
+the `*_many_iteration_budget` theorems are token-count bounds that do not
+mention `many`.
+
+
+## Checkpoint AB — constructive catch-clause coverage
+
+Adopted published `b6b4d158ddc1ef9092c62c5b984033fde6f2d885`, preserving
+the coordinator's AA documentation qualification. AA Lean sources and controls
+were byte-identical to the reviewed checkpoint before duplicate rebase skipping.
+The recovery ref `refs/backup/statement-grammar/pre-b6b4d158d2` retains `cd21f8f3`.
+AA's root registration is integrated. This checkpoint is additive and makes no
+change to old statements, budgets, immutable producers or reserved Yul files.
+
+[CatchCoverage](../../Solidity/Frontend/StatementGrammarH28/CatchCoverage.lean)
+proves both actual `catchClause` branches. `catch_plain_prefix` exposes the exact
+remaining block-parser call at fuel `n+1`. `catch_signature_prefix` exposes the
+call at fuel `n+6` after a header with one Boolean parameter, arbitrary optional
+clause name and arbitrary optional parameter name. Parameter type is exactly
+`.elem .bool`, data location exactly `none`, and remaining parameters exactly
+`nil`; arbitrary type/argument coverage is not asserted.
+
+Bodies use the existing recursive `BooleanItemList`/`BooleanListBound` fragment,
+including arbitrary finite width and nesting, with the existing open-if contract.
+The sufficient catch fuels are `n+b+2` and `n+b+6`, derived from the syntax body
+bound, for every excess `n` and suffix state. `boolean_catch_clauses_complete`
+constructs the existential body bound from syntax; no successful parse is assumed.
+The result concerns the grammar parser, not Solidity catch-signature semantic
+validity: a Boolean parameter is intentionally a fixed grammar atom and is not
+claimed to be a semantically valid Error/Panic payload in solc.
+
+`BooleanCatch` is a two-constructor inhabited relation indexed by existing
+`Syn (.catchClause k)`, actual tokens and sufficient structural fuel. It is not
+an alternate syntax tree. `boolean_catch_coverage` proves actual parser success;
+`boolean_catch_yield` preserves arbitrary remaining layouts;
+`boolean_catch_token_unique` uses a common proved fuel to establish equality of
+fragment trees. `boolean_catch_derives` witnesses the actual grammar derivation,
+and `boolean_catch_actual_yield_unique` extracts uniqueness from successful
+actual yields inside this fragment. This is restricted catch uniqueness, not
+whole-statement or whole-language uniqueness. SOL-EU remains excluded.
+
+The exhaustive public inventory is 12 source theorems: two prefix equations,
+two coverage specializations, two actual-yield equations, fragment coverage,
+fragment yield, token uniqueness, existential completeness, derivability and
+actual-yield uniqueness. [Public audit](../../tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean)
+prints signatures and pins axiom messages with `#guard_msgs` for all 12 plus both
+relation constructors. [Controls](../../tests/h28-sol/statement-grammar/CatchCoverageControls.lean)
+have 12 theorems and pin every theorem's axiom message. These local pins address
+the coordinator's unguarded-message observation without changing older audits
+or shared trust inventories. Only standard `propext`/`Quot.sound` are permitted.
+
+Controls prove actual parsing at arbitrary natural-number body width/depth and
+excess fuel, both inhabited catch constructors, all four optional-name combinations,
+following catch/else/unchecked suffix preservation, actual derivations, rejection
+of empty parameter lists, wrong headers, missing braces, zero fuel and insufficient
+plain-clause fuel. These are token-level kernel controls, not new solc semantic
+acceptance fixtures. The previously checked solc fixture suites remain separate.
+
+Initial diagnostics passed after two source proof-elaboration repairs (StateT
+bind exposure and list flattening) and one control arithmetic repair (`max a a`).
+Raw failed iterations remain in immutable evidence; no premise/budget changed.
+Exact committed-head gates, final finder/skeptic reviews, cache and sealed handoff
+remain acceptance requirements, not claims already established by this prose.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.CatchCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Original G11 remains partial: whole try-statement/catch-list coverage, arbitrary
+catch parameter types/lists, general compound boundary framing and remaining
+parser coverage/final whole-repository acceptance are open. SG-CEX-01/02 remain
+explicit; no exclusion or premise has been approved or weakened here.
+
+
+## Checkpoint AC — actual catch-list many coverage
+
+Continues the sealed AB checkpoint without changing its statements or source.
+[CatchListCoverage](../../Solidity/Frontend/StatementGrammarH28/CatchListCoverage.lean)
+connects intrinsic clause-list syntax to the actual `manyAux` and `many`
+combinators. `catchStep` names the step expression in the immutable try branch;
+the existing `catchClause` remains the sole clause parser implementation. This is a parser equation,
+beyond the AA token-count inequalities, whose coordinator qualification remains
+unchanged.
+
+`BooleanCatchList` is indexed by existing clause-list syntax, actual token
+segments and a structural maximum of the represented `BooleanCatch` budgets.
+Both nil and cons are inhabited. `boolean_catch_list_many_aux` proves success
+for one counter step per clause plus stopping, with arbitrary excess counter.
+`boolean_catch_list_many` supplies the actual parser counter from the proved
+nonempty-yield/token-count bound and arbitrary suffix length. Clause parser fuel
+is the maximum of syntax-derived bounds; no successful parse is assumed.
+Actual yields preserve layouts and common sufficient fuel proves list-tree
+uniqueness from flattened token equality inside the fragment.
+
+The terminal frame `NoFollowingCatch s` is the exact token-head observation that
+the catch loop stops. A following catch is greedily consumed: a checked control
+shows two plain clauses returned when one is supplied as the suffix. Omitting
+the frame would give a false stopping equation. This is not an approved source
+exclusion or a weakening of any prior theorem. `statement_no_following_catch`
+discharges the frame for **every actual following statement yield**, using the
+existing unconditional continuation-head theorem, without a root-fragment or
+expression-uniqueness restriction. Catch-list coverage remains restricted to
+AB's clause fragment; arbitrary parameter-type and whole-try coverage are open.
+
+The complete source inventory is 13 theorems: universal following-statement
+frame; catch-step stop, fragment head, step start and concrete step success;
+actual fragment list yield; universal arbitrary-catch yield head, nonemptiness
+and list token bound (reusing AA); fragment count bound; actual manyAux and many
+success; fragment list token/tree uniqueness. The three universal catch-yield
+results are unrestricted in header atoms/body syntax, while parser coverage is
+not. Existing G0 typed-list observations supply all computed syntax measures.
+
+[Controls](../../tests/h28-sol/statement-grammar/CatchListCoverageControls.lean)
+contain exactly 13 theorems: arbitrary mixed plain/signature pair-list bounds,
+counts, actual many and manyAux equations; empty-list parsing; preservation of
+non-catch keyword suffixes; consumed greedy catch suffix and its failed terminal
+frame; zero/insufficient counter refusal; malformed/underfuelled clause refusal;
+an actual non-Boolean string/memory/fragmented-literal catch yield head; both
+list relation constructors inhabited; and an actual following return-statement
+frame. These controls distinguish universal yield framing from restricted parser
+coverage and exercise both existing catch constructors plus list nil/cons.
+[Public audit](../../tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean)
+pins all 13 source theorem axiom messages plus both relation constructors;
+controls pin all 13 of their theorem messages. Thus 28 declarations are audited.
+
+Initial source diagnostics exposed incorrectly named indexed-induction binders
+and a beta-reduction rewrite issue. The former caused cascading type errors and
+a 200000-heartbeat timeout; all raw failures remain evidence. Correcting binders
+and exposing the proposition fixed the proofs without raising any budget or
+changing any statement. Source and control diagnostics and the preliminary
+controls gate passed. Finder and skeptic both caught a duplicated nested axiom
+guard introduced while pinning a shared name prefix; the trailer was rebuilt
+with exactly one guard per query before commit. Exact committed-head checks,
+final reviews, cache and seal
+remain acceptance requirements in the checkpoint handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.CatchListCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/CatchListCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. Whole try-statement header/composition coverage,
+arbitrary catch parameters, general compound framing and final whole-repository
+acceptance remain unfinished. SG-CEX-01/02 and the SOL-EU exclusion are unchanged.
+No solc semantic catch-validity claim follows from these kernel token-parser
+proofs; previous external fixture results remain separate evidence.
+
+
+## Checkpoint AD — concrete try-statement composition
+
+Rebased onto published `c460b20c15fd99d207a1297b49eb340608a129ee` after verifying
+original-base ancestry and byte-identical owned Lean/tests. The recovery ref
+`refs/backup/statement-grammar/pre-c460b20c` preserves `528be0a5`. AB/AC sources are now published, but their central imports remain pending;
+the new try module also awaits central registration. No old proof or implementation is refactored.
+
+[TryCoverage](../../Solidity/Frontend/StatementGrammarH28/TryCoverage.lean)
+proves the actual statement parser on a restricted, inhabited try fragment:
+exactly an identifier call with empty positional arguments; no return parameters;
+an empty success block; a required first `BooleanCatch` and arbitrary finite
+`BooleanCatchList` tail. Catch bodies retain the earlier recursive Boolean item
+fragment. Identifier names are arbitrary token payload strings. This does not
+cover arbitrary calls, nonempty success blocks or return-parameter variants.
+
+Two exact prefix equations expose the actual expression/header/block composition
+before catch parsing. The fixed `f() {}` header followed by a catch has definite
+lookahead, so the expression parser does not consume the success block as call
+options. The generalized prefix permits any locations on that following catch.
+`boolean_try_coverage` then composes the actual proved catch-list `many` result
+and existing typed-list inverse. Sufficient statement fuel is
+`n + max firstClauseBound tailBound + 10`, for every excess `n` and suffix state
+satisfying the exact `NoFollowingCatch` greedy terminal frame. No successful
+parse is assumed; clause bounds are constructed from syntax in AB/AC. Existing
+universal following-statement framing discharges the terminal frame when used
+before any actual statement yield.
+
+`BooleanTry.attempt` is an inhabited relation indexed by existing statement
+syntax, actual tokens and the arithmetic bound. It introduces no alternate AST.
+`boolean_try_fragment_coverage` and `boolean_try_fragment_yield` expose actual
+parser/yield equations; common sufficient fuel proves fragment token/tree
+uniqueness. `boolean_try_derives` and `boolean_try_actual_yield_unique` concern
+actual derivations/layouts within the fragment. Expressions are fixed call
+atoms here; SOL-EU is neither assumed nor proved. Grammar parsing of a call or
+Boolean catch signature does not establish Solidity semantic try validity.
+
+The exact source inventory is nine theorems: two prefix equations; direct
+coverage/yield; fragment coverage/yield; token uniqueness; Derives; actual-yield
+uniqueness. [Public audit](../../tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean)
+checks all nine signatures plus the relation constructor and pins all 10 axiom
+messages with `#guard_msgs`. [Controls](../../tests/h28-sol/statement-grammar/TryCoverageControls.lean)
+have 14 theorems with 14 individual axiom pins, for 24 audited declarations total.
+
+Controls construct arbitrary natural-number catch-body depth and clause-list
+width, prove actual parsing and layout-preserving yields, exercise both plain
+and signature first clauses (including arbitrary optional names), plain-only
+and multi-clause tries, preserve a real following return statement, and establish
+an inhabited actual grammar derivation. Negative controls reject a missing catch,
+missing success block, empty catch parameters and insufficient fuel. A concrete
+try consumes two clauses when a second catch is supplied as suffix, retaining
+the necessity of the greedy terminal frame. These are kernel token-parser
+controls, not new solc semantic acceptance fixtures.
+
+Initial diagnostics required a syntax indentation fix, explicit flattening in
+the many rewrite and an explicit intrinsic context in a control helper. Raw failed
+iterations remain evidence; no theorem/premise/exclusion/budget changed. Source,
+controls and preliminary control gates passed. Exact committed-head gates,
+final finder/skeptic reviews, cache and seal remain handoff acceptance requirements.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.TryCoverage
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoverageControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/TryCoveragePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try calls/success bodies/return parameters,
+arbitrary catch parameter types/lists, general compound boundary framing and
+remaining general parser coverage/final whole-repository acceptance remain open.
+SG-CEX-01/02 and all original exclusions/budgets are retained. Historical solc
+fixture evidence is separate from these universal restricted kernel proofs.
+
+
+## Checkpoint AE — universal block/call-options boundary
+
+Adopted remote-verified `812aeb301f27d70dad4acc3b3bd92d1c41d7c948`, preserving
+`65f7735f` under `refs/backup/statement-grammar/pre-812aeb301`. Owned Lean/tests
+were byte-identical before the rebase. Direct inspection of the published root
+confirmed imports for CatchCoverage, CatchListCoverage and TryCoverage; that
+statement is based on the root contents, not inferred merely from publication.
+This increment adds one owned module and local manifest row, without producer
+or earlier theorem changes.
+
+[BlockHeaderBoundary](../../Solidity/Frontend/StatementGrammarH28/BlockHeaderBoundary.lean)
+proves a universal token boundary for arbitrary existing syntax under the
+existing precedence contract. Named call options require an identifier followed
+by a colon immediately after their opening brace. A precedence-selected block's
+item list cannot have that prefix. An empty block retains its closing brace,
+so even an arbitrary continuation cannot manufacture the pair.
+
+`namedArgStart` is a token lookahead predicate, not an AST. `NoNamedFrame ts`
+quantifies over every token continuation. The proof reuses the existing universal
+expression/type atom-pair invariants, without expression uniqueness. All three
+simple alternatives are handled, including identifier-led type/name declarations
+and tuple declarations. Revert uses precisely the existing root path contract;
+the other fixed roots start in non-identifiers. `statement_no_named` takes only
+the existing `precNode` condition. The all-node projection and item/list lifting
+then derive `block_yield_no_named_header` from a successful arbitrary block yield
+and its existing full `Syn.prec` predicate, for arbitrary layouts and contents.
+No new source exclusion or expression/type/argument validity premise is added.
+
+The final two theorems concern the actual parser:
+`postLoop_no_named_lookahead` proves stopping at an opening brace whose next two
+located tokens are not an identifier/colon pair. `postLoop_yielded_block` derives
+those observations from **every** actual precedence-valid block yield and proves
+`postLoop (n+1)` preserves the supplied expression, entire block and arbitrary
+suffix state, at every positive fuel. This is lookahead discrimination; it does
+not establish expression uniqueness or general statement parser completeness.
+
+The exhaustive source inventory has 13 theorems: atom-pair exclusion;
+non-identifier framing; declaration-head framing; simple/revert/all-statement
+framing; statement all-node root projection; item and item-list framing; block
+item framing; block-yield lookahead; generic postfix stopping; yielded-block
+postfix stopping. There are five public token/predicate definitions.
+[Public audit](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean)
+checks/pins all 18 declarations. [Controls](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean)
+have 17 theorem pins, for 35 inventoried declarations total.
+
+Controls enumerate all 13 statement constructors, all three simple alternatives,
+both item forms, the block constructor and nil/cons through arbitrary width.
+They check actual successful precedence/yield/postfix behavior for every root,
+attribute and fragmented-literal layouts (plus a missing-layout refusal), atomic
+colon payloads, arbitrary-width yields and parser stopping, and arbitrary-depth
+block precedence. Positive call-options input is actually consumed; its named
+pair fails the block frame. Empty-block closing braces prevent continuation
+capture. A colon supplied after an empty block exercises the non-identifier branch even
+when the second lookahead is a colon. Zero postfix fuel is rejected, and an invalid revert path is shown to
+fail the existing contract. That last control is not a counterexample to the
+boundary outside the contract; no such stronger conclusion is asserted.
+
+Checking-cost evidence: an initial attempt to try trivial roots before recursive
+simplification gave matched MCP wall times 151.296 and 151.721 seconds, so the
+original proof was restored. A second, targeted change unfolds `Syn.all` exactly
+once per nontrivial root, then projects Boolean conjunctions. Matched fresh CLI
+compilations of the same 13-theorem module took 147.43 seconds / 146.96 user
+seconds / 584272 KiB peak RSS before, and 1.74 seconds / 1.55 user seconds /
+463280 KiB after. Source outside that one proof was verified byte-identical;
+imports, statements, toolchain, single-thread configuration and proof budgets
+were unchanged. The one-step proof is retained; no >10% slowdown occurred.
+Raw plans, both source versions and exact command/resource logs are preserved.
+No earlier speed-motivated producer change was undone.
+
+Initial diagnostics exposed implicit printer-predicate inference, Boolean
+conjunction projection and list-map normalization issues; a control induction
+needed the correct Boolean normal form. All were fixed without theorem/premise
+or budget changes. The bounded CLI module build and per-file controls passed.
+Exact committed-head gates, final read-only reviews, cache and seal remain
+acceptance requirements in the handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try call/success-body/return-parameter parser
+composition, arbitrary catch headers, remaining general compound framing and
+parser coverage, and final whole-repository acceptance remain open. Existing
+SG-CEX-01/02, SOL-EU exclusion, premises and budgets are unchanged. Kernel
+lookahead proofs are separate from historical external solc fixture evidence.

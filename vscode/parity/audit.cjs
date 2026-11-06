@@ -25,7 +25,7 @@ function enumerate(directory,component){
 }
 function scan(extension,server,inventoryPath=join(repo,'docs/dafny-editor-features.json')){
   const testFiles=[...enumerate(extension,'extension'),...enumerate(server,'server')];
-  const inventory=JSON.parse(fs.readFileSync(inventoryPath,'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory(inventoryPath);
   for(const file of testFiles){
     file.featureIds=inventory.features.filter(f=>f.upstream.some(s=>s.path===file.path&&s.repository===`dafny-lang/${file.component==='server'?'dafny':'ide-vscode'}`)).map(f=>f.id);
     for(const c of file.cases)c.reason=file.featureIds.length?'Related feature family discovered; this individual upstream test has not been ported and run against both targets.':'Unmapped reference test; inspect and add a targeted scenario before claiming coverage.';
@@ -50,7 +50,7 @@ function validate(audit){
       if(c.status!=='unexamined'||c.runtimeEvidence.length)errors.push('source registration cannot certify a runtime pass');
     }
   }
-  const inventory=JSON.parse(fs.readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory();
   for(const component of ['extension','server'])if(audit.upstream?.[component]!==inventory.upstream[component].commit)errors.push('source pin drift');
   return errors;
 }

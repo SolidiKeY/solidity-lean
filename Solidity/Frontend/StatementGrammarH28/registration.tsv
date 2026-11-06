@@ -89,3 +89,12 @@ Solidity.Frontend.StatementGrammarH28.ConditionalCoverage	Recursive Boolean cond
 Solidity.Frontend.StatementGrammarH28.ConditionalYield	Actual Boolean fragment yields, nearest else and framed prefix tree/suffix uniqueness
 Solidity.Frontend.StatementGrammarH28.ConditionalList	Arbitrary-width intrinsic Boolean item list tree/segment uniqueness and balanced block prefix splitting
 Solidity.Frontend.StatementGrammarH28.ConditionalFuel	Constructive Boolean item-list nesting bounds and actual block/statement/unchecked parser coverage
+Solidity.Frontend.StatementGrammarH28.ControlFreePr	Actual continuation-token-free printer combinators over existing token syntax
+Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms	Universal scalar type/operator/literal/attribute continuation-token absence
+Solidity.Frontend.StatementGrammarH28.SyntaxControlFree	All 42 atom constructors: global else/catch/unchecked absence with list/option closure
+Solidity.Frontend.StatementGrammarH28.YulControlFree	All 15 inline-Yul constructors and assembly: universal else/catch/unchecked token absence
+Solidity.Frontend.StatementGrammarH28.ListMeasures	Universal intrinsic list yield arity, statement/item token-count bounds and many iteration budgets
+Solidity.Frontend.StatementGrammarH28.CatchCoverage	Constructive plain and single-Boolean-parameter catch parser coverage, actual yields and restricted uniqueness
+Solidity.Frontend.StatementGrammarH28.CatchListCoverage	Actual many catch-list parsing from structural maximum fuel and token count, with explicit greedy terminal frame
+Solidity.Frontend.StatementGrammarH28.TryCoverage	Constructive try statement coverage for empty identifier calls and success blocks with recursive Boolean catch lists
+Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary	Universal precedence-valid block versus named call-options boundary and actual postfix parser stopping
