@@ -1,10 +1,10 @@
 # H62 migrate-syntax: validated directory overlay, blocked final integration
 
 The assigned Syntax directory builds on the exact official pinned Lean 4.35.0.
-All21 assigned modules and their eight local prerequisites pass a clean serial
+All 21 assigned modules and their eight local prerequisites pass a clean serial
 build. The complete assignment remains **blocked**, not done: actual annotation
 and whole-repository gates fail in other migration owners, and root-gate API,
-axiom and resource disposition plus handoff receipt remain outstanding.
+axiom disposition and full acceptance remain outstanding. H77/H78 below supersede historical RSS and delivery holds.
 No RUNTIME_GATE_PASS, merge, push, PR, pre-gate, deployment or freeze announcement.
 
 ## Exact checkout and producer artifacts
@@ -44,9 +44,9 @@ H64 explicitly permits `decide +kernel`; no native proof shortcut is used.
 
 A per-module time/memory increase does not stop a migration lane. Earlier
 per-module holds were removed; every module's metrics were retained and the
-matched complete directory comparison was finished. The conservative full
-comparison tool marks the 90.73% peak-RSS growth STOP/escalated for root
-cut-over disposition. No local resource waiver or acceptance is claimed.
+matched complete directory comparison was finished. Before H78, the conservative full
+comparison tool marked the 90.73% peak-RSS growth STOP/escalated for root
+cut-over disposition. H78 below now permits this recorded growth. No local resource waiver or acceptance is claimed.
 The old blocked handoff at 1bdaa3b0 is historical, not the current state.
 
 ## Toolchain and fixed-resource measurements
@@ -193,8 +193,9 @@ No production module registration fragment is needed for these scratch tests.
   workers, no cache and fail-fast; temporary TOML removed after each phase.
   Initial private-wrapper setup errors were fixed before the passing KeySort
   run; they are archived as setup failures, not source/compiler gate passes.
-- Matched full-directory comparison records STOP/escalation for the measured
-  full RSS growth. Root cut-over disposition remains outstanding; no local waiver.
+- Historical matched full-directory comparison records STOP/escalation for RSS
+  growth. H78 below now permits the recorded growth; API/trust/full acceptance
+  remain outstanding. The historical result is preserved, with no local waiver.
 
 ## Independent read-only reviews and continuation
 
@@ -208,7 +209,7 @@ verify source preservation and actual negative controls and endorse the
 
 Remaining: reviewed external SortCheck/Hash overlays, complete affected
 examples/TestSuite/whole-repository validation and whole-repository timing,
-generated API/per-entry axiom/resource disposition, and migrate-root-gate
+generated API/per-entry axiom disposition (RSS updated under H78), and migrate-root-gate
 receipt/live-owner cut-over relay. Other failures may appear after those first
 external prerequisites pass. Do not weaken statements or edit other owners.
 
@@ -220,3 +221,45 @@ coordinator owns continuation, not a self-launched replacement thread.
 Final export paths/full head/checksums are in the off-git HANDOFF and result JSON.
 
 Historical Raw/Grammar fixtures remain reproducible from the final branch with `python3 scripts/h62/item6/migrate-syntax/fixture.py --from-base --output <fresh off-git directory>`; already migrated inputs are handled idempotently. The fixture retains its UNAPPROVED-FIXTURE-ONLY label and does not replace the committed production overlay.
+
+
+## H77 delivery review and H78 recorded-RSS disposition
+
+The coordinator reports that head `72441d298484976c48dd14b4e095c9149b852025`
+was relayed to eight named consumers/root gate, with no current-owner delivery
+pending. This is a routing acknowledgment, not consumer adoption or acceptance.
+The exact Raw producer remains `074e62c1840dd2d7ab19c95ca5d437ebfe57dbb8`;
+its patch/file hashes and production source bytes are unchanged.
+
+All three requested consumer snapshots were delivered and reviewed in full:
+
+| Snapshot | Exact SHA256 | Review boundary |
+|---|---|---|
+| AUDIT-V09 |05ecae8c9ac71d5f283ec827da462bdec4bea0131179079e5f22ea53815c644b|Concrete five-error frozen Raw dependency; no witness/totality/fidelity proof accepted.|
+| GENERIC-STORAGEOPS |3e2686622d40ed4ac120f18926cbce88a12c47ddd5670b91ec305f935da71d97|Concrete Raw prerequisite; separate V10 agreement, semantic proofs and timings remain.|
+| MIGRATE-LOWERING |ae51de12c48baacf26ff7bbad6636a346f080666e4a12de68dfd83e0592c5f83|Historical d604... supervisor snapshot; Syntax-family dependency only, not an exact observed Raw failure or current remote process state.|
+
+These are the exact originally requested router `154212` payloads, not later
+router `160530` versions. Counts and cited remote evidence in those snapshots
+remain requester-reported; no remote source/proof replay, original-file edit,
+process inspection or supervisor restart was performed. Their delivered bytes
+remain unchanged. Missing exact Lowering edge/failure evidence must be supplied
+before asserting a more specific culprit.
+
+H78 explicitly permits the recorded RSS growth within 8 GiB per module. All 29
+modules in each accepted measurement are below 8,388,608 KiB; new peak 1,688,748 KiB,
+old 885,420 KiB, with wall time 207.377 → 102.747 seconds. Thus the prior
+conservative RSS-only STOP is superseded for this recorded pair. Original
+STOP/result files remain immutable history, not a current unresolved RSS hold.
+The historical -M11000 runs did not enforce an 8 GiB cap; this disposition does
+not retroactively claim otherwise. Any future heavy check must enforce and
+report the new 8 GiB/module cap before it starts. No new Lean check was run.
+
+H78 grants no trust-policy waiver. Root generated-API review, 637 per-declaration
+standard axiom-growth review, SortCheck/Hash owner prerequisites and full affected
+acceptance remain blocked. No goal creation/reset or permission/scope transfer.
+Independent finder/skeptic reviewed all three snapshots and this disposition
+read-only, without Lean/server use. Their limits and confirmed findings are
+recorded under /workspace/migrate-syntax-evidence/h77-h78-review; complete
+current consumer-review and H78 JSON receipts live there. The previous handoff
+and its hashes remain preserved as historical evidence.
