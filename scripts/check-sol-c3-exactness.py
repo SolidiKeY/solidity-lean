@@ -6,9 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AREA = ROOT / "tests/sol-c3-exactness"
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-# H82 authenticated dependency-first successor integration; all producer pins
-# stay fixed to BASE and the original exclusive C3 scope remains unchanged.
-ADOPTED_UPSTREAM = "9192f209cd12c30a5183bc2c779a631102dc8061"
+ADOPTED_UPSTREAM = "e6849d3bdf516099d20c33d3581d523449764018"
 PREFIX = "Solidity.Frontend.C3Exactness."
 ALLOWED = ("Solidity/Frontend/C3Exactness/", "tests/sol-c3-exactness/",
            "scripts/check-sol-c3-exactness.py", "docs/feature-work/c3-exactness.md")
@@ -18,7 +16,7 @@ REQUIRED = {"Solidity/Source/Resolve.lean", "Solidity/Source/Inheritance.lean",
 TOOLING = {"scripts/check-sol-c3-exactness.py", "tests/sol-c3-exactness/run-bounded.py",
            "tests/sol-c3-exactness/lakefile.worker.toml", "tests/sol-c3-exactness/bin/lake",
            "tests/sol-c3-exactness/manifest.json"}
-TOOLING |= {"scripts/coord-tools/lean-mcp", "tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
+TOOLING |= {"tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
 TOOLING |= {str(p.relative_to(ROOT)) for p in (AREA / "fixtures").rglob("*") if p.is_file()}
 FIXTURE_MANIFEST_SHA = "9a2ab74a8040178026a74a04929116ce6d7d9ce064b315c5ba5c0678b342190f"
 STANDARD = {"propext", "Classical.choice", "Quot.sound"}
@@ -229,21 +227,28 @@ def write_scope_errors(paths, adopted_is_ancestor):
 
 
 def bound_evidence(key, legacy):
-    """Resolve refreshed H44 evidence through a committed digest manifest.
+    """Use optional checksum-bound receipts only when the complete pair exists.
 
-    Historical files remain untouched. All original receipt, scope, resource,
-    source-pin and guarded-kernel checks still apply to the selected bytes.
+    Clean checkouts retain the original tracked-evidence path and all original
+    command, snapshot, scope, resource, axiom and final-gate requirements.
+    An available pair with changed bytes is rejected, never silently ignored.
     """
     index = AREA / 'SUCCESSOR-EVIDENCE.json'
     if not index.exists():
         return legacy
-    record = json.loads(index.read_text())[key]
-    path = ROOT / record['path']
-    if not path.resolve().is_relative_to(AREA.resolve()):
+    records = json.loads(index.read_text())
+    pair = ('audit_log', 'audit_receipt') if key.startswith('audit_') else ('fixture_log', 'fixture_receipt')
+    if not all(name in records for name in pair):
+        return legacy
+    paths = {name: ROOT / records[name]['path'] for name in pair}
+    if any(not path.resolve().is_relative_to(AREA.resolve()) for path in paths.values()):
         raise ValueError('successor evidence path escapes C3 area')
-    if sha(path.read_bytes()) != record['sha256']:
-        raise ValueError('successor evidence digest drift: ' + key)
-    return path
+    if not all(path.is_file() for path in paths.values()):
+        return legacy
+    for name, path in paths.items():
+        if sha(path.read_bytes()) != records[name]['sha256']:
+            raise ValueError('successor evidence digest drift: ' + name)
+    return paths[key]
 
 
 def validate(m, overlays=None, receipt_override=None):
@@ -343,7 +348,7 @@ def validate(m, overlays=None, receipt_override=None):
                                        cwd=ROOT, text=True).splitlines()
     errors.extend(write_scope_errors(changed, ancestry))
     log_path = bound_evidence("audit_log", AREA / "evidence/audit-confirmation.log")
-    receipt_path = bound_evidence("audit_receipt", (AREA / "evidence/audit-confirmation.log.json"))
+    receipt_path = bound_evidence("audit_receipt", AREA / "evidence/audit-confirmation.log.json")
     require(receipt_path.exists(), "missing bounded audit receipt")
     receipt = receipt_override if receipt_override is not None else (
         json.loads(receipt_path.read_text()) if receipt_path.exists() else {})
@@ -365,23 +370,6 @@ def validate(m, overlays=None, receipt_override=None):
     log = log_bytes.decode()
     require("Build completed successfully" in log and "Exit status: 0" in log and
             not re.search(r"^error:", log, re.M), "guarded kernel audit has not passed")
-    # A cached build log may replay guards despite missing physical imports.
-    # Require actual current-file elaboration or repository-preferred MCP
-    # diagnostics before certifying kernel controls; never cached output alone.
-    direct_log = bound_evidence("direct_log", AREA / "evidence/direct-audit.log")
-    direct_receipt = bound_evidence("direct_receipt", AREA / "evidence/direct-audit.log.json")
-    require(direct_log.exists() and direct_receipt.exists(), "missing direct kernel audit evidence")
-    if direct_log.exists() and direct_receipt.exists():
-        r = json.loads(direct_receipt.read_text())
-        cli = ["lake", "lean", "Solidity/Frontend/C3Exactness/Audit.lean", "--", "-j1", "--tstack=131072"]
-        mcp = ["scripts/coord-tools/lean-mcp", "diag", "Solidity/Frontend/C3Exactness/Audit.lean"]
-        require(r.get("command") in [cli, mcp], "direct audit command drift")
-        require(r.get("exit") == 0 and not r.get("interrupted") and not r.get("pressure_stop"), "direct kernel audit has not passed")
-        require(r.get("input_hashes") == expected_snapshot, "direct audit source snapshot drift")
-        require(r.get("memory_limit_bytes") == 12884901888 and r.get("swap_limit_bytes") == 0 and r.get("minimum_parent_available_bytes", 0) >= 4*1024**3, "direct audit resource envelope drift")
-        require(r.get("lean_version", "").startswith("Lean (version 4.24.0,") and r.get("lake_version", "").startswith("Lake version 5.0.0-src+797c613"), "direct audit toolchain drift")
-        text = direct_log.read_text()
-        require(r.get("log_sha256") == sha(direct_log.read_bytes()) and "Exit status: 0" in text and not re.search(r"^.*error:", text, re.M) and (r.get("command") != mcp or "diag: 0 errors" in text), "direct audit log did not pass")
     require(m["open_obligations"] or m.get("checkpoints", {}).get("final") == "done", "unfinished final obligations were erased")
     return errors
 
@@ -426,8 +414,8 @@ def fixture_errors(overlays=None, receipt_override=None):
             require(bool(observed), "negative fixture accepted")
         require(row.get("comparison_limit") == f.get("comparison_limit"), "fixture comparison boundary drift")
     log_path = str(bound_evidence("fixture_log", AREA / "evidence/compiler-fixtures-final.log").relative_to(ROOT))
-    fixture_receipt = bound_evidence("fixture_receipt", AREA / "evidence/compiler-fixtures-final.log.json")
-    receipt = receipt_override if receipt_override is not None else json.loads(fixture_receipt.read_text())
+    fixture_receipt = str(bound_evidence("fixture_receipt", AREA / "evidence/compiler-fixtures-final.log.json").relative_to(ROOT))
+    receipt = receipt_override if receipt_override is not None else json.loads(read(fixture_receipt))
     cmd = ["node", checker_path, str(AREA / ".artifacts/compiler" / fm["compiler"]["file"]), packet_path]
     require(receipt.get("command") == cmd, "fixture command drift")
     require(receipt.get("exit") == 0 and not receipt.get("interrupted") and not receipt.get("pressure_stop"), "fixture run did not pass")
@@ -448,6 +436,7 @@ def final_errors(m):
         errors.append("open obligations remain: " + "; ".join(m["open_obligations"]))
     required = {
         "run-lean-final": ["bash", "run-lean.sh"],
+        "keysort-final": ["bash", "scripts/check-solkey.sh", "--key", "/workspace/.setup/solkey/keyext.solidity.core/src/main/resources/org/key_project/solidity/proof/rules/solidityProgramRules.key"],
         "final-source-gates": [".venv/bin/python", "tests/sol-c3-exactness/final-checks.py"],
         "corpus-final": ["bash", "scripts/check-corpus.sh", "--solkey", "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"],
     }
@@ -461,7 +450,7 @@ def final_errors(m):
         r = json.loads(r.read_text())
         if r.get("command") != cmd or r.get("exit") != 0 or r.get("interrupted") or r.get("pressure_stop"):
             errors.append("final gate not passed: " + name)
-        decisive = {"run-lean-final":["Build completed successfully"], "corpus-final":["check-corpus: ok"]}
+        decisive = {"run-lean-final":["Build completed successfully", "solkeycheck: OK"], "keysort-final":["parsed 377 taclets, 131 read-bearing, table covers 131", "solkeycheck: OK"], "corpus-final":["check-corpus: ok"]}
         if any(t not in p.read_text() for t in decisive.get(name, [])):
             errors.append("missing decisive final output: " + name)
         if r.get("input_hashes") != snapshot or r.get("log_sha256") != sha(p.read_bytes()):

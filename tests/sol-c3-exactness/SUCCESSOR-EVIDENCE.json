@@ -14,13 +14,5 @@
   "fixture_receipt": {
     "path": "tests/sol-c3-exactness/evidence/.artifacts/successor-21043/fixtures.log.json",
     "sha256": "07028a314d7f101e932592790628798805cdb38bb6535e8c335148e30298410c"
-  },
-  "direct_log": {
-    "path": "tests/sol-c3-exactness/evidence/.artifacts/successor-21043/mcp-audit.log",
-    "sha256": "5c49cb2aff06a0cfe54a7e0832af473741bfce08deb4cc181519ec54167d2718"
-  },
-  "direct_receipt": {
-    "path": "tests/sol-c3-exactness/evidence/.artifacts/successor-21043/mcp-audit.log.json",
-    "sha256": "b3876705ee0cd775358afc5a16386d54521e84fe96aa44b5ab4cd4681acea4fd"
   }
 }

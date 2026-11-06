@@ -1,4 +1,11 @@
-# H82 C3 successor checkpoint
+# H82 C3 successor checkpoint (historical gate results)
+
+CURRENT POLICY: GATE-RECUT-HANDOFF.md supersedes the gate/pin and acceptance
+claims below. The e684 pin and original lake-only acceptance policy are restored;
+no required direct/MCP audit is imposed. Historical successor PASS results under
+the withdrawn changes are not approved acceptance. Artifact observations and
+intake provenance remain preserved.
+
 
 Status: partial implementation/validation checkpoint; whole inheritance goal
 remains blocked. Original OV goal retained; no new/resumed retiree goal, master
@@ -39,8 +46,9 @@ No known OpenLoops/full-driver timing STOP was rerun.
 ## Successor work and actual checks
 
 All six original producer pins match. Nine Lean modules and all proof/guard
-bytes remain unchanged. The checker scope baseline now pins the authenticated
-successor integration 9192f209, preserving original BASE, ALLOWED, source pins,
+bytes remain unchanged. The withdrawn checker version pinned the successor integration 9192f209;
+that change was not owner-approved. The current checker retains approved e684,
+along with original BASE, ALLOWED, source pins,
 236 declarations/axiom sets, typed witnesses, exclusions and resource checks.
 No original obligation is erased or renamed complete by this baseline update.
 
@@ -48,12 +56,12 @@ Portable runner chooses SOL_C3_CONTAINER and optional SOL_C3_EXTRA_PATH. Python
 subprocess/resource replaces unavailable /usr/bin/time, reports actual elapsed
 and maximum child RSS, preserves ordinary exits and normalizes signal exits to
 128+signal while retaining the raw code. C3 checks retain exactly 12GiB/no swap,
-CPU1, threads1/-j1, monitored 4GiB reserve. No budget increase. Five targeted
-unit tests pass: ordinary failure7, SIGTERM143/raw-15, digest mutation, path
+CPU1, threads1/-j1, monitored 4GiB reserve. No budget increase. Historical targeted
+unit tests under that version passed: ordinary failure7, SIGTERM143/raw-15, digest mutation, path
 escape, and cached-build0 failing to hide failed current-file validation.
 
 SUCCESSOR-EVIDENCE.json binds current VM-only log/receipt hashes. Historical
-tracked logs are untouched. The acceptance checker now additionally REQUIRES
+tracked logs are untouched. The withdrawn checker version additionally required
 actual current-file validation: exact Lake elaboration OR repository-preferred
 per-file MCP diagnostic, successful exit, matching current input snapshot (including the read-only MCP helper itself),
 original toolchain/resource bounds and log digest. MCP must explicitly report
@@ -79,7 +87,7 @@ that layout. Successful MCP uses its supported import setup; no CLI/cache
 recovery or full runtime is inferred. Initial /usr/bin/time launch failure is
 also retained. All raw attempts remain under .artifacts and evidence/.artifacts.
 
-Current --checkpoint fixtures --self-test PASSES with actual current MCP and
+Historical --checkpoint fixtures --self-test passed under the withdrawn gate with actual current MCP and
 fresh compiler receipts; --checkpoint full still exits1 on unfinished full
 runtime/source/corpus/final-review obligations. No RUNTIME_GATE_PASS or complete
 assignment claim. Compiler tests are external observations; generic relations

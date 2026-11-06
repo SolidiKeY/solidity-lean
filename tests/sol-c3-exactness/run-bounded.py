@@ -58,7 +58,7 @@ def main():
             "scripts/check-sol-c3-exactness.py", "tests/sol-c3-exactness/run-bounded.py",
             "tests/sol-c3-exactness/lakefile.worker.toml", "tests/sol-c3-exactness/bin/lake",
             "tests/sol-c3-exactness/manifest.json"}
-        paths |= {"scripts/coord-tools/lean-mcp", "tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
+        paths |= {"tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
         paths |= {str(p.relative_to(ROOT)) for p in (ROOT / "tests/sol-c3-exactness/fixtures").rglob("*") if p.is_file()}
         snapshot = {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in sorted(paths)}
         extra_path = os.environ.get("SOL_C3_EXTRA_PATH", "")

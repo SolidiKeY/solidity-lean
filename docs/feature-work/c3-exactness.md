@@ -460,3 +460,23 @@ External solc observations, kernel proofs, constructor-name order and actual
 constructor execution remain distinct. Source, theorem, budget, axiom and
 exclusion bytes are unchanged. See tests/sol-c3-exactness/SUCCESSOR-HANDOFF.md
 for absolute paths, measured limits/times, exact resolved/unresolved waits.
+
+
+## Gate-owner hold and gate-preserving re-cut
+
+The successor e684-to-9192 pin change, mandatory direct audit and MCP acceptance
+alternative were not owner-approved and are withdrawn. Original e684 pin,
+TOOLING set and every original gate function/condition are restored. Optional
+successor receipts are used only as complete hash-bound pairs; absent files
+fall back to original tracked evidence. No MCP result substitutes for the
+required lake run. Earlier successor PASS reports under the withdrawn edits
+are historical, not approved acceptance.
+
+Six regression tests PASS, including full-module AST equality to member21043
+apart from the permitted evidence-location adapter. A detached clean-checkout
+check with all successor artifacts absent reaches tracked evidence without a
+missing-file exception. It still refuses original scope/snapshot drift; that
+is retained as failure, not waived. No pin, theorem or budget was changed to
+force parity. See tests/sol-c3-exactness/GATE-RECUT-HANDOFF.md. Gate-owner route,
+shared inventory, full runtime/cache/final acceptance and original external
+retirement evidence remain waits. No known timing STOP was rerun.

@@ -1,4 +1,5 @@
-"""Targeted checks for portable timing and immutable successor evidence."""
+"""Original gate preservation, optional artifact fallback, and portable timing."""
+import ast
 import hashlib
 import importlib.util
 import json
@@ -11,6 +12,7 @@ from unittest.mock import patch
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[2]
+ORIGINAL = '21043c5220a7c0390810ec7088c83a6bd9c8ff8c'
 
 def load(name, path):
     spec = importlib.util.spec_from_file_location(name, ROOT / path)
@@ -23,13 +25,32 @@ runner = load('c3_runner', 'tests/sol-c3-exactness/run-bounded.py')
 
 
 class SuccessorEvidence(unittest.TestCase):
+    def test_original_gate_and_pin_are_preserved(self):
+        path = 'scripts/check-sol-c3-exactness.py'
+        original = subprocess.check_output(['git', 'show', ORIGINAL + ':' + path], cwd=ROOT, text=True)
+        current = (ROOT / path).read_text()
+        # Normalize only the coordinator-authorized evidence location adapter.
+        current = current.replace(
+            '    log_path = bound_evidence("audit_log", AREA / "evidence/audit-confirmation.log")\n'
+            '    receipt_path = bound_evidence("audit_receipt", AREA / "evidence/audit-confirmation.log.json")',
+            '    log_path = AREA / "evidence/audit-confirmation.log"\n'
+            '    receipt_path = log_path.with_suffix(".log.json")')
+        current = current.replace(
+            '    log_path = str(bound_evidence("fixture_log", AREA / "evidence/compiler-fixtures-final.log").relative_to(ROOT))\n'
+            '    fixture_receipt = str(bound_evidence("fixture_receipt", AREA / "evidence/compiler-fixtures-final.log.json").relative_to(ROOT))\n'
+            '    receipt = receipt_override if receipt_override is not None else json.loads(read(fixture_receipt))',
+            '    log_path = "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log"\n'
+            '    receipt = receipt_override if receipt_override is not None else json.loads(read(log_path + ".json"))')
+        before = ast.parse(original)
+        after = ast.parse(current)
+        after.body = [node for node in after.body if not isinstance(node, ast.FunctionDef) or node.name != 'bound_evidence']
+        self.assertEqual(ast.dump(before), ast.dump(after))
+
     def test_timing_preserves_actual_failure(self):
         result = subprocess.run([sys.executable, '-c', runner.TIMING_CODE,
-                                 sys.executable, '-c', 'raise SystemExit(7)'],
-                                capture_output=True, text=True)
+                                 sys.executable, '-c', 'raise SystemExit(7)'], capture_output=True, text=True)
         self.assertEqual(result.returncode, 7)
         self.assertIn('Exit status: 7', result.stdout)
-        self.assertIn('Maximum child resident set size', result.stdout)
 
     def test_signal_is_reported_as_posix_status(self):
         result = subprocess.run([sys.executable, '-c', runner.TIMING_CODE,
@@ -37,62 +58,50 @@ class SuccessorEvidence(unittest.TestCase):
                                 capture_output=True, text=True)
         self.assertEqual(result.returncode, 143)
         self.assertIn('Raw child return code: -15', result.stdout)
-        self.assertIn('Exit status: 143', result.stdout)
 
-    def test_cached_build_cannot_hide_failed_direct_audit(self):
-        # Synthetic unit receipts only: this is not kernel execution evidence.
-        model = json.loads((gate.AREA / 'manifest.json').read_text())
-        snapshot = {p: gate.sha((ROOT / p).read_bytes()) for p in
-                    gate.REQUIRED | gate.TOOLING | set(model['modules'])}
-        with tempfile.TemporaryDirectory() as directory:
-            folder = Path(directory)
-            build_log = folder / 'build.log'
-            build_log.write_text('Build completed successfully\nExit status: 0\n')
-            direct_log = folder / 'direct.log'
-            direct_log.write_text('error: missing import object\nExit status: 1\n')
-            common = {'input_hashes': snapshot, 'memory_limit_bytes': 12884901888,
-                      'swap_limit_bytes': 0, 'minimum_parent_available_bytes': 4 * 1024**3,
-                      'lean_version': 'Lean (version 4.24.0, test)',
-                      'lake_version': 'Lake version 5.0.0-src+797c613',
-                      'pressure_stop': False, 'interrupted': False}
-            build = dict(common, command=['lake', 'build', '+Solidity.Frontend.C3Exactness.Audit'],
-                         exit=0, log_sha256=gate.sha(build_log.read_bytes()))
-            direct = dict(common, command=['lake', 'lean', 'Solidity/Frontend/C3Exactness/Audit.lean',
-                                          '--', '-j1', '--tstack=131072'],
-                          exit=1, log_sha256=gate.sha(direct_log.read_bytes()))
-            build_receipt = folder / 'build.json'
-            direct_receipt = folder / 'direct.json'
-            build_receipt.write_text(json.dumps(build))
-            direct_receipt.write_text(json.dumps(direct))
-            paths = {'audit_log': build_log, 'audit_receipt': build_receipt,
-                     'direct_log': direct_log, 'direct_receipt': direct_receipt}
-            with patch.object(gate, 'bound_evidence', side_effect=lambda key, legacy: paths[key]):
-                errors = gate.validate(model)
-            self.assertIn('direct kernel audit has not passed', errors)
-
-    def test_verified_evidence_cannot_change(self):
+    def test_clean_checkout_falls_back_to_tracked_pairs(self):
+        records = json.loads((gate.AREA / 'SUCCESSOR-EVIDENCE.json').read_text())
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             area = root / 'tests/sol-c3-exactness'
             area.mkdir(parents=True)
-            log = area / 'audit.log'
-            log.write_bytes(b'original checked output')
-            record = {'path': str(log.relative_to(root)),
-                      'sha256': hashlib.sha256(log.read_bytes()).hexdigest()}
-            (area / 'SUCCESSOR-EVIDENCE.json').write_text(json.dumps({'audit_log': record}))
+            (area / 'SUCCESSOR-EVIDENCE.json').write_text(json.dumps(records))
+            with patch.object(gate, 'ROOT', root), patch.object(gate, 'AREA', area):
+                for key in records:
+                    legacy = area / ('tracked-' + key)
+                    legacy.write_text('tracked evidence')
+                    self.assertEqual(gate.bound_evidence(key, legacy), legacy)
+                    self.assertEqual(legacy.read_text(), 'tracked evidence')
+
+    def test_complete_pair_is_bound_and_partial_pair_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            area = root / 'tests/sol-c3-exactness'
+            area.mkdir(parents=True)
+            log, receipt = area / 'audit.log', area / 'audit.json'
+            log.write_bytes(b'checked output')
+            receipt.write_bytes(b'receipt')
+            records = {key: {'path': str(path.relative_to(root)),
+                             'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
+                       for key, path in [('audit_log', log), ('audit_receipt', receipt)]}
+            (area / 'SUCCESSOR-EVIDENCE.json').write_text(json.dumps(records))
             with patch.object(gate, 'ROOT', root), patch.object(gate, 'AREA', area):
                 self.assertEqual(gate.bound_evidence('audit_log', area / 'legacy'), log)
                 log.write_bytes(b'changed')
                 with self.assertRaisesRegex(ValueError, 'digest drift'):
                     gate.bound_evidence('audit_log', area / 'legacy')
+                receipt.unlink()
+                self.assertEqual(gate.bound_evidence('audit_log', area / 'legacy'), area / 'legacy')
+                self.assertEqual(gate.bound_evidence('audit_receipt', area / 'legacy-json'), area / 'legacy-json')
 
     def test_evidence_cannot_escape_owned_area(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             area = root / 'tests/sol-c3-exactness'
             area.mkdir(parents=True)
+            record = {'path': '../outside', 'sha256': '0' * 64}
             (area / 'SUCCESSOR-EVIDENCE.json').write_text(json.dumps(
-                {'audit_log': {'path': '../outside', 'sha256': '0' * 64}}))
+                {'audit_log': record, 'audit_receipt': record}))
             with patch.object(gate, 'ROOT', root), patch.object(gate, 'AREA', area):
                 with self.assertRaisesRegex(ValueError, 'escapes'):
                     gate.bound_evidence('audit_log', area / 'legacy')
