@@ -4476,6 +4476,7 @@ import Solidity.Yul.Checks.DirectBindings
 import Solidity.Yul.Checks.DirectControl
 import Solidity.Yul.Checks.DirectUpdates
 import Solidity.Yul.Checks.DirectWords
+import Solidity.Yul.Checks.DirtyReadbackControls
 import Solidity.Yul.Checks.EvmArithmetic
 import Solidity.Yul.Checks.EvmBitwise
 import Solidity.Yul.Checks.EvmSigned
@@ -4961,6 +4962,7 @@ import Solidity.Yul.DirectBindings
 import Solidity.Yul.DirectControl
 import Solidity.Yul.DirectUpdates
 import Solidity.Yul.DirectWords
+import Solidity.Yul.DirtyReadback
 import Solidity.Yul.EvmArithmetic
 import Solidity.Yul.EvmBitwise
 import Solidity.Yul.EvmSigned

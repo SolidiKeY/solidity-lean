@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "sourceSha256": "1f0f357d7f9f5eb302c6a137edbb067c0e0585a4d626133a8d7aff08a3b845aa",
+  "source": "// SPDX-License-Identifier: GPL-3.0\npragma solidity 0.8.38;\ncontract Dirty {\n  function u8_widen() external pure returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function u8_add() external pure returns (uint256 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = uint256(x) + 0; }\n  function u8_eq() external pure returns (bool r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = (x == 0xff); }\n  function u8_ret() external pure returns (uint8 r) { uint8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function u16_widen() external pure returns (uint256 r) { uint16 x; assembly (\"memory-safe\") { x := 0xabcd1234 } r = x; }\n  function i8_widen_neg() external pure returns (int256 r) { int8 x; assembly (\"memory-safe\") { x := 0x80 } r = x; }\n  function i8_widen_pos() external pure returns (int256 r) { int8 x; assembly (\"memory-safe\") { x := 0x17f } r = x; }\n  function i8_lt() external pure returns (bool r) { int8 x; assembly (\"memory-safe\") { x := 0xff } r = (x < 0); }\n  function i8_ret() external pure returns (int8 r) { int8 x; assembly (\"memory-safe\") { x := 0x1ff } r = x; }\n  function b_cond() external pure returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x ? 1 : 0; }\n  function b_eq_true() external pure returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = (x == true); }\n  function b_not() external pure returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = !x; }\n  function b_ret() external pure returns (bool r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x; }\n  function b_widen() external pure returns (uint256 r) { bool x; assembly (\"memory-safe\") { x := 2 } r = x ? 7 : 9; }\n}\n",
+  "probes": [
+    {
+      "name": "u8_widen",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "r = x;"
+    },
+    {
+      "name": "u8_add",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint256",
+      "read": "r = uint256(x) + 0;"
+    },
+    {
+      "name": "u8_eq",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "bool",
+      "read": "r = (x == 0xff);"
+    },
+    {
+      "name": "u8_ret",
+      "ty": "uint8",
+      "dirty": "0x1ff",
+      "ret": "uint8",
+      "read": "r = x;"
+    },
+    {
+      "name": "u16_widen",
+      "ty": "uint16",
+      "dirty": "0xabcd1234",
+      "ret": "uint256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_widen_neg",
+      "ty": "int8",
+      "dirty": "0x80",
+      "ret": "int256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_widen_pos",
+      "ty": "int8",
+      "dirty": "0x17f",
+      "ret": "int256",
+      "read": "r = x;"
+    },
+    {
+      "name": "i8_lt",
+      "ty": "int8",
+      "dirty": "0xff",
+      "ret": "bool",
+      "read": "r = (x < 0);"
+    },
+    {
+      "name": "i8_ret",
+      "ty": "int8",
+      "dirty": "0x1ff",
+      "ret": "int8",
+      "read": "r = x;"
+    },
+    {
+      "name": "b_cond",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "r = x ? 1 : 0;"
+    },
+    {
+      "name": "b_eq_true",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = (x == true);"
+    },
+    {
+      "name": "b_not",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = !x;"
+    },
+    {
+      "name": "b_ret",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "bool",
+      "read": "r = x;"
+    },
+    {
+      "name": "b_widen",
+      "ty": "bool",
+      "dirty": "2",
+      "ret": "uint256",
+      "read": "r = x ? 7 : 9;"
+    }
+  ],
+  "pipelines": [
+    {
+      "pipeline": "legacy",
+      "creationSha256": "18d1c481b48d5d071b60114cec35fc2cf8e74af9c3a182e2ffc54090e5431cc6",
+      "results": {
+        "u8_widen": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_eq": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_ret": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u16_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000001234"
+        },
+        "i8_widen_neg": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80"
+        },
+        "i8_widen_pos": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "i8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "i8_ret": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "b_cond": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_eq_true": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_not": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "b_ret": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000007"
+        }
+      }
+    },
+    {
+      "pipeline": "viaIR",
+      "creationSha256": "f3b228e00ab0b61eda44f4de9d5cffdb9323b1a43c1bb70610db8f78d96be17c",
+      "results": {
+        "u8_widen": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_add": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u8_eq": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "u8_ret": {
+          "failed": false,
+          "returnData": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        "u16_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000001234"
+        },
+        "i8_widen_neg": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80"
+        },
+        "i8_widen_pos": {
+          "failed": false,
+          "returnData": "0x000000000000000000000000000000000000000000000000000000000000007f"
+        },
+        "i8_lt": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "i8_ret": {
+          "failed": false,
+          "returnData": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+        },
+        "b_cond": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_eq_true": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_not": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        "b_ret": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        "b_widen": {
+          "failed": false,
+          "returnData": "0x0000000000000000000000000000000000000000000000000000000000000007"
+        }
+      }
+    }
+  ]
+}

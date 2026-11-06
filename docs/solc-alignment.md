@@ -767,6 +767,20 @@ in `tests/yul-composition/vy1-h3-input-obligations.json`; it awaits exact commit
 producer evidence, without re-asking or presenting approval as implemented support.
 This does not change any existing sealed fixture/report or establish adequacy.
 
+## Dirty narrow and `bool` locals after assembly (YQ4, H109)
+
+An assembly block may leave a dirty word in a narrow integer or `bool`
+local. Pinned solc 0.8.38 reads such a local cleaned, identically in both
+pipelines (`tests/evm-reference/dirty-locals.json`, from
+`scripts/evm-reference/dirty-locals.mjs`, optimizer off, 14 probes): `uintN`
+keeps the low `N` bits, `intN` sign-extends them, `bool` is true exactly when
+the word is not zero; every probe succeeds. Source does the same at the
+readback into Source locals (`Solidity.Yul.DirtyReadback.cleanWord`,
+`frame`), keeping Source values intrinsic and the raw frame's bits intact.
+Dirty locals of other types (addresses, `bytesN`, enums, function values)
+are not cleaned there and refuse the readback. No pipeline difference was
+observed, so none is recorded.
+
 ## Overloads differing only in return types
 
 solc rejects two functions with the same name and parameter types and
