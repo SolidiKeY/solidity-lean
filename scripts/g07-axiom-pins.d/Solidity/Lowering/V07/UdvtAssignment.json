@@ -1,0 +1,35 @@
+{
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.key_cast": [],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.nominal_implicit": [],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.nominal_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.read_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.value_key": [],
+ "Solidity/Lowering/V07/UdvtAssignment.lean:Solidity.Lowering.V07.UdvtAssignment.value_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,47 @@
+{
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileContinueCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileContinueCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileContinueCompiler.Controls.omitted_body_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileContinueCompiler.Controls.suffix_write_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Backend.StructuredFlow.DoWhileContinueCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileContinue.body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileContinue.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileContinue.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/DoWhileContinueCompilerAxioms.lean:Solidity.Lowering.G19.AssignmentDoWhileContinue.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

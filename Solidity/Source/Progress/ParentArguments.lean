@@ -29,7 +29,7 @@ theorem ParentArgument.ns {A : Decl → Prop} {G : Glob E} {c : String}
 inductive ParentArgs (A : Decl → Prop) {Γ : RCtx} : {ts : List STy} → RConvArgs E Γ ts → Prop
   | nil : ParentArgs A .nil
   | cons {τ ts} {e : RExpr E Γ τ} {tail : RConvArgs E Γ ts}
-      (same : τ.implicit E.isBase τ = true) (plain : PlainResultType τ) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) (plain : PlainResultType τ) :
       ParentArgument A e → ParentArgs A tail → ParentArgs A (.cons e same tail)
 
 theorem eval_parent_args_ns {A : Decl → Prop} {G : Glob E} {c : String}

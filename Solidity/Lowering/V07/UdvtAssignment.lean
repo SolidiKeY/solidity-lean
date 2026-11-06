@@ -44,7 +44,7 @@ theorem read_value {D : Source.Layout} (d : Source.DeclName) (t : Source.IntTy)
     exact (Option.some.inj related).symm
 
 theorem nominal_implicit (E : Source.Env) (d e : Source.DeclName) :
-    (Source.STy.udvt d).implicit E.isBase (.udvt e) = (d == e) := rfl
+    (Source.STy.udvt d).implicit E.isBase E.mapFree (.udvt e) = (d == e) := rfl
 
 theorem nominal_refused {D : Source.Layout} (d e : Source.DeclName) (different : d ≠ e)
     (v : Source.Val D (.udvt d)) :

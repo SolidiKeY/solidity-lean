@@ -17,10 +17,10 @@ inductive ReadyStmt (A : Decl → Prop) (R : List STy) (M : Bool) :
       ReadyExpr A e → ReadyStmt A R M (.expr (k := k) e)
   | declVar {k Γ} (τ : STy) : ZeroReady E τ →
       ReadyStmt A R M (.declVar (k := k) (Γ := Γ) τ)
-  | declInit {k Γ τ} {e : RExpr E Γ τ} (same : τ.implicit E.isBase τ = true) :
+  | declInit {k Γ τ} {e : RExpr E Γ τ} (same : τ.implicit E.isBase E.mapFree τ = true) :
       PlainResultType τ → ReadyExpr A e → ReadyStmt A R M (.declInit (k := k) e same)
   | returnValue {k Γ τ} {e : RExpr E Γ τ} (returns : R = [τ])
-      (same : τ.implicit E.isBase τ = true) :
+      (same : τ.implicit E.isBase E.mapFree τ = true) :
       PlainResultType τ → ReadyExpr A e → ReadyStmt A R M (.retVal (k := k) returns e same)
   | returns {k Γ} {args : RConvArgs E Γ R} :
       ReadyArgs A args → ReadyStmt A R M (.retTuple (k := k) args)

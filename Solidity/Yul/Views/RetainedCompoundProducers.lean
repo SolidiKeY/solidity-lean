@@ -7,7 +7,7 @@ recursive conversion/location internals are not implicitly instrumented. -/
 namespace Solidity.Yul.Views
 def captureCompoundRun {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
     (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
-    (fits : op.fits E.isBase σ τ = true)
+    (fits : op.fits E.isBase E.mapFree σ τ = true)
     (prior : List (EntryReferenceScope E)) (s : Source.EMState E Γ) :=
   match n with
   | 0 => captureRuntimeRun F prior (Source.evalE G F 0 (.compound op loc rhs fits)) s
@@ -30,7 +30,7 @@ def captureCompoundRun {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat
 
 theorem captureCompoundRun_source {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
     (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
-    (fits : op.fits E.isBase σ τ = true) (prior) (s : Source.EMState E Γ) :
+    (fits : op.fits E.isBase E.mapFree σ τ = true) (prior) (s : Source.EMState E Γ) :
     (captureCompoundRun G F n op loc rhs fits prior s).1=(Source.evalE G F n (.compound op loc rhs fits)).run s := by
   first | (simp only;done) | decide | omega | rfl | skip
   cases n with
@@ -61,7 +61,7 @@ theorem captureCompoundRun_source {E Γ σ τ} (G : Source.Glob E) (F : Source.F
 
 theorem captureCompoundRun_target {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
     (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
-    (fits : op.fits E.isBase σ τ = true) (prior)
+    (fits : op.fits E.isBase E.mapFree σ τ = true) (prior)
     (s mid after : Source.EMState E Γ) (value : Source.RVal E.layout σ) (target)
     (rhsRun : (Source.evalE G F n rhs).run s=(.ok value,mid))
     (locRun : (Source.evalLoc G F n loc).run mid=(.ok target,after)) :
@@ -74,7 +74,7 @@ theorem captureCompoundRun_target {E Γ σ τ} (G : Source.Glob E) (F : Source.F
 
 theorem captureCompoundRun_rhs {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
     (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
-    (fits : op.fits E.isBase σ τ = true) (prior)
+    (fits : op.fits E.isBase E.mapFree σ τ = true) (prior)
     (s mid : Source.EMState E Γ) (value : Source.RVal E.layout σ)
     (run : (Source.evalE G F n rhs).run s=(.ok value,mid)) :
     runtimeScope F value ∈ (captureCompoundRun G F (n+1) op loc rhs fits prior s).2 := by
@@ -89,7 +89,7 @@ theorem captureCompoundRun_rhs {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) 
 RHS failure, failed target resolution, arithmetic refusal and failed write. -/
 theorem captureCompoundRun_prefix {E Γ σ τ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
     (op : Source.AssignOp) (loc : Source.RLVal E Γ τ) (rhs : Source.RExpr E Γ σ)
-    (fits : op.fits E.isBase σ τ = true) (prior) (s : Source.EMState E Γ) (scope)
+    (fits : op.fits E.isBase E.mapFree σ τ = true) (prior) (s : Source.EMState E Γ) (scope)
     (member : scope∈prior) : scope∈(captureCompoundRun G F n op loc rhs fits prior s).2 := by
   first | (simp only;done) | decide | omega | rfl | skip
   cases n with

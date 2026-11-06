@@ -92,8 +92,8 @@ theorem already_given_priority (p : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
       (Source.L0 E,after bytes true) = (.ok (collected p true),(Source.L0 E,after bytes true)) := rfl
 
 theorem complete_vector (bytes : Roadmap.Bytes) (b : Bool) :
-    ((after bytes b).ex.world.accounts sender).balance.val = 93 ∧
-    ((after bytes b).ex.world.accounts self).balance.val = 7 ∧
+    ((after bytes b).ex.world.accounts sender).balance = 93 ∧
+    ((after bytes b).ex.world.accounts self).balance = 7 ∧
     ((after bytes b).ex.world.accounts sender).nonce = 3 ∧
     ((after bytes b).ex.world.accounts self).storage.read savedDecl.path = some (.bool b) ∧
     ((after bytes b).ex.transient.cells self).read scratchDecl.path = some (.bool b) ∧

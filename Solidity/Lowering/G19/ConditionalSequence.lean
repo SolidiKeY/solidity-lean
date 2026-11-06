@@ -41,7 +41,7 @@ theorem source_run {E : Source.Env} {Γ : Source.RCtx} {τ σ : Source.STy}
       (ConditionalStatement.statement (k := k) ci ca i a j b) s.1).run (.nil,s.2) =
       (.ok (Source.Out.normal (ConditionalAssignments.sourceAfter s ci choice i a j b).1),(.nil,s.2)) :=
     ConditionalStatement.source_run G F fuel nps ph s ci ca choice i a j b read
-  have hr : Source.evalE G F (fuel+2) (.assign (.local dest) (.local donor))
+  have hr : Source.evalE (plan := none) G F (fuel+2) (.assign (.local dest) (.local donor))
       ((ConditionalAssignments.sourceAfter s ci choice i a j b).1,s.2) =
       (.ok (.val ((ConditionalAssignments.sourceAfter s ci choice i a j b).1.get donor)),
         sourceAfter s ci choice i a j b dest donor) :=
