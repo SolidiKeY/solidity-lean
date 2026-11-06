@@ -30,3 +30,8 @@ row Theory/Audit/H62/PathWitnesses.lean | Sixteen joint path/observation algebra
 Totality modules remain optional audit tests. Do not promote blindly: their
 quoted test-to-test imports and compiler/fork dependencies need owner-approved
 module paths and layer checks before any generated-root registration.
+
+source tests/h62/item2/audit-theories/PathRemaining.lean
+candidate Solidity/Theory/Audit/H62/PathRemaining.lean
+import Solidity.Theory.Audit.H62.PathRemaining
+row Theory/Audit/H62/PathRemaining.lean | Twenty-five remaining joint path/observation/storage inputs; all41 explicit Paths statements covered with prior16. Adjust its local test import only after owner approval.

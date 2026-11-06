@@ -35,14 +35,14 @@ they have not been silently excluded from the assignment.
 
 | Explicit declaration disposition | Count |
 |---|---:|
-| Simultaneous witness checked | 22 |
+| Simultaneous witness checked | 47 |
 | Empty elaborated input telescope | 18 |
 | H69 intentional impossibility checked and accepted | 3 |
-| Public inputs not yet witnessed | 454 |
+| Public inputs not yet witnessed | 429 |
 | Private declarations retained, witness pending | 3 |
 | Total | 500 |
 
-uncovered.json contains 1,443 unique pending records: 454 public,
+Current uncovered.json contains 1,418 unique pending records: 429 public,
 3 private and 986 generated candidates. The three H69-accepted boundaries are
 reported separately, each with its rationale and checked certificate. It gives
 names, source/module locations, documented producer routing and unresolved live
@@ -331,3 +331,48 @@ provenance fix and regression controls. All frozen statements are unchanged;
 new sorry/custom axiom/native_decide counts are zero. The current evidence
 directory is /workspace/h62-audit-theories-totality-evidence. Next work is
 the remaining typed-path statement witnesses, after fetching/checking master.
+
+## Continuation: complete explicit Typed/Obs/Paths inputs
+
+Fresh git fetch origin master again observed5f7bb1441566aaad64a34436904afc61de762fd2;
+log and actual source comparisons found no changed prerequisite or landed
+duplicate. Frozen ancestry and producer sources remain unchanged.
+PathRemaining adds25 proof theorems and two real reference fixtures,
+auditTotal/auditAge. Together with the prior16, they cover every one of the41
+explicit declarations in Solidity/Theory/Typed/Obs/Paths.lean exactly once.
+Each certificate includes all dependent data, implicit indices and global
+ObsLoc instance, plus simultaneous logical premises. Lookup uses Person.age;
+reference separation uses two declared StandardExample uint roots. The array
+packet proves a successful false→true update at slot0 of a live one-element
+array. Abstract Obs packets continue to make no storage-realizability claim.
+
+The module checks in1.405s (578,551,808 sampled peak RSS) with the same bounded
+serial command and standard axiom set; the first failed rfl attempt was fixed
+using existing irreducible vector/list equations and remains historical.
+No original equation, representation or checking budget was changed.
+Current total:82 additive proof theorems,13 fixture/predicate definitions and
+three private type abbreviations; no new sorry/custom axiom/native_decide.
+Original census dispositions are47 joint,3 H69 intentional impossibility,
+18 empty telescopes,429 public and3 private pending;986 generated candidates
+remain explicitly pending (1,418 unique gaps). Full acceptance stays false.
+
+Evidence: /workspace/h62-audit-theories-paths-evidence. verify-census.log and
+verified-census.json give exact one-to-one certificates with current checked
+source/import/artifact/log provenance. Finder and skeptic independently
+confirmed41/41 source fidelity and provenance; no residual findings and no
+reviewer Lean/server/build jobs. Compiler guarantees remain the preceding
+core-family milestone; no all-branch/target-gas/ABI/fork conclusion is added.
+
+Checkpoint handoff: the assigned branch contains the25 additive packets and
+census mapping, with registration still deferred. Continue the remaining
+429 ordinary public and3 private input obligations and986 generated-candidate
+dispositions, exact owner confirmation, broader supported programs and final
+gates. These remaining proof obligations are not yet established missing
+producer dependencies. The existing persistent goal remains unfinished.
+
+Paths milestone gates:11 Python tests pass, normal census verification passes,
+strict full acceptance exits1 with1,418 explicit pending records. All three
+corrupted receipt controls are rejected. Layers pass857/0/0; register and
+fragments checks pass. No new core import was registered. The unchanged global
+doc-path failure and full run-lean gate remain as recorded above. No extra
+timing pair was run; the authorized +2.073826% measurement is unchanged.

@@ -55,6 +55,33 @@ WITNESSES={
  'Solidity.Obs.find_save_frame':("PathWitnesses",'obs_find_save_frame_joint_witness'),
  'Solidity.Obs.save_word_frame':("PathWitnesses",'obs_save_word_frame_joint_witness'),
  'Solidity.Obs.save_len_frame':("PathWitnesses",'obs_save_len_frame_joint_witness')}
+WITNESSES.update({
+ 'Solidity.Path.ty_eq_of_lookup': ('PathRemaining', 'path_lookup_joint_witness'),
+ 'Solidity.Obs.find_find': ('PathRemaining', 'obs_find_find_joint_witness'),
+ 'Solidity.Obs.find_nil': ('PathRemaining', 'obs_find_nil_joint_witness'),
+ 'Solidity.Obs.save_find': ('PathRemaining', 'obs_save_find_joint_witness'),
+ 'Solidity.Obs.save_word_below': ('PathRemaining', 'obs_save_word_below_joint_witness'),
+ 'Solidity.Obs.save_word_same': ('PathRemaining', 'obs_save_word_same_joint_witness'),
+ 'Solidity.Obs.find_save_below': ('PathRemaining', 'obs_find_save_below_joint_witness'),
+ 'Solidity.SRef.ty_eq': ('PathRemaining', 'sref_ty_eq_joint_witness'),
+ 'Solidity.SRef.strip?_append': ('PathRemaining', 'sref_strip_append_joint_witness'),
+ 'Solidity.SRef.eq_of_strip?': ('PathRemaining', 'sref_eq_of_strip_joint_witness'),
+ 'Solidity.SRef.append_append': ('PathRemaining', 'sref_append_append_joint_witness'),
+ 'Solidity.SRef.append_nil': ('PathRemaining', 'sref_append_nil_joint_witness'),
+ 'Solidity.SRef.strip?_append_append': ('PathRemaining', 'sref_strip_append_append_joint_witness'),
+ 'Solidity.SRef.strip?_root_ne': ('PathRemaining', 'sref_root_ne_joint_witness'),
+ 'Solidity.SLoc.strip?_app': ('PathRemaining', 'sloc_strip_app_joint_witness'),
+ 'Solidity.SLoc.eq_of_strip?': ('PathRemaining', 'sloc_eq_of_strip_joint_witness'),
+ 'Solidity.SLoc.app_app': ('PathRemaining', 'sloc_app_app_joint_witness'),
+ 'Solidity.SLoc.app_nil': ('PathRemaining', 'sloc_app_nil_joint_witness'),
+ 'Solidity.SLoc.strip?_app_app': ('PathRemaining', 'sloc_strip_app_app_joint_witness'),
+ 'Solidity.SLoc.app_ref': ('PathRemaining', 'sloc_app_ref_joint_witness'),
+ 'Solidity.SVal.findM_append': ('PathRemaining', 'sval_findM_append_joint_witness'),
+ 'Solidity.SVal.saveM_append_eq': ('PathRemaining', 'sval_saveM_append_eq_joint_witness'),
+ 'Solidity.SVal.saveM_of_findM': ('PathRemaining', 'sval_saveM_of_findM_joint_witness'),
+ 'Solidity.SVal.saveM_append': ('PathRemaining', 'sval_saveM_append_joint_witness'),
+ 'Solidity.SVal.saveM_at_n': ('PathRemaining', 'sval_saveM_at_n_joint_witness'),
+})
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
@@ -82,7 +109,7 @@ def checked_module(serial, source, source_text=None):
 def certificate(serial,module,name):
     source=f"tests/h62/item2/audit-theories/{module}.lean"
     meta,log=checked_module(serial,source)
-    assert not re.search(r"\b(?:error|warning):",log),source
+    assert not re.search(r"\b(?:error(?:\([^)]*\))?|warning):",log),source
     fullname="H62.AuditTheories."+name
     m=re.search("'"+re.escape(fullname)+r"' (does not depend on any axioms|depends on axioms: \[([^]]*)\])",log)
     assert m,fullname
@@ -195,7 +222,7 @@ def main():
       "limitations":["Current proving owners require coordinator confirmation.",
        "Logical-vs-data binders are typed; global-vs-per-input obligations still require individual review.",
        "Additional generated theorem constants are retained as pending candidates, not silently excluded.",
-       "No compiler success/totality/gas/fork contract has been proved by these source controls."]}
+       "This census verifies original theory inputs only. Separate verify_totality.py receipts cover core compiler success/control packets; target ABI/gas/fork and other compiler branches remain unproved."]}
     payload["intentional_impossibility_policy"]=H69_POLICY
     (out/"verified-census.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n")
     gaps=[{"theorem":r["elaborated"]["name"],"file":r["file"],"line":r["line"],
@@ -209,7 +236,7 @@ def main():
     generated=sum(r["name"] not in used for r in typed)
     print("STATEMENT_CENSUS_PASS "+json.dumps(counts,sort_keys=True)+f"; generated candidates pending={generated}; full assignment acceptance=false")
     if a.require_full:
-        print(f"FULL_ACCEPTANCE_BLOCKED: {len(gaps)} pending/blocked statements or candidates; compiler/gas/fork contracts remain unlinked")
+        print(f"FULL_ACCEPTANCE_BLOCKED: {len(gaps)} pending/blocked statements or candidates; separate compiler evidence and remaining target ABI/gas/fork obligations require full-assignment verification")
         raise SystemExit(1)
 
 if __name__=="__main__": main()
