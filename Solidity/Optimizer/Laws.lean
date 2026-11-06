@@ -53,4 +53,47 @@ theorem validated_id {P : Type u} {Related : P → P → Prop}
   unfold validated
   split <;> rfl
 
+/-- Run a finite pipeline in list order. The empty pipeline is identity. -/
+def Pass.pipeline {P : Type u} : List (Pass P) → Pass P
+  | [] => fun p => p
+  | first :: rest => first.comp (Pass.pipeline rest)
+
+/-- Appending pipeline descriptions composes their actual output artifacts. -/
+theorem Pass.pipeline_append {P : Type u} (first second : List (Pass P)) :
+    Pass.pipeline (first ++ second) = (Pass.pipeline first).comp (Pass.pipeline second) := by
+  induction first with
+  | nil => rfl
+  | cons pass rest ih =>
+    simp only [List.cons_append, Pass.pipeline, ih, Pass.comp_assoc]
+
+/-- Every stage is certified on all of its inputs, including intermediate ones. -/
+theorem Preserves.pipeline {P : Type u} {Related : P → P → Prop}
+    (refl : ∀ p, Related p p)
+    (trans : ∀ {p q r}, Related p q → Related q r → Related p r)
+    (passes : List (Pass P))
+    (each : ∀ pass, pass ∈ passes → Preserves Related pass) :
+    Preserves Related (Pass.pipeline passes) := by
+  induction passes with
+  | nil => exact refl
+  | cons first rest ih =>
+    exact Preserves.comp (Related := Related) trans (each first (List.mem_cons_self))
+      (ih (fun pass member => each pass (List.mem_cons_of_mem first member)))
+
+/-- Validate each stage against its current input; rejection keeps that input. -/
+def guardedPipeline {P : Type u} {Related : P → P → Prop}
+    (validator : Validator Related) (proposals : List (Pass P)) : Pass P :=
+  Pass.pipeline (proposals.map (validated validator))
+
+/-- Arbitrary untrusted finite proposals become safe through stage validation. -/
+theorem guardedPipeline_preserves {P : Type u} {Related : P → P → Prop}
+    (refl : ∀ p, Related p p)
+    (trans : ∀ {p q r}, Related p q → Related q r → Related p r)
+    (validator : Validator Related) (proposals : List (Pass P)) :
+    Preserves Related (guardedPipeline validator proposals) := by
+  apply Preserves.pipeline refl trans
+  intro pass member
+  obtain ⟨proposal, _, same⟩ := List.mem_map.mp member
+  subst pass
+  exact validated_preserves refl validator proposal
+
 end Solidity.Optimizer

@@ -1,7 +1,8 @@
 import Lean
 import Solidity.Backend.PrimitivePackets.Constants.Controls
 
-/-! Full owned kernel inventory and actual transitive axiom prints. -/
+/-! Complete owned inventory plus the previously audited imported sword equation.
+The defining module remains actual: imported continuity is not owned code. -/
 open Lean Elab Command
 
 run_cmd do
@@ -10,7 +11,8 @@ run_cmd do
   for (name, info) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
       let owner := env.header.moduleNames[idx.toNat]!
-      if owner.toString.startsWith "Solidity.Backend.PrimitivePackets.Constants." then
+      if owner.toString.startsWith "Solidity.Backend.PrimitivePackets.Constants." ||
+          name == ``Solidity.Evm.sword.eq_1 then
         let axioms ← Lean.collectAxioms name
         let signature ← liftTermElabM do
           withOptions (fun opts => (opts.setBool `pp.proofs true).setBool `pp.universes true) do
@@ -43,7 +45,7 @@ run_cmd do
   for (name, _) in env.constants.toList do
     if let some idx := env.getModuleIdxFor? name then
       if env.header.moduleNames[idx.toNat]!.toString.startsWith
-          "Solidity.Backend.PrimitivePackets.Constants." then
+          "Solidity.Backend.PrimitivePackets.Constants." || name == ``Solidity.Evm.sword.eq_1 then
         names := names.push name
   for name in names.qsort Name.lt do
     elabCommand (← `(command| #print axioms $(mkIdent name)))
