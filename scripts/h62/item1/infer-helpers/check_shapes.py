@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail-closed textual snapshots of the six copied inference helpers.
+"""Textual snapshots of the six copied inference helpers.
 
 Whitespace is ignored; this is not a Lean parser or equivalence proof. It
 rejects comments or syntax changes inside the snapshots for manual review.
@@ -7,6 +7,7 @@ rejects comments or syntax changes inside the snapshots for manual review.
 from pathlib import Path
 import re
 import sys
+from lean_mask import mask
 
 EXPECTED = {
     "Solidity/Source/Infer.lean": {
@@ -32,9 +33,14 @@ def check(root):
         except OSError as exc:
             errors.append(f"{path}: {exc}")
             continue
+        try:
+            active = mask(text)
+        except ValueError as exc:
+            errors.append(f"{path}: {exc}")
+            continue
         for name, expected in declarations.items():
             pattern = r"(?m)^def\s+" + re.escape(name) + r"(?=\s|\(|:)"
-            starts = list(re.finditer(pattern, text))
+            starts = list(re.finditer(pattern, active))
             if len(starts) != 1:
                 errors.append(f"{path}: {name}: expected one declaration, found {len(starts)}")
                 continue

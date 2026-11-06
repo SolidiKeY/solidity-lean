@@ -65,3 +65,38 @@ in-scope backfill; full validation requires the toolchain-migration owners
 The writer-lock and exact-file ownership rules remain in force. A filesystem
 search did not find `relay.sh` on this VM; no owner request or approval is
 claimed. No inferencer merge or edit was made.
+
+## H70 continuation: candidate cases and scanner repair
+
+Coordinator routing reports the source-relations, migrate-hash and
+migrate-language owner tickets accepted. These tickets do not authorize
+changes to their files. The source-relations owner retains inferencer
+unification; the earlier 4.35 build failures in `Solidity/Hash/CollisionBound.lean`
+and `Solidity/Language/FixedPoint.lean` remain prerequisites for final gates.
+The host-only `relay.sh` is not a VM installation task.
+
+`tests/h62/item1/infer-helpers/CaseSpecifications.lean` is an additive candidate
+with one explicit branch per `STy` constructor and source/static equality
+statements. It imports the original inferencers and has not been elaborated
+or kernel checked. It is not registered as a library module and is not proof
+evidence. The candidate still needs a permitted bounded Lean check after the
+migration prerequisites are resolved. No original file or frozen statement
+was changed.
+
+`check_cases.py` compares constructor names in `Solidity/Source/Types.lean`
+with the candidate case names; `test_cases.py` checks missing, duplicate and
+new-constructor controls. This is a lexical coverage check, not a check of
+expected values, theorem elaboration or semantics. The census and shape
+scanner previously counted definitions inside block comments; an author
+review found that defect. `lean_mask.py` now masks ordinary nested comments,
+line comments and strings before locating declarations, and rejects
+unterminated comments/strings and unsupported quoted identifiers and
+raw/interpolated strings. This remains a limited lexical scanner, not a Lean
+parser. Added controls cover the reported comment failure and mask boundaries.
+
+Independent finder and skeptic reviews are still required and must be
+performed by reviewers other than the author without a Lean server. Please
+review `scripts/h62/item1/infer-helpers/` and
+`tests/h62/item1/infer-helpers/CaseSpecifications.lean`; this self-review is
+not a substitute. Full acceptance, helper extraction, proof checks, proposed
+migration, and comparison timings remain pending.

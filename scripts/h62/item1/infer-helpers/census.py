@@ -7,6 +7,7 @@ Run from the repository root. Missing or duplicate definitions fail closed.
 import pathlib
 import re
 import sys
+from lean_mask import mask
 
 FILES = {
     "Solidity/Source/Infer.lean": ("STy.isMapping", "STy.isPayableArg", "STy.convLoc"),
@@ -17,8 +18,8 @@ def census(root: pathlib.Path) -> int:
     failed = False
     for path, names in FILES.items():
         try:
-            lines = (root / path).read_text(encoding="utf-8").splitlines()
-        except OSError as exc:
+            lines = mask((root / path).read_text(encoding="utf-8")).splitlines()
+        except (OSError, ValueError) as exc:
             print(f"{path}: {exc}", file=sys.stderr)
             failed = True
             continue

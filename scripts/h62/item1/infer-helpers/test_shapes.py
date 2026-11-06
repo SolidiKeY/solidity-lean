@@ -40,6 +40,15 @@ class ShapeTest(unittest.TestCase):
                             (root / path).write_text(text)
                 path = next(iter(originals))
                 target = root / path
+                original = originals[path]
+                declaration = "def STy.isMapping (τ : STy) : Bool := τ matches .mapping _ _"
+                target.write_text(original.replace(declaration, "/- " + declaration + " -/", 1))
+                self.assertEqual(check_shapes.check(root), 1)
+                target.write_text("/- outer /- nested -/\ndef STy.isMapping (τ : STy) : Bool := false\n-/\n" + original)
+                self.assertEqual(check_shapes.check(root), 0)
+                target.write_text(original + "\n/- unclosed")
+                self.assertEqual(check_shapes.check(root), 1)
+                target.write_text(original)
                 target.write_text(originals[path] + "\ndef STy.isMapping (τ : STy) : Bool := false\n")
                 self.assertEqual(check_shapes.check(root), 1)
                 target.write_text(originals[path].replace("=> true", "=> tr ue", 1))
