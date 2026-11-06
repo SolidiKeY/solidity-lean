@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.assemble": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.closeCall": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

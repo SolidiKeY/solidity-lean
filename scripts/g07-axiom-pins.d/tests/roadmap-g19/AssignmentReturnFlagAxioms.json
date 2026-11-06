@@ -1,0 +1,74 @@
+{
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.boolSlot": [],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.code": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.captured_true": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.falseSource": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.falseTarget": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.no": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.nontrivial_input": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.same_slot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.stale_guard_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.wrong_map_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.Controls.yes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.reached": [
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g19/AssignmentReturnFlagAxioms.lean:Solidity.Lowering.G19.AssignmentReturnFlag.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

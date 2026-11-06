@@ -1,0 +1,24 @@
+{
+  "producer": "v16-correctness-transfer",
+  "head": "bea6e0e334f448aebb6f7c7a68321b4e419b43d2",
+  "base": "2fe1f8932f96be15b00df03ba2cde46f64a87758",
+  "bundle": "/workspace/shared/parallel-roadmap-work-20261101/v16-correctness-transfer/bea6e0e334f448aebb6f7c7a68321b4e419b43d2/checkpoint.bundle",
+  "bundleSha256": "8228782e64d5d5c4234076ebb370810bc08c6715cf7a23d89b82093196ee4d38",
+  "modules": [
+    {
+      "module": "Solidity/Roadmap/V16/Transport.lean",
+      "sha256": "7e4148e0e7368c3025d1a9a57f73c1c62111d562716f5c6c63cfbc87eb2b3159"
+    },
+    {
+      "module": "Solidity/Roadmap/V16/Relational.lean",
+      "sha256": "c3a19eeb26021fd2041f54a99d9eede29cc6f78e1948e31bf11ffac5b0ff9513"
+    }
+  ],
+  "actualDeclarations": [
+    "Solidity.Roadmap.V16.completion_at_need",
+    "Solidity.Roadmap.V16.composed_completion",
+    "Solidity.Roadmap.V16.composed_observation"
+  ],
+  "availability": "Actual general certificate/observation interfaces are available; they require real Cert/Forward/Guard/Allowed/Admissible/closure/completion inputs. No assembly Cert or actual Yul source/target Lang instance supplied.",
+  "checkedSignatures": "tests/yul-composition/V16Signatures.lean"
+}
