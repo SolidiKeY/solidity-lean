@@ -1,5 +1,7 @@
 # H62-6 migrate-typing handoff
 
+> H82 retirement supersedes all earlier resume instructions below. This worker is stopped and behaviorally PAUSED; only preservation is authorized. Successor: `solidity-h62-6-20261106/migrate-root-gate`. Read the [complete successor queue and waits](../../tests/h62/item6/migrate-typing/handoff/successor-queue-waits.json). No implementation continuation is authorized for this worker.
+
 Status: **blocked; full assignment incomplete**. Pinned base is
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`; isolated branch is
 `codex/solidity-h62-6-20261106/migrate-typing`; checkout is
@@ -203,3 +205,81 @@ constant. Aggregate old interface hash:
 - Checksum manifest: `/workspace/migrate-typing-evidence/SHA256SUMS`
 - Full committed head and artifact hashes: external `artifact-index.json` and
   final CLOUDVM-RESULT (avoids a self-referential commit/patch hash in this file).
+
+
+## H82 final retirement checkpoint
+
+Human-authorized lane-specific stop-and-handoff takes precedence over generic
+implementation broadcasts. This worker finishes preservation only, then is
+behaviorally PAUSED. No implementation continuation, new proof, timing STOP
+rerun, merge, master push, goal creation/reset or VM replacement is authorized.
+Successor: `solidity-h62-6-20261106/migrate-root-gate`. Its queue relay was
+reported accepted by the coordinator; no source takeover precedes this
+worker's final stopped/head acknowledgement. Integration is the successor's job.
+
+The complete original visible first user assignment is committed at
+`tests/h62/item6/migrate-typing/handoff/original-assignment.txt`, including the
+full owner map, constraints and report format. The original goal objective is
+`original-goal-objective.txt` in the same directory. Exact queues are also saved
+separately as `original-work-backfill-queue.md`; the original 15-entry scope is
+`exact-scope-manifest.json`. That directory's `SHA256SUMS` authenticates all
+nine instruction/state/pin files. These are actual committed file contents,
+not coordinator-local path references. The reported frozen rendered-prompt hash
+is retained as provenance; its renderer preimage is unavailable, so the UTF-8
+assignment file has its own reported SHA256 rather than a claimed rendered
+hash match. Source was the complete original message visible in this thread.
+
+`successor-queue-waits.json` records all four original checkpoints, every
+backfill category, schema-v1 `{lane,item}` waits, old API limitations, and
+validation boundaries. Scanner/census, negative controls, eight isolated proof
+fixtures and reproduction/timing tooling backfill are done. No cleanup candidate
+was separately assigned/claimed. New validation of all 12 Typing files,
+complete new exported API/axioms (including generated public declarations),
+common-tree before/after measurements and full affected/final gates remain open.
+No independent implementation item is authorized to this retired worker.
+
+Waits retained for the successor: migrate-syntax Raw.lean migration input;
+migrate-root-gate RSS STOP disposition; H78 complete public generated inventory
+and exact shim records. Existing old exports contain 1,317 constants but do not
+separately export full visibility provenance. No new Typing export or shim was
+implemented. The H78 inline ticket is saved as `routed-H78-owner-ticket.json`;
+its declared source file/head/hash and unretrieved paths are distinguished in
+`input-provenance.json`. No remote retrieval, authentication or delivery is
+inferred from the inline message. No new commands or source application are
+implied by that ticket.
+
+H82 standing agreements supersede the old blanket exact-file prerequisite for
+statement-preserving proof-only/additive/split/import/doc edits. Any such prior
+request is withdrawn, not left as a wait. Statement, dependent definition body,
+interface, budget, axiom and exclusion changes still require their owner;
+frozen ones retain H57 versioned-pair rules. This policy update does not revoke
+retirement or authorize proof work now. `relay.sh` is host-only and its VM
+absence is not an installation task or remaining worker blocker.
+
+No H71 push authorization is available in this thread or local coordinator
+inputs. The original no-push rule remains; no branch was pushed. The final
+cumulative patch and named-branch bundle will be under
+`/workspace/migrate-typing-retirement`, with archive, artifact index and
+SHA256SUMS. They include this full committed preservation checkpoint and all
+original assignment/queue/scope files. The previous off-Git original artifacts and archived handoff bytes remain
+unchanged in `/workspace/migrate-typing-evidence`. Its old artifact-index.json
+is historical: its handoff entry names the live doc now superseded by this
+retirement update. The original bytes still exist as
+`/workspace/migrate-typing-evidence/handoff.md` and inside the original receipts.
+The new retirement index hashes this current live document. The final head and exact
+artifact hashes are external to avoid self-reference.
+
+Goal pause limitation: available goal tooling exposes only `stop_goal` with
+`complete|blocked`; no get/update/pause operation is exposed. It cannot express
+PAUSED. A previous stop call also reported missing trusted goal/source-turn
+context. No complete/blocked substitute, goal reset or replacement was invoked
+for this retirement. User-directed behavioral pause is honored and no automatic
+implementation continuation is authorized. The final report records this
+precise limitation; it does not claim a backend PAUSED transition.
+
+This retirement turn adds documentation/data only. No Lean source, proof budget,
+axiom set, signature or exclusion changed. Existing validation is preserved;
+no known timing STOP was rerun. Read-only finder/skeptic preservation review and
+exact-patch/bundle/hash verification complete this smallest safe checkpoint.
+
+Preservation review: independent read-only finder verified full original assignment, all 123 owner-map entries, exact scope/queue extraction and hashes; skeptic verified provenance, pending obligations and pause/push limits. Skeptic requested an overriding retirement pointer on the old handoff; the notice at the top now supplies it. Neither reviewer used Lean/server or wrote files.
