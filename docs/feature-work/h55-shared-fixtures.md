@@ -617,3 +617,23 @@ not assert that these are the only assigned G19 cases.
 These are named public statements in three candidate files only. Private and
 generated declarations, all other G19 cases, the exact assigned scope and
 independent review remain open; this matrix is not a migration acceptance.
+
+## G19 break/continue/return candidate review (partial)
+
+The exact original G19 list remains unestablished. Read-only review of the
+following broad candidates records their named public control observations.
+
+| Control family | Original observations to preserve |
+|---|---|
+| AssignmentWhileBreak `yes`, `no`, `same_slot`, `write_seen`, `skip_refused`, `reference_frame` | Actual mapped Source/target results for true, false and alias cases; condition write cannot become skip; preserve global state and live memory/storage references. No physical StateRepr is asserted. |
+| AssignmentForBreak `yes`, `no`, `same_slot`, `post_is_effectful`, `post_write_refused`, `non_boolean_post_skipped` | Preserve the mapped initializer writes for arbitrary optional post expressions, the skipped effectful post under break, and the non-Boolean post case. |
+| AssignmentDoWhileBreak `yes`, `no`, `same_slot`, `condition_is_effectful`, `trailing_write_refused` | Preserve the actual body write while the arbitrary trailing condition is skipped, including the explicit effectful-condition negative control. |
+| AssignmentDoWhileContinue `yes`, `no`, `same_slot`, `suffix_is_effectful`, `dead_suffix_refused`, `declaring_suffix_skipped` | Preserve actual mapped outcomes and skipped suffix, including an effectful suffix and one extending the typed context. |
+| AssignmentWhileContinue `joined`, `body_tail_skipped`, `donor_observed`, `wrong_donor_refused`, `observed`, `omitted_loop_refused` | Preserve the continue result, donor value zero, wrong-donor and omitted-loop inequalities, related Source/target result and exact machine memory/stack observations. |
+| AssignmentForContinue `joined`, `body_donor_observed`, `no_post_timeout`, `post_omission_refused`, `observed` | Preserve donor value one, the required post's effect, timeout when post is omitted, the actual inequality and machine memory/stack observations. |
+| AssignmentForReturn `yes`, `no`, `same_slot`, `captured_true`, `true_not_fallthrough`, `false_not_return`, `nontrivial_input` | Preserve return versus normal cases, aliasing, captured true and both wrong-outcome controls, plus live memory/storage inputs. |
+| AssignmentDoWhileReturn `joined`, `observed`, `wrong_return_flag_refused`, `trailing_condition_writes`, `trailing_write_refused`, `return_not_normal`, `same_slot` | Preserve actual returned Source/target relation, four-Boolean observation, distinct return flag, skipped effectful condition and alias case. |
+
+These are partial manual case notes, not an exact G19 scope determination,
+complete private/generated declaration review, proof of a migration or
+independent review.
