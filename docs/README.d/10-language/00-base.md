@@ -1,3 +1,4 @@
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 | [feature-work/integration-20261105T1200Z.md](feature-work/integration-20261105T1200Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105T0840Z.md](feature-work/integration-20261105T0840Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
 | [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
