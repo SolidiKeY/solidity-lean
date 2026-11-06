@@ -221,7 +221,8 @@ theorem MxRel.look (hr : MxRel θ τ ρ) {s : Srt} (t : Tm C Γ s) {r : Tm C Δ 
 /-- The `orLook` step of `Tm.mx_eval`: a looked-up term reads as its source
 (`MxRel.look`); otherwise the fallback `r` must. -/
 private theorem MxRel.orLook_eval (hr : MxRel θ τ ρ) {s : Srt} {t : Tm C Γ s}
-    {r : Option (Tm C Δ s)} (k : ∀ {t' : Tm C Δ s}, r = some t' → t'.eval ρ = Srt.trO s (t.eval τ)) :
+    {r : Option (Tm C Δ s)}
+    (k : ∀ {t' : Tm C Δ s}, r = some t' → t'.eval ρ = Srt.trO s (t.eval τ)) :
     ∀ {t' : Tm C Δ s}, θ.orLook t r = some t' → t'.eval ρ = Srt.trO s (t.eval τ) :=
   fun e => (MxMap.orLook_cases θ t e).elim (fun e => (hr.look t e).1) k
 
@@ -260,7 +261,8 @@ theorem _root_.Solidity.Tm.mx_eval (hr : MxRel θ τ ρ) {s : Srt} (t : Tm C Γ 
     obtain ⟨a', ha, e⟩ := Option.bind_eq_some_iff.1 e
     cases e
     have hl : TEnv.get j ρ.env = TEnv.get i τ.env := hr.loc _ _ hj
-    show (a'.eval ρ).bind (Tm.netOfT (TEnv.get j ρ.env)) = (a.eval τ).bind (Tm.netOfT (TEnv.get i τ.env))
+    show (a'.eval ρ).bind (Tm.netOfT (TEnv.get j ρ.env)) =
+      (a.eval τ).bind (Tm.netOfT (TEnv.get i τ.env))
     rw [ih ha, hl]
     rfl
   | app0 o =>

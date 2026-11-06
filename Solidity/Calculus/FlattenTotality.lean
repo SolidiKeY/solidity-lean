@@ -536,8 +536,8 @@ private theorem flattenFuel?_Src_bin {l : LedgerMode} {k kx ky : SrcKind} {s u v
   obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by omega⟩
   obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ :=
     ihx d r start (by omega) (by omega) (by omega) (by omega)
-  obtain ⟨b, hb', bok, blen, blaid, bab, bn, bocc⟩ := ihy d (r - x.nodes) a.next (by omega) (by omega)
-    (by simp only [Flattened.next]; omega) (by omega)
+  obtain ⟨b, hb', bok, blen, blaid, bab, bn, bocc⟩ :=
+    ihy d (r - x.nodes) a.next (by omega) (by omega) (by simp only [Flattened.next]; omega) (by omega)
   refine ⟨mk a b, ?_, hok a b aok bok, ?_, ?_, ?_, ?_, ?_⟩
   · rw [hfuel, ha]
     show Option.bind (flattenFuel? d (r - x.nodes) y a.next) _ = _
@@ -581,7 +581,8 @@ private theorem flattenFuel?_Src_un {l : LedgerMode} {k kx : SrcKind} {s v : Srt
   rw [hTb] at hb
   obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by omega⟩
   obtain ⟨r, rfl⟩ : ∃ m, r = m + 1 := ⟨r - 1, by omega⟩
-  obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ := ihx d r start (by omega) (by omega) hb (by omega)
+  obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ :=
+    ihx d r start (by omega) (by omega) hb (by omega)
   refine ⟨mk a, ?_, hok a aok, ?_, ?_, ?_, ?_, ?_⟩
   · rw [hfuel, ha]
     show some (mk a, r - x.nodes) = _
@@ -647,7 +648,8 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | @field sn f T h q _ ih =>
     exact flattenFuel?_Src_un ih (Flattened.app1 (.field h)) (fun _ => LTm.PathF.field h)
   | @not x _ ih =>
-    exact flattenFuel?_Src_un ih (Flattened.app1 (Op1.unop UnOp.not (p := .bool) rfl)) (fun _ => LTm.BoolV.not)
+    exact flattenFuel?_Src_un ih (Flattened.app1 (Op1.unop UnOp.not (p := .bool) rfl))
+      (fun _ => LTm.BoolV.not)
   | @neg h x _ ih =>
     exact flattenFuel?_Src_un ih (Flattened.app1 (Op1.unop UnOp.neg h)) (fun _ => LTm.Num.neg h)
   | @bnot h x _ ih =>
@@ -726,9 +728,11 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | @neB x y _ _ ihx ihy =>
     exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .neB rfl)) (fun _ _ => LTm.BoolV.neB)
   | @eqN p hp x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .eqB rfl)) (fun _ _ => LTm.BoolV.eqN hp)
+    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .eqB rfl))
+      (fun _ _ => LTm.BoolV.eqN hp)
   | @neN p hp x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .neB rfl)) (fun _ _ => LTm.BoolV.neN hp)
+    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .neB rfl))
+      (fun _ _ => LTm.BoolV.neN hp)
   | @lt p h x y _ _ ihx ihy =>
     exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .lt h)) (fun _ _ => LTm.BoolV.lt h)
   | @gt p h x y _ _ ihx ihy =>
@@ -738,11 +742,11 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | @ge p h x y _ _ ihx ihy =>
     exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.binop .ge h)) (fun _ _ => LTm.BoolV.ge h)
   | @seq q p x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.seq) (fun _ _ => LTm.Num.seq)
+    exact flattenFuel?_Src_bin ihx ihy Flattened.seq (fun _ _ => LTm.Num.seq)
   | @seqB x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.seq) (fun _ _ => LTm.BoolV.seqB)
+    exact flattenFuel?_Src_bin ihx ihy Flattened.seq (fun _ _ => LTm.BoolV.seqB)
   | @seqN q hq x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.seq) (fun _ _ => LTm.BoolV.seqN hq)
+    exact flattenFuel?_Src_bin ihx ihy Flattened.seq (fun _ _ => LTm.BoolV.seqN hq)
   | @key K V x y _ _ ihx ihy =>
     exact flattenFuel?_Src_bin ihx ihy (Flattened.index .map) (fun _ _ => LTm.PathF.key)
   | zlit n =>
@@ -754,7 +758,8 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
   | @zsub h x y _ _ ihx ihy =>
     exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.zbin .sub h)) (fun _ _ => LTm.ZNum.sub h)
   | @zcmp op h x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.zcmp op h)) (fun _ _ => LTm.BoolV.zcmp op h)
+    exact flattenFuel?_Src_bin ihx ihy (Flattened.app2 (.zcmp op h))
+      (fun _ _ => LTm.BoolV.zcmp op h)
   | @zmulL h n y _ ihy =>
     intro d r start hd hr hb hs
     obtain ⟨d, rfl⟩ : ∃ m, d = m + 1 := ⟨d - 1, by simp only [LTm.depth] at hd; omega⟩
@@ -832,7 +837,7 @@ theorem flattenFuel?_Src {l : LedgerMode} (hpre : l ≠ .pre) :
     · show (LTm.app1 .net (LTm.app0 (C := C) (.lit v))).nodes ≤ 2 * (LTm.app1 .net (LTm.app0 (C := C) (.lit v))).nodes
       omega
   | @zseq hl q x y _ _ ihx ihy =>
-    exact flattenFuel?_Src_bin ihx ihy (Flattened.seq) (fun _ _ => LTm.ZNum.zseq)
+    exact flattenFuel?_Src_bin ihx ihy Flattened.seq (fun _ _ => LTm.ZNum.zseq)
   | @ofNum t _ ih =>
     intro d r start hd hr hb hs
     obtain ⟨a, ha, aok, alen, alaid, aab, an, aocc⟩ := ih d r start hd hr hb hs

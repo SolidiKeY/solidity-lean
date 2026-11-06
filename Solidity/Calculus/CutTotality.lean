@@ -261,9 +261,10 @@ theorem cut2_comm_src {op : BinOp} (h : op.accepts .uint = true) (hop : litCutL 
          · exact (lit?_none ha hv).elim
          · exact (lit?_none hb hv).elim)
 
-/-- `LTm.cut_src` at a binary operator the cut leaves (`cut2_default`): both
-operands are cut in sequence and the node is rebuilt by `mk`, its fragment
-constructor. -/
+/-- `LTm.cut_src` at a binary operator the cut leaves: both operands are cut
+in sequence, `cut2_default` rebuilds the node, and `mk` (the fragment
+constructor) puts it in the fragment. `hop` restates `cut2_default`'s side
+condition (`Calculus/QuotientCut.lean`) and must stay in step with it. -/
 private theorem LTm.cut_src_binop {k kx : SrcKind} {op : BinOp} {p : PrimTy}
     (h : op.accepts p = true) {a b : LTm C (.val p)}
     (mk : ∀ {x y : LTm C (.val p)}, x.SrcL false false l kx → y.SrcL false false l kx →
@@ -585,13 +586,13 @@ theorem LTm.cut_src : ∀ {k : SrcKind} {s : Srt} {t : LTm C s}, t.SrcL false tr
     rw [cut2_default h (by decide) prev]
     exact ⟨.mulR h v h1, defs_append h2 (fun _ h => nomatch h)⟩
   | @and a b _ _ iha ihb =>
-    exact LTm.cut_src_binop rfl (.and) iha ihb
+    exact LTm.cut_src_binop rfl .and iha ihb
   | @or a b _ _ iha ihb =>
-    exact LTm.cut_src_binop rfl (.or) iha ihb
+    exact LTm.cut_src_binop rfl .or iha ihb
   | @eqB a b _ _ iha ihb =>
-    exact LTm.cut_src_binop rfl (.eqB) iha ihb
+    exact LTm.cut_src_binop rfl .eqB iha ihb
   | @neB a b _ _ iha ihb =>
-    exact LTm.cut_src_binop rfl (.neB) iha ihb
+    exact LTm.cut_src_binop rfl .neB iha ihb
   | @eqN p hp a b _ _ iha ihb =>
     exact LTm.cut_src_binop rfl (.eqN hp) iha ihb
   | @neN p hp a b _ _ iha ihb =>
