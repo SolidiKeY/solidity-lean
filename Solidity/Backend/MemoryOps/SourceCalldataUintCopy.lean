@@ -164,13 +164,6 @@ theorem source_cd_uint_copy {E : Source.Env} {Γ : Source.RCtx} {H : HTy}
       rw [oldAddress _ q.id_lt]
       exact hq.transport keeps preserved
 
-/-- Unsupported genuine fixed Source target is a stuck conversion, not a
-successful dynamic copy or an ABI bounds panic. No Source admission is added. -/
-theorem source_cd_uint_fixed_stuck {E : Source.Env} {Γ : Source.RCtx}
-    (F : Source.Fr) (off len n : Nat) (y : Source.EMState E Γ) :
-    (Source.cdToMem F (.array .memory (.int .u256) (some n)) off len).run y=
-      (.error (.stuck "calldata conversion"),y) := by
-  rfl
 /-- info: 'Solidity.Backend.MemoryOps.source_uint_value_array' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms source_uint_value_array
@@ -189,9 +182,6 @@ theorem source_cd_uint_fixed_stuck {E : Source.Env} {Γ : Source.RCtx}
 /-- info: 'Solidity.Backend.MemoryOps.source_cd_uint_copy' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms source_cd_uint_copy
-/-- info: 'Solidity.Backend.MemoryOps.source_cd_uint_fixed_stuck' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms source_cd_uint_fixed_stuck
 /-- Actual resolved implicit conversion in either existing pipeline. -/
 def sourceUintCalldataCopy {E : Source.Env} {Γ : Source.RCtx}
     (i : Source.Idx Γ (.array .calldata (.int .u256) none)) :

@@ -1,0 +1,45 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.decoded_argument": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.dirty_match_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.existing_entry_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.matched_executes_and_skips_miss": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.miss_executes_other_branch": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.miss_ignores_entry_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.miss_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.protected_and_saved": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean:Solidity.Backend.AbiEntry.SelectorBranchesControls.public_selections": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

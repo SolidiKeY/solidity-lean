@@ -15,7 +15,7 @@ private def storage (empty : Bool) : Source.Storage E.layout E.cellTy :=
       (path.go (.index 1)) (.fixedBytes [23] rfl)).write path (.int 2 (by decide)))
 private def before (empty : Bool) : Source.EMState E [.bool] :=
   (.cons (.bool true) .nil,
-    {ex := ⟨⟨fun _ => ⟨⟨17,by decide⟩,3,some 9,storage empty⟩⟩,Source.Transient.empty,[]⟩,
+    {ex := ⟨⟨fun _ => ⟨17,3,some 9,storage empty⟩⟩,Source.Transient.empty,[]⟩,
      heap := (Source.Heap.empty.alloc ⟨.bool,.val (.bool true)⟩).1,events := [],
      logs := [(⟨13,by decide⟩,[1,2])],fnLocals := ⟨[.bool],.cons (.bool false) .nil⟩})
 private theorem range (empty : Bool) : Source.IntTy.u256.lo ≤ ((payload empty).length : Int) ∧

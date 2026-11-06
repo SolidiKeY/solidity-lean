@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "derivation": "Frozen before execution. Caller raw small1+1024=1025; catch adds256->1281, wrong variant257->1282. Seven raw words and memory alias survive. marker7 and log55 are caller-prefix effects; outerAB then childCD writes/transient22/33/log66/77 are reverted. c remains0. Explicit failure bytes dead or empty; no native-to-Lean fuel equality. Return data after empty catch must be zero for the requested empty word: see buffer-independent explicit zero branch in source. Sample horizon4 succeeds: assignment consumes one level, builtin another, leaf operands a third; horizons0/1/2 exhaust per ClosedRun.evalStmtNode/evalExpr. This prediction is from evaluator source before driver execution.",
+  "cells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1281",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "prefixCells": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1025",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "flow": "normal",
+  "nonwordId": 0,
+  "heapBytes": [
+    170,
+    187
+  ],
+  "sourceLogs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "horizons": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "completedFrom": 4,
+  "journalLengths": {
+    "residual": 1,
+    "owned": 1,
+    "childResidual": 2,
+    "childOwned": 2,
+    "outerResidual": 0,
+    "outerOwned": 0
+  },
+  "targetBytes": [
+    238,
+    222,
+    173,
+    238
+  ],
+  "emptyTargetBytes": [
+    238,
+    238,
+    238
+  ],
+  "physical": {
+    "child": "3439329283",
+    "outer": "0"
+  },
+  "nativePlan": [
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "0",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": false,
+      "logs": []
+    },
+    {
+      "signature": "caught()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1281",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtWrong()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1282",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "2",
+        "100719116927691798707895874029850069994745719541394658707722161504685790330880"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "caughtEmpty()",
+      "words": [
+        "2",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "2309737967",
+        "1281",
+        "22136",
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "77345497107738552411838431392522000948863935069627095510731433067785723314176",
+        "0",
+        "43707",
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 3,
+      "catch": true,
+      "empty": true,
+      "outer": "outerEmpty()",
+      "transientTracked": true,
+      "logs": [
+        "0x55"
+      ]
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "outer()",
+      "words": [],
+      "rawBytes": "0xdead",
+      "post": "0",
+      "marker": "7",
+      "exception": "revert",
+      "frames": 2,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "outerEmpty()",
+      "words": [],
+      "rawBytes": "0x",
+      "post": "0",
+      "marker": "7",
+      "exception": "revert",
+      "frames": 2,
+      "catch": false,
+      "empty": true,
+      "outer": "outerEmpty()",
+      "transientTracked": true,
+      "logs": []
+    },
+    {
+      "signature": "peek()",
+      "words": [
+        "0",
+        "0"
+      ],
+      "rawBytes": null,
+      "post": "0",
+      "marker": "7",
+      "exception": null,
+      "frames": 1,
+      "catch": false,
+      "empty": false,
+      "outer": "outer()",
+      "transientTracked": true,
+      "logs": []
+    }
+  ]
+}
