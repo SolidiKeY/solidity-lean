@@ -1105,6 +1105,20 @@ sibling. This is one reason component, not the exhaustive Residue union or
 a global unknown theorem; it is not a counterexample to `GuardP.floors`.
 
 
+**m7-gaps (AU02, 2026-11-06)**: three gap families now have certified
+coverage and verdicts ([handoff](feature-work/m7-gaps.md), which lists for
+the `Fml.Residue` owner exactly which pins left it). Fresh binders of a
+struct with a mapping member are vacuous — such a struct has no memory
+object — so `memStructMapping`, `mappingReversed` and `mappingOne` are proved
+(`Calculus/DecisionMappingStruct.lean`). The nested partial-OR floor family
+of `Examples/DecisionHaltingOrGaps.lean` is decided exactly, its refutations
+at one symbolic mapping region (`Calculus/DecisionPartialOrFloor.lean`);
+the APF guard-floor reconstruction itself is unchanged. The false companions
+of the five array source shapes are refuted at threshold-uniform storage
+regions by a certified finite check (`Calculus/DecisionBlockRefute.lean`).
+Families without fresh allocation enter through one extension point,
+`Calculus/DecisionGapAnswer.lean`; `Fml.memCovered` gained one disjunct for it.
+
 **Read first**: `AGENTS.md`; this document's M6 (the gate and the user's
 decisions c, c′, d, e3′, e3″) and M7 (statement, features 1–32, "What is
 not proved", the plan); `docs/module-map.md`.  The modules:

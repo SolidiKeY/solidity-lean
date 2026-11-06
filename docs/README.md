@@ -74,6 +74,7 @@ history is in git.
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
+| [feature-work/m7-gaps.md](feature-work/m7-gaps.md) | M7-next decision gaps (AU02): void fresh binders, the partial-OR floor family and false array blocks decided; what leaves `Fml.Residue` and what stays. |
 
 **The calculus and its proofs**
 
