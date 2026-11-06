@@ -33,3 +33,5 @@
 | `Source/Agreement/BoolSlotSavedControls.lean` | Internally instantiated saved-copy client, horizon and polarity/liveness controls. |
 | `Source/Agreement/PrimitiveSlot.lean` | Actual arbitrary-slot primitive read/write transport and normal initialization agreement, retaining signed/unsigned range evidence. |
 | `Source/Agreement/PrimitiveSlotControls.lean` | Internally instantiated copy client, actual integer runs, insufficient horizon and wrong-value refusal. |
+| `Source/Agreement/PrimitiveSlotAssign.lean` | Actual primitive old-head-to-deeper-slot assignment, concrete normal producer/client and exact insufficient-horizon control. |
+| `Source/Agreement/PrimitiveSlotAssignControls.lean` | Mixed-type neighbor preservation, actual signed/unsigned writes and reversed-copy controls. |
