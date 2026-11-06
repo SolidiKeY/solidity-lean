@@ -184,3 +184,15 @@ subsequent command-constructor work. The checker does not validate whether the
 chosen execution context or method is correct, prove exhaustive coverage of
 ignored/generated Lean sources, authenticate toolchain or cache, or measure a
 module. A manually supplied disposition is not owner acceptance.
+
+## Fixed-shape Lean command candidate
+
+`lean_command.py` constructs an absolute Lean invocation with `-j1`, the
+existing `--tstack=131072` flag and `LEAN_NUM_THREADS=1`, verifies a supplied
+executable SHA-256 and rejects source traversal or symlink paths. The additional
+synthetic test uses a fake fixture executable; no Lean was executed. Nineteen
+synthetic test methods pass. This constructor is not wired to the resource
+prototype and cannot authenticate the supplied executable pin, environment,
+import path, toolchain, tree, cache or H56 VM. It does not independently enforce
+one heavy job or process containment. The complete gate and independent
+finder and skeptic reviews are still pending.
