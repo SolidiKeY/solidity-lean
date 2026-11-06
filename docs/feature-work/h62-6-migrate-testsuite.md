@@ -238,3 +238,63 @@ checksums and unchanged originals. Original assignment text is transcribed
 from the visible original thread, not authenticated as byte-identical to an
 unavailable canonical renderer artifact; see its explicit provenance note.
 The Syntax prerequisite remains awaited, not locally delivered or accepted.
+
+## Explicit resumption after coordinator merge
+
+The latest coordinator instruction reports this lane merged at master
+`20e492ee9` and explicitly directs merging origin/master and continuing. This
+resumes the previous H82 retirement in the same VM, branch and original goal;
+no reset, replacement goal, new VM or competing continuation was created.
+The merge fast-forwarded to `d96f2406d352de7e0b72ba6ac4ab29dc457582c6` after
+verifying ancestry of the pinned base, previous final head and coordinator
+merge. The earlier retirement section records history, not current disposition.
+
+All 333 source-closure files, including all 49 assigned modules, remain exactly
+identical to the accepted pinned-base census. Syntax/Raw.lean retains the same
+five known v4.35.0 error locations; no accepted prerequisite patch was delivered.
+That dependency failure was not rerun unchanged. No original Lean file or
+frozen interface was edited by this lane. Master changed lakefile defaults and
+comments, so the historical clean old build remains evidence; a final matched
+pair must satisfy the existing strict configuration/source/resource checks.
+No comparison result or renewed runtime pass is inferred from the merge.
+
+Independent H78 backfill now explicitly enumerates all kernel and compiler-added
+names for each assigned module, rather than omitting compiler-only names.
+The old inventory retains 8068 kernel declarations and 104 compiler extras,
+including all private/internal/generated names, with zero exclusions. Exact
+structured names, universe parameters, declaration kinds and type fingerprints
+join to the accepted old snapshot and its complete DAG stream. The 104 compiler
+extras have no ModuleData kernel signature and remain explicit unresolved rows.
+New signatures, export accessibility, shim names and shim signatures remain
+unresolved; naming flags are not an export-visibility proof. No H78 completeness
+or compatibility acceptance is claimed. Hash-addressed provenance links the
+actual passing official old-toolchain fixture, census, frozen signature file,
+manifest and full DAG stream. Large outputs remain off git.
+
+The first structured-name fixture placed a helper before target imports and
+failed; the generated import ordering was corrected and fresh evidence retained.
+Only a successful final fixture and validated join count toward the inventory.
+The 59 Python controls include missing kernel/compiler names, malformed types,
+false naming flags, overlap, duplicate rows, failed compiler and snapshot
+mutation refusals. Reviewer findings were fixed without source/proof changes.
+
+The Syntax prerequisite and exhaustive new API/parity/full-comparison/root-gate
+work remain typed waits; no unrelated unclaimed cleanup or ownership takeover
+was performed. No push, default-branch change or cut-over is authorized here.
+Detailed H81 policy text was not delivered; this small inventory check retained
+the original measured hard 12GiB/no-swap/4GiB-reserve serial settings and makes
+no new H81 approval or matched timing claim.
+
+Accepted structured inventory evidence: `public-inventory-old-03` and
+`public-api-old-03`. Lean exit0; 13.856743 s; sampled peak RSS 1126273024 bytes.
+Inventory SHA256:
+`646b9823dc10955d567be8c293512c5273048ef0f5677514f269768c1a585ddf`.
+The resumed checkpoint supplies the generator and 13 API-inventory controls
+(59 Python controls total). Prior unstructured/syntax-failed probes remain
+unaccepted diagnostics for the strengthened schema.
+
+Independent read-only finder and skeptic re-reviews passed the resumed partial
+inventory checkpoint. Confirmed findings fixed: structured naming flags,
+category overlap, signature schemas/hash formats and naming versus export
+visibility. Both independently verified inventory/provenance hashes and
+explicit pending fields; neither used Lean/server or edited files.
