@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/NestedStoragePathInterface.lean` | Contract only for actual dynamic-outer storage path copying and intrinsic declaration/rebinding, full post-state/allocator and machine refusal. |

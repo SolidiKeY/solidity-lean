@@ -580,6 +580,7 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedStorageLiveInterface.lean` | Contract only for live normalization and existing checked dynamic-outer-array copying with arbitrary outer and child storage shadows. |
 | `Backend/MemoryCopies/NestedStorageLive.lean` | Proved exact live normalization, ReprAt transport and existing checked dynamic nested runtime copying for original arbitrary outer/child shadows. |
 | `Backend/MemoryCopies/NestedStorageLiveControls.lean` | Populated-heap mixed-length dynamic execution, retained outer/child shadows, 64-empty-child success and represented capacity refusal. |
+| `Backend/MemoryCopies/NestedStoragePathInterface.lean` | Contract only for actual dynamic-outer storage path copying and intrinsic declaration/rebinding, full post-state/allocator and machine refusal. |
 | `Backend/MemoryCopies/ReferenceDefaultDemandInterface.lean` | Actual runtime reference-array default demand and existing checked guard agreement; compiler selection explicit. |
 | `Backend/MemoryCopies/ReferenceDefaultDemand.lean` | Existing runtime default copy, actual live demand, heap-word growth and checked capacity branch agree under explicit compiler selection. |
 | `Backend/MemoryCopies/ReferenceDefaultDemandControls.lean` | Actual empty/2/64 and struct-child runs, explicit new contents, unused huge child, refusals and rejected-selection cost control. |

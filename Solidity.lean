@@ -786,6 +786,7 @@ import Solidity.Backend.MemoryCopies.NestedStorageLoopInterface
 import Solidity.Backend.MemoryCopies.NestedStorageParent
 import Solidity.Backend.MemoryCopies.NestedStorageParentControls
 import Solidity.Backend.MemoryCopies.NestedStorageParentInterface
+import Solidity.Backend.MemoryCopies.NestedStoragePathInterface
 import Solidity.Backend.MemoryCopies.NestedStorageTurn
 import Solidity.Backend.MemoryCopies.NestedStorageTurnControls
 import Solidity.Backend.MemoryCopies.NestedStorageTurnInterface
