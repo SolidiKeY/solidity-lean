@@ -146,10 +146,12 @@ full-gate, timing or completion approval. Review evidence is `evidence/reviews.j
 
 ## Typed blockers and exact resume actions
 
-- `DEPENDENCY_MIGRATION_REQUIRED`: owner-validated v4.35 repairs/artifacts for
-  `Solidity/Hash/CollisionBound.lean` (direct dependency) and
-  `Solidity/Language/FixedPoint.lean` (full-gate failure) must be relayed. These
-  originals are outside our write scope; no repairs were attempted here.
+- `DEPENDENCY_MIGRATION_REQUIRED`: `Solidity/Language/FixedPoint.lean`
+  (full-gate failure) still needs an owner relay. The initial Hash blocker is
+  superseded by H70 below: its exact overlay was supplied and targeted checking
+  passed in isolation; full affected validation remains pending. H70 also records
+  the current Roadmap/Storage blockers. These originals remain outside our write
+  scope; no local repairs were attempted.
 - `OWNER_RELAY_REQUIRED`: VY2 exact-file agreement is still absent. No `relay.sh`
   exists in this checkout. The coordinator can retrieve this committed request:
   approve/apply a migration of `Solidity/Yul/Views/ReadControls.lean` and a new
@@ -168,3 +170,46 @@ real axiom outputs, complete semantic case dispositions/negative coverage,
 prepare exact owner migration patches, measure matched before/after, and rerun
 full gates. All four checkpoints remain unfinished. No human scope/exclusion
 or premise decision is requested; the blockers require owner coordination.
+
+
+## H70 Hash relay consumption (partial, still blocked)
+
+The owner relay from `solidity-h62-6-20261106/migrate-hash`, head
+`a3f49ee0ec1829e63022c90194048d5a1ffe0d22`, source `2a18afcd`, supplied the
+CollisionBound overlay with SHA256
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+That exact hash and patch applicability passed. The overlay was applied only to
+the isolated validation snapshot; assigned-checkout originals remain unchanged.
+Independent read-only finder/skeptic reviews found no statement/trust/budget
+change; the finder compared all 91 lexical declaration signatures unchanged.
+
+The bounded targeted `lean -j1 --tstack=131072 Solidity/Hash/CollisionBound.lean`
+check passed, exit 0, 4.630 s wall, 610,770,944 bytes sampled peak RSS, one Lean
+process and verified group cleanup. This resolves the earlier direct Hash
+compile failure locally for this exact overlay, not its full affected gates.
+The following bounded `lake --fail-fast build Solidity.Yul.Views.ReadControls`
+failed, exit 1, 8.457 s wall, 724,402,176 bytes sampled peak RSS, one Lean process
+and verified group cleanup. No retry, proof shortcut or budget increase followed.
+
+New exact owner relay requests:
+
+- `TRUST_GATE_STOP`: `solidity-h62-6-20261106/migrate-roadmap`,
+  `Solidity/Roadmap/Contracts.lean:1104`, theorem
+  `Solidity.Roadmap.PublicCorrectness.transfer`. The unchanged guard expects no
+  axioms; v4.35 reports `propext`, `Classical.choice`, `Quot.sound`. Owner analysis
+  and resolution under the existing trust policy are required. No permission to
+  update a guard/pin, expand trust or bypass the stop is inferred.
+- `DEPENDENCY_MIGRATION_REQUIRED`: `solidity-h62-6-20261106/migrate-storage`,
+  `Solidity/Storage/HashedLayout.lean:376`, dependent elimination fails; downstream
+  axiom guards at 417/420 also fail after the proof error. Relay a validated
+  owner repair. This source remains outside this lane's write scope.
+
+The Language relay for `Solidity/Language/FixedPoint.lean` and VY2 exact-file
+agreement on `Solidity/Yul/Views/ReadControls.lean` and proposed
+Solidity/Yul/Views/H62ControlFacts.lean are still pending. `relay.sh` is host-only;
+its absence is not an installation task or an independent blocker.
+The additive lemma and seven rows still lack real Lean/axiom/refusal validation;
+no full gate, timing delta or checkpoint completion is claimed.
+Saved evidence: `evidence/h70-hash-consumption.json`,
+`evidence/h70-hash-overlay-check.{json,log}` and
+`evidence/h70-views-dependencies.{json,log}` under the export directory.
