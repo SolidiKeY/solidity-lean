@@ -65,8 +65,11 @@ class DeliveryReceiptControls(unittest.TestCase):
                 git("add", "."); git("commit", "-qm", "controlled member receipt")
                 if fault is None:
                     self.assertEqual(verify_bulk.verify_h44_member_manifest(repo, pin), 1)
+                    self.assertEqual(verify_bulk.verify_validation_archives({"rollback_proof_pack": pin}, repo), ["rollback_proof_pack"])
                     with self.assertRaisesRegex(ValueError, "archive member count mismatch"):
                         verify_bulk.verify_h44_member_manifest(repo, {**pin, "members": 2})
                 else:
                     with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
                         verify_bulk.verify_h44_member_manifest(repo, pin)
+                    with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
+                        verify_bulk.verify_validation_archives({"rollback_proof_pack": pin}, repo)

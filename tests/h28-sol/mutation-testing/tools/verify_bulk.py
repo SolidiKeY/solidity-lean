@@ -52,12 +52,12 @@ def verify_h44_member_manifest(repo, pin):
 
 
 def verify_validation_archives(manifest, repo=None):
-    """Hash every validation/review archive, including nested audit receipts."""
+    """Hash validation/review archives and authenticate every declared member map."""
     verified = []
     def walk(value, path=()):
         if not isinstance(value, dict):
             return
-        if "archive" in value and any("validation" in key or "review" in key for key in path):
+        if "archive" in value and ("member_manifest" in value or any("validation" in key or "review" in key for key in path)):
             archive = Path(value["archive"])
             require(archive.is_absolute() and archive.is_file() and not archive.is_symlink(), "invalid validation archive")
             require(archive.stat().st_size == value["bytes"] and digest(archive.read_bytes()) == value["sha256"], "validation archive identity mismatch")

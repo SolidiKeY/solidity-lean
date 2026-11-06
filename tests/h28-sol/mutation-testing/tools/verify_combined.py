@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Authenticate and replay the saved combined pilot; never grants full acceptance."""
 from pathlib import Path
-import hashlib,json,subprocess,tarfile
+import argparse,hashlib,json,subprocess,tarfile
 from archive_io import read_json,require
 import checked
 from engine import summarize
@@ -10,8 +10,12 @@ from engine import summarize
 def digest(data):return hashlib.sha256(data).hexdigest()
 
 
-def verify(repo):
- pin=read_json(repo/'tests/h28-sol/mutation-testing/bulk-data.json',repo)['combined_proof_pack']
+def verify(repo, profile='combined'):
+ profiles={'combined':('combined_proof_pack','combined-pilot.json',17,13),
+           'rollback':('rollback_proof_pack','rollback-pilot.json',2,1)}
+ require(profile in profiles,'unsupported proof profile')
+ pin_key,manifest_name,case_count,scored_count=profiles[profile]
+ pin=read_json(repo/'tests/h28-sol/mutation-testing/bulk-data.json',repo)[pin_key]
  archive=Path(pin['archive']);require(archive.stat().st_size==pin['bytes'],'archive size mismatch')
  with archive.open('rb') as f:
   h=hashlib.sha256()
@@ -30,13 +34,13 @@ def verify(repo):
   require(set(members)==set(expected)|{'SHA256SUMS'},'archive membership mismatch')
   for name,sha in expected.items():require(digest(read(name))==sha,'member checksum mismatch: '+name)
   m=json.loads(read('run/manifest.json'));r=json.loads(read('run/result.json'));catalog=json.loads(read('catalog.json'))
-  frozen=subprocess.check_output(['git','show',r['run_head']+':tests/h28-sol/mutation-testing/manifests/combined-pilot.json'],cwd=repo)
+  frozen=subprocess.check_output(['git','show',r['run_head']+':tests/h28-sol/mutation-testing/manifests/'+manifest_name],cwd=repo)
   require(read('run/manifest.json')==frozen,'manifest differs from committed run head')
   require(r['run_head']==pin['input_head'] and r['base']==m['base'],'run identity mismatch')
   require(r['runner_cases_complete'] and not r['scope_complete'] and not r['unrun'],'run incomplete or scope overclaim')
   summary=summarize(r['records'],m['cases'])
   require(all(r[k]==v for k,v in summary.items()),'summary replay mismatch')
-  require(len(r['records'])==17 and r['denominator']==r['killed']==13 and r['score']==1,'combined outcomes changed')
+  require(len(r['records'])==case_count and r['denominator']==r['killed']==scored_count and r['score']==1,'combined outcomes changed')
   cases={c['id']:c for c in m['cases']};checks=exports=artifacts=0
   for rec in r['records']:
    c=cases[rec['id']];prefix='run/'+rec['id']+'/'
@@ -103,4 +107,5 @@ def verify(repo):
 
 if __name__=='__main__':
  repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
- print(json.dumps(verify(repo),indent=2))
+ parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=('combined','rollback'),default='combined');args=parser.parse_args()
+ print(json.dumps(verify(repo,args.profile),indent=2))
