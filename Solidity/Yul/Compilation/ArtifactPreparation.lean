@@ -10,6 +10,36 @@ certificate. The generic roundtrips prevent losing either preparation phase. -/
 namespace Solidity.Yul.Compilation.Artifact
 variable {c : Control} {n depth : Nat} {stmt : Stmt [] [] c n}
 
+/-- Certify a selected payload while retaining preparation refusal exactly.
+The certificate is supplied by existing producer proofs, never by the table. -/
+def select {E A : Type} (selection : E → Option A)
+    (certify : ∀ original payload, selection original = some payload → Artifact depth stmt)
+    (original : E) : Option (Artifact depth stmt) :=
+  match selected : selection original with
+  | none => none
+  | some payload => some (certify original payload selected)
+
+theorem select_none {E A : Type} (selection : E → Option A)
+    (certify : ∀ original payload, selection original = some payload → Artifact depth stmt)
+    (original : E) (refused : selection original = none) :
+    select selection certify original = none := by
+  unfold select
+  split
+  next observed => rfl
+  next payload observed => cases observed.symm.trans refused
+
+theorem select_some {E A : Type} (selection : E → Option A)
+    (certify : ∀ original payload, selection original = some payload → Artifact depth stmt)
+    (original : E) (payload : A) (selected : selection original = some payload) :
+    select selection certify original = some (certify original payload selected) := by
+  unfold select
+  split
+  next observed => cases observed.symm.trans selected
+  next actual observed =>
+    have same : actual = payload := Option.some.inj (observed.symm.trans selected)
+    subst actual
+    rfl
+
 structure PreparationImage {E : Type} (encode : E → Option (Artifact depth stmt)) where
   original : E
   artifact : Option (Artifact depth stmt)

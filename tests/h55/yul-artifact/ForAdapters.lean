@@ -1,5 +1,6 @@
 import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.ForCompilation
+import Solidity.Yul.Compilation.GuardedForCompilationControls
 
 /-! Exact selected and preselection for-producer adapters. A successful phase
 retains both old execution laws; a refused preparation retains the original
@@ -147,3 +148,126 @@ end Controls
 #print axioms prepare_selection_none
 #print axioms prepare_selected
 end Solidity.Yul.Compilation.H55For
+
+/-! The guarded-for producers instantiate the common semantic Artifact and
+PreparationImage. No additional per-shape Artifact or execution semantics. -/
+namespace Solidity.Yul.Compilation.H55For.Guarded
+open Backend Scalar MachineAdapter Solidity.Yul.Closed ProducerExpressions
+variable {c : Control} {n fuel depth : Nat} {stmt : Stmt [] [] c n}
+
+def encode (a : GuardedForCompilation.Artifact fuel depth stmt) : Artifact depth stmt where
+  profile := a.compiled.profile
+  code := a.code
+  source_to_model := by
+    intro horizon locals result ran newer m caller
+    rcases a with ⟨compiled, code, lowered⟩
+    cases compiled with
+    | branch condition loop =>
+      exact GuardedFor.source_to_model condition loop code lowered horizon locals result ran newer m caller
+  model_to_source := a.reflected
+
+abbrev Image (fuel depth : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.Image (encode (fuel := fuel) (depth := depth) (stmt := stmt))
+
+theorem selected_roundtrip (a : GuardedForCompilation.Artifact fuel depth stmt) :
+    Artifact.fromImage (Artifact.toImage encode a) = a := Artifact.source_roundtrip encode a
+
+def prepare (a : GuardedForCompilation.Compiled fuel depth stmt) : Option (Artifact depth stmt) :=
+  Artifact.select GuardedForCompilation.Compiled.code
+    (fun compiled code selected => encode ⟨compiled, code, selected⟩) a
+
+abbrev Preparation (fuel depth : Nat) (stmt : Stmt [] [] c n) :=
+  Artifact.PreparationImage (prepare (fuel := fuel) (depth := depth) (stmt := stmt))
+
+theorem raw_roundtrip (a : GuardedForCompilation.Compiled fuel depth stmt) :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare a) = a :=
+  Artifact.preparation_source_roundtrip prepare a
+
+theorem prepare_none (a : GuardedForCompilation.Compiled fuel depth stmt)
+    (refused : a.code = none) : prepare a = none :=
+  Artifact.select_none _ _ a refused
+
+theorem prepare_some (a : GuardedForCompilation.Compiled fuel depth stmt) (code : List Evm.Instr)
+    (selected : a.code = some code) : prepare a = some (encode ⟨a, code, selected⟩) :=
+  Artifact.select_some _ _ a code selected
+
+namespace Controls
+def source (guard : Solidity.Yul.Word) : Stmt [] [] ⟨false, false⟩ 1 :=
+  .if_ (.literal guard) H55For.Controls.stoppedSource
+
+def producer (guard : Solidity.Yul.Word) : GuardedForCompilation.Artifact 1 2 (source guard) :=
+  (GuardedForCompilation.lower 1 2 (source guard)).get (by rfl)
+
+theorem skipped_source (locals : Vector Scalar.Word 1) :
+    evalStmt 2 .nil True.intro (source 0) (producer 0).compiled.profile (sourceLocals locals) =
+      some ⟨sourceLocals locals, .normal⟩ := rfl
+
+theorem taken_source (locals : Vector Scalar.Word 1) :
+    evalStmt 4 .nil True.intro (source 1) (producer 1).compiled.profile (sourceLocals locals) =
+      some ⟨sourceLocals locals, .normal⟩ := rfl
+
+theorem selected_preparation (guard : Solidity.Yul.Word) :
+    prepare (producer guard).compiled = some (encode (producer guard)) :=
+  prepare_some _ _ (producer guard).lowered
+
+theorem skipped_model (locals : Vector Scalar.Word 1) (newer : Vector Scalar.Word 2)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode (producer 0)).code
+      {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} 0 :=
+  (encode (producer 0)).normal_to_model 2 locals locals (skipped_source locals) newer m caller
+
+theorem taken_model (locals : Vector Scalar.Word 1) (newer : Vector Scalar.Word 2)
+    (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode (producer 1)).code
+      {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} =
+      .ok {m with stack := (newer.toList ++ locals.toList).map coreWord ++ caller} 0 :=
+  (encode (producer 1)).normal_to_model 4 locals locals (taken_source locals) newer m caller
+
+/-- Reuse the existing effectful visitor fixture: the taken branch resets
+an arbitrary old counter. This distinguishes taking the loop from skipping it. -/
+theorem effectful_taken (a b : Scalar.Word) (m : Evm.Machine) (caller : List Evm.Word) :
+    Evm.run (encode GuardedForCompilation.Controls.takenArtifact).code
+      {m with stack := [coreWord a, coreWord b] ++ caller} =
+      .ok {m with stack := [coreWord 0, coreWord (~~~(~~~b+3)+3)] ++ caller} 0 :=
+  GuardedForCompilation.Controls.taken_success a b m caller
+
+#guard (GuardedForCompilation.lower 0 2 (source 1)).isNone
+/-- The real guard needs DUP17 below the newer prefix. The loop itself
+remains selectable; a source-feasible raw producer survives code refusal. -/
+def refusedSource : Stmt [] [] ⟨false, false⟩ 1 :=
+  .if_ (.local 0) H55For.Controls.stoppedSource
+def refusedRaw : GuardedForCompilation.Compiled 1 16 refusedSource :=
+  (GuardedForCompilation.compile 1 16 refusedSource).get (by rfl)
+theorem refused_code : refusedRaw.code = none := rfl
+theorem refused_preparation :
+    (Artifact.toPreparationImage prepare refusedRaw).artifact = none := prepare_none _ refused_code
+theorem refused_source_completes :
+    evalStmt 2 .nil True.intro refusedSource refusedRaw.profile
+      (sourceLocals (Vector.replicate 1 0)) =
+      some ⟨sourceLocals (Vector.replicate 1 0), .normal⟩ := rfl
+theorem refused_original_recovered :
+    Artifact.recoverPreparation (Artifact.toPreparationImage prepare refusedRaw) = refusedRaw :=
+  raw_roundtrip refusedRaw
+#guard (GuardedForCompilation.lower 1 16 refusedSource).isNone
+#guard (GuardedForCompilation.lower 1 2 H55For.Controls.stoppedSource).isNone
+end Controls
+
+#print axioms encode
+#print axioms selected_roundtrip
+#print axioms raw_roundtrip
+#print axioms Artifact.select_none
+#print axioms Artifact.select_some
+#print axioms Artifact.preparation_image_roundtrip
+#print axioms Artifact.image_roundtrip
+#print axioms prepare_none
+#print axioms prepare_some
+#print axioms Controls.skipped_model
+#print axioms Controls.taken_model
+#print axioms Controls.effectful_taken
+#print axioms Controls.selected_preparation
+#print axioms Controls.refused_code
+#print axioms Controls.refused_preparation
+#print axioms Controls.refused_source_completes
+#print axioms Controls.refused_original_recovered
+end Solidity.Yul.Compilation.H55For.Guarded

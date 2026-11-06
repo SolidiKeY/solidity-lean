@@ -72,6 +72,24 @@
       "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
       "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed",
       "adapter_kind": "selected_artifact"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/GuardedForCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Guarded",
+      "declaration_kind": "inductive",
+      "declaration_name": "Compiled",
+      "adapter_kind": "preselection_provenance",
+      "boundary": "Instantiates generic Artifact.select and PreparationImage. Selected payload derives both actual guarded-for execution laws; source-feasible DUP17 refusal retains the exact original compiled producer. None is preparation refusal, not a runtime verdict."
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/GuardedForCompilation.lean",
+      "adapter_module": "tests/h55/yul-artifact/ForAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55For.Guarded",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_kind": "selected_artifact",
+      "boundary": "Instantiates the existing common Artifact and exact Artifact.Image with original guarded-if source, code, profile, separate component fuel and arbitrary newer-prefix depth. Generic image roundtrips retain the full selected producer; no per-shape Artifact definition or family migration."
     }
   ]
 }
