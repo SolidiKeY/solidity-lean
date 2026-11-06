@@ -3682,6 +3682,8 @@ import Solidity.Source.Agreement.BoolSlotConditionalControls
 import Solidity.Source.Agreement.BoolSlotControls
 import Solidity.Source.Agreement.BoolSlotNot
 import Solidity.Source.Agreement.BoolSlotNotControls
+import Solidity.Source.Agreement.BoolSlotOr
+import Solidity.Source.Agreement.BoolSlotOrControls
 import Solidity.Source.Agreement.BoolSlotRead
 import Solidity.Source.Agreement.BoolSlotReadControls
 import Solidity.Source.Agreement.Locals
