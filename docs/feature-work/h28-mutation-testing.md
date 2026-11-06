@@ -864,3 +864,11 @@ This is a completed rollback checkpoint, not full assignment completion. The
 frame-effect witness, exhaustive selection ledger, expanded combined run and
 final repository gates remain outstanding. The earlier full repository gate
 failed; no passing full gate is inferred from the owned proof checks.
+
+
+Final finder review identified a packaging check gap: member maps at proof-pack
+keys were skipped by validation/review-only traversal. Bulk verification now
+authenticates every declared member map regardless of its key. The real-Git
+control checks the rollback-pack location and rejects changed member hash, size
+and membership there. Archive integrity had passed; the missing enforcement
+was fixed before checkpoint seal acceptance. No proof or budget changed.
