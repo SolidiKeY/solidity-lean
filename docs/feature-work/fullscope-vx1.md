@@ -977,6 +977,16 @@ see the same declarations. Measured: Below 2182 MiB / 51 s, Grow 3871 MiB /
 90 s, Const 1440 MiB / 26 s, Horizon 4091 MiB / 105 s (batch, one thread).
 This touches a VY5-owned file under the assignment's OOM authorization only.
 
+Third fix (`[oom-fix]` commit `75fea01c`): `Frontend/Checked/UnitExamples.lean`
+peaked at **7972 MiB, 129 s**. Its corpora move to `UnitExamples/Corpus`, the
+per-program `decide +kernel` certificates to `UnitExamples/Parsed`,
+`ProfileParsed` and `ProfileExprParsed` (made public, otherwise unchanged);
+`UnitExamples.lean` keeps the exactness lemmas, the pinned
+`allCtors_covered`/`profileCtors_covered` (pins unchanged, `#guard_msgs`
+passes) and the controls. Measured batch, one thread: Corpus 2008 MiB / 23 s,
+Parsed 2355 MiB / 38 s, ProfileParsed and ProfileExprParsed under 3726 MiB /
+34 s and 19 s, UnitExamples 2610 MiB / 20 s.
+
 ### Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
 
 `Solidity/Language/EnvironmentFields/Frozen.lean`, namespace
