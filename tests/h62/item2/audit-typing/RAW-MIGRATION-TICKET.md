@@ -1,6 +1,8 @@
 # RAW-435: frozen typing dependency fails mandated migration toolchain
 
-Status: blocked dependency; owner identity/delivery pending coordinator retrieval.
+Status: RESOLVED FOR THIS LANE by coordinator clarification: this lane uses v4.24.0; v4.35 is migration-batch-only. Raw passes unchanged on v4.24.0. QRAW-435 is answered; no producer repair/overlay is requested. Historical options below are closed, not approval requests.
+
+Historical v4.35 reproduction follows; it is not a current blocker.
 Worker: solidity-h62-2-20261106/audit-typing.
 Repository: /workspace/solidity-lean.
 Branch: codex/solidity-h62-2-20261106/audit-typing.

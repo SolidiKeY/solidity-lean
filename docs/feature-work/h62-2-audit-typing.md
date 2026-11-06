@@ -1,10 +1,28 @@
 # H62 item 2: typing/frontend empty-statement audit
 
-Status: blocked full completion on RAW-435; none of the four checkpoints is complete. Persistent goal remains unfinished. Unaffected frontend/backfill work is not declared blocked.
+Status: partial; resumed on v4.24.0. RAW-435 and QRAW-435 are resolved by coordinator clarification. No global checkpoint is complete.
 Owner: solidity-h62-2-20261106/audit-typing.
 Branch: codex/solidity-h62-2-20261106/audit-typing.
 Frozen base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
 Repository: /workspace/solidity-lean.
+
+## Current coordinator clarification and v4.24 evidence
+
+Coordinator answer, verbatim: Lean v4.35.0 applies ONLY to the toolchain-migration batch (solidity-h62-6) on its migration branch. Your lane stays on master's toolchain v4.24.0; do not install or overlay v4.35. Continue your queue on v4.24.0 and end the turn with a CLOUDVM-RESULT.
+
+This supersedes every v4.35 requirement and RAW-435 blocker/escalation below. QRAW-435 is answered; no Raw producer edit or overlay is requested. No goal was created or reset. No get_goal/resume tool is exposed. Branch, base, frozen interfaces and exclusive scope remain unchanged.
+
+Current binaries: `/workspace/.setup/tools/lean-4.24.0-linux/bin/{lean,lake}`. Actual Lean 4.24.0 release commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613 (Lean 4.24.0). Evidence/output path: `/workspace/h62-audit-typing-evidence/v4.24.0/`. No historical v4.35 artifacts are consumed.
+
+All 28 frozen Typing.Values prerequisites passed on v4.24.0, including KeySort and Raw unchanged. All 23 Closure source witnesses passed again. Its actual v4.24 census is 32 constants: 23 source plus 9 generated with interface/witness obligations pending. The historical 33-count is specific to v4.35.
+
+Nine new simultaneous association-list witnesses cover Values.lean source declarations at lines 39–145, using two inhabited Bool carriers and the actual key DecidableEq instance. Their explicit whitelist extends the restricted premise-comparison helper; every data/proposition binder is retained. ValuesListsWitnesses.lean and ValuesListsFidelity.lean live under the owned tests directory. Exact signatures for all 228 Values theorem constants are saved off Git; only these nine Values declarations are witnessed so far. None of the remaining statements is excluded or certified.
+
+Reproduce: `python3 scripts/h62/item2/audit-typing/build_typing_values.py`, then `python3 scripts/h62/item2/audit-typing/check_closure.py`. The first records frozen-source and output hashes for all 28 dependencies. The second verifies those hashes before consuming artifacts and checks seven files, 23 Closure + 9 Values-list witness mappings, both omitted-premise rejection controls, and axiom reports. Both retain writer locking, serial -j1, explicit memory/time bounds and a continuous 4 GiB reserve guard.
+
+Independent read-only finder/skeptic reviewed the toolchain correction and all nine bundles without Lean/server. No omitted premise found. Both requested explicit dependency artifact provenance; source/output hashes now address that finding. Only existing propext or no axioms appear in witness dependency reports. No frozen source edits, new axioms/sorry/native_decide or increased heartbeats. Full assignment gates, live owner resolution, remaining modules and compiler success contracts remain pending. No proof-refactor timing comparison is claimed.
+
+## Historical saved work (superseded toolchain/blocker claims)
 
 ## Saved source backfill
 
@@ -85,3 +103,15 @@ ESCALATE: action compile frozen Solidity/Syntax/Raw.lean on mandated Lean v4.35.
 Full completion is blocked until an approved dependency handoff exists; remaining frontend/scanner/fixture backfill is not asserted blocked or exhausted. No 8–10-hour queue completion is claimed. All four checkpoints, all global final gates, live owner resolution and pending generated-constant interface/witness obligations remain unfinished. The persistent goal must remain unfinished, with this typed dependency blocker retained.
 
 Fresh-thread handoff: original VM environment ccarenv_b64_Y2NhcmVudl8zMWE4NTM2NTg3MWM4MTkxYmM5NDM2MzdlNTU1N2FhZQ; repository /workspace/solidity-lean; assigned branch and base above. Existing original persistent goal is the supplied SHA256 38c86c8ae936d7d46882834692303bd39eccdd174f345bb4e862706b89d21d5e. get_goal remains unavailable; no goal creation/reset/replacement is authorized. Coordinator should continue the same saved goal/state after dependency resolution or schedule the remaining unaffected in-scope backfill in the required fresh thread. Never self-launch a replacement.
+
+## Latest v4.24 acceptance and handoff
+
+Final hardened prerequisite run: 28/28 exit 0, no resource/time stops, total measured subprocess time 107.802 seconds. Commands, individual times and source/olean SHA256s: `v4.24.0/typing-values-build-results.json`. Actual versions: `v4.24.0/versions.txt`. KeySort passes as the first bounded prerequisite. Raw passes unchanged, closing the obsolete migration question for this lane.
+
+Final hardened subset run: 7/7 exit 0, no guard stops. Times in seconds: Closure 0.803; reflection helper 1.405; Closure witnesses 0.502; Closure census 1.005; Closure fidelity 0.803; Values-list witnesses 0.803; Values-list fidelity 1.806. Acceptance records: `v4.24.0/closure-check-results.json`. The runner validates results against the saved 28-file plan; the plan's full frozen dependency closure and topological order were independently reviewed. It checks every planned frozen source hash and corresponding artifact hash before importing Values. It does not independently reconstruct the plan on each acceptance run.
+
+Both read-only reviews independently verified all 28 source/artifact hashes and confirmed all seven checks. No omitted hypothesis in the nine added bundles. Fixed findings: dependency artifact provenance and duplicate Python import. No new/custom axioms; witness dependency reports show only pre-existing propext or no axioms. The comparison helper remains deliberately restricted to reviewed signatures. No source theorem weakness or vacuity was established; no theorem repair or premise change is requested.
+
+Queue remains unfinished. Thirty-two source witnesses do not complete an area-wide checkpoint. Other Values source declarations, generated constants, remaining module-map files, current producer owners, compiler success/failure/gas/fork controls, full affected builds/acceptance and final whole-audit reviews remain pending. Historical v4.35 results do not count as current gates. No RUNTIME_GATE_PASS or full assignment completion is claimed. Before/after proof-refactor timing remains unavailable because no frozen proof implementation was refactored.
+
+This continuation adds toolchain recovery/validation and the nine-lemma witness/fidelity item to the saved work. Preserve the same original goal and branch; do not create/reset a goal or self-launch a replacement. Coordinator fresh-thread handoff can continue from the exact original VM and saved state recorded above. RAW-435 is resolved, not a reason to stop work. The next in-scope work is additional Values witnesses and broader elaborated census coverage, then supported-program compiler success contracts.

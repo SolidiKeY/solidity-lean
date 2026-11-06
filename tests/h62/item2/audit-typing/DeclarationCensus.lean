@@ -41,16 +41,25 @@ elab "#audit_witness " original:ident " via " witness:ident : command => do
   liftTermElabM do
     let originalInfo ← getConstInfo original.getId
     let witnessInfo ← getConstInfo witness.getId
-    let .forallE _ carrier body _ := originalInfo.type
+    let .forallE _ carrier _ _ := originalInfo.type
       | throwError "expected carrier binder"
     unless ← isDefEq carrier (← inferType (mkConst ``Bool)) do
       throwError "unsupported carrier shape"
     let env ← getEnv
     let some closureIdx := env.getModuleIdx? `Solidity.Frontend.Static.Closure
       | throwError "Closure must be imported"
-    unless env.getModuleIdxFor? original.getId == some closureIdx do
-      throwError "witness checker is currently restricted to reviewed Closure signatures"
-    let mut type := body.instantiate1 (mkConst ``Bool)
+    let listNames := [`Solidity.lookupBy_isSome_of_mem', `Solidity.lookupBy_of_nodup,
+      `Solidity.mem_setBy, `Solidity.lookupBy_none_setBy, `Solidity.nodupKeysB_setBy',
+      `Solidity.setBy_of_lookupBy, `Solidity.lookupBy_append_none,
+      `Solidity.setBy_append_none, `Solidity.nodupKeysB_mid]
+    unless env.getModuleIdxFor? original.getId == some closureIdx || listNames.contains original.getId do
+      throwError "witness checker is restricted to reviewed signatures"
+    let mut type := originalInfo.type
+    -- Only the reviewed one/two-carrier families may use Bool specialization.
+    for _ in [0:2] do
+      if let .forallE _ domain body _ := type then
+        if ← isDefEq domain (← inferType (mkConst ``Bool)) then
+          type := body.instantiate1 (mkConst ``Bool)
     if let .forallE _ domain body _ := type then
       if ← isDefEq domain (← mkAppM ``DecidableEq #[mkConst ``Bool]) then
         type := body.instantiate1 (← synthInstance domain)

@@ -2,6 +2,7 @@
 """Build unchanged frozen prerequisites for Typing.Values; no shared cache."""
 import fcntl
 import hashlib
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -11,17 +12,20 @@ import time
 
 ROOT = Path(__file__).resolve().parents[4]
 BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
-EVIDENCE = Path("/workspace/h62-audit-typing-evidence")
-LEAN = Path("/workspace/h62-audit-typing-tools/lean-4.35.0-linux/bin/lean")
+EVIDENCE = Path("/workspace/h62-audit-typing-evidence/v4.24.0")
+LEAN = Path("/workspace/.setup/tools/lean-4.24.0-linux/bin/lean")
 
 def main():
-    EVIDENCE.mkdir(exist_ok=True)
+    EVIDENCE.mkdir(parents=True, exist_ok=True)
     lockpath = Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
     lockpath.parent.mkdir(exist_ok=True)
     with lockpath.open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        with (EVIDENCE/"lean-4.35.0-linux.tar.zst").open("rb") as stream:
-            assert hashlib.file_digest(stream, "sha256").hexdigest() == "7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d"
+        assert (ROOT/"lean-toolchain").read_text().strip() == "leanprover/lean4:v4.24.0"
+        versions = subprocess.check_output([str(LEAN), "--version"], text=True)
+        assert "version 4.24.0," in versions
+        lake_version = subprocess.check_output([str(LEAN.with_name("lake")), "--version"], text=True)
+        (EVIDENCE/"versions.txt").write_text(versions+lake_version)
         ordered = []
         seen = set()
         def visit(module):
@@ -68,7 +72,9 @@ def main():
                         break
                     time.sleep(0.1)
             result = dict(command=cmd, exit=process.returncode, seconds=time.monotonic()-start,
-                stopped=stopped, log=str(log))
+                stopped=stopped, log=str(log),
+                source_sha256=hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),
+                olean_sha256=hashlib.sha256(output.read_bytes()).hexdigest() if process.returncode == 0 and not stopped else None)
             results.append(result)
             (EVIDENCE/"typing-values-build-results.json").write_text(json.dumps(results, indent=2)+"\n")
             print(path, process.returncode, stopped, flush=True)
