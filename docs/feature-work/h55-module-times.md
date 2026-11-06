@@ -932,3 +932,66 @@ remain outstanding. A checkpoint that skips a changed slow module is not
 evidence that the module was checked. The lexical CI check does not prove
 Lake resolution or cover every external/custom root. The historical H28
 object, H56 runner provenance and measurements remain unresolved.
+
+## H109 axiom-pin relocation: read-only preparation
+
+`pin_dry_run.mjs` reads tracked Lean files under Solidity, Bridge and tests
+using the current pin checker parser. It records each recognized occurrence,
+source SHA-256, original checker key, observed doc/guard byte span and block,
+proposed area/key, duplicate warnings and unresolved destination. It never
+rewrites sources, roots, inventories or pins. The full report from isolated
+`/workspace/h55-pin-master` at upstream `33eb46304cdb536e6c8b686223c6d8e456b703ae`
+is `/workspace/h55-module-times-evidence/h109-pin-master-proposal.json`;
+its and earlier observations' hashes are in
+`tests/h55/module-times/h109-pin-evidence.sha256`.
+
+This recognizes 16,140 occurrences in 1,645 files, with 0 duplicate old
+checker keys, 34 duplicate suggested keys, 0 null parsed axiom sets, and all
+23 required pin names present by name. These are scanner-relative counts,
+not an independent Lean parse or proof that required file/axiom/multiplicity
+contracts are preserved. Area is the first two path components, a provisional
+grouping, not approved ownership or destination. Suggested destinations can
+already exist or combine incompatible scopes; no actual destination is
+selected. The checker walks filesystem paths beyond this tracked-only scan.
+Its original keys include source file paths, so relocation needs a reviewed
+old-to-new inventory mapping and integration changes; `--write` was not run.
+Observed blocks omit surrounding namespace, options and command context and
+are not certified movable Lean units. No pin has been removed or weakened.
+
+| Provisional area | Files | Recognized occurrences |
+| --- | ---: | ---: |
+| `Bridge/SolidityBridge` | 131 | 929 |
+| `Bridge/tests` | 1 | 82 |
+| `Solidity` | 1 | 18 |
+| `Solidity/Backend` | 841 | 7166 |
+| `Solidity/Calculus` | 43 | 104 |
+| `Solidity/Corpus` | 2 | 3 |
+| `Solidity/Counterexamples` | 1 | 1 |
+| `Solidity/Examples` | 45 | 193 |
+| `Solidity/Frontend` | 31 | 1782 |
+| `Solidity/Hash` | 2 | 11 |
+| `Solidity/Language` | 4 | 35 |
+| `Solidity/Lowering` | 224 | 2264 |
+| `Solidity/Precompiles` | 1 | 3 |
+| `Solidity/Roadmap` | 13 | 107 |
+| `Solidity/Semantics` | 20 | 118 |
+| `Solidity/Source` | 44 | 587 |
+| `Solidity/Stipend` | 1 | 2 |
+| `Solidity/Storage` | 10 | 77 |
+| `Solidity/Yul` | 166 | 1118 |
+| `tests/calldata-packets-1105` | 1 | 55 |
+| `tests/h28-sol` | 9 | 544 |
+| `tests/h62` | 5 | 63 |
+| `tests/roadmap-g19` | 23 | 398 |
+| `tests/roadmap-g36` | 14 | 234 |
+| `tests/sol-constant-depth` | 1 | 83 |
+| `tests/sol-override-validation` | 4 | 135 |
+| `tests/upstream` | 7 | 28 |
+
+Independent read-only reviews identified the file-key migration, parser,
+scope and proposed-key collisions; an added synthetic test checks UTF-8 byte
+offsets. Full relocation design, safe extraction and semantic/axiom checks,
+five-module measured before/after wall and RSS, and the coordinator quiet
+window remain pending. The audit's earlier raw `#print axioms` figure uses a
+different revision and counting method; it is not replaced by this parsed
+tracked-only count. No H109 pin A/B or production migration is claimed.
