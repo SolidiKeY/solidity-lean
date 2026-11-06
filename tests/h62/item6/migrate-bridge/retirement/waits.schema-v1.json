@@ -14,14 +14,6 @@
       "item": "H78-COMPLETE-PUBLIC-INVENTORY: existing old/new elaborated public exports, including every generated declaration and exact shim signatures, not available; implemented_shims=[]; no new Lean run under retirement"
     },
     {
-      "lane": "coordinator",
-      "item": "Exact original rendered prompt authentication: thread transcription SHAff6e7badd210385a29e1999bc6c41b3dc4f9d6ca31ddadd51c58cf7c96c71704 differs from launcher SHA7456740aae294bbb28be3e1b5806b783646bfbddeed942fd01137d0562faf014; deliver exact original rendering to survivor"
-    },
-    {
-      "lane": "coordinator",
-      "item": "Q-H82-RETIRE: specific stop-and-handoff instruction versus later general Continue now message; clarification requested; no implementation resumed"
-    },
-    {
       "lane": "solidity-h62-6-20261106/migrate-syntax",
       "item": "B01/DEP-RAW-435: only partial receipt reported; no accepted overlay/trust/holds lifted"
     },
@@ -52,6 +44,10 @@
     {
       "lane": "claudecloud/move5-20261106/v14-g43",
       "item": "OBL-SUCCESS actual compiler-success theorem not supplied; frozen Solidity.Stipend.Obligation unchanged; no Claude-owned source edits/messages"
+    },
+    {
+      "lane": "coordinator",
+      "item": "Set existing goal PAUSED after final head report and idle; no pause action exposed here; blocked stop fallback is not completion"
     }
   ]
 }
