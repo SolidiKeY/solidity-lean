@@ -28,7 +28,8 @@ def frame : Source.Fr where
   contract := "C"
 def sourceState : Source.St E :=
   ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
-    Source.Heap.empty,[],[(⟨0,by decide⟩,[7])],⟨[.bool],.cons (.bool true) .nil⟩⟩
+    Source.Heap.empty,[],[(⟨0,by decide⟩,[7])],⟨[.bool],.cons (.bool true) .nil⟩,
+    Source.FailureExecution.Cursor.empty⟩
 def initial : State C [] := State.init C
 def machine0 : Machine := (Machine.init (fun _ => 0) ⟨0,W_pos⟩).push w[77]
 def addresses : Nat → Fin W := fun _ => wmod 0

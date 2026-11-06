@@ -1,0 +1,87 @@
+{
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.code_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.badCore": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.badEmitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.checked_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.core": [
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.no_canary_store": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.observed_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.post": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.typed_bad": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.typed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.Controls.wrong_tail_slot_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.emit": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/ConditionalSequenceCompilerAxioms.lean:Solidity.Backend.StructuredFlow.ConditionalSequenceCompiler.emit_split": [
+  "Quot.sound",
+  "propext"
+ ]
+}

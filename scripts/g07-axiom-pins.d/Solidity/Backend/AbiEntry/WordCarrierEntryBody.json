@@ -1,0 +1,73 @@
+{
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.body_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.composed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.short_before_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.Binding.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.decoded_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.early_rejection": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.gated": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean:Solidity.Backend.AbiEntry.WordCarrierEntryBody.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,37 @@
+{
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_nonce_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.caller_prefix_required": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.disabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.enabled_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.heap_alias_readback": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.no_false_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureEventControls.lean:Solidity.Source.FailureExecution.EventControls.owner_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
