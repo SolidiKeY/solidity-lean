@@ -245,5 +245,21 @@
     "gate_head": "3407707a3c8817ef72e5bd88211f41c712b2ef5c",
     "effective_gate_count": 8,
     "scope_complete": false
+  },
+  "frozen_manifest_inputs": {
+    "tests/h28-sol/mutation-testing/manifests/combined-pilot.json": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ]
   }
 }

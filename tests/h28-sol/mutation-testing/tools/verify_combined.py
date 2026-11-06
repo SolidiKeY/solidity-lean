@@ -22,6 +22,7 @@ def verify(repo):
   for m in tar:
    require(m.isfile() and m.name not in members and not m.name.startswith('/') and '..' not in Path(m.name).parts,'unsafe archive member')
    members[m.name]=m
+  require(len(members)==pin['members'],'archive member count mismatch')
   def read(name):return tar.extractfile(members[name]).read()
   expected={}
   for line in read('SHA256SUMS').decode().splitlines():

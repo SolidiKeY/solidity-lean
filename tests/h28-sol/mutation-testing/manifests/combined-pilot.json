@@ -819,5 +819,24 @@
     "sha256": "1d1f4da80c217f78eae36154c4ac283d765712b4c2bac8e7a0bc8f028e38dcfb",
     "input_head": "b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9",
     "catalog_sha256": "9977a50a4d659d02283ecc6587611413cd3ea298cc134bd01da5c36a052d2f73"
+  },
+  "input_storage": {
+    "authorization": "H44",
+    "availability": "VM-only",
+    "bulk_manifest": "tests/h28-sol/mutation-testing/bulk-data.json",
+    "inputs": [
+      {
+        "role": "inventory",
+        "path": "tests/h28-sol/mutation-testing/inventory.extended.draft.json",
+        "sha256": "e7f8f223586b55837584f57385d46061e00d03377e160f2a25d8d23587002554",
+        "bytes": 106323
+      },
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528
+      }
+    ]
   }
 }
