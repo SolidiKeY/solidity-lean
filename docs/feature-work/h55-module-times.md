@@ -411,3 +411,21 @@ still be delayed or unavailable, the watcher has not been integrated with
 trusted image, source, toolchain, cache or VM identity, and independent reviews
 remain pending. The coordinator confirmed H28 goal pause and quiescence, but
 its final bundle and exact original rendered prompt remain unavailable here.
+
+## Synthetic slowdown comparison
+
+`slowdown_compare.py` compares a supplied pair for one source path. It requires
+matching supplied VM, CPU, tool, cache, image, unchanged-input, memory, swap,
+thread and job fields; fresh successful measurements; wall/RSS values; and the
+4 GiB reserve. It stops when after-wall time is strictly greater than 110% of
+before-wall time, using integer arithmetic. Synthetic controls cover the exact
+boundary, over-boundary, failures and unmatched conditions; the 42-method
+synthetic suite passes.
+
+The comparator does not authenticate inputs, prove unchanged inputs or cache,
+collect wall/RSS, handle a censored baseline timeout as a measurement, compare
+statements/imports or identify H56. It is not an actual before/after result or
+production acceptance. No split or Lean job was performed. Independent reviews,
+H56 and the full gate remain pending. The H28 member pause and quiescence are
+confirmed by the coordinator, but its final bundle, exact rendered prompt and
+scope bytes remain unavailable on this VM.
