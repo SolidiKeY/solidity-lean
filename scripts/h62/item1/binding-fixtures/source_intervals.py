@@ -9,8 +9,10 @@ import hashlib
 import json
 import pathlib
 import re
-import subprocess
 import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from lexical import code_only, unknown_identifiers
+import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 MARKER = re.compile(r"^(?:(?:private|protected|noncomputable)\s+)*(theorem|lemma|def|abbrev|inductive|structure)\s+([^\s:(]+)")
@@ -18,7 +20,7 @@ MARKER = re.compile(r"^(?:(?:private|protected|noncomputable)\s+)*(theorem|lemma
 
 def split_source(data):
     lines = data.splitlines(keepends=True)
-    starts = [(i, match.group(1), match.group(2)) for i, line in enumerate(lines)
+    starts = [(i, match.group(1), match.group(2)) for i, line in enumerate(code_only(data).splitlines(keepends=True))
               if (match := MARKER.match(line))]
     preamble = "".join(lines[:starts[0][0]]) if starts else data
     intervals = []
@@ -40,7 +42,8 @@ def main():
         data = raw.decode("utf-8")
         preamble, intervals = split_source(data)
         files.append({"path": row["path"], "sha256": hashlib.sha256(raw).hexdigest(),
-                      "preamble": preamble, "intervals": intervals})
+                      "preamble": preamble, "intervals": intervals,
+                      "unknown_quoted_identifiers": unknown_identifiers(data)})
     print(json.dumps({"format": 1, "method": "lexical markers; not Lean parsing", "files": files},
                      indent=2, ensure_ascii=False))
 
