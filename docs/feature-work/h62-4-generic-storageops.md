@@ -420,3 +420,15 @@ This is a bounded coverage-proof refactor, not full semantic classification,
 fixture-table correspondence or acceptance of all 1623 control claims. The
 earlier timing STOPs and corrected C207 axiom interpretation remain retained.
 Full affected/lane validation and all original producer obligations stay open.
+
+## Second coverage stage
+
+C216 reuses the same general helper for fifteen additional finite membership
+subproofs in the same fifteen callers. Cumulative accounting now covers thirty
+subproof replacements, not thirty semantic theorem migrations. All 286 original
+statements and fixture definitions remain unchanged. Both kernel checks and
+existing axiom guards pass; the remaining child bridge has equal directly
+measured standard axiom sets. One matched warm sample measured 51.83 seconds
+before and 52.62 seconds after (1.5% increase, within 10%). Exact-byte packet
+checks and six tampering controls pass. Independent read-only finder and skeptic
+found no issue. Full-family correspondence and original lane closure remain open.

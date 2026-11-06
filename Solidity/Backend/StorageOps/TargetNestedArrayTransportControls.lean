@@ -204,12 +204,7 @@ theorem growing_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside
@@ -709,12 +704,7 @@ theorem retained_copied_root :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro j member
     simp only [retainedIndices,List.mem_cons,List.not_mem_nil,or_false] at member
@@ -1085,12 +1075,7 @@ theorem both_phase_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside
@@ -1222,12 +1207,7 @@ theorem selected_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside
@@ -1610,12 +1590,7 @@ theorem precise_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside
@@ -1768,12 +1743,7 @@ theorem later_precise_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside
@@ -2058,12 +2028,7 @@ theorem stale_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside
@@ -2315,12 +2280,7 @@ theorem older_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside
@@ -2518,12 +2478,7 @@ private theorem freshChildBridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro j member
     simp only [freshIndices,List.mem_cons,List.not_mem_nil,or_false] at member
@@ -2827,12 +2782,7 @@ theorem mixed_growth_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside; change 2 ≤ k at begun; omega
@@ -3062,12 +3012,7 @@ theorem shrink_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside; change 2 ≤ k at begun
@@ -3280,12 +3225,7 @@ theorem output_growth_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside; change 2 ≤ k at begun; omega
@@ -3396,12 +3336,7 @@ theorem output_shrink_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 3 at inside; change 2 ≤ k at begun
@@ -3545,12 +3480,7 @@ theorem complete_growth_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside; change 2 ≤ k at begun; omega
@@ -3734,12 +3664,7 @@ theorem finite_root_bridge :
     change k < 2 at inside
     have casesK : k = 0 ∨ k = 1 := by omega
     rcases casesK with rfl | rfl <;> decide
-  · intro k inside j live
-    change k < 2 at inside
-    have casesK : k = 0 ∨ k = 1 := by omega
-    rcases casesK with rfl | rfl <;> change j < 1 at live
-    all_goals have same : j = 0 := by omega
-    all_goals subst j; decide
+  · exact forall_bounded_pair (by decide)
   · exact forall_bounded_pair (by decide)
   · intro k inside begun
     change k < 2 at inside; change 2 ≤ k at begun; omega

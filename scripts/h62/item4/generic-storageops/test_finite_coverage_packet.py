@@ -8,7 +8,9 @@ class PacketTest(unittest.TestCase):
     def setUpClass(cls):cls.old=subprocess.check_output(["git","show",m.BASE+":"+m.MODULE],cwd=ROOT)
     def test_exact_packet(self):
         current=(ROOT/m.MODULE).read_bytes();self.assertEqual(current,m.expected(self.old))
-        self.assertEqual(len(m.verify(self.old,current)["changed_proof_names"]),15)
+        report=m.verify(self.old,current)
+        self.assertEqual(len(report["changed_proof_names"]),15)
+        self.assertEqual(report["coverage_subproofs_replaced"],30)
     def test_tampering_rejected(self):
         source=m.expected(self.old)
         cases=[source.replace(b"theorem growing_bridge",b"theorem missing_case",1),
