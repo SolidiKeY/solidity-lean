@@ -9,8 +9,31 @@ import census
 
 PAIRS = {"byte_component": "original_byte_component", "byte_component_decode": "original_byte_component_decode"}
 
+def normalize_type(text):
+    """Normalize whitespace outside strings/quoted identifiers only."""
+    parts = []
+    i = 0
+    while i < len(text):
+        if text[i].isspace():
+            while i < len(text) and text[i].isspace(): i += 1
+            parts.append(" ")
+        elif text[i] in ('"', '«'):
+            start = i
+            close = '"' if text[i] == '"' else '»'
+            i += 1
+            while i < len(text):
+                if close == '"' and text[i] == "\\": i += 2; continue
+                if text[i] == close: i += 1; break
+                i += 1
+            else: raise ValueError("unterminated literal/identifier")
+            parts.append(text[start:i])
+        else:
+            parts.append(text[i]); i += 1
+    return "".join(parts).strip()
+
 def theorem_types(text):
     code = census.mask(text)
+    preserved = census.mask(text, strings=False)
     declarations = list(census.DECL.finditer(code))
     result = {}
     for i, match in enumerate(declarations):
@@ -20,8 +43,9 @@ def theorem_types(text):
         name = re.match(r"\s+(\w+)", tail)
         if not name: raise ValueError("unsupported theorem identifier")
         prefix = tail[name.end():]
-        prefix = prefix[:census.statement_end(prefix)]
-        result[name[1]] = " ".join(prefix.split())
+        cut = census.statement_end(prefix)
+        start = match.end() + name.end()
+        result[name[1]] = normalize_type(preserved[start:start+cut])
     return result
 
 def compare(original, candidate):
@@ -48,7 +72,7 @@ def main():
     controls = [dict(path=d["path"],line=d["line"],name=d["name"],statement_sha256=d["statement_sha256"],
         disposition="preserved original; candidate correspondence available" if d["path"].endswith("/ReadControls.lean") and d["name"] in PAIRS else "preserved original; generic migration pending")
         for d in inventory["declarations"] if d["in_controls_file"] and d["kind"] == "theorem"]
-    result = dict(schema_version=1,status="LEXICAL_CORRESPONDENCE_PASS",boundary="whitespace-normalized lexical types only; kernel equivalence and proofs pending",pairs=pairs,original_control_theorems=controls)
+    result = dict(schema_version=1,status="LEXICAL_CORRESPONDENCE_PASS",boundary="selected unquoted theorem names; comments and outside-literal whitespace normalized; kernel equivalence/proofs pending; preservation dispositions require separate base-blob check",pairs=pairs,original_control_theorems=controls)
     args.output.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(dict(status=result["status"],pairs=len(pairs),original_control_theorems=len(controls))))
 
