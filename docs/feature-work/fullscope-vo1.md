@@ -1165,3 +1165,7 @@ statement of `Val.cfold_evalT` is unchanged. Control `index_folded`
 expressions left as written" item for folding; propagation, simplification and CSE still
 leave path indices as written, and statement-level locations (`assign l`, `delete l`) are
 not yet rewritten.
+`Prog.vopt` also rewrites the storage location of `assign`, `delete`, `push` and `pop`
+(`SPath.vmap`/`Loc.vmap` with `SPath.vmap_resolveT`, `Loc.vmap_resolveT`), so folding
+and simplification reach `x[e] = v`, `delete x[e]`, `x[e].push(v)` indices. Control
+`delete_index_folded`. Compound-assignment and memory locations are still left as written.

@@ -119,6 +119,33 @@ theorem _root_.Solidity.Src.vopt_valueT {Γ : Ctx} (V : ValPass C) (σ : State C
   | _, .val v => by simp only [Src.vopt, Src.valueT, V.sound]
   | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
 
+mutual
+/-- An expression pass on the index expressions of a storage path. -/
+def _root_.Solidity.SPath.vmap {Γ : Ctx} (V : ValPass C) : {T : Ty} → SPath C Γ T → SPath C Γ T
+  | _, .alias i => .alias i
+  | _, .loc l => .loc (l.vmap V)
+
+/-- An expression pass on the index expressions of a storage location. -/
+def _root_.Solidity.Loc.vmap {Γ : Ctx} (V : ValPass C) : {T : Ty} → Loc C Γ T → Loc C Γ T
+  | _, .root r h => .root r h
+  | _, .field b f h => .field (b.vmap V) f h
+  | _, .index it b i => .index it (b.vmap V) (V.run i)
+end
+
+mutual
+theorem _root_.Solidity.SPath.vmap_resolveT {Γ : Ctx} (V : ValPass C) (σ : State C Γ) :
+    {T : Ty} → (b : SPath C Γ T) → (b.vmap V).resolveT σ = b.resolveT σ
+  | _, .alias _ => rfl
+  | _, .loc l => by simp only [SPath.vmap, SPath.resolveT, Loc.vmap_resolveT V σ l]
+
+theorem _root_.Solidity.Loc.vmap_resolveT {Γ : Ctx} (V : ValPass C) (σ : State C Γ) :
+    {T : Ty} → (l : Loc C Γ T) → (l.vmap V).resolveT σ = l.resolveT σ
+  | _, .root .. => rfl
+  | _, .field b f h => by simp only [Loc.vmap, Loc.resolveT, SPath.vmap_resolveT V σ b]
+  | _, .index it b i => by
+    simp only [Loc.vmap, Loc.resolveT, SPath.vmap_resolveT V σ b, V.sound]
+end
+
 /-- Constant folding as an expression pass. -/
 def cfoldPass : ValPass C := ⟨Val.cfold, fun σ v => Val.cfold_evalT σ v⟩
 
@@ -186,7 +213,9 @@ def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ'
   | _, _, .ite c thn els => foldIte (V.run c) (Prog.vopt V thn) (Prog.vopt V els)
   | _, _, .block body => .block (Prog.vopt V body)
   | _, _, .loop a c body => .loop a (V.run c) (Prog.vopt V body)
-  | _, _, .assign l r => .assign l (r.vopt V)
+  | _, _, .assign l r => .assign (l.vmap V) (r.vopt V)
+  | _, _, .delete l => .delete (l.vmap V)
+  | _, _, .pop b => .pop (b.vmap V)
   | _, _, s@(.rebind ..) => s
   | _, _, s@(.declStorage ..) => s
   | _, _, .opAssign op hop hp l r => .opAssign op hop hp l (V.run r)
@@ -194,13 +223,11 @@ def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ'
   | _, _, s@(.assignIncDec ..) => s
   | _, _, s@(.assignLocalPush ..) => s
   | _, _, .push b v hd =>
-    .push b (v.map (Src.vopt V)) (by rw [Option.isSome_map]; exact hd)
-  | _, _, s@(.pop ..) => s
+    .push (b.vmap V) (v.map (Src.vopt V)) (by rw [Option.isSome_map]; exact hd)
   | _, _, s@(.declMem ..) => s
   | _, _, s@(.rebindMem ..) => s
   | _, _, s@(.assignFromMem ..) => s
   | _, _, s@(.assignMem ..) => s
-  | _, _, s@(.delete ..) => s
   | _, _, s@(.deleteMem ..) => s
   | _, _, s@(.assignNew ..) => s
   | _, _, s@(.revert) => s
@@ -326,7 +353,7 @@ theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s :
   | _, _, .assign l r => by
     simp only [Stmt.vopt, Stmt.runC]
     funext σ
-    simp only [TRun.assign, Src.vopt_valueT]
+    simp only [TRun.assign, Src.vopt_valueT, Loc.vmap_resolveT]
   | _, _, .opAssign op hop hp l r => by
     simp only [Stmt.vopt, Stmt.runC]
     funext σ
@@ -338,11 +365,19 @@ theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s :
   | _, _, .push b v hd => by
     simp only [Stmt.vopt, Stmt.runC]
     funext σ
-    cases v <;> simp only [TRun.push, Option.map, Src.vopt_valueT]
+    cases v <;> simp only [TRun.push, Option.map, Src.vopt_valueT, SPath.vmap_resolveT]
+  | _, _, .delete l => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    simp only [TRun.delete, Loc.vmap_resolveT]
+  | _, _, .pop b => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    simp only [TRun.pop, SPath.vmap_resolveT]
   | _, _, .rebind .. | _, _, .declStorage ..
   | _, _, .incDec .. | _, _, .assignIncDec .. | _, _, .assignLocalPush ..
-  | _, _, .pop .. | _, _, .declMem .. | _, _, .rebindMem .. | _, _, .assignFromMem ..
-  | _, _, .assignMem .. | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
+  | _, _, .declMem .. | _, _, .rebindMem .. | _, _, .assignFromMem ..
+  | _, _, .assignMem .. | _, _, .deleteMem .. | _, _, .assignNew ..
   | _, _, .revert | _, _, .assumeFalse | _, _, .call .. | _, _, .tryCall ..
   | _, _, .pushIncDec .. | _, _, .callReceiver ..
   | _, _, .callReceiverPush .. | _, _, .callRec .. | _, _, .revertData ..

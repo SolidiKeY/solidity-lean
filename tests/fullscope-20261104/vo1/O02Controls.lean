@@ -46,6 +46,14 @@ def balRead (i : Val C [] .uint) : Val C [] .uint :=
 
 theorem index_folded : (balRead (add (lit 2) (lit 3))).cfold = balRead (lit 5) := rfl
 
+/-- `delete balances[1 + 1];`: the statement's location index is folded. -/
+def balLoc (i : Val C [] .uint) : Loc C [] (.prim .uint) :=
+  .index .map (.loc (.root (T := .ref (.mapping .uint (.prim .uint))) "balances" rfl)) i
+
+theorem delete_index_folded :
+    Prog.cfold (.cons (.delete (balLoc (add (lit 1) (lit 1)))) .nil : Prog C [] []) =
+      .cons (.delete (balLoc (lit 2))) .nil := rfl
+
 /-- `assert(3 > 2 + 4)`: the condition folds to `false`, the `assert` stays,
 and the program still halts with Panic. -/
 def assertProg : Prog C [] [] := .cons (.assert (gt (lit 3) (add (lit 2) (lit 4)))) .nil
