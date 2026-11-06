@@ -995,3 +995,39 @@ five-module measured before/after wall and RSS, and the coordinator quiet
 window remain pending. The audit's earlier raw `#print axioms` figure uses a
 different revision and counting method; it is not replaced by this parsed
 tracked-only count. No H109 pin A/B or production migration is claimed.
+
+### H109 post-integration review and outstanding gates
+
+The task branch integrated `origin/master` at
+`33eb46304cdb536e6c8b686223c6d8e456b703ae`; its two conflict resolutions
+retain the reviewed H109 changes and upstream cache/CI and per-file gate
+behavior. The pre-integration task head remains at backup branch
+`codex/solidity-h55-terra-20261106/module-times-before-h109-upstream`.
+After integration a read-only review counted 14 slow and 341 regular examples
+with disjoint generated roots covering the then-current 355 example files;
+the static partition test passed. This is not Lake build validation.
+
+`node scripts/check-axiom-pins.mjs` failed with 0 errors and 99 unrecorded
+changes. The identical command on the isolated upstream master worktree also
+failed with the same 99 notes; the two output logs compare byte-for-byte
+equal. No checker `--write` or inventory update was performed. The earlier
+document-path gate failed on five existing missing references; neither failure
+is a passing gate. H109 evidence logs and hashes are listed in
+`tests/h55/module-times/h109-validation-evidence.sha256`.
+
+Slow-root and AxiomAudit elaboration, real CI/full and checkpoint gates,
+matched before/after wall/RSS and the 10% slowdown stop remain pending. The
+pin dry run remains a lexical inventory and preliminary destination proposal,
+not the requested complete safe migration script or measured five-module A/B;
+no pin migration is authorized before the scheduled quiet window. Neither
+H109 ticket is complete and no runtime/proof gate pass is claimed.
+
+Post-merge synthetic checks passed (73 Python tests, pin/site Node tests,
+generated roots, orphan/layer checks and fragments). The merged-branch and
+upstream-master documentation-path checks both fail on the same five missing
+references, recorded separately. The verified published Lake cache pack is
+retained at `/workspace/h55-module-times-evidence/h109-master-cache.tar.gz`,
+SHA-256 `af8ff93d3171aa367a4017606c59d7a25b36c5e8dc1900123a38451191679f6e`;
+its embedded head is `ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`. Its unpacked
+copy is `/workspace/h55-h109-pack/pack`. This is cache preparation, not a
+before/after measurement, proof pass or H56 evidence.
