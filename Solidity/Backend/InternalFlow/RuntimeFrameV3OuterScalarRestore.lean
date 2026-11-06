@@ -45,6 +45,8 @@ theorem step {C : Contract} {R : RefTy} {L b frame : Nat} {F : Frag (Frame R)}
    exact (outside x hp hr hc).trans (skipOutside x hp)
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore
-/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore.step' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore.step' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.OuterScalarRestore.step

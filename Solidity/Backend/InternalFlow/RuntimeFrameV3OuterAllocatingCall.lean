@@ -108,6 +108,8 @@ theorem complete : ∃ (out : Solidity.Out C σ.H (Frame A)) (last : Machine) (a
  · rw [actual];intro bad;cases bad
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall
-/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall.complete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall.complete' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.OuterAllocatingCall.complete
