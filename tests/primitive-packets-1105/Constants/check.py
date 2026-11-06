@@ -19,7 +19,7 @@ def validate_inventory(rows):
 def scope_candidates(diff,untracked): return set(diff)|set(untracked)
 def validate_scope(paths):
  for p in paths:
-  owned=p.startswith(('Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or p=='docs/feature-work/primitive-packets-1105-Constants.md'
+  owned=p.startswith(('Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/','Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/')) or p in ('docs/feature-work/primitive-packets-1105-Constants.md','docs/feature-work/numeric-literal-proofs.md','scripts/check-sol-numeric-literals.py')
   if not owned:
    assert p in M['preserved_untracked'] and sha(ROOT/p)==M['preserved_untracked'][p],'foreign write '+p
 def validate_modules(paths):
