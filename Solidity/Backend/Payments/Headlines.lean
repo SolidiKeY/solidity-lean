@@ -9,7 +9,9 @@ The versioned pair (H57, H98) for `Main.compiler_correct` and
 under their premises, with the payment-revert outcome gone:
 `compiler_correct_v2`, `compiler_checked_v2`, and the migration lemmas
 `compiler_correct_of_v2`, `compiler_checked_of_v2` giving the frozen
-statements back. The frozen headlines are unchanged.
+statements back. The frozen headlines are unchanged. This is the only module
+that imports `Solidity.Theorems`; consumers outside `Main` should use
+`Backend/Payments/Versioned.lean` instead.
 -/
 
 namespace Solidity
@@ -50,20 +52,20 @@ theorem compiler_correct_of_v2 {P : Prog C Γ Γ'} {F : Frag Γ} {F' : Frag Γ'}
   · exact .inr (.inr (.inr ⟨h1, .inl h2⟩))
 
 /-- **The checked entry, V2**: every compilation result agrees exactly under
-its input (`Compiler.CompilationV2.correct`). -/
+its input (`Compiler.Compilation.correct_v2`). -/
 theorem compiler_checked_v2 {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame : Nat}
     (compiled : Evm.Compiler.Compilation b F P) {base : Nat → Fin Evm.W}
     {σ : State C Γ} {mc : Evm.Machine}
     (h : compiled.Input L frame base σ mc) :
-    Evm.Compiler.CompilationV2.Agrees compiled L frame base σ mc :=
-  Evm.Compiler.CompilationV2.correct compiled h
+    compiled.AgreesV2 L frame base σ mc :=
+  compiled.correct_v2 h
 
 /-- Migration: the frozen `compiler_checked` statement, from V2. -/
 theorem compiler_checked_of_v2 {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame : Nat}
     (compiled : Evm.Compiler.Compilation b F P) {base : Nat → Fin Evm.W}
     {σ : State C Γ} {mc : Evm.Machine}
     (h : compiled.Input L frame base σ mc) : compiled.Agrees L frame base σ mc :=
-  Evm.Compiler.CompilationV2.agrees_frozen (compiler_checked_v2 compiled h)
+  Evm.Compiler.Compilation.agrees_of_v2 (compiler_checked_v2 compiled h)
 
 /-! ## Axioms: Lean's three -/
 
@@ -74,14 +76,6 @@ theorem compiler_checked_of_v2 {P : Prog C Γ Γ'} {F : Evm.Frag Γ} {b L frame 
 /-- info: 'Solidity.Main.compiler_checked_v2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms compiler_checked_v2
-
-/-- info: 'Solidity.Evm.PaymentControls.paying_premises' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms Evm.PaymentControls.paying_premises
-
-/-- info: 'Solidity.Evm.PaymentControls.refusing_world_not_sim' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs in
-#print axioms Evm.PaymentControls.refusing_world_not_sim
 
 end Main
 end Solidity

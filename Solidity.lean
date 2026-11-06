@@ -1484,6 +1484,7 @@ import Solidity.Backend.Payments.CompilerExact
 import Solidity.Backend.Payments.CoreExact
 import Solidity.Backend.Payments.Headlines
 import Solidity.Backend.Payments.Versioned
+import Solidity.Backend.Payments.VersionedControls
 import Solidity.Backend.PrimitivePackets.BitNot.Agreement
 import Solidity.Backend.PrimitivePackets.BitNot.Controls
 import Solidity.Backend.PrimitivePackets.BitNot.Selected
