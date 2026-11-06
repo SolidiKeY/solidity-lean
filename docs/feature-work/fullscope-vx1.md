@@ -987,6 +987,36 @@ passes) and the controls. Measured batch, one thread: Corpus 2008 MiB / 23 s,
 Parsed 2355 MiB / 38 s, ProfileParsed and ProfileExprParsed under 3726 MiB /
 34 s and 19 s, UnitExamples 2610 MiB / 20 s.
 
+Fourth (partial) fix: `Examples/Tactics/OpenLoops.lean` measured **9108 MiB,
+469 s** standalone (one thread). `binomialRowsNine` moves unchanged to
+`Examples/Tactics/OpenLoops/RowsNine.lean`; `OpenLoops.lean` now builds in
+10 s. `RowsNine` with its original `chunk := 128` peaked at 8992 MiB / 457 s;
+with `chunk := 64` it peaks at **5876 MiB but takes 594 s**. The chunk size is
+the only proof change (`sol_prove (chunk := n)` re-checks the same walk; each
+chunk is still kernel-checked). The 8 GiB bound now holds; the 300 s bound does
+not: the time is the walk itself, and meeting it needs the walk checkpointed
+across modules, which `sol_prove (chunk := n)` (`Calculus/ProveChunked.lean`,
+tactic owner) does not offer. Open, owner request below.
+
+Cold-build table (`run-lean.sh`, `LEAN_NUM_THREADS=1`, Lake running four jobs,
+VmHWM sampled every 0.2 s over 6415 modules; times are under parallel load and
+exceed standalone times). Rows over 5 GiB after the splits above (the split
+modules themselves are listed in their fixes):
+
+| Module | Peak MiB | Seconds |
+|---|---|---|
+| `Solidity/SortCheck/Faithfulness.lean` | 6427 | 61 |
+| `Solidity/Examples/Tactics/RevertData.lean` | 6163 | 118 |
+| `Solidity/TestSuite/Derived21.lean` | 5990 | 66 |
+| `Solidity/TestSuite/Derived7.lean` | 5428 | 86 |
+| `Solidity/Yul/Views/MemberDynamicSequence.lean` | 5357 | 13 |
+| `Solidity/Yul/Views/MemberDynamicBoundaryControls.lean` | 5326 | 9 |
+| `Solidity/Examples/Tactics/CallSharingDefault.lean` | 5297 | 73 |
+| `Solidity/Examples/DecisionHashThreeKinds.lean` | 5290 | 31 |
+
+Next by time: `Examples/Tactics/Recursion.lean` 296 s (2741 MiB) under load,
+at the time bound; not changed here.
+
 ### Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
 
 `Solidity/Language/EnvironmentFields/Frozen.lean`, namespace
