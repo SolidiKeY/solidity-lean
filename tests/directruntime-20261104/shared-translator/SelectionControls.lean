@@ -26,7 +26,7 @@ private def noSelection (source : Json) (name : String) (id : Int) : IO Unit := 
   | .error "no selected functions" => pure ()
   | _ => throw (IO.userError "unmatched identity/name was accepted")
 private def controls : IO Unit := do
-  let source ← contractFrom "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"
+  let source ← contractFrom "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"
   for id in [(209 : Int), 219] do
     let row ← oneRow source "overloaded" id
     unless (← checked (row.getObjValAs? String "status")) == "unsupported" do
@@ -51,7 +51,7 @@ private def controls : IO Unit := do
   let bad ← oneRow mutated "overloaded" 219
   unless (← checked (bad.getObjValAs? String "reason")) == "a malformed boolean literal" do
     throw (IO.userError "selected malformed sibling was not refused")
-  let unsupported ← contractFrom "tests/directruntime-20261104/shared-translator/UnsupportedContract.ast.json"
+  let unsupported ← contractFrom "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/UnsupportedContract.ast.json"
   match Tools.DirectRuntime.check (Json.mkObj [("contract", unsupported), ("listing", .bool true)]) with
   | .error "contract member" => pure ()
   | _ => throw (IO.userError "unsupported contract member was silently dropped")
