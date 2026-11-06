@@ -115,6 +115,32 @@
     "H70_generic_source_frontend": {
       "head": "b450d5c88e85cc1c01865718e9fb30e586b27bea",
       "response": "R-TOKEN receives unapplied Token candidate plus subsequent isolated Parser repair; both remain pending full gate/axiom/coordination review. No generic statement/numeric refactor work duplicated."
+    },
+    "H70_p16_generator": {
+      "head": "c0f52b16a359237329373e94a4633f45e5d21d01",
+      "handoff_sha256": "06a68fbeeb6b5550e173a331b1007fd33479240cab201f6c289870ca4e687781",
+      "source": "Coordinator-delivered handoff text, not a local replay",
+      "reported_failures": [
+        "Solidity.Hash.CollisionBound:407",
+        "Solidity.Language.FixedPoint:152",
+        "Solidity.Frontend.Checked.Token:38"
+      ],
+      "response": "Token candidate and exact source/axiom/type/control hashes available in this handoff; no original-file permission or full P16 acceptance claimed. Other repairs remain with their migration owners."
+    },
+    "H70_audit_label_execution_latest": {
+      "head": "d89b309029f9ad57f17711432aeef4990005994b",
+      "ticket_sha256": "5f63fe1a9f15bdd857e4bd601f59a36886cc06477474bcbf80bedf6ce2cc6c3d",
+      "source": "Coordinator-delivered JSON, not local gate replay",
+      "reported_blockers": [
+        "Solidity.Syntax.Raw",
+        "Solidity.Hash.CollisionBound",
+        "Solidity.Backend.Scalar.Slice",
+        "Solidity.Source.Ctor",
+        "Solidity.Yul.ReservedNames",
+        "Solidity.Frontend.Checked.Token",
+        "Bridge common4.35 dependency overlay"
+      ],
+      "response": "B06 maps to our unapplied Token candidate; B04 corroborates our measured Source.Ctor blocker. No witness/totality/consumer acceptance claim. All original files stay read-only pending coordination."
     }
   },
   "questions": []

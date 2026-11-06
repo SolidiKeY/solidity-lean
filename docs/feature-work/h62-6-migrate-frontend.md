@@ -336,3 +336,9 @@ is recorded in `static-gates/doc-paths-baseline.json` and routed to the root
 gate without changing that outside-scope document or adding a core dependency.
 Layer/root/fragment/orphan checks pass; global documentation and full runtime
 acceptance are not represented as passing.
+
+The later H70 P16-generator receipt at c0f52b16a359237329373e94a4633f45e5d21d01
+and audit-label receipt at d89b309029f9ad57f17711432aeef4990005994b were recorded
+in the saved response map. Their external failure reports are not local gate
+replays. They corroborate Token/Ctor blockers and retain other migration owners'
+dependencies; they grant no original-file permission and close no consumer gate.
