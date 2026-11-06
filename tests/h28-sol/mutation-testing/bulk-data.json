@@ -184,5 +184,25 @@
     "unit_tests_per_mode": 74,
     "finder": "PASS",
     "skeptic": "PASS"
+  },
+  "candidate_inventory_audit": {
+    "authorization": "H41/H44",
+    "status": "ready-for-coordinator-pull",
+    "archive": "/workspace/h28-candidate-export-b85da7eb/inventory-proof-world.tar.gz",
+    "sha256": "1d1f4da80c217f78eae36154c4ac283d765712b4c2bac8e7a0bc8f028e38dcfb",
+    "bytes": 200344,
+    "archive_seconds": 0.12219038599869236,
+    "process_maxrss_kib": 104192,
+    "regular_members": 13,
+    "input_head": "b85da7eb8f5cd1dc9cebeb19fd0a90f3613a2da9",
+    "positive_source_sha256": "50a662458218d17e1fcc92e3798a2c6c64f85b42a008ad34a0323e6576866ed2",
+    "artifact_sha256": "c0b0267507d47cba7e3b5b40175c64e51b80adc774b9bb6f0000385d7dca9e3e",
+    "catalog_sha256": "9977a50a4d659d02283ecc6587611413cd3ea298cc134bd01da5c36a052d2f73",
+    "dependency_pack": {
+      "archive": "/workspace/h28-h35-handoff-79fe296a/compiled-proof-worlds.tar.gz",
+      "sha256": "aeceb8036520bfa9df52a225053b8de6597747f8b3c46de299d630a22268c168",
+      "cache_manifest_sha256": "edea3b40feb29c9dd7a792a037d0ae1f05dae13fef7381640b315b53836dc1ec"
+    },
+    "coordinator_pull_observed": false
   }
 }
