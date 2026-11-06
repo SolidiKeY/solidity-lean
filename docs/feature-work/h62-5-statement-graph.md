@@ -219,3 +219,38 @@ preserved and a pending entry cannot hide an omitted tagged declaration.
 The independent EVM input census can now run with `census.py --area evm` without
 importing the failing CollisionBound module. Its results are separately recorded;
 it makes no G49/G50 statement or owner inference. No full runtime gate is implied.
+
+### Pending-input checkpoint evidence
+
+Validated implementation: `e846768d844272d595c1927922b28383037b0a49`, tree `336b91a1e4985d43f7d82560d31d061b7ec263b4`.
+Committed-tree acceptance passed 32 tests, the existing 12-process claim race,
+pending-only production generation and mixed available/pending regressions.
+The production placeholder graph contains five blocked pending inputs, zero
+typed declarations and `openPremises=null`; its known count is zero with
+`premiseInventoryComplete=false`. No completed statement is inferred.
+Evidence: `/workspace/h62-statement-graph-evidence/pending-acceptance/`.
+
+Both independent read-only reviewers confirmed the changes without using Lean
+or its server. Per-file MCP checks passed Exporter, Fixture, Pending and
+EvmCensus with no diagnostic items. Known dependency shutdown warnings are
+archived. KeySort control medians were 1.112864061s before and 1.062098248s
+after (-4.5617%, within the slowdown bound). Layers, generated roots/fragments
+and diff checks passed. These are bounded controls, not whole-project timings.
+
+The independent pinned EVM input census passed: 391 elaborated declarations,
+34 structure fields; the census explicitly includes generated declarations.
+Its kinds are 118 theorems, 217 definitions, 12 inductives, 32 constructors and
+12 recursors. These are census records, not 391 interface-statement graph nodes.
+Evidence: `/workspace/h62-statement-graph-evidence/evm-input-census/`.
+No inferred proof-owner assignment or G49/G50 completion is attached to them.
+The full Roadmap census and final full gate still require the separate
+CollisionBound migration repair; no owner file has changed.
+
+Q-H55-INVENTORY and B-H55-RELAY are resolved by the coordinator's explicit
+relay arrangement. B-H55-INVENTORY is now `pending-input`, awaiting
+`h64-shapes.json` from the producer's next result. No question or further
+permission request is open. B-PRODUCTION-GRAPH, typed witness discharge and
+B-FINAL-GATE remain binding. The goal is not complete. The new handoff is at
+`/workspace/h62-statement-graph-handoff-pending/`; the previous exported handoff
+and archive remain intact. Resume this same original goal and branch when
+inputs or owner-approved migration repairs arrive.
