@@ -365,6 +365,7 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingCoherence
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingDeclarationCheck
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingEmission
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingFailure
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingGuardedTurn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViews
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHeadViewsControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingHistory
@@ -384,6 +385,8 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEndpoint
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarEntry
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeaves
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarLeavesControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarOutcomes
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarReturn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarSource
@@ -394,6 +397,9 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificate
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceCertificateControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViews
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingSourceViewsControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViews
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingTurnViewsControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingValueViews
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingZero
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventoryControls
@@ -604,6 +610,9 @@ import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.BudgetedDefault
 import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
 import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
+import Solidity.Backend.MemoryCopies.BudgetedFinite
+import Solidity.Backend.MemoryCopies.BudgetedFiniteControls
+import Solidity.Backend.MemoryCopies.BudgetedFiniteInterface
 import Solidity.Backend.MemoryCopies.BudgetedReference
 import Solidity.Backend.MemoryCopies.BudgetedReferenceControls
 import Solidity.Backend.MemoryCopies.BudgetedReferenceInterface
@@ -2884,6 +2893,8 @@ import Solidity.Frontend.StatementGrammarH28.BlockLeafCoverage
 import Solidity.Frontend.StatementGrammarH28.BoolCompound
 import Solidity.Frontend.StatementGrammarH28.BoundaryHead
 import Solidity.Frontend.StatementGrammarH28.BoundaryHeadPr
+import Solidity.Frontend.StatementGrammarH28.CatchCoverage
+import Solidity.Frontend.StatementGrammarH28.CatchListCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalCoverage
 import Solidity.Frontend.StatementGrammarH28.ConditionalFuel
 import Solidity.Frontend.StatementGrammarH28.ConditionalList
@@ -2970,6 +2981,7 @@ import Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi
 import Solidity.Frontend.StatementGrammarH28.SyntaxPair
 import Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance
 import Solidity.Frontend.StatementGrammarH28.TokenRoot
+import Solidity.Frontend.StatementGrammarH28.TryCoverage
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
 import Solidity.Frontend.StatementGrammarH28.YulControlFree
 import Solidity.Frontend.Static.C3
