@@ -383,7 +383,7 @@ The external audit-precompiles owner relay at
 requests Bridge dependency evidence. On the unchanged frozen v4.24 setup,
 all 11 installed git packages match the Bridge manifest. The Mathlib Log
 artifact exists. Owned `H70BridgeProbe.lean` imports it, the actual vendored
-precompiles and existing IDENTITY proof; the bounded serial kernel check
+precompiles and existing IDENTITY proof; the bounded serial import/elaboration probe
 passes in 4.744s. This proves neither installation in the requester worktree
 nor v4.35 compatibility. Migration, RAW/BLS prerequisites and G43/V14's separate
 compiler-success theorem remain with their respective owners. No frozen
