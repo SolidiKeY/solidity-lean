@@ -1,34 +1,32 @@
 #!/usr/bin/env python3
-"""Generate a read-only compiled declaration/type census, including private names.
-Output is version-sensitive raw Expr representation, not a semantic equivalence proof.
-No proof/resource options are raised. Bulk stdout belongs off git.
+"""Generate one module's kernel declaration/type census without forcing all env maps.
+Including private declarations; compiler-only extraConstNames are not kernel declarations.
+No budget override. Generate/run modules serially and validate the combined output.
 """
-import argparse,json
+import argparse,json,re
 from pathlib import Path
-ap=argparse.ArgumentParser();ap.add_argument('census',type=Path);a=ap.parse_args()
+ap=argparse.ArgumentParser();ap.add_argument("census",type=Path);ap.add_argument("--module",required=True);a=ap.parse_args()
 s=json.loads(a.census.read_text())
-print('import Lean')
-for m in sorted(s['owned']): print('import '+m)
-print('''
-open Lean in
-run_elab do
-  let env ← getEnv
-  let entries := env.constants.fold (init := #[]) fun acc name info =>
-    match env.getModuleIdxFor? name with
-    | none => acc
-    | some index =>
-      let owner := env.header.moduleNames[index.toNat]!
-      if owner.toString.startsWith "Solidity.TestSuite." then
-        acc.push (name, owner, info)
-      else acc
-  unless entries.size > 0 do throwError "empty TestSuite interface census"
-  for name in [``Solkey.TestSuite.additionStorageWrite.proved,
-      ``Solkey.TestSuite.storageRootReadWrite.proved,
-      ``Solkey.TestSuite.additionStorageWrite.problem] do
-    unless entries.any (fun entry => entry.1 == name) do
-      throwError "missing frozen representative {name}"
-  let entries := entries.qsort (fun a b => a.1.toString < b.1.toString)
-  for (name, owner, info) in entries do
+if a.module not in s["owned"]: ap.error("module must be in assigned census")
+record=s["owned"][a.module];expected=set()
+for row in record["declaration_lines"]+record["commands"]:
+    match=re.match(r"(?:theorem|lemma|def|abbrev|opaque|sol_auto_theorem) (Solkey\.TestSuite\.(?:[A-Za-z_][A-Za-z0-9_]*\.)*[A-Za-z_][A-Za-z0-9_]*)(?=\s|:|$)",row["text"])
+    if match: expected.add(match[1])
+if a.module=="Solidity.TestSuite.ScopedProblems": expected.add("Solkey.TestSuite.additionStorageWrite.problem")
+print("import Lean\nimport "+a.module+"\nopen Lean in\nrun_elab do")
+print("  let env ← getEnv\n  let moduleName := "+json.dumps(a.module))
+print("""  let names := env.header.moduleNames
+  let some index := names.findIdx? (fun name => name.toString == moduleName)
+    | throwError "missing imported module {moduleName}"
+  let data := env.header.moduleData[index]!
+  unless data.constNames == data.constants.map (·.name) do
+    throwError "module constant names/data disagree"
+""")
+for name in sorted(expected):
+    print("  unless data.constNames.contains ``"+name+" do throwError "+json.dumps("missing frozen declaration "+name))
+print("""  let entries := data.constants.qsort (fun a b => a.name.toString < b.name.toString)
+  for info in entries do
+    let name := info.name
     let kind := match info with
       | .axiomInfo _ => "axiom"
       | .defnInfo _ => "definition"
@@ -39,23 +37,11 @@ run_elab do
       | .ctorInfo _ => "constructor"
       | .recInfo _ => "recursor"
     let row := Json.mkObj [
-      ("kind", toJson kind),
-      ("name", toJson name.toString),
-      ("module", toJson owner.toString),
+      ("kind", toJson kind), ("name", toJson name.toString),
+      ("module", toJson moduleName),
       ("levels", toJson (info.levelParams.map Name.toString)),
       ("raw_type", toJson (reprStr info.type)),
       ("internal", toJson name.isInternal)]
-    liftIO <| IO.println ("H62-INTERFACE " ++ row.compress)
-''')
-
-for module in sorted(s['owned']):
-    print('open Lean in\nrun_elab do')
-    print('  let env ← getEnv')
-    print('  let moduleName := '+json.dumps(module))
-    print('  unless env.header.moduleNames.any (fun name => name.toString == moduleName) do')
-    print('    throwError "missing imported module {moduleName}"')
-    print('  let count := env.constants.fold (init := 0) fun count name _ =>')
-    print('    match env.getModuleIdxFor? name with')
-    print('    | none => count')
-    print('    | some index => if env.header.moduleNames[index.toNat]!.toString == moduleName then count + 1 else count')
-    print('  liftIO <| IO.println ("H62-MODULE " ++ (Json.mkObj [("module",toJson moduleName),("count",toJson count)]).compress)')
+    IO.println ("H62-INTERFACE " ++ row.compress)
+  IO.println ("H62-MODULE " ++ (Json.mkObj [("module",toJson moduleName),("count",toJson entries.size)]).compress)
+""")

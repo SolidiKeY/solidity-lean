@@ -20,6 +20,11 @@ class InterfaceControls(unittest.TestCase):
     def test_missing_raw_type_refused(self):
         log='H62-INTERFACE '+json.dumps({'name':'Solkey.TestSuite.additionStorageWrite.proved','module':'M','kind':'theorem'})
         with self.assertRaisesRegex(ValueError,'INVALID_INTERFACE_ROW'): collector.collect({'owned':{'M':{}}},log,0)
+    def test_representatives_alone_not_full_case_inventory(self):
+        names=['Solkey.TestSuite.additionStorageWrite.proved','Solkey.TestSuite.storageRootReadWrite.proved','Solkey.TestSuite.additionStorageWrite.problem']
+        rows=[{'name':n,'module':'M','kind':'theorem','raw_type':'synthetic parser control','levels':[],'internal':False} for n in names]
+        log='\n'.join('H62-INTERFACE '+json.dumps(r) for r in rows)+'\nH62-MODULE '+json.dumps({'module':'M','count':3})
+        with self.assertRaisesRegex(ValueError,'FROZEN_CASE_COUNT_MISMATCH'): collector.collect({'owned':{'M':{}}},log,0)
     def test_zero_rows_refused(self):
         log='H62-MODULE '+json.dumps({'module':'M','count':0})
         with self.assertRaisesRegex(ValueError,'INCOMPLETE_INTERFACE_OUTPUT'): collector.collect({'owned':{'M':{}}},log,0)

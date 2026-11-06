@@ -55,8 +55,8 @@ The exploratory old-clean-01 was interrupted for review corrections.
 old-clean-02 stopped at TermSize with a thread-creation failure under the wrong
 virtual-address limiter. Both are unaccepted baselines. TermSize subsequently
 passed the controlled hard-cgroup probe (30.986 s, 1,272,651,776 bytes sampled
-peak RSS). That reused dependencies and is diagnostic only; a fresh complete
-old-toolchain cold build remains required. No incomplete wall time is a baseline.
+peak RSS). That reused dependencies and is diagnostic only; the accepted fresh
+old-clean-03 result is recorded below. No incomplete wall time is a baseline.
 `compare.py` rejects incomplete/subset runs, source/resource/config differences,
 wrong Lean commits or Lake versions, config tampering and invalid metrics.
 Any regression escalates; a wall or sampled peak RSS regression above 10%
@@ -71,7 +71,7 @@ classes. It cannot establish Solidity obligation validity or imported API
 compatibility. The Python controls cover nested/line comments, strings,
 import ordering/cycles, source identity and mutation, incomplete builds,
 config mismatches/tampering, wrong versions, NaN/zero metrics and timing/RSS
-thresholds. Twenty-one Python controls pass; both official toolchains pass the isolated Lean fixture.
+thresholds. Twenty-two Python controls pass; both official toolchains pass the isolated Lean fixture.
 
 Independent read-only finder and skeptic reviews ran without Lean/server
 or edits. Confirmed findings were fixed: unsafe arbitrary subset probes,
@@ -107,7 +107,7 @@ interpretation paused further Lean runs; the coordinator clarification below
 resolves that pause. These module measurements remain recorded for cut-over
 escalation while matched clean full-directory measurements continue.
 
-1. Import/source census is complete; required full clean old build is unfinished.
+1. Import/source census and the full clean old build are complete: all 333 closure modules, including all 49 assigned modules, passed in old-clean-03 (3359.376553 s; 5822562304 bytes sampled peak aggregate RSS). Original ScopedProblems, Report, Suggestions and refusal controls passed.
 2. Exact release archive and versions are verified; new KeySort and isolated
    API controls pass. All-assigned-module compatibility/adaptation is unfinished.
 3. Full clean new build and accepted before/after directory comparison are pending.
@@ -125,3 +125,28 @@ The same VM, branch, pinned releases, hard resource bounds and original goal
 are retained. No new goal or replacement continuation was created. The fresh
 old baseline uses new private outputs under `evidence/old-clean-03`; no previous
 partial outputs count toward its clean build.
+
+## Old baseline checkpoint
+
+Command: `H62_RUNTIME_IMAGE=python@sha256:4209fae09a3e20afd863e528bfddc235da5fd5977983e1996cd54cc9a72e6267 bash scripts/h62/item6/migrate-testsuite/run-bounded.sh python3 scripts/h62/item6/migrate-testsuite/measure.py --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out /workspace/h62-migrate-testsuite/evidence/old-clean-03`.
+Exit 0; summary status pass; all 333 requested modules completed with no resource stop.
+The source tree, official releases and bounds remain frozen as documented above.
+Both releases default to maxHeartbeats 200000 and maxRecDepth 512.
+
+Independent finder and skeptic reviews confirmed the baseline evidence and
+per-module reporting changes. The installed per-module reporter has eleven
+passing controls and records growth without stopping the lane; failed/missing
+modules and mismatched provenance never receive comparable timing deltas.
+The census/comparison/output-collector controls now number twenty-two.
+
+Compiled interface export remains checkpoint 4 work. A whole-environment
+export hit the reserve guard; per-module raw rendering then expanded shared
+expression nodes into gigabytes. Those diagnostics are unaccepted. Generated
+sources, summaries, compressed logs and checksums are retained off git in
+`evidence/superseded-raw-interface-logs.tar.gz` and the associated manifest.
+A compact structural expression graph is required before accepting interface
+hashes. This diagnostic work does not change the passed old build result.
+
+The next required lane action is the fresh full v4.35.0 build using identical
+resources/configuration and no old cache reuse. Full clean timing comparison,
+compiled interfaces and final migration acceptance remain pending.

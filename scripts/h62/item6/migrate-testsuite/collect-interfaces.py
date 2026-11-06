@@ -26,8 +26,10 @@ def collect(census,log,lean_exit):
     names={r['name'] for r in rows}
     required={'Solkey.TestSuite.additionStorageWrite.proved','Solkey.TestSuite.storageRootReadWrite.proved','Solkey.TestSuite.additionStorageWrite.problem'}
     if not required<=names: raise ValueError('MISSING_FROZEN_REPRESENTATIVE')
+    case_counts={suffix:sum(name.startswith('Solkey.TestSuite.') and name.endswith('.'+suffix) for name in names) for suffix in ('proved','problem','refuted')}
+    if case_counts!={'proved':552,'problem':563,'refuted':11}: raise ValueError('FROZEN_CASE_COUNT_MISMATCH: '+str(case_counts))
     canonical=''.join(json.dumps(r,sort_keys=True,separators=(',',':'))+'\n' for r in sorted(rows,key=lambda r:r['name']))
-    return canonical,{'status':'pass','kind':'version-sensitive raw types/kinds/levels; no proof-value or semantic equivalence claim','declarations':len(rows),'module_counts':dict(sorted(counts.items())),'kind_counts':dict(collections.Counter(r['kind'] for r in rows)),'sha256':hashlib.sha256(canonical.encode()).hexdigest()}
+    return canonical,{'status':'pass','kind':'version-sensitive raw types/kinds/levels; no proof-value or semantic equivalence claim','declarations':len(rows),'case_counts':case_counts,'axiom_names':sorted(r['name'] for r in rows if r['kind']=='axiom'),'module_counts':dict(sorted(counts.items())),'kind_counts':dict(collections.Counter(r['kind'] for r in rows)),'sha256':hashlib.sha256(canonical.encode()).hexdigest()}
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('census',type=Path);ap.add_argument('log',type=Path);ap.add_argument('--lean-exit',required=True,type=int);ap.add_argument('--out',required=True,type=Path);a=ap.parse_args()
     canonical,summary=collect(json.loads(a.census.read_text()),a.log.read_text(),a.lean_exit)
