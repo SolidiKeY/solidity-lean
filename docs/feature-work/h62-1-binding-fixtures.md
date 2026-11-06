@@ -112,3 +112,20 @@ missing `Solidity.*` module paths and no `public import`, `private import`, or
 `import` followed by a tab. This check does not rule out other syntax or a
 comment that resembles an import. V07 exact-file coordination is awaited from
 its current Claude owner; the host-only relay is not installed or invoked here.
+
+## H82 exact-source inventory backfill
+
+`PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item1/binding-fixtures/source_intervals.py`
+captures the complete UTF-8 text of the ten V07 and seven G19 controls as a
+preamble plus intervals starting at lexical declaration markers. Each file and
+interval carries a SHA256 and each interval its original starting and ending
+line. Its generated JSON is saved outside Git with the evidence manifest. Two
+runs were byte-identical. `test_source_intervals.py` reconstructs each of the
+17 files byte for byte, checks each interval hash, checks one `BindingRel`
+marker per file, and exercises no-marker and block-comment false-positive
+controls. It does not identify exact Lean declaration boundaries, separate
+statement from proof, prove coverage of every language construct, or perform
+fixture extraction. Comments and commands may belong to an adjacent interval.
+No original file or frozen statement was edited. Owner coordination and
+independent reviews remain outstanding; this inventory is not a completed
+checkpoint or proof gate.
