@@ -1194,3 +1194,36 @@ Dead local stores (`DeadCode.lean`): `x = e₁; x = e₂;` → `x = e₂;` when 
 premise), `dse_preserves`; a stage of `round` after `Prog.dce`. Controls:
 `dead_store_removed`, `self_read_kept`, `failing_store_kept`. Storage/memory dead stores
 stay with X06.
+
+## Moved-lane handoff and queue accounting — 2026-11-06
+
+Branch `cloud/moved4-20261105/vo1-optimizer` (Claude VM), from `cloud/vo1-optimizer-move`
+cdfa3601 + origin/master aec9adf1. All work is source + kernel proofs; no compiler/EVM
+evidence, no gas or code-size claims. `Optimizer/Pass.lean` signatures unchanged.
+
+| Item | Status | Evidence |
+|---|---|---|
+| O01 interface, laws, controls | done (inherited) | `Pass`, `Laws`, `Controls`, test controls |
+| O01 composition into `Compilation.correct`/G49 | open, waits on V09/VY3 adapters and X01 D6 | caveat section above |
+| O01 code-size/gas baselines | open, waits on D1 artifact/gas oracle (machine has no gas) | — |
+| O02 constant folding (Panic/revert kept) | done | `Val.cfold_evalT`, `Prog.cfold_runC` |
+| O02 constant + copy propagation | done | `Prog.cprop_empty_runC` |
+| O02 expression simplification (solc rules, checked-safe subset) | done (subset listed) | `Val.simp_evalT`, `Prog.simplify_runC` |
+| O02 dead code (literal branches, satisfied checks, dead loops, code after halts, dead local stores) | done | `Prog.cfold_runC`, `Prog.dce_runC`, `Prog.dse_runC` |
+| O02 unused-variable elimination | done (fragment: leading block declarations) | `blockDecl_runC`, `Prog.uve_runC` |
+| O02 D6 binding | open, X01 | — |
+| O03 inlining of internal functions | done for void and single-value returns with value arguments | `inlineBlock_runC`, `inlineBlockVal_runC`, `Prog.inl_runC` |
+| O03 CSE | done (pure expressions, syntactic) | `Val.pbeq_eq`, `Prog.cse_empty_runC` |
+| O03 unused-function pruning | open (no lowering-IR function table; Yul needs a fuel-shift simulation) | — |
+| O03 redundant sload/mload/store elimination, LICM | open, waits on X06 aliasing facts | — |
+| Certified pipeline | done | `Prog.optimize_runC`, `e2e_optimized` |
+| Final revalidation after integrated prerequisites/V16 | open | — |
+
+Consumers (VO2/VT): `Prog.optimize n` with `Prog.optimize_runC`, the per-pass
+`*_preserves` instances of `Preserves SameRun`, and `ValPass`/`Prog.vopt_runC` for new
+expression passes.
+
+Owner requests (unchanged from the Codex handoff, still open): X01 — frozen D6 relation
+and D1 artifact/gas-oracle API; V09/VY3 — `Compilation.correct` adapters covering
+optimizer output (the agreement premises read `asserts`/`pays`/`pushes`); X06 — aliasing
+facts; COORD — Optimizer entries in `scripts/check-layers.mjs` CORE (not edited here).
