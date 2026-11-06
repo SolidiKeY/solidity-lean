@@ -713,3 +713,13 @@ positive signature/axiom certificates, output identities and runtime bounds.
 The scope boundary remains false: unselected candidates in the 290-entry,
 308-unit census have no general semantic validation, the final acceptance
 scope question remains pending, and repository-wide final gates remain open.
+
+Combined checkpoint gates at `3407707a3c8817ef72e5bd88211f41c712b2ef5c`:
+83 controls, combined evidence replay, census proof-world replay and strict
+bulk mirror verification all pass in normal Python and under `-O` (eight
+effective gates). `gate.sh touched` passes with targets none. The first
+optimized replay attempt was interrupted, retained as incomplete, and rerun
+in a fresh directory; it is not counted as a pass. Exact commands, exits,
+timings and process RSS are in the H44 validation archive referenced by
+`bulk-data.json.combined_validation`; no source changed between attempts.
+This receipt does not replace pending repository-wide final gates.

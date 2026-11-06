@@ -237,5 +237,13 @@
     "check_count": 101,
     "compiled_artifact_count": 70,
     "axiom_export_count": 267
+  },
+  "combined_validation": {
+    "archive": "/workspace/h28-combined-export-fb7ce29b/validation.tar.gz",
+    "sha256": "fd41cafd29edc296c5496e855e52463f7c0a7b20098a7ff3c5907879c05c48ee",
+    "bytes": 3212,
+    "gate_head": "3407707a3c8817ef72e5bd88211f41c712b2ef5c",
+    "effective_gate_count": 8,
+    "scope_complete": false
   }
 }
