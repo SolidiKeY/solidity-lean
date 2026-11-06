@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "source": "complete visible original user assignment transcribed from original thread; scope inserted verbatim from SHA256-verified coordinator ownership snapshot",
+  "expected_frozen_rendered_prompt_sha256": "4f63c0cac2f8cb9d098a419dabd250ba85c65c79e5a3df78dd26034550417470",
+  "visible_assignment_sha256": "c9b6a1200f73406ccc9a9ca1ab38916ba89fd7544b7e24d1f10c95bb46dd3930",
+  "rendered_prompt_hash_verified": false,
+  "boundary": "No original rendered-envelope file or get_goal tool is exposed; this is the complete visible assignment body, not a claimed byte-identical recovery of an unavailable renderer envelope. Survivor/coordinator must verify the canonical rendered-prompt identity before new task work.",
+  "assignment_body_sha256": "d6ec3b6d6ea38ce7878f4ad4edb384c2aa9c1d3ba5b115ca83304332e6b8db38"
+}

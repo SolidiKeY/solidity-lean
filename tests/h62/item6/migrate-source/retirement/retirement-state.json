@@ -1,0 +1,137 @@
+{
+  "schema": "schema-v1",
+  "status": "partial",
+  "worker_state": "STOPPED_BY_H82_RETIREMENT",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "pre_retirement_head": "507d862071f28235a6ba027f7c45cc85ee163c78",
+  "repository": "/workspace/solidity-h62-6-migrate-source",
+  "branch": "codex/solidity-h62-6-20261106/migrate-source",
+  "goal": {
+    "requested_state": "PAUSED",
+    "actual_transition": "unavailable",
+    "reason": "Only exposed goal method is stop_goal(outcome: complete|blocked); no PAUSED value or pause method; no call made that would falsely substitute BLOCKED or COMPLETE. Existing goal ID unavailable; not created/reset/completed."
+  },
+  "push": {
+    "attempted": false,
+    "reason": "No H71 branch-push authorization text supplied locally or in this thread. Original no-push instruction retained."
+  },
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "MS-H78-SHIM-PERF-STOP disposition: prototype wall +18.3601226%; RSS +155.8220221%; no unchanged rerun or full comparison claimed"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "Accepted Raw.lean v4.35 migration prerequisite with provenance/API/trust evidence"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-hash",
+      "item": "Accepted CollisionBound.lean existing partial overlay with provenance/API/trust evidence"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78 same-public-name restoration strategy for Syn.noConfusion/noConfusionType; compiler installs changed names; no replacement or namespace-only compatibility claim"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Per-declaration standard axiom closure changes (IntegerInstanceSemantics) and resource increase review; no pin changes"
+    },
+    {
+      "lane": "coordinator",
+      "item": "Goal PAUSED transition unavailable: no get_goal/pause_goal exposed; stop_goal supports only complete or blocked, neither means PAUSED"
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "Retirement successor owns unfinished checkpoints/backfill; do not restart this worker"
+    }
+  ],
+  "questions": [],
+  "source_edits": [],
+  "frozen_statements_touched": [],
+  "installed_shims": [],
+  "new_axioms": 0,
+  "new_sorry": 0,
+  "new_native_decide": 0,
+  "new_lean_runs": 0,
+  "h82_protocol_update": "Withdraw MS-OWNER-CTOR as an exact-file permission wait: proof-only changes now covered by H82 standing agreement. Do not apply during retirement. Definition/interface/axiom/budget/exclusion changes still require owner; frozen changes need H57 versioned pairs. H78 API freeze remains.",
+  "open_queue": [
+    {
+      "item": "1 Census/imports/old clean build",
+      "status": "done",
+      "evidence": "/workspace/h62-migrate-source-evidence/old-clean-04/result.json; census-base.json; api-full-old.json (17542 records)"
+    },
+    {
+      "item": "2 Official target migration",
+      "status": "partial",
+      "remaining": "Apply reviewed Ctor proof patch under H82; reconcile all 199 modules after Hash/Raw; preserve every authored and generated public API and axiom closure; complete visibility/metadata/binder inventory. 16 enum prototypes incomplete/unapplied; two Syn namespace prototypes failed/unvalidated and do not restore original public names."
+    },
+    {
+      "item": "3 Full target build and clean matched measurement",
+      "status": "blocked",
+      "remaining": "Build assigned closure; matched clean old/new wall/RSS same settings; any slowdown escalate, >10% stop; no full target or runtime/repository final gate passed."
+    },
+    {
+      "item": "4 Final reviewed migration handoff",
+      "status": "partial",
+      "remaining": "Successor integrates reviewed changes, freezes complete compatible API hashes, supplies cross-directory report and final proof/test/axiom/build gates; this retirement handoff is not full migration completion."
+    }
+  ],
+  "open_backfill": [
+    {
+      "item": "Static full generated-public API name/type/binder/visibility/metadata inventory",
+      "status": "unfinished",
+      "boundary": "Old full ledger has 17542 records; new partial only 5/199 modules, 2422 records. Existing raw exports do not capture visibility/attributes. Do not regex-exempt generated declarations."
+    },
+    {
+      "item": "H78 alias metadata and transparency preservation",
+      "status": "unfinished",
+      "boundary": "16 enum type/value prototypes pass; plain defs omit old protected/reducible/deprecation/completion metadata; new ctorIdx transparency differs."
+    },
+    {
+      "item": "Same-name Syn compatibility strategy and validation",
+      "status": "unfinished",
+      "boundary": "Existing compiler declarations collide; old namespace shape failed executable generation; target role not run."
+    },
+    {
+      "item": "Additional witness/case controls and deterministic tooling",
+      "status": "unfinished",
+      "boundary": "Only assigned nonpadding coverage; no new proof during retirement. Existing scanner/comparator negative controls, integer bridge and Ctor fixture remain saved."
+    },
+    {
+      "item": "Measurement reproduction",
+      "status": "blocked",
+      "boundary": "Preserve STOP; no unchanged rerun without disposition. Existing old baseline valid, full target comparison unavailable."
+    },
+    {
+      "item": "Continuous cleanup",
+      "status": "not taken",
+      "boundary": "Only newly unclaimed coordinator/registry candidates allowed; none claimed."
+    }
+  ],
+  "incoming_consumers": [
+    "audit-label-execution",
+    "audit-roadmap",
+    "audit-v10-storage",
+    "migrate-frontend",
+    "migrate-roadmap",
+    "migrate-lowering",
+    "migrate-language",
+    "migrate-semantics",
+    "migrate-root-gate"
+  ],
+  "source_ctor": {
+    "path": "/workspace/solidity-h62-6-migrate-source/Solidity/Source/Ctor.lean",
+    "sha256": "2ccaac06787dc1aeab8fe923f6a38bb4a9657b868becafb12732358ca07cfe13",
+    "patch": "/workspace/solidity-h62-6-migrate-source/tests/h62/item6/migrate-source/ctor-candidate.patch",
+    "patch_sha256": "4eae67d556a0f322499c3695b0db0582cf259c08d1e55b2ea9d41dce96f55881",
+    "state": "unapplied; isolated two-version fixture passes; original target still fails",
+    "theorems": [
+      "Solidity.Source.Syn.nodes_eq",
+      "Solidity.Source.Syn.excl_ctor"
+    ]
+  },
+  "staged_payloads": "Remote coordinator-local receipt paths are provenance only; full Roadmap/Lowering/root requirements files not delivered to this VM, not reviewed; successor requests delivery if needed.",
+  "prompt_provenance": "original-frozen-assignment.txt transcribed from original rendered first user assignment; exact 199 Source path list reproduced from frozen census. This file is not asserted byte-identical to earlier coordinator rendered-prompt hash fe77b382... (original serialization unavailable).",
+  "authority": "Explicit H82 retirement is not undone by generic standing-guidance continue message; no automatic continuation authorized."
+}
