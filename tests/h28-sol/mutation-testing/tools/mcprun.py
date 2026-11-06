@@ -349,8 +349,12 @@ def semantic_success(items, regions, oracle_text, require):
     if "sound_all" in require:
         sound = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".sound_all"]
         flat = re.sub(r"\s+", "", sound[0]) if len(sound) == 1 else ""
-        if not flat or "Solidity.Premise.Sound" not in flat or "¬" in flat or "∀" not in flat:
-            return {"ok": False, "reason": "sound_all does not state Premise.Sound universally"}
+        # universal in the state: the state `Premise.Sound` is applied to
+        # (its last argument) must be a bound variable of type `State`
+        m = re.search(r"Solidity\.Premise\.Sound.*?(\w+)\)*$", flat) if flat else None
+        if not flat or "¬" in flat or not m or \
+                not re.search(r"\(" + re.escape(m[1]) + r":Solidity\.State", flat):
+            return {"ok": False, "reason": "sound_all does not state Premise.Sound in every state"}
     if "checked_kill" in require:
         kill = [v for k, v in sigs.items() if k.lstrip("@") == ns + ".checked_kill"]
         if len(kill) != 1 or "¬Solidity.Premise.Sound" not in re.sub(r"\s+", "", kill[0]):

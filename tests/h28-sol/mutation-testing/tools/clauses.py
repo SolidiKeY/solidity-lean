@@ -200,8 +200,6 @@ def inventory(root):
                 raise SystemExit(f"hand fixture not unique in {cid}: {old!r}")
             found.append((c, f, "hand", span.replace(old, new, 1)))
         for clause, fam, op, mutated in found:
-            if cid in PAYMENT and fam == "alias-capture-once":
-                fam = "alias-capture-once"  # also rollback-payment: recorded in `also`
             if mutated == span or mutated in made:
                 clauses.append({"clause": clause, "family": fam, "operator": op,
                                 "fixture": None, "reason": "same text as " + made.get(mutated, "the original")})

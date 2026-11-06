@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Verify the committed H44 bulk manifest, all external/mirror files and archive."""
 from pathlib import Path
 import hashlib
@@ -173,5 +174,6 @@ if __name__ == '__main__':
         # The external data is absent (any VM but the Codex one): say so and
         # check the committed side, instead of a traceback.
         print(json.dumps(verify_local(repo), indent=2))
+        sys.exit(3)  # local-only is never a pass
     else:
         print(json.dumps(verify(repo), indent=2))

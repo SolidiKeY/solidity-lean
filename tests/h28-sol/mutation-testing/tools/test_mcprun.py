@@ -263,9 +263,11 @@ class Summary(unittest.TestCase):
             for n in ("source_link_all", "sound_all"):
                 items.append(item(105, f"'H28.T.{n}' does not depend on any axioms", "info"))
             return mcprun.semantic_success(items, REG, oracle, ["source_link_all", "sound_all"])["ok"]
-        self.assertTrue(run("∀ σ, Solidity.Premise.Sound m s p σ"))
-        self.assertFalse(run("¬Solidity.Premise.Sound m s p σ"))
-        self.assertFalse(run("Solidity.Premise.Sound m s p σ"))
+        self.assertTrue(run("∀ {C : Solidity.Contract} (k : Nat) (σ : Solidity.State C Γ),\n  Solidity.Premise.Sound m s (H28.T.mutated k) σ"))
+        self.assertFalse(run("∀ (σ : Solidity.State C Γ), ¬Solidity.Premise.Sound m s p σ"))
+        self.assertFalse(run("Solidity.Premise.Sound m s p H28.T.start"))
+        # parameters bound, but the state fixed: not universal
+        self.assertFalse(run("∀ (k : Nat), Solidity.Premise.Sound m s p H28.T.start"))
         self.assertFalse(run("True"))
 
     def test_negative_control_expectation(self):
