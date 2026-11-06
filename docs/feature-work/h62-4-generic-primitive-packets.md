@@ -100,8 +100,8 @@ ownership remains intact. Logs: `/workspace/h62-generic-primitive-packets-eviden
 `/workspace/h62-generic-primitive-packets-evidence/dependency-logs/Solidity.Hash.CollisionBound.log`. Exit 1.
 No dependency failure is accepted as proof or axiom evidence.
 
-**B-OWNER-RELAY**: Existing family originals are read-only. No exact-file owner
-agreement has arrived. relay.sh is host-only; no worker installation is needed. No original was changed.
+**B-OWNER-RELAY**: Existing family originals are read-only. H71 now agrees
+the owner-applied coordination protocol; semantic application review remains pending. relay.sh is host-only; no worker installation is needed. No original was changed.
 V09 coordinates family owners. Any migration patch remains owner-applied only.
 
 ## Remaining checkpoints and committed handoff
@@ -276,7 +276,8 @@ The reserved migration owner is `solidity-h62-6-20261106/migrate-roadmap` per
 the supplied ownership snapshot. Exact-path ticket is saved in blockers.json
 for coordinator routing. This is an axiom-guard failure, not a new source sorry.
 The full import closure, compiler correspondence and final gates remain blocked.
-MRS exact-file agreement on CheckedSub/Controls also remains pending.
+MRS owner application review on CheckedSub/Controls remains pending under the
+H71 owner-applied coordination protocol recorded below.
 
 The complete eight-module command/exits/source roots/caps/hashes/times are in
 `/workspace/h62-generic-primitive-packets-evidence/hash-overlay/run/dependency-results.json`.
@@ -306,3 +307,30 @@ A numeric goal ID is not exposed; do not create/reset a goal to obtain one.
 State is dependency-blocked, not complete. Exact committed head and fresh export
 paths are in the external `hash-overlay/result.json` after this checkpoint.
 Retain all original queue obligations, owner scopes, v4.35 pin and proof budgets.
+
+## H71 MRS exact-file protocol agreed; application review pending
+
+MRS reference head `0b2a648b32335f35ff323ff468f75907e926fc13` supplies an
+OWNER-APPLIED protocol for `Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean`.
+Its raw SHA256 `6076f049bccc97e12e08c10512770cb9597a1cd79394a0111a41367a0143c945`
+matches the unchanged local original. The named owner-agreement document is
+absent locally; provenance is the supplied inline relay, not a claimed retrieval
+or checksum verification of that document. The protocol and exact boundaries
+are saved in `tests/h62/item4/generic-primitive-packets/mrs-owner-protocol.json`.
+
+This resolves protocol coordination only. The current H72/exact-file writer
+retains the file; helper source edits, reservation release and unseen candidate
+acceptance are not granted. Packet-panic may prepare its three listed panic
+proof-body candidates, with actual Source.panicData payload proofs; this worker
+does not duplicate that lane. Broader generic Controls migration still needs
+its own actual semantic candidate/equivalence and complete original control,
+refusal and consumer accounting. The seven arithmetic rows are not that package.
+
+Before owner application: current-writer confirmation through coordinator/V09;
+successful agreed-pin dependency and affected/full gates; unchanged exact axiom
+pins; independent finder/skeptic; complete identical-condition timing groups
+including extracted helpers, with no greater than 10 percent slowdown. Failed
+prerequisites yield no timing delta. Roadmap.Contracts:1104 remains the current
+dependency failure, requiring its owner's trust-preserving repair. No Lean gate,
+source, statement, trust or budget changed in this metadata-only update.
+The existing same-VM/same-goal fresh-thread handoff remains requested.

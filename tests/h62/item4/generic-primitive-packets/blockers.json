@@ -24,7 +24,7 @@
     },
     {
       "id": "B-OWNER-RELAY",
-      "kind": "exact-file-owner-agreement-pending",
+      "kind": "owner-applied-protocol-agreed-application-review-pending",
       "status": "blocked",
       "exact_files": [
         "Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean"
@@ -32,12 +32,19 @@
       "owner": "solidity-compiler10-20261028/memory-reference-structs",
       "coordinator": "V09",
       "required_resolution": "Owner reviews semantic generic lemma/correspondence once dependencies check, then owner applies exact-instance migration; no existing family write is authorized here.",
-      "relay_status": "H70 coordinator router confirms owner ticket accepted. relay.sh is host-only; no worker installation task. Exact-file agreement remains pending.",
-      "routing_receipt": "H70: owner ticket relay accepted; dependency and exact-file agreement remain pending; no write authorization implied."
+      "relay_status": "H71 MRS owner-applied coordination protocol agreed; current exact-writer confirmation and semantic application review remain pending.",
+      "routing_receipt": "Inline H71 owner agreement; no approval of an unseen candidate or source-edit delegation.",
+      "protocol_agreed": true,
+      "application_approval": false,
+      "source_edit_delegated": false,
+      "reference_head": "0b2a648b32335f35ff323ff468f75907e926fc13",
+      "reference_raw_sha256": "6076f049bccc97e12e08c10512770cb9597a1cd79394a0111a41367a0143c945",
+      "local_reference_hash_matches": true,
+      "protocol": "tests/h62/item4/generic-primitive-packets/mrs-owner-protocol.json"
     }
   ],
   "questions": [],
-  "registration": "No registered area module yet. SubFixtures is standalone additive arithmetic backfill. Area registration fragments and exact-instance migration patch remain pending semantic bridge and exact owner agreement.",
+  "registration": "Area registration fragments and exact-instance migration remain pending semantic bridge, full gates/timing and owner application review under the agreed owner-applied protocol.",
   "resolved_dependencies": [
     {
       "id": "B-MIGRATION-HASH",
