@@ -298,3 +298,43 @@ inventory checkpoint. Confirmed findings fixed: structured naming flags,
 category overlap, signature schemas/hash formats and naming versus export
 visibility. Both independently verified inventory/provenance hashes and
 explicit pending fields; neither used Lean/server or edited files.
+
+## Portable artifact verification after ac9d8db2a
+
+The next explicit coordinator instruction reports this checkpoint merged at
+`ac9d8db2a`; origin/master was fetched and the lane fast-forwarded to
+`ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`, after verifying original-base and
+reviewed-head ancestry. Syntax/Raw.lean and the assigned modules are unchanged.
+No new goal, ownership takeover, source/proof edit or Lean run was introduced.
+
+The review minor about VM-only pins is addressed by the committed
+[portable evidence manifest](../../tests/h62/item6/migrate-testsuite/evidence-manifest.json)
+and [verification instructions](../../tests/h62/item6/migrate-testsuite/README-evidence.md).
+The manifest gives repository-relative paths and sizes/SHA256 for 356 checkout
+files (333 closure sources plus 23 lane Python/shell tools and Lean fixtures),
+17 evidence-root-relative files, and the existing historical archive itself.
+The capture VM path is historical receipt provenance only. Bulk outputs remain
+off git; the deterministic manifest generator and streaming verifier are in git.
+
+Checkout-only verification and explicitly unavailable external artifacts report
+`pending_artifacts`/exit2; present mismatches fail. Supplying the manifested
+archive or a relocated evidence directory verifies the declared files without
+any dependence on the capture location. Archive verification reads compressed
+bytes and all 17 required members without extraction. Other historical members
+are not interpreted. It is integrity evidence, not a fresh proof or runtime gate.
+
+The API reporter now accepts an explicit artifact root and historical recorded
+root, confines captured receipt paths to the supplied directory and writes
+relative provenance paths. An actual relocated replay reproduced the same
+8172-row inventory SHA256 and retained all 104 unresolved signatures. Compiler
+receipt paths are checked as data, never executed. New compilation, export
+accessibility, shims, H78 parity, full comparison and root final gates remain
+pending on the same accepted Syntax prerequisite.
+
+All 75 Python controls pass, including omitted/missing artifacts, tampering,
+missing checkout files, duplicate members and root escapes. Actual archive and
+relocated-directory verification pass; checkout-only and absent-directory checks
+return expected pending2. Read-only finder/skeptic reviews confirmed the fixes:
+run-bounded.sh is now manifested, and unavailable external evidence consistently
+stays pending. Neither review used Lean/server or made edits. No RUNTIME or H78
+acceptance is inferred from these artifact checks.
