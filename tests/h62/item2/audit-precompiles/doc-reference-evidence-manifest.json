@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "proof_payload_head": "98f94cfae741a7aa9aa0501a997701b43865e31c",
+  "fetched_master": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "status": "documentation-wait-resolved; original goal blocked",
+  "files": [
+    {
+      "path": "/workspace/solidity-lean/docs/feature-work/h62-1-infer-helpers.md",
+      "size_bytes": 18593,
+      "sha256": "777924793f69aea858152a9c8fd031d9fedc50262b8b77d53c08ed6ef6628de7"
+    },
+    {
+      "path": "/workspace/solidity-lean/docs/feature-work/h62-6-migrate-theory.md",
+      "size_bytes": 14118,
+      "sha256": "4a33e14a99a1d93c7f1a5eef26258175551c797e6dbc55ff9c566376e2c917ec"
+    },
+    {
+      "path": "/workspace/solidity-lean/scripts/h62/item2/audit-abi-world/test_census.py",
+      "size_bytes": 2379,
+      "sha256": "e249a384d547385b0a1503e0d6295bd6a89e0004a60533b30e84d68913346901"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item4/generic-structuredflow/registration.md",
+      "size_bytes": 2635,
+      "sha256": "caaaf6335bfe083faff2c922ef9e3411f4f996c37b0f17b5cdc098fc5eccfb26"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/h82-doc-fix-paths.log",
+      "size_bytes": 12903,
+      "sha256": "2b75c087bd6fa7d766225dda56850505fd2e1ee06ed247b52487a1ca08539ad6"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/h82-doc-fix-abi-tests.log",
+      "size_bytes": 102,
+      "sha256": "88736f9bb60508815ec805b474c2ee7d1cb2e3975945eab3b858cdf54f5e02bc"
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/DOC-REFERENCE-HANDOFF.md",
+      "size_bytes": 1878,
+      "sha256": "c451fdbe3c42fdea355cee864b43bb105a06825d556165508bf8590329470fbf"
+    }
+  ]
+}

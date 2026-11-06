@@ -268,9 +268,10 @@ uses `[propext]`. This covers only the additive shared module, not either
 inferencer, the other candidates, import migration or full validation.
 
 `propose_migration.py` emits `migration-proposal.patch` deterministically from
-the current originals and the shared module. The proposal adds
-`Solidity/Source/InferHelpers.lean`, imports it from the two inferencers and
-keeps each existing helper name and type while changing its definition body
+the current originals and the shared module. The proposal would add the
+not-yet-created module
+`Solidity.Source.InferHelpers`, import it from the two inferencers and
+keep each existing helper name and type while changing its definition body
 to call the shared definition. It was not applied; `git apply --check` passes
 on this tree. It is a review artifact, not a checked migration: changed
 definition bodies require the H55 owner, and theorem definitional equality,
@@ -280,7 +281,9 @@ owner-approved adoption. No inference or relation merge is proposed.
 Suggested owner registration fragment, subject to the final destination and
 owner approval, for `docs/module-map/source-definitions.d/<lane>.md`:
 
-`| Source/InferHelpers.lean | Shared top-level mapping, payable-argument and elementary conversion-location helpers. |`
+The proposed Source-area row would name module `InferHelpers` and describe it
+as shared top-level mapping, payable-argument and elementary conversion-location
+helpers. Its destination file does not exist in this checkout.
 
 The owner/coordinator must integrate the module registration and generated
 roots according to repository policy; this lane has not edited them. The
