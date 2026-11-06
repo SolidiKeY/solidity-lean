@@ -6,9 +6,12 @@ Intermediate locals are derived from actual checked interpreter runs. -/
 namespace Solidity.Source.Agreement
 variable {E : Env} {C : Contract} {R : List STy} {M : Bool} {k : SCtx}
 
-private theorem source_cons_normal {Γ : RCtx} (G : Glob E) (F : Fr)
-    (n nps : Nat) (ph : Option (Ph E)) (s : RStmt E R M k Γ Γ)
-    (rest : RItems E R M k Γ Γ) (ls mid last : Locals E.layout Γ)
+/-- Forward normal sequencing of actual Source runs, allowing a declaration
+between contexts. It observes execution; concrete clients supply both runs. -/
+theorem source_cons_normal_run {Γ₀ Γ₁ Γ₂ : RCtx} (G : Glob E) (F : Fr)
+    (n nps : Nat) (ph : Option (Ph E)) (s : RStmt E R M k Γ₀ Γ₁)
+    (rest : RItems E R M k Γ₁ Γ₂) (ls : Locals E.layout Γ₀)
+    (mid : Locals E.layout Γ₁) (last : Locals E.layout Γ₂)
     (st midSt lastSt : St E)
     (headRun : (execS G F n nps ph s ls).run (.nil, st) = (.ok (.normal mid), (.nil, midSt)))
     (tailRun : (execItems G F n nps ph rest mid).run (.nil, midSt) =
@@ -52,10 +55,10 @@ theorem bool_double_toggle_source (pre tail : List PrimTy) (b : Bool)
       (.nil, st) = (.ok (.normal last), (.nil, st)) := by rfl
   have tailRun : (execItems G F (n+5) nps ph (.stmt s .nil) mid).run (.nil, st) =
       (.ok (.normal last), (.nil, st)) :=
-    source_cons_normal G F (n+4) nps ph s .nil mid last last st st st secondRun nilRun
+    source_cons_normal_run G F (n+4) nps ph s .nil mid last last st st st secondRun nilRun
   have fullRun : (execItems G F (n+6) nps ph (.stmt s (.stmt s .nil)) ls).run
       (.nil, st) = (.ok (.normal last), (.nil, st)) :=
-    source_cons_normal G F (n+5) nps ph s (.stmt s .nil) ls mid last st st st firstRun tailRun
+    source_cons_normal_run G F (n+5) nps ph s (.stmt s .nil) ls mid last st st st firstRun tailRun
   have restored : last = ls := bool_slot_source_double_not E.layout pre tail ls b read
   simpa only [restored] using fullRun
 
