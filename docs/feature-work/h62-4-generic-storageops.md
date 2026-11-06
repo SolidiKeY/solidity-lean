@@ -352,12 +352,15 @@ late failure; the arbitrary-split theorem uses the generic law rather than
 a table of expected outputs. The final scheduler file measured 1.93 seconds
 against the unchanged 1.88-second warm baseline (2.66% increase, one sample).
 
-The attempted original-control instances were rejected: their new proofs used
-propext and Quot.sound where the original proofs used no axioms. Both original
-consumer proofs were restored exactly. No existing axiom set was widened.
-The accepted scope is the additive zero-axiom law and test fixtures only, not
-a completed control migration or full correspondence. All 1623 original claim
-obligations remain in the frozen plan.
+The attempted original-control instances were stopped after guards incorrectly
+expected no axioms. C212 directly checked the exact frozen original source:
+both original controls already use propext and Quot.sound, matching the
+optimized candidates. The prior axiom-growth interpretation was wrong. All
+31 local import files match the C207 dependency context byte-for-byte. Both
+original consumer proofs remain restored; no migration or optimized-consumer
+performance acceptance is claimed. The accepted scope remains the additive
+zero-axiom law and test fixtures only. All 1623 original claim obligations
+remain in the frozen plan.
 
 append_acceptance.py verifies that removing precisely the additive theorem
 packet reproduces the frozen OperationFamilies source byte-for-byte, and that
@@ -366,3 +369,13 @@ source-preservation checks, not kernel proofs or full-family acceptance.
 The failed consumer guards and previous timing rejection remain preserved;
 full affected validation, whole-family correspondence and all original holds
 remain open.
+
+## Correction of the C207 axiom comparison
+
+C212 preserves the original and candidate axiom messages and exact dependency
+hashes. A reflexive proof is not sufficient evidence of an empty axiom set: its
+referenced fixture definitions also matter. The measured original and candidate
+sets are both [propext, Quot.sound]. Historical sealed reports are retained,
+but their claim of growth from an empty set is superseded by this correction.
+The independent C206 21.1% timing STOP remains unchanged. Neither this correction
+nor the additive law completes the 1623-case generic migration.
