@@ -1,0 +1,71 @@
+{
+  "relay": "H70",
+  "requester": "solidity-h62-2-20261106/audit-precompiles",
+  "requester_commit": "5fcec7dca5ab0d6d321eaf29ca176045b5c38e0c",
+  "producer": "solidity-h62-6-20261106/migrate-precompiles",
+  "producer_commit": "d393a60b76120dfab477e62c569f11cf34cdcfcb",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-precompiles",
+  "tickets": [
+    {
+      "id": "DEP-BLS-435",
+      "status": "producer-fix-available-consumer-retest-pending",
+      "declarations": [
+        "Solidity.Precompiles.Bls12381.g1Discount_length",
+        "Solidity.Precompiles.Bls12381.g2Discount_length"
+      ],
+      "change": "Both original statements preserved; rfl proof bodies changed to by decide +kernel under the authorized four-file migration overlay.",
+      "source_sha256": "50112ce74787363c94a6e9e34abe406bfaf6452375dd94c173ee2be21b9d4f46",
+      "evidence": {
+        "summary": "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/summary.json",
+        "log": "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/Solidity.Precompiles.Bls12381.log",
+        "module_result": {
+          "module": "Solidity.Precompiles.Bls12381",
+          "command": [
+            "/workspace/h62-migrate-precompiles/toolchains/lean-4.35.0-linux/bin/lean",
+            "-j1",
+            "--tstack=131072",
+            "-o",
+            "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/olean/Solidity/Precompiles/Bls12381.olean",
+            "Solidity/Precompiles/Bls12381.lean"
+          ],
+          "exit": 0,
+          "wall_seconds": 11.871125679000215,
+          "peak_rss_kib": 601608,
+          "resource_stop": null
+        }
+      },
+      "consumer_retested": false,
+      "limit": "This module pass does not establish consumer import closure, Osaka axiom acceptance, or full migration acceptance."
+    },
+    {
+      "id": "ROOT-AXIOMS",
+      "status": "waiting-owner-disposition",
+      "owner": "solidity-h62-6-20261106/migrate-root-gate",
+      "file": "Solidity/Secp256k1.lean",
+      "evidence": "/workspace/h62-migrate-precompiles/evidence/authorized-new-final/Solidity.Precompiles.Osaka.log",
+      "required": "Owner disposition/dependency input for recover axiom change; frozen Osaka assertion remains unchanged."
+    },
+    {
+      "id": "RSS-REGRESSION",
+      "status": "waiting-recorded-owner-review",
+      "owner": "solidity-h62-6-20261106/migrate-root-gate",
+      "old_peak_kib": 375120,
+      "new_peak_kib": 601608,
+      "required": "Recorded review; no passing final comparison or waiver inferred."
+    }
+  ],
+  "outside_scope": [
+    "OBL-SUCCESS belongs to G43/V14 compiler-success theorem owner; no frozen-interface change authorized.",
+    "DEP-RAW-435 and DEP-BRIDGE-435 belong to their named producers; no fixes attempted by this lane."
+  ],
+  "unavailable_host_receipt": {
+    "path": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T145928Z/solidity-h62-6-20261106__migrate-precompiles/index.json",
+    "reported_read_failures": 1,
+    "locally_available": false,
+    "contents_reconstructed": false
+  },
+  "routing_policy": "Host-only relay; routing grants no original-file edit permission. Existing four-file overlay remains partial. Same VM/goal/branch/budgets, no reset/create/push/merge.",
+  "new_lean_runs": 0,
+  "new_production_edits": 0
+}

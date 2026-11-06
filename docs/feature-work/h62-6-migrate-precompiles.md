@@ -174,3 +174,27 @@ After root producer repair: apply only an authorized dependency input, rerun cle
 comparable new build and full affected/run-lean.sh validation with pinned toolchain,
 escalate resource regressions, obtain fresh reviews and deliver final complete
 handoff. The persistent goal must remain unfinished until every required gate passes.
+
+## H70 relay disposition
+
+H70 explicitly routes this lane to **wait** for migrate-root-gate's
+`Solidity/Secp256k1.lean` recovery axiom disposition and recorded RSS review.
+The four-file overlay at `d393a60b76120dfab477e62c569f11cf34cdcfcb` remains partial;
+no new producer-source edits, Lean checks, budget changes or acceptance occurred.
+
+For audit-precompiles at `5fcec7dca5ab0d6d321eaf29ca176045b5c38e0c`,
+`DEP-BLS-435` has a producer fix available in that committed overlay: both
+discount-length statements use the already verified kernel proof. The recorded
+official-v4.35 build compiled BLS with exit0; the current BLS bytes match that
+compiled committed source. **Consumer retest remains pending**, and the BLS
+module pass does not establish a passing Osaka/frozen consumer import closure.
+Machine-readable evidence and exact source hash are in
+`tests/h62/item6/migrate-precompiles/h70-relay-disposition.json`.
+
+`OBL-SUCCESS` is the G43/V14 owner's separate actual-compiler success theorem;
+this lane does not change its frozen obligation, supply premises or claim that
+the audit demonstrated failure of an actual compiler theorem. Raw/Bridge
+prerequisites remain with their named owners. The supplied router receipt path
+is host-only and absent locally; H70 reports one read failure. Missing receipt
+bytes were not reconstructed, and no root disposition was inferred from them.
+Coordinator retrieves this receipt; no new relay or edit permission is inferred.
