@@ -1239,3 +1239,21 @@ These reviews are not paired row judgments. All486 rows/frozen270, original
 gates/budgets and proof semantics remain unchanged; no complete row or runtime
 pass is claimed. H80's incoming scoped instructions are the next provisioning,
 metadata and proof-help work; no goal mutation or integration is authorized.
+
+### H80 scoped implementation and provisioning (2026-11-06)
+
+Incoming user message H80 supplies scoped answers: provision pinned CLI/Frontend
+dependencies with the specified12GiB no-swap serial-j1 fallback; add real
+kernel-checked verifier identity/source-span metadata; open project proof docs
+for help; compiler-only Build leaves runtime/test equivalence incomplete. It
+supersedes the earlier proof-help exclusion claim; no row is waived. No
+integration or goal-state change is authorized.
+
+The conditional help action now opens the configured project's docs/README.md,
+which links docs/calculus.md. It uses qualified current summary state, canonical
+file containment, trust and existing picker document/session/version guards.
+Injected regressions cover current running/error/completed state, edit/close/
+switch/configuration/disposal/trust rejection and no backend restart. Finder and
+skeptic found no concrete defect; this is source evidence, not native UI parity
+or either fresh row judgment. Metadata and mandatory proof gates continue after
+dependency provisioning; no local positioned trace is fabricated.
