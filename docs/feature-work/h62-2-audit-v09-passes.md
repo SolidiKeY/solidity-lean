@@ -288,3 +288,21 @@ or blocked and cannot express PAUSED; prior calls also lacked trusted CCA goal
 context. No substitute completion/reset/new goal is attempted. This precise
 limitation is saved in retirement-state.json; the worker stops regardless.
 The successor must retrieve the original scope and waits before integrating.
+
+## Scalar-passes successor adoption
+
+The successor verified all five committed handoff-document SHA256 values from
+final audit head `521196a3a78cd6cce22a7f14dd4364493b16cdbc` against the
+coordinator receipt, then merged that stopped member head on its existing
+branch. The recorded original assignment is a thread transcription; matching
+the handoff hashes does not establish launcher rendered-prompt byte equality.
+The portable evidence archive and prior runtime results have not been locally
+verified by the successor.
+
+The existing source acceptance suite was rerun after adoption: all 15 tests
+passed. This verifies the frozen 179-file/1259-declaration source census and
+its source-classification controls, not Lean elaboration, premise feasibility,
+witness coverage, supported-success totality or timing acceptance. All four
+checkpoints remain unfinished. Raw migration and reported axiom-growth review
+holds remain in force; the failed runtime baseline was not rerun unchanged.
+No original producer, frozen statement, proof budget or trust policy changed.
