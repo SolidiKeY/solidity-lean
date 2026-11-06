@@ -567,3 +567,37 @@ manifest was refreshed. A matching parent string does not authenticate the
 actual ancestor CPU quota, cpuset, namespace mapping or daemon identity. The
 pre-watch portion of runtime is still outside the watcher deadline. These
 remaining limitations preclude production acceptance; no H56 run was made.
+
+## Pre-start deadline and visible CPU ancestry backfill
+
+The coordinator supplied H56 provisioning identity, not measurement or runner
+attestation. The experimental `start_and_watch` checks for an owned created
+container and anchors both clocks immediately before the Docker start request;
+its synthetic tests include time spent in that request. It uses the unchanged
+full requested allowance, not a one-second sub-limit. A 1.5-second synthetic
+fixture in a network-isolated, 64 MiB no-swap container timed out and removed
+both the parent and an escaped-session child. Runs 01 through 04 are retained
+under `/workspace/h55-module-times-evidence/prestart-control-*` and bound by
+`tests/h55/module-times/prestart-evidence.sha256`. No Lean job or H56 timing
+was run, and the H93-deferred cold-timing experiment was not restarted.
+
+The additive CPU ancestry helper reads visible cgroup-v2 `cpu.max` and effective
+CPU/memory sets, binds the sampled process start time and cgroup membership on
+both sides, rejects malformed ranges and incomplete Docker chains, and compares
+visible policies across separately identified containers. Its output remains
+`matching-visible-unattested`, never a production pass: the local `/..` mount
+root hides higher ancestors. The fixture records that incomplete ancestry.
+The 58-method synthetic suite passes.
+
+Independent read-only finder and skeptic reviews used no Lean server, builds or
+writes. Their PID-reuse, malformed-chain, reversed-range and cross-run identity
+findings were fixed and rechecked; their input hashes are recorded in
+`tests/h55/module-times/prestart-review-inputs.sha256`. The finder confirmed the
+pre-start anchor and removal of the one-second sub-limit. It also found that
+created-state inspection and Docker start remain non-atomic, a timed-out start
+can finish after inconclusive cleanup, and daemon/kill latency can exceed the
+deadline. The skeptic confirmed that hidden ancestors, transient changes,
+CPU burst/weight/idle, daemon/VM identity and host scheduling remain
+unauthenticated. The helpers are not an accepted production runner, and no
+300-second hard-bound or actual H56 measurement is claimed. The exact H28
+rendered prompt is verified; its final Git artifact remains unavailable.

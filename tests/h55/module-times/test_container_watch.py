@@ -39,6 +39,55 @@ class WatchControls(unittest.TestCase):
                 watch.state(self.container, self.nonce)
             self.assertEqual((True, 0), watch.state(self.container, self.nonce, check_limits=False))
 
+    def test_start_delay_counts_against_deadline(self):
+        """Guard regression: time spent in Docker start is omitted."""
+        def daemon(*args, **kwargs):
+            if args[0] == "inspect":
+                return self.nonce + "|created"
+            self.assertEqual("start", args[0])
+            return self.container
+        with patch.object(watch, "docker", side_effect=daemon), \
+             patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 350_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 350_000_000]), \
+             patch.object(watch, "stop_owned", return_value=137):
+            self.assertEqual({"status": "timeout", "exit_code": 137},
+                             watch.start_and_watch(self.container, self.nonce, .3))
+
+    def test_prestarted_or_unavailable_container_is_not_launched(self):
+        """Guard regression: an existing run is relabeled as freshly started."""
+        with patch.object(watch, "docker", return_value=self.nonce + "|running") as daemon:
+            result = watch.start_and_watch(self.container, self.nonce, 1)
+            self.assertEqual("untrusted-prestart-state", result["status"])
+            self.assertEqual(1, daemon.call_count)
+        with patch.object(watch, "docker", return_value=self.nonce + "|created") as daemon, \
+             patch.object(watch, "host_headroom", return_value=False):
+            self.assertEqual("resource-stop-before-start", watch.start_and_watch(self.container, self.nonce, 1)["status"])
+            self.assertEqual(1, daemon.call_count)
+
+    def test_start_uses_unchanged_full_budget(self):
+        """Guard regression: an unapproved one-second start budget is imposed."""
+        def daemon(*args, **kwargs):
+            if args[0] == "inspect":
+                return self.nonce + "|created"
+            self.assertEqual(300, kwargs["timeout"])
+            return self.container
+        with patch.object(watch, "docker", side_effect=daemon), \
+             patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch, "watch", return_value={"status": "unobserved-exit", "exit_code": 0}):
+            self.assertEqual("unobserved-exit", watch.start_and_watch(self.container, self.nonce)["status"])
+
+    def test_failed_start_does_not_claim_cleanup_or_pass(self):
+        """Guard regression: a timed-out start is accepted as cleaned up."""
+        def daemon(*args, **kwargs):
+            if args[0] == "inspect":
+                return self.nonce + "|created"
+            raise subprocess.TimeoutExpired("docker", 1)
+        with patch.object(watch, "docker", side_effect=daemon), \
+             patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch, "stop_owned", return_value=137):
+            self.assertEqual("untrusted-start-error", watch.start_and_watch(self.container, self.nonce, 1)["status"])
+
     def test_bad_inputs_refused_without_docker(self):
         with patch.object(watch, "docker") as docker:
             for cid, nonce, seconds in [("wrong", self.nonce, 1), (self.container, "bad", 1),

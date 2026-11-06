@@ -97,14 +97,20 @@ def host_headroom():
     return (fields["SwapTotal"] == 0 and swap == 0 and 0 <= current <= cap
             and fields["MemAvailable"] >= reserve and cap - current >= reserve)
 
-def watch(container_id, nonce, seconds):
+def watch(container_id, nonce, seconds, *, _anchor=None):
     """Synthetic deadline; timeout is adjustable for tests and never a receipt."""
     if (not isinstance(container_id, str) or not IDENT.fullmatch(container_id) or
             not isinstance(nonce, str) or not NONCE.fullmatch(nonce) or
             type(seconds) not in (int, float) or not 0 < seconds <= 300):
         raise ValueError("invalid owned-container watch arguments")
-    start = time.monotonic_ns()
-    boot = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+    if _anchor is None:
+        start = time.monotonic_ns()
+        boot = time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+    elif (isinstance(_anchor, tuple) and len(_anchor) == 2
+          and all(type(value) is int and value >= 0 for value in _anchor)):
+        start, boot = _anchor
+    else:
+        raise ValueError("invalid clock anchor")
     observed_running = False
     try:
         while True:
@@ -148,3 +154,41 @@ def watch(container_id, nonce, seconds):
         except (OSError, subprocess.SubprocessError, ValueError, RuntimeError):
             pass
         return {"status": "watch-error", "exit_code": None}
+
+
+def start_and_watch(container_id, nonce, seconds=300):
+    """Guard regression: execution before watch evades the deadline.
+
+    Synthetic only: caller-supplied identity/limits and Docker daemon are not
+    authenticated. Start or cleanup errors never establish a timing pass.
+    """
+    if (not isinstance(container_id, str) or not IDENT.fullmatch(container_id) or
+            not isinstance(nonce, str) or not NONCE.fullmatch(nonce) or
+            type(seconds) not in (int, float) or not 0 < seconds <= 300):
+        raise ValueError("invalid owned-container start arguments")
+    try:
+        fmt = "{{index .Config.Labels \"" + LABEL + "\"}}|{{.State.Status}}"
+        if docker("inspect", "--format", fmt, container_id) != nonce + "|created":
+            return {"status": "untrusted-prestart-state", "exit_code": None}
+        if not host_headroom():
+            return {"status": "resource-stop-before-start", "exit_code": None}
+        # The deadline begins immediately before the start request, not after
+        # Docker has started the workload or returned from its API call.
+        anchor = (time.monotonic_ns(), time.clock_gettime_ns(time.CLOCK_BOOTTIME))
+        try:
+            docker("start", container_id, timeout=seconds)
+        except (OSError, subprocess.SubprocessError, ValueError):
+            # A timed-out start request may still complete later. Attempt only
+            # ownership-checked cleanup and never claim it was conclusive.
+            try:
+                stop_owned(container_id, nonce)
+            except (OSError, subprocess.SubprocessError, ValueError, RuntimeError):
+                pass
+            return {"status": "untrusted-start-error", "exit_code": None}
+        result = watch(container_id, nonce, seconds, _anchor=anchor)
+        # This wrapper is not an authenticated measurement or acceptance gate.
+        if result.get("status") == "exited":
+            return {**result, "status": "untrusted-exited"}
+        return result
+    except (OSError, subprocess.SubprocessError, ValueError):
+        return {"status": "untrusted-prestart-error", "exit_code": None}
