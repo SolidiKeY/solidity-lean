@@ -636,6 +636,9 @@ import Solidity.Backend.MemoryCopies.AllocationPanicInterface
 import Solidity.Backend.MemoryCopies.BudgetedDefault
 import Solidity.Backend.MemoryCopies.BudgetedDefaultControls
 import Solidity.Backend.MemoryCopies.BudgetedDefaultInterface
+import Solidity.Backend.MemoryCopies.BudgetedFinite
+import Solidity.Backend.MemoryCopies.BudgetedFiniteControls
+import Solidity.Backend.MemoryCopies.BudgetedFiniteInterface
 import Solidity.Backend.MemoryCopies.BudgetedReference
 import Solidity.Backend.MemoryCopies.BudgetedReferenceControls
 import Solidity.Backend.MemoryCopies.BudgetedReferenceInterface
@@ -3004,6 +3007,7 @@ import Solidity.Frontend.StatementGrammarH28.SyntaxNoSemi
 import Solidity.Frontend.StatementGrammarH28.SyntaxPair
 import Solidity.Frontend.StatementGrammarH28.SyntaxParenBalance
 import Solidity.Frontend.StatementGrammarH28.TokenRoot
+import Solidity.Frontend.StatementGrammarH28.TryCoverage
 import Solidity.Frontend.StatementGrammarH28.YieldSplit
 import Solidity.Frontend.StatementGrammarH28.YulControlFree
 import Solidity.Frontend.Static.C3
