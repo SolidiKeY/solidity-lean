@@ -1,0 +1,152 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitAnd": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitNot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitOr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.bitXor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.div": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.exp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.exp_uniform": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.gt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.iszero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.lt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.mod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.sdiv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_and_or": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_div_mod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_exp": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_flags": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_not": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_sdiv": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_sgt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_shifts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_slt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_smod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.selected_xor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.sgt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.shl": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.shr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.slt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionAgreement.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement.smod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -177,7 +177,7 @@ theorem dyn_coverage : CoversMixedHeap dynEntries := by
 
 def dynState : Source.EMState mixedEnv [dynTy, dynTy] :=
   ⟨.cons (.memRef rfl 0) (.cons (.memRef rfl 0) .nil),
-    ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, dynHeap, [], [], ⟨[], .nil⟩⟩⟩
+    ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, dynHeap, [], [], ⟨[], .nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def dynZeroState := withSourceHeap dynState dynZeroHeap
 
 theorem dyn_actual_MemOK : Source.MemOK mixedEnv dynHeap.ty dynState := by

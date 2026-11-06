@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalPointerMaterialize.lean:Solidity.Backend.MemoryOps.Physical.PointerFrame.materialize_outside": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerMaterialize.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_checked_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerMaterialize.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_outside": [
+  "Quot.sound",
+  "propext"
+ ]
+}

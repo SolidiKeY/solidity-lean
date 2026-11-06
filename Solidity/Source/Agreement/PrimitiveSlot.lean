@@ -47,7 +47,7 @@ theorem primitive_slot_set_related (D : Layout) (C : Contract) (H : HTy)
 
 /-- Self-conversion for precisely the supported primitive Source types. -/
 theorem primitive_source_implicit (E : Env) (p : PrimTy) :
-    STy.implicit E.isBase (sourceTy p) (sourceTy p) = true := by
+    STy.implicit E.isBase E.mapFree (sourceTy p) (sourceTy p) = true := by
   cases p <;> rfl
 
 /-- The primitive relation retains the same value and its intrinsic evidence. -/

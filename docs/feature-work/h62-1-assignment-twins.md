@@ -19,7 +19,27 @@ Each pass contains `value`, `reached`, `reached_value`, and `execution`: additio
 
 Independent read-only finder and skeptic reviews, without a Lean server, both found the original scanner omitted the three attributed `after` declarations and the dotted constructors in the three value definitions. Both were fixed. The skeptic also identified the outcome cases, shorthand pipeline splits, selected-observation boundary, and stale KeySort statement; the accounting above records those distinctions. A second review confirmed the semantic accounting and found that the first test checked counts only. The test was strengthened to compare declaration names, branch sequences, and source hashes; its negative controls exercise those checks.
 
-The six originals are V09-owned and read-only in this lane. Request exact-file agreement through the coordinator for `Solidity/Backend/Passes/AssignmentAdditionPass.lean`, `AssignmentAdditionControls.lean`, `AssignmentMultiplicationPass.lean`, `AssignmentMultiplicationControls.lean`, `AssignmentSubtractionPass.lean`, and `AssignmentSubtractionControls.lean` (all under that directory). No approval or delivery is inferred. Shared support, original-file migration, full acceptance, before/after timing, and final review remain outstanding. No Lean statement, axiom, sorry, or proof budget has been changed. The bounded KeySort prerequisite passed on Lean 4.24.0 in the prior turn; this is not full validation.
+The six originals are V09-owned: `Solidity/Backend/Passes/AssignmentAdditionPass.lean`, `AssignmentAdditionControls.lean`, `AssignmentMultiplicationPass.lean`, `AssignmentMultiplicationControls.lean`, `AssignmentSubtractionPass.lean`, and `AssignmentSubtractionControls.lean` (all under that directory). The earlier exact-file request protocol for statement-preserving edits was superseded by H82; the successor live scope and producer boundaries still apply. Shared support, original-file migration, full acceptance, before/after timing, and final review remain outstanding. This assignment-twins lane changed no Lean statement, axiom, sorry, or proof budget. The bounded KeySort prerequisite passed on Lean 4.24.0 at the earlier lane base; it is not validation of this merge head.
+
+## Authenticated scalar-passes successor intake
+
+The successor verified the H82b archive, manifest and checksum-manifest hashes
+and all 557 listed files. The delivered frozen assignment, live scope and
+verified-final-stop metadata resolve the prior missing-assignment and
+retirement waits. Exact stopped head
+`7c5de4602fa754ea3c3cca44185ef26098df5ff2` is merged into the original
+VY3/scalar-passes branch; no retired worker was resumed at that intake.
+
+Fresh `test_census.py` acceptance passed for the six frozen source hashes,
+declaration inventories, pipeline arms and its three mutation controls. This
+is source validation, not a Lean proof or timing result. Prior worker runtime
+logs and bundles remain separately unverified locally. H82 supersedes the
+historical proof-only exact-file request protocol above, but the authenticated
+scalar-passes live scope does not transfer the six V09 production originals.
+The additive generic-passes support is already merged and should be reused,
+not duplicated. Extraction/migration, typed proof validation, final gates and
+paired timings remain unfinished; v4.35 dependency/overlay and live producer
+boundaries remain binding.
 
 ## Frozen-text backfill after master fast-forward
 

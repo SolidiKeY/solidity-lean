@@ -189,7 +189,7 @@ def frontCells (st : Source.Storage env.layout env.cellTy) :=
  [child (child right 0) 0,child (child right 1) 0,child (child right 1) 1].map (SourceCapturedByteCommitControls.raw st)
 def journalRows (s : Source.St env) := s.ex.journal.map fun e=>
  match e with
- | .account a old => (a.val,sourceCells old.storage,tailRow old.storage,frontCells old.storage,old.balance.val,old.nonce,old.code)
+ | .account a old => (a.val,sourceCells old.storage,tailRow old.storage,frontCells old.storage,old.balance,old.nonce,old.code)
  | .transient a _ => (a.val,([],[]),([],[]),[],0,0,none)
 def setupRows : List (List (Option Nat) × List (Option (List Nat)) × List (Option (List Nat))) := [
  ([some 1,some 1,some 0,some 6,some 0],[some [5],some [7],some [11],some [13],some [17],some [19],none],[some [17],none,none]),

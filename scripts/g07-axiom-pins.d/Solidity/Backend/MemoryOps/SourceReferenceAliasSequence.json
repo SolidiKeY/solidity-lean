@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceReferenceAliasSequence.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.computed_reference_alias_sequence": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
