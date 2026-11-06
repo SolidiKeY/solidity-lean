@@ -1,7 +1,7 @@
 {
   "id": "V15-GENERIC-P10-BYTE-01",
   "owner": "V15 (v12-v17/v15-evm-agreement)",
-  "state": "pending-coordinator-relay; no owner permission received",
+  "state": "kernel-validated additive proposal; timing pending; no owner permission received",
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "exact_files": [
     {
@@ -20,7 +20,23 @@
     "zero_word",
     "maximum_word"
   ],
-  "requested_action": "Owner reviews an additive typed fixture and intrinsic execution-lemma proposal, then explicitly agrees to/apply migration of exact original declarations, retaining their exact statements. No implementation or proof acceptance is claimed by this request.",
+  "requested_action": "V15 reviews the exact single-file patch and proof/evidence, explicitly agrees to the exact file, and applies/reviews migration only after timing acceptance. This request grants no edit permission and transfers no ownership.",
   "excluded": "All other original files, generated roots/module maps/axiom pins, frozen-interface changes, H55 Yul Raw/vector generation.",
-  "implementation_state": "not started; toolchain applicability awaiting clarification"
+  "implementation_state": "Generic lemma,typed table,all21public correspondences and48headline guards pass; full affected standalone package passes; owner source remains untouched.",
+  "patch": "tests/h62/item4/generic-p10/owner-migration.patch",
+  "proposed_source_sha256": "ae0f960bf933aca562e15eaeb90586d081ea90943e87752f38e0d6d1cf5e729b",
+  "layout": "Single existing owner file, inline ByteTable namespace; no new production module/root registration",
+  "validation_evidence": "/workspace/generic-p10-artifacts/evidence/accept-owner-validation.log",
+  "changed_proof_bodies": [
+    "observed",
+    "first_byte",
+    "second_byte",
+    "middle_zero",
+    "penultimate_byte",
+    "last_byte",
+    "outside_word",
+    "maximum_index",
+    "zero_word",
+    "maximum_word"
+  ]
 }

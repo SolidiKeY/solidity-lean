@@ -1,9 +1,10 @@
 # H62 item 4: generic-p10
 
-The full four-checkpoint assignment remains **unfinished**. This checkpoint
-delivers reviewed source-accounting backfill only. No generic semantic lemma,
-typed execution fixture table, correspondence proof, Lean gate, or proof timing
-comparison has passed. No original declaration or frozen interface changed.
+The full four-checkpoint assignment remains **unfinished**. Source accounting,
+an intrinsic BYTE execution lemma, a typed nine-row table, all 21 original public
+proposition correspondences, and full affected standalone-package validation
+now pass. Timing acceptance and V15's original-file migration remain pending.
+No original declaration or frozen interface changed.
 
 The assigned branch is `codex/solidity-h62-4-20261106/generic-p10`, based exactly
 on `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The VM checkout is
@@ -82,8 +83,8 @@ the repository. All commands, exits, durations, and log hashes are recorded in
 | Negative acceptance | PASS: checksum tamper, missing source, forged base hash, empty inventory, and changed theorem statement all refused |
 | `node scripts/check-layers.mjs` | PASS: 857 core modules, zero reaches to elaborators or checked parser adapters |
 | Frozen-family diff / `git diff --check` | PASS: no family diff, no whitespace errors |
-| Generic lemma / typed fixture proofs / correspondence | PENDING |
-| KeySort prerequisite / affected Lean checks / full gate | PENDING; no `RUNTIME_GATE_PASS` |
+| Generic lemma / typed fixture proofs / correspondence | PASS in the additive test package; original-file migration pending |
+| KeySort prerequisite / full affected package checks | PASS; 48 headline axiom guards checked; assignment-wide integration remains pending |
 | Same-condition original versus migrated proof timings | PENDING; no slowdown percentage asserted |
 
 Independent read-only finder `/root/census_finder` and skeptic
@@ -98,7 +99,8 @@ challenges successfully. These reviews do not accept any semantic proof.
 
 ## Runtime and ownership state
 
-The VM has a 16 GiB cgroup memory cap and no host swap. No heavy Lean job ran.
+The VM has a 16 GiB cgroup memory cap and no host swap. At the first source
+checkpoint, no heavy Lean job had run. The resumed v4.24 work is recorded below.
 Future checks remain serial, with explicit `LEAN_NUM_THREADS=1`, Lean `-j1`,
 bounded memory and a 4 GiB available reserve. No `systemd-run` is allowed.
 The writer-lock path is
@@ -126,13 +128,13 @@ optional absence as nonblocking. No replacement goal was created.
 
 | Typed state | Required next action |
 |---|---|
-| `SCOPE_TOOLCHAIN_APPLICABILITY` | Resolve Q-TOOLCHAIN-01 below before toolchain-dependent proof validation. |
+| `TOOLCHAIN_RESOLVED` | The coordinator answered Q-TOOLCHAIN-01: this lane stays on v4.24.0; v4.35.0 applies only to batch solidity-h62-6. Actual v4.24 versions and a passing bounded KeySort diagnostic are recorded below. |
 | `OWNER_RELAY_REQUIRED` | V15 owns original family files. No `relay.sh` or exact-file owner agreement is available locally. Additive work is permitted; original-file migration remains prohibited. The saved exact-file request identifies the proposed ByteObservation control file. This is coordination, not a request to the human to waive ownership. |
-| `PROOF_WORK_QUEUED` | Prove an intrinsic parameterized execution lemma using the existing native semantic theorem, then a typed fixture table. Do not replace fetched execution with a decision table or add a success premise equivalent to the conclusion. |
-| `CORRESPONDENCE_QUEUED` | Connect each migrated original declaration as an exact instance where possible; retain all negative/refusal/guard observations and prove the correspondence. |
-| `VALIDATION_QUEUED` | Run version/KeySort prerequisite, per-file diagnostics or authorized fallback, transitive axiom checks, affected/full gates, and same-cache/tree/resource timing comparison. Stop for slowdown above 10%. |
+| `ADDITIVE_PROOFS_PASS` | Intrinsic word-parameterized execution and typed fixtures are proved using actual native semantics. No whole execution is decided by the table. |
+| `ADDITIVE_CORRESPONDENCE_PASS` | Kernel proposition equalities cover all 21 public originals, with all negative/refusal/resource-order controls retained. |
+| `VALIDATION_PARTIAL` | Version/KeySort, per-file diagnostics, 48 transitive headline guards and the full affected package pass. Same-condition timing and owner-applied integration/full gates remain pending. Stop for slowdown above 10%. |
 
-`ESCALATE: Q-TOOLCHAIN-01`, sources: coordinator toolchain update and base
+Historical `Q-TOOLCHAIN-01` (now resolved), sources: coordinator toolchain update and base
 `lean-toolchain`. Does “Migration ONLY” apply the pinned v4.35.0 requirement
 to this generic-controls lane? The mutually exclusive options are:
 
@@ -142,13 +144,150 @@ to this generic-controls lane? The mutually exclusive options are:
    assigned base and ownership boundaries. Dependency/source migration must be
    provided by its owners; this lane cannot edit their files.
 
-No option is assumed approved. No exclusion, premise, theorem statement,
+The coordinator selected option 1: “Your lane stays on master's toolchain
+v4.24.0; do not install or overlay v4.35.” No exclusion, premise, theorem statement,
 interface, resource budget, axiom allowance, or proof budget is weakened.
-New Lean declarations/helpers: zero. Frozen statements touched: zero.
-New axioms/sorry/native_decide: zero. The 10% proof-time gate remains unmeasured.
+New Lean helpers and proposition comparisons are listed below. Frozen statements
+touched: zero. New axioms/sorry/native_decide: zero. The 10% proof-time gate
+remains unmeasured.
 
 The original patch, committed-head receipt, handoff, complete inventory,
 individual gate logs, review record, and checksum manifest are saved under
 `/workspace/generic-p10-artifacts`. The off-git handoff records the full commit
 head after committing; this document deliberately cannot contain its own commit
 hash. No checkpoint or elapsed time is treated as completion of the full queue.
+
+## Resumed v4.24 runtime prerequisite
+
+The official v4.24 GitHub release downloaded successfully through the permitted
+proxy route. The release archive SHA256 is
+`b14f5e5159219dd1a1956c3b806813319f5e94ccd5bdfd56f54520609a5bb5ec`;
+the unchanged `bin/lean` SHA256 is
+`8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c`.
+The actual binaries report:
+
+```text
+Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)
+Lake version 5.0.0-src+797c613 (Lean version 4.24.0)
+```
+
+`scripts/coord-tools/lean-mcp diag Solidity/KeySort.lean` passed with
+`diag: 0 errors`. The MCP run's observed tree RSS peak was 1,038,266,368 bytes;
+minimum available memory was 15,093,714,944 bytes. Evidence is in the off-git
+`resume-versions.log`, `resume-keysort.log`, and
+`resume-core-mcp-resources.json`. These establish the runtime prerequisite,
+not the generic lemma, correspondence, or full validation gate.
+
+`provision_runtime.py` reproduces an off-git launch tree around the unchanged
+official binary. It checks v4.24's version/githash, preserves unexpected paths,
+and creates shell-quoted per-session environment files. The launcher supplies
+explicit `-j1`, `-M11264`, and `--tstack=131072`, rejects conflicting resource
+arguments, and serializes file compiler invocations. Tracked toolchain pins,
+Lake files, proof options and owner sources remain unchanged.
+
+`bounded.py` enforces a sampled 12 GiB aggregate RSS limit and a 4 GiB reserve;
+the separate hard limits are the VM's 16 GiB cgroup cap and Lean's 11,264 MiB
+allocation option. It requires zero host swap. It tracks the launched session
+and observed descendants with PID start-time identities, rejects orphaned
+workers after launcher exit, and applies TERM/KILL cleanup to every surviving
+owned process. This is for foreground Lean/Lake/MCP processes; a program that
+daemonizes and reparents entirely between samples is outside its containment
+assumptions. No systemd invocation or global swap change is made.
+
+Independent finder and skeptic reviews found and then accepted fixes for
+orphaned/TERM-resistant child cleanup, PID identity checks, conflicting launch
+flags, and unexpected provisioning symlinks/files. Four real process-lifecycle
+tests pass. The provisioning regression also refuses three unexpected output
+or parent-path cases while preserving their targets. These are external tool
+tests, not Lean proofs.
+
+The pinned Bridge repositories cloned successfully. The selective Mathlib
+cache request failed: all 900 requested files received proxy CONNECT 403.
+The same BYTE dependency closure built from pinned sources: 1,146 jobs, exit 0,
+2,446.174 seconds, 4,721,393,664-byte peak tree RSS and 9,386,577,920-byte minimum
+available memory. That warm-up started before the guard lifecycle review fixes;
+subsequent validation uses the corrected guard. This provisioning duration is
+not a before/after refactor measurement.
+
+The additive BYTE generator retains all 32 original declaration signatures
+and every nonmigrated body; only the nine positive proofs and the private
+semantic wrapper are intended to change. Two source-preservation tests pass.
+An explicit P10 namespace opening was added after finder review. Kernel
+correspondence now checks that name resolution preserves every public type.
+
+## Additive proof and correspondence checkpoint
+
+The standalone package is under `tests/h62/item4/generic-p10`; its own pin is
+v4.24.0, matching the untouched parent/Bridge pins. Its dependency manifest
+retains every frozen Bridge remote revision and shares only ignored storage.
+No central generated root, module map, or axiom pin was edited.
+
+`GenericP10.ByteFixture` provides:
+
+- `execute`: parameterized over intrinsic `Scalar.Word` inputs/results, an
+  actual `Site .BYTE`, tail, gas, capacity and fuel. Its sole observation premise
+  is byte algebra; `byte_fetched` proves actual driver execution and continuation.
+- `ByteFixture`: word-sized `Fin UInt256.size` index/value and a `Fin 256`
+  result, carrying its native byte-equation witness.
+- `ByteCase`, `fixtureValues`, `fixture_word`, and `fixture`: all nine original
+  positive cases, including index 32, maximum index and maximum word. The byte
+  equations prove by `cases c <;> rfl`; no new `decide` table proves execution.
+
+`GenericP10.ByteControls` retains all 32 original declaration signatures. The
+original `observed` statement is an exact wrapper around `execute`; the nine
+positive declarations are exact table instances through `table_case`. Every
+other declaration body is unchanged. The 21 original public propositions
+include nine positives and twelve other observation/negative/refusal controls;
+these are original cases, not duplicated progress counts.
+
+`GenericP10.Correspondence` proves 21 explicit equalities in `Prop`, each by
+`rfl`, between the complete original proposition and its candidate proposition.
+The private `proposition` selector returns a proof term's type. This is not an
+equality of proofs justified by proof irrelevance. The candidate itself imports
+only the helper/native semantics, not the original control proofs.
+
+`GenericP10.AxiomAudit` pins all 48 helper, candidate and correspondence
+headlines against the fixed allowlist `propext`, `Classical.choice`, `Quot.sound`.
+The pin generator refuses missing, duplicate or additional headlines and any
+other axiom. Whitespace comparison is lax only to accommodate namespace-driven
+line wrapping; names and axiom sets remain exact. An actual failed guard report
+with CLI exit 0 is retained as a regression: transport success cannot establish
+Lean success. Five parser tests cover failure, partial/missing payloads and real
+complete diagnostic/build shapes.
+
+Reproduce the combined source/semantic acceptance after provisioning MCP:
+
+```sh
+python3 -B scripts/h62/item4/generic-p10/accept_semantics.py \
+  --evidence /workspace/generic-p10-artifacts/evidence
+```
+
+The acceptance passed source reproduction/refusals, generator checks, trust and
+budget scan, full affected package build, all five per-file diagnostics, the
+owner-proposal kernel check, layer checks, frozen-source diff, and whitespace
+checks. Actual commands, semantic outcomes and durations are in
+`semantic-acceptance-gates.json`. Stricter response-shape validation was also
+applied to every captured Lean response without repeating unchanged proofs.
+
+Independent finder and skeptic semantic reviews accept the lemma/table boundary,
+all 32 retained signatures and all 21 complete proposition correspondences.
+They found no semantic weakening, vacuous execution premise, indexed-family
+match, trust shortcut, budget increase, ownership violation, or H55 overlap.
+No reviewer ran Lean. Timing and integration are expressly separate gates.
+
+The exported single-file owner proposal places the helper/table in the existing
+control module under `SolidityBridge.RoadmapV15.P10.ByteTable`; it adds eight
+helpers while preserving all original signatures and public names. Keeping it
+in that file avoids an additional module-load step. Its exact combined body and
+21 original proposition equalities passed a separate MCP kernel check. The
+patch is `tests/h62/item4/generic-p10/owner-migration.patch`; it has not been
+applied. V15 must explicitly agree to the exact file and apply/review migration.
+No new production module registration is required for this inline proposal.
+
+The next gate is `measure.py`: a predeclared five-pair, alternating-order
+comparison, with both warmups, identical native imports, full original controls
+and helper/trust-command costs, equal-length fresh namespaces, one guarded MCP
+backend and scratch slot, and strict complete Lean-success checks. Median wall
+times measure elaboration/kernel checking only. A backend change or timeout
+rejects the run; cleanup signals only the originally captured owned guard.
+Any slowdown above 10% stops the refactor. No timing verdict is claimed yet.
