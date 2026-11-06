@@ -1,0 +1,272 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_full_word_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.and_or_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitAnd_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitNot_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitOr_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.bitXor_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.div_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.div_high_bit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.div_mod_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.div_mod_resource_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.div_mod_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.eq_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_nonzero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_resource_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.exp_zero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_full_word_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.flags_resource_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.gt_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.iszero_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.lt_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.mod_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_full_word_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.not_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_full_word_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.order_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sdiv_signed_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.sgt_signed_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shifts_resource_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shl_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.shr_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.slt_signed_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.smod_signed_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_complete_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_full_word_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InstructionSelectionControls.lean:SolidityBridge.RoadmapV15.P10.InstructionSelectionControls.xor_resource_priority": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

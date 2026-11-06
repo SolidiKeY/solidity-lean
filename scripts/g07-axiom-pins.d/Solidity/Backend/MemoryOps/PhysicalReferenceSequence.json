@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequence.lean:Solidity.Backend.MemoryOps.Physical.primitive_words_after_reference": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalReferenceSequence.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.redirect_primitive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

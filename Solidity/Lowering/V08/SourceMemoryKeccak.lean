@@ -94,8 +94,8 @@ theorem zero_horizon {E : Source.Env} {Γ : RCtx} (global : Glob E) (frame : Fr)
 
 theorem mixed_vector (pipeline : Roadmap.Pipeline) (packed : Bool) :
     let final := SourceKeccak.afterLiteral (SourceKeccak.afterLiteral SourceCustomErrorControls.populated SourceCustomErrorControls.binary) (SourceAbiControls.data packed pipeline)
-    (final.ex.world.accounts SourceCustomErrorControls.sender).balance.val = 93 ∧
-    (final.ex.world.accounts SourceCustomErrorControls.self).balance.val = 7 ∧
+    (final.ex.world.accounts SourceCustomErrorControls.sender).balance = 93 ∧
+    (final.ex.world.accounts SourceCustomErrorControls.self).balance = 7 ∧
     (final.ex.world.accounts SourceCustomErrorControls.self).code = some 0 ∧
     (final.ex.world.accounts SourceCustomErrorControls.self).nonce = 1 ∧
     (final.ex.world.accounts SourceCustomErrorControls.self).storage.read SourceCustomErrorControls.saved = some (.bool true) ∧

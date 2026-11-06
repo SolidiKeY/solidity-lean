@@ -1,0 +1,101 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.arena": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.code_eq": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.count_fails": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.cursor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.different_callers": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.exact_cost": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.fragile_retained": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.free_tail": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.initial_owner": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.preparation_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.preparation_observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.public_root": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.reached": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.same_plan_entries": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.source_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.source_observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.storage_unchanged": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.target_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.whole_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.whole_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3SameSelectedRevert.lean:Solidity.Backend.InternalFlow.RuntimeFrame.SameSelectedRevert.wrong_frontier": [
+  "propext"
+ ]
+}
