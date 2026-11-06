@@ -10,16 +10,16 @@ variable {E : Source.Env} {Γ : Source.RCtx}
 
 def localArgs (a b : Source.IntTy)
     (i : Source.Idx Γ (.int a)) (j : Source.Idx Γ (.int b))
-    (ha : (Source.STy.int a).implicit E.isBase (.int a) = true)
-    (hb : (Source.STy.int b).implicit E.isBase (.int b) = true) :
+    (ha : (Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+    (hb : (Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true) :
     Source.RConvArgs E Γ [.int a,.int b] :=
   .cons (.local i) ha (.cons (.local j) hb .nil)
 
 def argument (G : Source.Glob E) (derived base : String) (a b : Source.IntTy)
     (i : Source.Idx (G.prog.ctorLocals derived) (.int a))
     (j : Source.Idx (G.prog.ctorLocals derived) (.int b))
-    (ha : (Source.STy.int a).implicit E.isBase (.int a) = true)
-    (hb : (Source.STy.int b).implicit E.isBase (.int b) = true) :
+    (ha : (Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+    (hb : (Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true) :
     Source.RBaseArg E (G.prog.ctorLocals derived) :=
   ⟨base,[.int a,.int b],localArgs a b i j ha hb⟩
 
@@ -29,8 +29,8 @@ theorem evaluated :
 ∀ {E : Solidity.Source.Env} {Γ : Solidity.Source.RCtx}
  (G : Solidity.Source.Glob E) (F : Solidity.Source.Fr) (n : Nat)
  (a b : Solidity.Source.IntTy) (i : Solidity.Source.Idx Γ (.int a)) (j : Solidity.Source.Idx Γ (.int b))
- (ha : (Solidity.Source.STy.int a).implicit E.isBase (.int a) = true)
- (hb : (Solidity.Source.STy.int b).implicit E.isBase (.int b) = true)
+ (ha : (Solidity.Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+ (hb : (Solidity.Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true)
  (l : Solidity.Source.Locals E.layout Γ) (s : Solidity.Source.St E)
  (x y : Int) (hx : a.lo ≤ x ∧ x ≤ a.hi) (hy : b.lo ≤ y ∧ y ≤ b.hi)
  (hi : l.get i = .int x hx) (hj : l.get j = .int y hy),
@@ -61,8 +61,8 @@ theorem bound :
  (derived base : String) (a b : Solidity.Source.IntTy)
  (i : Solidity.Source.Idx (G.prog.ctorLocals derived) (.int a))
  (j : Solidity.Source.Idx (G.prog.ctorLocals derived) (.int b))
- (ha : (Solidity.Source.STy.int a).implicit E.isBase (.int a) = true)
- (hb : (Solidity.Source.STy.int b).implicit E.isBase (.int b) = true)
+ (ha : (Solidity.Source.STy.int a).implicit E.isBase E.mapFree (.int a) = true)
+ (hb : (Solidity.Source.STy.int b).implicit E.isBase E.mapFree (.int b) = true)
  (l : Solidity.Source.Locals E.layout (G.prog.ctorLocals derived))
  (s : Solidity.Source.St E) (acc : Solidity.Source.CtorLocals G)
  (absent : acc.any (fun entry => entry.1 == base) = false)

@@ -197,7 +197,7 @@ abbrev argumentTy (t : Source.IntTy) : Source.STy := .array .calldata (.int t) n
 /-- Derive the existing Source implicit conversion judgment for every width.
 Explicit decidable equality avoids reducing the generated equality machinery. -/
 theorem conversion_allowed (E : Source.Env) (t : Source.IntTy) :
-    (argumentTy t).implicit E.isBase (sourceTy t) = true := by
+    (argumentTy t).implicit E.isBase E.mapFree (sourceTy t) = true := by
   change (decide (t = t) && true && true) = true
   simp only [Bool.and_true, decide_eq_true_eq]
 
