@@ -912,5 +912,7 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean` | Actual native recursive output represented after actual target parent returns, with derived heaps, locals and remaining State fields. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean` | Populated actual-output representation, complete ordered 20-word observation vector and cursor/alias/halt negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherence.lean` | Frozen recursive-return source-coherence duty for the allocating family, all compatible callers/arguments/return binders and quotation indices. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallCoherenceControls.lean` | Actual outer calls at indices two/four with private allocation and preserved caller scalar; zero-index exhaustion distinguished from bare revert. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
