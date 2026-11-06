@@ -443,3 +443,28 @@ repairs, timing resolution and final combined gates remain open.
 Final independent read-only finder and skeptic reviews pass with the stated
 limits. Their archive denominator clarification was fixed:453 payload files plus
 the index,454 archive members. Neither reviewer used Lean or reran benchmarks.
+
+## Exact B journal receipt and reconciliation
+
+[Reconciliation manifest](../../tests/directruntime-20261104/native-browser/b-original-reconciliation-manifest.json)
+records verified delivery of the original537822-byte journal and handoff. The
+84 cases match saved source/compiler identities; explicit selectors identify
+the intended function. Common-field values match, but zero complete request
+objects are identical: delivered raw AST/sourceId fields differ from normalized
+line metadata. All field-presence differences are retained; the checker permits
+missing fields generally and does not establish metadata-only equivalence.
+The exact delivered bytes have not been replayed through either backend.
+
+Both saved backend denominators and wire hashes reconcile. Selector and shared
+value drift controls reject their mutations. Four primary input files have
+before/after metadata/hash checks; referenced sources are hashed once. Finder
+and skeptic pass with these limits; finder provenance advice was applied.
+The initial /usr/bin/time setup failed before comparison (exit127), retained
+externally; Python resource accounting and final comparison pass. No Lean,
+browser, build or stopped benchmark rerun was needed for this tooling change.
+
+This clears only the exact B delivery wait. Prior four pending diamond cases,
+13 unsupported C constructs, browser stack failure and both timing STOPs remain.
+The A H44 archive is still pending. Under H88 no new cache shipment or semantic
+gate is inferred from the old343-module pack. Original full acceptance remains
+open. All bulk stays outside Git with the committed checksum manifest.
