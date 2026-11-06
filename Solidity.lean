@@ -3763,8 +3763,11 @@ import Solidity.Optimizer.CSE
 import Solidity.Optimizer.ConstFold
 import Solidity.Optimizer.Controls
 import Solidity.Optimizer.DeadCode
+import Solidity.Optimizer.DeadStore
 import Solidity.Optimizer.Inline
+import Solidity.Optimizer.LICM
 import Solidity.Optimizer.Laws
+import Solidity.Optimizer.Loads
 import Solidity.Optimizer.Pass
 import Solidity.Optimizer.Pipeline
 import Solidity.Optimizer.Propagate
