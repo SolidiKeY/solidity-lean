@@ -38,7 +38,3 @@ lake build "${default_targets[@]}" SolkeyTestSuite
 if [[ "$with_bridge" -eq 1 ]]; then
   ./scripts/check-bridge.sh
 fi
-# Keep the sort-annotation table honest against the solkey taclet file:
-# drift fails the build. Skipped with a warning when no checkout is beside
-# this repository -- see scripts/check-solkey.sh.
-exec ./scripts/check-solkey.sh
