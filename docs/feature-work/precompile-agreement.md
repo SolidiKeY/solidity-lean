@@ -378,7 +378,8 @@ No whole-goal/runtime completion or cache freshness is claimed.
 
 ## H70 DEP-BRIDGE-435 environment receipt, 2026-11-06
 
-The audit-precompiles owner relay at `13ae4273bad4123baea9347dfa724ded432dfd57`
+The external audit-precompiles owner relay at
+`13ae4273bad4123baea9347dfa724ded432dfd57` (not reachable in this checkout)
 requests Bridge dependency evidence. On the unchanged frozen v4.24 setup,
 all 11 installed git packages match the Bridge manifest. The Mathlib Log
 artifact exists. Owned `H70BridgeProbe.lean` imports it, the actual vendored
