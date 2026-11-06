@@ -2520,3 +2520,93 @@ arbitrary catch parameter types/lists, general compound boundary framing and
 remaining general parser coverage/final whole-repository acceptance remain open.
 SG-CEX-01/02 and all original exclusions/budgets are retained. Historical solc
 fixture evidence is separate from these universal restricted kernel proofs.
+
+
+## Checkpoint AE — universal block/call-options boundary
+
+Adopted remote-verified `812aeb301f27d70dad4acc3b3bd92d1c41d7c948`, preserving
+`65f7735f` under `refs/backup/statement-grammar/pre-812aeb301`. Owned Lean/tests
+were byte-identical before the rebase. Direct inspection of the published root
+confirmed imports for CatchCoverage, CatchListCoverage and TryCoverage; that
+statement is based on the root contents, not inferred merely from publication.
+This increment adds one owned module and local manifest row, without producer
+or earlier theorem changes.
+
+[BlockHeaderBoundary](../../Solidity/Frontend/StatementGrammarH28/BlockHeaderBoundary.lean)
+proves a universal token boundary for arbitrary existing syntax under the
+existing precedence contract. Named call options require an identifier followed
+by a colon immediately after their opening brace. A precedence-selected block's
+item list cannot have that prefix. An empty block retains its closing brace,
+so even an arbitrary continuation cannot manufacture the pair.
+
+`namedArgStart` is a token lookahead predicate, not an AST. `NoNamedFrame ts`
+quantifies over every token continuation. The proof reuses the existing universal
+expression/type atom-pair invariants, without expression uniqueness. All three
+simple alternatives are handled, including identifier-led type/name declarations
+and tuple declarations. Revert uses precisely the existing root path contract;
+the other fixed roots start in non-identifiers. `statement_no_named` takes only
+the existing `precNode` condition. The all-node projection and item/list lifting
+then derive `block_yield_no_named_header` from a successful arbitrary block yield
+and its existing full `Syn.prec` predicate, for arbitrary layouts and contents.
+No new source exclusion or expression/type/argument validity premise is added.
+
+The final two theorems concern the actual parser:
+`postLoop_no_named_lookahead` proves stopping at an opening brace whose next two
+located tokens are not an identifier/colon pair. `postLoop_yielded_block` derives
+those observations from **every** actual precedence-valid block yield and proves
+`postLoop (n+1)` preserves the supplied expression, entire block and arbitrary
+suffix state, at every positive fuel. This is lookahead discrimination; it does
+not establish expression uniqueness or general statement parser completeness.
+
+The exhaustive source inventory has 13 theorems: atom-pair exclusion;
+non-identifier framing; declaration-head framing; simple/revert/all-statement
+framing; statement all-node root projection; item and item-list framing; block
+item framing; block-yield lookahead; generic postfix stopping; yielded-block
+postfix stopping. There are five public token/predicate definitions.
+[Public audit](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean)
+checks/pins all 18 declarations. [Controls](../../tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean)
+have 17 theorem pins, for 35 inventoried declarations total.
+
+Controls enumerate all 13 statement constructors, all three simple alternatives,
+both item forms, the block constructor and nil/cons through arbitrary width.
+They check actual successful precedence/yield/postfix behavior for every root,
+attribute and fragmented-literal layouts (plus a missing-layout refusal), atomic
+colon payloads, arbitrary-width yields and parser stopping, and arbitrary-depth
+block precedence. Positive call-options input is actually consumed; its named
+pair fails the block frame. Empty-block closing braces prevent continuation
+capture. A colon supplied after an empty block exercises the non-identifier branch even
+when the second lookahead is a colon. Zero postfix fuel is rejected, and an invalid revert path is shown to
+fail the existing contract. That last control is not a counterexample to the
+boundary outside the contract; no such stronger conclusion is asserted.
+
+Checking-cost evidence: an initial attempt to try trivial roots before recursive
+simplification gave matched MCP wall times 151.296 and 151.721 seconds, so the
+original proof was restored. A second, targeted change unfolds `Syn.all` exactly
+once per nontrivial root, then projects Boolean conjunctions. Matched fresh CLI
+compilations of the same 13-theorem module took 147.43 seconds / 146.96 user
+seconds / 584272 KiB peak RSS before, and 1.74 seconds / 1.55 user seconds /
+463280 KiB after. Source outside that one proof was verified byte-identical;
+imports, statements, toolchain, single-thread configuration and proof budgets
+were unchanged. The one-step proof is retained; no >10% slowdown occurred.
+Raw plans, both source versions and exact command/resource logs are preserved.
+No earlier speed-motivated producer change was undone.
+
+Initial diagnostics exposed implicit printer-predicate inference, Boolean
+conjunction projection and list-map normalization issues; a control induction
+needed the correct Boolean normal form. All were fixed without theorem/premise
+or budget changes. The bounded CLI module build and per-file controls passed.
+Exact committed-head gates, final read-only reviews, cache and seal remain
+acceptance requirements in the handoff.
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/BlockHeaderBoundaryPublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+Whole G11 remains partial. General try call/success-body/return-parameter parser
+composition, arbitrary catch headers, remaining general compound framing and
+parser coverage, and final whole-repository acceptance remain open. Existing
+SG-CEX-01/02, SOL-EU exclusion, premises and budgets are unchanged. Kernel
+lookahead proofs are separate from historical external solc fixture evidence.

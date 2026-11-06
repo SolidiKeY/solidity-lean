@@ -97,3 +97,4 @@ Solidity.Frontend.StatementGrammarH28.ListMeasures	Universal intrinsic list yiel
 Solidity.Frontend.StatementGrammarH28.CatchCoverage	Constructive plain and single-Boolean-parameter catch parser coverage, actual yields and restricted uniqueness
 Solidity.Frontend.StatementGrammarH28.CatchListCoverage	Actual many catch-list parsing from structural maximum fuel and token count, with explicit greedy terminal frame
 Solidity.Frontend.StatementGrammarH28.TryCoverage	Constructive try statement coverage for empty identifier calls and success blocks with recursive Boolean catch lists
+Solidity.Frontend.StatementGrammarH28.BlockHeaderBoundary	Universal precedence-valid block versus named call-options boundary and actual postfix parser stopping

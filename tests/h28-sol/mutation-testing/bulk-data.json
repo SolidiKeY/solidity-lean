@@ -2,7 +2,7 @@
   "schema": 1,
   "authorization": "H44",
   "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
-  "delivery_base": "86253aba9aad8b457190f9e5f14c77c7ad030318",
+  "delivery_base": "c75cae56226543c331618f9f8936d2893b9edb32",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
@@ -280,6 +280,8 @@
     "follow_up_head": "d9687ad3f29fda805977de9ba1c749771f21da50",
     "status": "blocked",
     "members": 50,
-    "scope_complete": false
-  }
+    "scope_complete": false,
+    "member_manifest": "tests/h28-sol/mutation-testing/evidence/repository-gate-60a068dd/manifest.json"
+  },
+  "snapshot_delivery_base": "86253aba9aad8b457190f9e5f14c77c7ad030318"
 }

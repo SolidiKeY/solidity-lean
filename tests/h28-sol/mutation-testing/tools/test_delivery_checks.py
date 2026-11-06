@@ -42,3 +42,31 @@ class DeliveryReceiptControls(unittest.TestCase):
             git("init", "-q"); git("add", "."); git("commit", "-qm", "controlled receipt")
             with self.assertRaisesRegex(ValueError, "archive member count mismatch"):
                 verify_combined.verify(repo)
+
+    def test_committed_member_manifest_rejects_member_tampering(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); repo = root / "repo"; repo.mkdir()
+            payload = root / "data.txt"; payload.write_bytes(b"payload")
+            archive = root / "data.tar.gz"
+            with tarfile.open(archive, "w:gz") as tar:
+                tar.add(payload, arcname="data.txt")
+            relative = "tests/h28-sol/mutation-testing/evidence/member-manifest.json"
+            target = repo / relative; target.parent.mkdir(parents=True)
+            pin = {"archive": str(archive), "bytes": archive.stat().st_size, "sha256": hashlib.sha256(archive.read_bytes()).hexdigest(), "member_manifest": relative}
+            def git(*args):
+                subprocess.run(["git", "-c", "user.name=H28 control", "-c", "user.email=h28@example.invalid", "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", *args], cwd=repo, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            git("init", "-q")
+            for fault in (None, "hash", "size", "membership"):
+                members = {"data.txt": {"bytes": 7, "sha256": hashlib.sha256(b"payload").hexdigest()}}
+                if fault == "hash": members["data.txt"]["sha256"] = "0" * 64
+                if fault == "size": members["data.txt"]["bytes"] = 8
+                if fault == "membership": members["missing.txt"] = members.pop("data.txt")
+                target.write_text(json.dumps({"schema": 1, "authorization": "H44", "archive": pin["archive"], "archive_bytes": pin["bytes"], "archive_sha256": pin["sha256"], "members": members}))
+                git("add", "."); git("commit", "-qm", "controlled member receipt")
+                if fault is None:
+                    self.assertEqual(verify_bulk.verify_h44_member_manifest(repo, pin), 1)
+                    with self.assertRaisesRegex(ValueError, "archive member count mismatch"):
+                        verify_bulk.verify_h44_member_manifest(repo, {**pin, "members": 2})
+                else:
+                    with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
+                        verify_bulk.verify_h44_member_manifest(repo, pin)
