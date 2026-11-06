@@ -205,4 +205,21 @@ theorem run_captured : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.C
   cases captured
   rfl
 
+/-- An alleged result with an absent raw cell cannot be a completed outcome.
+This refuses that result, not execution or completion in general. -/
+theorem run_not_sparse : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (state : Solidity.Yul.RawFrame.State ctx) (result : Solidity.Yul.RawFrame.Outcome ctx control)
+ (cell : Solidity.Yul.WordCell (Solidity.Yul.localExternalTypes ctx)),
+ result.state.raw cell = none →
+ Solidity.Yul.RawFrame.run code policy fuel state ≠ some result := by
+  intro ctx control code policy fuel state result cell missing done
+  have same : (capture result.state (view result.state)).raw cell = result.state.raw cell :=
+    congrArg (fun frame : State ctx => frame.raw cell)
+      (run_captured ctx control code policy fuel state result done)
+  change some (view result.state cell) = result.state.raw cell at same
+  rw [missing] at same
+  cases same
+
 end Solidity.Yul.RawFrame

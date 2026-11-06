@@ -971,4 +971,24 @@ def otherCleanSameWords : RawFrame.State ctx :=
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.Logic.box_captured
 
+/-- Refusing a sparse claimed result does not imply execution never completes. -/
+theorem sparseRefusalWithCompletion : (∀ fuel, Solidity.Yul.Checks.LocalBlock.rawRun fuel ≠
+ some (Solidity.Yul.RawFrame.Outcome.mk Solidity.Yul.Checks.LocalBlock.rawInitial .normal)) ∧
+ Solidity.Yul.Checks.LocalBlock.rawRun 32 = some Solidity.Yul.Checks.LocalBlock.logicResult := by
+  constructor
+  · intro fuel
+    exact RawFrame.run_not_sparse ctx ⟨false,false⟩ code policy fuel rawInitial
+      ⟨rawInitial,.normal⟩ flag rfl
+  · exact logicFinished
+
+/-- info: 'Solidity.Yul.RawFrame.run_not_sparse' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_not_sparse
+/-- info: 'Solidity.Yul.RawFrame.Logic.box_not_sparse' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.box_not_sparse
+/-- info: 'Solidity.Yul.Checks.LocalBlock.sparseRefusalWithCompletion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.Checks.LocalBlock.sparseRefusalWithCompletion
+
 end Solidity.Yul.Checks.LocalBlock
