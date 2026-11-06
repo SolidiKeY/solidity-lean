@@ -38,3 +38,5 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterZeroControls.lean` | Represented input with no allocator witness, actual zero-cost Entry/Returned and exact observations with cursor/halt negatives. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaims.lean` | Universal frozen ReturnClaim/BareRevertClaim for the existing allocating family and plan; checked zero-counter argument failure and insufficient-depth exhaustion remain distinct. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterClaimsControls.lean` | Inhabited universal success/revert consumers and complete failure entries at every index, rejecting panic/exhaustion/wrong-success outcomes. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificate.lean` | Closed syntax certificates for canonical/scoped allocating recursion; full source-run equality and frozen claim transport are derived, with no arbitrary-input parser or public-selector claim. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean` | Inhabited scoped recursion success/failure at all supplied indices and uncertifiability of malformed base/quotation inputs. |
