@@ -97,6 +97,11 @@ theorem bool_params_atom (x : Option String) :
   intro n body s
   cases x <;> rfl
 
+theorem bool_rets_atom :
+    RetsAtom (.cons (.param (.elem .bool) .none .none) .nil)
+      [.kw .returns, .punct .lparen, .elem .bool, .punct .rparen] 6 :=
+  fun _ _ _ => rfl
+
 /-- The actual `try` branch of `stmt`, given its four sub-parser results. -/
 theorem try_step {k : SCtx} {e : Syn .expr} {rets : Syn (.list .param)} {b : Syn (.block k)}
     {c : Syn (.catchClause k)} {rest : List (Syn (.catchClause k))}
@@ -198,6 +203,7 @@ theorem catch_sig_step {k : SCtx} {p : Syn .param} {ps : Syn (.list .param)} {pt
 #print axioms ident_expr_brace
 #print axioms ident_expr_returns
 #print axioms empty_rets_atom
+#print axioms bool_rets_atom
 #print axioms bool_params_atom
 #print axioms try_step
 #print axioms catches_many
