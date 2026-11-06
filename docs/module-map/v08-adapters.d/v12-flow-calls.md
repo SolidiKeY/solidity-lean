@@ -25,3 +25,4 @@
 | `Backend/InternalFlow/RuntimeFrameV3StateShell.lean` | Equality of existing non-memory State fields for allocation-only internal execution; no external/world-call adequacy. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentation.lean` | Actual native recursive output represented after actual target parent returns, with derived heaps, locals and remaining State fields. |
 | `Backend/InternalFlow/RuntimeFrameV3NativeReturnRepresentationControls.lean` | Populated actual-output representation, complete ordered 20-word observation vector and cursor/alias/halt negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocationInventoryControls.lean` | Populated zero/one/two actual descent inventories and new-object alias negatives. |
