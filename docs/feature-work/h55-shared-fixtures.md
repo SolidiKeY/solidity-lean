@@ -305,3 +305,22 @@ full item-1 census/acceptance remain pending. No milestone or whole-goal
 completion is claimed. Later queue items, backfill and final gates also remain
 open. H82 owner decisions remain required for proposed changes to definition
 bodies on which statements depend.
+
+## Fitting helper attempt: return to Sol
+
+An exploratory generic `fitsBool` helper checked root, data and hash key
+bounds; its first probe failed because `Bool.and_eq_true.mp` is not a lemma,
+then a corrected probe using `Bool.and_eq_true_iff.mp` passed, including a
+mixed root/data/hash example. Four original snapshot controls and their
+baseline timings passed. The attempted helper in the nested production
+namespace then failed to build because unqualified `Loc` resolved to
+`Solidity.Loc` rather than `Solidity.Storage.Loc`. Lean's `sorry` warnings in
+that error log are elaborator recovery diagnostics; no source `sorry` was
+introduced. Treating the two failed probes/build attempts conservatively under
+the Terra two-failure rule, return this fitting attempt to Sol. The attempted
+consumer diff and helper are preserved off Git as
+`/workspace/h55-shared-fixtures-evidence/fitting-failed-consumers.patch` and
+`/workspace/h55-shared-fixtures-evidence/fitting-failed-helper.lean`; all four
+uncommitted consumer edits and the helper were removed from the worktree. The
+prior extract-failure checkpoint is unaffected. No fitting proof, after timing,
+review or acceptance is claimed.
