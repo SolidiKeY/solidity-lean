@@ -10,6 +10,27 @@ inside this commit. This is an incomplete checkpoint, never completion of the
 four-checkpoint assignment. The existing goal must remain unfinished.
 
 
+## H44 reviewability split — current packaging
+
+The generated 389-file scope/ownership inventory is preserved off Git at
+`/workspace/h62-audit-language-evidence/h44/scope-manifest.full.json`.
+The tracked retirement `scope-manifest.json` is now a small pointer with the
+absolute path, size and SHA256, plus original scope metadata. The deterministic
+`scope_manifest.py` generator reconstructs the exact original bytes from the
+pinned frozen census. The full inventory travels in the portable evidence
+archive, whose internal and external checksums authenticate it.
+
+This cleanup adds no proof or scope and changes no Lean modules, theorems, gates
+or budgets. The worker remains retired; only the requested packaging correction
+is authorized. The branch already contains coordinator merges. Export records
+both the original frozen base and the cleanup increment base; `increment.patch`
+and the incremental bundle apply to the latter. The cumulative `original.patch`
+contains only this lane's owned paths relative to the frozen base.
+
+Exact scope reproduction and whitespace checks pass. The global documentation
+checker fails on five unrelated references whose citing files equal the cleanup
+parent; none is changed here. The failures remain recorded in H44 split evidence.
+
 ## H82 retirement — authoritative current disposition
 
 The human explicitly stopped this worker and assigned the handoff to
@@ -34,7 +55,8 @@ branch was pushed; the original no-push rule remains effective here.
 
 Mandatory authenticated handoff inputs are tracked under
 `tests/h62/item2/audit-language/retirement/`: complete original rendered prompt,
-full original work/backfill queue, exact 389-file frozen scope manifest,
+full original work/backfill queue, small authenticated scope pointer (full
+generated 389-file inventory off Git under H44),
 retirement state/open obligations/waits and their SHA256SUMS. Portable evidence
 contains actual coordinator inputs and current/historical proof/scan logs,
 without compiled caches or extracted toolchain. Export records final base/head,

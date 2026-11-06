@@ -26,6 +26,7 @@ def digest(path):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--increment-base", default=BASE, help="Existing checkout head before this isolated packaging increment")
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--evidence", type=Path, required=True)
     p.add_argument("--coordinator-inputs", type=Path, required=True)
@@ -37,7 +38,9 @@ def main():
     assert git("branch", "--show-current").decode().strip() == BRANCH
     assert not git("status", "--porcelain"), "commit all handoff work first"
     subprocess.run(["git", "merge-base", "--is-ancestor", BASE, "HEAD"], cwd=ROOT, check=True)
-    paths = git("diff", "--name-only", BASE, "HEAD").decode().splitlines()
+    increment_base = git("rev-parse", "--verify", a.increment_base + "^{commit}").decode().strip()
+    subprocess.run(["git", "merge-base", "--is-ancestor", increment_base, "HEAD"], cwd=ROOT, check=True)
+    paths = git("diff", "--name-only", increment_base, "HEAD").decode().splitlines()
     for path in paths:
         assert path.startswith(("tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/")) or path == "docs/feature-work/h62-2-audit-language.md", path
     # Mandatory original scope and prompt bytes must be committed and authenticated.
@@ -45,13 +48,20 @@ def main():
         expected, name = line.split("  ", 1)
         assert digest(INPUTS / name) == expected
         assert git("show", "HEAD:" + str((INPUTS / name).relative_to(ROOT))) == (INPUTS / name).read_bytes()
+    scope_manifest = json.loads((INPUTS / "scope-manifest.json").read_text())
+    bulk = Path(scope_manifest["artifact"]["path"])
+    assert bulk.resolve().is_relative_to(a.evidence), "scope bulk must be included in portable evidence"
+    assert digest(bulk) == scope_manifest["artifact"]["sha256"]
+    assert bulk.stat().st_size == scope_manifest["artifact"]["bytes"]
     state = json.loads((INPUTS / "retirement.json").read_text())
     assert state["execution_state"] == "STOPPED_BY_HUMAN_RETIREMENT"
     a.output.mkdir(parents=True, exist_ok=True)
     patch = a.output / "original.patch"
-    patch.write_bytes(git("diff", "--binary", BASE, "HEAD"))
+    owned_paths = ["tests/h62/item2/audit-language/", "scripts/h62/item2/audit-language/", "docs/feature-work/h62-2-audit-language.md"]
+    patch.write_bytes(git("diff", "--binary", BASE, "HEAD", "--", *owned_paths))
+    (a.output / "increment.patch").write_bytes(git("diff", "--binary", increment_base, "HEAD"))
     bundle = a.output / "audit-language.bundle"
-    subprocess.run(["git", "bundle", "create", str(bundle), BASE + ".." + BRANCH], cwd=ROOT, check=True)
+    subprocess.run(["git", "bundle", "create", str(bundle), increment_base + ".." + BRANCH], cwd=ROOT, check=True)
     verify = subprocess.run(["git", "bundle", "verify", str(bundle)], cwd=ROOT, capture_output=True, text=True)
     (a.output / "bundle-verify.log").write_text(verify.stdout + verify.stderr)
     assert verify.returncode == 0
@@ -90,7 +100,11 @@ def main():
     (a.output / "archive-contents.sha256").write_bytes(internal)
     handoff = dict(state, batch="solidity-h62-2-20261106", slug="audit-language", branch=BRANCH,
                    base=BASE, head=git("rev-parse", "HEAD").decode().strip(), repository=str(ROOT),
-                   clean=True, changed_paths=paths, bundle_requires_base=BASE,
+                   clean=True, changed_paths=paths, bundle_requires_base=increment_base,
+                   increment_base=increment_base, cumulative_patch_scope="Only original lane-owned paths relative to frozen base; upstream merges excluded",
+                   external_scope_manifest=scope_manifest,
+                   packaging_validation="evidence/h44/split-validation.json",
+                   packaging_reviews="evidence/h44/split-reviews.json",
                    no_push_merge_publication=True, archived_files=len(members),
                    archive_exclusions="Compiled lib/cache products and toolchain archive/extraction; all remain on original VM. Official pin is included.",
                    portable_path_rule="Original absolute paths are provenance. Extract portable-evidence.tar.gz: evidence/, coordinator-inputs/, retirement/. Verify PORTABLE-SHA256SUMS.",
@@ -98,7 +112,7 @@ def main():
                    prior_gate_commands_and_outcomes=["evidence/h70-continuation-validation.json", "evidence/migration-blockers.json", "evidence/final-reviewed/checks.json"],
                    final_retirement_validation="evidence/h82/retirement-validation.json",
                    final_retirement_reviews="evidence/h82/retirement-reviews.json",
-                   artifacts={"original_patch": str(patch), "bundle": str(bundle), "handoff": str(a.output / "handoff.json"),
+                   artifacts={"original_patch": str(patch), "increment_patch": str(a.output / "increment.patch"), "bundle": str(bundle), "handoff": str(a.output / "handoff.json"),
                               "evidence": str(a.evidence), "archive": str(archive), "checksums": str(a.output / "SHA256SUMS")})
     (a.output / "handoff.json").write_text(json.dumps(handoff, indent=2) + "\n")
     files = sorted(x for x in a.output.iterdir() if x.is_file() and x.name != "SHA256SUMS")

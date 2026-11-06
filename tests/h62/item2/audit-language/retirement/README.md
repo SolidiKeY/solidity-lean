@@ -6,7 +6,10 @@ is `solidity-sol2-20261104/numeric-literals`; integration is its responsibility
 after the final stopped/head acknowledgement.
 
 Read the complete original rendered prompt, the verbatim original work/backfill
-queue, the exact frozen scope manifest and `retirement.json` in this directory.
+queue, the small scope pointer/checksum manifest and `retirement.json` in this
+directory. H44 keeps the generated 389-file inventory off Git. The pointer
+records its absolute VM path, byte size, SHA256 and portable archive member.
+`scope_manifest.py` reproduces its exact bytes from the pinned frozen census.
 H82 supersedes historical exact-file agreement waits for statement-preserving
 edits. It does not authorize implementation by this retired worker.
 
