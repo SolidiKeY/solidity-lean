@@ -1,4 +1,4 @@
-# H55–H68 G49/G50 work record and handoff
+# H55–H70 G49/G50 work record and handoff
 
 Batch: `solidity-h55-sol-20261106`; task: `g49-final-theorem`.
 Repository: `/workspace/solidity-lean`.
@@ -6,7 +6,7 @@ Branch: `codex/solidity-h55-sol-20261106/g49-final-theorem`.
 Frozen base: `4d3790eadb8a5212233bc7d5e345817476b2f590`.
 Historical H55 identity: `/workspace/h55-g49-evidence/identity.json`.
 Historical H64/H65 identity: `/workspace/h64-g49-evidence/identity.json`.
-Current H68 identity: `/workspace/h68-g49-evidence/identity.json`.
+Historical H68 identity: `/workspace/h68-g49-evidence/identity.json`.
 
 The full assignment is unfinished. H68 resolves both prior questions: owning
 lanes supply additive full-certificate bridges, and one proof-only optimization
@@ -19,7 +19,72 @@ The current section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
 
-## H68 current work: exact owner bridge requests and timing retry
+## H70 current work: producer inventory relay for statement-graph
+
+This continuation supplies metadata for requester
+`solidity-h62-5-20261106/statement-graph` at
+`d8c1eaf4f0d4aedfb5d650d12ad6a40b2d9dd3b7`. It makes no Lean source change,
+runs no new Lean check and preserves the H68 timing HOLD and pending owner
+bridges. The full original assignment remains blocked. Current handoff and
+identity are `/workspace/h70-g49-relay/handoff.md` and
+`/workspace/h70-g49-relay/identity.json`.
+
+The shape catalog was already published at
+`9f1d4fba424fdb1592e2e90c17b54c2bbd8bc73c`, contrary to the older missing-input
+note in the relayed requester history. Its path is
+[the shape inventory](../../tests/h55/g49-final-theorem/h64-shapes.json), Git blob
+`d40b4b803166524274db7fbf1e851bddfcd7f9b6`, SHA256
+`6c3d3221506bcf288b3c8694d4d6b1d54e49e595b5618c65aed22c593d57f0d0`.
+The coordinator can relay these exact bytes; no host relay command or message
+to another VM was issued here. Publication does not imply requester acceptance.
+
+[The committed relay manifest](../../tests/h55/g49-final-theorem/h70-producer-relay.json)
+identifies `/workspace/h70-g49-relay/g49-producer-input.tar.gz`, SHA256
+`c43ad605f0a53be78df1dd030ce25e374a785ccb4ba297a334464a5f8228a36f`.
+The archive contains the exact catalog, prior successful H68 typed export,
+source closure, exporter, raw logs with path mapping, owner snapshot and H68
+bridge requests. Bulk data stays off Git. Verify the outer hash and the
+relative payload SHA256SUMS before consuming it. The source identity in this
+packet stays pinned to the validated H68 commit; later metadata commits do
+not change that identity.
+
+The packet has **14 selected typed declarations**, including one conditional
+`g49_g50_of_fold` aggregate. It has **five separate work-item placeholders** for
+G49.01-.03/G50.01-.02 whose standalone declaration/type/existence/dependencies
+are unknown. Those records are not five elaborated proof nodes and the one
+aggregate must not be copied five times. Related declaration references are
+navigation metadata, not asserted dependency edges. The 24 constructor binders
+include 15 public proof fields, three certificate packages, two implementation
+functions and four interface parameters. Field expressions are not separately
+proved producers. Expanded atomic open-premise count remains unknown; selected
+direct constant dependencies are not a complete transitive typed census.
+The six representative families remain nonexhaustive: one full-certificate
+shape supports five carrier entrypoints; five other families await owner bridges.
+Exact required signatures and preservation conditions remain in the H68 section
+and `/workspace/h68-g49-evidence/bridge-requests.json`, copied into the packet.
+
+The eight-module source import closure includes CollisionBound, SHA256
+`49e8b756f01c78c6e850401ba29ac4e65b71ce3d091a2ccee02e2291a6d9e7ce`.
+KeySort is a separate validation prerequisite. These sources and selected
+exports passed on producer Lean 4.24.0 / Lake 5.0.0-src+797c613. The requester
+reports Lean 4.35.0 / Lake 5.0.0-src+eb6cafb and CollisionBound failures at
+407:56, 660:4, 680:4 plus axiom guards 950–968. Its source hash was not supplied,
+so source equality and compatibility are unknown. No migration repair or 4.35
+rerun was performed here. No compiled Lean artifacts are supplied; raw Expr
+representations and 4.24 oleans cannot serve as 4.35 proof inputs. After the
+owner migration, the requester must re-elaborate and regenerate its typed facts.
+
+The H70 gates are artifact integrity, metadata consistency, unchanged proof
+source hashes and documentation paths only. They do not establish a production
+DAG, concrete producer discharge, compatibility, runtime acceptance or a full
+proof pass. Finder/skeptic results and exact commands are recorded in the H70
+handoff. Independent read-only finder and skeptic reviews found no confirmed
+defects; neither used Lean, a server, builds or tests. Both checked archive
+hashes, source provenance and proof/toolchain boundaries. The documentation
+path check passed with 115 pre-existing ambiguous references, all resolving.
+The persistent goal remains unfinished, with no replacement goal.
+
+## H68 historical work: exact owner bridge requests and timing retry
 
 The coordinator supplied the human's H68 decisions: the owning lanes prove
 additive full-certificate PassCorrect bridges for the five unresolved families;
