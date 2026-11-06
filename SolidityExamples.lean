@@ -60,6 +60,8 @@ import Solidity.Examples.DecisionGapData
 import Solidity.Examples.DecisionGapHashes
 import Solidity.Examples.DecisionGapKInt
 import Solidity.Examples.DecisionGapOperators
+import Solidity.Examples.DecisionGapPartialOrFloor
+import Solidity.Examples.DecisionGapVoidBinder
 import Solidity.Examples.DecisionGaps
 import Solidity.Examples.DecisionGivenHeapComputedReason
 import Solidity.Examples.DecisionGivenHeapFixed
