@@ -8,7 +8,7 @@ from test_mul_proposal import statement
 DIRECTORY = pathlib.Path(__file__).resolve().parent
 ROOT = DIRECTORY.parents[3]
 SOURCE = ROOT / "Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean"
-HELPER = ROOT / "tests/h62/item1/packet-panic/PanicBytes.lean"
+HELPER = ROOT / "Solidity/Backend/PrimitivePackets/PanicBytes.lean"
 NAMES = ("exact_panic_bytes", "panic_not_truncated", "panic_not_empty")
 
 

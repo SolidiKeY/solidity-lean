@@ -1486,6 +1486,7 @@ import Solidity.Backend.PrimitivePackets.Constants.Controls
 import Solidity.Backend.PrimitivePackets.Constants.Selected
 import Solidity.Backend.PrimitivePackets.Constants.Source
 import Solidity.Backend.PrimitivePackets.Constants.Target
+import Solidity.Backend.PrimitivePackets.PanicBytes
 import Solidity.Backend.PrimitivePackets.Shifts.Controls
 import Solidity.Backend.PrimitivePackets.Shifts.General
 import Solidity.Backend.PrimitivePackets.Shifts.Transport

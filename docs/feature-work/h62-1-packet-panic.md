@@ -53,3 +53,11 @@ The stopped final checkpoint is preserved, including its failed stale-import dia
 The initial successor check also failed on a missing `Observe.olean`. Lake reported a cache fetch without materializing that object. Preserving the incomplete traces and rebuilding the small required closure with artifact fetching disabled repaired that operational failure; the helper then checked. This does not establish a 4.35 migration result. The historical failed diagnostics remain evidence of those attempts.
 
 The helper remains in the additive test scope. Production placement/registration, original consumer instance/equivalence checks, complete case accounting, helper-inclusive before/after measurements, affected/full gates and final reviews remain open. The source-byte observations make no claim about the coarse selected-target revert or its payload. H82 supersedes the earlier permission waits for statement-preserving proof edits; it does not weaken these semantic or validation obligations.
+
+## H86 canonical placement and live consumer probe
+
+`Backend/PrimitivePackets/PanicBytes.lean` now owns the same three axiom-free Source observations and is registered in the generated library root and EVM-compiler module map. The original test path is a compatibility import. Its CheckedSub proposition-equality checks also kernel-check without axioms against the unchanged original consumer. These proof equalities establish proposition compatibility, not operational equivalence or equal performance.
+
+The supplemental live Lean 4.24 cost probe measured the entire CheckedSub Controls file before extraction and the helper plus that file afterwards. It exceeded the unchanged 10% limit (23.45% in the first measured pair), stopped, and restored the original consumer proofs. No production consumer rewrite is applied. This is neither pinned-4.35 timing acceptance nor an optimization pass. The stopped result and historical failed attempts remain in the successor evidence.
+
+H86 resolves placement permission and declares the old off-Git evidence unrecoverable. Fresh evidence must be generated; unavailable historical baselines are limitations rather than producer waits. Full original case/consumer accounting, the remaining family proposals, pinned migration validation and affected/full gates remain unfinished.

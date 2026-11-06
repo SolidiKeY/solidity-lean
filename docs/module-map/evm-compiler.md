@@ -139,6 +139,7 @@
 | `Backend/PrimitivePackets/Bitwise/Source.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
 | `Frontend/SolcJson/TryPanicCallMetadata.lean` | Bounded diamond-try checkpoint; typed scope and retained obligations are stated in the module. |
+| `Backend/PrimitivePackets/PanicBytes.lean` | Exact arithmetic Source panic bytes and nontruncation/nonemptiness observations; no selected-target payload claim. |
 | `Evm/MemoryLoopHorizonObjectHeapGrowth.lean` | Actual allocating-body heap extension and exact initial-length-plus-count growth through scope exit. |
 | `Evm/MemoryLoopHorizonObjectHeapControls.lean` | Existentially witnessed selected-loop execution with matched object count and cursor observations. |
 | `Evm/MemoryLoopHorizonObjectHeapKeeps.lean` | Original typed objects survive actual empty-array allocation prefixes. |

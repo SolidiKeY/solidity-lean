@@ -8,7 +8,7 @@ import unittest
 DIRECTORY = pathlib.Path(__file__).resolve().parent
 ROOT = DIRECTORY.parents[3]
 SOURCE = ROOT / "Solidity/Backend/PrimitivePackets/CheckedMul/Controls.lean"
-HELPER = ROOT / "tests/h62/item1/packet-panic/PanicBytes.lean"
+HELPER = ROOT / "Solidity/Backend/PrimitivePackets/PanicBytes.lean"
 
 
 def statement(text, name):
