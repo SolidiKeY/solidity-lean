@@ -1,8 +1,11 @@
+import {retainCompilerMetadata} from './retained-metadata.mjs';
 import {compileFixture} from '../../../scripts/solc-ast.mjs';
 import {readFileSync,writeFileSync} from 'node:fs';
 const owned='tests/directruntime-20261104/shared-translator';
+const bulk=owned+'/artifacts/h68-bulk';
 const base=['--solkey','/workspace/.setup/solkey','--soljson','/workspace/.setup/soljson','--no-wrapper'];
-compileFixture({args:[...base,'--source',owned+'/YulKinds.sol','--out',owned+'/YulKinds.ast.json']});
+const yul=compileFixture({args:[...base,'--source',owned+'/YulKinds.sol','--out',bulk+'/YulKinds.ast.json']});
+writeFileSync(bulk+'/YulKinds.ast.json',JSON.stringify(retainCompilerMetadata(yul).fixture,null,2)+'\n');
 let rejected=false;
 try {
   compileFixture({args:[...base,'--source',owned+'/LegacyThrow.sol','--out',owned+'/artifacts/LegacyThrow-unexpected.ast.json']});
