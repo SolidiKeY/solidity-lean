@@ -942,4 +942,21 @@ theorem recursiveNegationContrast : Solidity.Yul.RawFrame.Logic.holds .box Solid
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.Logic.holds_snapshot
 
+/- Equal authoritative words alone do not identify the retained clean backup. -/
+def otherCleanSameWords : RawFrame.State ctx :=
+  { RawFrame.capture rawInitial (RawFrame.view rawInitial) with
+    clean := locals.set .here (.bool false) }
+#guard RawFrame.view otherCleanSameWords flag = word 1
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 otherCleanSameWords).map
+  (fun result => match result.state.clean.get .here with | .bool value => value) = some false
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 rawInitial).map
+  (fun result => match result.state.clean.get .here with | .bool value => value) = some true
+
+/-- info: 'Solidity.Yul.RawFrame.run_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.run_agrees
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_agrees' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_agrees
+
 end Solidity.Yul.Checks.LocalBlock

@@ -173,4 +173,22 @@ theorem run_snapshot : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.C
   intro ctx control code policy fuel state
   rfl
 
+/-- Equal authoritative words, clean backups and worlds determine every exact raw run.
+Overlay metadata may differ. All three equalities are explicit. -/
+theorem run_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code) (fuel : Nat)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ first.clean = second.clean → first.world = second.world →
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ Solidity.Yul.RawFrame.run code policy fuel first = Solidity.Yul.RawFrame.run code policy fuel second := by
+  intro ctx control code policy fuel first second cleanEq worldEq viewEq
+  cases first
+  cases second
+  cases cleanEq
+  cases worldEq
+  unfold run
+  rw [viewEq]
+  rfl
+
 end Solidity.Yul.RawFrame
