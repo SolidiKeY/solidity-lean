@@ -1,4 +1,6 @@
-# G19 mapped immediate-return while
+# G19 context-related immediate-return while
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [WhileReturn](../../Solidity/Lowering/G19/WhileReturn.lean) consumes the existing V07 ContextMap, assignment operand and G19 AssignmentReturnFlag code/reached definitions read-only. The actual Source while evaluates a Boolean local-assignment condition and has an immediate bare-return body. True propagates Out.ret; false yields Out.normal. Both preserve the condition write. Neither case performs another loop iteration; this terminal-body shape does not impose an unrolling bound on the admitted Source profile. General recursive loops remain open. No new lowering framework, Source evaluator or target representation is introduced.
 

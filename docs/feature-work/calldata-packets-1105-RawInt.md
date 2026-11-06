@@ -26,4 +26,64 @@ Fetched published3ad22f66d8fc6431378c22e71823436c79dede7f and verified8bf83218 a
 
 Both modules build serially in3.56seconds total; no owned module above60seconds. Fresh MCP inventory contains18 information-only actual axiom reports; no partial/timeout/error. Separate read-only finder and skeptic accepted the statements without Lean/server or edits. Skeptic identified an overbroad English phrase about old allocations; corrected to every address other than the allocation address, matching the theorem exactly. No theorem or premise changed.
 
-This closes observation, empty/EOF and low-horizon obligations. Width-specific accepted-range arithmetic, actual raw-negative/mixed-offset copying, frame binding/guard controls, partial-word padding and exact guarded axiom pins remain unfinished. Original ConstantDepth and prior RawInt seals stay intact.
+The observation and empty/EOF controls cover those cases. The zero/one-horizon controls demonstrate fuel exhaustion only; they do not close semantic or execution-adequacy obligations. Width-specific accepted-range arithmetic, actual raw-negative/mixed-offset copying, frame binding/guard controls, partial-word padding were unfinished at this historical checkpoint; the published increment below supersedes this list and supplies the exact guarded axiom pins. Original ConstantDepth and prior RawInt seals stay intact.
+
+The earlier checkpoint lists above are historical. Current published coverage is recorded below.
+
+## Claude-VM increment (2026-11-05)
+
+The following preserves the published Claude-VM report. Its references to "here"
+and "this checkout" refer to that VM, not fresh validation on the original Codex VM.
+
+The lane moved to a Claude VM (`cloud/moved4-20261105/constant-depth`). The Codex
+bulk evidence (H44, `H44-manifest.json`) stays on the Codex VM and is not cited;
+everything below was re-run here. The Codex wrappers `lake` and `bounded.py` were
+removed.
+
+New in `Execution.lean` (all for arbitrary `IntTy`, frames and lengths):
+
+| Theorem | Statement |
+|---|---|
+| `accepted` (def), `range_iff_accepted` | the decoder's range test equals an independent width test: signed `w < 2^(b-1) ∨ 2^256-2^(b-1) ≤ w`, unsigned `w < 2^b` |
+| `accepted_sign_bits` | for signed widths, acceptance iff the top `257-b` bits are all equal (`w / 2^(b-1)` is `0` or `2^(257-b)-1`) |
+| `accepted_value` | an accepted word's value without `wordInt`: `w - 2^256` in the high band, else `w` |
+| `decode_accepted`, `decode_dirty`, `decode_ok_iff` | decoding succeeds exactly on accepted words; dirty words revert with empty data |
+| `values_zero`, `values_succ`, `values_ok_iff`, `values_dirty` | validation reads the head word then the rest; it succeeds iff every word is accepted |
+| `dataValues`, `values_frame`, `guarded_frame_run` | with `F.cd = selector ++ data` (4-byte selector), the guarded entry+copy outcome in terms of the argument bytes: each of the three `cdTail` refusals and each dirty word preserves the state; success allocates the decoded words |
+
+New controls in `Controls.lean` (each runs the real `Source.cdToMem`/`cdTail`;
+word values are kernel-checked facts about the bytes, via `decide +kernel`):
+near-width acceptance for `int8`, `int16`, `int248`, all of `int256`, `uint8`
+255/256 and all of `uint256`, and `sign_matters` (200 is clean for `uint8`, dirty
+for `int8`); `near_width_decode` (−128, −129, −2^255, 2^255−1 through the decoder);
+raw negative bytes at the unaligned offset 3 (`negative_copy`: −1, −128, 127),
+the suffix at 35, the misaligned window at 2 (reverts), the same bytes as `uint8`
+(revert); an `int16` copy of −2^15 followed by a revert on 2^15; partial-word
+padding (`0xff` pads to a dirty `int8` word and to the `int256` value
+`0xff00…00 − 2^256`; `0x00` pads clean); and guarded entry under the frame
+binding: admitted (`entry_frame_copy`), dirty second element, truncated
+elements, short head, length ≥ 2^64, the unshifted offset 64 (dirty), and
+selector independence. `eof_padding` now says that past-EOF zero reads are the
+standalone helper's; at entry `cdTail` refuses such spans.
+
+Pins: `tests/calldata-packets-1105/RawInt/Axioms.lean` has exact `#guard_msgs`
+pins for all 55 public theorems (standard axioms only; nine controls use none);
+the same block closes `Controls.lean`, so the library build checks it.
+
+Reviews (read-only, no Lean server). Skeptic — ACCEPT-WITH-FINDINGS: `accepted`
+is independent of `wordInt`/`lo`/`hi`, `guarded_frame_run` matches the RawUint
+template, controls execute the real operations, nothing earlier was weakened.
+Its findings, all fixed: pins were not built (now inline too); the boundary
+docstring over-claimed for unsigned widths (unsigned controls added, header
+narrowed); `eof_padding` needed the entry caveat. Finder — confirmed and fixed:
+no short-head or large-length entry controls (added); no control showing the
+selector shift matters (added `unshifted_copy`, `selector_independent`);
+`decode_accepted` gave the value only through `wordInt` (added `accepted_value`);
+`signed_decode_range`'s docstring over-claimed (rewritten); widths beyond `int8`
+had no copy (added `int16_copy`). Its pin-exactness doubts (`values_zero`,
+`int256_all`) are settled by Lean: the pins pass.
+
+Still open: none of the listed RawInt obligations. The H44 bulk is unverifiable
+from this checkout and is not relied on.
+
+Gates for this increment: see `constant-depth.md`, section "Gates" (one build covers both areas).

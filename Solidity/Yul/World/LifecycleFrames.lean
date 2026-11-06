@@ -8,15 +8,15 @@ open Solidity.Roadmap (Address Word Bytes)
 variable {D : Layout} {L T : Address → SPath → STy}
 /-- Restore entry metadata and journal rollback of the actual returned state.
 This local snapshot operation is not G42 callee reachability. -/
-def rollbackLifecycle (entry out : Lifecycle D L T)
+abbrev rollbackLifecycle (entry out : Lifecycle D L T)
     (receiver caller : Address) (value : Word) (input : Bytes) (static : Bool) : Lifecycle D L T :=
-  {entry with execution := (entry.execution.enter receiver caller value input static).rollback out.execution}
+  entry.rollbackDestruction out receiver caller value input static
 theorem rollbackLifecycle_selfDestruct (entry out : Lifecycle D L T) (static : Bool) (a beneficiary : Address)
     (completed : selfDestruct entry static a beneficiary = some out)
     (receiver caller : Address) (value : Word) (input : Bytes) (frameStatic : Bool) :
-    rollbackLifecycle entry out receiver caller value input frameStatic = entry := by
-  simp only [rollbackLifecycle,
-    selfDestruct_rollback entry out static a beneficiary completed receiver caller value input frameStatic]
+    rollbackLifecycle entry out receiver caller value input frameStatic = entry :=
+  destructKnown_rollback_all entry out static a beneficiary completed receiver caller value input frameStatic
+
 theorem selfDestruct_journaled (entry out : Lifecycle D L T) (static : Bool) (a beneficiary : Address)
     (completed : selfDestruct entry static a beneficiary = some out) :
     ∃ ops : List (Op D L T), out.execution = entry.execution.run ops := by
@@ -36,5 +36,10 @@ theorem rollbackLifecycle_two_committed (entry first second : Lifecycle D L T) (
   obtain ⟨ops2,actual2⟩ := selfDestruct_journaled first second static a2 beneficiary2 completed2
   have sequence : second.execution = entry.execution.run (ops ++ ops2) := by
     rw [actual2,actual,run_append]
-  simp only [rollbackLifecycle,CallFrame.commit,sequence,rollback_run]
+  simp only [rollbackLifecycle,Lifecycle.rollbackDestruction,CallFrame.commit,sequence,rollback_run]
+/-- Compatibility snapshot uses the existing exact entry-mark operation. -/
+theorem rollbackLifecycle_eq_rollbackDestruction (entry out : Lifecycle D L T)
+    (receiver caller : Address) (value : Word) (input : Bytes) (static : Bool) :
+    rollbackLifecycle entry out receiver caller value input static =
+      entry.rollbackDestruction out receiver caller value input static := rfl
 end Solidity.Yul.World

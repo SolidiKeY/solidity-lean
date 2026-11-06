@@ -110,6 +110,7 @@ import Solidity.Examples.DecisionOperators
 import Solidity.Examples.DecisionPrefixNormalizationResidue
 import Solidity.Examples.DecisionQuantLedger
 import Solidity.Examples.DecisionRefutations
+import Solidity.Examples.DecisionResidue
 import Solidity.Examples.DecisionResidueReasons
 import Solidity.Examples.DecisionSourceBoundary
 import Solidity.Examples.DecisionSourceChain

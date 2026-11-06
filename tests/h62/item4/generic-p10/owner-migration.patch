@@ -1,0 +1,156 @@
+--- a/Bridge/SolidityBridge/RoadmapV15/P10/ByteObservationControls.lean
++++ b/Bridge/SolidityBridge/RoadmapV15/P10/ByteObservationControls.lean
+@@ -1,4 +1,73 @@
+ import SolidityBridge.RoadmapV15.P10.ByteObservation
++
++/-! Additive BYTE fixtures. The execution proof consumes the actual fetched
++native semantics; fixture arithmetic never decides a whole execution result. -/
++namespace SolidityBridge.RoadmapV15.P10.ByteTable
++open Solidity Solidity.Backend EvmYul Solidity.Evm.External
++open SolidityBridge.RoadmapV15.P10
++
++/-- Any complete native site and stack tail, with the original resource bounds.
++The word equality is byte algebra; fetched execution and continuation follow
++from the existing semantic theorem, rather than from a finite decision table. -/
++theorem execute (site : Site .BYTE) (index value result : Scalar.Word)
++    (word : UInt256.byteAt (UInt256.mk index.toFin) (UInt256.mk value.toFin) = UInt256.mk result.toFin)
++    (tail : Scalar.Stack) (room : tail.length+2 ≤ 1024)
++    (gas : 3 ≤ site.seed.gasAvailable.toNat) (fuel : Nat) :
++    let input := (modularSite site (index :: value :: tail)).state
++    let next := (Assembly.chargedPrepare input 3).replaceStackAndIncrPC
++      (UInt256.mk result.toFin :: tail.map (fun w => UInt256.mk w.toFin))
++    Assembly.driverSteps 1 (fuel+2) #[] input = .ok next ∧
++      EVM.X (fuel+2) #[] input = EVM.X (fuel+1) #[] next := by
++  simpa only [word] using (byte_fetched site index value tail room gas fuel)
++
++/-- A native word index/value and an intrinsically byte-sized result. -/
++structure ByteFixture where
++  index : Fin UInt256.size
++  value : Fin UInt256.size
++  result : Fin 256
++  word_eq : UInt256.byteAt (UInt256.ofNat index.val) (UInt256.ofNat value.val) =
++    UInt256.ofNat result.val
++
++/-- Exactly the nine original positive BYTE execution controls. -/
++inductive ByteCase where
++  | first | second | middle | penultimate | last | outside | maximumIndex | zero | maximumWord
++
++private def fixturePayload : Nat := 0x12*2^248+0x34*2^240+0x56*256+0x78
++
++/-- Typed fixture values; the original boundary indices and words are retained. -/
++def fixtureValues : ByteCase → Fin UInt256.size × Fin UInt256.size × Fin 256
++  | .first => (0,Fin.ofNat _ fixturePayload,0x12)
++  | .second => (1,Fin.ofNat _ fixturePayload,0x34)
++  | .middle => (15,Fin.ofNat _ fixturePayload,0)
++  | .penultimate => (30,Fin.ofNat _ fixturePayload,0x56)
++  | .last => (31,Fin.ofNat _ fixturePayload,0x78)
++  | .outside => (32,Fin.ofNat _ fixturePayload,0)
++  | .maximumIndex => (Fin.ofNat _ (2^256-1),Fin.ofNat _ fixturePayload,0)
++  | .zero => (0,0,0)
++  | .maximumWord => (31,Fin.ofNat _ (2^256-1),255)
++
++/-- Closed byte algebra only. No fetched execution is decided by this table. -/
++theorem fixture_word (c : ByteCase) :
++    UInt256.byteAt (UInt256.ofNat (fixtureValues c).1.val)
++      (UInt256.ofNat (fixtureValues c).2.1.val) = UInt256.ofNat (fixtureValues c).2.2.val := by
++  cases c <;> rfl
++
++/-- Every table row contains its byte-algebra witness. -/
++def fixture (c : ByteCase) : ByteFixture :=
++  ⟨(fixtureValues c).1,(fixtureValues c).2.1,(fixtureValues c).2.2,fixture_word c⟩
++
++/-- info: 'SolidityBridge.RoadmapV15.P10.ByteTable.execute' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms execute
++/-- info: 'SolidityBridge.RoadmapV15.P10.ByteTable.fixture_word' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms fixture_word
++/-- info: 'SolidityBridge.RoadmapV15.P10.ByteTable.fixture' depends on axioms: [propext, Classical.choice, Quot.sound] -/
++#guard_msgs (whitespace := lax) in
++#print axioms fixture
++
++end SolidityBridge.RoadmapV15.P10.ByteTable
++
+ namespace SolidityBridge.RoadmapV15.P10.ByteObservationControls
+ open Solidity Solidity.Backend EvmYul Solidity.Evm.External
+ private def u (n : Nat) : UInt256 := .ofNat n
+@@ -25,54 +94,54 @@
+ private theorem observed (index value result : Nat)
+     (word : UInt256.byteAt (u index) (u value)=u result) :
+     Assembly.driverSteps 1 2 #[] (input index value) = .ok (expected index value result) := by
+-  have h := (byte_fetched (site 9) (BitVec.ofNat 256 index) (BitVec.ofNat 256 value)
+-    [258,513] (by decide +kernel) (by decide +kernel) 0).1
+-  change Assembly.driverSteps 1 2 #[] (input index value) =
+-    .ok {input index value with
+-      gasAvailable := u 9-u 3,pc := u 3+u 1,execLength := 42
+-      stack := [UInt256.byteAt (u index) (u value),u 258,u 513]} at h
+-  rw [word,show u 9-u 3=u 6 from by decide +kernel,
++  have h : Assembly.driverSteps 1 2 #[] (input index value) =
++      .ok {input index value with
++        gasAvailable := u 9-u 3,pc := u 3+u 1,execLength := 42
++        stack := [u result,u 258,u 513]} :=
++    (SolidityBridge.RoadmapV15.P10.ByteTable.execute (site 9) (BitVec.ofNat 256 index)
++      (BitVec.ofNat 256 value) (BitVec.ofNat 256 result) word [258,513]
++      (by decide +kernel) (by decide +kernel) 0).1
++  rw [show u 9-u 3=u 6 from by decide +kernel,
+     show u 3+u 1=u 4 from by decide +kernel] at h
+   exact h
+
+ private def payload : Nat := 0x12*2^248+0x34*2^240+0x56*256+0x78
+ private def typed : PrimTy.uint.Denote := ⟨payload,by decide +kernel⟩
+
++
++private theorem table_case (c : SolidityBridge.RoadmapV15.P10.ByteTable.ByteCase) :
++    Assembly.driverSteps 1 2 #[]
++      (input (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).index.val (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).value.val) =
++    .ok (expected (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).index.val (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).value.val
++      (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).result.val) :=
++  observed _ _ _ (SolidityBridge.RoadmapV15.P10.ByteTable.fixture c).word_eq
++
+ theorem first_byte : Assembly.driverSteps 1 2 #[] (input 0 payload) = .ok (expected 0 payload 0x12) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .first
+
+ theorem second_byte : Assembly.driverSteps 1 2 #[] (input 1 payload) = .ok (expected 1 payload 0x34) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .second
+
+ theorem middle_zero : Assembly.driverSteps 1 2 #[] (input 15 payload) = .ok (expected 15 payload 0) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .middle
+
+ theorem penultimate_byte : Assembly.driverSteps 1 2 #[] (input 30 payload) = .ok (expected 30 payload 0x56) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .penultimate
+
+ theorem last_byte : Assembly.driverSteps 1 2 #[] (input 31 payload) = .ok (expected 31 payload 0x78) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .last
+
+ theorem outside_word : Assembly.driverSteps 1 2 #[] (input 32 payload) = .ok (expected 32 payload 0) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .outside
+
+ theorem maximum_index : Assembly.driverSteps 1 2 #[] (input (2^256-1) payload) = .ok (expected (2^256-1) payload 0) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .maximumIndex
+
+ theorem zero_word : Assembly.driverSteps 1 2 #[] (input 0 0) = .ok (expected 0 0 0) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .zero
+
+ theorem maximum_word : Assembly.driverSteps 1 2 #[] (input 31 (2^256-1)) = .ok (expected 31 (2^256-1) 255) := by
+-  apply observed
+-  decide +kernel
++  exact table_case .maximumWord
+
+ theorem ordered_code : (input 0 payload).executionEnv.code.data.toList =
+     [0x60,0x58,0x50,0x1a,0x00] := rfl

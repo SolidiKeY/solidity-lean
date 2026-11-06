@@ -38,5 +38,14 @@ theorem other_target_preserved : (Transient.write target account 0 rawB).bank 2 
 
 theorem reset_unowned_slot : transientSlotLoad ts (companionEndTx childCore) account 99 =
     some ((Transient.endTx target).bank account 99) := by
-  first | simp only [reset_agreement ts childCore target actual_zero_defaults] | decide | rfl
+  exact reset_readback_zero ts childCore target actual_zero_defaults account 99
+theorem initially_mismatched_view : transientSlotLoad ts callerCore account 0 ≠ some (target.bank account 0) := by
+  first | decide | rfl
+theorem actual_stored_load : (transientSlotLoad ts ⟨completed.1.2.2.ex,completed.2⟩ account 0,
+    Transient.callbackObserved account false (Transient.loadCode 0)
+      (Transient.write target account 0 rawB)) =
+    (some rawB,(.ok (Transient.write target account 0 rawB),some (.val rawB))) := by
+  exact stored_load_readback frame 0 rawB caller.1.2 caller.2 target completed
+    (Option.some_get (by decide)).symm rfl rootTempChecked.separated
+
 end Solidity.Yul.World.TransientTarget.Controls

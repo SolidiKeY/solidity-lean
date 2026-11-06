@@ -1,3 +1,5 @@
+import Solidity.Backend.InternalFlow.RuntimeFrameV3StateShell
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocationInventory
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScalarTurn
 import Solidity.Backend.InternalFlow.RuntimeFrameV3ScalarDescentInterfaceV1
 
@@ -48,7 +50,7 @@ theorem zero_turn {L frame : Nat} (σ : State C (Frame A))
    simpa only [show decide (0<(0:Nat))=false from rfl,bword] using guard
  exact GuardedRecursion.empty_turn _ _ m checked
 
-theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
+theorem running_with_context (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
  (fit : remaining+steps<W) (ref : HRef σ.H A)
  (result : TEnv.get (.here : Idx (Frame A) (.val .uint)) σ.env=PrimTy.dflt .uint)
  (counter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (remaining+steps) fit)
@@ -69,18 +71,21 @@ theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
  after.stack=before.stack ∧ after.mem pointer=.val (wmod (start+3*steps)) ∧
  (∀ j,j<steps → after.mem (start+3*j)=.val (base ref.id) ∧
    after.mem (start+3*j+1)=.val (wmod (remaining+steps-j)) ∧ after.mem (start+3*j+2)=w[0]) ∧
- (∀ x,6≤x → x<frame → x≠pointer → (x<start ∨ start+3*steps≤x) → after.mem x=before.mem x) := by
+ (∀ x,6≤x → x<frame → x≠pointer → (x<start ∨ start+3*steps≤x) → after.mem x=before.mem x) ∧
+ ScalarAllocationInventory.Holds σ.H.length steps cursor.val τ addresses ∧ StateShell.Same σ τ := by
  induction steps generalizing σ base before cursor start with
  | zero =>
    have environment : σ.env=(PrimTy.dflt .uint,(countValue remaining (by omega),(some ref,()))) :=
      Prod.ext result (Prod.ext counter (Prod.ext alias (by cases σ.env.2.2.2;rfl)))
    refine ⟨σ,List.prefix_refl _,before,base,rfl,repr,environment,?_,Heap.Keeps.refl σ.heap,owned,
-     BaseExtends.refl base,?_,rfl,current,?_,?_⟩
+     BaseExtends.refl base,?_,rfl,current,?_,?_,?_,?_⟩
    · omega
    · intro other positive initial space
      simpa only [Nat.mul_zero,Nat.add_zero] using initial
    · intro j impossible;omega
    · intro x lower upper different region;rfl
+   · intro j impossible;omega
+   · exact StateShell.refl σ
  | succ steps ih =>
    have firstCounter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (remaining+steps+1) (by omega) := by
      simpa only [show remaining+(steps+1)=remaining+steps+1 from by omega] using counter
@@ -109,7 +114,7 @@ theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
        lo pointer start privateBelow pointerAbove pointerBelow payloadAbove (by omega) pointerBefore (by omega) current
    let nextCursor : Fin W := ⟨cursor.val+4,firstSpace⟩
    have remainingSpace : nextCursor.val+4*steps<W := by change cursor.val+4+4*steps<W;omega
-   obtain ⟨τ,lastExt,after,addresses,running,finalRepr,finalEnv,finalSize,finalKeeps,finalOwner,finalBase,finalGrowth,finalStack,finalPointer,finalHistory,finalWords⟩ :=
+   obtain ⟨τ,lastExt,after,addresses,running,finalRepr,finalEnv,finalSize,finalKeeps,finalOwner,finalBase,finalGrowth,finalStack,finalPointer,finalHistory,finalWords,finalInventory,finalContext⟩ :=
      ih (σ:=child) (fit:=by omega) (ref:=ref.wk firstExt) (result:=rfl) (counter:=rfl) (alias:=rfl)
        (base:=nextBase) (before:=next) (repr:=nextRepr) (cursor:=nextCursor) (owned:=nextOwner)
        (heapSpace:=remainingSpace) (start:=start+3) (payloadAbove:=by omega) (payloadBelow:=by omega)
@@ -122,7 +127,7 @@ theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
    have oldSaved (i : Nat) (small : i<3) : after.mem (start+i)=next.mem (start+i) :=
      finalWords (start+i) (by omega) (by omega) (by omega) (.inl (by omega))
    refine ⟨τ,firstExt.trans lastExt,after,addresses,?_,finalRepr,finalEnv,?_,kept.trans finalKeeps,finalOwner,
-     firstBase.trans firstExt finalBase,?_,finalStack.trans stack,?_,?_,?_⟩
+     firstBase.trans firstExt finalBase,?_,finalStack.trans stack,?_,?_,?_,?_,?_⟩
    · simpa only [loopIterN,turn] using running
    · change τ.H.length=(σ.H++([.array (.prim .bool)] : HTy)).length+steps at finalSize
      simpa only [List.length_append,List.length_singleton,Nat.add_assoc,Nat.add_comm 1 steps] using finalSize
@@ -147,6 +152,86 @@ theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
      have first := firstWords x (by omega) (by omega) (by omega) (by omega) hp
        (by have above:=owned.arrays.free.above;omega) (by omega)
      exact (finalWords x lower upper hp (by omega)).trans first
+
+   · intro j small
+     cases j with
+     | zero =>
+       let fresh : HRef child.H (.array (.prim .bool)) := (σ.alloc (defaultArray .bool AllocatingScalarSource.size)).2
+       have content : child.heap.get fresh=defaultArray .bool AllocatingScalarSource.size :=
+         Heap.get_alloc_self σ.heap (defaultArray .bool AllocatingScalarSource.size)
+       refine ⟨fresh.wk lastExt,rfl,?_,?_⟩
+       · rw [finalKeeps fresh,content]
+         simp only [MObj.wk,defaultArray,List.map_replicate,MVal.wk]
+       · have address := finalBase fresh
+         change addresses fresh.id=nextBase fresh.id at address
+         rw [show nextBase fresh.id=cursor from upd_same base σ.H.length cursor] at address
+         change (addresses fresh.id).val=cursor.val+4*0
+         rw [address]
+         omega
+     | succ j =>
+       obtain ⟨r,identity,content,address⟩ := finalInventory j (by omega)
+       refine ⟨r,?_,content,?_⟩
+       · change r.id=(σ.H++([.array (.prim .bool)] : HTy)).length+j at identity
+         simp only [List.length_append,List.length_singleton] at identity
+         omega
+       · change (addresses r.id).val=cursor.val+4+4*j at address
+         omega
+   · exact StateShell.trans (show StateShell.Same σ child from ⟨rfl,rfl,rfl,rfl⟩) finalContext
+
+theorem running_with_inventory (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
+ (fit : remaining+steps<W) (ref : HRef σ.H A)
+ (result : TEnv.get (.here : Idx (Frame A) (.val .uint)) σ.env=PrimTy.dflt .uint)
+ (counter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (remaining+steps) fit)
+ (alias : TEnv.get (.there (.there .here) : Idx (Frame A) (.mem A)) σ.env=some ref)
+ (base : Nat → Fin W) (before : Machine) (repr : StateRepr L 2 frame F σ base before)
+ (cursor : Fin W) (owned : StructAllocatorRepr σ.heap base frame cursor before)
+ (heapSpace : cursor.val+4*steps<W) (lo pointer start : Nat)
+ (privateBelow : 5<lo) (pointerAbove : lo≤pointer) (pointerBelow : pointer<frame)
+ (payloadAbove : lo≤start) (payloadBelow : start+3*steps≤frame) (pointerBefore : pointer<start)
+ (fits : start+3*steps<W) (current : before.mem pointer=.val (wmod start)) :
+ ∃ (τ : State C (Frame A)) (e : σ.H <+: τ.H) (after : Machine) (addresses : Nat → Fin W),
+ loopIterN (run guardCompiled.code) (run (AllocatingScalarTurn.code pointer)) steps before=.inl after ∧
+ StateRepr L 2 frame F τ addresses after ∧
+ τ.env=(PrimTy.dflt .uint,(countValue remaining (by omega),(some (ref.wk e),()))) ∧
+ τ.H.length=σ.H.length+steps ∧ Heap.Keeps e σ.heap τ.heap ∧
+ StructAllocatorRepr τ.heap addresses frame (⟨cursor.val+4*steps,heapSpace⟩ : Fin W) after ∧
+ BaseExtends σ.H base addresses ∧ GrowsAllocator 2 frame (4*steps) σ base before τ addresses after ∧
+ after.stack=before.stack ∧ after.mem pointer=.val (wmod (start+3*steps)) ∧
+ (∀ j,j<steps → after.mem (start+3*j)=.val (base ref.id) ∧
+   after.mem (start+3*j+1)=.val (wmod (remaining+steps-j)) ∧ after.mem (start+3*j+2)=w[0]) ∧
+ (∀ x,6≤x → x<frame → x≠pointer → (x<start ∨ start+3*steps≤x) → after.mem x=before.mem x) ∧
+ ScalarAllocationInventory.Holds σ.H.length steps cursor.val τ addresses := by
+ obtain ⟨τ,e,after,addresses,actual,represented,environment,size,kept,owner,extended,growth,stack,position,history,words,inventory,context⟩ :=
+   running_with_context steps remaining σ fit ref result counter alias base before repr cursor owned heapSpace
+     lo pointer start privateBelow pointerAbove pointerBelow payloadAbove payloadBelow pointerBefore fits current
+ exact ⟨τ,e,after,addresses,actual,represented,environment,size,kept,owner,extended,growth,stack,position,history,words,inventory⟩
+
+theorem running (steps remaining : Nat) {L frame : Nat} (σ : State C (Frame A))
+ (fit : remaining+steps<W) (ref : HRef σ.H A)
+ (result : TEnv.get (.here : Idx (Frame A) (.val .uint)) σ.env=PrimTy.dflt .uint)
+ (counter : TEnv.get (.there .here : Idx (Frame A) (.val .uint)) σ.env=countValue (remaining+steps) fit)
+ (alias : TEnv.get (.there (.there .here) : Idx (Frame A) (.mem A)) σ.env=some ref)
+ (base : Nat → Fin W) (before : Machine) (repr : StateRepr L 2 frame F σ base before)
+ (cursor : Fin W) (owned : StructAllocatorRepr σ.heap base frame cursor before)
+ (heapSpace : cursor.val+4*steps<W) (lo pointer start : Nat)
+ (privateBelow : 5<lo) (pointerAbove : lo≤pointer) (pointerBelow : pointer<frame)
+ (payloadAbove : lo≤start) (payloadBelow : start+3*steps≤frame) (pointerBefore : pointer<start)
+ (fits : start+3*steps<W) (current : before.mem pointer=.val (wmod start)) :
+ ∃ (τ : State C (Frame A)) (e : σ.H <+: τ.H) (after : Machine) (addresses : Nat → Fin W),
+ loopIterN (run guardCompiled.code) (run (AllocatingScalarTurn.code pointer)) steps before=.inl after ∧
+ StateRepr L 2 frame F τ addresses after ∧
+ τ.env=(PrimTy.dflt .uint,(countValue remaining (by omega),(some (ref.wk e),()))) ∧
+ τ.H.length=σ.H.length+steps ∧ Heap.Keeps e σ.heap τ.heap ∧
+ StructAllocatorRepr τ.heap addresses frame (⟨cursor.val+4*steps,heapSpace⟩ : Fin W) after ∧
+ BaseExtends σ.H base addresses ∧ GrowsAllocator 2 frame (4*steps) σ base before τ addresses after ∧
+ after.stack=before.stack ∧ after.mem pointer=.val (wmod (start+3*steps)) ∧
+ (∀ j,j<steps → after.mem (start+3*j)=.val (base ref.id) ∧
+   after.mem (start+3*j+1)=.val (wmod (remaining+steps-j)) ∧ after.mem (start+3*j+2)=w[0]) ∧
+ (∀ x,6≤x → x<frame → x≠pointer → (x<start ∨ start+3*steps≤x) → after.mem x=before.mem x) := by
+ obtain ⟨τ,e,after,addresses,actual,represented,environment,size,kept,owner,extended,growth,stack,position,history,words,inventory⟩ :=
+   running_with_inventory steps remaining σ fit ref result counter alias base before repr cursor owned heapSpace
+     lo pointer start privateBelow pointerAbove pointerBelow payloadAbove payloadBelow pointerBefore fits current
+ exact ⟨τ,e,after,addresses,actual,represented,environment,size,kept,owner,extended,growth,stack,position,history,words⟩
 
 /-- The frozen narrow descent contract, inhabited by the actual checked
 compiler/guard/prefix theorems above. This is not a V3 recursion/profile instance. -/
@@ -182,3 +267,11 @@ end Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.producer' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.producer
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_inventory' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_inventory
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_context' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.ScalarAllocatingDescent.running_with_context

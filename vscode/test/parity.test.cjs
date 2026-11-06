@@ -93,14 +93,14 @@ test('independent audit keeps all upstream registration sites explicitly unexami
   assert.ok(validate(audit).length);
 });
 test('unsupported and untested capabilities cannot be marked complete',()=>{
-  const inventory=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('../parity/inventory.cjs').loadInventory();
   assert.deepEqual(validate(inventory),[]);
   inventory.features[0].assessment.status='complete';assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
   inventory.features[0].assessment.testEvidence=[{status:'skipped',assertion:'something',artifact:'fake.json'}];
   assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
 });
 test('inventory shrinkage and invented upstream evidence fail the offline gate',()=>{
-  const original=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const original=require('../parity/inventory.cjs').loadInventory();
   const fewer=structuredClone(original);fewer.features.pop();assert.ok(validate(fewer).some(e=>e.includes('feature set changed')));
   const tampered=structuredClone(original);tampered.features[0].upstream[0].sha256='0'.repeat(64);
   assert.ok(validate(tampered).some(e=>e.includes('unregistered upstream evidence')));
@@ -192,4 +192,89 @@ test('long artifact paths do not become long editor IPC/profile paths',async()=>
     assert.equal(data.portable.startsWith(trial),false);
     assert.equal(require('node:fs').existsSync(data.portable),false,'temporary editor state is removed');
   }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test('visual suite retains all phase gaps without requiring the separate benchmark scenario',()=>{
+  const config={runId:'visual-fresh',target:'dafny',suite:'visual'};
+  const ids=['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'];
+  const base={schemaVersion:1,runId:config.runId,target:config.target,status:'passed-with-gaps',checks:[],
+    scenarios:ids.map(id=>({id,status:id==='visual-open'?'missing':'partial'}))};
+  assert.deepEqual(hostEvidenceErrors(base,config),[]);
+  for(const id of ids)assert.ok(hostEvidenceErrors({...base,scenarios:base.scenarios.filter(s=>s.id!==id)},config).length,'missing '+id+' cannot pass report validation');
+  assert.ok(hostEvidenceErrors({...base,status:'passed'},config).length,'visual gaps cannot become a pass');
+  assert.ok(hostEvidenceErrors({...base,runId:'stale'},config).length);
+  assert.ok(hostEvidenceErrors({...base,checks:['visual-verified']},config).length,'partial phases are not passed checks');
+  assert.ok(hostEvidenceErrors(base,{...config,suite:'full'}).length,'full suite still requires initial verification');
+});
+
+
+test('visual launcher passes suite identity to report validation (injected editor)',async()=>{
+  if(process.platform==='win32')return;
+  const dir=mkdtempSync(join(tmpdir(),'parity-visual-suite-'));
+  try {
+    const code=join(dir,'code');
+    writeFileSync(code,`#!${process.execPath}\nconst fs=require('node:fs');const c=JSON.parse(fs.readFileSync(process.env.PARITY_HOST_CONFIG,'utf8'));fs.writeFileSync(c.result,JSON.stringify({schemaVersion:1,runId:c.runId,target:c.target,status:'passed-with-gaps',checks:[],scenarios:['visual-open','visual-first-feedback','visual-verified','visual-proof-broken','visual-proof-fixed'].map(id=>({id,status:'missing'}))}));\n`,{mode:0o700});
+    const trial=join(dir,'trial');
+    const config={dir:trial,target:'local',workers:1,cache:'basic',trial:0,warmup:false,workspace:join(trial,'workspace'),result:join(trial,'result.json'),events:join(trial,'events.jsonl'),trace:join(trial,'lsp.jsonl')};
+    const run=await launch(config,{code,suite:'visual',operationTimeoutMs:1000,timeoutMs:2000,obligations:1});
+    assert.equal(run.status,'passed-with-gaps');assert.equal(run.result.scenarios.every(s=>s.status==='missing'),true);assert.deepEqual(run.result.checks,[]);
+  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test('compiler command suite cannot masquerade as full proof evidence',()=>{
+ const config={runId:'commands-only',target:'local',suite:'commands'},report={schemaVersion:1,runId:config.runId,target:'local',status:'passed',checks:['command-build-keybinding'],scenarios:[{id:'command-build-keybinding',status:'passed'}]};
+ assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[]},config).length);assert.ok(hostEvidenceErrors({...report,runId:'old'},config).length);assert.ok(hostEvidenceErrors({...report,checks:[]},config).length);
+ assert.throws(()=>parse(['--suite','commands','--targets','dafny']),/requires --targets local/);assert.equal(parse(['--suite','commands','--targets','local']).suite,'commands');
+});
+test('native build key dispatch refuses an unfocused editor (injected CDP boundary)',async()=>{
+ const {buildKeybinding}=require('../parity/renderer.cjs'),calls=[];
+ await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:false}};}}),/No focused source editor/);assert.equal(calls.length,1);
+ calls.length=0;const value=await buildKeybinding({request:async(method,params)=>{calls.push({method,params});return{result:{value:true}};}});assert.equal(value.chord,'ctrl+shift+b');assert.deepEqual(calls.slice(1).map(c=>[c.method,c.params.type,c.params.code,c.params.modifiers]),[['Input.dispatchKeyEvent','keyDown','KeyB',10],['Input.dispatchKeyEvent','keyUp','KeyB',10]]);
+});
+
+test('context submenu observation refuses to click without a source editor (injected CDP boundary)',async()=>{
+ const {contextSubmenu}=require('../parity/renderer.cjs'),calls=[];await assert.rejects(contextSubmenu({request:async(method,params)=>{calls.push({method,params});return{result:{value:null}};}},'/unused'),/No source editor/);assert.equal(calls.length,1);assert.equal(calls[0].method,'Runtime.evaluate');
+});
+
+for(const suite of ['custom-commands','custom-default-commands'])test(suite+' requires its own native action and cannot replace proof evidence',()=>{
+ const id=suite==='custom-commands'?'command-custom-build-keybinding':'command-custom-default-build-keybinding';
+ const config={runId:'custom-only',target:'local',suite},report={schemaVersion:1,runId:config.runId,target:'local',status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
+ assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[{id:'command-build-keybinding',status:'passed'}],checks:['command-build-keybinding']},config).length);
+ assert.equal(parse(['--suite',suite,'--targets','local']).suite,suite);
+});
+test('F6 refuses wrong prompt contents before Enter (injected CDP boundary)',async()=>{
+ const {buildKeybinding}=require('../parity/renderer.cjs'),calls=[];let evaluations=0;
+ await assert.rejects(buildKeybinding({request:async(method,params)=>{calls.push({method,params});if(method==='Runtime.evaluate')return{result:{value:++evaluations===1?true:{focused:true,value:'wrong'}}};return{};}},{custom:true,input:'{}'}),/contents did not match/);
+ assert.deepEqual(calls.filter(c=>c.params.code==='F6').map(c=>[c.params.type,c.params.modifiers]),[['keyDown',0],['keyUp',0]]);assert.equal(calls.some(c=>c.params.code==='Enter'),false);
+});
+test('terminal observer retains real output/exit and stops subscriptions on restore (injected VS Code boundary)',async()=>{
+ let start,end,disposed=0;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){disposed++;}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){disposed++;}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
+ const observer=observe(vscode,(kind,data)=>records.push({kind,data}),'/not-an-extension',null,'/owned/workspace');
+ try{assert.equal(observer.terminalSupported,true);const execution={commandLine:{value:'build /owned/workspace/main.dfy'},async *read(){yield 'compiler output';}};start({execution});end({execution,exitCode:3});await new Promise(r=>setImmediate(r));assert.equal(records.find(r=>r.kind==='terminal.end').data.exitCode,3);assert.equal(records.find(r=>r.kind==='terminal.output').data.data,'compiler output');assert.ok(records.some(r=>r.kind==='terminal.output.end'));const length=records.length;start({execution:{...execution,commandLine:{value:'build /other/file'}}});await new Promise(r=>setImmediate(r));assert.equal(records.length,length);}finally{observer.restore();}assert.equal(disposed,2);
+});
+
+test('paired default custom suite cannot omit its partial native trace observation',()=>{
+ const id='command-custom-default-build-keybinding',config={runId:'pair',target:'dafny',suite:'custom-default-commands'},report={schemaVersion:1,...config,status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
+ assert.ok(hostEvidenceErrors(report,config).includes('missing native observation native-trace-show-copy-hide'));
+ assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,...['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'].map(id=>({id,status:'partial'}))]},config),[]);
+});
+test('terminal execution IDs cannot combine output and exit from distinct executions (injected boundary)',async()=>{
+ let start,end;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
+ const observer=observe(vscode,(kind,data)=>records.push({kind,data}),'/unused',null,'/owned');
+ try{const make=()=>({commandLine:{value:'build /owned/main.dfy'},async *read(){yield 'data';}}),a=make(),b=make();start({execution:a});start({execution:b});end({execution:b,exitCode:3});end({execution:a,exitCode:0});await new Promise(r=>setImmediate(r));const starts=records.filter(r=>r.kind==='terminal.start');assert.notEqual(starts[0].data.executionId,starts[1].data.executionId);for(const [executionId,exit] of [[starts[0].data.executionId,0],[starts[1].data.executionId,3]]){assert.equal(records.find(r=>r.kind==='terminal.end'&&r.data.executionId===executionId).data.exitCode,exit);assert.ok(records.some(r=>r.kind==='terminal.output.end'&&r.data.executionId===executionId));}observer.restore();const length=records.length;start({execution:a});end({execution:a,exitCode:0});assert.equal(records.length,length);}finally{observer.restore();}
+});
+
+test('terminal SDK observation strips native shell control sequences but rejects suffix paths or wrong versions',()=>{
+ const {terminalSdkIdentity}=require('../parity/core.cjs'),raw='\x1b]633;C\x07'+process.execPath+'\r\n\x1b[?1h\x1b='+process.version+'\r\n';
+ const observed=terminalSdkIdentity(raw,process.execPath,process.version);assert.equal(observed.executable,require('node:fs').realpathSync(process.execPath));assert.match(observed.sha256,/^[a-f0-9]{64}$/);assert.throws(()=>terminalSdkIdentity('/other'+process.execPath+'\n'+process.version,process.execPath,process.version),/differs/);assert.throws(()=>terminalSdkIdentity(process.execPath+'\nwrong',process.execPath,process.version),/differs/);
+});
+
+test('native trace visibility suite stays distinct from local or full proof evidence',()=>{
+ assert.equal(parse(['--suite','trace-visibility','--targets','dafny']).suite,'trace-visibility');assert.throws(()=>parse(['--suite','trace-visibility','--targets','local']),/requires --targets dafny/);
+ const config={suite:'trace-visibility',target:'dafny',runId:'native'},report={schemaVersion:1,runId:'native',target:'dafny',status:'passed-with-gaps',checks:[],scenarios:[{id:'native-trace-tab-visibility-theme',status:'partial'}]};assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[]},config).length);
+});
+
+test('explicit native light-show observation cannot replace theme continuity, lifecycle or proof scenarios',()=>{
+ assert.equal(parse(['--suite','trace-light-show','--targets','dafny']).suite,'trace-light-show');assert.throws(()=>parse(['--suite','trace-light-show','--targets','local']),/requires --targets dafny/);const config={suite:'trace-light-show',target:'dafny',runId:'light'},report={schemaVersion:1,runId:'light',target:'dafny',status:'passed-with-gaps',checks:[],scenarios:[{id:'native-trace-light-show-hide',status:'partial'}]};assert.deepEqual(hostEvidenceErrors(report,config),[]);for(const suite of ['full','custom-default-commands','trace-visibility'])assert.ok(hostEvidenceErrors(report,{...config,suite}).length);
 });

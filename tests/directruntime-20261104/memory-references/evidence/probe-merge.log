@@ -1,2 +1,0 @@
-{"line_context": "  sol_close", "goals": null, "goals_before": ["⊢ ⊨ᶠ\n    dl{\n      { m := freshId(copySt(memory, newArr(int[], 1))) ‖ memory := copySt(memory, newArr(int[], 1)) }\n        { memory := write(memory, m[0], 1) }\n          { se2 := read(memory, m[0]) } { se1 := (se2 == 1) } ((se1 = true → true) ∧ se1 = true) }"], "goals_after": [], "status": null}
-FAIL sol_merge; sol_close

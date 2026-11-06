@@ -240,6 +240,7 @@ import SolidityBridge.RoadmapV15.P10.FrozenWitness
 import SolidityBridge.RoadmapV15.P10.HeaderEnvironment
 import SolidityBridge.RoadmapV15.P10.HeaderEnvironmentControls
 import SolidityBridge.RoadmapV15.P10.IndexedRefusalInterfaceV1
+import SolidityBridge.RoadmapV15.P10.IndexedRefusalWitnessV1
 import SolidityBridge.RoadmapV15.P10.InequalityConsumer
 import SolidityBridge.RoadmapV15.P10.InequalityControls
 import SolidityBridge.RoadmapV15.P10.InstructionSelectionAgreement

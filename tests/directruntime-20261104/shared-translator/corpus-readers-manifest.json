@@ -1,0 +1,39 @@
+{
+  "archive": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-readers-68b78f8ac2ad9719.tar.zst",
+  "archiveRelative": "tests/directruntime-20261104/shared-translator/artifacts/corpus-readers-68b78f8ac2ad9719.tar.zst",
+  "archiveBytes": 159929,
+  "archiveSha256": "68b78f8ac2ad97199eaa54b83a0f19870acb56bf3ca965f29bcf17a908abe0be",
+  "extractedRoot": "/workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/corpus-readers",
+  "filesManifestSha256": "c32cfd6a8a50402a40d6343b3306ed5b78657fe57242d4e09f0d81ef6b205f0f",
+  "dataFiles": 14,
+  "dataBytes": 2654693,
+  "censusDependencyManifest": "tests/directruntime-20261104/shared-translator/corpus-inventory-manifest.json",
+  "cases": 1926,
+  "default": {
+    "not-standalone": 294,
+    "decoded": 408,
+    "refused": 1224
+  },
+  "composed": {
+    "not-standalone": 294,
+    "decoded": 469,
+    "refused": 1163
+  },
+  "unknownRootRefusalsEachReader": 1632,
+  "changes": {
+    "refused->decoded": 61,
+    "refused->refused": 152
+  },
+  "pairedNormalizedOccurrences": 738,
+  "idFieldPresence": {
+    "both": 92,
+    "raw-only": 565,
+    "neither": 81
+  },
+  "referenceFieldPresence": {
+    "neither": 640,
+    "both": 98
+  },
+  "restore": "Copy archive into archiveRelative and extract at artifacts/corpus-readers;restore census and H44 prerequisite archives;run verify-corpus-readers.py,then frozen ConstructReaderControls.lean without capture flags.",
+  "boundary": "All observed structural forms have one actual standalone outcome per reader or explicit no-entry status;not all scalar semantics/contexts/source states. Raw/normalized pairs use the same retained compiler packet,kind/src and retained ID;missing/ambiguous pairing remains unknown. Exact retained identity/signed-reference comparisons do not establish lexical scope,shadowing,overload selection,intrinsic closure or source/backend preservation. Producer comparison is expression printing only,not actual importer migration."
+}

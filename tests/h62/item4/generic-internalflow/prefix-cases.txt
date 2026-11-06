@@ -1,0 +1,25 @@
+# Explicit prefix Checks namespaces only; all other embedded regions pending.
+@V3ParentPrefixes
+repr: initial
+alloc: ownership
+ts,loop,repr,obs,alloc,neq: horizons
+@V3AllocatingPrefixes
+loop,repr,obs,pres,alloc,heap_keeps: available specification
+obs: word_facts observations
+loop: stopped stopped_stable
+ts: target_loop
+neq: wrong_alias wrong_old_content wrong_horizon
+rneg: not_returned_parent
+growthneg: wrong_cost
+@V3MutatingPrefixes
+loop,repr,obs,pres,alloc,lengths: horizons
+obs: first_length observations source_objects target_facts
+ss,ev,eq,ts,repr,pres,alloc,obs: available specification
+capacity: capacity
+obs,pres,alloc: total
+loop: running stopped stopped_horizons
+ts: loop_endpoint
+ss: child_source
+sx: child_exhausts
+neq: wrong_horizon wrong_cursor wrong_alias missing_write swapped_parents unrelated_write
+loop,tr: bad_horizons
