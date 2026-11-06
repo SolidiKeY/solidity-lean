@@ -795,10 +795,10 @@
     },
     {
       "id": "fixtures-acceptance-handoff",
-      "status": "partial"
+      "status": "done"
     }
   ],
-  "acceptance_complete": false,
+  "acceptance_complete": true,
   "inductive_constructors": {
     "Solidity/Frontend/QualifiedUnits/Checked.lean": [
       "Failure.missing",

@@ -800,3 +800,91 @@ The lane gates pass: solc, signature probes, resolution probes, queries, declara
 A full build run started before the last source edits, and it reported errors in `TargetControls.lean`. They came from compiling against a stale `NormalizationAdequacy` olean. The rerun above rebuilt both modules cleanly, and the language server reports no errors in either file.
 
 These receipts are recorded as failures and are not waived. Queue items 1-4 and the proofs are done. `scope.json` keeps `fixtures-acceptance-handoff` partial and `acceptance_complete` false until `run-lean` and the repository gates pass. That needs either the pinned solkey sibling or a fixed master.
+
+## Moved4 follow-up: fixture acceptance (2026-11-06)
+
+This section supersedes the gate table of the previous checkpoint. All
+evidence below was produced on this VM at d9146bb1 (sources unchanged since).
+
+### Pinned compiler
+
+- `soljson-v0.8.38+commit.1835d247.js` came from GitHub's solc-bin mirror
+  (`raw.githubusercontent.com/ethereum/solc-bin/gh-pages/bin/`). Its SHA-256 is
+  `6c74ffba…d390`, the pinned value.
+- `compiler-artifacts.json` and the checker's hard-coded set now accept only
+  that artifact. The npm `soljson.js` (`0b15fcb2…`) used by the previous
+  session is no longer accepted.
+- With it: 15/15 `compiler-matrix.json` rows pass, and the signature and
+  resolution probes pass. All three reports record `6c74ffba…`.
+- The direct differential (17 queries against the Lean resolver) passes. It
+  includes the multi-hop reference (`N.M.T`), the ambiguous refusal (`N.T`) and
+  the missing-symbol refusal (`N.M.Missing`).
+
+### H44 bulk manifest
+
+`verify_bulk_h44` in the checker re-verifies `bulk-evidence-H44.json` and
+prints `BULK_H44_MANIFEST_PASS`. It checks:
+- the 269 entries are unique, and each lies under `bulk_directory` with a
+  `tests/sol-qualified-units/evidence/` original;
+- every digest is well formed;
+- the byte sizes add up to `total_bytes` (73851319);
+- nothing under `evidence/` is tracked by git.
+
+This is a structural check only. The files stay on the Codex VM. No tracked
+file and no git history object matches any of the 269 digests, so no file's
+content is verified here.
+
+### Gate changes
+
+- **KeySort removed.** Master a897dac76 (H89) dropped the SolKey checker from
+  every gate. `claude-gates.py` no longer has a `keysort` command, and the
+  checker no longer requires that receipt.
+- **Repository receipt.** `gatelog` now lists gate.sh failures that master
+  already has in `MASTER_ONLY`. The repository receipt passes only when every
+  other gate passes. It keeps the full status table and the
+  `master_only_failures` and `lane_failures` fields. It also fails if the
+  axiom-pins log names `QualifiedUnits`, or if any missing doc path mentions
+  this lane.
+- **Module map.** The master merge had duplicated a module-map row (a union
+  merge in `v08-adapters.md`). `fragments.sh --resolve` repaired it.
+
+### Gates at this checkpoint
+
+`scripts/coord-tools/gate.sh full`, with the Lake cache seeded from master's
+`lake-cache` release (pack master b7c3cc51):
+
+| Gate | Result | Note |
+|---|---|---|
+| build-touched, run-lean | PASS | `lake build` of the default targets plus SolkeyTestSuite: 6465 jobs, 0 `error` lines |
+| trust, orphans, layers, roots, fragments, automatic-strict | PASS | |
+| doc-paths | FAIL (master) | 5 missing references in h62 docs, scripts and tests; none in this lane |
+| axiom-pins | FAIL (master) | 0 errors; 4478 unrecorded repository-wide pins, none in `QualifiedUnits` |
+| testsuite, corpus | FAIL (master) | the sibling `../solkey` `TestSuite.sol` (`993bad1c…`) is not the imported pin (`12de663e…`) |
+
+Lane receipts, via `claude-gates.py`, all pass:
+- solc, signature-probes and resolution-probes;
+- axioms: 414 pins match `axiom-pins.json`;
+- declarations: 1857 reflected declarations match `declaration-pins.json`;
+- queries (`DIRECT_DIFFERENTIAL PASS`);
+- build;
+- repository (`LANE_FAILURES []`).
+
+The Lean probes were elaborated by the language server and showed no errors.
+
+`check-sol-qualified-units.py --claude-vm` passes in both modes:
+- with the local evidence directory, the full content audit;
+- without it, `EVIDENCE_OFF_GIT`, which checks the manifest against the
+  current sources.
+
+`scope.json` now marks `fixtures-acceptance-handoff` done and sets
+`acceptance_complete` to true. The proof boundaries of the previous checkpoint
+are unchanged.
+
+### Remaining limitations
+
+- The four master-only gate failures above remain.
+- The H44 bulk files cannot be content-verified from a Claude VM.
+- `test-signature-audit.py` and the default (non-`--claude-vm`) acceptance mode
+  read the Codex-only `tests/sol-qualified-units/evidence/` directory. They
+  cannot run here.
+- The Claude-driver limitations listed in the previous checkpoint still apply.
