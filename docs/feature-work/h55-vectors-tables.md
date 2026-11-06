@@ -302,3 +302,31 @@ passed twice with identical JSON reports and verified snapshot cleanup.
 Existing-report and in-checkout report destinations were refused without
 overwriting or creating those files. Logs are under
 `/workspace/vy1-words-evidence/h55-frozen-runner-*`.
+
+## Successor fresh oracle kernel check
+
+At source head `71c5963f3cd9da2eb2989be1e19c810def6ff019`, two operand-only
+extractions were identical and matched committed operand SHA-256
+`1b55bbe41a160d767f50087caca296dbf64cc6d8dd972de43564651366456aef`.
+The integer oracle regenerated all 6,903 declarations, matching the complete
+bytes of all nine original modules.
+
+A fresh external output tree compiled KeySort, six dependencies and all nine
+generated modules with Lean 4.24.0 / Lake 5.0.0-src+797c613, explicit `-j1`,
+`LEAN_NUM_THREADS=1`, stack 131072, enforced 12 GiB/no-swap container cap
+and the compiler runner's 4 GiB host/cgroup headroom guard. The bounded job
+exited zero in 168.74 seconds, peak aggregate VM RSS 3,820,744 KiB, with no OOM
+events. Per-command wall times and the raw tool versions are retained in
+`/workspace/vy1-words-evidence/words-oracle-kernel-recheck.log` and sibling
+resource/host-configuration records. No production source or theorem changed.
+
+Both independent read-only reviewers found no oracle, lossless-inventory or
+negative-control defect. They did not run Lean. This checks finite generated
+kernel controls, not universal opcode agreement, semantic Raw parametrisation,
+table migration, full-lane acceptance or a before/after performance delta.
+The failed v4.35 migration gate was not repeated.
+
+Fresh operand data, emitted sources, provenance hashes and object cache are
+under `/workspace/scratch/words-oracle-recheck-71c5963/`, off Git.
+The object pack is `oracle-objects.tar.gz`, SHA-256
+`2c34c1a8bca044687e5a2dadf4d38a392e993ee7c070ebcfc531c55e9d5ad3c9`; it is left for coordinator pull, not shipped.
