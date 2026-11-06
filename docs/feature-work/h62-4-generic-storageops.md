@@ -395,3 +395,28 @@ and candidate sets remain equal. The additive generic append law and typed
 fixtures remain available, but no original-case migration is accepted and all
 1623 frozen migration obligations remain open. Rejected source and raw timing
 receipts remain outside Git with their exact before/after context.
+
+## Fifteen finite coverage proof instances
+
+The published lexical scanner identified fifteen identical two-index coverage
+patterns in the nested-array transport controls. A general bounded-Nat to
+dependent-Fin helper now discharges those exact finite membership obligations.
+The helper permits arbitrary outer/inner bounds and uses no axioms; the fixed
+fixture sizes remain original data, not admitted-source restrictions. Every
+semantic correctness theorem application, store, location, observation and
+negative case remains unchanged. Decidable coverage checks do not replace the
+operation correctness proof with expected outputs.
+
+Exact packet accounting preserves all 286 original declaration statements and
+all fixture definitions, with precisely fifteen proof-body replacements and
+one added helper. Six tampering controls pass. Both original and candidate
+files pass kernel checks and existing guards; the otherwise unguarded child
+bridge was directly checked on both sides with equal standard axiom sets.
+One matched warm sample measured 53.61 seconds before and 54.38 seconds after
+(1.4% increase, within 10%); no speedup is claimed. Independent read-only
+reviews found no issue.
+
+This is a bounded coverage-proof refactor, not full semantic classification,
+fixture-table correspondence or acceptance of all 1623 control claims. The
+earlier timing STOPs and corrected C207 axiom interpretation remain retained.
+Full affected/lane validation and all original producer obligations stay open.
