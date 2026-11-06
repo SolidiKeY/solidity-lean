@@ -132,3 +132,20 @@ RawInt reviews: see the RawInt document.
 - A qualified constant reference (`K.X`) is no graph edge and has no typed value in
   the existing semantics (`Syn.paths`, `TEval`), unlike solc; `Solidity/Source/**`
   is VY5's, so this is recorded, not changed.
+
+## Register (coordinator / integrator)
+
+- Roots: `Determinism`, `Correspondence` and `Controls` under
+  `Solidity/Frontend/ConstantDepth/` are in `Solidity.lean` via `register.sh`
+  (regenerate after merge).
+- Module map: rows in `docs/module-map/frontend.d/constant-depth.md`. Proposed
+  replacements for the placeholder RawInt rows in `docs/module-map/v08-adapters.d/00-base.md`
+  (not this lane's fragment): `RawInt/Execution.lean` — "raw intN/uintN calldata to
+  memory: width-specific accepted words, exact copy run, dirty-word revert with
+  rollback, frame-bound guarded entry"; `RawInt/Controls.lean` — "raw intN controls:
+  negative bytes at mixed offsets, near-width, padding, entry guards, selector
+  shift; exact axiom pins". The `Rank.lean` row sits in `v08-adapters.d/00-base.md`
+  and could move to the frontend area.
+- Axiom pins: `node scripts/check-axiom-pins.mjs --write` after integration
+  records `tests/sol-constant-depth/Axioms.lean` (83), `tests/calldata-packets-1105/RawInt/Axioms.lean`
+  (55) and the identical inline blocks closing both `Controls.lean` files.
