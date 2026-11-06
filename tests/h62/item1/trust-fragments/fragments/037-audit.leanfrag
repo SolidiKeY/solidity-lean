@@ -1,0 +1,16 @@
+/-! Lane CF1: the eager ABI entry decoder agrees with solc's lazy calldata reads (model only). -/
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.AbiEntry.mdec_cval,
+    ``Solidity.AbiEntry.eager_cref,
+    ``Solidity.AbiEntry.verdict_revert_iff,
+    ``Solidity.AbiEntry.verdict_run_entry]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} ABI entry-decoding theorems use only the standard axioms"
+
