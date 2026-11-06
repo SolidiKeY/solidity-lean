@@ -7,9 +7,9 @@ def sha(path):
  with path.open('rb') as f:
   for block in iter(lambda:f.read(1048576),b''):h.update(block)
  return h.hexdigest()
-def verified_corpus():
- packet=json.loads((OWNED/'corpus-inventory-manifest.json').read_text())
- source=OWNED/'artifacts/corpus-inventory';archive=ROOT/packet['archiveRelative']
+def verified_packet(manifestName,directory):
+ packet=json.loads((OWNED/manifestName).read_text())
+ source=OWNED/'artifacts'/directory;archive=ROOT/packet['archiveRelative']
  assert archive.resolve().is_relative_to((OWNED/'artifacts').resolve()) and not source.is_symlink()
  assert archive.stat().st_size==packet['archiveBytes'] and sha(archive)==packet['archiveSha256']
  index=source/'files.json';assert sha(index)==packet['filesManifestSha256']
@@ -22,3 +22,8 @@ def verified_corpus():
  assert expected=={str(p.relative_to(source)) for p in source.rglob('*') if p.is_file() and p!=index}
  assert len(expected)==packet['dataFiles'] and totalBytes==packet['dataBytes']
  return source,packet
+
+def verified_corpus():
+ return verified_packet('corpus-inventory-manifest.json','corpus-inventory')
+def verified_readers():
+ return verified_packet('corpus-readers-manifest.json','corpus-readers')

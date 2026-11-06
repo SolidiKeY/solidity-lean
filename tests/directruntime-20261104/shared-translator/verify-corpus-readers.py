@@ -5,11 +5,12 @@ from pathlib import Path
 from collections import Counter,defaultdict
 import hashlib,json,sys,subprocess
 sys.dont_write_bytecode=True
-from corpus_packet import verified_corpus
+from corpus_packet import verified_corpus,verified_readers
 ROOT=Path(__file__).resolve().parents[3];OWNED=Path(__file__).resolve().parent
 source,packet=verified_corpus()
 subprocess.run(['python3',str(OWNED/'verify-bulk.py')],check=True,cwd=ROOT)
-out=OWNED/'artifacts/corpus-readers'
+out,readersManifest=verified_readers()
+assert ROOT/readersManifest['censusDependencyManifest']==OWNED/'corpus-inventory-manifest.json'
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def canonical(value):return json.dumps(value,sort_keys=True,separators=(',',':'))
 forms=json.loads((source/'forms.json').read_text());casePacket=json.loads((out/'cases.json').read_text());cases=casePacket['cases']
@@ -73,5 +74,8 @@ for receipt in receipts:
   pairRows.append(row)
 (out/'normalization-identities.json').write_text(json.dumps(pairRows,indent=2)+'\n')
 summary={'cases':1926,'kinds':len({r['nodeType'] for r in cases}),'default':dict(Counter(r['natural']['status'] for r in matrices[0])),'composed':dict(Counter(r['natural']['status'] for r in matrices[1])),'unknownRootRefusalsEachReader':1632,'noStandaloneEntries':len(unknown),'changes':changes,'changedWitnesses':len(changes),'pairedNormalizedOccurrences':len(pairRows),'pairingCounts':dict(Counter(r['pairing'] for r in pairRows)),'idFieldPresence':dict(Counter(r.get('idFieldPresence','unpaired') for r in pairRows)),'referenceFieldPresence':dict(Counter(r.get('referenceFieldPresence','unpaired') for r in pairRows)),'outcomeTransitions':dict(Counter(x['default']['status']+'->'+x['composed']['status'] for x in changes)),'retainedReferenceParity':dict(Counter(r.get('referenceParity','not-retained-or-ambiguous') for r in pairRows)),'inputs':{name:sha(out/name) for name in ['cases.json','default.json','composed.json','normalization-identities.json']},'boundary':'All observed structural forms have one actual standalone outcome per reader or explicit no-entry status;not all scalar semantics/contexts/source states. Raw/normalized pairs use the same retained compiler packet,kind/src and retained ID;missing/ambiguous pairing remains unknown. Exact retained identity/signed-reference comparisons do not establish lexical scope,shadowing,overload selection,intrinsic closure or source/backend preservation. Producer comparison is expression printing only,not actual importer migration.'}
+for key in ['cases','default','composed','unknownRootRefusalsEachReader','pairedNormalizedOccurrences','idFieldPresence','referenceFieldPresence']:
+ assert summary[key]==readersManifest[key], 'reader manifest count mismatch: '+key
+assert summary['outcomeTransitions']==readersManifest['changes'], 'reader manifest transition mismatch'
 (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
 print(json.dumps({k:summary[k] for k in ['cases','kinds','default','composed','unknownRootRefusalsEachReader','changedWitnesses','pairedNormalizedOccurrences','pairingCounts','retainedReferenceParity','idFieldPresence','referenceFieldPresence','outcomeTransitions']}))
