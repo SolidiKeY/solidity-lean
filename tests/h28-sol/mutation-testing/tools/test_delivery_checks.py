@@ -64,6 +64,7 @@ class DeliveryReceiptControls(unittest.TestCase):
                 if fault == "size": members["data.txt"]["bytes"] = 8
                 if fault == "membership": members["missing.txt"] = members.pop("data.txt")
                 target.write_text(json.dumps({"schema": 1, "authorization": "H44", "archive": pin["archive"], "archive_bytes": pin["bytes"], "archive_sha256": pin["sha256"], "members": members}))
+                (repo / "tests/h28-sol/mutation-testing/bulk-data.json").write_text(json.dumps({"combined_proof_pack": pin}))
                 git("add", "."); git("commit", "-qm", "controlled member receipt")
                 if fault is None:
                     self.assertEqual(verify_bulk.verify_h44_member_manifest(repo, pin), 1)
@@ -74,4 +75,20 @@ class DeliveryReceiptControls(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
                         verify_bulk.verify_h44_member_manifest(repo, pin)
                     with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
+                        verify_combined.verify(repo)
+                    with self.assertRaisesRegex(ValueError, "archive member.*mismatch"):
                         verify_bulk.verify_validation_archives({"rollback_proof_pack": pin}, repo)
+
+    def test_archive_authentication_precedes_member_parsing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); repo = root / "repo"; repo.mkdir()
+            archive = root / "untrusted.tar.gz"; archive.write_bytes(b"not a tar stream")
+            pin = {"archive": str(archive), "bytes": archive.stat().st_size, "sha256": "0" * 64,
+                   "member_manifest": "tests/h28-sol/mutation-testing/evidence/missing.json"}
+            target = repo / "tests/h28-sol/mutation-testing/bulk-data.json"
+            target.parent.mkdir(parents=True); target.write_text(json.dumps({"combined_proof_pack": pin}))
+            def git(*args):
+                subprocess.run(["git", "-c", "user.name=H28 control", "-c", "user.email=h28@example.invalid", "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", *args], cwd=repo, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            git("init", "-q"); git("add", "."); git("commit", "-qm", "untrusted archive control")
+            with self.assertRaisesRegex(ValueError, "archive hash mismatch"):
+                verify_combined.verify(repo)
