@@ -2875,8 +2875,10 @@ import Solidity.Frontend.QualifiedUnits.Controls
 import Solidity.Frontend.QualifiedUnits.DifferentialControls
 import Solidity.Frontend.QualifiedUnits.Inheritance
 import Solidity.Frontend.QualifiedUnits.Layout
+import Solidity.Frontend.QualifiedUnits.Linearization
 import Solidity.Frontend.QualifiedUnits.Lookup
 import Solidity.Frontend.QualifiedUnits.MergeSpecification
+import Solidity.Frontend.QualifiedUnits.NormalizationAdequacy
 import Solidity.Frontend.QualifiedUnits.NormalizationControls
 import Solidity.Frontend.QualifiedUnits.ReferenceControls
 import Solidity.Frontend.QualifiedUnits.ReferenceCoverage
@@ -2890,6 +2892,8 @@ import Solidity.Frontend.QualifiedUnits.SignatureNormalization
 import Solidity.Frontend.QualifiedUnits.SignatureResolution
 import Solidity.Frontend.QualifiedUnits.SignatureResolutionControls
 import Solidity.Frontend.QualifiedUnits.Specification
+import Solidity.Frontend.QualifiedUnits.Target
+import Solidity.Frontend.QualifiedUnits.TargetControls
 import Solidity.Frontend.QualifiedUnits.TypePaths
 import Solidity.Frontend.QualifiedUnits.UnitPaths
 import Solidity.Frontend.SolcJson
@@ -4066,6 +4070,7 @@ import Solidity.Source.Monetary
 import Solidity.Source.MonetaryAuthority
 import Solidity.Source.MonetaryAuthoritySource
 import Solidity.Source.MonetaryExecution
+import Solidity.Source.MonetaryFit
 import Solidity.Source.MonetaryLaws
 import Solidity.Source.MonetaryRollback
 import Solidity.Source.MonetaryRollbackControls
@@ -6014,6 +6019,7 @@ import Solidity.Yul.Views.SlotTranslation
 import Solidity.Yul.Views.SnapshotHashBinding
 import Solidity.Yul.Views.SnapshotHashBindingControls
 import Solidity.Yul.Views.SourceBalanceControls
+import Solidity.Yul.Views.SourceBalanceExact
 import Solidity.Yul.Views.SourceBalanceInputs
 import Solidity.Yul.Views.SourceBalanceOperandControls
 import Solidity.Yul.Views.SourceBalanceOperands
@@ -6095,6 +6101,7 @@ import Solidity.Yul.World.Frames
 import Solidity.Yul.World.Lifecycle
 import Solidity.Yul.World.LifecycleAdapter
 import Solidity.Yul.World.LifecycleAdapterChecks
+import Solidity.Yul.World.LifecycleBalancesFit
 import Solidity.Yul.World.LifecycleFrameControls
 import Solidity.Yul.World.LifecycleFrames
 import Solidity.Yul.World.LogBuiltin
