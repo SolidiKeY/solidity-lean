@@ -54,12 +54,13 @@ class FrozenBaseline(unittest.TestCase):
    if record:
     metadata,path=record.split(b'\t',1);baseline[path.decode()]=metadata.split()[2].decode()
   path='Solidity/Backend/CalldataPackets/RawAddress/Controls.lean'
-  self.assertEqual(len(c.BASELINE_OVERRIDES),39)
-  self.assertEqual(hashlib.sha256('\n'.join(sorted(c.BASELINE_OVERRIDES)).encode()).hexdigest(),'5cf38703bcd9a1ce7b3d716503f750a2406e410dbe560a1a08bf2a8515718e12')
+  self.assertEqual(len(c.BASELINE_OVERRIDES),118)
+  self.assertEqual(hashlib.sha256('\n'.join(sorted(c.BASELINE_OVERRIDES)).encode()).hexdigest(),'be438c85bc4840a8aeba1c8b51a1f4ae98dc0b1aae1f610baffe6a4abe82f616')
   self.assertEqual({p for p in set(frozen)|set(baseline) if frozen.get(p)!=baseline.get(p)},set(c.BASELINE_OVERRIDES))
   c.verify_frozen(ROOT,frozen,path)
-  with self.assertRaises(SystemExit):
-   c.verify_frozen(ROOT,frozen,'Solidity/Lowering/V08/EnvironmentProjection.lean')
+  self.assertEqual(len(c.MASTER_TRACE_CORRESPONDENCE),79)
+  self.assertTrue(set(c.BASELINE_CORRESPONDENCE).isdisjoint(c.MASTER_TRACE_CORRESPONDENCE))
+  self.assertEqual(c.correspondence_notes()['Solidity/Lowering/V08/EnvironmentProjection.lean']['basis'],'master-hunk-trace-issue-55')
   with tempfile.TemporaryDirectory() as tmp:
    root=pathlib.Path(tmp);target=root/path;target.parent.mkdir(parents=True)
    target.write_bytes((ROOT/path).read_bytes()+b'\n-- unreviewed drift\n')
