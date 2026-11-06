@@ -89,5 +89,38 @@ theorem revert_step {k : SCtx} {e : Syn .expr} {y : String} {ps : List Tok}
 #print axioms emit_step
 #print axioms revert_step
 
+/-- The token after a contextual `revert` is not an identifier, so the
+statement dispatcher reads an expression statement (`revert(...)`, `revert;`,
+`revert = …`, …) rather than a `revert` statement. -/
+def revertExprNext : List Tok → Bool
+  | .ident _ :: _ => false
+  | _ => true
+
+theorem revert_expr_dispatch (m : Nat) (k : SCtx) (t : Tok) (rest : List Tok) (s : St)
+    (h : revertExprNext (t :: rest) = true) :
+    stmt (m + 1) k (locatedInput (.ident "revert" :: t :: rest) s) =
+      simpleStmt m k (locatedInput (.ident "revert" :: t :: rest) s) := by
+  cases t <;> first | rfl | cases h
+
+/-- `revert …;` read as a simple statement, from the `simple` premise. -/
+theorem revert_expr_coverage {k : SCtx} {x : Syn .simple} {ss : List Tok} {a : Nat}
+    (hx : SimpleAtom x (.ident "revert" :: ss) a)
+    (hr : revertExprNext (ss ++ [.punct .semi]) = true) (n : Nat) (s : St) :
+    stmt (n + (a + 1) + 6) k (locatedInput (.ident "revert" :: ss ++ [.punct .semi]) s) =
+      .ok (.simpleStmt x, s) := by
+  obtain ⟨t, tail, ht⟩ : ∃ t tail, ss ++ [Tok.punct .semi] = t :: tail := by
+    cases ss with
+    | nil => exact ⟨_, _, rfl⟩
+    | cons t tail => exact ⟨t, tail ++ [.punct .semi], rfl⟩
+  have fuel : n + (a + 1) + 6 = (n + 5 + a + 1) + 1 := by omega
+  rw [fuel, List.cons_append, ht, revert_expr_dispatch _ k t tail s (ht ▸ hr), ← ht,
+    ← List.cons_append]
+  change (simple (n + 5 + a) (locatedInput (.ident "revert" :: ss ++ [.punct .semi]) s)).bind
+    (fun p => ((do expectP .semi; return Syn.simpleStmt p.1) : P (Syn (.stmt k))) p.2) = _
+  rw [hx (n + 5) s]
+  rfl
+
+#print axioms revert_expr_dispatch
+#print axioms revert_expr_coverage
 
 end Solidity.Frontend.StatementGrammarH28

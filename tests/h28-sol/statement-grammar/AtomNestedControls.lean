@@ -37,7 +37,7 @@ theorem outer_relation : AtomItems outerItems outerParts 26 :=
 theorem outer_block_coverage (n : Nat) (s : St) :
     stmt (n + 26 + 6) .body (locatedInput (braces outerParts.flatten) s) =
       .ok (.blockStmt (.block outerItems), s) :=
-  atom_stmt_coverage (.block outer_relation) n s (Or.inl rfl)
+  atom_stmt_coverage (.block outer_relation) n s (Or.inl rfl) (Or.inl rfl)
 
 /-- An instance of the universal coverage theorem at zero excess fuel. -/
 theorem outer_block_at_fuel_32 :
@@ -99,6 +99,7 @@ theorem if_depth_relation (n : Nat) : AtomStmt (ifDepth n) (ifDepthTokens n) (if
 theorem arbitrary_depth_coverage (n extra : Nat) (s : St) (he : NoFollowingElse s) :
     stmt (extra + ifDepthBudget n + 6) .body (locatedInput (ifDepthTokens n) s) = .ok (ifDepth n, s) :=
   atom_stmt_coverage (if_depth_relation n) extra s (Or.inr he)
+    (Or.inl (by cases n <;> rfl))
 
 /-- Inside a block the closing brace frames an open if: a following else
 stays outside the block. -/
@@ -107,7 +108,7 @@ theorem open_if_in_block_closed (n : Nat) (s : St) :
       (locatedInput (braces [ifDepthTokens 1].flatten) (locatedInput [.kw .else_] s)) =
       .ok (.blockStmt (.block (.cons (.stmtItem (ifDepth 1)) .nil)), locatedInput [.kw .else_] s) :=
   atom_stmt_coverage (.block (.stmtCons (if_depth_relation 1) .nil)) n
-    (locatedInput [.kw .else_] s) (Or.inl rfl)
+    (locatedInput [.kw .else_] s) (Or.inl rfl) (Or.inl rfl)
 
 /-- Negative: `return;` is the empty return, not an atom return. -/
 theorem no_semi_head_refuses_empty : ¬ NoSemiHead [] := fun h => h.1 rfl
@@ -146,7 +147,7 @@ theorem for_do_relation : AtomStmt forDoTree forDoTokens 14 :=
 
 theorem for_do_arbitrary_suffix (n : Nat) (s : St) :
     stmt (n + 14 + 6) .body (locatedInput forDoTokens s) = .ok (forDoTree, s) :=
-  atom_stmt_coverage for_do_relation n s (Or.inl rfl)
+  atom_stmt_coverage for_do_relation n s (Or.inl rfl) (Or.inl rfl)
 
 /-- `for (; c; u) break;` in all four shapes of the optional condition and update. -/
 def forHeaderTokens (cs vs : List Tok) : List Tok :=
@@ -156,26 +157,26 @@ def forHeaderTokens (cs vs : List Tok) : List Tok :=
 theorem for_header_none_none (n : Nat) (s : St) :
     stmt (n + 1 + 6) .body (locatedInput (forHeaderTokens [] []) s) =
       .ok (.forStmt .none .none .none .breakStmt, s) :=
-  atom_stmt_coverage (.forAtom .none .none .breakStmt) n s (Or.inl rfl)
+  atom_stmt_coverage (.forAtom .none .none .breakStmt) n s (Or.inl rfl) (Or.inl rfl)
 
 theorem for_header_cond (n : Nat) (s : St) :
     stmt (n + 6 + 6) .body (locatedInput (forHeaderTokens [.ident "c"] []) s) =
       .ok (.forStmt .none (.some (.ident "c")) .none .breakStmt, s) :=
   atom_stmt_coverage (.forAtom (.some (ident_atom_semi "c") (by intro h; cases h)
-    (by intro h; cases h)) .none .breakStmt) n s (Or.inl rfl)
+    (by intro h; cases h)) .none .breakStmt) n s (Or.inl rfl) (Or.inl rfl)
 
 theorem for_header_update (n : Nat) (s : St) :
     stmt (n + 6 + 6) .body (locatedInput (forHeaderTokens [] [.ident "v"]) s) =
       .ok (.forStmt .none .none (.some (.ident "v")) .breakStmt, s) :=
   atom_stmt_coverage (.forAtom .none (.some (ident_atom_rparen "v") (by intro h; cases h)
-    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl)
+    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl) (Or.inl rfl)
 
 theorem for_header_both (n : Nat) (s : St) :
     stmt (n + 11 + 6) .body (locatedInput (forHeaderTokens [.bool true] [.ident "v"]) s) =
       .ok (.forStmt .none (.some (.lit (.bool true))) (.some (.ident "v")) .breakStmt, s) :=
   atom_stmt_coverage (.forAtom (.some (bool_atom_semi true) (by intro h; cases h)
     (by intro h; cases h)) (.some (ident_atom_rparen "v") (by intro h; cases h)
-    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl)
+    (by intro h; cases h)) .breakStmt) n s (Or.inl rfl) (Or.inl rfl)
 
 /-- The kernel evaluates the actual parser on the four-shape header. -/
 theorem for_header_both_kernel :
@@ -221,7 +222,7 @@ theorem simple_items_relation : AtomItems simpleItems simpleParts 33 :=
 theorem simple_block_coverage (n : Nat) (s : St) :
     stmt (n + 33 + 6) .body (locatedInput (braces simpleParts.flatten) s) =
       .ok (.blockStmt (.block simpleItems), s) :=
-  atom_stmt_coverage (.block simple_items_relation) n s (Or.inl rfl)
+  atom_stmt_coverage (.block simple_items_relation) n s (Or.inl rfl) (Or.inl rfl)
 
 /-- The kernel evaluates the actual parser on `x;` at the derived fuel. -/
 theorem simple_stmt_kernel :
@@ -269,7 +270,7 @@ theorem call_items_relation : AtomItems callItems callParts 8 :=
 theorem call_block_coverage (n : Nat) (s : St) :
     stmt (n + 8 + 6) .body (locatedInput (braces callParts.flatten) s) =
       .ok (.blockStmt (.block callItems), s) :=
-  atom_stmt_coverage (.block call_items_relation) n s (Or.inl rfl)
+  atom_stmt_coverage (.block call_items_relation) n s (Or.inl rfl) (Or.inl rfl)
 
 /-- The kernel evaluates the actual parser on `revert Err();`. -/
 theorem revert_kernel :

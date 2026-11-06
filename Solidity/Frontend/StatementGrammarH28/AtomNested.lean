@@ -1,4 +1,4 @@
-import Solidity.Frontend.StatementGrammarH28.AtomCall
+import Solidity.Frontend.StatementGrammarH28.AtomTry
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
@@ -157,6 +157,28 @@ inductive AtomStmt : {k : SCtx} → Syn (.stmt k) → List Tok → Nat → Prop 
       AtomStmt (k := k) (.revert e args)
         ([.ident "revert"] ++ (.ident y :: ps) ++ as ++ [.punct .semi]) b
 
+  | revertExpr {k : SCtx} {x : Syn .simple} {ss : List Tok} {a : Nat} :
+      SimpleAtom x (.ident "revert" :: ss) a → revertExprNext (ss ++ [.punct .semi]) = true →
+      AtomStmt (k := k) (.simpleStmt x) (.ident "revert" :: ss ++ [.punct .semi]) (a + 1)
+  | tryS {k : SCtx} {e : Syn .expr} {es : List Tok} {a : Nat}
+      {xs : Syn (.list (.item k))} {parts : List (List Tok)} {b : Nat}
+      {c : Syn (.catchClause k)} {cts : List Tok} {f : Nat}
+      {cs : Syn (.list (.catchClause k))} {cparts : List (List Tok)} {g : Nat} :
+      ExprAtomBrace e es a → AtomItems xs parts b → BlockBodyParts parts →
+      AtomCatch c cts f → AtomCatches cs cparts g →
+      AtomStmt (.tryStmt e .nil (.block xs) c cs)
+        ([.kw .try_] ++ es ++ braces parts.flatten ++ cts ++ cparts.flatten) (a + b + f + g + 2)
+  | tryRets {k : SCtx} {e : Syn .expr} {es : List Tok} {a : Nat}
+      {rets : Syn (.list .param)} {rs : List Tok} {r : Nat}
+      {xs : Syn (.list (.item k))} {parts : List (List Tok)} {b : Nat}
+      {c : Syn (.catchClause k)} {cts : List Tok} {f : Nat}
+      {cs : Syn (.list (.catchClause k))} {cparts : List (List Tok)} {g : Nat} :
+      ExprAtomReturns e es a → RetsAtom rets (.kw .returns :: rs) r → AtomItems xs parts b →
+      AtomCatch c cts f → AtomCatches cs cparts g →
+      AtomStmt (.tryStmt e rets (.block xs) c cs)
+        ([.kw .try_] ++ es ++ (.kw .returns :: rs) ++ braces parts.flatten ++ cts ++
+          cparts.flatten) (a + r + b + f + g + 2)
+
 inductive AtomItems : {k : SCtx} → Syn (.list (.item k)) → List (List Tok) → Nat → Prop where
   | nil {k : SCtx} : AtomItems (Syn.nil (c := .item k)) [] 0
   | stmtCons {k : SCtx} {x : Syn (.stmt k)} {xs : Syn (.list (.item k))}
@@ -168,7 +190,45 @@ inductive AtomItems : {k : SCtx} → Syn (.list (.item k)) → List (List Tok) �
       AtomItems ys qs c → AtomItems xs parts b →
       AtomItems (.cons (.uncheckedItem (.block ys)) xs)
         ((.kw .unchecked :: braces qs.flatten) :: parts) (max (c + 2) b)
+
+/-- Catch clauses with item-list bodies; signature parameters enter through
+the exposed `ParamsAtom` premise. -/
+inductive AtomCatch : {k : SCtx} → Syn (.catchClause k) → List Tok → Nat → Prop where
+  | plain {k : SCtx} {xs : Syn (.list (.item k))} {parts : List (List Tok)} {b : Nat} :
+      AtomItems xs parts b →
+      AtomCatch (.catchPlain (.block xs)) ([.kw .catch_] ++ braces parts.flatten) (b + 2)
+  | sig {k : SCtx} {name : Option String} {p : Syn .param} {ps : Syn (.list .param)}
+      {pts : List Tok} {a : Nat} {xs : Syn (.list (.item k))} {parts : List (List Tok)}
+      {b : Nat} :
+      ParamsAtom (.cons p ps) pts a → pts.head? = some (.punct .lparen) → AtomItems xs parts b →
+      AtomCatch (.catchSig name p ps (.block xs))
+        ([.kw .catch_] ++ optToks idt name ++ pts ++ braces parts.flatten) (a + b + 2)
+
+inductive AtomCatches : {k : SCtx} → Syn (.list (.catchClause k)) → List (List Tok) → Nat →
+    Prop where
+  | nil {k : SCtx} : AtomCatches (Syn.nil (c := .catchClause k)) [] 0
+  | cons {k : SCtx} {c : Syn (.catchClause k)} {cs : Syn (.list (.catchClause k))}
+      {ts : List Tok} {parts : List (List Tok)} {d b : Nat} :
+      AtomCatch c ts d → AtomCatches cs parts b → AtomCatches (.cons c cs) (ts :: parts) (max d b)
 end
+
+theorem atom_catch_head {k : SCtx} {c : Syn (.catchClause k)} {ts : List Tok} {d : Nat}
+    (h : AtomCatch c ts d) : ts.head? = some (.kw .catch_) := by
+  cases h <;> rfl
+
+theorem atom_catches_count_le : {k : SCtx} → {cs : Syn (.list (.catchClause k))} →
+    {parts : List (List Tok)} → {b : Nat} → AtomCatches cs parts b →
+    g0ListLength cs ≤ parts.flatten.length
+  | _, _, _, _, .nil => Nat.le_refl 0
+  | _, _, _, _, .cons (ts := ts) hc ht => by
+    have hn : ts.length ≠ 0 := by
+      intro zero
+      have hh := atom_catch_head hc
+      rw [List.eq_nil_of_length_eq_zero zero] at hh
+      cases hh
+    have ih := atom_catches_count_le ht
+    simp only [g0ListLength_cons, List.flatten_cons, List.length_append]
+    omega
 
 /-- No atom statement starts with `else`. -/
 theorem atom_stmt_no_else_input {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
@@ -191,6 +251,29 @@ theorem atom_items_no_else {k : SCtx} {xs : Syn (.list (.item k))} {parts : List
   | stmtCons hx _ =>
     rw [List.flatten_cons, locatedInput_append]
     exact atom_stmt_no_else_input hx _
+  | uncheckedCons => intro bad; cases bad
+
+/-- No atom statement starts with `catch`. -/
+theorem atom_stmt_no_catch_input {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
+    (h : AtomStmt x ts d) (s : St) : NoFollowingCatch (locatedInput ts s) := by
+  cases h
+  case simpleS _ hh =>
+    obtain ⟨t, tail, rfl, ht⟩ := simple_head_cons hh
+    intro bad
+    simp only [locatedInput, List.cons_append, List.map_cons, List.head?_cons, Option.map_some,
+      atToken, Option.some.injEq] at bad
+    subst bad
+    cases ht
+  all_goals (intro bad; cases bad)
+
+theorem atom_items_no_catch {k : SCtx} {xs : Syn (.list (.item k))} {parts : List (List Tok)}
+    {b : Nat} (h : AtomItems xs parts b) (s : St) (hs : NoFollowingCatch s) :
+    NoFollowingCatch (locatedInput parts.flatten s) := by
+  cases h with
+  | nil => exact hs
+  | stmtCons hx _ =>
+    rw [List.flatten_cons, locatedInput_append]
+    exact atom_stmt_no_catch_input hx _
   | uncheckedCons => intro bad; cases bad
 
 theorem atom_items_count_le : {k : SCtx} → {xs : Syn (.list (.item k))} →
@@ -372,25 +455,25 @@ theorem for_init_step {u : Bool} {x : Syn .simple} {ss : List Tok} {a : Nat}
 mutual
 /-- Coverage at every excess fuel and every framed suffix. -/
 theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List Tok} → {d : Nat} →
-    AtomStmt x ts d → ∀ (n : Nat) (s : St), StatementFrame x s →
+    AtomStmt x ts d → ∀ (n : Nat) (s : St), StatementFrame x s → CatchFrame x s →
       stmt (n + d + 6) k (locatedInput ts s) = .ok (x, s)
-  | k, _, _, b, .block (xs := xs) (parts := parts) h, n, s, _ => by
+  | k, _, _, b, .block (xs := xs) (parts := parts) h, n, s, _, _ => by
     have items := atom_items_at h (n + b + 4) (by omega)
     have hb := block_of_itemsAt xs parts.flatten (n + b + 4) (atom_items_count_le h) items s
     rw [blockInput_eq] at hb
     change stmt ((n + b + 5) + 1) k (blockInput parts.flatten s) = _
     rw [blockInput_eq, stmt_block_prefix, hb]
     rfl
-  | k, _, _, _, .returnNone, n, s, _ => atom_empty_return n k s
-  | _, _, _, _, .returnSome he hs, n, s, _ => atom_return_some he hs n s
-  | _, _, _, _, .breakStmt, n, s, _ => break_coverage (n + 5) _ 0 0 0 0 s
-  | _, _, _, _, .continueStmt, n, s, _ => continue_coverage (n + 5) _ 0 0 0 0 s
-  | k, _, _, _, .ifNone (c := c) (x := x) (ts := ts) (d := d) (a := a) hc h, n, s, hf => by
+  | k, _, _, _, .returnNone, n, s, _, _ => atom_empty_return n k s
+  | _, _, _, _, .returnSome he hs, n, s, _, _ => atom_return_some he hs n s
+  | _, _, _, _, .breakStmt, n, s, _, _ => break_coverage (n + 5) _ 0 0 0 0 s
+  | _, _, _, _, .continueStmt, n, s, _, _ => continue_coverage (n + 5) _ 0 0 0 0 s
+  | k, _, _, _, .ifNone (c := c) (x := x) (ts := ts) (d := d) (a := a) hc h, n, s, hf, hk => by
     have he : NoFollowingElse s := by
       rcases hf with hc' | he
       · cases hc'
       · exact he
-    have hb := atom_stmt_coverage h (n + a) s (Or.inr he)
+    have hb := atom_stmt_coverage h (n + a) s (Or.inr he) hk
     rw [locatedInput_append]
     have fuel : n + (d + a + 1) + 6 = (n + d + 6) + a + 1 := by omega
     rw [fuel, if_atom_prefix hc]
@@ -407,10 +490,11 @@ theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List T
     rw [eat_else_false s he]
     rfl
   | k, _, _, _, .ifSome (c := c) (t := t) (e := e) (ts := ts) (es := es) (d := d) (f := f)
-      (a := a) hc ht he hcl, n, s, hf => by
+      (a := a) hc ht he hcl, n, s, hf, hk => by
     let tail := locatedInput [.kw .else_] (locatedInput es s)
     have pt := atom_stmt_coverage ht (n + f + a) tail (Or.inl hcl)
-    have pe := atom_stmt_coverage he (n + d + a) s hf
+      (Or.inr (by intro bad; cases bad))
+    have pe := atom_stmt_coverage he (n + d + a) s hf hk
     have ft : n + f + a + d + 6 = n + (d + f) + 6 + a := by omega
     have fe : n + d + a + f + 6 = n + (d + f) + 6 + a := by omega
     rw [ft] at pt
@@ -427,46 +511,119 @@ theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List T
       (fun p => .ok (Syn.ifStmt c t (.some p.1), p.2)) = _
     rw [pe]
     rfl
-  | _, _, _, _, .whileLoop (l := l) (u := u) (d := d) (a := a) hc h, n, s, hf => by
+  | _, _, _, _, .whileLoop (l := l) (u := u) (d := d) (a := a) hc h, n, s, hf, hk => by
     rw [locatedInput_append]
     have fuel : n + (d + a + 1) + 6 = (n + d + 6) + a + 1 := by omega
     rw [fuel, while_atom_prefix hc]
     have fb : n + d + 6 + a = n + a + d + 6 := by omega
-    rw [fb, atom_stmt_coverage h (n + a) s hf]
+    rw [fb, atom_stmt_coverage h (n + a) s hf hk]
     rfl
-  | _, _, _, _, .forLoop (l := l) (u := u) (ts := ts) (d := d) h, n, s, hf => by
+  | _, _, _, _, .forLoop (l := l) (u := u) (ts := ts) (d := d) h, n, s, hf, hk => by
     rw [locatedInput_append, stmt]
     change (stmt (n + (d + 1) + 5) ⟨true, u⟩ (locatedInput ts s)).bind
       (fun p => .ok (Syn.forStmt (l := l) .none .none .none p.1, p.2)) = _
     have fuel : n + (d + 1) + 5 = n + d + 6 := by omega
-    rw [fuel, atom_stmt_coverage h n s hf]
+    rw [fuel, atom_stmt_coverage h n s hf hk]
     rfl
   | _, _, _, _, .forAtom (l := l) (u := u) (x := x) (ts := ts) (d := d)
-      (ca := ca) (va := va) hc hv h, n, s, hf => by
-    have hb := atom_stmt_coverage h (n + ca + va) s hf
+      (ca := ca) (va := va) hc hv h, n, s, hf, hk => by
+    have hb := atom_stmt_coverage h (n + ca + va) s hf hk
     have fuel : n + (d + ca + va + 1) + 6 = (n + d + 1) + ca + va + 5 + 1 := by omega
     rw [show n + ca + va + d + 6 = (n + d + 1) + ca + va + 5 by omega] at hb
     rw [fuel]
     exact for_atom_step hc hv (n + d + 1) l s hb
-  | _, _, _, _, .simpleS hx hh, n, s, _ => simple_stmt_coverage hx hh n s
-  | _, _, _, b, .emitS hp ha hl _, n, s, _ => by
+  | _, _, _, _, .simpleS hx hh, n, s, _, _ => simple_stmt_coverage hx hh n s
+  | _, _, _, _, .revertExpr hx hr, n, s, _, _ => revert_expr_coverage hx hr n s
+  | k, _, _, _, .tryS (e := e) (es := es) (a := a) (xs := xs) (parts := parts) (b := b)
+      (c := c) (cts := cts) (f := f) (cs := cs) (cparts := cparts) (g := g)
+      he hi hbp hc hcs, n, s, _, hf => by
+    have hk : NoFollowingCatch s := hf.resolve_left (by intro bad; cases bad)
+    let S := locatedInput (cts ++ cparts.flatten) s
+    have pe := he (n + b + f + g + 7) parts.flatten S hbp
+    rw [show n + b + f + g + 7 + a = n + a + b + f + g + 7 by omega] at pe
+    have pr := empty_rets_atom (n + a + b + f + g + 6) parts.flatten S
+    have pb := block_of_itemsAt xs parts.flatten (n + a + b + f + g + 6)
+      (atom_items_count_le hi) (atom_items_at hi (n + a + b + f + g + 6) (by omega)) S
+    have pc : many (catchStep (n + a + b + f + g + 7) k) S = .ok (c :: g0ListValues cs, s) := by
+      apply catches_many
+      · have hl := atom_catches_count_le hcs
+        have hh := atom_catch_head hc
+        cases cts with
+        | nil => cases hh
+        | cons t tail =>
+          simp only [List.cons_append, List.length_cons, List.length_append]
+          omega
+      · intro extra
+        rw [locatedInput_append]
+        exact many_aux_cons (atom_catch_step hc _ (by omega) _)
+          (atom_catches_many_aux hcs _ (by omega) extra s hk)
+    have step := try_step (k := k) (n + a + b + f + g + 7) es [] (braces parts.flatten) S S s
+      (by simpa only [List.append_nil, List.nil_append, blockInput] using pe)
+      (by simpa only [List.nil_append, blockInput] using pr)
+      (by simpa only [blockInput] using pb) pc
+    have hin : locatedInput ([.kw .try_] ++ es ++ braces parts.flatten ++ cts ++ cparts.flatten) s =
+        locatedInput ([.kw .try_] ++ es ++ [] ++ braces parts.flatten) S := by
+      simp only [S, ← locatedInput_append, List.append_assoc, List.nil_append]
+    rw [hin, show n + (a + b + f + g + 2) + 6 = n + a + b + f + g + 7 + 1 by omega, step]
+    change Except.ok (Syn.tryStmt e .nil (.block xs) c (toSynList (itemsAsList cs)), s) = _
+    rw [itemsAsList_inverse]
+  | k, _, _, _, .tryRets (e := e) (es := es) (a := a) (rets := rets) (rs := rs) (r := r)
+      (xs := xs) (parts := parts) (b := b)
+      (c := c) (cts := cts) (f := f) (cs := cs) (cparts := cparts) (g := g)
+      he hr hi hc hcs, n, s, _, hf => by
+    have hk : NoFollowingCatch s := hf.resolve_left (by intro bad; cases bad)
+    let S := locatedInput (cts ++ cparts.flatten) s
+    have pe := he (n + r + b + f + g + 7) (rs ++ braces parts.flatten) S
+    rw [show n + r + b + f + g + 7 + a = n + a + r + b + f + g + 7 by omega] at pe
+    have pr := hr (n + a + b + f + g + 7) parts.flatten S
+    rw [show n + a + b + f + g + 7 + r = n + a + r + b + f + g + 7 by omega] at pr
+    have pb := block_of_itemsAt xs parts.flatten (n + a + r + b + f + g + 6)
+      (atom_items_count_le hi) (atom_items_at hi (n + a + r + b + f + g + 6) (by omega)) S
+    have pc : many (catchStep (n + a + r + b + f + g + 7) k) S =
+        .ok (c :: g0ListValues cs, s) := by
+      apply catches_many
+      · have hl := atom_catches_count_le hcs
+        have hh := atom_catch_head hc
+        cases cts with
+        | nil => cases hh
+        | cons t tail =>
+          simp only [List.cons_append, List.length_cons, List.length_append]
+          omega
+      · intro extra
+        rw [locatedInput_append]
+        exact many_aux_cons (atom_catch_step hc _ (by omega) _)
+          (atom_catches_many_aux hcs _ (by omega) extra s hk)
+    have step := try_step (k := k) (n + a + r + b + f + g + 7) es (.kw .returns :: rs)
+      (braces parts.flatten) S S s
+      (by simpa only [List.append_assoc, List.cons_append] using pe)
+      (by simpa only [blockInput] using pr)
+      (by simpa only [blockInput] using pb) pc
+    have hin : locatedInput ([.kw .try_] ++ es ++ (.kw .returns :: rs) ++ braces parts.flatten ++
+        cts ++ cparts.flatten) s =
+        locatedInput ([.kw .try_] ++ es ++ (.kw .returns :: rs) ++ braces parts.flatten) S := by
+      simp only [S, ← locatedInput_append, List.append_assoc]
+    rw [hin, show n + (a + r + b + f + g + 2) + 6 = n + a + r + b + f + g + 7 + 1 by omega, step]
+    change Except.ok (Syn.tryStmt e rets (.block xs) c (toSynList (itemsAsList cs)), s) = _
+    rw [itemsAsList_inverse]
+  | _, _, _, b, .emitS hp ha hl _, n, s, _, _ => by
     rw [show n + b + 6 = (n + 5) + b + 1 by omega]
     exact emit_step hp ha hl (n + 5) s
-  | _, _, _, b, .revertS hp ha hl _, n, s, _ => by
+  | _, _, _, b, .revertS hp ha hl _, n, s, _, _ => by
     rw [show n + b + 6 = (n + 5) + b + 1 by omega]
     exact revert_step hp ha hl (n + 5) s
   | _, _, _, _, .forInit (l := l) (u := u) (ts := ts) (d := d) (a := a) (ca := ca) (va := va)
-      hx hh hc hv h, n, s, hf => by
-    have hb := atom_stmt_coverage h (n + a + ca + va) s hf
+      hx hh hc hv h, n, s, hf, hk => by
+    have hb := atom_stmt_coverage h (n + a + ca + va) s hf hk
     rw [show n + a + ca + va + d + 6 = (n + d + 1) + a + ca + va + 5 by omega] at hb
     rw [show n + (d + a + ca + va + 1) + 6 = (n + d + 1) + a + ca + va + 5 + 1 by omega]
     exact for_init_step hx hh hc hv (n + d + 1) l s hb
   | _, _, _, _, .doLoop (l := l) (u := u) (c := c) (cs := cs) (x := x) (ts := ts) (d := d)
-      (a := a) hc h, n, s, _ => by
+      (a := a) hc h, n, s, _, _ => by
     let tail := locatedInput ([.kw .while_, .punct .lparen] ++ cs ++
       [.punct .rparen, .punct .semi]) s
     have frame : StatementFrame x tail := Or.inr (by intro bad; cases bad)
     have hb := atom_stmt_coverage h (n + a) tail frame
+      (Or.inr (by intro bad; cases bad))
     have fb : n + a + d + 6 = n + (d + a + 1) + 5 := by omega
     rw [fb] at hb
     have ht : locatedInput ([.kw .do_] ++ ts ++ [.kw .while_, .punct .lparen] ++ cs ++
@@ -509,7 +666,9 @@ theorem atom_items_at : {k : SCtx} → {xs : Syn (.list (.item k))} →
     have head : blockLeafStep fuel k (locatedInput ts (leafInput parts.flatten s)) =
         .ok (some (.stmtItem x), leafInput parts.flatten s) := by
       rw [eqfuel]
-      exact atom_item_step hh (n + d + 6) _ (atom_stmt_coverage hh n _ frame)
+      have hk : NoFollowingCatch (leafInput parts.flatten s) :=
+        atom_items_no_catch ht (endState s) (by intro bad; cases bad)
+      exact atom_item_step hh (n + d + 6) _ (atom_stmt_coverage hh n _ frame (Or.inr hk))
     exact many_aux_cons head (atom_items_at ht fuel (by omega) extra s)
   | _, _, _, _, .uncheckedCons (l := l) (ys := ys) (xs := xs) (qs := qs) (parts := parts)
       (c := c) (b := b) hy ht, fuel, hf => by
@@ -529,6 +688,46 @@ theorem atom_items_at : {k : SCtx} → {xs : Syn (.list (.item k))} →
       rw [eqfuel]
       exact step_unchecked_of_coverage ((n + c) + 1) l (.block ys) qs.flatten _ inner
     exact many_aux_cons head (atom_items_at ht fuel (by omega) extra s)
+
+/-- One catch-loop step at every fuel above the clause budget. -/
+theorem atom_catch_step : {k : SCtx} → {c : Syn (.catchClause k)} → {ts : List Tok} → {d : Nat} →
+    AtomCatch c ts d → ∀ fuel, d ≤ fuel → ∀ s,
+      catchStep fuel k (locatedInput ts s) = .ok (some c, s)
+  | k, _, _, _, .plain (xs := xs) (parts := parts) (b := b) h, fuel, hf, s => by
+    obtain ⟨n, rfl⟩ : ∃ n, fuel = (n + b + 1) + 1 := ⟨fuel - b - 2, by omega⟩
+    have pb := block_of_itemsAt xs parts.flatten (n + b) (atom_items_count_le h)
+      (atom_items_at h (n + b) (by omega)) s
+    rw [catch_step_start _ k _ s rfl]
+    have hi : locatedInput ([.kw .catch_] ++ braces parts.flatten) s =
+        plainCatchInput parts.flatten s := by
+      simp only [plainCatchInput, blockInput, tk, ← locatedInput_append]
+    rw [hi, catch_plain_prefix, pb]
+    rfl
+  | k, _, _, _, .sig (name := name) (a := a) (xs := xs) (parts := parts) (b := b) hp hl h,
+      fuel, hf, s => by
+    obtain ⟨n, rfl⟩ : ∃ n, fuel = (n + b + 1) + a + 1 := ⟨fuel - a - b - 2, by omega⟩
+    have pb := block_of_itemsAt xs parts.flatten (n + a + b) (atom_items_count_le h)
+      (atom_items_at h (n + a + b) (by omega)) s
+    rw [show n + a + b + 1 = n + b + 1 + a by omega] at pb
+    rw [catch_step_start _ k _ s rfl, catch_sig_step name hp hl (n + b + 1) parts.flatten s s pb]
+    rfl
+
+/-- The catch loop over a clause list, ending at a suffix without `catch`. -/
+theorem atom_catches_many_aux : {k : SCtx} → {cs : Syn (.list (.catchClause k))} →
+    {parts : List (List Tok)} → {b : Nat} → AtomCatches cs parts b →
+    ∀ fuel, b ≤ fuel → ∀ extra s, NoFollowingCatch s →
+      manyAux (catchStep fuel k) (extra + g0ListLength cs + 1) (locatedInput parts.flatten s) =
+        .ok (g0ListValues cs, s)
+  | k, _, _, _, .nil, fuel, _, extra, s, hs => by
+    simp only [g0ListLength_nil, g0ListValues_nil, List.flatten_nil, Nat.add_zero]
+    change manyAux _ (extra + 1) s = _
+    exact many_aux_none (catch_step_stop fuel k s hs)
+  | k, _, _, _, .cons (cs := cs) (parts := parts) hc ht, fuel, hf, extra, s, hs => by
+    simp only [g0ListLength_cons, g0ListValues_cons, List.flatten_cons]
+    rw [locatedInput_append]
+    change manyAux _ ((extra + g0ListLength cs + 1) + 1) _ = _
+    exact many_aux_cons (atom_catch_step hc fuel (by omega) _)
+      (atom_catches_many_aux ht fuel (by omega) extra s hs)
 end
 
 /-- Block-statement, block and unchecked-item coverage for item lists. -/
@@ -566,8 +765,8 @@ theorem atom_stmt_token_unique {k : SCtx} {x y : Syn (.stmt k)}
   subst us
   let s : St := ⟨[], [], 0⟩
   have frame (z : Syn (.stmt k)) : StatementFrame z s := Or.inr (by intro bad; cases bad)
-  have px := atom_stmt_coverage hx e s (frame x)
-  have py := atom_stmt_coverage hy d s (frame y)
+  have px := atom_stmt_coverage hx e s (frame x) (Or.inr (by intro bad; cases bad))
+  have py := atom_stmt_coverage hy d s (frame y) (Or.inr (by intro bad; cases bad))
   have hf : e + d + 6 = d + e + 6 := by omega
   rw [hf] at px
   exact congrArg Prod.fst (Except.ok.inj (px.symm.trans py))
@@ -578,11 +777,12 @@ theorem atom_stmt_prefix_unique {k : SCtx} {x y : Syn (.stmt k)}
     (hy : AtomStmt y us e) (s : St)
     (fx : StatementFrame x (locatedInput rest s))
     (fy : StatementFrame y (locatedInput tail s))
+    (cx : CatchFrame x (locatedInput rest s)) (cy : CatchFrame y (locatedInput tail s))
     (he : ts ++ rest = us ++ tail) : x = y ∧ rest = tail := by
   have input : locatedInput ts (locatedInput rest s) = locatedInput us (locatedInput tail s) := by
     rw [← locatedInput_append, ← locatedInput_append, he]
-  have px := atom_stmt_coverage hx e (locatedInput rest s) fx
-  have py := atom_stmt_coverage hy d (locatedInput tail s) fy
+  have px := atom_stmt_coverage hx e (locatedInput rest s) fx cx
+  have py := atom_stmt_coverage hy d (locatedInput tail s) fy cy
   have fuel : e + d + 6 = d + e + 6 := by omega
   rw [fuel, input] at px
   have pair := Except.ok.inj (px.symm.trans py)
@@ -628,6 +828,12 @@ theorem atom_items_of_leaf_items {k : SCtx} {xs : Syn (.list (.item k))} {ts : L
 #print axioms for_init_step
 #print axioms atom_stmt_coverage
 #print axioms atom_items_at
+#print axioms atom_catch_step
+#print axioms atom_catches_many_aux
+#print axioms atom_catch_head
+#print axioms atom_catches_count_le
+#print axioms atom_stmt_no_catch_input
+#print axioms atom_items_no_catch
 #print axioms atom_items_block_coverage
 #print axioms atom_items_unchecked_coverage
 #print axioms atom_stmt_node

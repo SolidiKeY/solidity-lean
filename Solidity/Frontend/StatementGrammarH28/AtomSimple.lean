@@ -19,7 +19,7 @@ no-else frame and the `for` header's `eat ;`. -/
 def simpleHead : Tok → Bool
   | .kw k => !(k == .if_ || k == .for_ || k == .while_ || k == .do_ || k == .continue_ ||
       k == .break_ || k == .try_ || k == .return_ || k == .emit || k == .assembly ||
-      k == .unchecked || k == .else_)
+      k == .unchecked || k == .else_ || k == .catch_)
   | .punct p => !(p == .lbrace || p == .rbrace || p == .semi)
   | .ident x => x != "revert"
   | _ => true
