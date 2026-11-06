@@ -316,4 +316,17 @@ theorem box_captured : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.C
   intro ctx control code policy state fuel result done
   exact RawFrame.run_captured ctx control code policy fuel state result done
 
+/-- A sparse alleged target is excluded from every completed result.
+This box allows actual completion at other, fully captured outcomes. -/
+theorem box_not_sparse : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (state : Solidity.Yul.RawFrame.State ctx) (target : Solidity.Yul.RawFrame.Outcome ctx control)
+ (cell : Solidity.Yul.WordCell (Solidity.Yul.localExternalTypes ctx)),
+ target.state.raw cell = none →
+ Solidity.Yul.RawFrame.Logic.holds .box code policy (fun result => result ≠ target) state := by
+  intro ctx control code policy state target cell missing fuel result done equal
+  cases equal
+  exact RawFrame.run_not_sparse ctx control code policy fuel state target cell missing done
+
 end Solidity.Yul.RawFrame.Logic
