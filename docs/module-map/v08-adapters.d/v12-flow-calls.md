@@ -32,3 +32,5 @@
 | `Backend/InternalFlow/RuntimeFrameV3OuterAllocatingCall.lean` | Executed allocating scalar call with actual exported caller representation and ordered result/control observations. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamily.lean` | Fixed-image actual outer return over all capacity-admitted counts and sufficient source indices, with exported caller representation, total allocator transport, base extension and older-word preservation below an arbitrary runtime start. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterFamilyControls.lean` | Inhabited zero/one-allocation families, complete ordered observations, changed-caller-result transport, starts9/11 and protected-word/scalar/halt negatives. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlan.lean` | State-indexed argument demand and positive-allocation frozen Returned transport from existing Entry capacity; zero-cost and universal ReturnClaim remain open. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlanControls.lean` | Inhabited complete Entry and Returned across sufficient source indices, exact cursor/reference/counter/result/pointer vector and revert rejection. |
