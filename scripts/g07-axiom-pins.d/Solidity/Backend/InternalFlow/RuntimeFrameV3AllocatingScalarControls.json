@@ -1,0 +1,52 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.args_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.bad_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.callee": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.default_entry": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.generic_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.heap_observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.native": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.observations": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.shallow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.shallow_not_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.wrong_growth": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarSource.Controls.wrong_result": [
+  "propext"
+ ]
+}

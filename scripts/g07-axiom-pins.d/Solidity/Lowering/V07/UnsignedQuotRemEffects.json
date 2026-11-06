@@ -1,0 +1,48 @@
+{
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.code_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.code_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.divisor_range": [],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.operand_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.source_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.transport_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRemEffects.lean:Solidity.Lowering.V07.UnsignedQuotRemEffects.transport_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
