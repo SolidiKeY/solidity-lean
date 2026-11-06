@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "requested_state": "PAUSED",
+  "applied": false,
+  "available_goal_tools": [
+    {
+      "name": "mcp__codex_apps__codex_goals_stop_goal",
+      "allowed_outcomes": [
+        "complete",
+        "blocked"
+      ]
+    }
+  ],
+  "precise_failure": "PAUSED is not an allowed operation in the exposed goal-tool schema; no pause or set-status tool is callable. No invalid enum call or unrelated automation change attempted.",
+  "implementation_continuation_authorized": false,
+  "retirement_resume_question": "Q-H82-RESUME resolved: KEEP RETIREMENT",
+  "host_followup": "Coordinator will apply PAUSED after final head report/idle"
+}
