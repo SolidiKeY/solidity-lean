@@ -1,0 +1,11 @@
+{
+  "environment_id": "ccarenv_b64_Y2NhcmVudl82NzAzMzRlNGJiNzg4MTkxYmE0NjUxZmI3MzFkYjFiMQ",
+  "original_cwd": "/workspace",
+  "initial_status": "starting",
+  "date": "2026-11-06",
+  "timezone": "Etc/UTC",
+  "original_checkout": "/workspace/solidity-lean",
+  "original_checkout_branch": "work",
+  "original_checkout_head": "6cf853aea0417155aca29ddb91f1767d3f3a3cc4",
+  "isolated_task_checkout": "/workspace/migrate-lowering"
+}
