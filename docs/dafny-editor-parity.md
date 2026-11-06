@@ -1133,3 +1133,14 @@ bundles/artifact checksums remain untouched. Exact-head receipts follow there.
 Whole original queue and all mandatory proof/runtime/rendered/performance/
 adversarial/scaling/fresh-judge gates remain unfinished; no gate, theorem,
 axiom/sorry, budget, exclusion or goal status changed. No push/merge/PR.
+
+A follow-up native compiler regression for the same first obligation reproduced
+a change-back race: an imported unit changed during compilation and returned to
+its admitted disk bytes before completion. Main-source and final-disk checks
+alone accepted the mismatched artifact. Build now checks every emitted unit's
+name, uniqueness and hash against the admitted project snapshot. Single-source
+header checks remain; valid remapped multi-source builds still pass. The runtime
+wrapper injects the race; the compiler itself is real. Before/after results and
+read-only reviews are bound by the existing custom-build evidence manifest's
+provenanceFollowup entry. No IDs/row requirements or proof budgets changed;
+native macOS and full parity remain pending.

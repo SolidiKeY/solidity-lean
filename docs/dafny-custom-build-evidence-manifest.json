@@ -26,5 +26,15 @@
     "injected editor guard tests labeled",
     "actual Linux submenu and ordinary Build only",
     "native custom action, paired Dafny and macOS remain pending"
-  ]
+  ],
+  "provenanceFollowup": {
+    "path": "/workspace/dafny-parity-custom-build-20261106/provenance-evidence.tar.gz",
+    "bytes": 2020,
+    "sha256": "67441f7a0fc94b60eebc8826281ae147fee65c05b32dd0a16f5b25e46776838b",
+    "scope": "Same first obligation: actual compiler via injected dependency-change wrapper; old acceptance reproduced, all unit digests now bound to admitted snapshot; no proof pass",
+    "reviewMember": {
+      "path": "REVIEWS-provenance.md",
+      "sha256": "e9fd329ca8ac161ef46656ddaa24a99caa6e37ebe542f4de3a602cd469cd0892"
+    }
+  }
 }
