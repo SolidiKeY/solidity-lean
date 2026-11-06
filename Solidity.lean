@@ -3882,6 +3882,11 @@ import Solidity.SolcValidation.Dialect
 import Solidity.SolcValidation.IrAbiHelpers
 import Solidity.SolcValidation.IrAbiSim
 import Solidity.SolcValidation.IrCensus
+import Solidity.SolcValidation.IrCensusCreation
+import Solidity.SolcValidation.IrCensusDeployed
+import Solidity.SolcValidation.IrCensusMaps
+import Solidity.SolcValidation.IrCensusTransfer
+import Solidity.SolcValidation.IrCensusTree
 import Solidity.SolcValidation.IrEval
 import Solidity.SolcValidation.IrEvalFuel
 import Solidity.SolcValidation.IrExpHelpers
@@ -3891,9 +3896,11 @@ import Solidity.SolcValidation.IrHelperSim
 import Solidity.SolcValidation.IrHelperSource
 import Solidity.SolcValidation.IrHelperSteps
 import Solidity.SolcValidation.IrHelpers
+import Solidity.SolcValidation.IrLinkedCode
 import Solidity.SolcValidation.IrParse
 import Solidity.SolcValidation.IrPushHelpers
 import Solidity.SolcValidation.IrPushSim
+import Solidity.SolcValidation.IrRename
 import Solidity.SolcValidation.IrSyntax
 import Solidity.Solkey.ComputedRevert
 import Solidity.Solkey.Constructors
