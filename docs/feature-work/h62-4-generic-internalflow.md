@@ -449,3 +449,17 @@ Read-only source census at successor input 371ac25a44ae9a77500da2308229992a675ac
 `Backend/WorldCalls/Premises` explicitly supplies conditional interfaces rather than an executable world CALL producer. An inhabited primitive body or checked local store is therefore not evidence that `WorldLogAt` is inhabited. Source raw halts keep their own bytes; only completed outcomes constrain the last-returndata field. Coarse target revert/fault has no invented machine endpoint.
 
 No Lean declaration, proof, evaluator, statement or budget changed. Migration compatibility remains with migrate-root-gate (`Syntax/Raw.lean` and reported axiom growth); this source census does not accept that prerequisite.
+
+## Successor Client failure-stage tranche
+
+Read-only accounting after published-master adoption; no original theorem or prior census total changed. These two explicit `Client` regions distinguish argument failure from callee-write failure. Names below are lexical declaration accounting, not a Lean completeness oracle.
+
+- `RuntimeFrameV3OrderedArgumentFailure.Client`: `checked_failure`, `image`, `source`, `target_suffix`, `target`, `program`, `whole_source`, `whole_target`, `failure_stages`, `source_not_exhausted`, `target_not_ok`, `target_not_fault`, `zero_control`. Raw source SHA256 `b1ad0c1702c629e9aff090f9486303188f3363a1dcafb149079fe905ed285094`.
+
+- `RuntimeFrameV3EffectfulScalarFailure.Client`: `arguments`, `actual_write_failure`, `source`, `write_code`, `target`, `program`, `whole_source`, `whole_target`, `arguments_not_failure`, `source_not_exhausted`, `target_not_ok`, `target_not_fault`, `zero_control`. Raw source SHA256 `9feb953f97636546175128d2396a1e65769b46adfdcd851e89b2ac8a174de3c5`.
+
+OrderedArgumentFailure: `checked_failure` retains failing argument evaluation, every function/depth/destination and every target suffix. `source`, `target_suffix`, `target`, `whole_source` and `whole_target` transport that same actual failure through the prepared prefix; `failure_stages` contrasts the valid literal count. The not-exhausted/not-ok/not-fault observations and `zero_control` preserve the distinction from a genuinely shallow recursive call.
+
+EffectfulScalarFailure: `arguments` actually succeeds; `actual_write_failure` is a concrete heap-write refusal. `source` and `target` therefore locate failure in the callee write, not argument decoding. `write_code` pins the selected writer; whole-program lemmas retain the preparation prefix. `arguments_not_failure`, `source_not_exhausted`, `target_not_ok`, `target_not_fault` and `zero_control` preserve all contrasts. Neither region supplies Source panic bytes, G42 callback execution, monetary rollback or a target reverted machine.
+
+Generalization must keep the stage-specific actual argument/write evidence and original depth/suffix quantifiers. It must not collapse both failures into an unqualified supplied revert result. Full semantic correspondence, axiom audit and comparable timings remain open.
