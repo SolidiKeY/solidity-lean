@@ -487,3 +487,31 @@ The 37 Bridge files remain uninspected by the elaborated census. Existing
 producer waits, meaningful-success/gas/fork work, full affected gates and final
 performance obligations remain open. No current H81 policy or historical bulk
 Lean evidence is inferred from these source hashes.
+
+
+## Bridge inspection preparation
+
+The additive `scripts/h62/item2/audit-bytecode-selection/bridge_inspection.py`
+provides the missing Bridge selection path without changing the original core
+generator or its manifest format. It reads the retired census and exact Lean
+inspection template from immutable Git objects at the authenticated final member
+head. It retains the frozen map/source checks and emits only Bridge selections.
+The package directory is removed from import names, so the module name begins
+with `SolidityBridge`, not `Bridge.SolidityBridge`. Unknown, duplicate, escaping
+or core-module selections are refused.
+
+The full frozen 37-Bridge-file program and a deterministic repeat were generated
+under `/workspace/parallel-20261103/executable-bytecode/h82-bridge-generator/`.
+The program and schema-2 source manifests are byte-identical between repeats.
+The manifest pins the exact template, source files, original tool objects and
+new emitter. Schema 2 records package-aware module/source pairs; it is not an
+old core-manifest acceptance receipt. Six unit tests exercise import naming,
+selection refusal, literal-template extraction without executing the generator,
+exact-template preservation, determinism and changed/symlink source refusal.
+
+**No emitted Bridge program has run.** Compatible dependency provisioning,
+execution/normalization of this full program, kernel/source linkage, obligation
+classification, joint witnesses and all affected gates remain pending. The
+existing 37-file uninspected elaborated-census count is not reduced by source
+program generation. No proof option, theorem, premise, exclusion, producer or
+live Bridge source changed.
