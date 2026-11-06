@@ -59,7 +59,7 @@
         "Solidity.Backend.WorldCalls.UnknownSourceControls.children",
         "Solidity.Backend.WorldCalls.UnknownRevertControls.children"
       ],
-      "status": "pending owner intent",
+      "status": "waiting RO owner decision",
       "evidence": "tests/h62/item2/audit-readonly-calls/HiddenClients.lean; continuation-semantic/evidence/hidden-clients.log",
       "question_id": "Q-CALLBACK-INTENT",
       "question_resolved": false,
@@ -68,7 +68,12 @@
         "Intentional no-callback separation controls: accept checked joint impossibility under H69, never as positive witnesses.",
         "Ordinary producer obligations: retain pending status until owners publish reachable versions or fixtures."
       ],
-      "delivery_status": "New request saved for coordinator relay; H70 acceptance applies to prior RO-v2/compiler-success tickets, not this new question."
+      "delivery_status": "Coordinator confirms routed to RO owner; owner decision pending. V13 declaration ownership remains unchanged.",
+      "wait": {
+        "lane": "solidity-compiler10-20261028/readonly-external",
+        "item": "Q-CALLBACK-INTENT"
+      },
+      "decision_owner": "solidity-compiler10-20261028/readonly-external"
     },
     {
       "id": "SEMANTIC-CHECKING-PERFORMANCE-STOP",
