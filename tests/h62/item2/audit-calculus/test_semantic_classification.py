@@ -47,6 +47,25 @@ class SemanticClassificationControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unaccounted"):
             classify(self.source, self.curated)
 
+    def test_multifile_review_requires_every_declared_file_candidate(self):
+        self.curated.pop("reviewed_file")
+        self.curated["reviewed_files"] = ["f", "g"]
+        with self.assertRaisesRegex(ValueError, "unaccounted"):
+            classify(self.source, self.curated)
+        second = self.source["declarations"][1]
+        self.curated["declarations"].append(dict(second, name=second["source_name"], global_proof_obligations={}, per_input_proof_facts={}))
+        result = classify(self.source, self.curated)
+        self.assertEqual(result["counts"]["role_reviewed"], 2)
+        self.assertEqual(result["counts"]["semantic_owners_unresolved"], 2)
+        self.assertEqual(result["counts"]["new_joint_witnesses"], 0)
+
+    def test_unknown_or_repeated_reviewed_file_refused(self):
+        for files in [["f", "missing"], ["f", "f"], [], [None]]:
+            with self.subTest(files=files):
+                self.curated["reviewed_files"] = files
+                with self.assertRaisesRegex(ValueError, "reviewed file"):
+                    classify(self.source, self.curated)
+
     def test_premise_cannot_be_both_global_and_local(self):
         self.curated["declarations"][0]["per_input_proof_facts"]["proved"] = "incorrect local role"
         with self.assertRaisesRegex(ValueError, "two roles"):

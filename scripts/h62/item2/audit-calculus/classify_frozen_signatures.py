@@ -43,7 +43,13 @@ def classify(source, curated):
         if set(row["global_proof_obligations"]) & set(row["per_input_proof_facts"]):
             raise ValueError("proof premise assigned two roles")
         reviewed[identity] = row
-    expected = {row["id"] for row in declarations if row["file"] == curated["reviewed_file"]}
+    files = curated.get("reviewed_files", [curated.get("reviewed_file")])
+    known_files = {row["file"] for row in declarations}
+    if not isinstance(files, list) or not files or any(not isinstance(file, str) for file in files):
+        raise ValueError("invalid reviewed file roster")
+    if len(set(files)) != len(files) or not set(files) <= known_files:
+        raise ValueError("duplicate or unknown reviewed file")
+    expected = {row["id"] for row in declarations if row["file"] in files}
     if set(reviewed) != expected:
         raise ValueError("reviewed file has unaccounted declarations")
     result = []
