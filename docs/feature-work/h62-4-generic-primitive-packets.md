@@ -84,8 +84,11 @@ The corrected check uses Bash `time -p`: `LEAN_NUM_THREADS=1 lean -j1
 --tstack=131072 -o /workspace/h62-generic-primitive-packets-evidence/build/Solidity/KeySort.olean Solidity/KeySort.lean`.
 Exit 0, wall 1.16 s; `/workspace/h62-generic-primitive-packets-evidence/keysort-check.log`. AST check also passed, 6.04 s,
 with deprecation warnings. This is a prerequisite result, not a full runtime gate.
-VM cgroup memory cap: 16 GiB; no active swap; jobs bounded to 12 GiB address
-space with a 4 GiB available reserve; writer lock held; no systemd-run.
+VM cgroup memory cap: 16 GiB; no active swap. Initial checks used a 12 GiB
+address-space limit and host-only headroom. Independent review identified that
+as insufficient evidence of a cgroup reserve; final checks use the conservative
+minimum of host availability and cgroup remaining memory, minus 4 GiB. The
+final fixed child cap was 8 GiB. Writer lock held; no systemd-run.
 
 **B-MIGRATION-HASH**: The 231-module CheckedSub.Controls import closure fails
 under pinned v4.35 at `Solidity/Hash/CollisionBound.lean`:407 (List.contains
@@ -104,7 +107,8 @@ V09 coordinates family owners. Any migration patch remains owner-applied only.
 ## Remaining checkpoints and committed handoff
 
 Checkpoint 2: pending PrimitivePackets semantic parameterized lemma and owner
-migration; isolated typed arithmetic fixture backfill is being checked.
+migration; isolated typed arithmetic fixture backfill is proved and reviewed
+(see the bounded backfill below).
 Checkpoint 3: census reproduction passes; EVM/Source correspondence and complete
 semantic refusal validation await the failed prerequisite and owner relay.
 Checkpoint 4: same-condition original-versus-migrated timing, full affected final
@@ -113,3 +117,92 @@ stop migration if the measured slowdown exceeds 10 percent. The warning about
 checking speed was given before edits; recent family history was inspected.
 The full original case inventory is retained in the off-git census and manifest.
 This milestone is not completion of the four-checkpoint assignment.
+
+## Bounded arithmetic and tooling backfill: complete
+
+`tests/h62/item4/generic-primitive-packets/SubFixtures.lean` has no imports or
+external dependencies. `SubFixture bound` carries two `Fin bound` operands;
+`subtract` returns an intrinsically bounded result or a local arithmetic error.
+The seven named theorems are `subtract_success`, `subtract_refusal`,
+`subtract_exact`, `subtract_no_success`, `subtract_wrong_result`, `fixture_exact`
+and `fixture_refusal`. Exactness uses `Nat.sub_add_cancel`; no semantic result
+is proved by deciding a table. Ground `decide` proofs establish range/branch
+witnesses only. No sorry, axiom declaration, native_decide, trust shortcut or
+heartbeat override was added; all seven printed axiom sets are `[propext]`.
+No frozen statement or original declaration changed.
+
+The typed table retains exactly the original seven concrete target-input cases:
+minimum (0,0), maximum (W-1,0), equal (7,7), regular (9,7), underflow (0,1),
+far_underflow (0,W-1), wrong_order_refused (7,9). Acceptance matches every row
+to its original `run differenceCode {machine ...}` observation. The other
+original refusal/observation controls remain in the census unchanged: saved-tail
+corruption, underflow does not wrap, wrong values/indices, low fuel, protected
+frame and exact/nontruncated/nonempty panic bytes. The local arithmetic
+`Except Unit` is not a new shared outcome interface and does not replace Evm.Out.
+
+Final pinned-v4.35 checks, with cgroup-aware 8 GiB cap and explicit `-j1`:
+KeySort exit 0, 1.118 s; SubFixtures exit 0, 0.323 s, no warnings.
+Commands/caps/exits are in
+`/workspace/h62-generic-primitive-packets-evidence/final-bounded-checks.json`;
+proof/axiom output is in `subfixtures-final.log`. These are isolated check times,
+not migration speed measurements. Full runtime/affected validation is pending.
+
+Tooling under `scripts/h62/item4/generic-primitive-packets/`:
+
+- `check.py`: topological per-file pinned compiler fallback, explicit `-j1`,
+  per-file 300-second stop, source/output hashes, failed-artifact removal,
+  fresh pending/blocked/pass status, serial execution. `runtime.py` supplies
+  conservative cgroup/host limits and content fingerprints.
+- `measure.py`: requires current successful dependency evidence, fingerprints
+  HEAD, tracked/untracked source bytes and isolated import artifacts, then
+  warms both file groups and runs three alternating pairs with fixed resources.
+  Caller/reviewer must supply complete before/after groups including extracted
+  helpers; the harness does not certify scope completeness. It fails above
+  10 percent slowdown and never supplies a delta for a failed prerequisite.
+- `accept.py`: census/comment/let-signature/refusal acceptance plus seven
+  exact original operand bindings. The final invocation exited 0.
+
+After guard repairs, `check.py --evidence
+/workspace/h62-generic-primitive-packets-evidence
+Solidity.Backend.PrimitivePackets.CheckedSub.Controls` again exited 1 at the
+same Hash prerequisite under the 8 GiB cap. Source.Syntax/Const/Types passed;
+Hash.CollisionBound failed at 407/660/680. `dependency-results.json` records
+all four commands, source/output hashes, caps, exits and times. No failed
+artifact is retained. `dependency-status.json` remains blocked.
+
+Timing refusal was exercised against that failed prerequisite: exit 1,
+`affected dependency build has not passed`, `timings.json.status=blocked`,
+`delta_percent=null`; acceptance output
+`TIMING_INVALID_PREREQUISITE_REFUSAL_PASS (no comparison or delta)`.
+The supplied file paths in this refusal probe are not a proposed migration
+comparison. No before/after performance conclusion is supported.
+
+Independent finder/skeptic backfill reviews passed after all confirmed fixes;
+neither used a Lean server or made edits. Detailed results:
+`/workspace/h62-generic-primitive-packets-evidence/reviews-backfill.txt`.
+
+## Resumption handoff
+
+The persistent goal remains unfinished and dependency-blocked. `get_goal` is
+not exposed; coordinator explicitly authorized continuing from the supplied
+verified goal. No second goal or competing continuation was created.
+Checkpoint 1 and bounded backfill are committed on the assigned branch.
+This is two completed work items, below the 3–5-item fresh-thread threshold.
+
+Read `tests/h62/item4/generic-primitive-packets/blockers.json`. Resolve the
+Hash migration with its existing owner and relay exact application authority;
+then re-run the bounded import closure. Complete the actual PrimitivePackets
+parameterized semantic lemma, typed execution table and frozen-statement
+correspondence. Retain and validate every original negative/observation case.
+Coordinate MRS/V09 before the exact CheckedSub Controls migration; continue
+other census candidates only within the assigned family and ownership rules.
+Supply owner-ready registration fragments/migration patch only after the bridge
+is checked. Run complete affected checks and repository final run-lean.sh under
+the same pin/bounds; measure full before/after affected groups under identical
+conditions and stop above 10 percent slowdown. Obtain finder/skeptic reviews
+for each remaining checkpoint. No required pending gate may be marked pass.
+
+External final handoff, original patch, checksum manifest and evidence archive
+are under `/workspace/h62-generic-primitive-packets-evidence/`. Their exact head
+and hashes are recorded after the final commit in `handoff.md`, `result.json`
+and `SHA256SUMS`. Large raw inventory, logs and distribution archive stay off git.

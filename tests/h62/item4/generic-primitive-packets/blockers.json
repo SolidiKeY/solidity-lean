@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "blockers": [
+    {
+      "id": "B-MIGRATION-HASH",
+      "kind": "failed-owned-migration-prerequisite",
+      "status": "blocked",
+      "exact_files": [
+        "Solidity/Hash/CollisionBound.lean"
+      ],
+      "owner": "solidity-h62-6-20261106/migrate-hash",
+      "authority": "H62-6-MIGRATE-HASH ownership snapshot; isolated migration overlay only",
+      "evidence": "/workspace/h62-generic-primitive-packets-evidence/dependency-logs/Solidity.Hash.CollisionBound.log",
+      "errors": [
+        407,
+        660,
+        680
+      ],
+      "required_resolution": "Coordinator relays the migration owner\u2019s reviewed compatible prerequisite with explicit exact-file application authority; keep theorem statements and trust policy unchanged."
+    },
+    {
+      "id": "B-OWNER-RELAY",
+      "kind": "exact-file-owner-agreement-pending",
+      "status": "blocked",
+      "exact_files": [
+        "Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean"
+      ],
+      "owner": "solidity-compiler10-20261028/memory-reference-structs",
+      "coordinator": "V09",
+      "required_resolution": "Owner reviews semantic generic lemma/correspondence once dependencies check, then owner applies exact-instance migration; no existing family write is authorized here.",
+      "relay_status": "relay.sh absent at pinned base; this saved request has not been sent externally"
+    }
+  ],
+  "questions": [],
+  "registration": "No registered area module yet. SubFixtures is standalone additive arithmetic backfill. Area registration fragments and exact-instance migration patch remain pending semantic bridge and exact owner agreement."
+}
