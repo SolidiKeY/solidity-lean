@@ -171,6 +171,18 @@ theorem storage_untouched :
       Prog.simplify storageProg = storageProg ∧ Prog.uve storageProg = storageProg :=
   ⟨rfl, rfl, rfl, rfl⟩
 
+/-- `total = 2 + 3; total += 0 + 1;`: both value positions are folded. -/
+def storeProg : Prog C [] [] :=
+  .cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (add (lit 2) (lit 3))))
+    (.cons (.opAssign .add rfl rfl (.root "total" rfl) (add (lit 0) (lit 1))) .nil)
+
+theorem store_folded : Prog.cfold storeProg =
+    .cons (.assign (.root (T := .prim .uint) "total" rfl) (.val (lit 5)))
+      (.cons (.opAssign .add rfl rfl (.root "total" rfl) (lit 1)) .nil) := rfl
+
+theorem store_same : Prog.runC (Prog.cfold storeProg) = Prog.runC storeProg :=
+  Prog.cfold_runC storeProg
+
 /-! ## Unused-variable elimination -/
 
 /-- `{ uint y = 5; require(1 > 0); }`: `y` is unused and dropped. -/

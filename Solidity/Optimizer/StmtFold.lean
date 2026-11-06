@@ -5,7 +5,9 @@ import Solidity.Optimizer.Pass
 # O02 constant folding and dead-branch elimination over lowering programs
 
 `Prog.cfold` folds the value expressions of local assignments, local
-declarations, `require`/`assert` conditions, `transfer`/`send` operands and
+declarations, storage writes of a value (`assign`, `push`), compound-assignment
+right sides (`opAssign`, `pushOpAssign`), `require`/`assert` conditions,
+`transfer`/`send` operands and
 `if`/`while` conditions (`Val.cfold`), and recurses into `if` branches, blocks
 and loop bodies. On the folded program it removes dead code whose removal the
 run cannot observe:
@@ -107,6 +109,16 @@ structure ValPass (C : Contract) where
   run : {Γ : Ctx} → {p : PrimTy} → Val C Γ p → Val C Γ p
   sound : ∀ {Γ : Ctx} {p : PrimTy} (σ : State C Γ) (v : Val C Γ p), (run v).evalT σ = v.evalT σ
 
+/-- An expression pass on a storage source's value. -/
+def _root_.Solidity.Src.vopt {Γ : Ctx} (V : ValPass C) : {T : Ty} → Src C Γ T → Src C Γ T
+  | _, .val v => .val (V.run v)
+  | _, s@(.copy ..) | _, s@(.fixedCopy ..) | _, s@(.copyMem ..) | _, s@(.fixedCopyMem ..) => s
+
+theorem _root_.Solidity.Src.vopt_valueT {Γ : Ctx} (V : ValPass C) (σ : State C Γ) :
+    {T : Ty} → (r : Src C Γ T) → (r.vopt V).valueT σ = r.valueT σ
+  | _, .val v => by simp only [Src.vopt, Src.valueT, V.sound]
+  | _, .copy .. | _, .fixedCopy .. | _, .copyMem .. | _, .fixedCopyMem .. => rfl
+
 /-- Constant folding as an expression pass. -/
 def cfoldPass : ValPass C := ⟨Val.cfold, fun σ v => Val.cfold_evalT σ v⟩
 
@@ -174,14 +186,15 @@ def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ'
   | _, _, .ite c thn els => foldIte (V.run c) (Prog.vopt V thn) (Prog.vopt V els)
   | _, _, .block body => .block (Prog.vopt V body)
   | _, _, .loop a c body => .loop a (V.run c) (Prog.vopt V body)
-  | _, _, s@(.assign ..) => s
+  | _, _, .assign l r => .assign l (r.vopt V)
   | _, _, s@(.rebind ..) => s
   | _, _, s@(.declStorage ..) => s
-  | _, _, s@(.opAssign ..) => s
+  | _, _, .opAssign op hop hp l r => .opAssign op hop hp l (V.run r)
   | _, _, s@(.incDec ..) => s
   | _, _, s@(.assignIncDec ..) => s
   | _, _, s@(.assignLocalPush ..) => s
-  | _, _, s@(.push ..) => s
+  | _, _, .push b v hd =>
+    .push b (v.map (Src.vopt V)) (by rw [Option.isSome_map]; exact hd)
   | _, _, s@(.pop ..) => s
   | _, _, s@(.declMem ..) => s
   | _, _, s@(.rebindMem ..) => s
@@ -194,7 +207,7 @@ def _root_.Solidity.Stmt.vopt (V : ValPass C) : {Γ Γ' : Ctx} → Stmt C Γ Γ'
   | _, _, s@(.assumeFalse) => s
   | _, _, s@(.call ..) => s
   | _, _, s@(.tryCall ..) => s
-  | _, _, s@(.pushOpAssign ..) => s
+  | _, _, .pushOpAssign op hop hp b r => .pushOpAssign op hop hp b (V.run r)
   | _, _, s@(.pushIncDec ..) => s
   | _, _, s@(.callReceiver ..) => s
   | _, _, s@(.callReceiverPush ..) => s
@@ -310,12 +323,28 @@ theorem _root_.Solidity.Stmt.vopt_runC (V : ValPass C) : {Γ Γ' : Ctx} → (s :
     simp only [Stmt.vopt, Stmt.runC]
     rw [Prog.vopt_runC V body]
     exact TRun.loop_congr (V.sound · c) _ _ _
-  | _, _, .assign .. | _, _, .rebind .. | _, _, .declStorage .. | _, _, .opAssign ..
-  | _, _, .incDec .. | _, _, .assignIncDec .. | _, _, .assignLocalPush .. | _, _, .push ..
+  | _, _, .assign l r => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    simp only [TRun.assign, Src.vopt_valueT]
+  | _, _, .opAssign op hop hp l r => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    simp only [TRun.opAssign, V.sound]
+  | _, _, .pushOpAssign op hop hp b r => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    simp only [TRun.pushOpAssign, V.sound]
+  | _, _, .push b v hd => by
+    simp only [Stmt.vopt, Stmt.runC]
+    funext σ
+    cases v <;> simp only [TRun.push, Option.map, Src.vopt_valueT]
+  | _, _, .rebind .. | _, _, .declStorage ..
+  | _, _, .incDec .. | _, _, .assignIncDec .. | _, _, .assignLocalPush ..
   | _, _, .pop .. | _, _, .declMem .. | _, _, .rebindMem .. | _, _, .assignFromMem ..
   | _, _, .assignMem .. | _, _, .delete .. | _, _, .deleteMem .. | _, _, .assignNew ..
   | _, _, .revert | _, _, .assumeFalse | _, _, .call .. | _, _, .tryCall ..
-  | _, _, .pushOpAssign .. | _, _, .pushIncDec .. | _, _, .callReceiver ..
+  | _, _, .pushIncDec .. | _, _, .callReceiver ..
   | _, _, .callReceiverPush .. | _, _, .callRec .. | _, _, .revertData ..
   | _, _, .catchData .. => rfl
 

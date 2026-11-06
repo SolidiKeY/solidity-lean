@@ -223,6 +223,7 @@ theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
         rw [e1, hst]
         simp only [State.drop, State.lift, State.withEnv, drop_put_top, key]
 
+/-- `put_top` for any background: the frame on top of what `d` holds below it. -/
 theorem put_top_gen (Γ : Ctx) : (ps : Ctx) → {H : HTy} → (x : TEnv C H ps) →
     (d : TEnv C H (ps ++ Γ)) →
     TEnv.put (thinTop Γ ps) x d = TEnv.append ps x (TEnv.drop (Ext.append Γ ps) d)

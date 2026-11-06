@@ -152,6 +152,38 @@ def aAfter (r : TRes (Out C (withA 5).H G)) : TRes Int :=
 theorem ret_call_seven : aAfter (Stmt.runC callRet (withA 5)) = .ok 7 := rfl
 theorem ret_inlined_seven : aAfter (Stmt.runC (Stmt.inl callRet) (withA 5)) = .ok 7 := rfl
 
+/-- `g2(a)` for `function g2(uint x) internal returns (uint r) { r = r + x + 2; }`,
+reading the return variable's default; once assigned to `a`, once discarded. -/
+def g2Body : Prog C ([.val .uint] ++ [.val .uint]) [.val .uint, .val .uint] :=
+  .cons (.assignLocal .here
+    (add (add (.simple (.local .here)) (.simple (.local (.there .here)))) (lit 2))) .nil
+
+def callG2 (res : Option (Idx G (.val .uint))) : Stmt C G G :=
+  .call "g2" (.snoc .nil .uint (.user "x") (.simple (.local .here)))
+    (.val .uint (.user "r") res) g2Body
+
+theorem g2_assigned : aAfter (Stmt.runC (Stmt.inl (callG2 (some .here))) (withA 5)) = .ok 7 := rfl
+theorem g2_call_assigned : aAfter (Stmt.runC (callG2 (some .here)) (withA 5)) = .ok 7 := rfl
+theorem g2_discarded : aAfter (Stmt.runC (Stmt.inl (callG2 none)) (withA 5)) = .ok 5 := rfl
+theorem g2_call_discarded : aAfter (Stmt.runC (callG2 none) (withA 5)) = .ok 5 := rfl
+
+/-- Negative control: writing the result to the parameter slot instead of `a`
+(a wrong target index) leaves `a = 5` where the call gives `7`. -/
+def wrongTarget : Stmt C G G :=
+  .block (.cons (.declLocal .uint (.user "x") (some (.simple (.local .here))))
+    (.cons (.declLocal .uint (.user "r") none)
+      (.cons (.block (g2Body.wk (thinTop G [.val .uint, .val .uint])).2.2)
+        (.cons (.assignLocal (.there .here) (.simple (.local .here))) .nil))))
+
+theorem wrong_target_differs : aAfter (Stmt.runC wrongTarget (withA 5)) = .ok 5 := rfl
+
+/-- A value-returning call with a storage argument is left as written. -/
+def callStorageArg : Stmt C G G :=
+  .call "s" (.snocStorage .nil (.array (.prim .uint)) (.user "v") (.loc (.root "values" rfl)))
+    (.val .uint (.user "r") (some .here)) (.cons (.assignLocal .here (lit 1)) .nil)
+
+theorem storage_arg_kept : Stmt.inl callStorageArg = callStorageArg := rfl
+
 /-- A call with a memory return is left as written. -/
 def callMem : Stmt C G (.mem (.array (.prim .uint)) :: G) :=
   .call "m" .nil (.mem (.array (.prim .uint)) (.user "r") rfl rfl) .nil

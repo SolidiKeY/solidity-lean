@@ -1114,3 +1114,21 @@ weakened along the heap (`TEnv.append qs (drop body.ext …) (TEnv.wk … σ.env
 `a = 7` from `a = 5`), `mem_call_kept` (a memory return is left as written). Still not
 inlined: several returns (`rets`), memory/storage returns, reference parameters,
 `callRec`, receiver calls.
+
+Value-return inlining review (read-only finder+skeptic): no blocking issue; statement is
+`Stmt.runC` function equality with premise `args.allVal = true`; order (arguments, `T r`
+default, body in an inner block, `x = r`) matches `enterT`/`take`/`leaveT`; an argument
+reading the assigned caller local sees the old value in both forms. Applied: controls for
+the discarded-return branch and a body reading the return default (`g2_assigned`,
+`g2_call_assigned`, `g2_discarded`, `g2_call_discarded`), the negative control
+`wrong_target_differs` (a wrong target index leaves `a = 5` where the call gives `7`), and
+`storage_arg_kept`; `put_top_gen` documented. Not applied (optional): restating
+`inlineBlock_runC` through `frame_runC`.
+
+### O02 coverage extension — 2026-11-06
+
+`Prog.vopt` (hence `Prog.cfold`, `Prog.simplify`) now also rewrites the value of a storage
+write (`assign l (.val v)`, `push b (some (.val v))`, through `Src.vopt` and
+`Src.vopt_valueT`) and the right side of `opAssign`/`pushOpAssign`; the location `l` and
+its index expressions are still left as written. Control: `store_folded`
+(`total = 2 + 3; total += 0 + 1;` → `total = 5; total += 1;`), `store_same`.
