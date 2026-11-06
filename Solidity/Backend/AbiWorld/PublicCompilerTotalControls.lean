@@ -3,14 +3,16 @@ import Solidity.Backend.AbiWorld.PublicCompilerTotal
 /-! Controls for `PublicCompilerTotal`: an inhabited domain program using a
 storage read, a mapping write, a loop, a branch, a revert and a single-value
 internal call is accepted through the theorem and, independently, by kernel
-evaluation of the public entry. Negative controls show each recorded side
-condition names a real refusal of that entry, so the domain is not the
-compiler's own acceptance test widened by hand. -/
+evaluation of the public entry. Negative controls kernel-observe refusals
+for three recorded side conditions (signed bitwise, self balance, a non-`uint`
+mapping key); the word-fit conditions are refusals of `locIn` by its code and
+have no kernel control here. -/
 namespace Solidity.Backend.AbiWorld.PublicCompilerTotalControls
 open Solidity.Evm Solidity.Backend.AbiWorld.PublicCompilerTotal
 
 def C : Contract :=
-  { vars := [("total", .prim .uint), ("balances", .ref (.mapping .uint (.prim .uint)))] }
+  { vars := [("total", .prim .uint), ("balances", .ref (.mapping .uint (.prim .uint))),
+    ("signed", .ref (.mapping .int (.prim .uint)))] }
 
 abbrev Γ₀ : Ctx := []
 abbrev Γ₁ : Ctx := [.val .uint]
@@ -92,7 +94,16 @@ theorem selfBalance_refused :
     (Compiler.compile 0 (Frag.init Γ₀) selfBalance).isNone = true := by
   decide +kernel
 
-/-- The domain is not every program: the refusals stay outside it. -/
+/-- A read of an `int`-keyed mapping is typed but refused. -/
+def intKey : Solidity.Prog C Γ₀ Γ₀ :=
+  .cons (.require (.binop .eqB rfl rfl
+    (.read (.index .map (.loc (.root "signed" rfl)) (.simple (.lit 0 (by decide))))
+      : Solidity.Val C Γ₀ .uint) (.simple (.lit 0 (by decide))))) .nil
+
+theorem intKey_refused : (Compiler.compile 0 (Frag.init Γ₀) intKey).isNone = true := by
+  decide +kernel
+
+/-- Contrapositive of totality: the refused program is outside the domain. -/
 theorem signedAnd_outside : ¬ ProgOk signedAnd := fun h =>
   absurd (compile_isSome 0 (Frag.init Γ₀) h) (by rw [Option.isSome_iff_ne_none,
     ← Option.isNone_iff_eq_none.mp signedAnd_refused]; exact fun e => e rfl)

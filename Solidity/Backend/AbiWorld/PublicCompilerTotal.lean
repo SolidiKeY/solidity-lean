@@ -5,14 +5,18 @@ import Solidity.Evm.Compiler
 H62 (2)/H69 ask for a separate totality theorem: a compiler that rejects
 everything must not satisfy the public statements. The public compiler entry
 is `Solidity.Evm.Compiler.compile`; its fixed observation is
-`Compilation.Agrees` (typed state and stack on success, a data-free machine
-`revert` for source revert/panic/payment refusal, fault on divergence).
+`Compilation.Agrees`: a disjunction pairing each source outcome with a machine
+outcome (success with typed state and stack; source revert or asserting panic
+with a data-free machine `revert`; payment refusal; divergence with a fault).
 
 The domain is stated here as inductive predicates over the intrinsic syntax.
-They mention no compiler function, no fragment (`Frag`) and no compile result:
+They mention no acceptance function, no fragment (`Frag`) and no compile
+result; the word-fit side conditions read the backend's storage layout
+(`Evm.offset`, `W`):
 alias-free scalar programs over locals and storage locations, with branches,
 blocks, loops and single-value internal calls. Each side condition records an
-actual gap of the compiler, not a success filter:
+actual refusal in the compiler's code (`simpleIn`, `binInFrag`, `locIn`), not a
+success filter:
 
 * `env` excludes `address(this).balance` (`simpleIn`);
 * `binop` excludes `&`, `|`, `^` at `int` (typed, but not in `binInFrag`);

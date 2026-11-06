@@ -13,13 +13,25 @@ and the G49 base (`origin/cloud/move6-20261106/g49-base`):
 | Item | Fixed as |
 |---|---|
 | Public compiler declaration | `Solidity.Evm.Compiler.compile (b : Nat) (F : Frag Γ) (P : Prog C Γ Δ) : Option (Compilation b F P)` — the single checked entry every G38/G40/G42 consumer selects ("public compiler" in `abi-entry.md`, `g38-failure-paths.md`). No separate G42 world-call compiler exists: `g42-world-call-consumers.md` records that no world CALL is implemented. RO's V2 interface is Source-only (dispatch partition, histories) and declares no compiler. |
-| Fixed outcome/returndata observation | `Compiler.Compilation.Agrees`, obtained from `Compilation.Input` by `Compilation.correct`: success with typed state, stack and the branch's `Rep`; source revert or (asserting) panic ↔ machine `.revert`; payment refusal; divergence ↔ fault (or payment revert). The machine `revert` carries **no returndata**: the entry refuses `revertData`/`catchData`/`tryCall`, so no ABI returndata is observed by it. |
-| Supported input domain (this lane's statement) | `PublicCompilerTotal.ProgOk`: inductive predicates over the intrinsic syntax that mention no compiler function, fragment or compile result. Alias-free storage paths (roots; struct fields whose offset fits a word; `uint`-keyed mappings; dynamic and word-sized fixed arrays); values: literals, booleans, locals, environment reads other than `address(this).balance`, storage reads, every typed unary operator, every typed binary operator except `&`/`|`/`^` at `int`, ternaries and storage-array lengths; statements: storage value assignment, local assignment, declarations, local `op=`/`++`/`--`, `require`, `assert`, `revert`, `if`, blocks, `while`, internal calls with value arguments and no or one value return. |
+| Fixed outcome/returndata observation | `Compiler.Compilation.Agrees`, obtained from `Compilation.Input` by `Compilation.correct`: success with typed state, stack and the branch's `Rep`; a disjunction pairing each source outcome with a machine outcome (one direction, no converse): source revert or asserting panic with machine `.revert`; source success with a payment revert; divergence with fault (or payment revert). The machine `revert` carries **no returndata**. The core branch refuses `revertData`/`catchData`/`tryCall` (`inFrag` returns `none`); refusal by the seven memory backends is observed in examples, not proved generally. |
+| Supported input domain (this lane's statement) | `PublicCompilerTotal.ProgOk`: inductive predicates over the intrinsic syntax that mention no acceptance function, fragment or compile result (the word-fit conditions read the backend storage layout `Evm.offset`). Alias-free storage paths (roots; struct fields whose offset fits a word; `uint`-keyed mappings; dynamic and word-sized fixed arrays); values: literals, booleans, locals, environment reads other than `address(this).balance`, storage reads, every typed unary operator, every typed binary operator except `&`/`|`/`^` at `int`, ternaries and storage-array lengths; statements: storage value assignment, local assignment, declarations, local `op=`/`++`/`--`, `require`, `assert`, `revert`, `if`, blocks, `while`, internal calls with value arguments and no or one value return. |
 
-The side conditions are recorded compiler gaps, not success filters: the
-Controls kernel-evaluate the public entry on a signed `&` and on
-`address(this).balance` and observe refusal (`isNone`), so neither the theorem
-nor the domain hides them.
+**Framing (skeptic review).** The domain is chosen to match the part of the
+core branch's fragment that does not depend on `Frag`: each side condition and
+structural restriction mirrors a check of `simpleIn`, `binInFrag` or `locIn`.
+It is a syntactic restatement of an implemented fragment, so whether it meets
+H62 (2) and H68's ban on implemented-fragment domains is a coordinator/user
+decision (question Q1 of the CLOUD-RESULT). Valid Solidity excluded only
+because the compiler lacks it, recorded as open gaps: signed `&`/`|`/`^`,
+`address(this).balance`, non-`uint` mapping keys, storage aliases, storage
+`op=`/`++`/`--`, memory, transfers/sends, pushes/pops/deletes, multiple
+returns, recursion and external calls.
+
+The side conditions are recorded compiler gaps (refusals in `simpleIn`,
+`binInFrag`, `locIn`), not success filters. The Controls kernel-evaluate the
+public entry on a signed `&`, on `address(this).balance` and on an
+`int`-keyed mapping read and observe refusal (`isNone`); the two word-fit
+conditions are refusals by `locIn`'s code without a kernel control.
 
 ## Compiler-success (totality) theorem
 
@@ -42,8 +54,7 @@ Controls: an inhabited program using a storage read, a `while` loop with
 is accepted through the theorem at every base and, independently, by kernel
 evaluation; its code is nonempty. `program_agrees_fresh` meets the `Sim` premise
 with the published `Sim.init` fresh contract, so `Agrees` is reached, not
-vacuous. `signedAnd_outside` derives from the
-theorem and the observed refusal that the domain is not every program.
+vacuous. `signedAnd_outside` is the contrapositive of totality on the refused program.
 
 Limits: this is totality of the existing entry on this domain. It does not
 extend the domain to aliases, memory, transfers/sends, pushes/pops, deletes,
@@ -62,8 +73,10 @@ fields (`RevertingEntry`, `BareRevertClaim`).
 
 It cannot be delivered without inventing endpoints, which H68 forbids:
 
-1. `Solidity.Roadmap.G49Final.PassCorrect`/`Behaviour`/`BridgeGoal` exist only
-   on `origin/cloud/move6-20261106/g49-base` (head `191bce52`), not on master;
+1. `Solidity.Roadmap.G49Final.PassCorrect`/`Behaviour` exist only on
+   `origin/cloud/move6-20261106/g49-base` (head `191bce52`), not on master;
+   `BridgeGoal`/`p1_frame_bridge` are H68 schema names in that branch's doc,
+   not Lean declarations;
    importing it would make this lane depend on an unmerged lane.
 2. No canonical G01 `Lang Event Outcome` exists for intrinsic call sessions or
    emitted-code sessions; the g49 document itself records that
