@@ -113,6 +113,19 @@ outside the library tree; they return to `Solidity/Roadmap/V16/` when the
 prerequisite closure is delivered. No theorem in them changed and none is claimed
 checked. `staging-manifest.json` keeps the original historical paths.
 
+**Gates (this VM, `scripts/coord-tools/gate.sh checkpoint` at `d6473620`).**
+`build-touched` and `library` (`lake build Solidity`, 6001 jobs) PASS; trust,
+orphans, layers, roots and fragments PASS. `doc-paths` FAILS only on master's
+existing missing Mathlib test path cited by `after-roadmap-va1.md`. `axiom-pins`
+reports 0 errors but 4379 unrecorded changes, none in this lane's modules (they
+come from master's unpinned theorems such as `Frontend.OverrideValidation`); this
+lane's new declarations print only `Quot.sound`/`propext`.
+Finder and skeptic reviews (read-only, no Lean) found no Lean defect; their
+documentation/evidence findings (generic owner requirements missing from the
+JSON, timing-method disclosure, uncommitted baseline, trimmed run records,
+median label, stale introduction, an unsupported "similar amounts" claim) were
+fixed in `d6473620`.
+
 **Limitations.** The two Python accounting suites
 (`test_h64_account.py`, `test_premise_tools.py`) read the Codex VM's off-Git
 inventory logs, ownership snapshot and staging archive under `/workspace/`, which
