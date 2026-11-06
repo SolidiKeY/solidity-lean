@@ -392,3 +392,22 @@ compares supplied snapshots and paths, not actual H56 measurements. It does
 not establish cache completeness, trusted VM/tool identity, race-free state
 between snapshots, or production runner integration. Independent reviews and
 all H56, production and full-scope acceptance gates remain pending.
+
+## Synthetic inspection-deadline correction
+
+The experimental watcher previously checked time before Docker inspection but
+could accept a successful exit after a slow inspection crossed the deadline.
+It now checks both clocks after inspection. Its first live synthetic retest,
+control 10, exited 1 with `watch-error` when inspection itself timed out near
+the deadline; the fixture cleanup trap removed the owned container. The
+watcher was then changed to classify an inspection timeout as a deadline only
+when both clocks confirm the deadline has passed. Control 11 passed with the
+escaped child absent after cleanup. Both attempts are retained and bound by
+`tests/h55/module-times/inspection-deadline-evidence.sha256`; the 40-method
+synthetic unit suite passes.
+
+This is not a production timing or Lean proof pass. Docker inspection/kill can
+still be delayed or unavailable, the watcher has not been integrated with
+trusted image, source, toolchain, cache or VM identity, and independent reviews
+remain pending. The coordinator confirmed H28 goal pause and quiescence, but
+its final bundle and exact original rendered prompt remain unavailable here.

@@ -1,5 +1,6 @@
 import importlib.util
 import pathlib
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -53,6 +54,30 @@ class WatchControls(unittest.TestCase):
              patch.object(watch, "stop_owned", return_value=137) as stop:
             self.assertEqual({"status": "invalid-clock", "exit_code": 137}, watch.watch(self.container, self.nonce, 2))
             stop.assert_called_once_with(self.container, self.nonce)
+
+    def test_inspection_timeout_after_deadline_is_classified(self):
+        with patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 100_000_000, 350_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 100_000_000, 350_000_000]), \
+             patch.object(watch, "state", side_effect=subprocess.TimeoutExpired("docker", .2)), \
+             patch.object(watch, "stop_owned", return_value=137):
+            self.assertEqual({"status": "timeout", "exit_code": 137}, watch.watch(self.container, self.nonce, .3))
+
+    def test_slow_exit_inspection_does_not_bypass_deadline(self):
+        with patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 100_000_000, 350_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 100_000_000, 350_000_000]), \
+             patch.object(watch, "state", return_value=(False, 0)), \
+             patch.object(watch, "stop_owned", return_value=0):
+            self.assertEqual({"status": "timeout", "exit_code": 0}, watch.watch(self.container, self.nonce, .3))
+
+    def test_clock_disagreement_after_inspection_is_rejected(self):
+        with patch.object(watch, "host_headroom", return_value=True), \
+             patch.object(watch.time, "monotonic_ns", side_effect=[0, 100_000_000, 200_000_000]), \
+             patch.object(watch.time, "clock_gettime_ns", side_effect=[0, 100_000_000, 800_000_000]), \
+             patch.object(watch, "state", return_value=(False, 0)), \
+             patch.object(watch, "stop_owned", return_value=0):
+            self.assertEqual({"status": "invalid-clock", "exit_code": 0}, watch.watch(self.container, self.nonce, 2))
 
     def test_lost_host_reserve_stops_owned_container(self):
         with patch.object(watch, "host_headroom", return_value=False), \

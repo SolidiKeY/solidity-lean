@@ -115,7 +115,25 @@ def watch(container_id, nonce, seconds):
                 return {"status": "invalid-clock", "exit_code": stop_owned(container_id, nonce)}
             if elapsed >= seconds or boot_elapsed >= seconds:
                 return {"status": "timeout", "exit_code": stop_owned(container_id, nonce)}
-            running, code = state(container_id, nonce, timeout=max(.01, min(1, seconds - elapsed)))
+            try:
+                running, code = state(container_id, nonce, timeout=max(.01, min(1, seconds - elapsed)))
+            except subprocess.TimeoutExpired:
+                # An inspection timeout is still a failure. Classify it as a
+                # deadline only if both clocks show that deadline has passed.
+                elapsed = (time.monotonic_ns() - start) / 1e9
+                boot_elapsed = (time.clock_gettime_ns(time.CLOCK_BOOTTIME) - boot) / 1e9
+                if (elapsed >= seconds and boot_elapsed >= seconds and
+                        abs(elapsed - boot_elapsed) <= max(.05, boot_elapsed * .01)):
+                    return {"status": "timeout", "exit_code": stop_owned(container_id, nonce)}
+                raise
+            # Inspection itself can cross the deadline or expose a clock
+            # discontinuity. Never accept its result using the earlier time.
+            elapsed = (time.monotonic_ns() - start) / 1e9
+            boot_elapsed = (time.clock_gettime_ns(time.CLOCK_BOOTTIME) - boot) / 1e9
+            if elapsed < 0 or boot_elapsed < 0 or abs(elapsed - boot_elapsed) > max(.05, boot_elapsed * .01):
+                return {"status": "invalid-clock", "exit_code": stop_owned(container_id, nonce)}
+            if elapsed >= seconds or boot_elapsed >= seconds:
+                return {"status": "timeout", "exit_code": stop_owned(container_id, nonce)}
             if not running:
                 return {"status": "exited", "exit_code": code}
             time.sleep(min(.05, max(0, seconds - elapsed)))
