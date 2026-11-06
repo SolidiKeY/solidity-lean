@@ -95,3 +95,44 @@ registration. Newer master producers and all historical strict checks are kept.
 Detailed evidence: /workspace/h55-g49-evidence.
 The entire original queue and V08/public-theorem/acceptance obligations remain
 unfinished. Source-only review is not a proof pass. No push or merge.
+
+## Checked frozen-interface composition backfill
+
+[PassChain](../../Solidity/Roadmap/G49Final/PassChain.lean) proves `pass_chain`
+from the unchanged full G01 Lowering, Compilation and Execution packages and an
+exact equation identifying the assembled artifact with the table read by source
+meaning. It composes both directions at the actual lowered world, using each
+certificate's need/back fields; all admissibility, Forward/Guard and environment
+maps remain. It adds no closure restriction on source admission or producer
+pass domains. The theorem has only `propext` in its observed axiom set.
+
+This is conditional refinement for supplied complete certificates, not a
+concrete Source/P8a/P8b/P1/P10/V08 producer, PublicCorrectness, deployment or
+reachable adversarial-session proof. In particular coverage, approved readings,
+non-vacuity, source-determined hashes, creation table consistency, reached-world
+decoding and resumed-session commutation have not been proved by this helper.
+All five G49.01–.03/G50.01–.02 obligations remain unfinished.
+
+The source-only bounded helper rebuilds all five affected modules in an isolated
+external cache, then checks a test-only Lean inventory of the actual kernel
+declaration. No old `.lake` olean is consumed. Lean tooling is imported only by
+the external inventory test, not the core.
+
+```sh
+python3 -B scripts/h55/g49-final-theorem/check-pass-chain.py --lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --evidence /workspace/h55-g49-evidence/pass-chain-reviewed
+```
+
+That evidence directory already exists and is immutable; a rerun must use a NEW
+directory. Recorded outcome: `PASS_CHAIN_SOURCE_AND_INVENTORY_CHECK_PASS`.
+Full per-module commands, source hashes, results and logs are in that directory.
+This direct affected-module check does not replace repository final acceptance.
+
+
+The fresh serial isolated five-module closure and actual Lean inventory pass.
+The theorem uses only propext; independent finder/skeptic semantic reviews found
+no defect. This remains a generic conditional backfill with supplied full
+certificates, not delivery of the original full public theorem. Current gate
+commands, hashes and logs: /workspace/h55-g49-evidence/pass-chain-reviewed.
+Scoped cache pack: /workspace/h55-g49-evidence/pass-chain-cache.tar.gz, SHA256
+8019ff5e1815dbc1178b4fbc97eba5f2684e34634a363692c2e7ecd112809260.
+Full public and acceptance gates remain pending as above.
