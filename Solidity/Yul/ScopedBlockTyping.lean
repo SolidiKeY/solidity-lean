@@ -560,4 +560,26 @@ theorem WalkD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : 
   intro X scope F n E control tree firstCount secondCount firstEnv secondEnv first second
   exact Option.some.inj ((WalkD.complete first).symm.trans (WalkD.complete second))
 
+/-- The same scoped case syntax determines its packed labels and derivation.
+This is result determinism, not a distinct-label assertion. -/
+theorem CaseD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn .yulCase) (firstValue secondValue : Solidity.Yul.Word)
+ (first : Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree firstValue)
+ (second : Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree secondValue),
+ (⟨firstValue,first⟩ : (value : Solidity.Yul.Word) × Solidity.Yul.ScopedBlockTyping.CaseD scope E control tree value) = ⟨secondValue,second⟩ := by
+  intro X scope F n E control tree firstValue secondValue first second
+  exact Option.some.inj ((CaseD.complete first).symm.trans (CaseD.complete second))
+
+/-- The same scoped case syntax determines its packed labels and derivation.
+This is result determinism, not a distinct-label assertion. -/
+theorem CasesD.result_unique : ∀ (X : List Solidity.Yul.ExternalType) (scope : Solidity.Yul.BlockScope.Scope X)
+ (F : List Solidity.Yul.Sig) (n : Nat) (E : Solidity.Yul.BlockTyping.Env F n)
+ (control : Solidity.Yul.Control) (tree : Solidity.Source.Syn (.list .yulCase)) (firstValue secondValue : List Solidity.Yul.Word)
+ (first : Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree firstValue)
+ (second : Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree secondValue),
+ (⟨firstValue,first⟩ : (value : List Solidity.Yul.Word) × Solidity.Yul.ScopedBlockTyping.CasesD scope E control tree value) = ⟨secondValue,second⟩ := by
+  intro X scope F n E control tree firstValue secondValue first second
+  exact Option.some.inj ((CasesD.complete first).symm.trans (CasesD.complete second))
+
 end Solidity.Yul.ScopedBlockTyping
