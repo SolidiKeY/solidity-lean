@@ -309,6 +309,66 @@ class ScannerControls(unittest.TestCase):
             self.assertIn("previous candidate comparison", errors.getvalue())
             self.assertNotIn("Traceback", errors.getvalue())
 
+    def test_internal_aliases_keep_paths_owners_and_shared_source_warning(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Target.lean").write_text("theorem same : True := by trivial\n")
+            for name in ("A.lean", "B.lean"):
+                (root / name).symlink_to("Target.lean")
+            owners = {name: name for name in ("A.lean", "B.lean", "Target.lean")}
+            config = root / "owners.json"
+            config.write_text(json.dumps(owners))
+            cmd = [sys.executable, "-B", str(SCRIPT), str(root), "*.lean", "A.*", "--owners", str(config)]
+            report = json.loads(subprocess.check_output(cmd))
+            self.assertEqual([x["path"] for x in report["inputs"]], sorted(owners))
+            self.assertEqual({row["path"]: row["owner"] for row in report["inventory"]}, owners)
+            self.assertEqual(report["input_aliases"], [{"path": name, "resolved_path": "Target.lean"} for name in ("A.lean", "B.lean")])
+            self.assertIn("shared-resolved-source", report["candidates"][0]["reject_reasons"])
+            self.assertIn("shared-resolved-source", report["body_candidates"][0]["reject_reasons"])
+            self.assertEqual(subprocess.check_output(cmd), subprocess.check_output(cmd))
+
+    def test_alias_selection_uses_alias_extension(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "Backing.txt").write_text("theorem actual : True := by trivial\n")
+            (root / "Selected.lean").symlink_to("Backing.txt")
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual([row["path"] for row in report["inventory"]], ["Selected.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "Selected.lean", "resolved_path": "Backing.txt"}])
+
+    def test_bad_selected_links_are_errors_not_silent_omissions(self):
+        for kind in ("broken", "outside", "loop", "directory"):
+            with self.subTest(kind=kind), tempfile.TemporaryDirectory() as directory:
+                parent = Path(directory)
+                root = parent / "root"
+                root.mkdir()
+                (root / "Good.lean").write_text("theorem good : True := by trivial\n")
+                (parent / "Outside.lean").write_text("theorem outside : True := by trivial\n")
+                bad = root / "Bad.lean"
+                if kind == "directory":
+                    bad.mkdir()
+                else:
+                    target = {"broken": "Missing.lean", "outside": "../Outside.lean", "loop": "Bad.lean"}[kind]
+                    bad.symlink_to(target)
+                result = subprocess.run([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"], capture_output=True)
+                self.assertNotEqual(result.returncode, 0)
+                report = json.loads(result.stdout)
+                self.assertEqual([row["path"] for row in report["inventory"]], ["Good.lean"])
+                self.assertEqual([row["path"] for row in report["errors"]], [str(bad)])
+                self.assertEqual(report["unmatched_patterns"], [])
+                self.assertEqual(report["incremental"]["comparison_status"], "current-incomplete")
+                self.assertIsNone(report["incremental"]["added"])
+
+    def test_explicit_directory_alias_keeps_selected_path(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "real").mkdir()
+            (root / "real" / "A.lean").write_text("theorem a : True := by trivial\n")
+            (root / "alias").symlink_to("real", target_is_directory=True)
+            report = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "alias/*.lean"]))
+            self.assertEqual([row["path"] for row in report["inputs"]], ["alias/A.lean"])
+            self.assertEqual(report["input_aliases"], [{"path": "alias/A.lean", "resolved_path": "real/A.lean"}])
+
     def test_report_and_incremental(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
