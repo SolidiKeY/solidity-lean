@@ -103,4 +103,16 @@ example : Solidity.Yul.WordSyntax.prepare ["x"] closedSource = .ok closedWitness
   closedWitness.closed_old_result
 
 def text := Solidity.Yul.Checks.WordSyntax.text
+/-- info: 'Solidity.Yul.ScopedSyntax.Prepared.unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedSyntax.Prepared.unique
+
+/-- info: 'Solidity.Yul.ScopedSyntax.Prepared.code_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedSyntax.Prepared.code_unique
+
+/-- info: 'Solidity.Yul.ScopedSyntax.Prepared.wordRun_unique' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.ScopedSyntax.Prepared.wordRun_unique
+
 end Solidity.Yul.Checks.ScopedSyntax
