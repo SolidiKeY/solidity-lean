@@ -402,3 +402,16 @@ pipeline/static/packing inputs and exact reached states.
 This matrix records named public statements in this one file. It does not
 establish the complete cross-family census, private/generated case acceptance,
 or any post-migration proof or independent review.
+
+### Source ABI kernel declaration baseline
+
+`tests/h55/shared-fixtures/SourceAbiDeclarationAudit.lean` inventories every
+kernel constant owned by `SourceAbiControls` and `SourceAbiEntryControls`,
+including private/generated constants, elaborated type expressions, universe
+parameters, axiom dependencies and safety flags. The serial Lean 4.24.0 run
+at integrated baseline `5f14596531efea2be64f1a5e7a83afa5e151e865` recorded 131
+and 52 constants respectively. Those two source files are unchanged from the
+original base. The off-Git JSONL and the exact source/OLean inputs are hashed in
+`tests/h55/shared-fixtures/source-abi-evidence.sha256`. This establishes a
+comparison baseline for these modules only; it is not a migrated-source check,
+case-equivalence proof, independent review or complete original-scope census.
