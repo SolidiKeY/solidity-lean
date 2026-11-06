@@ -123,7 +123,7 @@ layers, roots and fragments PASS. Lake built
 `Solidity` library build reached 3,035/5,997 jobs with zero errors, then hit
 the session's two-hour background limit. With no shared build cache on this
 VM, the full library build is not complete. doc-paths FAILs only on the
-pre-existing `Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` citation in
+pre-existing Mathlib test-file citation in
 `after-roadmap-va1.md`. axiom-pins FAILs with 0 errors and the pre-existing
 4,379 foreign unrecorded changes; none is in this lane's module. Per-file MCP
 diagnostics on the final module are clean.
@@ -214,3 +214,19 @@ Reviews of the apply (read-only):
   `Contract.lean` 586, 637; `PaymentPlan.lean` 70; `WorldImport.lean` 100). Only
   the `Body.lean:1826` slice reason changes for the migrated fixtures. No
   non-Lean consumer checks key sets, node counts or byte lengths.
+
+### Checkpoint gate after the apply
+
+`gate.sh checkpoint` on `cead2aaeb` (merged master `a897dac76`, the applied
+fixtures, all pins):
+
+- PASS: build-touched (6,056 jobs, including the seven touched
+  `Examples/Tactics` modules, `Solkey/QuantifiedDiamond` and
+  `Frontend/Admission/CanonicalReaderContract`), library (6,048 jobs), trust,
+  orphans, layers, roots and fragments.
+- doc-paths FAIL. Four of its misses come from master (`h62-6-migrate-theory.md`
+  and the `tests/h62` notes). The fifth was this document's quotation of a
+  missing path, now reworded.
+- axiom-pins FAIL with 0 errors and 4,415 foreign unrecorded changes. None is
+  in this lane's module.
+- The SolKey checker is no longer a gate (master `a897dac76`) and was not run.
