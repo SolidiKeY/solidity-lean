@@ -240,3 +240,22 @@ reached states and exact failure data are part of the original obligations.
 This is a partial manual review of named public statements in two controls;
 other Source/static files, private declarations, exact post-migration
 statements and all Lean gates remain open.
+
+## H82 retirement handoff
+
+H82 permits statement-preserving proof-only, additive, split, import and
+prose changes without exact-file owner agreement. The previous requests for
+such agreement are withdrawn. Owner review remains necessary before changing
+an existing statement, a definition body on which a statement depends, an
+interface, budget, axiom set or exclusion; H57 versioning applies to frozen
+interfaces. The proposed `uintSyntax` and snapshot-initial packets replace
+existing definition bodies used by statements and therefore still require the
+relevant owner decision. No original source migration has been applied.
+
+The serial V08 baseline build started under the writer lock with Lean `-j1`,
+`LEAN_NUM_THREADS=1`, no swap and a 10 GiB virtual-memory bound, and was
+interrupted for the retirement instruction. Its partial log is not a passing
+baseline or timing gate. All original queue items and backfill, complete
+semantic acceptance, proof and timing checks, independent finder/skeptic
+reviews, and registration fragments remain outstanding. The surviving lane
+is `solidity-h62-2-20261106/audit-readonly-calls`.
