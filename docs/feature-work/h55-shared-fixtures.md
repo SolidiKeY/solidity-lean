@@ -580,3 +580,20 @@ Source behavior for their stated pipeline, static and horizon parameters:
 
 This is a partial semantic census of one control file, not a complete
 cross-family acceptance, proof of a replacement or independent review.
+
+## Source call-phase semantic review (partial)
+
+The named public statements in `SourceCallPhaseControls` distinguish raw
+callee outcomes from caller-side return demand under an inherited static frame.
+Any later fixture consolidation must preserve the following original cases:
+
+| Declarations | Original observations to preserve |
+|---|---|
+| `actual_raw`, `actual_capture`, `actual_prefix` | Actual code-present raw call for arbitrary outcomes preserves ordered input bytes and inherited static mode; capture observes the reached state; the prefixed expression changes the caller local before that call. |
+| `retained` | Preserve the old heap object and cursor, account, transient state, journal, function locals and logs separately from the new call/answer history. |
+| `one_byte_caller_failure`, `no_demand_success` | One-byte successful callee output reverts under the declared uint return demand but succeeds as unit under an empty demand. The two demands are not interchangeable. |
+| `revert_payload`, `unfinished`, `static_value_refusal` | Preserve the exact callee revert bytes, zero-horizon timeout at the initial state, and nonzero-value static refusal at the initial state. |
+| `wrong_order`, `wrong_mode`, `wrong_outcome` | Preserve the explicit byte-order, inherited-static and success-versus-revert inequalities. |
+
+This is a partial manual census of one control file, not an ExtCall edit,
+full Source-family acceptance, a replacement proof or independent review.
