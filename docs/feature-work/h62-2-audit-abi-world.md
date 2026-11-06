@@ -12,16 +12,15 @@ statement-fidelity census now cover all 177 frozen declarations across all 24
 mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
-semantic feasibility coverage. The remaining phase
-is meaningful supported-program success/totality contracts, reject-all and
-always-revert controls, observable failure/gas/fork boundaries, after timings,
-and full final validation/review. Witness completion does not complete that phase.
+semantic feasibility coverage. The success/runtime phase and matched after timings now also pass. Full normal
+repository validation and the final handoff/review remain pending; the assignment
+must not be marked complete until those gates pass.
 
 | Checkpoint | Result |
 |---|---|
 | 1. Frozen signatures, ownership, premise classification | Complete source inventory; elaborated binders now also exported. |
 | 2. Simultaneous hypotheses | 177 exact-type packages pass complete Lean diagnostics and reviews. |
-| 3. Success/totality and behavioral controls | Pending. Reference interpreter provisioned; no gas/fork result claimed. |
+| 3. Success/totality and behavioral controls | Seven formal theorems and ten provenance-bound external programs pass; proof/runtime boundary below. |
 | 4. Witness and statement-fidelity census | 177 independent type comparisons pass; 439 binders, 113 proposition binders. Full final gate rerun remains required after checkpoint 3. |
 
 The accounting tool explicitly reports `witness_gate_complete=true` and
@@ -97,9 +96,9 @@ and conclusion do not establish feasibility. This checks one simultaneous input
 for each statement, not total compiler success over all programs.
 
 The schema has two public controls and two private fixture theorems: a feasible
-shared input and rejection of incompatible premises on one input. There are 181
-new theorem declarations in total: 177 mapped witnesses plus those four schema
-fixtures/controls. Of the 177 witnesses, 157 report no axioms; the remaining 20 use
+shared input and rejection of incompatible premises on one input. The witness/schema modules contain 181 theorem declarations: 177 mapped
+witnesses plus those four schema fixtures/controls. SuccessContracts adds seven,
+for 188 new theorem declarations in total. Of the 177 witnesses, 157 report no axioms; the remaining 20 use
 only combinations of propext, Classical.choice and Quot.sound. No new axiom was
 introduced. The generic assembler packages choose concrete labels/items and
 library type Empty without assuming an impossible Empty value.
@@ -185,9 +184,56 @@ results, command exits or source/output hashes.
 The current before baseline is seven warm CodecWitnesses samples after a discarded
 warmup: median 1.219290965 seconds. Source/config/toolchain/guard/resource identities
 are captured. measure.py after must retain them and exits 2 above 10% slowdown.
-No after measurement or slowdown result is claimed yet. Earlier baselines preceding
+The matched after median is 1.217935128 seconds, a −0.1112% delta, within the
+10% limit. This is a warm per-file checking comparison, not a general performance
+improvement claim. Earlier baselines preceding
 necessary guard/config fixes are explicitly archived as superseded; none had an
 after comparison. Full ./run-lean.sh and final acceptance are still pending.
+
+## Supported success and observable runtime boundaries
+
+SuccessContracts defines an Option-valued ReturnContract: every independently
+bounded packet and stack-safe machine must yield actual compiler output and exact
+successful Slice execution. compileReturn satisfies it. A shared nonempty [0,255]
+fixture refutes both reject-all and an actual emit-custom always-revert compiler.
+Neither success nor compilation is assumed as a premise. Additional theorems prove
+actual complete typed Panic-handler success for every bounded full-word code and
+suffix, and retain zero-receiver failure. Checked-add assembly totality remains
+explicitly structural; it does not claim branch execution from nonempty layout.
+
+RuntimeVectors exports actual Backend.encode bytes. Six packet programs initialize
+a nonzero stack tail and two sentinel bytes before the real emitter; four checked-
+add artifacts use actual assembly with the 66-byte operand prefix relocation.
+The external pinned EthereumJS interpreter checks:
+
+| Program | Result | Exact gas including initialization |
+|---|---|---:|
+| return_two / return_suffix | success 00ff, stack tail 77 | 48 |
+| return_word300 | complete 32-byte word, tail 77 | 321 |
+| empty_revert | revert with empty data | 30 |
+| panic300 | complete Panic(300) packet | 357 |
+| error_two | complete Error byte payload | 939 |
+| add_small / add_zero / add_max_no_overflow | success with exact sum stack | 42 |
+| add_overflow | revert with Panic(17) | 373 |
+
+Every case passes high gas, exactly measured required gas, one-below out-of-gas,
+and zero-gas out-of-gas checks on fresh equivalent frame state. Packet sentinels
+and stack tails are exact. The unreachable suffix consumes no gas/steps. Raw
+Homestead REVERT is invalid opcode; Byzantium and Osaka revert with exact data.
+Always-revert and always-STOP alternatives fail the positive return fixture.
+
+These are isolated-frame external tests, not Lean gas/fork or whole-world bridge
+proofs. High gas is a frame budget, not a transaction-cap assertion. Failure.Slice
+continues to omit gas/world semantics. The formal contract covers the real bounded
+packet-emitter program family, not a replacement H55/general compiler contract.
+
+The interpreter uses repository-pinned evm10.1.3/common10.1.2/util10.1.2 outside
+Git. Extraction reuses complete receipt validation and binds all local Lean imports.
+Replay verifies source/support/diagnostic/resource/provenance hashes and compares
+vectors directly with the checked #eval output before executing. Final acceptance
+checks seven formal theorem axiom reports and all ten result/resource/code bindings.
+Two additional mutation controls reject altered vectors and stale imported source.
+Both independent reviewers accepted this chain and its proof/external boundaries.
 
 ## Reviews and handoff
 
@@ -198,7 +244,8 @@ They found and had fixed result-let signature truncation, owner attribution,
 fail-open diagnostics, canonical-census/helper binding, axiom/receipt identity
 checks, orphan/PID/cancellation cleanup, and proof/resource pairing. Current
 negative controls exercise those rejection paths. No residual checkpoint finding
-remains; their acceptance does not cover pending success/runtime/final gates.
+remains. The later component-success/runtime review is recorded above; full
+normal validation and final review remain pending.
 
 Bulk proof/census/fidelity/resource evidence stays outside Git under
 `/workspace/audit-abi-world-evidence/`. The committed evidence manifest points at
@@ -212,14 +259,10 @@ the independent fidelity/accounting gate. Resume this same VM/branch/base and
 existing persistent goal. get_goal is not exposed, which the coordinator explicitly
 made nonblocking. Do not reset/create a goal or launch a replacement.
 
-Next: add actual supported-program success contracts with Option-valued compilers
-and jointly feasible nonempty inputs that refute reject-all/always-revert. Separate
-checked-add assembly/layout availability from real branch execution. Prove actual
-typed Panic-handler success. Use actual Backend.encode output for pinned reference
-execution with exact/one-below gas and historical REVERT fork boundaries, labeling
-external tests separately from Lean proofs. The pinned EthereumJS dependencies
-are installed outside Git; reference results are not yet produced. Complete after
-timings, full affected/final validation and independent final reviews. Keep Slice's
-explicit gas/world limitations and H55 ownership intact. Any frozen repair must
-retain a typed owner blocker and the required ESCALATE options. Do not merge,
-push, publish, pre-gate or declare assignment completion while that work remains.
+Next: finish full ./run-lean.sh on the isolated branch, inspect actual final
+sort-check output and resource evidence, run final read-only reviews, refresh the
+final immutable manifest and export the exact head/patch/handoff. The first full
+attempt was deliberately cancelled with verified cleanup to fix the provenance
+finding; its completed cache artifacts are retained and it is not a passing gate.
+No residual proof/runtime review finding remains. Do not merge, push, publish,
+pre-gate or mark the persistent goal complete before full final validation passes.

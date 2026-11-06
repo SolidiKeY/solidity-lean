@@ -12,8 +12,10 @@ Isolated audit-only library H62AbiWorld uses source directory
 | H62AbiWorld.BasicWitnesses | 29 other non-representation packages. |
 | H62AbiWorld.RepresentationWitnesses | Nine joint call/state/heap/physical packages. |
 | H62AbiWorld.Fidelity | Independent comparisons for all 177 pairs, with binder/type export. |
+| H62AbiWorld.SuccessContracts | Seven behavioral success/nonvacuity/failure theorems for actual supported components. |
+| H62AbiWorld.RuntimeVectors | Actual encoded programs for explicitly external frame gas/fork checks. |
 
 Audit tooling imports Lean. No intrinsic core module may import these tools.
 No production root, core-layer entry, central module map or axiom pin was changed.
 Keep audit modules as explicit test targets unless the area producer/coordinator
-approve registration. Success/runtime modules and final acceptance remain pending.
+approve registration. Full final repository acceptance remains pending.
