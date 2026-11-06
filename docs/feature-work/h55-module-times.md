@@ -821,3 +821,47 @@ A warning is not proof that Lake resolves both paths, and no warning is not
 proof of unique resolution: globs, external packages, standalone paths,
 invalid candidate names and generated/untracked files remain outside this
 comparison. No Lean, server, build or H56 measurement was run.
+
+## Standalone row hints and two source-backed driver groups
+
+`standalone_hints.py` projects every supplied candidate into a row retaining
+its original census record, source hash and candidate context, plus lexical
+line hints. It explicitly leaves driver, expected outcome, auxiliary inputs
+and side effects unresolved. Its CLI labels coverage, supplied head and scope
+as unverified, accepts subsets, and hashes the source manifest bytes. Hints
+can occur in comments or omit syntax: they are not a Lean parser, reviewed
+recipe, source attestation or completeness gate. The 504-row output has 502
+rows with at least one lexical hint and is stored off Git at
+`/workspace/h55-module-times-evidence/cc62d2226-standalone-hints-v2.json`,
+with its SHA-256 in `tests/h55/module-times/standalone-hints-evidence.sha256`.
+This does not resolve all individual execution contexts.
+
+Independent read-only review classified these narrower groups from source:
+
+- Seven `tests/h62/item1/duplication-scanner/Signature*.lean` files are
+  driven by `scripts/h62/item1/duplication-scanner/check_signature_fixture.sh`.
+  `SignatureFingerprint` and `SignatureEnvironment` are prerequisite oleans;
+  `SignatureEnvironmentProbe` and `SignatureObservedConsumer` produce
+  observation logs; `SignatureConsumer` produces signature records checked
+  against pinned expectations; `SignatureMissing` guards an expected
+  unknown-constant diagnostic; `SignatureAxioms` guards axiom output. The
+  driver expects successful Lean process exit for each, including the guarded
+  error, and writes oleans, logs, snapshots and checksums to its evidence
+  directory. These are static driver expectations, not observed success.
+- Under `Bridge/tests/precompile-agreement/`, `verify.py` invokes
+  `Acceptance`, `Axioms`, `AllDeclarations`, `ActualAxioms` and
+  `BoundaryVectors` through `run-file.py`, expecting successful execution
+  and checking relevant axiom output; it also writes logs, producer oleans
+  and a receipt and stops the MCP server. `CacheRequest` is Mathlib cache
+  hash tooling; `TrustProbe` has no confirmed dedicated current driver;
+  `NativeModexpProbe` is a separate native execution probe. Historical
+  native-modexp failure evidence includes a `BoundaryVectors` run with a
+  printed marker but exit 1; a marker alone is not a passing control. Exact
+  current drivers, prerequisites and outcomes for the latter probes remain
+  unresolved. This external/native evidence is not a Lean theorem proof.
+
+Finder and skeptic reviews identified missing explicit subset/head limits,
+loss of original row metadata, and an uncaught malformed top-level JSON
+case in the first helper draft; those were fixed. They did not use Lean, a
+server or builds. H56 measurement and authenticated runner provenance, all
+remaining row classifications and generated-control scope remain open.
