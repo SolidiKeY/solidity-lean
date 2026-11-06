@@ -152,3 +152,68 @@ binders/premises to read_total; it was split into the exact two bundles above, a
 resume command now explicitly requires coordinator hold release. The skeptic found
 no status/scope/path mismatch. Neither reviewer used Lean or edited files. Generator
 consistency and two byte-identical outputs passed; no witness satisfiability was checked.
+
+## H70 requester continuation: all-row static classification
+
+Starting head: 2d53437157aeb2385aeaaab7b7bb891e92566058. The requester directs
+continued static work across all 3281 uncovered rows, retaining zero verified
+witnesses and waiting on migrate-syntax Raw, migrate-hash CollisionBound and
+migrate-backend producer repairs. Earlier Source/Ctor and root-gate timing holds
+have not been explicitly released. This continuation runs no Lean, MCP, Lake,
+build, timing or runtime gate; no original file or toolchain is edited.
+
+surface_classification.py adds a deterministic off-Git ledger with exactly one row
+per original census ID. Each retains its exact source signature/hash/context hash,
+owner and uncovered status. It extracts grouped declaration binders with source
+offsets/types, leading forall source text, the complete result text, and occurrences
+of selected representation/endpoint markers. Bare or unsupported syntax is retained
+as unresolved. Section dependencies remain unresolved explicitly; in particular,
+PublishedOps.lean has source variable declarations, so a no-declaration-binders
+label must not be interpreted as a closed theorem or absence of logical premises.
+
+| Static syntax class | Rows |
+|---|---:|
+| declaration-binders | 1247 |
+| declaration-binders plus leading-forall | 40 |
+| no-declaration-binders | 1672 |
+| no-declaration-binders plus leading-forall | 322 |
+| Total, all still uncovered | 3281 |
+
+Signature-marker occurrences: FiniteRun: 275, Represented: 592, Transport: 410,
+PathSupported: 28. Counts overlap and include conclusions, so they are not counts
+of hypotheses, global structures or feasible inputs. No inference about semantic
+premise class, statement vacuity or satisfiability is made from token occurrence.
+No statement is excluded; semantic interface selection/verification remains pending.
+
+Manual candidate metadata now has thirteen exact selected declarations: the original
+five and TargetOperations.ofSlot_toSlot/toSlot_ofSlot/toSlot_injective/add_keysFit/
+run_read/run_write/run_copy/run_copy_self (namespace Solidity.Backend.StorageOps).
+Local bounds and equality in the conversion cases share the same root values.
+The four run cases have data binders but no logical success hypotheses. Populated
+read/write/nonself-copy plans observe stored11, write bool-true word1 over11, and copy
+root 0 = 11 into root 1 = 0 respectively. All are fixed symbolic target-code contracts,
+not arbitrary compiler selection or gas/fork correctness. Self-copy preserves the
+machine, so empty code also meets that identity; it is not presented as a useful
+reject-empty-code control. These are source plans only. Thirteen manual source
+classifications leave 3268 rows without manual semantic analysis and all 3281 without
+new checked witnesses. The existing five were not counted again as new work.
+
+[Producer field inspection](../../tests/h62/item2/audit-v10-storage/producer-field-classification.md)
+separates the three local endpoint structures from a universal compiler producer,
+and retains FiniteRun.hash_bound over ALL preimages. It is not a checked structure
+inhabitant or an added theorem row. No backend repair diff was supplied or applied.
+
+External consistency checks: five static-extractor regressions pass; candidate and
+all-row outputs each generated twice and compared byte-identical; all frozen input
+bytes matched BASE; no row was lost, duplicated or promoted. Independent read-only
+finder and skeptic reviews found no concrete mismatch in extraction or the eight
+new shared-input plans and preserved all semantic/proof limitations. Neither used
+Lean/server or edited files. Detailed review and generated bulk evidence are off Git.
+All four checkpoints and the original goal remain unfinished; no new Lean helper,
+axiom, sorry, heartbeat override, root registration or interface change was made.
+
+Final static review closure: both reviewers checked producer field fidelity, including
+the universal hash bound and the same after state, and found no concrete mismatch.
+Source-only counts and the new backend wait are accurate; old holds stay unreleased.
+The ledger explicitly defines binder offsets relative to the signature suffix after
+the declaration name. No semantic or proof coverage is promoted by successful parsing.

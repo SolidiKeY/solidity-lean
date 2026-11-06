@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
-  "classification_boundary": "Manual frozen-source analysis, not Lean elaboration, satisfiability proof, or coverage promotion. All original 3281 rows remain uncovered.",
+  "classification_boundary": "Manual frozen-source analysis for thirteen selected declarations, not Lean elaboration, satisfiability proof, or coverage promotion. All original3281 rows remain uncovered.",
   "hold": "H70: no Lean runs pending migrate-syntax/hash/source and migrate-root-gate timing disposition.",
   "bundles": [
     {
@@ -196,7 +196,201 @@
       "negative_candidate": "The stored read value is 11, NOT SourceWordWriteControls.value (53). Changing only slot to root 1 (17), or value to 53, invalidates coherent or present. A missing path invalidates present.",
       "status": "source-classified; Lean witness blocked",
       "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.ofSlot_toSlot",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "l",
+        "fits"
+      ],
+      "shared_inputs": {
+        "l": "Solidity.Storage.Loc.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit l"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Conditional inverse conversion, not source path liveness.",
+      "proof_plan": "After hold release: one l=root0 bundle with fits=True.intro, then instantiate the unchanged conversion theorem.",
+      "negative_candidate": "Key bounds concern hashed keys; root offsets and source liveness are not additional premises.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_ofSlot",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Total inverse conversion over intrinsic symbolic slots.",
+      "proof_plan": "After hold release: retain the slot data binder; there is no logical hypothesis to invent. Its fitting proof is constructed by the frozen expression, not supplied as a theorem premise.",
+      "negative_candidate": "Any malformed-address/source-liveness control belongs to a separate boundary; this theorem accepts intrinsic Evm.Slot values.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_injective",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "a",
+        "b",
+        "fa",
+        "fb",
+        "equal"
+      ],
+      "shared_inputs": {
+        "a": "Solidity.Storage.Loc.root 0",
+        "b": "Solidity.Storage.Loc.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "fa",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit a"
+        },
+        {
+          "name": "fb",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit b"
+        },
+        {
+          "name": "equal",
+          "classification": "per-input converted-address equality",
+          "obligation": "toSlot a fa = toSlot b fb"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Injectivity under simultaneous fitting and equality.",
+      "proof_plan": "After hold release: one a/b tuple, fa/fb=True.intro and equal=rfl on the same root0. Do not inhabit equality independently of a/b.",
+      "negative_candidate": "Changing only b to root1 leaves fitting possible but invalidates equal.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.add_keysFit",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "l",
+        "fits",
+        "offset"
+      ],
+      "shared_inputs": {
+        "l": "Solidity.Storage.Loc.root 0",
+        "offset": "7"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit l"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Preserves key-word bounds through symbolic offset addition.",
+      "proof_plan": "After hold release: one l=root0/offset7 tuple with fits=True.intro. No offset bound or live-cell premise may be added.",
+      "negative_candidate": "This is not a numeric storage overflow or source liveness guarantee.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_read",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed symbolic readCode success; no execution-success premise.",
+      "proof_plan": "After hold release: data-only bundle with populated initial machine; target read is expected to push stored11 and preserve context. Kernel validation still required.",
+      "negative_candidate": "Future negative selection control: empty/reverting code cannot satisfy the same pushed-stack result. Do not change the frozen readCode statement.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_write",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "word",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "word": "Solidity.Backend.StorageOps.ProducerInterfaceControls.word",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed writeCode success; no execution-success premise.",
+      "proof_plan": "After hold release: data-only bundle uses bool-true word1 against populated root0=11, making the write observable; result must preserve full other context.",
+      "negative_candidate": "Future negative selection control: empty/reverting code cannot satisfy the changed-store result; no compiler parameter appears in this frozen theorem.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "dst",
+        "src",
+        "machine"
+      ],
+      "shared_inputs": {
+        "dst": "Evm.Slot.root 1",
+        "src": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed current-store SLOAD/SSTORE copy success.",
+      "proof_plan": "After hold release: one dst/root1,src/root0,machine tuple; populated source11 and destination0 make runtime copy observable. No source payload oracle is supplied.",
+      "negative_candidate": "Future wrong-code/revert controls must use these same original inputs and expected destination11; no arbitrary compiler correctness is inferred.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy_self",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Fixed self-copy preserves the entire intrinsic Machine.",
+      "proof_plan": "After hold release: slot/root0 and populated machine; no success premise. This identity alone is not a useful reject-empty-code negative.",
+      "negative_candidate": "Empty code can also preserve the machine here; use nonself run_copy and changing run_write for nontrivial selection controls. Always-revert still cannot yield ok machine.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false
     }
   ],
-  "name_boundary": "Fully qualified names are read from the frozen explicit namespaces; Lean elaboration/name verification remains held."
+  "name_boundary": "Fully qualified names are read from the frozen explicit namespaces; Lean elaboration/name verification remains held.",
+  "expected_bundle_count": 13
 }

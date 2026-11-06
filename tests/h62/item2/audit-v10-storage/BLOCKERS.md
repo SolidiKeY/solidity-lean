@@ -86,3 +86,20 @@ Coordinator requests remain attached to these exact original-file paths:
 Timing evidence remains /workspace/audit-v10-storage-handoff/evidence/reproduce/keysort.json
 and /workspace/audit-v10-storage-handoff/evidence/final-prerequisite/keysort.json.
 No missing VM file or unstated repair is needed to review the source classification.
+
+## H70 requester continuation: full static triage
+
+Requester disposition at head 2d53437157aeb2385aeaaab7b7bb891e92566058 names
+migrate-syntax Raw, migrate-hash CollisionBound and migrate-backend producer repairs
+as waits. B-MIG-BACKEND is a coordinator-directed producer dependency, not a newly
+observed Lean failure. Relevant frozen interface inspection:
+[producer-field-classification.md](producer-field-classification.md), original path
+/workspace/solidity-lean/Solidity/Backend/StorageOps/ProducerInterface.lean.
+The exact backend repair diff/file list has not been supplied. This grants no edit
+permission. Earlier Source/Ctor and KeySort holds have no explicit release; no Lean
+runs or new measurements occurred. relay.sh remains host-only.
+
+surface_classification.py now retains all 3281 rows in one static ledger. It records
+syntax and markers only, without treating any row as premise-free or witnessed.
+Thirteen selected declarations have manual joint-input classifications, including
+eight address/read/write/copy contracts; their witness count remains zero.

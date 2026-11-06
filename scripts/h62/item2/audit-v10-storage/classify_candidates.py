@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Attach exact frozen source signatures to the five H70 manual classifications.
+"""Attach exact frozen source signatures to the selected H70 manual classifications.
 This external consistency check cannot verify any Lean witness. Bulk output is off Git.
 """
 import argparse
@@ -19,8 +19,8 @@ def main():
     metadata=json.loads((root/'tests/h62/item2/audit-v10-storage/candidate-bundles.json').read_text())
     inventory=census.collect(root)
     assert metadata['base']==inventory['base']
-    assert len(metadata['bundles'])==5
-    assert len({r['theorem'] for r in metadata['bundles']})==5
+    assert len(metadata['bundles'])==metadata['expected_bundle_count']
+    assert len({r['theorem'] for r in metadata['bundles']})==metadata['expected_bundle_count']
     for row in metadata['bundles']:
         namespace,name=row['theorem'].rsplit('.',1)
         frozen_text=census.frozen(root,row['path']).decode()
@@ -36,7 +36,7 @@ def main():
         assert all(n in row['binder_order'] for n in hypotheses)
         assert not row['global_premise_structures']
         row['frozen_source']=dict(id=declaration['id'],line=declaration['line'],signature=declaration['signature'],signature_sha256=declaration['signature_sha256'],owner=declaration['owner'])
-    metadata['counts']=dict(source_classified_bundles=5,verified_witnesses=0,uncovered_rows=inventory['counts']['uncovered'])
+    metadata['counts']=dict(source_classified_bundles=len(metadata['bundles']),verified_witnesses=0,uncovered_rows=inventory['counts']['uncovered'])
     output.mkdir(parents=True,exist_ok=True)
     (output/'candidate-classification.json').write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(metadata['counts'],sort_keys=True))
