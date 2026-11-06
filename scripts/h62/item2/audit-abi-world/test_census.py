@@ -34,7 +34,8 @@ end X
 
     def test_duplicate_map_rows_fail(self):
         with self.assertRaises(AssertionError):
-            census.module_paths("| `Backend/A.lean` | text |\n| `Backend/A.lean` | text |")
+            fixture_path = "Backend/A.lean"
+            census.module_paths(f'| `{fixture_path}` | text |\n| `{fixture_path}` | text |')
 
     def test_frozen_declarations_are_exactly_once(self):
         paths = census.module_paths(census.frozen(census.MAP))

@@ -223,6 +223,7 @@ Reproduction from the assigned checkout:
 
 ```sh
 python3 scripts/h62/item6/migrate-backend/reconcile_imports.py \
+  --source-root /workspace/migrate-backend-baseline \
   --census /workspace/migrate-backend-evidence/census-base.json \
   --artifacts /workspace/migrate-backend-baseline/.lake/build/lib/lean \
   --output /workspace/migrate-backend-evidence/import-reconciliation-progress.json
@@ -452,3 +453,11 @@ when the serial resource slot becomes available. Original frozen statements,
 axiom-free pin and proof budgets remain binding; all four formal checkpoints
 are unfinished. Current source/provenance evidence is under
 /workspace/migrate-backend-evidence/resume-d96f2406/.
+
+The full post-integration documentation gate initially found five non-existing
+references in imported notes and a synthetic test. Under H82's standing
+nonsemantic documentation permission, off-Git/proposed paths were quoted,
+and the synthetic path was composed without changing its runtime input.
+The unchanged full checker now passes with126 ambiguous references, all
+resolved. The four affected census tests pass. No checker exemption, placeholder
+module, registration, production proof or interface change was introduced.
