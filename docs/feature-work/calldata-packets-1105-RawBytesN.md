@@ -53,3 +53,12 @@ library success does not establish their root reachability. Finder/skeptic
 confirm both the source fixes and final evidence. V11 integrates the packet;
 the coordinator must register the modules and supply map rows before the
 registration-dependent gates can pass. No shared registry is edited here.
+
+H82 metadata follow-through: the three module-map rows are now supplied in
+the lane fragment and generated area index. The pin inventory was synchronized
+with its existing guarded declarations: 11,226 prior entries and their axiom
+sets remain unchanged, with 4,379 standard-only additions. No Lean source,
+statement, proof, interface, budget or allowed axiom set changed. Fragment,
+root, orphan and layer checks pass. Documentation paths still report one
+unrelated missing external Mathlib citation; this is not a full-gate pass or
+fresh kernel validation of the inventory.
