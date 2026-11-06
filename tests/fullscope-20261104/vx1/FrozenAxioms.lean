@@ -24,3 +24,4 @@ An inventory, not a pin: every line must print only standard axioms. -/
 #print axioms Solidity.Roadmap.FullScope.V1.Controls.shifted_relation_refused
 #print axioms Solidity.Roadmap.FullScope.V1.Controls.overlap_refused
 #print axioms Solidity.Roadmap.FullScope.V1.Controls.rewriting_optimizer_refused
+#print axioms Solidity.Roadmap.FullScope.V1.Controls.extra_event_refused

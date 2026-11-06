@@ -160,12 +160,15 @@ def Physical.Representable (p : Physical) (s : p.SourceState) : Prop :=
     ∀ address : Word, p.extent s ≤ address.val → p.view s address = 0
 
 /-- **D3.** Related states agree on every slot and memory byte, and every
-representable source state is related to some target state, so an empty
+representable source state is related to some target state. `live` requires a
+representable source state, so neither an empty source state type nor an
+extent that is never word-aligned makes `total` vacuous; with it, an empty
 relation does not satisfy the contract. -/
 structure D3 (p : Physical) : Prop where
   agrees : ∀ s t, p.Related s t →
     p.layout.Agrees (p.value s) (p.slots t) ∧ MemoryAgrees (p.extent s) (p.view s) (p.memory t)
   total : ∀ s, p.Representable s → ∃ t, p.Related s t
+  live : ∃ s, p.Representable s
 
 /-! ## D4: unsafe assembly -/
 
@@ -187,6 +190,9 @@ block byte for byte. -/
 structure D4 (a : Assembly) : Prop where
   writeback : UnsafeWriteback a.State a.MemOK a.executes a.writeback a.Corresponds
   opaqueBlocks : Opaque a.optimize a.isUnsafe
+  /-- An unsafe block executes from some state and the optimizer meets some
+  unsafe block, so neither obligation holds vacuously. -/
+  live : (∃ before after, a.executes before after) ∧ ∃ block, a.isUnsafe block
 
 /-! ## D5: environments and premises -/
 
@@ -263,7 +269,10 @@ def D1.toD6 {source : Source} {target : Target} {domain : SourceRuns source}
 /-- **The frozen G01 full-scope contract** of one compiler in one mode: the
 run-indexed certificate (D1 in `.exact`, D6 in `.optimizer`, D5 by
 `d5_of_certificate`), creation-size failures (D2), the physical correspondence
-(D3) and the assembly boundary (D4). Every parameter is explicit. -/
+(D3) and the assembly boundary (D4). Every parameter is explicit. D2–D4 are
+stated over the producer's own `attempt`, `Physical` and `Assembly`; this
+bundle does not tie them to `target`'s operational semantics, which is each
+producer's adapter obligation. -/
 structure Contract (source : Source) (target : Target) (domain : SourceRuns source)
     (machine : TargetRuns target) (compiler : source.Resolved → Option Artifact)
     (environment : target.lang.Env → source.lang.Env) (aligned : Alignment source target)

@@ -947,7 +947,7 @@ Lane moved from the Codex VM lane `solidity-fullscope-20261104/vx1-contracts-env
 (H75); branch `cloud/move5-20261106/vx1-g01` from `cloud/move5-20261106/vx1-base`
 (`d2a9a040`), which already contained `origin/master` (`5f7bb144`).
 
-### 1. OOM hold: the module over the bound
+### OOM hold: the module over the bound
 
 Measured on a cold full build (`LEAN_NUM_THREADS=1 ./run-lean.sh`, 4 cores,
 15 GiB, no swap) with a `/proc/<pid>/status` VmHWM sampler (0.2 s) over every
@@ -963,11 +963,11 @@ now emits `PowerBounds/Part01`–`Part08` (four widths each: rows
 `naturalThresholdRow<w>` and `rowBounds<w>`, no longer `private`) and
 `PowerBounds.lean` assembling `naturalThresholds`, `threshold_bounds`,
 `thresholdWord(_nat)`, `exponentWord(_nat)` with unchanged statements and
-proofs. Constants and row proofs are byte-identical (multiset and order
-checked). Parts measured: Part04 2099 MiB / 26 s, Part08 2337 MiB / 26 s;
+proofs. Constants, statements and row proofs are unchanged up to placement
+(multiset and order checked); the 64 row names lose `private`. Parts measured: Part04 2099 MiB / 26 s, Part08 2337 MiB / 26 s;
 `--check` of the generator and `check-backend-scalar.mjs` pass.
 
-### 3. Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
+### Frozen G01 relation contracts D1–D6 (`FullScope.V1`)
 
 `Solidity/Language/EnvironmentFields/Frozen.lean`, namespace
 `Solidity.Roadmap.FullScope.V1`, over the unchanged definitions of
@@ -985,8 +985,8 @@ Consumer declaration names (vt1, vo1 and every X/O/T lane):
 | `V1.D2 attempt` | `abbrev` (Prop) | `CreationSizeFailures attempt` (EIP-170/3860) |
 | `FullScope.PackedField.read`, `FullScope.PackedField.Disjoint` | defs | low-order-first packed field content; byte disjointness |
 | `V1.Layout`, `V1.Layout.Agrees`, `V1.MemoryAgrees`, `V1.Physical`, `V1.Physical.Representable` | defs/structures | D3 data |
-| `V1.D3 physical` | structure (Prop) | `agrees` on related states, `total` on representable ones |
-| `V1.Assembly`, `V1.D4 assembly` | structure, structure (Prop) | `writeback : UnsafeWriteback …`, `opaqueBlocks : Opaque …` |
+| `V1.D3 physical` | structure (Prop) | `agrees` on related states, `total` on representable ones, `live`: some representable state |
+| `V1.Assembly`, `V1.D4 assembly` | structure, structure (Prop) | `writeback : UnsafeWriteback …`, `opaqueBlocks : Opaque …`, `live`: some execution and some unsafe block |
 | `V1.D5 source target environment`, `V1.d5_of_certificate` | def, theorem | environment correspondence; every certificate proves it |
 | `V1.D6 …` | `abbrev` (Type) | `RunIndexed.Certificate … .optimizer` |
 | `V1.Mode.observe_le`, `V1.Mode.observe_optimizer`, `V1.D1.toD6` | theorems/def | quotient monotone, idempotent; exact ⇒ optimizer |
@@ -1000,8 +1000,10 @@ a successful completion matched by the target (`witness_live`,
 `oracle_live`), creation success at the limits (`creation_at_limits`) and a
 representable nonzero layout (`d3_live`). Negative controls:
 `rejecting_refused`, `reverting_refused` (both modes), `empty_relation_refused`,
-`shifted_relation_refused`, `overlap_refused`, `rewriting_optimizer_refused`.
-`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 21 declarations:
+`shifted_relation_refused`, `overlap_refused`, `rewriting_optimizer_refused`,
+`extra_event_refused` (an extra non-gas observation with equal gas reads and
+outcome fails in both modes).
+`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 22 declarations:
 only `propext`/`Quot.sound`. MCP diagnostics: no errors or warnings on all three.
 
 Binding for consumers: vt1's `fun_<name>_<id>` simulations state their
@@ -1017,3 +1019,27 @@ staged and kernel-checked 30-row transition, seven mutation controls.
 Activation waits for VY5's `ScopeScan.certify` to test `unmodelled?` first; the
 active catalog (`docs/solidity-features.json`, `FeatureInfo.lean`,
 `Features.lean`) is unchanged.
+
+Use the qualified names (`V1.D1.toD6 c`, `V1.forward_completes c …`): `V1.D1`
+and `V1.D6` are abbreviations of `RunIndexed.Certificate`, so dot notation on
+a certificate value does not find the `V1` lemmas.
+
+Limits of the freeze, stated rather than hidden: D2–D4 are over the producer's
+own `attempt`, `Physical` and `Assembly`; `V1.Contract` does not tie them to
+the target's operational semantics (each producer's adapter does). The joint
+witness is a toy whose source and target share one execution function with
+trivial guards; its value is that every field is inhabited at once with live
+domains, not that the fields constrain each other. A "gas-only difference
+passes D6 but fails D1" control is not constructible in the run-indexed design:
+the coupled transcripts force the source oracle to read the target's gas
+values in both modes, so the quotient only matters for gas observations that
+are not oracle reads.
+
+### Reviews (finder, skeptic; read-only, no Lean server)
+
+Skeptic: C1 partially holds (D3/D4 could be vacuous through the producer's
+choice of state types, extent or an empty `executes`/`isUnsafe`); fixed by the
+`live` fields of `D3` and `D4`. C2 partially holds (degenerate toy, missing
+non-gas-change control); `extra_event_refused` added, degeneracy and the
+gas-only control recorded above. C3–C5 hold; fixed the doc's "byte-identical"
+wording, section numbering and the dot-notation caveat.

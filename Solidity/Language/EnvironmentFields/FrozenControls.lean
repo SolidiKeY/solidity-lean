@@ -258,6 +258,8 @@ theorem d3 : D3 physical where
     intro s representable
     have small : s.1 < 256 := representable.1 ()
     exact ⟨(⟨s.1, Nat.lt_trans small (by decide)⟩, s.2), small, rfl, rfl⟩
+  live := ⟨((7, ByteMemory.empty) : Nat × ByteMemory),
+    fun _ => show 7 < 256 ^ 1 by decide, Nat.zero_le _, rfl, fun _ _ => rfl⟩
 
 /-- A representable source state with a nonzero stored value. -/
 theorem d3_live : physical.Representable ((7, ByteMemory.empty) : Nat × ByteMemory) ∧
@@ -276,7 +278,9 @@ def boundary : Assembly where
   optimize := Controls.optimize
   isUnsafe := Controls.isUnsafe
 
-theorem d4 : D4 boundary := ⟨Controls.unsafe_writeback, Controls.opaque_preservation⟩
+theorem d4 : D4 boundary :=
+  ⟨Controls.unsafe_writeback, Controls.opaque_preservation,
+    ⟨⟨FullScope.Controls.dirtyBefore, FullScope.Controls.dirtyAfter, rfl⟩, ⟨(true, [0x60, 1]), rfl⟩⟩⟩
 
 /-! ## The bundle, inhabited -/
 
@@ -347,6 +351,41 @@ theorem reverting_refused (mode : Mode) :
     (fun _ _ => show (5 : Word) ≠ 0 by decide) trivial (o := .success [5]) (by cases mode <;> rfl)
   have finals := congrArg (fun p : Prefix Observation Outcome => p.final) same
   cases mode <;> cases finals
+
+/-- A target that adds a non-gas observation (a memory byte) before the gas
+read, with the same gas reads and outcome. -/
+def extraEvent : Target where
+  lang := { target.lang with
+    sem := fun art env resource =>
+      { target.lang.sem art env resource with
+        events := .memory 0 0 :: (target.lang.sem art env resource).events }
+    consistent := by
+      intro art env resource resource' same
+      cases same
+      exact Prefix.Le.refl _ }
+  load := fun art => art
+  read := fun _ _ supply _ => supply
+
+def extraEventMachine : TargetRuns extraEvent where
+  queries := fun art run => transcript art (fun _ => run.resource)
+  observations := fun art run => transcript_observations art (fun _ => run.resource)
+  reads := fun art run query value observed =>
+    transcript_reads art (fun _ => run.resource) query value observed
+
+def extraEventAligned : Alignment source extraEvent :=
+  fun _ _ sourceRun targetRun => sourceRun.resource = targetRun.resource
+
+/-- The gas quotient does not hide an extra non-gas observation: D6 (and D1)
+reject a target whose outcome and gas reads agree but which emits one more
+memory observation. -/
+theorem extra_event_refused (mode : Mode) :
+    ¬ Nonempty (Certificate source extraEvent domain extraEventMachine compiler id
+      extraEventAligned mode) := by
+  intro ⟨alleged⟩
+  have same := forward_completes alleged rfl (sourceRun 5) (source_run_eligible 5) () trivial rfl
+    (fun _ _ => show (5 : Word) ≠ 0 by decide) trivial (o := .success [5]) (by cases mode <;> rfl)
+  have lengths := congrArg (fun p : Prefix Observation Outcome => p.events.length) same
+  cases mode <;> cases lengths
 
 /-- An empty physical relation fails D3's totality. -/
 theorem empty_relation_refused : ¬ D3 { physical with Related := fun _ _ => False } := by
