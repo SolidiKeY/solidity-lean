@@ -17,7 +17,7 @@ verdict. None of them may be in `Fml.Residue`.
 | `memStructMapping` (`∀ fresh Wallet w; w.owner = w.owner`) | unknown | proved | void binder | `Examples/DecisionGapVoidBinder.lean`, `Examples/DecisionMemory.lean` |
 | `mappingReversed` (`∀ fresh Wallet w; 0 = w.owner`) | unknown | proved | void binder | `Examples/DecisionGapVoidBinder.lean`, `Examples/DecisionResidueReasons.lean` (`mapping_global_proved`) |
 | `mappingOne` (`∀ fresh Wallet w; 1 = w.owner`) | unknown | proved | void binder | `Examples/DecisionMappingFieldReason.lean` (`actual_proved_controls`) |
-| every `∀ fresh S x; φ` with `S` a struct with a direct mapping member (or a mapping, or a nonempty fixed array of mapping references), any body | unknown | proved | void binder | `ledgerSeven` in `Examples/DecisionGapVoidBinder.lean` |
+| a root binder `∀ fresh S x; φ` with `S` in `RefTy.memVoid` (a struct with a direct mapping member, a mapping, a nonempty fixed array of mapping references), any body, when negative-block preparation finds no array cut (`mxTop = none`, the route to `structAnswerWithCompound`) | unknown | proved | void binder | `ledgerSeven` in `Examples/DecisionGapVoidBinder.lean`; not proved here: the binder under a prefix (`∀ uint k; ∀ fresh Wallet w; …`) |
 | `floorClaim 1` (halting-OR APF block, valid) | unknown, not covered | proved | partial-OR floor | `Examples/DecisionHaltingOrGaps.lean` (`validAPF_proved`) |
 | `floorClaim 0` (key zero) | unknown, not covered | refuted | partial-OR floor | `zeroAPF_refuted` |
 | `floorBad` | unknown, not covered | refuted | partial-OR floor | `falseAPF_refuted` |
@@ -46,7 +46,9 @@ covered with certified verdicts on the base.
   answers (`Calculus/DecisionCompoundExtension.lean`), so `Fml.memCovered`
   covers it with no change to `Decision.lean`. The negated binder is outside
   `Fml.inTarget` (negative `allocAll`, decision d); the target holds no false
-  member of this family.
+  member of this family. `RefTy.memVoid` is a syntactic subset: a struct whose
+  member is a void struct is void too but not recognized, and a void binder
+  under a universal prefix is not recognized.
 * **Partial-OR floor** (`Calculus/DecisionPartialOrFloor.lean`). The guard
   `(i ≤ j && i < s - 1) || i ≤ i` is `true` exactly when `j < i` or `1 ≤ s`
   (checked subtraction halts at `s = 0`; `||`/`&&` short-circuit left to
@@ -66,7 +68,9 @@ covered with certified verdicts on the base.
   default, leaves `c` below index `n` and `h` past it, `c`/`h` from the
   formula's literals, zero and words different from them; `n ≤ 64`. The
   region is symbolic: no key or slot list. This is a certified refutation
-  search, not a complete decision: a false block it misses stays unknown.
+  search (a sound semi-decision), not a complete decision: a false block it
+  misses stays unknown. Arrays are at most `lenCap` (129) slots, and literals
+  past that are not indices any region reaches.
 
 ## The extension point and the `Decision.lean` commit
 
@@ -97,7 +101,34 @@ operands and `addmod`/`mulmod` with a symbolic modulus or two symbolic
 factors (checked: `inTarget {} = false`). `addmod(x, y, 7)` with two symbolic
 addends is in the target and already covered.
 
-## Gates and reviews
+## Reviews
 
-Recorded at the end of the lane (see the CLOUD-RESULT block of the final
-marker commit).
+Read-only finder and skeptic reviews, neither using the Lean server, after the
+three families were in. The skeptic confirmed all five soundness claims (void
+vacuity from `MObj (.mapping ..) = Empty`; the partial-OR guard re-derived by
+hand from `binopT`/`shortT`; block refutations cover every `i` through the
+guard; every new route is a last `orElse`, so earlier answers and their
+counterstates stay authoritative; fixtures test both polarities with
+kernel-checked countermodels). Findings fixed:
+
+* `fills` sized arrays by the largest literal of the formula, so a large value
+  literal could build huge regions, and a literal near `2^256` disabled the
+  search: lengths now come from literals below `lenCap` only, and candidates
+  are deduplicated.
+* Wording that overclaimed: `RefTy.memVoid` is a syntactic subset; the block
+  refuter and `Fml.gapCovered` are a semi-decision; the void-binder row above
+  is narrowed to the root binder on the `mxTop = none` route.
+* Stale present-tense prose in `docs/automation.md` now points here.
+* Missing theorem docstrings in the new fixtures; `original_controls` now
+  states `floorBad`'s refutation; `notWallet` is written in `cdl{}`.
+  `totalClaim` stays in constructors: `dl{}` cannot spell a `&&` under `||`.
+
+Not changed: partial-OR discovery tries `roots² × literals³` candidates after
+its shape check (no current `Covered = false` pin has that shape; reading the
+literals off their fixed positions would make it constant work), and the
+positives of `Examples/DecisionGapArrayNegatives.lean` are pinned only as not
+refuted there (their `proved` verdicts are in `Examples/DecisionArrayGaps.lean`).
+
+## Gates
+
+Recorded in the CLOUD-RESULT block of the final marker commit.

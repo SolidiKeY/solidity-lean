@@ -20,8 +20,9 @@ variable {C : Contract}
 def gapAnswer? (φ : Fml C []) : Option (MemoryWitness.Answer φ) :=
   (ResidueReason.partialOrFloorAnswer? φ).orElse fun _ => BlockRefute.answer? φ
 
-/-- Decidable membership: a source family, or a certified refutation found by the
-finite region search. No decision verdict function is consulted. -/
+/-- Decidable membership: a syntactic source family, or a certified refutation
+found by the finite region search (a semi-decision: membership is the search's
+own success). No `decideGoal`/`Covered` verdict is consulted. -/
 def _root_.Solidity.Fml.gapCovered (φ : Fml C []) : Bool := φ.partialOrFloor || φ.blockRefutable
 
 /-- Every member of a decided gap family is answered. -/

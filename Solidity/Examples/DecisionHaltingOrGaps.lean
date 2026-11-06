@@ -146,21 +146,28 @@ private theorem refuted_of_check {C : Contract} (φ : Fml C [])
   | refuted σ => exact ⟨σ, rfl, decideGoal_refutes hd⟩
   | unknown => rw [hd] at h; cases h
 
+/-- `floorClaim 1` is in the target. -/
 theorem validAPF_target : (floorClaim 1).inTarget {} = true := by decide +kernel
 /-- The former unknown is covered by the decided partial-OR floor family. -/
 theorem validAPF_covered : (floorClaim 1).Covered = true := by decide +kernel
+/-- `floorClaim 1`: proved. -/
 theorem validAPF_proved : decideGoal (floorClaim 1) = .proved :=
   proved_of_check (floorClaim 1) (by decide +kernel)
 
+/-- `floorClaim 0` is in the target. -/
 theorem zeroAPF_target : (floorClaim 0).inTarget {} = true := by decide +kernel
+/-- `floorClaim 0` is covered. -/
 theorem zeroAPF_covered : (floorClaim 0).Covered = true := by decide +kernel
 /-- Key zero is unconstrained when the scalar is zero: a certified countermodel. -/
 theorem zeroAPF_refuted : ∃ σ : State FloorProbe [],
     decideGoal (floorClaim 0) = .refuted σ ∧ ¬ Fml.holdsH σ (floorClaim 0) :=
   refuted_of_check (floorClaim 0) (by decide +kernel)
 
+/-- `floorBad` is in the target. -/
 theorem falseAPF_target : (floorBad).inTarget {} = true := by decide +kernel
+/-- `floorBad` is covered. -/
 theorem falseAPF_covered : (floorBad).Covered = true := by decide +kernel
+/-- `floorBad`: a certified countermodel. -/
 theorem falseAPF_refuted : ∃ σ : State FloorProbe [],
     decideGoal floorBad = .refuted σ ∧ ¬ Fml.holdsH σ floorBad :=
   refuted_of_check floorBad (by decide +kernel)

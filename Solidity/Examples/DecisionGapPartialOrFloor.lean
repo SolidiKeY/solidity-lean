@@ -30,7 +30,10 @@ def atZero : Fml Floors [] := claim 5 0 5
 /-- Refuted: the wrong value at a positive key. -/
 def wrongValue : Fml Floors [] := claim 5 3 4
 
-/-- The same shape with a total bound `cap + 1` is not a member. -/
+/-- The same shape with a total bound `cap + 1` is not a member. Written with
+constructors: `dl{}` has no spelling for a `&&` nested under `||` in a guard
+(`docs/automation.md`, unpinned shapes), the same reason `PartialOrRoots.sourceGuard`
+is built this way. -/
 def totalGuard : Tm Floors [.val .uint, .val .uint] (.val .bool) :=
   .app2 (.binop .or rfl)
     (.app2 (.binop .and rfl)
@@ -38,6 +41,7 @@ def totalGuard : Tm Floors [.val .uint, .val .uint] (.val .bool) :=
       (.app2 (.binop .lt (p := .uint) rfl) (.pvV (.there .here))
         (.app2 (.binop .add rfl) roots.scalarRead (.app0 (.lit (uintOfNat 1))))))
     (.app2 (.binop .le (p := .uint) rfl) (.pvV (.there .here)) (.pvV (.there .here)))
+/-- The total-bound claim, otherwise the shape of `good`. -/
 def totalClaim : Fml Floors [] :=
   .imp (.all (.user "i") .uint (.all (.user "j") .uint
     (.imp (.eq totalGuard (.app0 (.lit true)))
@@ -51,15 +55,20 @@ def totalClaim : Fml Floors [] :=
 /-- info: [(true, true, true, "proved"), (true, true, true, "refuted"), (true, true, true, "refuted")] -/
 #guard_msgs in #eval [good, atZero, wrongValue].map observe
 
+/-- The three claims are members; the total-bound guard is not. -/
 theorem members : good.partialOrFloor = true ∧ atZero.partialOrFloor = true ∧
     wrongValue.partialOrFloor = true ∧ totalClaim.partialOrFloor = false := by
   decide +kernel
 
+/-- All three members are in the target. -/
 theorem targets : good.inTarget {} = true ∧ atZero.inTarget {} = true ∧
     wrongValue.inTarget {} = true := by decide +kernel
 
+/-- `owed[2] == 5`: covered. -/
 theorem good_covered : good.Covered = true := by decide +kernel
+/-- `owed[0] == 5`: covered. -/
 theorem atZero_covered : atZero.Covered = true := by decide +kernel
+/-- `owed[3] == 4`: covered. -/
 theorem wrongValue_covered : wrongValue.Covered = true := by decide +kernel
 
 /-- Coverage and the exact family semantics force the certified verdict. -/
@@ -79,6 +88,7 @@ theorem atZero_countermodel :
     ¬ holds (roots.counterState (uintOfNat 5) (uintOfNat 5)) atZero :=
   roots.sourceClaim_counter_refutes _ _ _ _ _ (by decide)
 
+/-- The region state refutes the wrong value, independently of the decider. -/
 theorem wrongValue_countermodel :
     ¬ holds (roots.counterState (uintOfNat 5) (uintOfNat 4)) wrongValue :=
   roots.sourceClaim_counter_refutes _ _ _ _ _ (by decide)
@@ -100,11 +110,14 @@ theorem atZero_refuted : ∃ σ : State Floors [],
     decideGoal atZero = .refuted σ ∧ ¬ Fml.holdsH σ atZero :=
   refuted_of_check atZero (by decide +kernel)
 
+/-- The decider returns a certified countermodel for the wrong value. -/
 theorem wrongValue_refuted : ∃ σ : State Floors [],
     decideGoal wrongValue = .refuted σ ∧ ¬ Fml.holdsH σ wrongValue :=
   refuted_of_check wrongValue (by decide +kernel)
 
+/-- Key zero is not valid. -/
 theorem atZero_notValid : ¬ Fml.Valid atZero := fun h => atZero_countermodel (h _)
+/-- The wrong value is not valid. -/
 theorem wrongValue_notValid : ¬ Fml.Valid wrongValue := fun h => wrongValue_countermodel (h _)
 
 /-- info: 'Solidity.Decide.ResidueReason.PartialOrFloor.valid_iff' depends on axioms: [propext, Classical.choice, Quot.sound] -/

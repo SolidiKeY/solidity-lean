@@ -22,7 +22,9 @@ set_option Elab.async false
 def ledgerSeven : Fml StandardExample [] := cdl[StandardExample]{ ∀ fresh Ledger l; l.nonce = 7 }
 
 /-- The negated binder: false in every state. -/
-def notWallet : Fml StandardExample [] := .not mappingOne
+def notWallet : Fml StandardExample [] := cdl[StandardExample]{ ¬ (∀ fresh Wallet w; 1 = w.owner) }
+
+example : notWallet = .not mappingOne := rfl
 
 def verdict (φ : Fml StandardExample []) : String :=
   match decideGoal φ with | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown"
@@ -35,15 +37,18 @@ info: [(true, true, true, "proved"), (true, true, true, "proved"), (true, true, 
 #eval [memStructMapping, mappingReversed, mappingOne, ledgerSeven, notWallet, reversedFive].map
   fun φ => (φ.inTarget {}, φ.freshVoidBinder, φ.Covered, verdict φ)
 
+/-- `memVoid` on mapping-bearing structs, a map-free struct and arrays of mappings. -/
 theorem void_types : (RefTy.struct "Wallet").memVoid = true ∧
     (RefTy.struct "Ledger").memVoid = true ∧ (RefTy.struct "Person").memVoid = false ∧
     (RefTy.fixed (.ref (.mapping .uint .uint)) 2).memVoid = true ∧
     (RefTy.array (.ref (.mapping .uint .uint))).memVoid = false := by decide +kernel
 
+/-- The fixtures in the source class; the map-free control is not. -/
 theorem members : memStructMapping.freshVoidBinder = true ∧ mappingReversed.freshVoidBinder = true ∧
     mappingOne.freshVoidBinder = true ∧ ledgerSeven.freshVoidBinder = true ∧
     notWallet.freshVoidBinder = true ∧ reversedFive.freshVoidBinder = false := by decide +kernel
 
+/-- The positive members are in the target; the negated binder is not. -/
 theorem targets : memStructMapping.inTarget {} = true ∧ mappingReversed.inTarget {} = true ∧
     mappingOne.inTarget {} = true ∧ ledgerSeven.inTarget {} = true ∧
     notWallet.inTarget {} = false := by decide +kernel
@@ -52,20 +57,27 @@ theorem targets : memStructMapping.inTarget {} = true ∧ mappingReversed.inTarg
 theorem mappingOne_valid : Fml.Valid mappingOne :=
   fun σ => allocAll_void_holds σ _ _ rfl _
 
+/-- The initial state refutes the negated binder, independently of the decider. -/
 theorem notWallet_countermodel : ¬ holds (State.init StandardExample) notWallet :=
   fun h => h (mappingOne_valid _)
 
+/-- The positive members are covered. -/
 theorem covered : memStructMapping.Covered = true ∧ mappingReversed.Covered = true ∧
     mappingOne.Covered = true ∧ ledgerSeven.Covered = true := by decide +kernel
 
+/-- `∀ fresh Wallet w; w.owner = w.owner`: proved. -/
 theorem memStructMapping_proved : decideGoal memStructMapping = .proved := by rfl
+/-- `∀ fresh Wallet w; 0 = w.owner`: proved. -/
 theorem mappingReversed_proved : decideGoal mappingReversed = .proved := by rfl
+/-- `∀ fresh Wallet w; 1 = w.owner`: proved. -/
 theorem mappingOne_proved : decideGoal mappingOne = .proved := by rfl
+/-- `∀ fresh Ledger l; l.nonce = 7`: proved. -/
 theorem ledgerSeven_proved : decideGoal ledgerSeven = .proved := by rfl
 
 /-- The negated binder's returned state is the initial state, certified. -/
 theorem notWallet_refuted : decideGoal notWallet = .refuted (State.init StandardExample) := by rfl
 
+/-- The returned state refutes the negated binder under the hash reading. -/
 theorem notWallet_refutesH : ¬ Fml.holdsH (State.init StandardExample) notWallet :=
   decideGoal_refutes notWallet_refuted
 

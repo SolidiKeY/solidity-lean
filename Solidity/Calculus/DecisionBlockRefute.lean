@@ -14,12 +14,13 @@ guard, so `n` checks cover all `2^256`. Nothing about the candidate state is
 assumed: a refutation is returned only with its proof.
 
 The candidates are threshold-uniform regions (`Calculus/DecisionThresholdStore.lean`):
-dynamic arrays of length `n`, leaves `c` below index `n` and `h` past it,
-with `c` and `h` drawn from the formula's uint literals, zero, and words
-different from them. One region refutes a read past the bound (it halts, or
-reads `h`) and a wrong value inside it (it reads `c`), below mapping keys,
-struct fields, struct elements and nested arrays alike. The bound is capped
-at 64 instances; the class is the set of formulas this check refutes, not a
+dynamic arrays one past the largest literal index (at most `lenCap`), leaves
+`c` below index `n` and `h` past it, with `c` and `h` drawn from the
+formula's uint literals, zero, and words different from them. One region
+refutes a read past the bound (it reads `h`) and a wrong value inside it (it
+reads `c`), below mapping keys, struct fields, struct elements and nested
+arrays alike. The bound is capped at 64 instances. This is a sound
+semi-decision: the class is the set of formulas this search refutes, not a
 syntactic family, and a miss stays unknown.
 -/
 namespace Solidity.Decide.BlockRefute
@@ -124,14 +125,19 @@ def leafHi (h : PrimTy.uint.Denote) : (p : PrimTy) → p.Denote
   | .uint => h
   | p => MemoryWitness.one p
 
-/-- The candidate regions for bound `n`: dynamic arrays long enough for every
-literal index (so a read past the bound sees the past leaf rather than halting),
-below/past leaves from the literals. -/
+/-- The longest dynamic array a candidate region builds: twice the instance cap. -/
+def lenCap : Nat := 129
+
+/-- The candidate regions for bound `n ≤ 64`: dynamic arrays long enough for
+every literal index up to `lenCap` (so a read past the bound sees the past
+leaf rather than halting; a larger literal is no index such a region can
+reach and is ignored), below/past leaves from the literals, without repeats. -/
 def fills (n : Nat) (lits : List PrimTy.uint.Denote) : List ThresholdStore.Fill :=
-  let len := (lits.map fun v => v.1.toNat).foldl max n + 1
+  let len := min ((lits.map fun v => v.1.toNat).filter (· < lenCap) |>.foldl max n) (lenCap - 1) + 1
   if hl : len < 2 ^ 256 then
-    let his := lits.map (MemoryWitness.different .uint) ++ lits
-    lits.flatMap fun c => his.map fun h => ⟨n, len, hl, leafLo c, leafHi h⟩
+    let los := lits.eraseDups
+    let his := (lits.map (MemoryWitness.different .uint) ++ lits).eraseDups
+    los.flatMap fun c => his.map fun h => ⟨n, len, hl, leafLo c, leafHi h⟩
   else []
 
 /-- **The refuter**: a threshold region at which the block is certified false. -/
@@ -140,7 +146,8 @@ def refute? (φ : Fml C []) : Option {σ : State C [] // ¬ holds σ φ} :=
   match boundAt? φ lits with
   | none => none
   | some b =>
-    if hn : b.1.toNat ≤ 64 then
+    -- `blockAt?` repeats this cap on its own; here it also bounds the regions built.
+    if b.1.toNat ≤ 64 then
       (fills b.1.toNat lits).findSome? fun F =>
         (chainAt? φ (ThresholdStore.state F C) b).map fun ⟨h⟩ => ⟨_, h⟩
     else none

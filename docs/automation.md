@@ -1044,7 +1044,7 @@ Boolean lowering from the actual open APF guard-floor case. A nested halting
 noncoverage, with a valid positive claim and false companion countermodel.
 Its illustrative collapsed-key guard changes from true to halt; this is not
 an actual collector/Setting proof or a refutation of `GuardP.floors`. The
-AU02 guard-floor repair remains open.
+AU02 guard-floor repair remains open. (Superseded for this family: m7-gaps decides it, below.)
 `Calculus/DecisionLeafPreparation.lean` next proves that actual uint-prefix
 translation yields the existing Num grammar with only its permitted bound
 atom and no environment input. Elimination and simplification preserve those
@@ -1073,7 +1073,7 @@ classes cover valid literal-instance chains with those immediate path shapes,
 not arbitrary/negative array goals or all array gaps. Five existing unknown
 pins inhabit them; covered direct fixed roots remain outside these classifiers.
 The exhaustive Residue union, negative companions and global array integration
-remain open. H6 resolves VA1-Q2: the human answered "VA1 splits it", authorizing
+remain open. (Negative companions: refuted by m7-gaps, below.) H6 resolves VA1-Q2: the human answered "VA1 splits it", authorizing
 a performance-only TypeExamples split with statements/observations/budgets intact.
 
 `Calculus/DecisionSourceChain.lean` completes the existing source literal-chain
@@ -1100,8 +1100,8 @@ literals. Its complete source equation does not inspect coverage or verdicts.
 `Calculus/DecisionHaltingOrBoundary.lean` proves all-waiver target admission, actual
 prepared-guard recognition and failure of the left-definedness test required
 by APF OR. Clients link this to the guard extracted from the actual complete
-leaf, retain valid and false unknown members, and check an accepted total
-sibling. This is one reason component, not the exhaustive Residue union or
+leaf, retain valid and false unknown members (now decided by m7-gaps, below), and
+check an accepted total sibling. This is one reason component, not the exhaustive Residue union or
 a global unknown theorem; it is not a counterexample to `GuardP.floors`.
 
 
@@ -1301,7 +1301,7 @@ DecisionMemoryCoverage proves actual routing, all-waiver target admission,
 Covered and certified returned refutation for every closed member of this exact
 source family. The original fixture separately proves exact returned-state
 equality with its existing child heap before parent allocation. UInt/Bool clients
-pass; buried, given-heap and mapping unknowns remain. Only the assigned reversed
+pass; buried, given-heap and mapping unknowns remain (mapping: proved by m7-gaps). Only the assigned reversed
 verdict changes after observed improvement and matching certificates. Covered,
 inTarget, Waivers and DecisionTheorem declarations are byte-identical; Covered
 behavior intentionally expands through memCovered. The affected376-job closure
@@ -1316,7 +1316,8 @@ validity over every heap/binder value under the unchanged hash reading. The old
 finite countermodel remains first and its exact state is preserved; no positive
 one-heap check is promoted to validity. Original/another-index positives improve
 unknown→proved; parameter/alias negatives retain their candidate refutations.
-Computed-index, buried and mapping targets remain unknown/noncovered. Actual
+Computed-index, buried and mapping targets remain unknown/noncovered (mapping:
+proved by m7-gaps). Actual
 defined/out-of-bounds/unset observations and the 517-node uncovered-but-proved
 control remain unchanged. All edited-file MCPs and complete affected targets
 pass; 68 public declarations have standard-only axiom reports. Full Residue,

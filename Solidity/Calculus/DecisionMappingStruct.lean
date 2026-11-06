@@ -25,7 +25,9 @@ def mapRef : Ty → Bool
   | .ref (.mapping _ _) => true
   | _ => false
 
-/-- The memory types with no object in any heap, recognized syntactically. -/
+/-- A syntactic subset of the memory types with no object in any heap: a mapping, a
+struct with a direct mapping-reference member, a nonempty fixed array of mapping
+references. A struct whose member is a void struct is void too, but not recognized. -/
 def _root_.Solidity.RefTy.memVoid : RefTy → Bool
   | .mapping _ _ => true
   | .struct s => (structDef s).any (fun fT => mapRef fT.2)
@@ -129,6 +131,6 @@ theorem voidAnswer_isSome {Γ : Ctx} {φ : Fml C Γ} (h : φ.freshVoidBinder = t
 
 /-- The one-line reason this family was a gap and why it is decided. -/
 def voidReason : String :=
-  "A struct with a mapping member (or a mapping) has no memory object; the fresh binder is vacuous."
+  "A struct with a mapping member, a mapping or a nonempty fixed array of mapping references has no memory object; the fresh binder is vacuous."
 
 end Solidity.Decide.MappingStruct
