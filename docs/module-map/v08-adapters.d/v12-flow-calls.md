@@ -51,3 +51,7 @@
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean` | Exact allocating-family guard/zero/increment syntax recognition from actual value/assignment views; no indexed statement/argument match or semantic premise. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingGuardedTurn.lean` | Actual allocating root recognition checks original guard and zero arm, retains original continuation, and checks exact increment suffix independently. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeavesControls.lean` | Populated guard/zero/increment/root/suffix receipts and actual wrong-operator/slot/literal/destination/alternative/extra-tail refusals. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallViews.lean` | Generalized intrinsic argument/memory-variable/value-return readers retain actual indices, payloads and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingCallLeaves.lean` | Exact original allocating argument labels/order/decrement/alias slot and result destination recognition through typed views. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheck.lean` | Actual allocating recursive-head recognition retains child thunks, verifies original quotation indices, constructs existing source certificates and derives full source-run agreement from checker success. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingRecursiveCheckControls.lean` | All-index canonical acceptance, actual child retention, wrong arguments/returns/index/child/base/signature refusals, using existing opaque checked equations. |
