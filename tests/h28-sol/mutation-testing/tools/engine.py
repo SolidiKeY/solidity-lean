@@ -16,7 +16,12 @@ import checked
 from runner import mutate, relative, digest
 
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-DELIVERY_BASE = "32dd5befce264eb9a5d1b622b9270e71c50a0f5a"
+# The coordinator published 86253aba on 2026-11-06. This pin is only the
+# delivery/write-scope comparison boundary, updated from the previously
+# published a6fa0138 so upstream lane merges are not attributed to this lane.
+# BASE above remains the exact mutation-source/cache trust pin; none of its
+# source hashes or proof budgets change when this delivery anchor advances.
+DELIVERY_BASE = "86253aba9aad8b457190f9e5f14c77c7ad030318"
 BRANCH = "codex/solidity-h28-sol-20261104/mutation-testing"
 PREFIX = "tests/h28-sol/mutation-testing/"
 KINDS = {"mutant", "negative-control", "known-kill", "equivalent-control", "invalid-control", "runner-survivor-control"}

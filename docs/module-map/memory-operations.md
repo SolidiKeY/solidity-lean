@@ -540,6 +540,9 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/NestedLocationPipeline.lean` | Two actual nested copy phases, retained heaps and separate capacity refusals. |
 | `Backend/MemoryCopies/NestedLocationPipelineObservations.lean` | Observable returned root, both parent headers, free cursor and machine framing. |
 | `Backend/MemoryCopies/NestedLocationPipelineControls.lean` | Inhabited empty/mixed 2/0/64 executions and distinct first/second allocation refusals. |
+| `Backend/MemoryCopies/GuardedDefaultDeclarationInterface.lean` | Guard the actual selected declaration code; explicit frame/representation inputs and capacity-free success-or-refusal contract. |
+| `Backend/MemoryCopies/GuardedDefaultDeclaration.lean` | Guard the actual selected declaration with complete success state/allocator contract and explicit capacity refusal. |
+| `Backend/MemoryCopies/GuardedDefaultDeclarationControls.lean` | Actual body selection, local bindings, stack/payload, full new contents, represented saturation refusal and unsupported-domain controls. |
 | `Backend/MemoryCopies/ReferenceDefaultDemandInterface.lean` | Actual runtime reference-array default demand and existing checked guard agreement; compiler selection explicit. |
 | `Backend/MemoryCopies/ReferenceDefaultDemand.lean` | Existing runtime default copy, actual live demand, heap-word growth and checked capacity branch agree under explicit compiler selection. |
 | `Backend/MemoryCopies/ReferenceDefaultDemandControls.lean` | Actual empty/2/64 and struct-child runs, explicit new contents, unused huge child, refusals and rejected-selection cost control. |
