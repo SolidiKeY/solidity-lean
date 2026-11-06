@@ -684,6 +684,7 @@ import Solidity.Backend.MemoryCopies.FixedMemoryCopyInterface
 import Solidity.Backend.MemoryCopies.FixedPathCopy
 import Solidity.Backend.MemoryCopies.FixedPathCopyControls
 import Solidity.Backend.MemoryCopies.FixedPathCopyInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageTurn
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnControls
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageTurnInterface
