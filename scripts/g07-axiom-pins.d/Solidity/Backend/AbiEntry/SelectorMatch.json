@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.frameCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.short_no_match": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.source_bytes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.source_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorMatch.lean:Solidity.Backend.AbiEntry.SelectorMatch.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

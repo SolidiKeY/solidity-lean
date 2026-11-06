@@ -1,0 +1,22 @@
+{
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.check_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.emit_plan_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.frame_approx": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Source/FailureFrameHorizon.lean:Solidity.Source.FailureExecution.frame_grow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

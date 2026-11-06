@@ -1,0 +1,10 @@
+{
+ "Solidity/Lowering/V07/UdvtBoolAssignment.lean:Solidity.Lowering.V07.UdvtBoolAssignment.read_value": [],
+ "Solidity/Lowering/V07/UdvtBoolAssignment.lean:Solidity.Lowering.V07.UdvtBoolAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtBoolAssignment.lean:Solidity.Lowering.V07.UdvtBoolAssignment.value_key": [],
+ "Solidity/Lowering/V07/UdvtBoolAssignment.lean:Solidity.Lowering.V07.UdvtBoolAssignment.value_related": []
+}

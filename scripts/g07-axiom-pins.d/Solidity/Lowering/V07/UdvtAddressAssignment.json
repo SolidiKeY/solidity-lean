@@ -1,0 +1,18 @@
+{
+ "Solidity/Lowering/V07/UdvtAddressAssignment.lean:Solidity.Lowering.V07.UdvtAddressAssignment.read_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignment.lean:Solidity.Lowering.V07.UdvtAddressAssignment.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UdvtAddressAssignment.lean:Solidity.Lowering.V07.UdvtAddressAssignment.value_key": [],
+ "Solidity/Lowering/V07/UdvtAddressAssignment.lean:Solidity.Lowering.V07.UdvtAddressAssignment.value_related": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
