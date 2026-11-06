@@ -1,0 +1,115 @@
+{
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "proof_check": "/workspace/h62-audit-yul-evidence/final-proofs/commands.jsonl",
+  "statements": [
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "87d634b0f77d3d500685d2fcd9d5b0f60049d54850de50cae9f3c4e9d66f4f1b",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Frontend.YulJson.Words.declaration_impossible"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "41c35db47ec2fd01cf0bd5231da78d6879a611d35a4f9dce20a400329c0a1339",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Frontend.YulJson.Words.reference_impossible"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "bf55f25beb51d343ae40e395364407c1be12ecfc7922bc2acf194f1515466fd5",
+      "owner": "VY5",
+      "proof": "H62.AuditYul.no_countable_resource_joint_witness",
+      "status": "joint_witness_impossible",
+      "theorem": "Solidity.Lowering.P8.SpecExecution.no_countable_resource"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "e3e35c9647a894ecdc408875d4fdfe1606b9f251ac36976375a1262c130bdb0c",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.Checks.ClosedFunctions.no_empty_member"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "f174955771b63eed48dbdaa158f3fbd0eaa8661a3f2033a75d2b0d5272cb0c89",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.Checks.ClosedFunctions.no_external_reference"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "d3f4215d2993c7ab9bab2ca150e0d6ceacbf75e723480bff1342cc21a7ce7813",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.Checks.ClosedPure.no_memory_builtin"
+    },
+    {
+      "classification": "per-input: actual literal certificate, emitted code, locals, prefix and caller jointly supplied",
+      "frozen_signature_sha256": "b79f46cd696f70b68d7d2435d76fef0c084b4ae03762e98571a8c2d20ed6a7e8",
+      "proof": "H62.AuditYul.expression_joint_witness",
+      "status": "joint_witness_proved",
+      "theorem": "Solidity.Yul.Compilation.ProducerExpressions.executes"
+    },
+    {
+      "classification": "per-input: actual assignment certificate, emitted code, locals, prefix and caller jointly supplied",
+      "frozen_signature_sha256": "ccf9ff2b9a24b21ed4b4655857cb5c1aa6d1eb54d51764d6f817cf39209b1ba4",
+      "proof": "H62.AuditYul.statement_joint_witness",
+      "status": "joint_witness_proved",
+      "theorem": "Solidity.Yul.Compilation.ProducerStatements.executes"
+    },
+    {
+      "classification": "global: concrete toy Stages and PublicBoundary; per-input TablesLinked jointly supplied; no actual assembly admission claimed",
+      "frozen_signature_sha256": "a8174760992a52e7583468ba99fa7e818ed03b589b192ce9b29446b1b50ebcba",
+      "proof": "H62.AuditYul.public_joint_witness",
+      "status": "joint_witness_proved",
+      "theorem": "Solidity.Yul.Composition.CorrectnessInstances.Stages.publicCorrectness"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "e01ffcbb1a7de38f2962ea985d328f5ebbadc11273595823a29fb51be24cd2ac",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.ScopedExternalD.function_noWrites"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "beb635db2ba081267e4094907c42c39bf61555942fc80e143e21e8c4d80a6003",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.GlobalExternalD.noWrites"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "3787811dea5b36b71fd94851aadb8ba93ad85570f14cb0d3a6a150659f472dd8",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.ScalarRef.not_globals"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "ed288f8a06dc06ff88ef37a83f97b7d2491ad54377f868ece6fb00e3bd097f08",
+      "owner": "VY2",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.Views.FixedDeclaration.no_dynamic_array"
+    },
+    {
+      "classification": "intentional refutation; complete premise telescope concludes False",
+      "frozen_signature_sha256": "f442bd9bda2662ed1dcc6f6dc05af8c2dac387d411bce49a959578964f295443",
+      "owner": "VY1",
+      "proof": null,
+      "status": "refutation_candidate_requires_check",
+      "theorem": "Solidity.Yul.WordCell.not_globals"
+    }
+  ]
+}
