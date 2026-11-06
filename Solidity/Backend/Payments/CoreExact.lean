@@ -365,6 +365,39 @@ theorem compile_revert {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
   · exact h1
   · rw [hr] at h2; cases h2
 
+/-- **`compile_storage` with no payment outcome**: from a fresh contract
+(`Sim.init`, so `compile_paid`'s premises hold for every world), a fragment
+program both runs, the machine holding every live `uint` the typed run reads,
+or both revert, or the typed run diverges and the machine faults. -/
+theorem compile_storage_paid {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')
+    (hL : Prog.pushes P < Lmax) (balance : Nat) (hb : balance < W) (bal : Fin W → Nat)
+    (self : Fin W) (hbalance : balance = bal self) :
+    (∃ o m', Solidity.Prog.run (freshT C balance hb self) P = .ok o ∧
+        run (compileProg 0 P) (Machine.init bal self) = .ok m' 0 ∧
+      ∀ (r : SRef C (.prim .uint)) s (v : PrimTy.uint.Denote),
+        PathSlot C false r s →
+        o.st.storage.findLive r = some (.prim v) → m'.store s = v.1.toNat) ∨
+    ((Solidity.Prog.run (freshT C balance hb self) P = .error .revert ∨
+        (Prog.asserts P = true ∧
+          Solidity.Prog.run (freshT C balance hb self) P = .error .panic)) ∧
+      run (compileProg 0 P) (Machine.init bal self) = .revert) ∨
+    (Solidity.Prog.run (freshT C balance hb self) P = .error .diverge ∧
+      run (compileProg 0 P) (Machine.init bal self) = .fault) := by
+  rcases compile_paid hP (Sim.init C balance hb bal self hbalance) (by omega) with
+    ⟨o, m', h1, h2, _, hm⟩ | h | h
+  · refine .inl ⟨o, m', h1, h2, fun r s v hp hf => ?_⟩
+    rcases find_repr hm.store hp with ⟨sv, hsv, hr⟩ | ⟨_, hsv⟩
+    · rw [hf] at hsv; cases hsv
+      cases hr with
+      | prim h =>
+        obtain ⟨a, ha, hv⟩ := h
+        cases ha
+        rw [hv, Int.toNat_natCast]
+        rfl
+    · rw [hf] at hsv; cases hsv
+  · exact .inr (.inl h)
+  · exact .inr (.inr h)
+
 end Headline
 
 end Solidity.Evm.Payments

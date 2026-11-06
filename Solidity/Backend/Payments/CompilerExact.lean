@@ -141,3 +141,21 @@ theorem revert_exact {b L frame : Nat} {Γ Δ : Ctx} {F : Frag Γ} {P : Prog C �
 
 end Compilation
 end Solidity.Evm.Compiler
+
+/-! ## Axioms: Lean's three -/
+
+/-- info: 'Solidity.Evm.Compiler.Compilation.correct_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Evm.Compiler.Compilation.correct_exact
+
+/-- info: 'Solidity.Evm.Compiler.Compilation.compile_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Evm.Compiler.Compilation.compile_success
+
+/-- info: 'Solidity.Evm.Payments.compile_paid' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Evm.Payments.compile_paid
+
+/-- info: 'Solidity.Evm.Payments.compile_success' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in
+#print axioms Solidity.Evm.Payments.compile_success
