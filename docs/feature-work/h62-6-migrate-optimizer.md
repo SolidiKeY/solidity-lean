@@ -176,7 +176,7 @@ No Lean checks occurred after the performance STOP.
 
 The repository-wide documentation-path checker exited 1 because the unchanged
 base document `docs/feature-work/after-roadmap-va1.md` cites absent optional
-`Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean` (base line 198). This is
+Bridge/.lake/packages/mathlib/MathlibTest/SplitIfs.lean (base line 198). This is
 outside lane ownership; the exact base citation was verified with `git show`.
 The complete warning log is retained outside Git. This failure is not relabeled
 as a passing gate.
