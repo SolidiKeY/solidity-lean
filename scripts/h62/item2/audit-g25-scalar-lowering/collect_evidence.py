@@ -23,8 +23,10 @@ def main():
     commands = [
       [sys.executable,scripts+"census_tests.py"],
       [sys.executable,scripts+"runner_tests.py"],
+      [sys.executable,scripts+"inventory_tests.py"],
       [sys.executable,scripts+"census.py","--ownership",str(a.ownership),"--output",str(output/"source-census.json")],
-      [sys.executable,scripts+"verify_census.py","--ownership",str(a.ownership),"--census",str(output/"source-census.json"),"--output",str(output/"coverage-ledger.json")],
+      [sys.executable,scripts+"inventory.py","--source",str(output/"source-census.json"),"--kernel",str(output/"kernel-census-v424.json"),"--schemas",str(output/"premise-structures-v424.json"),"--output",str(output/"statement-inventory-v424.json")],
+      [sys.executable,scripts+"verify_census.py","--ownership",str(a.ownership),"--census",str(output/"source-census.json"),"--kernel",str(output/"kernel-census-v424.json"),"--verification",str(output/"witness-verification-v424.json"),"--cache",str(output.parent/"audit-v424"),"--toolchain","/workspace/.setup/tools/lean-4.24.0-linux","--output",str(output/"coverage-ledger.json")],
       ["git","diff","--check",census.BASE],
       ["git","merge-base","--is-ancestor",census.BASE,"origin/master"],
       ["node","scripts/check-layers.mjs"],

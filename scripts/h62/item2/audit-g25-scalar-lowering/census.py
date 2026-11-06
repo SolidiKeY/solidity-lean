@@ -62,12 +62,20 @@ def assignment_end(clean, start):
     nesting = []
     pairs = {"(": ")", "{": "}", "[": "]", "⦃": "⦄"}
     i = start
+    pending_let_assignments = 0
     while i < len(clean):
         c = clean[i]
         if not nesting and (i == 0 or clean[i-1] == "\n"):
             if re.match(r"(?:private +)?(?:theorem|lemma|def|namespace|end)\b", clean[i:]):
                 raise ValueError("missing assignment before next declaration")
-        if not nesting and clean.startswith(":=", i): return i
+        if not nesting and re.match(r"let\b", clean[i:]) and (i == 0 or not (clean[i-1].isalnum() or clean[i-1] == "_")):
+            pending_let_assignments += 1
+        if not nesting and clean.startswith(":=", i):
+            if pending_let_assignments:
+                pending_let_assignments -= 1
+                i += 2
+                continue
+            return i
         if c in pairs: nesting.append(pairs[c])
         elif c in pairs.values():
             if not nesting or nesting.pop() != c: raise ValueError("unbalanced signature")
@@ -109,9 +117,6 @@ def declarations(source, path):
             "signature": raw,
             "signature_sha256": digest(raw.encode()),
             "section_variables": [source[v.start():v.end()] for v in variables if v.end() < match.start()],
-            "premise_classification": "pending-elaborated-type-review",
-            "joint_witness": None,
-            "witness_status": "uncovered",
         })
     # Reject theorem spellings this limited scanner does not understand.
     tokens = list(re.finditer(r"\b(?:theorem|lemma)\b", clean))
@@ -155,7 +160,7 @@ def census(repo, ownership):
             "modules":files, "theorems":records,
             "summary":{"modules":len(files), "named_theorems":len(records),
                        "public_theorems":len(public), "private_theorems":len(records)-len(public),
-                       "verified_joint_witnesses":0, "uncovered_public_theorems":len(public)}}
+                       "proof_credit_from_source_scan":0}}
 
 
 def main():

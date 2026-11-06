@@ -20,7 +20,7 @@ end N
         self.assertEqual([r["name"] for r in rows], ["N.helper", "N.visible"])
         self.assertEqual(rows[0]["signature"], "private theorem helper (x : Nat := 1) : x = x ")
         self.assertIn('"theorem fake := "', rows[1]["signature"])
-        self.assertEqual(rows[1]["witness_status"], "uncovered")
+        self.assertNotIn("witness_status", rows[1])
 
     def test_fail_closed(self):
         cases = ["namespace N\nprotected theorem t : True := trivial\nend N\n",
@@ -62,6 +62,12 @@ end N
         for case in cases:
             with self.subTest(case=case), self.assertRaises(ValueError):
                 census.declarations(case, "fixture")
+
+    def test_let_inside_conclusion_is_part_of_signature(self):
+        source="namespace N\ntheorem t (x : Nat) : x = (let y := x; y) := rfl\ntheorem u (x : Nat) : x =\n  let y := x\n  let z := y\n  z := rfl\nend N\n"
+        first,second=census.declarations(source,"fixture")
+        self.assertEqual(first["signature"], "theorem t (x : Nat) : x = (let y := x; y) ")
+        self.assertTrue(second["signature"].endswith("  let z := y\n  z "))
 
     def test_unterminated_comment(self):
         with self.assertRaises(ValueError): census.mask("/-")
