@@ -910,4 +910,21 @@ theorem recursiveNegationContrast : Solidity.Yul.RawFrame.Logic.holds .box Solid
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Yul.RawFrame.Logic.holds_mono
 
+/- Skip retains represented bits but fills the raw overlay; zero fuel is still a timeout. -/
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 0 rawInitial).isNone
+#guard rawInitial.raw flag = none
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 rawInitial).map
+  (fun result => result.state.raw flag) = some (some (word 1))
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 logicResult.state).map
+  (fun result => (RawFrame.view result.state flag).val) = some 2
+#guard (RawFrame.run (.skip : Stmt [] X ⟨false,false⟩ 0) True.intro 1 logicResult.state).map
+  (fun result => (RawFrame.view result.state small).val) = some 257
+
+/-- info: 'Solidity.Yul.RawFrame.Logic.skip_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.skip_run
+/-- info: 'Solidity.Yul.RawFrame.Logic.holds_skip' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Yul.RawFrame.Logic.holds_skip
+
 end Solidity.Yul.Checks.LocalBlock

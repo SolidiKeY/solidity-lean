@@ -254,4 +254,26 @@ theorem holds_mono : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Con
   intro ctx control mode code policy first second state implication actual
   cases mode <;> simp only [holds] at * <;> grind
 
+/-- Even skip captures a full raw snapshot; it does not preserve a sparse overlay as metadata. -/
+theorem skip_run : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.run (.skip : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ True.intro 1 state =
+ some ⟨Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state),.normal⟩ := by
+  intro ctx control state
+  change some (RawFrame.Outcome.mk
+    (RawFrame.capture state
+      (WordState.unpack (WordState.pack ⟨Fin.elim0,RawFrame.view state⟩)).cells) .normal) = _
+  rw [WordState.unpack_pack]
+
+/-- Skip's modal postcondition observes its actual full snapshot, not sparse metadata identity. -/
+theorem holds_skip : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ Solidity.Yul.RawFrame.Logic.holds mode (.skip : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ True.intro post state ↔ post ⟨Solidity.Yul.RawFrame.capture state (Solidity.Yul.RawFrame.view state),.normal⟩ := by
+  intro ctx control mode post state
+  exact holds_completed ctx control mode .skip True.intro post state 1 _
+    (skip_run ctx control state)
+
 end Solidity.Yul.RawFrame.Logic
