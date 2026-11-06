@@ -1232,6 +1232,6 @@ Dead-code review (read-only finder+skeptic): no soundness issue (halts are kept 
 no state; `ite`/`loop`/`block` drop with the branch's own `Ext`, which `scopeRun` takes;
 `assignLocal` targets only value locals, distinct `TEnv` slots, so no aliasing). Fixed:
 coverage wording (only blocks, `if` branches and loop bodies; `revertData` not treated as
-halting; `Val.indep` also rejects storage/memory reads in `e₂`); `o02_pipeline_preserves`
+halting at first (now fixed: `revert` with data halts, `alwaysHalts_runC` covers it); `Val.indep` also rejects storage/memory reads in `e₂`); `o02_pipeline_preserves`
 now includes `Prog.dce` and `Prog.dse`. Added controls `guarded_kept` (non-literal
 `require` not cut), `branch_cut` (cut inside an `if` branch), `different_targets_kept`.

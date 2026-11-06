@@ -6,16 +6,15 @@ import Solidity.Optimizer.UnusedVar
 # O02 dead-code elimination after a halting statement
 
 Inside a scope (a block, an `if` branch or a loop body), the statements after
-one that always halts — `revert;`, `assume(false);`, `require(false);`,
-`assert(false);` (conditions already literal, e.g. after `Prog.cfold`) — never
+one that always halts — `revert;`, `revert` with data, `assume(false);`,
+`require(false);`, `assert(false);` (conditions already literal, e.g. after `Prog.cfold`) — never
 run, so they are removed (`Prog.cut`). The scope pops whatever the removed tail
 would have declared, so its run is unchanged: `cut_scope` states that the run
 of a cut sequence, its scope ended, is the run of the original, its scope
 ended. The halt itself (revert or Panic) is kept.
 
 `Prog.dce` cuts every block, `if` branch and loop body of a program (call,
-`try`/`catch` and receiver-call bodies are left as written; `revertData` is
-not treated as halting); `Prog.dce_runC` is equality of the
+`try`/`catch` and receiver-call bodies are left as written); `Prog.dce_runC` is equality of the
 typed run. A top-level sequence is not cut (its output context is the
 program's type).
 
@@ -36,12 +35,13 @@ def alwaysHalts {Γ Γ₁ : Ctx} : Stmt C Γ Γ₁ → Bool
   | .assumeFalse => true
   | .require c => litIs false c
   | .assert c => litIs false c
+  | .revertData _ => true
   | .assign .. | .rebind .. | .assignLocal .. | .declLocal .. | .declStorage .. | .opAssign ..
   | .incDec .. | .assignIncDec .. | .assignLocalPush .. | .push .. | .pop .. | .transfer ..
   | .send .. | .declMem .. | .rebindMem .. | .assignFromMem .. | .assignMem .. | .delete ..
   | .deleteMem .. | .assignNew .. | .ite .. | .call .. | .tryCall .. | .loop .. | .block ..
   | .pushOpAssign .. | .pushIncDec .. | .callReceiver .. | .callReceiverPush .. | .callRec ..
-  | .revertData .. | .catchData .. => false
+  | .catchData .. => false
 
 theorem alwaysHalts_runC {Γ Γ₁ : Ctx} (s : Stmt C Γ Γ₁) (h : alwaysHalts s = true)
     (σ : State C Γ) : ∃ e, Stmt.runC s σ = .error e := by
@@ -56,10 +56,15 @@ theorem alwaysHalts_runC {Γ Γ₁ : Ctx} (s : Stmt C Γ Γ₁) (h : alwaysHalts
     refine ⟨.panic, ?_⟩
     simp only [Stmt.runC, TRun.assert, litIs_evalT h σ, bind, Except.bind]
     rfl
+  | revertData d =>
+    simp only [Stmt.runC, TRun.revertData, bind, Except.bind]
+    cases d.mapM (·.evalT σ) with
+    | error e => exact ⟨e, rfl⟩
+    | ok bs => exact ⟨_, rfl⟩
   | assign | rebind | assignLocal | declLocal | declStorage | opAssign | incDec | assignIncDec
   | assignLocalPush | push | pop | transfer | send | declMem | rebindMem | assignFromMem
   | assignMem | delete | deleteMem | assignNew | ite | call | tryCall | loop | block
-  | pushOpAssign | pushIncDec | callReceiver | callReceiverPush | callRec | revertData
+  | pushOpAssign | pushIncDec | callReceiver | callReceiverPush | callRec
   | catchData => simp only [alwaysHalts, Bool.false_eq_true] at h
 
 /-- A sequence cut after its first halting statement. -/
