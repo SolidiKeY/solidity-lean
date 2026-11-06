@@ -1,5 +1,11 @@
 # H55 shared fixtures: preparatory census
 
+**Current status:** The coordinator resumed this lane after the H82 retirement
+handoff and master integration. The V08 `extract_failure` proof-only subset is
+now implemented as described at the end of this document; earlier owner-lease
+and unapplied-packet notes below are historical. Independent review and the
+rest of the ordered queue remain open.
+
 Status: migration is blocked pending coordinator notices naming current owners,
 accepted handoffs and exact transferred files. The original source-path list is
 an inventory of inputs, not a write lease. No production migration is claimed.
@@ -259,3 +265,43 @@ baseline or timing gate. All original queue items and backfill, complete
 semantic acceptance, proof and timing checks, independent finder/skeptic
 reviews, and registration fragments remain outstanding. The surviving lane
 is `solidity-h62-2-20261106/audit-readonly-calls`.
+
+
+## Resumed V08 extract-failure subset (review pending)
+
+At integrated baseline `5f14596531efea2be64f1a5e7a83afa5e151e865`, four
+V08 controls contained identical private `extract_failure` proofs. They now
+use `Solidity.Lowering.V08.SharedFailureFixture.extract_failure`. For each
+file, removing the added import, restoring the original unqualified proof
+references, and removing the original private helper from the baseline leaves
+every remaining byte identical. This includes all public statements and
+observations, but does not complete the broader shared-fixtures item.
+
+Lean 4.24.0 / Lake 5.0.0, one Lean process, `-j1`, `LEAN_NUM_THREADS=1`,
+10 GiB virtual-memory limit and no swap were used. KeySort passed. The
+changed import chain and all four full affected files passed. Baseline/after
+wall times in seconds: Handler 7.130/6.922; LibraryHandler 5.970/5.954;
+CreationSuccess 5.333/5.432; Prefix 30.985/30.059. No measured file exceeded
+10% slowdown. Existing printed diagnostics and axiom reports were identical
+before/after after removing timing lines; the shared helper reports no axioms.
+These are kernel Lean checks, not external behavioral tests. Evidence hashes
+are in `tests/h55/shared-fixtures/extract-failure-evidence.sha256`; the logs
+remain off Git on the VM. A missing cached KeySort OLean caused the first
+direct baseline attempt to fail before elaboration; four missing OLeans were
+restored from hashes in Lake traces before the passing checks.
+
+Central integration registration fragments (do not edit generated roots/maps):
+
+```lean
+import Solidity.Lowering.V08.SharedFailureFixture
+```
+
+```markdown
+| `Lowering/V08/SharedFailureFixture.lean` | Shared failure extraction for V08 control proofs. |
+```
+
+Independent read-only finder and skeptic reviews, complete axiom audit and the
+full item-1 census/acceptance remain pending. No milestone or whole-goal
+completion is claimed. Later queue items, backfill and final gates also remain
+open. H82 owner decisions remain required for proposed changes to definition
+bodies on which statements depend.

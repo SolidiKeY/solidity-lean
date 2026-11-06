@@ -1,3 +1,4 @@
+import Solidity.Lowering.V08.SharedFailureFixture
 import Solidity.Lowering.V08.HandlerControls
 import Solidity.Lowering.V08.LibraryControls
 
@@ -74,14 +75,6 @@ private theorem extract_success {α : Type} (run : TRes (World Catalog × α)) (
       have same : result = value := Option.some.inj checked
       cases same
       rfl
-private theorem extract_failure {α : Type} (run : TRes α) (halt : THalt)
-    (checked : run.halt? = some halt) : run = .error halt := by
-  cases run with
-  | ok value => cases checked
-  | error actual =>
-    have same : actual = halt := Option.some.inj checked
-    cases same
-    rfl
 private theorem extract_value {α : Type} (run : TRes α) (fallback : α)
     (checked : run.toOption.isSome = true) : run = .ok (run.toOption.getD fallback) := by
   cases run with
@@ -92,11 +85,11 @@ theorem setup_reached : setup = .ok base := extract_value _ _ (by decide +kernel
 theorem ancestor_reached : enter base.resetTransient = .ok (outer, [0xab, 0xcd]) :=
   extract_success _ _ (by decide +kernel)
 theorem constructor_failed : outer.create false candidate constructor ctorCtx = .error ctorHalt :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem delegated_reached : delegated outer = .ok (handled, expected) :=
   extract_success _ _ (by decide +kernel)
 theorem later_failed : later handled expected = .error laterHalt :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem handler_failed : handler outer ctorHalt = .error laterHalt := by
   simp only [handler, delegated_reached, bind, Except.bind, later_failed]
 
@@ -203,7 +196,7 @@ theorem wrong_context : view (delegated outer) ≠ view wrongContext := by
 
 def wrongIdentity : Library Catalog false Result := { library with address := third }
 theorem wrong_runtime_identity : outer.libraryCall (⟨self⟩ : Handle false) wrongIdentity paidCtx = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 theorem wrong_rollback_snapshot : vector (base.transact frame).1 ≠ vector (atomic outer (attempt outer)).1 := by
   rw [transaction_application, atomic_application]
@@ -315,9 +308,9 @@ theorem repeat_vector_statuses :
 
 def wrongRole : Library Catalog false Result := { library with kind := false }
 theorem wrong_role_guard : outer.libraryCall (⟨self⟩ : Handle false) wrongRole paidCtx = .error .revert :=
-  extract_failure _ _ (by decide +kernel)
+  Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 theorem static_library_guard : outer.libraryCall (⟨self⟩ : Handle false) library
-    { sender, mode := .readOnly } = .error .revert := extract_failure _ _ (by decide +kernel)
+    { sender, mode := .readOnly } = .error .revert := Solidity.Lowering.V08.SharedFailureFixture.extract_failure _ _ (by decide +kernel)
 
 theorem wrong_failure_payload : (attempt outer).halt? ≠
     some (.revertWith (Semantics.encodeError [0x6c, 0x00, 0xff, 0x49])) := by
