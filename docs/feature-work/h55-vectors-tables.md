@@ -113,3 +113,17 @@ non-case syntax or omit cases not written at line starts. It does not establish
 semantic case accounting or prove that any parametrisation preserves behavior.
 All source-file migrations, meaningful Lean validation and owner handoffs remain
 pending. Eleven Python tests passed after the WordTable correction.
+
+## H70 table annotation proposals
+
+`table_proposals.py` produces two exact owner-reviewable patches without writing
+to the owner files. The WordTable proposal adds one provenance comment in each
+of 30 parts; the FixtureControls proposal does so in each of 45 controls. The
+patches are `/workspace/scratch/h55-vectors-tables/word-table-annotation.patch`
+and `/workspace/scratch/h55-vectors-tables/fixture-controls-annotation.patch`.
+Their hashes are committed in `table-proposals.sha256`. Both apply-check against
+the frozen sources and repeated generation produced identical bytes. Tests show
+that removing each proposed marker restores the exact source, including all
+proofs, assumptions, imports and observations. These annotations do not migrate
+the tables or replace proof generation; substantive migration patches and Lean
+validation remain pending owner coordination. No owner files were edited.
