@@ -1,4 +1,0 @@
-Summary of captured command: bash scripts/check-doc-paths.sh
-Exit: 0
-48 ambiguous reference(s); all resolve, none is unique.
-OK: every backticked *.lean reference resolves.

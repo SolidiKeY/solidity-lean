@@ -74,6 +74,7 @@ history is in git.
 | [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
 | [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
 | [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 
 **The calculus and its proofs**
 
@@ -172,3 +173,5 @@ Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` an
 - [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
 
 G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
+V17 validation and evidence preparation: [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md).
+| V17 validation/evidence preparation | [roadmap-v17-validation.md](feature-work/roadmap-v17-validation.md) |
