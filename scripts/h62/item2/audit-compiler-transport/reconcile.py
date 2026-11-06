@@ -53,7 +53,7 @@ for original in source['statements']:
         row['audit_theorem'] = 'H62.CompilerTransport.boundary_joint_witness'
         row['joint_witness'] = row['audit_theorem'] if verified else None
         row['input_feasibility'] = ('verified simultaneously by ' if verified else 'prepared in ') + row['audit_theorem']
-        row['global_premises'] = 'Per-program Compilation certificate inhabited in the same tuple; no global P12 producer is required or instantiated.'
+        row['global_premises'] = ('Per-program Compilation certificate inhabited in the same tuple; no global P12 producer is required or instantiated.' if verified else 'Prepared per-program certificate tuple; no inhabitation is certified and no global P12 producer is instantiated.')
     elif row['source_name'] in negative:
         row['witness_status'] = 'verified-joint-impossibility' if verified else 'prepared-joint-impossibility'
         row['audit_theorem'] = 'H62.CompilerTransport.'+negative[row['source_name']]
