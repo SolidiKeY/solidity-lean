@@ -1,0 +1,126 @@
+diff --git a/Solidity/Source/InferHelpers.lean b/Solidity/Source/InferHelpers.lean
+new file mode 100644
+--- /dev/null
++++ b/Solidity/Source/InferHelpers.lean
+@@ -0,0 +1,56 @@
++import Solidity.Source.Types
++
++/-!
++Candidate shared definitions for the mechanically copied inference helpers.
++This additive, unregistered module changes neither existing inferencer. Its
++location and namespace are provisional pending owner review. A per-file
++Lean check does not establish production compatibility or full validation.
++-/
++
++namespace Solidity.H62.InferHelpers.Shared
++
++open Solidity.Source
++
++/-- The top-level mapping test used by the source delete rule. -/
++def isMapping (τ : STy) : Bool := τ matches .mapping _ _
++
++/-- The payable-argument test used by the source payable rule. -/
++def payableArg (σ : STy) : Bool :=
++  match σ with
++  | .address _ => true
++  | .contract _ => true
++  | _ => false
++
++/-- The argument location retained by an elementary conversion. -/
++def convLoc (σ : STy) : DataLoc :=
++  match σ with
++  | .bytes l => l
++  | .string l => l
++  | _ => .memory
++
++/-- The helper is the existing inline delete test. -/
++theorem isMapping_rule (τ : STy) : isMapping τ = (τ matches .mapping _ _) := rfl
++
++/-- The helper is the existing inline payable test. -/
++theorem payableArg_rule (σ : STy) :
++    payableArg σ = (match σ with | .address _ => true | .contract _ => true | _ => false) := rfl
++
++/-- The helper is the existing inline elementary-conversion location. -/
++theorem convLoc_rule (σ : STy) :
++    convLoc σ = (match σ with | .bytes l => l | .string l => l | _ => .memory) := rfl
++
++/-! Witnesses distinguish the actual helper outcomes and location behavior. -/
++
++example (key value : STy) : isMapping (.mapping key value) = true := rfl
++example (key value : STy) (loc : DataLoc) :
++    isMapping (.array loc (.mapping key value) none) = false := rfl
++example (payable : Bool) : payableArg (.address payable) = true := rfl
++example (name : DeclName) : payableArg (.contract name) = true := rfl
++example : payableArg .bool = false := rfl
++example (loc : DataLoc) : convLoc (.bytes loc) = loc := rfl
++example (loc : DataLoc) : convLoc (.string loc) = loc := rfl
++example (loc : DataLoc) (elem : STy) (len : Option Nat) :
++    convLoc (.array loc elem len) = .memory := rfl
++
++end Solidity.H62.InferHelpers.Shared
++
+diff --git a/Solidity/Source/Infer.lean b/Solidity/Source/Infer.lean
+--- a/Solidity/Source/Infer.lean
++++ b/Solidity/Source/Infer.lean
+@@ -1,4 +1,5 @@
+ import Solidity.Source.Typing
++import Solidity.Source.InferHelpers
+ 
+ /-!
+ # Type inference: derivations computed (S02 item 1b)
+@@ -29,15 +30,13 @@
+ abbrev Inferred (Γ : Ctx) (e : Syn .expr) := (τ : STy) × Typed Γ e τ
+ 
+ /-- Whether a type is a mapping (`Typed.delete`'s test). -/
+-def STy.isMapping (τ : STy) : Bool := τ matches .mapping _ _
++def STy.isMapping (τ : STy) : Bool := Solidity.H62.InferHelpers.Shared.isMapping τ
+ 
+ /-- Whether a type is an address or contract (`Typed.payable`'s test). -/
+-def STy.isPayableArg (σ : STy) : Bool :=
+-  match σ with | .address _ => true | .contract _ => true | _ => false
++def STy.isPayableArg (σ : STy) : Bool := Solidity.H62.InferHelpers.Shared.payableArg σ
+ 
+ /-- The location an elementary conversion keeps (`Typed.convElem`). -/
+-def STy.convLoc (σ : STy) : DataLoc :=
+-  match σ with | .bytes l => l | .string l => l | _ => .memory
++def STy.convLoc (σ : STy) : DataLoc := Solidity.H62.InferHelpers.Shared.convLoc σ
+ 
+ /-- The `const` rule, when its premises hold. -/
+ def tryConst (Γ : Ctx) (e : Syn .expr) : Option (Inferred Γ e) :=
+diff --git a/Solidity/Frontend/Static/Infer.lean b/Solidity/Frontend/Static/Infer.lean
+--- a/Solidity/Frontend/Static/Infer.lean
++++ b/Solidity/Frontend/Static/Infer.lean
+@@ -1,4 +1,5 @@
+ import Solidity.Source.Typing
++import Solidity.Source.InferHelpers
+ 
+ /-!
+ # Type inference for S01's expression typing (G13)
+@@ -104,7 +105,7 @@
+ /-! ## Rules by syntax -/
+ 
+ /-- S01's premise shapes, as functions (each unfolds to S01's `match`). -/
+-def isMappingTy (τ : STy) : Bool := τ matches .mapping _ _
++def isMappingTy (τ : STy) : Bool := Solidity.H62.InferHelpers.Shared.isMapping τ
+ def bytesLike (τ : STy) : Bool :=
+   match τ with
+   | .bytes _ => true
+@@ -114,16 +115,8 @@
+   match τ with
+   | .fixedBytes n _ => Option.some n
+   | _ => Option.none
+-def payableArg (σ : STy) : Bool :=
+-  match σ with
+-  | .address _ => true
+-  | .contract _ => true
+-  | _ => false
+-def convLoc (σ : STy) : DataLoc :=
+-  match σ with
+-  | .bytes l => l
+-  | .string l => l
+-  | _ => .memory
++def payableArg (σ : STy) : Bool := Solidity.H62.InferHelpers.Shared.payableArg σ
++def convLoc (σ : STy) : DataLoc := Solidity.H62.InferHelpers.Shared.convLoc σ
+ 
+ /-- `const`: a constant expression at its exact value. -/
+ def constRes (e : Syn .expr) : List (Res Γ .expr e) :=

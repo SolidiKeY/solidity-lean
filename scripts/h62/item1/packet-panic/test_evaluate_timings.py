@@ -35,12 +35,20 @@ class TimingGateTest(unittest.TestCase):
                 result = subprocess.run(["python3", str(SCRIPT), str(manifest)], capture_output=True, text=True)
                 return result.returncode, json.loads(result.stdout)
             code, result = run(data)
-            self.assertEqual((code, result["status"]), (0, "within_limit"))
+            self.assertEqual((code, result["status"]), (0, "declared_receipts_within_limit"))
             slow = copy.deepcopy(data)
             slow["after"]["samples"][0]["components_ns"]["original"] = 110
             code, result = run(slow)
             self.assertEqual((code, result["status"]), (1, "stop_slowdown"))
-            for field in ("failed_prerequisite", "missing_helper", "different_conditions", "bad_log", "boolean_duration", "different_command"):
+            for value in (None, [], "not an object", {"schema_version": True}):
+                code, result = run(value)
+                self.assertEqual((code, result["status"], result["delta_computed"]), (2, "invalid", False))
+            malformed_version = copy.deepcopy(data)
+            malformed_version["before"]["metadata"]["lean_version"] = ["4.35.0"]
+            malformed_version["after"]["metadata"]["lean_version"] = ["4.35.0"]
+            code, result = run(malformed_version)
+            self.assertEqual((code, result["status"], result["delta_computed"]), (2, "invalid", False))
+            for field in ("failed_prerequisite", "missing_helper", "different_conditions", "bad_log", "boolean_duration", "different_command", "malformed_samples", "malformed_receipt", "malformed_components"):
                 bad = copy.deepcopy(data)
                 if field == "failed_prerequisite":
                     bad["prerequisites"]["helper"]["status"] = "fail"
@@ -52,8 +60,14 @@ class TimingGateTest(unittest.TestCase):
                     bad["after"]["samples"][0]["sha256"] = "0" * 64
                 elif field == "boolean_duration":
                     bad["before"]["samples"][0]["components_ns"]["original"] = True
-                else:
+                elif field == "different_command":
                     bad["after"]["samples"][0]["commands"]["original"] = "different command"
+                elif field == "malformed_samples":
+                    bad["after"]["samples"] = {"bad": "shape"}
+                elif field == "malformed_receipt":
+                    bad["before"]["samples"][0] = "not an object"
+                else:
+                    bad["after"]["samples"][0]["components_ns"] = [1, 2]
                 code, result = run(bad)
                 self.assertEqual((code, result["status"], result["delta_computed"]), (2, "invalid", False), field)
 
