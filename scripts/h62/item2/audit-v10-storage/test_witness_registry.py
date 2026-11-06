@@ -21,15 +21,20 @@ class RegistryTest(unittest.TestCase):
         for source in m.MAP_DIR.glob("*-witness-map.json"):
             shutil.copyfile(source,directory/source.name)
         shutil.copyfile(m.MAP_DIR/"kernel-source-pins.json",directory/"kernel-source-pins.json")
-        for relative in ["Solidity/Backend/StorageOps/LoopLaws.lean","Solidity/Backend/StorageOps/TargetOperations.lean"]:
-            target=root/relative;target.parent.mkdir(parents=True,exist_ok=True)
-            shutil.copyfile(m.ROOT/relative,target)
+        interfaces={row["frozen_id"].split(":",1)[0]
+                    for _,packet in m.maps() for row in packet["rows"]}
+        for relative in interfaces:
+            path=Path(relative)
+            if path.is_absolute() or ".." in path.parts:
+                raise ValueError("unsafe test interface path")
+            target=root/path;target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(m.ROOT/path,target)
         return directory
     def test_complete_reference_ledger(self):
         result=m.build(self.inventory,m.maps())
-        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_joint_bundles=12,unmapped=3269))
+        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_joint_bundles=14,unmapped=3267))
         self.assertEqual(len({r["id"] for r in result["rows"]}),3281)
-        self.assertEqual(len(result["witness_source_sha256"]),3)
+        self.assertEqual(len(result["witness_source_sha256"]),4)
     def test_corruption_refused(self):
         for kind in ["duplicate","unknown","signature","witness","source","interface","pin"]:
             with self.subTest(kind=kind),tempfile.TemporaryDirectory() as temp:

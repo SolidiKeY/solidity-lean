@@ -394,7 +394,7 @@ and compiler totality/failure/gas/fork obligations remain open.
 
 The witness_registry tool exports the exact frozen Git inputs to a temporary
 tree and reuses the original conservative census, including all byte checks.
-The live census and its drift rejection remain unchanged. The registry accounts
+The live census and its drift rejection remain unchanged. At checkpoint C198 the registry accounted
 for all 3281 rows exactly once: 12 mapped witness references and 3269 unmapped
 rows. It checks unchanged mapped interface files, exact signatures and context
 hashes, witness declarations and the three kernel-checked test source hashes.
@@ -413,3 +413,23 @@ checkpoint. The corrective commit 4e83a94a3 followed a passing kernel and axiom
 guard check; its repaired source is the one pinned here. The failed receipt and
 history are retained. Full lane, compiler-totality and migration gates remain
 open.
+
+## Actual Source cell-read premise witnesses
+
+SourceReadWitnesses reuses the published Source fixture and concrete read
+certificate. Ordinary-root, raw cell presence and target-word coherence hold
+jointly at the same typed inputs. Readonly/static Source reading preserves the
+whole input state. Missing ordinary cells keep their Source stuck result; a
+transient root cannot meet the ordinary premise. Wrong-slot SLOAD still runs
+but violates raw word coherence, so this is not a target-refusal claim.
+
+The Source path and target slot remain independent parameters of the frozen
+adapter, coupled here only by its existing word observation. No Source address
+compiler, general world relation or physical adequacy is supplied. No Source
+implementation or frozen interface changed. Two more exact frozen premise
+bundles are checked; the original conservative ledger remains unchanged.
+
+The updated registry has fourteen mapped references and 3267 unmapped rows,
+with unchanged original row identities. Kernel-source pins include this fourth
+checked test module. Source paths and target slots remain independently chosen
+inputs; the new certificate reuse does not establish their compilation relation.
