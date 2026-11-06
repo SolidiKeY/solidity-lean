@@ -245,7 +245,7 @@
       {
         "command": "solidityLean.build",
         "key": "ctrl+shift+b",
-        "mac": "⇧⌘B",
+        "mac": "shift+cmd+b",
         "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
       },
       {
@@ -257,7 +257,7 @@
       {
         "command": "solidityLean.test",
         "key": "shift+f5",
-        "mac": "⇧f5",
+        "mac": "shift+f5",
         "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
       }
     ]

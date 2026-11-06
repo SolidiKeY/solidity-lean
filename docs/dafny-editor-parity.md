@@ -1062,7 +1062,6 @@ macOS dispatch nor kernel proof. Automatic verification is disabled. Linux
 compiler AST is not a binary/proof result. Status-bar cancellation display after
 Build remains visible and is not reclassified as proved. Source guards and full
 proof-suite requirements remain intact; unfocused key dispatch is rejected.
-Independent finder/skeptic final reviews found no defect.
 
 Two native scenarios are additive judged obligations:486 total, all previous484
 and frozen270 retained. Updated inventory bundle/index and new evidence archive
@@ -1072,3 +1071,20 @@ archives/manifests/checksums remain untouched. Final exact-head receipts follow
 in that directory. Whole original implementation/proof/rendered/performance/
 adversarial/scaling/paired-judge/final-gate queue remains unfinished; no budgets,
 Lean sources/theorems, row requirements, judge prompts or goal status changed.
+
+### Held macOS binding syntax correction — 2026-11-06
+
+Coordinator finder rejected the 848ffc710f checkpoint: copying upstream display
+glyphs into `mac` declarations did not produce valid VS Code binding syntax.
+Build now uses `shift+cmd+b`; Test uses `shift+f5`. The contribution regression
+requires these exact strings and rejects display glyphs in the configured key
+tokens. Linux chords, commands and trust/file/focus guards are unchanged.
+README now distinguishes UTF-8 source encoding, CRLF line endings and UTF-16 LSP
+position units. The unsupported prior review claim above was removed.
+
+The corrected-syntax regression fails before the manifest fix; before/after
+results are retained in
+`/workspace/dafny-parity-macos-fix-20261106/`. No native macOS test is claimed.
+All 486 obligations and frozen 270 IDs remain; no row, gate/judge, budget, theorem or Lean
+source changed. Whole original parity and mandatory proof/runtime/rendered/
+performance/adversarial/scaling/paired-judge obligations remain unfinished.

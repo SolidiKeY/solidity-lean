@@ -266,8 +266,10 @@ commands. They do not turn compilation or concrete tests into proof results.
 Custom-build and verification-trace shortcuts remain unavailable.
 
 The existing parity launcher supports `--suite commands --targets local` for a
-native Linux Ctrl+Shift+B observation in real VS Code. It starts with a dirty
-CRLF/UTF16 buffer, checks save and compiler AST source identity, and captures the
-renderer. Automatic verification is disabled. This suite does not measure proof
+native Linux Ctrl+Shift+B observation in real VS Code. It starts with an unsaved
+buffer containing Unicode text, checks saving as UTF-8 with CRLF line endings,
+verifies compiler AST source identity, and captures the renderer. UTF-16 describes
+LSP position units, not the file encoding. Automatic verification is disabled.
+This suite does not measure proof
 performance or establish Dafny compile/run/test equivalence; Run/Test and macOS
 key dispatch still require native observations.
