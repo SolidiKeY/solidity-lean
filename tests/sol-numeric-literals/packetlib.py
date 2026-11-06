@@ -3,7 +3,7 @@ import hashlib,json,os,pathlib,re,subprocess
 ROOT=pathlib.Path(__file__).resolve().parents[2]
 FOLDER=ROOT/'tests/sol-numeric-literals'
 BASE='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5'
-ADOPTED_MASTER='3883c64ef750dd49acdb7d83adcdf0f101d42c6c'
+ADOPTED_MASTER='a91a6cca07ec493fae8dc8c318bad4fd3f543dff'
 PREFIX='Solidity.Frontend.NumericLiteralProofs.'
 
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()

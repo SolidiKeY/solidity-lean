@@ -1,4 +1,5 @@
 import Solidity.Frontend.NumericLiteralProofs.WordTable.Part25
+-- H55 reproduction: scripts/h55/vectors-tables/word_table.py (proof text remains authoritative).
 
 /-! # Generated direct structural word-table proof.
 No scanner changes, equation generation, or raised budgets. -/

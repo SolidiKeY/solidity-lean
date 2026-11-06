@@ -1,6 +1,6 @@
 {
   "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+  "adopted_master": "a91a6cca07ec493fae8dc8c318bad4fd3f543dff",
   "modules": [
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/Audit.lean",
@@ -1181,7 +1181,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part00.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part00",
-      "sha256": "a5355dd9effddecc7860b4c79bc478cf1d79667260742c468c9eb2e06557d174",
+      "sha256": "9b3a8beb429b4a02afef270946d4bfc2dee34477d45a251972cc427b9a77ac65",
       "imports": [
         "Solidity.Frontend.Checked.Lexer"
       ],
@@ -1266,7 +1266,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part01.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part01",
-      "sha256": "917d0369dc264939e6a85f063e0041815cfad11576089ddb3da7238b268459d1",
+      "sha256": "86b6d0cbc571fd617adbeb1084923074f9dc929ed2a0828cc4e1b7e1c0199ec4",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part00"
       ],
@@ -1351,7 +1351,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part02.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part02",
-      "sha256": "976b167c1f9dfe4730bae9b5381d48a36929a2822c4d4c62788cc152788880c8",
+      "sha256": "3f75e8473c8e9c95b4e65f5a99a3925dab34299b1371d6c70d4208fc35fb75cd",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part01"
       ],
@@ -1436,7 +1436,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part03.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part03",
-      "sha256": "d542e24112b8d31aefa3ddb4646723ef170a808fa031b76a516ce413439df067",
+      "sha256": "41cd17bd31d344f749536797efb3fc1eb529e80c8965861086e596d7ff56e990",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part02"
       ],
@@ -1521,7 +1521,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part04.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part04",
-      "sha256": "7652dccc032e0eeba038dc34e40bce93096c089b4d811271ea822279d92d99ca",
+      "sha256": "2e5da66021c08a887914aa6427a6cea7230bd2cfec5760175623a8906430781e",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part03"
       ],
@@ -1606,7 +1606,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part05.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part05",
-      "sha256": "22256c934cef6f9908d2a3a0837f1d6ef1beaa8be26835caf1dbe41d8de7c210",
+      "sha256": "4f2fb9ea4ee37a24de11019fc13538596331a2213a4d3a268f6b29e874150513",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part04"
       ],
@@ -1691,7 +1691,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part06.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part06",
-      "sha256": "1a098cf4a510655da19715ceaa3177a6f86a8d3c16be405c1974579c047314af",
+      "sha256": "d57dc4d0383d7b2b99765ee7ff0913e6a69f3ea8ce5663116d6bcbf0948bfbad",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part05"
       ],
@@ -1776,7 +1776,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part07.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part07",
-      "sha256": "663ef103e1b1f4c9426e73e749961b992797af38c0499d5f17175b18cb3ab7fe",
+      "sha256": "d32fcb08c8134b21da1d529f8dbbcc6293b27e7dc5df2077ac45210886bbce4b",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part06"
       ],
@@ -1861,7 +1861,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part08.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part08",
-      "sha256": "f0146ad2f8f54b918d00437c0f1fa4c59f55e7693b73ed082f473629837039e4",
+      "sha256": "a2ef3a2be4a4ed4ecebf549dd1d1da56499495a4ee6896c6c7893f00ccbb87d3",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part07"
       ],
@@ -1946,7 +1946,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part09.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part09",
-      "sha256": "2c7ff15c40bac05aa076398c3dbaf9e75d290c95d94089ac218c8ac9787b74ee",
+      "sha256": "7a0079dbe51e64d7c287d4d739d43c707098a15fecd334339ad09778455e179b",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part08"
       ],
@@ -2031,7 +2031,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part10.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part10",
-      "sha256": "e3cb0536f79992a56992e31e175e68a1edddf4a0a1e68ecef478434d96c79fae",
+      "sha256": "9d13f3ef9f97f2d47c5b93dd64655986f6e83619c85a87e4e5846c9c8209f610",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part09"
       ],
@@ -2116,7 +2116,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part11.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part11",
-      "sha256": "6ead07a07676ff0fb08460d159baa18ca2f5ac6249a489b1e325d6bef4187f68",
+      "sha256": "bb8dd96e9e633f2abbff0b5dcb9ea6d111e4b948ed55f48163b069c8758f4833",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part10"
       ],
@@ -2201,7 +2201,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part12.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part12",
-      "sha256": "9c93dbd24c4d57d58b91c9f7248261a1a3155ef67c9d58beb37af7e9304f31c1",
+      "sha256": "77487610218fff27903c96a0c586c748f74f02eeeb8295fd2b6c9ee733d492bb",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part11"
       ],
@@ -2286,7 +2286,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part13.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part13",
-      "sha256": "caab2b5392ce39b1ebe63d2fd2caea9a914e86fa01089784461945776938698e",
+      "sha256": "aab7b15aac69fb05a99bb3ac306facaf45c742978f09adf112777705b26b7885",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part12"
       ],
@@ -2371,7 +2371,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part14.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part14",
-      "sha256": "f67573d98f034e31e83eb94fb48816942895008e73f709f6f1030fb5c3e68652",
+      "sha256": "58aabb1c2acce320034e7e31a1a49596d5c43ef2eaa333b0329b7f176c9fc3ea",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part13"
       ],
@@ -2456,7 +2456,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part15.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part15",
-      "sha256": "2215d00ac36beabd039a1a40c8e439707fda587a398aa36965f49ba1ace778be",
+      "sha256": "564627d51cfe231f1c75bf9e2ab60ed20109217088e18750d8392cf41078dd2e",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part14"
       ],
@@ -2541,7 +2541,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part16.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part16",
-      "sha256": "d0767b2573cc47a0e1829dee8bfe48ef61c913d3e0814210f36b65ca7eb5fb6b",
+      "sha256": "084c280d1e5b4e50d0cfd9afedac93743e78e284c572c83e1d6af2662ae6f81f",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part15"
       ],
@@ -2626,7 +2626,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part17.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part17",
-      "sha256": "859fdcdac612fa7429e65e1029abce9030f351ff969ef09aa0ccd8d94e6814ac",
+      "sha256": "bffba9b5db614a05612ea4a105b1b35bc9b9b4d022ea0bade6c670ce577c68d0",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part16"
       ],
@@ -2711,7 +2711,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part18.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part18",
-      "sha256": "3007c2a6e4f20b9121ed86edeaf8a1289913b3b9a7ebb1baed7fe54fe4ea764e",
+      "sha256": "074498056a469453518e331f445b9fe1584450448395d80a60683d8f483c1da5",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part17"
       ],
@@ -2796,7 +2796,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part19.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part19",
-      "sha256": "068c30590604f45fad099fcdd0b2809395c0f729a668f99477a730c4edd60bd0",
+      "sha256": "ada3f4f7c62f77579365495ead46b073d708471aabefb0928cda16e97a7e558d",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part18"
       ],
@@ -2881,7 +2881,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part20.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part20",
-      "sha256": "9e38b906d83d9a139254a97e3d8c488171669c7f6348ac72b4b37cd4e5af677d",
+      "sha256": "8636e5bb47412b8297fc8b7471ad6103f8bf545a5134d1bf9063b178b8e2ffe5",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part19"
       ],
@@ -2966,7 +2966,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part21.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part21",
-      "sha256": "c818e2bba6f262511dbfa86485926c1317e4e152036974b40d997649b8d4ffc7",
+      "sha256": "0843cd4a4827720fb0cb25a05df90861874f11bc28660c6a912d3f2779bd4917",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part20"
       ],
@@ -3051,7 +3051,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part22.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part22",
-      "sha256": "75e6455b8d5d27749b0cd68c1713cbe228e7bae8e36fd354fca62193bce68433",
+      "sha256": "5daac961cfc462e376f8231c6ede13cdfb4aeed360b0f07d1e511ab231988595",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part21"
       ],
@@ -3136,7 +3136,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part23.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part23",
-      "sha256": "52ac342e002ae2429d2219af3bd468d04d45713c47993a6f7acfc4a7c1acff55",
+      "sha256": "5b76013c97dd2d4349a03f5aba7b21c182ee15772e56eacc592c535248b36110",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part22"
       ],
@@ -3221,7 +3221,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part24.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part24",
-      "sha256": "85c96bb0be2ee304a814419bbb4172b926e5eb2a1858db80639fc8406eab418e",
+      "sha256": "52b077b44d730105bd3f1db5cc845302c095f08597ffc98b1dcb48ec27b10f17",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part23"
       ],
@@ -3306,7 +3306,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part25.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part25",
-      "sha256": "6d9113dfb4a8f8b36f3eb4e7900de942c00e4cb974c0765cb2caf2aba822eaac",
+      "sha256": "d7dfd49c0855a1deb9074143067e300061852e7d17d28eef8d67a54b93448d37",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part24"
       ],
@@ -3391,7 +3391,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part26.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part26",
-      "sha256": "ce52ec10be30ee6a60e6d256bd683fbaeddeaaf160885b194c14c3e5b877802d",
+      "sha256": "a3830da05f04dfa2618344d6bedabe16a390e9f0512e4d86b98ac63cd3644419",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part25"
       ],
@@ -3476,7 +3476,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part27.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part27",
-      "sha256": "127317291afcb488cdd753156dbfce1283c06ecf1c255498bb4c3db2d842d00b",
+      "sha256": "b1351175e9f05bbc7e3b3ecee0ab9f02896a70f41c9af6be1fa6e56a54beec39",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part26"
       ],
@@ -3561,7 +3561,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part28.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part28",
-      "sha256": "f7540c732fed25fd4ce21364916aa21e8db87def420f54827d793a78ea496148",
+      "sha256": "3798547df59e81e5bab4643ede4366f8e56b0654b4a1d06a28d335814a474cc5",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part27"
       ],
@@ -3646,7 +3646,7 @@
     {
       "path": "Solidity/Frontend/NumericLiteralProofs/WordTable/Part29.lean",
       "name": "Solidity.Frontend.NumericLiteralProofs.WordTable.Part29",
-      "sha256": "94a41ff6870b47803abd128d9a7cd1e3df813b9373555532b6a106dbc79d996d",
+      "sha256": "2057a6cc6cb5060c03b6ea59924b8b96c85be0ffa23a8c9a5b45b621b059ca1e",
       "imports": [
         "Solidity.Frontend.NumericLiteralProofs.WordTable.Part28"
       ],
@@ -4015,15 +4015,16 @@
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "gate_scripts": {
     "scripts/check-sol-numeric-literals.py": "7e66307eb9f5349d389e8a1f5cb03ddc162c915ab28adfc53e9326f7ca0191ab",
-    "tests/primitive-packets-1105/Constants/registration-plan.py": "2ed05c5eaad534ee5a943199eedbf95e8fe579982bc974304e81396ad605e61b",
+    "tests/primitive-packets-1105/Constants/registration-plan.py": "8ac5a420593edc2b30a5adce0e18afdddaff5ab8fc0084d6006cd592f8bc52e1",
     "tests/primitive-packets-1105/Constants/validate-fresh.py": "d8e75b2a9071e32020ce50394c8b39fb1ca23a1a4900aa9d5a1695d7a8d4a410",
     "tests/primitive-packets-1105/Constants/check.py": "2cc3746b3fa30a15448c9cbca671fddb17d077feae62db3c6a6698baa9145a1d",
-    "tests/primitive-packets-1105/Constants/manifest.json": "d38885201e106fcf57bbfa826ec6e03455ad8cc96aa5186c7855f5867181c21a",
-    "tests/sol-numeric-literals/packetlib.py": "ba29b2c5e4a0587254f09f3bd7268e82e5442728f8b180fcf3f2a9d626a64ca7",
-    "tests/sol-numeric-literals/make-manifest.py": "5a80779accd02a2186e39b9edf729132454eee9ae929610a9df177f14004682e",
-    "tests/sol-numeric-literals/adoption.json": "4536d38cde9667bf3e7b2e0de62dd26ca71b30291349e00bba9ceb2a56fef248",
+    "tests/primitive-packets-1105/Constants/manifest.json": "bc8c3491c1d5f162a50ef6b60c3ed374611116d35ad0bbc99dec17586d12295b",
+    "tests/sol-numeric-literals/packetlib.py": "7f8b39de42eaaf3fccc8ad34c67bf3ba3c53ce661884eda6a6d0926637eeebef",
+    "tests/sol-numeric-literals/make-manifest.py": "3ce4d5433433ac97419d29be19c52d2a6a061e9be7360cddbe98aea244e99aa9",
+    "tests/sol-numeric-literals/adoption.json": "8d68298bd7990030a58b0dc06f8148a16c7f8f732ec20be56a836630dace131e",
     "tests/sol-numeric-literals/test-adoption.py": "01080db7de2fdde9f7d9ee87a9973a24914a5ee605457eb3d97e850a05ce4a90",
-    "tests/sol-numeric-literals/generate-wordtable.py": "d4fea570f7aec72eb5f86ed3dca6751b3e8783b4933432441f3769276dc69483",
+    "tests/sol-numeric-literals/generate-wordtable.py": "6616a6a82834c542fd36199dc760f16ccfcd4753a6f66456fd5459007a018ae4",
+    "tests/sol-numeric-literals/test-wordtable-annotation.py": "d999e035af7a1a575ccb8cc648c7db681fa2a8f783deff1a73cdb6fd6e9cf184",
     "tests/sol-numeric-literals/generate-fixtures.py": "3262d2638ff1ad0076951f38decaa4195acfb305c672bcd0d8c81c5d9708ff88",
     "tests/sol-numeric-literals/run-fixtures.mjs": "4fd93f61d436e6ec933451cb6a3c0063a7b7077b4e17abbd420d62944e67d05d",
     "tests/sol-numeric-literals/differential.py": "ef33debf53f06195584e311e8e81d4c25f0e78f098c4304e8646b7797695e6b7",

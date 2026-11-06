@@ -30,7 +30,7 @@ expected={}
 chunks=[blocks[i:i+15] for i in range(0,len(blocks),15)]
 for i,chunk in enumerate(chunks):
  dep='Solidity.Frontend.Checked.Lexer' if i==0 else f'Solidity.Frontend.NumericLiteralProofs.WordTable.Part{i-1:02}'
- lines=[f'import {dep}','','/-! # Generated direct structural word-table proof.','No scanner changes, equation generation, or raised budgets. -/','namespace Solidity.Frontend.NumericLiteralProofs','open Solidity.Frontend.Checked Solidity.Source','']
+ lines=[f'import {dep}','-- H55 reproduction: scripts/h55/vectors-tables/word_table.py (proof text remains authoritative).','','/-! # Generated direct structural word-table proof.','No scanner changes, equation generation, or raised budgets. -/','namespace Solidity.Frontend.NumericLiteralProofs','open Solidity.Frontend.Checked Solidity.Source','']
  for block in chunk:lines+=block
  lines+=['end Solidity.Frontend.NumericLiteralProofs','']
  expected[folder/f'Part{i:02}.lean']='\n'.join(lines)
