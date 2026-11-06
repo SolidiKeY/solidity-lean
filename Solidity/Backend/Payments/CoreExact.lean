@@ -6,11 +6,14 @@ import Solidity.Evm.Correct
 `Evm.compile_correct` (`Solidity/Evm/Correct.lean`) lists a third outcome
 for code that `pays`: the machine reverts at a refused payment while the
 typed run succeeds. This module proves that outcome never happens on the
-core fragment, with no premise beyond `compile_correct`'s own: `Sim` already
-carries the joint world/payment relation (`Sim.funds`, the typed balance is
-the machine's; `Sim.oracle`, `State.canPay` agrees with the machine's
-`accepts`), so a `transfer` the typed run makes is one the machine makes,
-and one it refuses both refuse (`transfer_paid`).
+core fragment, with no premise beyond `compile_correct`'s own: `Sim.funds`
+(the typed balance is the machine's) and the premise `Sim.oracle` (the typed
+world's `ext` answers each (recipient, amount) as the machine's `accepts`
+does) make `State.canPay` the machine's check, so a `transfer` the typed run
+makes is one the machine makes, and one it refuses both refuse
+(`transfer_paid`). The disjunct was vacuous under those premises (the
+never-constructed `refused` case, G04 R32). Recipients are a fixed
+(address, amount) oracle: no recipient code, gas or stipend is modelled.
 
 The proof re-runs `stmt_sim`/`prog_sim`'s structural recursion with the
 `pays` flag of `StmtOut` fixed at `false`, which rules out its `refused` arm
@@ -366,7 +369,8 @@ theorem compile_revert {P : Solidity.Prog C Γ Γ'} (hP : inFragP F P = some F')
   · rw [hr] at h2; cases h2
 
 /-- **`compile_storage` with no payment outcome**: from a fresh contract
-(`Sim.init`, so `compile_paid`'s premises hold for every world), a fragment
+(`Sim.init`, so `compile_paid`'s premises hold for every balance map and
+address, with every payment accepted; refusals then come from the balance check), a fragment
 program both runs, the machine holding every live `uint` the typed run reads,
 or both revert, or the typed run diverges and the machine faults. -/
 theorem compile_storage_paid {P : Solidity.Prog C [] Γ'} (hP : inFragP (Frag.init []) P = some F')

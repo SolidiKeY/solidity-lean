@@ -15,9 +15,9 @@ produces a payment outcome.
 `compile_success` is the separate compiler-success theorem G43 needs
 (OBL-SUCCESS): for every compilation result and every input it accepts, a
 typed run that succeeds is matched by a machine run that succeeds, in the
-state `Rep` relates. The joint world/payment relation is the one `Input`
-already carries (`Sim.funds`, `Sim.oracle` on the core path; the memory
-paths admit no payment). `Agrees`, `correct` and every frozen statement are
+state `Rep` relates. On the core path the payment agreement is `Input`'s
+`Sim.funds` and the premise `Sim.oracle`; the memory compilers reject
+`transfer`/`send`, and their certificates have no payment outcome. `Agrees`, `correct` and every frozen statement are
 unchanged; `agrees_of_exact` recovers `Agrees` from `AgreesExact`.
 -/
 
