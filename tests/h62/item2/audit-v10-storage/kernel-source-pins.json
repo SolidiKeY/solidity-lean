@@ -26,6 +26,10 @@
     "tests/h62/item2/audit-v10-storage/LayoutWitnesses.lean": {
       "sha256": "ae5fc9ba79e1725860ccec31a9713d83d45db8ef0c4aca15d7dd7554e8e35d55",
       "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint201-final-r1/1.log"
+    },
+    "tests/h62/item2/audit-v10-storage/TargetInputWitnesses.lean": {
+      "sha256": "c21eb09f4facc7a5ef86cbfb96ec1e1420af95aef1915b06360154d453bd75f4",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint202-final/1.log"
     }
   }
 }

@@ -478,3 +478,17 @@ rows unmapped. Six kernel-checked test modules supply those references. Both
 layout-family selected cells change in the positive control; left-only execution
 preserves the outside cell. This is a finite layout/operation-family result,
 not physical execution or a general Source storage compiler.
+
+## Data-only statements kept separate
+
+Five remaining statements in the original 25 source plans have no logical
+hypotheses: the reverse slot roundtrip and the four target read/write/copy
+execution equations. TargetInputWitnesses checks Nonempty input tuples using
+existing slots, the published populated machine and word. These do not certify
+arbitrary compiler success or supply new logical-premise bundles. Registry
+counts now distinguish data inhabitance from joint-premise evidence explicitly.
+
+The original 25 source-planned statements have 20 checked joint-premise bundles
+and five data-only classifications; three additional Source-write bundles were
+checked separately. This remains a small reviewed subset of the conservative
+3281-row ledger, not a completed elaborated census or full assignment acceptance.

@@ -62,6 +62,8 @@ def build(inventory,packets,root=ROOT):
     mapped={}; sources={}; packet_hashes={}
     for path,packet in packets:
         if packet["frozen_base"]!=c.BASE: raise ValueError("packet base mismatch")
+        kind=packet.get("kind","joint-premise")
+        if kind not in ("joint-premise","data-inhabitance"):raise ValueError("unknown witness kind")
         packet_hashes[str(path.relative_to(root))]=digest(path.read_bytes())
         for row in packet["rows"]:
             key=row["frozen_id"]
@@ -85,13 +87,16 @@ def build(inventory,packets,root=ROOT):
             if relative not in pins["sources"] or pins["sources"][relative]["sha256"]!=observed:
                 raise ValueError("kernel-checked witness source drift")
             sources[relative]=observed
-            mapped[key]=dict(row,witness_source=relative)
+            mapped[key]=dict(row,witness_source=relative,witness_kind=kind)
     rows=[dict(id=r["id"],signature_sha256=r["signature_sha256"],context_sha256=r["context_sha256"],
           witness_reference=mapped.get(r["id"]),status="mapped-witness-reference" if r["id"] in mapped else "unmapped")
           for r in inventory["declarations"]]
     return dict(schema_version=1,frozen_base=c.BASE,
         boundary="Frozen source/signature/reference identity only. Kernel checks and manual semantic fidelity are separate; not a complete elaborated interface census or compiler totality proof.",
-        counts=dict(conservative_rows=len(rows),mapped_joint_bundles=len(mapped),unmapped=len(rows)-len(mapped)),
+        counts=dict(conservative_rows=len(rows),mapped_rows=len(mapped),
+          mapped_joint_bundles=sum(r["witness_kind"]=="joint-premise" for r in mapped.values()),
+          mapped_data_inhabitants=sum(r["witness_kind"]=="data-inhabitance" for r in mapped.values()),
+          unmapped=len(rows)-len(mapped)),
         witness_source_sha256=sources,packet_sha256=packet_hashes,rows=rows)
 
 def main():

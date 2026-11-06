@@ -32,15 +32,16 @@ class RegistryTest(unittest.TestCase):
         return directory
     def test_complete_reference_ledger(self):
         result=m.build(self.inventory,m.maps())
-        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_joint_bundles=23,unmapped=3258))
+        self.assertEqual(result["counts"],dict(conservative_rows=3281,mapped_rows=28,mapped_joint_bundles=23,mapped_data_inhabitants=5,unmapped=3253))
         self.assertEqual(len({r["id"] for r in result["rows"]}),3281)
-        self.assertEqual(len(result["witness_source_sha256"]),6)
+        self.assertEqual(len(result["witness_source_sha256"]),7)
     def test_corruption_refused(self):
-        for kind in ["duplicate","unknown","signature","witness","source","interface","pin"]:
+        for kind in ["duplicate","unknown","signature","witness","source","interface","pin","kind"]:
             with self.subTest(kind=kind),tempfile.TemporaryDirectory() as temp:
                 root=Path(temp);directory=self.fixture(root)
                 path=next(directory.glob("*-witness-map.json"));packet=json.loads(path.read_text())
-                if kind=="duplicate":packet["rows"].append(copy.deepcopy(packet["rows"][0]))
+                if kind=="kind":packet["kind"]="unverified-kind"
+                elif kind=="duplicate":packet["rows"].append(copy.deepcopy(packet["rows"][0]))
                 elif kind=="unknown":packet["rows"][0]["frozen_id"]="absent"
                 elif kind=="signature":packet["rows"][0]["signature"]+=" "
                 elif kind=="witness":packet["rows"][0]["witness"]="Missing.Namespace.theorem"
