@@ -40,7 +40,9 @@ changed; no `maxHeartbeats` option is used.
 Controls: an inhabited program using a storage read, a `while` loop with
 `+=`, a branch with a mapping write and a `revert`, and a value internal call
 is accepted through the theorem at every base and, independently, by kernel
-evaluation; its code is nonempty. `signedAnd_outside` derives from the
+evaluation; its code is nonempty. `program_agrees_fresh` meets the `Sim` premise
+with the published `Sim.init` fresh contract, so `Agrees` is reached, not
+vacuous. `signedAnd_outside` derives from the
 theorem and the observed refusal that the domain is not every program.
 
 Limits: this is totality of the existing entry on this domain. It does not

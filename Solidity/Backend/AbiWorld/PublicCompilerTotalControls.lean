@@ -63,6 +63,15 @@ theorem program_code_nonempty :
     0 < ((Compiler.compile 0 (Frag.init Γ₀) program).map (·.code.length)).getD 0 := by
   decide +kernel
 
+/-- The `Sim` premise of `compile_agrees` is met by the published fresh
+contract (`Sim.init`), so the observation is reached, not vacuous. -/
+theorem program_agrees_fresh : ∃ result, Compiler.compile 0 (Frag.init Γ₀) program = some result ∧
+    ∀ (frame : Nat) (base : Nat → Fin W), result.Agrees 1 frame base
+      (freshT C 0 W_pos ⟨0, W_pos⟩) (Machine.init (fun _ => 0) ⟨0, W_pos⟩) := by
+  obtain ⟨result, accepted, agrees⟩ := compile_agrees 0 (Frag.init Γ₀) program_ok
+  exact ⟨result, accepted, fun frame base =>
+    agrees 1 frame base _ _ (Sim.init C 0 W_pos (fun _ => 0) ⟨0, W_pos⟩ rfl) (by unfold Lmax; decide)⟩
+
 /-! ## Negative controls: each side condition is a real refusal -/
 
 /-- `x & 1` at `int` is typed but refused. -/
