@@ -466,7 +466,7 @@ Generalization must keep the stage-specific actual argument/write evidence and o
 
 ## Successor ArrayProbe embedded region
 
-Explicit region: `RuntimeFrameV3ArrayProbe.lean`, `Checks` namespace (lines64–104 at inspected input). Source hash: `6a5c206775042a7ca8577b63685a79c3f569327bed78deb86d1479d7f311f3f2`. This is one bounded region, not completion of the embedded census; previous aggregate counts remain unchanged.
+Explicit region: `RuntimeFrameV3ArrayProbe.lean`, `Checks` namespace, from its explicit opening through `end Checks`. Source hash: `6a5c206775042a7ca8577b63685a79c3f569327bed78deb86d1479d7f311f3f2`. This is one bounded region, not completion of the embedded census; previous aggregate counts remain unchanged.
 
 Fixtures: `F` and `input` alias the existing Countdown/AllocatorReturn fixture; `bad` writes local count3 and `badMachine` writes word3 at cell3. `bad_repr` proves the actual full StateRepr after that local change; `bad_ownership` separately preserves the struct allocator relation. These are initial representation facts, not successful bounds/admission assumptions.
 
