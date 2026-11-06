@@ -1068,7 +1068,7 @@ Controls (`O03Controls.lean`): `call_inlined` (exact inlined syntax), `inlined_o
 `call_ok` and `inlined_reverts`/`call_reverts` on concrete states, `ret_call_kept`.
 
 Not covered (left as written): calls with return values (`CallRet.val/rets/mem/storage`),
-storage or memory parameters, `callRec`, receiver calls, `try` self-calls; calls
+(storage or memory parameters: inlined since the X06 follow-up) `callRec`, receiver calls, `try` self-calls; calls
 inside an inlined body are not inlined in the same pass (run it again).
 
 ### Unused-function pruning: open
@@ -1084,7 +1084,7 @@ done. Open, no claim.
 
 - Redundant `sload`/`mload`/store elimination and LICM of memory/storage reads: wait for
   X06 aliasing facts (VX4, wave B); no assumed aliasing facts.
-- LICM of pure expressions: a hoisted expression may fail when the loop runs zero
+- (Superseded by the X06 follow-up below: guarded LICM, `Prog.licm`.) LICM of pure expressions: a hoisted expression may fail when the loop runs zero
   times, so only failure-free expressions could move; not done.
 - Unused-function pruning (above), inlining with return values/reference parameters.
 
@@ -1215,7 +1215,7 @@ evidence, no gas or code-size claims. `Optimizer/Pass.lean` signatures unchanged
 | O03 inlining of internal functions | done for void and single-value returns with value arguments | `inlineBlock_runC`, `inlineBlockVal_runC`, `Prog.inl_runC` |
 | O03 CSE | done (pure expressions, syntactic) | `Val.pbeq_eq`, `Prog.cse_empty_runC` |
 | O03 unused-function pruning | open (no lowering-IR function table; Yul needs a fuel-shift simulation) | — |
-| O03 redundant sload/mload/store elimination, LICM | open, waits on X06 aliasing facts | — |
+| O03 redundant sload/mload/store elimination, LICM | done in the X06 follow-up (fragments listed there) | `Prog.rle_empty_runC`, `Prog.dstore_runC`, `Prog.licm_runC` |
 | Certified pipeline | done | `Prog.optimize_runC`, `e2e_optimized` |
 | Final revalidation after integrated prerequisites/V16 | open | — |
 
@@ -1372,3 +1372,61 @@ Axioms (`#print axioms` in the controls): `Prog.rle_empty_runC`, `Prog.rle_runC`
 `Prog.licm_runC`, the three `*_preserves`, `Prog.optimize_runC`: `propext`,
 `Classical.choice`, `Quot.sound` only (the classical ones through `TLoop.run`); no
 `sorry`, no `native_decide`, no heartbeat option.
+
+### Backfill: inlining with reference parameters
+
+`bindArgs` now binds every argument kind, so `inlineBlock`/`inlineBlockVal` and their
+theorems lost the premise `args.allVal = true` (a strengthening; `Args.allVal` is
+removed, no other module used it): a storage parameter is declared as the storage alias
+`R storage x = e;` (`declStorage … (some (.path e))`, the identity the call shares) and a
+memory parameter as the memory alias `R memory x = e;` (`declMem … (some (.alias e))`,
+the object by identity, no copy), each read past the parameters before it
+(`SPath.resolveT_wk`, `MPath.mvalT_wk`); `bindArgs_runC` covers the three arms. So
+`Prog.inl` inlines void and single-value calls with any parameters
+(`inlineBlock_runC f args body`, `inlineBlockVal_runC f args p r res body`, no premise).
+Controls: `ref_call_inlined`, `ref_call_same` and the `#guard`ed `balances[1] = 7` runs in
+`X06Controls.lean`; `O03Controls.storage_arg_kept` became `storage_arg_inlined`/
+`storage_arg_same`.
+
+Still open: inlining calls with several returns (`CallRet.rets`), memory or storage
+returns, `callRec`, receiver calls. Design note for `rets`: the call leaves its return
+variables in the caller (`rs ++ Γ`), which no single statement but the call does, so the
+rewrite is at `Prog` level — declare the caller's return locals at their defaults, then a
+block that declares the frame `rs ++ ps` above them (recursing on the binders so that
+`(rs ++ ps) ++ (rs ++ Γ)` is definitional; `List.append_assoc` is not), runs the body
+weakened by `thinTop (rs ++ Γ) (rs ++ ps)` (`frame_runC`), and copies each inner return
+variable to its caller local; the remaining proof is the copy-back sequence against
+`CallRet.leaveT`'s `TEnv.append`, and memory binders (`snocMem`) allocate on entry, after
+the arguments, which the order of declarations must keep.
+
+### Reviews (read-only finder + skeptic, no Lean server) and repairs
+
+No soundness defect found; both confirmed `SameRun` is `Prog.runC` equality, the three
+`*_preserves` instantiate it directly (the `Validator`/`validate_sound` path is not used:
+direct preservation is stronger), the memory rule `MLoc.apartB` is exactly what
+`MAddr.Apart` justifies (index/index only for distinct literals, stronger than needed),
+the LICM zero-iteration, condition-error and `e`-revert cases are matched exactly, and
+`State`/`Out` carry no memory-size or gas field. Applied:
+- LICM copied a written loop invariant (`LoopAnn.inv`/`.invLex`) onto the shortened loop,
+  whose entry state is after `x = e` (invisible to `runC`, wrong for the calculus):
+  `hoist` now requires `LoopAnn.plainB` (unwind bound or automatic); control
+  `licm_annotated_kept`.
+- Doc precision: RLE keeps entries across local value declarations only (storage/memory
+  declarations clear them) and rewrites a store's value, not its location; DSE's `e₂` is
+  `Val.isPure` (no storage and no memory read); LICM's `c` is re-evaluated each iteration
+  and need not be loop-invariant; stale O03 rows above superseded; `rle_killed` doc and
+  the controls header (which now states which controls are `#guard`).
+- Docstrings for every headline lemma; unused binder removed.
+- Controls added: member apartness on aliased memory locals (`rle_member_apart`, kill
+  `rle_member_alias_kept`, runs `4`/`6`), member vs element (`rle_member_index`), memory
+  dead-store negative (`dstore_live_mem_kept`, `#guard` `1` vs `0`), `mstore_witness`/
+  `mstore_witness_run`, kernel zero-iteration controls (`fail_loop_returns`,
+  `unguarded_reverts`, `guarded_returns`), `e` reverting in the first iteration
+  (`licm_rev_hoisted`, `rev_loop_reverts`, `rev_hoisted_reverts`), `rest` writing `x`
+  (`licm_x_rejected`).
+Not applied, recorded: the passes use `match` on `Stmt`/`Prog` like every earlier
+optimizer pass (Gate G0 condition 1 asks for `casesOn` in kernel-evaluated code; the
+controls reduce them by `rfl` in seconds, and the pass family would move together); all
+passes share namespace `Solidity.Optimizer.ConstFold` (the lane's existing convention);
+private copies of `TEnv.get_set(_ne)` and `ArrTy.eq` in `Loads.lean` (avoid importing
+`RunFrame`/`Calculus.TermEq` there).
