@@ -1370,3 +1370,9 @@ counted as the split's improvement.
 The coordinator's reported 6.3–8.0 GB host peaks were not reproduced on this
 VM. These local measurements do not claim a passing host integration rebuild,
 whole-lane completion or migration validation.
+
+### H86 original-branch reconciliation
+
+Merged published master into original `278633cfeedc`, retaining current calldata constructors, exact inventory helper extraction and additive published theorems. H86 authorized published layer/trust records, both historical documentation sections and generated-root/fragment regeneration. The preserved successor branch is now integrated into the original branch, including the OOM split and three authenticated final member heads. No owner Source edits, statement weakening, budget or trust-policy changes were introduced by resolution.
+
+All 13 conflicted Views files and the three priority OOM entry modules pass serial pinned-v4.24 Lean checks. Post-merge VmHWM KiB: MemberDynamicControls 473224; MemberDynamicSequence 484888; DynamicJournalControls 1751564. All 12 split module bodies are byte-identical to the reviewed `[oom-fix]` commit; earlier per-piece measurements and 134-declaration type/axiom comparisons remain applicable. The host 6–8 GB symptom was not reproduced on this VM; no host full-gate or v4.35 claim follows. KeySort, trust (6455 sources/289 sites/zero findings), layer checks and document paths pass. Register/fragments were regenerated and checked. Initial direct trust-script invocation lacked its required stdin; the repository wrapper passed. The large staged upstream delta includes inherited whitespace warnings; resolution-only working diff is clean. Finder and skeptic read-only reviews found no merge-preservation defect and ran no builds or servers. Full rebuild, inherited H55 drafts and whole-lane obligations remain pending. Exact measurements: `/workspace/vy2-evidence/h86-merge/report.json`.

@@ -4612,6 +4612,7 @@ import Solidity.Yul.Compilation.ArithmeticMachineControls
 import Solidity.Yul.Compilation.ArithmeticVisitorShapes
 import Solidity.Yul.Compilation.ArithmeticVisitorShapesControls
 import Solidity.Yul.Compilation.ArityShapes
+import Solidity.Yul.Compilation.Artifact
 import Solidity.Yul.Compilation.BitExpressions
 import Solidity.Yul.Compilation.BitMachineExecution
 import Solidity.Yul.Compilation.BitMachineExecutionControls
@@ -4629,6 +4630,7 @@ import Solidity.Yul.Compilation.ComparisonBranchControls
 import Solidity.Yul.Compilation.ComparisonMachine
 import Solidity.Yul.Compilation.ComparisonMachineControls
 import Solidity.Yul.Compilation.CompilationControls
+import Solidity.Yul.Compilation.CompletionControls
 import Solidity.Yul.Compilation.ConditionalCompilation
 import Solidity.Yul.Compilation.ConditionalCompilationControls
 import Solidity.Yul.Compilation.ControlLowering
