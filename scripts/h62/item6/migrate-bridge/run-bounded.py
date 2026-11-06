@@ -4,6 +4,29 @@ No toolchain or tracked configuration edits. Never treat a resource stop as pass
 """
 import argparse, fcntl, hashlib, json, os, pathlib, shlex, signal, subprocess, time
 
+BUILD_TREE_POLICY="Lean library outputs cold; prebuilt ProofWidgets JS only"
+
+def check_cold_build(root):
+    for build in (root/".lake/build",root/"Bridge/.lake/build"):
+        if build.exists() or build.is_symlink(): raise ValueError("Refusing non-clean build tree: "+str(build))
+    for build in root.glob("Bridge/.lake/packages/*/.lake/build"):
+        entries=list(build.iterdir()) if not build.is_symlink() else []
+        if build.parent.parent.name=="proofwidgets" and not build.is_symlink() and len(entries)==1 and entries[0].name=="js" and entries[0].is_dir() and not entries[0].is_symlink():
+            js=entries[0]
+            def allowed_asset(path):
+                return not path.is_symlink() and (path.is_dir() or (path.is_file() and (path.suffix==".js" or path==js/"lake.trace")))
+            if all(allowed_asset(path) for path in js.rglob("*")):
+                continue
+        raise ValueError("Refusing dependency Lean build outputs: "+str(build))
+
+def require_js_assets(root):
+    manifest=json.loads((root/"Bridge/lake-manifest.json").read_text())
+    if any(p.get("name")=="proofwidgets" for p in manifest["packages"]):
+        js=root/"Bridge/.lake/packages/proofwidgets/.lake/build/js"
+        trace=js/"lake.trace"
+        if not trace.is_file() or not trace.stat().st_size or not any(p.is_file() and not p.is_symlink() for p in js.glob("*.js")):
+            raise ValueError("Prepare pinned ProofWidgets JS assets before starting a Bridge measurement")
+
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root",type=pathlib.Path,required=True)
@@ -19,8 +42,10 @@ def main():
     lockpath=pathlib.Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
     with lockpath.open("a") as lock:
         fcntl.flock(lock,fcntl.LOCK_EX)
-        for build in [root/".lake/build",root/"Bridge/.lake/build",*root.glob("Bridge/.lake/packages/*/.lake/build")]:
-            if build.exists(): raise SystemExit("Refusing non-clean build tree: "+str(build))
+        try:
+            check_cold_build(root)
+            if args.bridge_measurement: require_js_assets(root)
+        except (ValueError,OSError) as error: raise SystemExit(str(error))
         status=subprocess.check_output(["git","status","--short"],cwd=root,text=True)
         (out/"starting-status.log").write_text(status)
         def meminfo():
@@ -67,7 +92,7 @@ def main():
                 try: os.killpg(proc.pid,signal.SIGKILL)
                 except ProcessLookupError: pass
                 proc.wait()
-        receipt={"command":command,"measurement_scope":"Bridge" if args.bridge_measurement else "full-root-and-Bridge","root":str(root),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip(),"versions":versions,"exit":proc.returncode,"elapsed_seconds":time.monotonic()-start,"resource_stop":stopped,"peak_vm_cgroup_bytes":peak,"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","status":"command-pass" if proc.returncode==0 and not stopped else "fail","full_gate_acceptance":"pending independent decisive-output review","solkey_rules_sha256":hashlib.sha256(rules.read_bytes()).hexdigest()}
+        receipt={"command":command,"build_tree_policy":BUILD_TREE_POLICY,"measurement_scope":"Bridge" if args.bridge_measurement else "full-root-and-Bridge","root":str(root),"head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=root,text=True).strip(),"versions":versions,"exit":proc.returncode,"elapsed_seconds":time.monotonic()-start,"resource_stop":stopped,"peak_vm_cgroup_bytes":peak,"compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","status":"command-pass" if proc.returncode==0 and not stopped else "fail","full_gate_acceptance":"pending independent decisive-output review","solkey_rules_sha256":hashlib.sha256(rules.read_bytes()).hexdigest()}
         (out/"receipt.json").write_text(json.dumps(receipt,indent=2,sort_keys=True)+"\n"); print(json.dumps(receipt))
         return 0 if receipt["status"]=="command-pass" else 1
 if __name__=="__main__": raise SystemExit(main())

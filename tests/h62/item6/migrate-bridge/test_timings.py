@@ -10,7 +10,7 @@ class TimingControls(unittest.TestCase):
     def write(self,path,version,elapsed,**changes):
         data={"status":"command-pass","exit":0,"resource_stop":None,"elapsed_seconds":elapsed,
               "versions":{"lean":"Lean (version "+version+", fixture)","lake":"Lake fixture (Lean version "+version+")"},
-              "command":["bash","./run-lean.sh","--bridge"],"measurement_scope":"full-root-and-Bridge","compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","solkey_rules_sha256":"f"*64}
+              "command":["bash","./run-lean.sh","--bridge"],"measurement_scope":"full-root-and-Bridge","build_tree_policy":"Lean library outputs cold; prebuilt ProofWidgets JS only","compiler_args":["-j1","-M10240"],"module_timeout_seconds":300,"reserve_gib":4,"swap_bytes":0,"cache":"disabled via empty LAKE_CACHE_DIR and --no-cache","solkey_rules_sha256":"f"*64}
         data.update(changes); (path/"receipt.json").write_text(json.dumps(data))
     def test_equal_and_faster(self):
         self.assertEqual(timing.compare(self.old,self.new)["action"],"no-regression")
@@ -44,7 +44,7 @@ class TimingControls(unittest.TestCase):
         (self.old/"receipt.json").write_text(json.dumps(data))
         with self.assertRaises(timing.Blocked): timing.compare(self.old,self.new)
     def test_equal_invalid_profiles_rejected(self):
-        for changes in ({"compiler_args":[]},{"reserve_gib":0},{"swap_bytes":1},{"command":None},{"module_timeout_seconds":True}):
+        for changes in ({"compiler_args":[]},{"reserve_gib":0},{"swap_bytes":1},{"command":None},{"module_timeout_seconds":True},{"build_tree_policy":"warm Lean outputs"}):
             self.write(self.old,"4.24.0",100,**changes); self.write(self.new,"4.35.0",100,**changes)
             with self.assertRaises(timing.Blocked): timing.compare(self.old,self.new)
     def test_incomplete_watchdog_rejected(self):

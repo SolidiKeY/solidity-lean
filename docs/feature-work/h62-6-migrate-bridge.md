@@ -48,13 +48,20 @@ is retained for the mandatory full gate. Without the measurement flag the
 runner invokes `bash ./run-lean.sh --bridge`; this full final gate remains
 required after migration. A Bridge-only receipt never establishes that gate.
 
-The runner holds the repository writer lock, refuses existing root/Bridge/
-dependency build trees and nonempty evidence directories, disables Lake
+The runner holds the repository writer lock, refuses existing root/Bridge and
+dependency Lean library outputs and nonempty evidence directories, disables Lake
 artifact/download caches, serializes Lean `-j1 -M10240`, requires zero host
 swap, bounds each compiler to 300 seconds, and preserves 4 GiB of host and VM
 headroom under the explicit assignment's reserve. The VM cap is 16 GiB; CPU
 quota is four cores with five visible CPUs. No systemd-run is used. A
 `command-pass` receipt remains subject to independent decisive-output review.
+Only prepared ProofWidgets JavaScript is permitted in a dependency build tree:
+real directories, regular `.js` files and exact top-level `js/lake.trace`.
+Symlinks, Lean artifacts, IR and unknown files are rejected. The JS prerequisite
+is required before a Bridge measurement, and this cold-library/JS-only policy
+is included in timing receipts and comparisons. Package configuration and
+non-Lean asset setup are performed before the measurement; library proof outputs
+are cold. Ten negative controls exercise this preflight separately.
 
 The first three preliminary commands included full core targets before Bridge.
 A static source-import estimate found 784 core modules in Bridge's closure
@@ -70,6 +77,9 @@ runs are preserved and are not accepted clean Bridge measurements:
 - Attempt 3: unchanged `PowerBounds` passed in 237 seconds after cache recovery;
   full preliminary command was intentionally stopped for scope correction,
   exit -15 after 1,966.2415 seconds. It is not a completed final gate.
+- Bridge attempt 4: missing ProofWidgets JS prerequisite caused a real target
+  failure. The invalid run was stopped, exit -15 after 1,874.2515 seconds;
+  its partial Lean outputs cannot be reused in a clean measurement.
 
 Unused owned v4.35 release-file cache was advised away via read-only file
 handles, reducing VM usage from 4.95 GB to 1.05 GB. No contents were changed or
@@ -79,9 +89,20 @@ symmetrically for final before/after conditions.
 
 Eleven dependency source checkouts were provisioned at the exact revisions
 already in the base Bridge manifest, with no compiled cache or pin changes.
-Source-fetch setup is excluded from the forthcoming timed build. Commands and
-revision equality checks are in old/pinned-source-preparation.log and its JSON
-receipt. Migration dependency selection still belongs to root/gate.
+Source-fetch setup is excluded from the timed build. Commands and revision
+equality checks are in old/pinned-source-preparation.log and its JSON receipt.
+Migration dependency selection and cross-directory prerequisites still require
+root/gate coordination.
+
+The first standalone pinned ProofWidgets JS target attempt failed its guard.
+Standard standalone `lake --reconfigure --no-cache
+-d <proofwidgets> build widgetJsAll` then succeeded in 57.04 seconds with clean
+source status and no imported Lean library cache. The original Bridge-context
+`proofwidgets/widgetJsAll` prerequisite also passed afterward. No Mathlib or
+ProofWidgets source/guard was edited or disabled. The JS-only target is the
+pinned deterministic generator; generated assets and checksum evidence stay
+off git. All partial library outputs from attempt 4 are preserved outside the
+new clean build. This prerequisite success is not Bridge semantic acceptance.
 
 ## Deterministic acceptance backfill
 
@@ -106,8 +127,9 @@ Finder and skeptic worked independently, read-only, without Lean servers or
 fixes. Confirmed findings were fixed: staged additions/deletions, process-group
 cleanup, stale sysroot reuse, clean dependency outputs, SolKey skip handling,
 VM headroom, incomplete/malformed receipts, invalid equal profiles, threshold
-rounding and exported scope labels. Final code reviews found no remaining
-blockers; final proof/build milestone reviews remain outstanding. Review text
+rounding and exported scope labels. The JS-only blacklist was replaced by a strict
+allowlist after both reviewers identified IR/unknown-file acceptance. Final code
+reviews found no remaining blockers; final proof/build milestone reviews remain outstanding. Review text
 is preserved in versioned off-git checkpoint exports.
 
 Layer and whitespace checks passed. Documentation-path checks initially failed
@@ -115,6 +137,26 @@ because an unchanged existing document referenced a missing downloaded mathlib
 test source. After exact pinned source provisioning, the path gate passed: every backticked
 Lean-file reference resolves. The out-of-scope document was not edited and no
 placeholder file was fabricated.
+
+## Incoming H70 requests
+
+`DEP-H70-01`: the audit-label-execution ticket from requester head
+`a107fd353aba492a3144da90cabcbde20032ca0c` is unavailable in this VM. Its verified
+host receipt and requested VM delivery path are recorded in the exported
+requests/DEP-H70-01.json, with expected 11,017 bytes and SHA256
+`4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1`.
+Coordinator delivery is requested for exact-path read-only triage. Its reported
+51 unresolved declaration owners have not been accepted as this lane's producer
+scope. relay.sh is host-only and is not a VM installation task.
+
+The audit-precompiles relay from head
+`5fcec7dca5ab0d6d321eaf29ca176045b5c38e0c` routes `DEP-BRIDGE-435` to this lane
+and precompile-agreement. This VM has frozen v4.24 source dependencies for the
+old baseline; approved v4.35 dependencies remain pending. `OBL-SUCCESS` belongs
+to G43/V14 and requires a separate actual-compiler success theorem, not a change
+to `Solidity.Stipend.Obligation`. Raw String and BLS recursion prerequisites
+remain with their named migration owners. Routing grants no original-file
+permission, budget change or passing gate; all frozen statements remain intact.
 
 ## Dependencies and continuation
 
