@@ -70,7 +70,7 @@ theorem relay_body : (Source.progOf E).body relayDecl = some relayBody := by
 theorem leaf_signature : leafDecl.fnSig E = some ([U],[Aty]) := rfl
 theorem relay_signature : relayDecl.fnSig E = some ([U],[Aty]) := rfl
 
-def same : Aty.implicit E.isBase Aty = true := by decide +kernel
+def same : Aty.implicit E.isBase E.mapFree Aty = true := by decide +kernel
 def leafExpr : RExpr E (returnContext [U] Aty) Aty := .newArray rfl (.local (.there .here)) rfl
 def relayExpr : RExpr E (returnContext [U] Aty) Aty :=
   .call leafDecl leaf_signature (.cons (.local (.there .here)) (by decide +kernel) .nil)

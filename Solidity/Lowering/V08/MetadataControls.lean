@@ -86,7 +86,7 @@ def errorArguments : RArgs sourceEnv [] [.bool, .rational (Q.ofInt 7)] :=
 
 /-- paramsOf selects the heterogeneous declaration's actual parameter list. -/
 theorem error_parameters :
-    (paramsOf sourceEnv sourceEnv.isBase [.bool, .rational (Q.ofInt 7)]
+    (paramsOf sourceEnv sourceEnv.isBase sourceEnv.mapFree [.bool, .rational (Q.ofInt 7)]
       errorDeclaration rfl).1 = [.bool, .int IntTy.u8] := rfl
 
 /-- The original rational argument is retained, with its implicit conversion. -/
@@ -96,7 +96,7 @@ theorem error_argument_origins : originTypes
 
 /-- The heterogeneous reversed argument types fail the existing fit test. -/
 theorem wrong_error_order :
-    errorDeclaration.fitsParams sourceEnv sourceEnv.isBase [.rational (Q.ofInt 7), .bool] = false := rfl
+    errorDeclaration.fitsParams sourceEnv sourceEnv.isBase sourceEnv.mapFree [.rational (Q.ofInt 7), .bool] = false := rfl
 
 #print axioms function_member
 #print axioms error_member

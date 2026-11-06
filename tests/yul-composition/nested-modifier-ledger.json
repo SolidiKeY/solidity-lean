@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "module": "Solidity/Yul/Composition/NestedModifierPhysical.lean",
+  "sourceCases": 78,
+  "nativeComparisons": 0,
+  "fullProofGate": "pending",
+  "original24": "pending",
+  "sixGeneralCombinations": "pending",
+  "boundary": "Real nested resolved modifier execution, not Derived/general raw/session/compiler/world adequacy; selected old/current account/cpath views are finite projections"
+}

@@ -27,8 +27,8 @@ theorem payload_cases (pipeline : Roadmap.Pipeline) (static : Bool) :
 /-- The entire existing ordered field vector is retained, with both old/new
 objects and exact allocator. Complete machine equality above covers all fields. -/
 theorem complete_vector (bytes : Roadmap.Bytes) :
-    ((after bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((after bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((after bytes).ex.world.accounts sender).balance = 93 ∧
+    ((after bytes).ex.world.accounts self).balance = 7 ∧
     ((after bytes).ex.world.accounts self).code = some 0 ∧
     ((after bytes).ex.world.accounts self).nonce = 1 ∧
     ((after bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧
@@ -164,8 +164,8 @@ theorem mixed_complete (pipeline : Roadmap.Pipeline) (static : Bool) :
     (SourceAbiControls.data true pipeline) evaluation memory
 
 theorem mixed_vector (pipeline : Roadmap.Pipeline) :
-    ((mixedAfter pipeline).ex.world.accounts sender).balance.val = 93 ∧
-    ((mixedAfter pipeline).ex.world.accounts self).balance.val = 7 ∧
+    ((mixedAfter pipeline).ex.world.accounts sender).balance = 93 ∧
+    ((mixedAfter pipeline).ex.world.accounts self).balance = 7 ∧
     ((mixedAfter pipeline).ex.world.accounts self).code = some 0 ∧
     ((mixedAfter pipeline).ex.world.accounts self).nonce = 1 ∧
     ((mixedAfter pipeline).ex.world.accounts self).storage.read saved = some (.bool true) ∧
