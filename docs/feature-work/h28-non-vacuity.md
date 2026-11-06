@@ -624,3 +624,7 @@ gate is not bypassed. Failed draft checks and the two rejected proposal-count
 assumptions remain explicitly failed evidence. Final committed-head gates,
 independent reviews and cache/seal evidence are recorded in the local
 `sealed/loop-backfill-e684-<head>` handoff after this commit.
+
+### Human H82 retirement: stopped preservation handoff
+
+Implementation is stopped by the explicit human retirement directive. The accepted successor is `solidity-v12-v17-20261031/v17-validation-release`; integration follows the final stopped/head acknowledgement. Complete original rendered prompt, original work/backfill queue, exact scope manifest, all open obligations, preservation patch/drafts and evidence hashes are committed under `tests/h28-sol/non-vacuity/retirement-h82/`. Both independent preservation reviews pass. Live proof/checker files remain byte-identical to published working base `7ae5607c9ecfff4078162115eaaaa48a1ff46eb0`; incomplete H82 edits are snapshots, not accepted implementations. Raw evidence stays off git with hashes. No H71 push grant was available, so no push is performed. The PAUSED goal transition was rejected by the tool enum (only complete/blocked); no completion or automatic implementation continuation is authorized. Final exact head, clean status, patch/bundle/cache references and full checksums are in the external retirement receipt.

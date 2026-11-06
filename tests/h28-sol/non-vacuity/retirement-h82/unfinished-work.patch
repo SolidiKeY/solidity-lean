@@ -1,0 +1,235 @@
+diff --git a/tests/h28-sol/non-vacuity/check.py b/tests/h28-sol/non-vacuity/check.py
+index e84d427d2..8c1dc0b62 100644
+--- a/tests/h28-sol/non-vacuity/check.py
++++ b/tests/h28-sol/non-vacuity/check.py
+@@ -13,6 +13,7 @@ ADOPTION_MERGE = '1d064c778d182600ea13d7e18cc0885c27222c92'
+ ADOPTION_HISTORY = [{'upstream': '8495f1deb0a95dd6b9301822d8649ab76b217681', 'prior_owned_head': 'ffd09ef2d49fd7bd71d585e66fc78e3bc81ecf83', 'merge': '9121caa3685b18df08ff7b40a7ce73beb87cbc1a'}, {'upstream': 'f77cf60d3cea8f7f1db8db29cc027532b0cd3fce', 'prior_owned_head': '66b9d11f3a614fb626df318334ae8ecdc099e1a8', 'merge': 'da9d39bad42f9e0fd996866bf0cde5caa32fe2ef'}, {'upstream': '9584f9e7df09f638d9e0cb8930501d1660aa4b2f', 'prior_owned_head': '502cf5411d2c75c885be07cb76beea8dfffafe0b', 'merge': '74a46841faa1b645e820363a8322ba47b1e25e86'}, {'upstream': 'b86ae4568cef6d6226f4d170360bbb089debe3fb', 'prior_owned_head': 'd952505990a00083f379d6221b729b37ffec6838', 'merge': 'e98f9b2b7834ee37019e4eac2d81ba187c61a86b'}]
+ CACHE_HANDOFF_POLICY = {'id': 'H41', 'mode': 'coordinator-pull', 'vm_ship_cache': False}
+ PUBLISHED_COPY = {'old_head': '8f6e7e626cd5d2b6b444616a5a17294ff29cc605', 'published_import': 'de1d76d922d7ff42d3a07bc020b740f8ec9f0105', 'upstream': 'e6849d3bdf516099d20c33d3581d523449764018', 'restored_ledger': 'tests/h28-sol/non-vacuity/public-contracts.json'}
++H82_ADOPTION = {'delivered_head': 'b2654f236a98df53a4daa58c4aa3ed86edd672dd', 'prior_published': '70845978ab616a63b13d0dee8b31b28893ccf591', 'upstream': '7ae5607c9ecfff4078162115eaaaa48a1ff46eb0'}
+ EXPECTED_ENTERED_REVERT = {'scope': 'first-body-attempt-reverts', 'condition_checks': 1, 'attempted_body_turns': 1, 'completed_body_turns': 0, 'allocation_cost': 0, 'positive_allocating_capacity': False, 'arbitrary_termination': False, 'theorems': ['Solidity.Assurance.NonVacuityH28.entered_revert_source', 'Solidity.Assurance.NonVacuityH28.entered_revert_target', 'Solidity.Assurance.NonVacuityH28.entered_revert_input', 'Solidity.Assurance.NonVacuityH28.entered_revert_demand', 'Solidity.Assurance.NonVacuityH28.entered_revert_joint']}
+ EXPECTED_LOOP_BACKFILL = {'scope': 'zero-body-turn', 'condition_checks': 1, 'body_turns': 0, 'allocation_cost': 0, 'compiled_body_family': 'require flag', 'arbitrary_compiled_bodies': False, 'positive_allocating_capacity': False, 'arbitrary_termination': False, 'file': 'tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean', 'theorems': ['Solidity.Assurance.NonVacuityH28.false_loop_stmt_source', 'Solidity.Assurance.NonVacuityH28.skipped_loop_source', 'Solidity.Assurance.NonVacuityH28.skipped_body_reverts', 'Solidity.Assurance.NonVacuityH28.skipped_loop_input', 'Solidity.Assurance.NonVacuityH28.skipped_loop_code_nonempty', 'Solidity.Assurance.NonVacuityH28.zero_condition_target', 'Solidity.Assurance.NonVacuityH28.skipped_loop_target', 'Solidity.Assurance.NonVacuityH28.skipped_loop_demand', 'Solidity.Assurance.NonVacuityH28.skipped_loop_cost', 'Solidity.Assurance.NonVacuityH28.skipped_loop_checked', 'Solidity.Assurance.NonVacuityH28.skipped_loop_joint', 'Solidity.Assurance.NonVacuityH28.skipped_loop_joint_layout']}
+ EXPECTED_SOURCES = ['Solidity/Calculus/Callback.lean', 'Solidity/Calculus/CallbackHolds.lean', 'Solidity/Calculus/CallbackSound.lean', 'Solidity/Calculus/CallbackSound/Calls.lean', 'Solidity/Calculus/CorrectCallback.lean', 'Solidity/Calculus/Fml.lean', 'Solidity/Calculus/PremiseSound.lean', 'Solidity/Calculus/Proves.lean', 'Solidity/Calculus/ProvesSound.lean', 'Solidity/Calculus/RuleExists.lean', 'Solidity/Calculus/SolkeyFragment.lean', 'Solidity/Calculus/SolkeyProves.lean', 'Solidity/Calculus/Sound.lean', 'Solidity/Calculus/StmtSound.lean', 'Solidity/Calculus/Symex.lean', 'Solidity/Calculus/Taclet.lean', 'Solidity/Calculus/TailMode.lean', 'Solidity/Evm/Compile.lean', 'Solidity/Evm/Compiler.lean', 'Solidity/Evm/Correct.lean', 'Solidity/Evm/Sim.lean', 'Solidity/Semantics/Callback.lean', 'Solidity/Syntax/Scoped.lean', 'Solidity/Theorems.lean', 'docs/feature-work/roadmap-g04-restrictions.md']
+@@ -55,6 +56,18 @@ def resource_errors(meta,usage):
+  if not isinstance(usage.get('children_max_rss_kib'),int) or usage.get('children_max_rss_kib',0)<=0: errors.append('child maximum RSS missing')
+  return errors
+ 
++def registration_errors(before,after,pins):
++ errors=[]
++ prefix='tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:'
++ for key,value in before.items():
++  if key not in after or after[key]!=value: errors.append('H82 registration changed existing entry: '+key)
++ expected={prefix+n:sorted(a) for n,a in pins.items()}
++ for key,value in after.items():
++  if key not in before and (key not in expected or value!=expected[key]): errors.append('H82 registration added unexpected entry: '+key)
++ for key,value in expected.items():
++  if key not in after or sorted(after[key])!=value: errors.append('H82 owned registration missing or mismatched: '+key)
++ return errors
++
+ def review_input_hashes():
+  spec=importlib.util.spec_from_file_location('h28_review_inputs',HERE/'review-inputs.py')
+  module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+@@ -92,6 +105,7 @@ def validate(d,accept=False,evidence_dir=HERE):
+   need(d.get('integration_adoption')==dict(upstream=UPSTREAM_BASE,prior_owned_head=PRE_ADOPTION_HEAD,merge=ADOPTION_MERGE),'published integration adoption record differs')
+   need(d.get('integration_history')==ADOPTION_HISTORY,'historical integration adoption record differs')
+   need(d.get('published_copy')==PUBLISHED_COPY,'published copy record differs')
++  need(d.get('h82_adoption')==H82_ADOPTION,'H82 adoption record differs')
+   need(d.get('entered_revert_backfill')==EXPECTED_ENTERED_REVERT,'entered revert scope differs')
+   need(d.get('cache_handoff')==CACHE_HANDOFF_POLICY,'H41 cache handoff policy differs')
+   need(d.get('loop_backfill')==EXPECTED_LOOP_BACKFILL,'loop backfill scope or witness inventory differs')
+@@ -271,11 +285,15 @@ def validate(d,accept=False,evidence_dir=HERE):
+    # separately; upstream producer work is not reclassified as worker edits.
+    for anchor in [UPSTREAM_BASE,PRE_ADOPTION_HEAD,ADOPTION_MERGE]+[v for row in ADOPTION_HISTORY for v in row.values()]:
+     need(subprocess.run(['git','merge-base','--is-ancestor',anchor,PUBLISHED_COPY['old_head']],cwd=ROOT).returncode==0,'historical authorized adoption ancestry missing: '+anchor)
+-   for older,newer in [(BASE,ADOPTION_HISTORY[0]['prior_owned_head'])]+[(row['upstream'],following['prior_owned_head']) for row,following in zip(ADOPTION_HISTORY,ADOPTION_HISTORY[1:]+[dict(prior_owned_head=PRE_ADOPTION_HEAD)])]+[(UPSTREAM_BASE,PUBLISHED_COPY['old_head']),(PUBLISHED_COPY['upstream'],'HEAD')]:
++   for older,newer in [(BASE,ADOPTION_HISTORY[0]['prior_owned_head'])]+[(row['upstream'],following['prior_owned_head']) for row,following in zip(ADOPTION_HISTORY,ADOPTION_HISTORY[1:]+[dict(prior_owned_head=PRE_ADOPTION_HEAD)])]+[(UPSTREAM_BASE,PUBLISHED_COPY['old_head']),(PUBLISHED_COPY['upstream'],H82_ADOPTION['delivered_head']),(H82_ADOPTION['upstream'],'HEAD')]:
+     changed=subprocess.check_output(['git','diff','--name-only',older,newer],cwd=ROOT,text=True).splitlines()
+-    need(all(p.startswith(('Solidity/Assurance/NonVacuityH28/','tests/h28-sol/non-vacuity/')) or p=='docs/feature-work/h28-non-vacuity.md' for p in changed),'committed worker writes escaped exclusive scope')
++    need(all(p.startswith(('Solidity/Assurance/NonVacuityH28/','tests/h28-sol/non-vacuity/')) or p=='docs/feature-work/h28-non-vacuity.md' or (older==H82_ADOPTION['upstream'] and p=='scripts/g07-axiom-pins.json') for p in changed),'committed worker writes escaped exclusive scope')
+    for older,newer in [(PUBLISHED_COPY['published_import'],PUBLISHED_COPY['upstream']),(PUBLISHED_COPY['upstream'],'HEAD')]:
+     need(subprocess.run(['git','merge-base','--is-ancestor',older,newer],cwd=ROOT).returncode==0,'published copy ancestry missing: '+older)
++   for older,newer in [(H82_ADOPTION['delivered_head'],H82_ADOPTION['prior_published']),(H82_ADOPTION['prior_published'],H82_ADOPTION['upstream']),(H82_ADOPTION['upstream'],'HEAD')]:
++    need(subprocess.run(['git','merge-base','--is-ancestor',older,newer],cwd=ROOT).returncode==0,'H82 adoption ancestry missing: '+older)
++   registry_before=json.loads(subprocess.check_output(['git','show',H82_ADOPTION['upstream']+':scripts/g07-axiom-pins.json'],cwd=ROOT))
++   for issue in registration_errors(registry_before,json.loads((ROOT/'scripts/g07-axiom-pins.json').read_text()),pins): need(False,issue)
+    # Source-copy delivery does not carry the old worker's commit ancestry.
+    # Bind every previously reviewed input at both immutable trees; the sole
+    # pruned ledger is restored exactly, while new backfill is audited above.
+diff --git a/tests/h28-sol/non-vacuity/checker-tests.py b/tests/h28-sol/non-vacuity/checker-tests.py
+index f8ca1873b..3627ea2d1 100644
+--- a/tests/h28-sol/non-vacuity/checker-tests.py
++++ b/tests/h28-sol/non-vacuity/checker-tests.py
+@@ -230,4 +230,13 @@ class AccountingControls(unittest.TestCase):
+  def test_published_copy_anchor_mutation_rejected(self):
+   self.assertTrue(any('published copy record differs' in x for x in self.changed(lambda d:d['published_copy'].update(upstream='0'*40))))
+ 
++ def test_h82_adoption_anchor_rejected(self):
++  self.assertTrue(self.changed(lambda d:d['h82_adoption'].update(upstream='0'*40)))
++ def test_h82_registration_only_exact_additions(self):
++  prefix='tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean:'
++  self.assertEqual(check.registration_errors({'old':[]},{'old':[],prefix+'new':['propext']},{'new':['propext']}),[])
++  self.assertTrue(check.registration_errors({'old':[]},{'old':['propext'],prefix+'new':['propext']},{'new':['propext']}))
++  self.assertTrue(check.registration_errors({'old':[]},{'old':[],'foreign':[],prefix+'new':['propext']},{'new':['propext']}))
++  self.assertTrue(check.registration_errors({}, {prefix+'new':['Classical.choice']},{'new':['propext']}))
++
+ if __name__=='__main__': unittest.main()
+diff --git a/tests/h28-sol/non-vacuity/inventory.json b/tests/h28-sol/non-vacuity/inventory.json
+index a970188b8..822dda1b8 100644
+--- a/tests/h28-sol/non-vacuity/inventory.json
++++ b/tests/h28-sol/non-vacuity/inventory.json
+@@ -3198,5 +3198,10 @@
+       "Solidity.Assurance.NonVacuityH28.entered_revert_demand",
+       "Solidity.Assurance.NonVacuityH28.entered_revert_joint"
+     ]
++  },
++  "h82_adoption": {
++    "delivered_head": "b2654f236a98df53a4daa58c4aa3ed86edd672dd",
++    "prior_published": "70845978ab616a63b13d0dee8b31b28893ccf591",
++    "upstream": "7ae5607c9ecfff4078162115eaaaa48a1ff46eb0"
+   }
+ }
+diff --git a/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean b/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean
+index 9f2797cd8..ffd919a29 100644
+--- a/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean
++++ b/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean
+@@ -239,4 +239,81 @@ theorem entered_revert_joint (a : LoopAnn C MemCtx) :
+   exact ⟨mc, base, ht, input, entered_revert_source C a _, entered_revert_target C a mc,
+     Main.compiler_checked (enteredRevertCompiled C a) input⟩
+ 
++/-- One Bool cell controls a genuinely completed, nonallocating loop turn. -/
++abbrev TurnCtx : Ctx := .val .bool :: MemCtx
++
++def turnBody : Prog C TurnCtx TurnCtx :=
++  .cons (.assignLocal .here (.simple (.bool false))) .nil
++
++def turnProgram (a : LoopAnn C TurnCtx) : Prog C MemCtx TurnCtx :=
++  .cons (.declLocal .bool (.user "flag") (some (.simple (.bool true))))
++    (.cons (.loop a (.simple (.local .here)) (turnBody C)) .nil)
++
++def turnResult (a : LoopAnn C TurnCtx) :
++    Evm.Memory.Loops.CompiledProg 1 (liveLayout C) (turnProgram C a) :=
++  (Evm.Memory.Loops.compileProg 1 (liveLayout C) (turnProgram C a)).get (by rfl)
++
++def turnCompiled (a : LoopAnn C TurnCtx) :
++    Evm.Compiler.Compilation 1 (liveLayout C) (turnProgram C a) :=
++  .memoryLoops (turnResult C a)
++
++theorem turn_loop_source (a : LoopAnn C TurnCtx) (σ : State C MemCtx) :
++    Stmt.run (σ.push true) (.loop a (.simple (.local .here)) (turnBody C)) =
++      .ok ⟨(σ.push true).setLocal .here false, List.prefix_refl _⟩ := by
++  rw [Stmt.run_loop]
++  exact TLoop.run_of_iterN (n := 2) rfl
++
++theorem turn_program_source (a : LoopAnn C TurnCtx) (σ : State C MemCtx) :
++    Prog.run σ (turnProgram C a) =
++      .ok ⟨(σ.push true).setLocal .here false, List.prefix_refl _⟩ := by
++  rw [turnProgram, Prog.run_cons_ok (show Stmt.run σ
++    (.declLocal .bool (.user "flag") (some (.simple (.bool true)))) =
++      .ok ⟨σ.push true, List.prefix_refl _⟩ from rfl)]
++  rw [Prog.run_cons_ok (turn_loop_source C a σ)]
++  rfl
++
++/-- This prefix uses next, rather than the zero-turn start constructor alone. -/
++theorem turn_completed_prefix (σ : State C MemCtx) :
++    Evm.Memory.LoopPrefix (.simple (.local (.here : Idx TurnCtx (.val .bool))))
++      (turnBody C) (σ.push true)
++      ⟨(σ.push true).setLocal .here false, List.prefix_refl _⟩ 0 := by
++  exact Evm.Memory.LoopPrefix.next
++    (o := ⟨σ.push true, List.prefix_refl _⟩)
++    (o' := ⟨(σ.push true).setLocal .here false, List.prefix_refl _⟩) .start rfl rfl
++
++theorem turn_input (a : LoopAnn C TurnCtx)
++    {σ : State C MemCtx} {base : Nat → Fin Evm.W} {mc : Evm.Machine}
++    (h : Evm.Memory.Objects.StateRepr 1 1 128 (liveLayout C) σ base mc) :
++    (turnCompiled C a).Input 1 128 base σ mc := by
++  change Evm.Memory.StateRepr 1 1 128 (liveLayout C) σ base mc ∧
++    1 + (turnResult C a).cert.need ≤ 128 ∧
++      Evm.Memory.Loops.Room (turnResult C a).cert 128 σ base mc
++  refine ⟨h.legacy, ?_, ?_⟩
++  · change 3 ≤ 128
++    decide +kernel
++  · exact Evm.Memory.Loops.room_nonallocating (turnResult C a).cert
++      (show Evm.Prog.allocates (turnProgram C a) = false from rfl) σ base mc
++
++def turnEntry (mc : Evm.Machine) : Evm.Machine :=
++  Evm.Memory.writeMachine mc 2 (.val (Evm.wmod 1))
++
++def turnExit (mc : Evm.Machine) : Evm.Machine :=
++  Evm.Memory.writeMachine (turnEntry mc) 2 (.val (Evm.wmod 0))
++
++/-- Independent VM evaluation checks true, executes the body, then checks false. -/
++theorem turn_target (a : LoopAnn C TurnCtx) (mc : Evm.Machine) :
++    Evm.run (turnCompiled C a).code mc = .ok (turnExit mc) 0 := by
++  have ht : Evm.loopRun
++      (fun m => Evm.exec [.mload 2] 0 m)
++      (fun m => Evm.exec [.push (.val (Evm.wmod 0)), .mstore 2] 0 m)
++      (turnEntry mc) = .ok (turnExit mc) 0 :=
++    Evm.loopRun_of_iterN (n := 2) rfl
++  with_unfolding_all
++    change ((Evm.loopRun
++      (fun m => Evm.exec [.mload 2] 0 m)
++      (fun m => Evm.exec [.push (.val (Evm.wmod 0)), .mstore 2] 0 m)
++      (turnEntry mc)).bind (fun m k => Evm.exec [] k m)) = _
++  rw [ht]
++  rfl
++
+ end Solidity.Assurance.NonVacuityH28
+diff --git a/tests/h28-sol/non-vacuity/prepare-cache.py b/tests/h28-sol/non-vacuity/prepare-cache.py
+index 44a4f45d7..e5f38287c 100644
+--- a/tests/h28-sol/non-vacuity/prepare-cache.py
++++ b/tests/h28-sol/non-vacuity/prepare-cache.py
+@@ -40,7 +40,7 @@ for row in registry:
+   dependencies[dependency]=dict(path=str(actual.resolve()),sha256=sha(actual),bytes=actual.stat().st_size)
+  modules.append(dict(module=name,source=row['file'],source_sha256=sha(source),cache_file=relative,olean_sha256=sha(target),imports=imports,kernel_command=record['command'],kernel_seconds=record['elapsed_seconds'],kernel_fingerprint=record['fingerprint'],artifact_types=['olean'],lake_trace_generated=False))
+ axioms=json.loads((HERE/'axiom-pins.json').read_text())['theorems'];assert len(axioms)==431 and all(set(x)<={'propext','Classical.choice','Quot.sound'} for x in axioms.values())
+-manifest=dict(adopted_upstream=json.loads((HERE/'inventory.json').read_text())['published_copy']['upstream'],format='h28-private-kernel-cache-v1',head=head,base='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5',branch=subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip(),repository=str(ROOT),lean=versions[0],lake=versions[1],version_evidence_sha256=sha(version_log),generator_sha256=sha(pathlib.Path(__file__)),kernel_metadata_sha256=sha(OUT/'evidence/kernel-all.json'),kernel_log_sha256=sha(log),reviewed_inputs_sha256=sha(OUT/'reviewed-inputs.json'),axiom_manifest_sha256=sha(HERE/'axiom-pins.json'),modules=modules,direct_baseline_dependency_oleans=dependencies,files=files,boundary='Exactly26 fresh private kernel oleans, not stale .lake/build H28 outputs. No .trace/.ilean or input mappings fabricated. Receiver must verify exact frozen baseline/toolchain and dependency digests before use. Changed baseline requires rechecking. H41 coordinator-pull pack only; worker must not invoke ship-cache.sh. Remote transfer receipt is not fabricated.')
++manifest=dict(adopted_upstream=json.loads((HERE/'inventory.json').read_text())['h82_adoption']['upstream'],format='h28-private-kernel-cache-v1',head=head,base='6f3eedf0788ee1f8a3bcf230558c712ecdca04d5',branch=subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip(),repository=str(ROOT),lean=versions[0],lake=versions[1],version_evidence_sha256=sha(version_log),generator_sha256=sha(pathlib.Path(__file__)),kernel_metadata_sha256=sha(OUT/'evidence/kernel-all.json'),kernel_log_sha256=sha(log),reviewed_inputs_sha256=sha(OUT/'reviewed-inputs.json'),axiom_manifest_sha256=sha(HERE/'axiom-pins.json'),modules=modules,direct_baseline_dependency_oleans=dependencies,files=files,boundary='Exactly26 fresh private kernel oleans, not stale .lake/build H28 outputs. No .trace/.ilean or input mappings fabricated. Receiver must verify exact frozen baseline/toolchain and dependency digests before use. Changed baseline requires rechecking. H41 coordinator-pull pack only; worker must not invoke ship-cache.sh. Remote transfer receipt is not fabricated.')
+ (payload/'cache-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n');files['cache-manifest.json']=sha(payload/'cache-manifest.json')
+ archive=cache/'h28-owned-kernel-cache.tar.zst';pack=['tar','--use-compress-program=zstd -T1 -3 -q','-cf',str(archive),'-C',str(payload),'.'];subprocess.run(pack,check=True,cwd=ROOT)
+ with tempfile.TemporaryDirectory(dir=cache) as directory:
+diff --git a/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs b/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs
+index fab17abdb..15a9843f3 100644
+--- a/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs
++++ b/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs
+@@ -11,7 +11,7 @@ if(!out.startsWith(here+'/'))throw Error('output outside owned scope');
+ const sha=x=>createHash('sha256').update(x).digest('hex');
+ const shared='scripts/g07-axiom-pins.json',pinFile='tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/Pins.lean';
+ const original=readFileSync(join(root,shared));
+-if(!original.equals(execFileSync('git',['show','e6849d3bdf516099d20c33d3581d523449764018:'+shared],{cwd:root,maxBuffer:original.length+65536})))throw Error('shared registry differs from authorized published adoption');
++if(!original.equals(execFileSync('git',['show','7ae5607c9ecfff4078162115eaaaa48a1ff46eb0:'+shared],{cwd:root,maxBuffer:original.length+65536})))throw Error('shared registry differs from authorized published adoption');
+ const {collect,compare,STANDARD}=await import(pathToFileURL(join(root,'scripts/check-axiom-pins.mjs')));
+ const recorded=JSON.parse(original),found=collect(root),before=compare(found,recorded);
+ if(before.errors.length)throw Error(JSON.stringify(before.errors));
+@@ -22,7 +22,7 @@ for(const [key,pin] of found){
+  if(pin.file!==pinFile){
+   if(pin.file.startsWith('tests/h28-sol/non-vacuity/'))throw Error('unexpected owned pin:'+key);
+   const source=readFileSync(join(root,pin.file));
+-  if(!source.equals(execFileSync('git',['show','e6849d3bdf516099d20c33d3581d523449764018:'+pin.file],{cwd:root,maxBuffer:source.length+65536})))throw Error('external source differs from adopted master:'+key);
++  if(!source.equals(execFileSync('git',['show','7ae5607c9ecfff4078162115eaaaa48a1ff46eb0:'+pin.file],{cwd:root,maxBuffer:source.length+65536})))throw Error('external source differs from adopted master:'+key);
+   external[key]={axioms:pin.axioms,source_sha256:sha(source)};
+   continue;
+  }
+@@ -31,18 +31,19 @@ for(const [key,pin] of found){
+  if(pin.axioms.some(x=>!STANDARD.includes(x)))throw Error('nonstandard axiom');
+  delta[key]=pin.axioms;
+ }
+-if(Object.keys(delta).length!==431)throw Error('expected exact431 owned pin delta');
++const expectedDelta=Object.keys(local).filter(n=>!Object.hasOwn(recorded,pinFile+':'+n));
++if(Object.keys(delta).length!==expectedDelta.length)throw Error('expected exact431 owned pin delta');
+ const merged={...recorded,...delta};
+ for(const [key,value] of Object.entries(recorded))if(JSON.stringify(value)!==JSON.stringify(merged[key]))throw Error('old record changed');
+ const after=compare(found,merged),baselineFound=new Map(found);
+ for(const key of Object.keys(delta))baselineFound.delete(key);
+ const baselineDrift=compare(baselineFound,recorded);
+-if(after.errors.length||baselineDrift.errors.length||JSON.stringify(after.notes)!==JSON.stringify(baselineDrift.notes)||before.notes.length-after.notes.length!==431)throw Error('candidate changed external drift or failed to resolve exact owned delta');
++if(after.errors.length||baselineDrift.errors.length||JSON.stringify(after.notes)!==JSON.stringify(baselineDrift.notes)||before.notes.length-after.notes.length!==expectedDelta.length)throw Error('candidate changed external drift or failed to resolve exact owned delta');
+ const candidate=JSON.stringify(Object.fromEntries(Object.entries(merged).sort(([a],[b])=>a.localeCompare(b))),null,1)+'\n';
+ mkdirSync(out,{recursive:true});
+ const save=(name,value)=>writeFileSync(join(out,name),value,{flag:'wx'});
+ save('shared-registry.candidate.json',candidate);
+ save('pin-delta.json',JSON.stringify(delta,null,2)+'\n');
+ save('external-unregistered.json',JSON.stringify(external,null,2)+'\n');
+-save('comparison.json',JSON.stringify({command:['node',self,out],generator_sha256:sha(readFileSync(self)),source_head:execFileSync('git',['rev-parse','HEAD'],{cwd:root}).toString().trim(),base:'6f3eedf0788ee1f8a3bcf230558c712ecdca04d5',registry_base:'e6849d3bdf516099d20c33d3581d523449764018',shared_inventory:shared,shared_inventory_sha256:sha(original),source_pins:pinFile,source_pins_sha256:sha(readFileSync(join(root,pinFile))),old_count:Object.keys(recorded).length,added_count:Object.keys(delta).length,candidate_count:Object.keys(merged).length,old_entries_unchanged:true,external_unregistered_count:Object.keys(external).length,before,after,candidate_sha256:sha(candidate),boundary:'UNAPPLIED proposal only. Global full gate remains failed until authorized registration. No shared file, checker, theorem, premise, exclusion, axiom set, observation or budget changed.'},null,2)+'\n');
+-console.log('PROPOSAL_ONLY: preserved '+Object.keys(recorded).length+' old entries; exact431 owned additions; candidate comparison0errors/'+after.notes.length+' external notes; shared registry UNCHANGED');
++save('comparison.json',JSON.stringify({command:['node',self,out],generator_sha256:sha(readFileSync(self)),source_head:execFileSync('git',['rev-parse','HEAD'],{cwd:root}).toString().trim(),base:'6f3eedf0788ee1f8a3bcf230558c712ecdca04d5',registry_base:'7ae5607c9ecfff4078162115eaaaa48a1ff46eb0',shared_inventory:shared,shared_inventory_sha256:sha(original),source_pins:pinFile,source_pins_sha256:sha(readFileSync(join(root,pinFile))),old_count:Object.keys(recorded).length,added_count:Object.keys(delta).length,candidate_count:Object.keys(merged).length,old_entries_unchanged:true,external_unregistered_count:Object.keys(external).length,before,after,candidate_sha256:sha(candidate),boundary:'UNAPPLIED proposal only. Global full gate remains failed until authorized registration. No shared file, checker, theorem, premise, exclusion, axiom set, observation or budget changed.'},null,2)+'\n');
++console.log('PROPOSAL_ONLY: preserved '+Object.keys(recorded).length+' old entries; exact'+expectedDelta.length+' owned additions; candidate comparison0errors/'+after.notes.length+' external notes; shared registry UNCHANGED');

@@ -1,0 +1,98 @@
+{
+  "working_base": "7ae5607c9ecfff4078162115eaaaa48a1ff46eb0",
+  "unfinished_patch_sha256": "709eed9e5d526f6561e4ebcaee438f4dc6013d5153a4db44054c6d2835a58822",
+  "drafts": [
+    {
+      "path": "tests/h28-sol/non-vacuity/check.py",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/check.py.wip",
+      "sha256": "7b891fc24347c27d741d36423ef5d0b7edc4e44479ef86352556fdf6734e96dd"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/checker-tests.py",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/checker-tests.py.wip",
+      "sha256": "23a4bc067b026667bf250809a271379edba446b6a1be6e920f8ed2657de8d5ca"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/inventory.json",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/inventory.json.wip",
+      "sha256": "301c429b88dd3e95c251fb46421220ac55656d6a7e1fe29241813f0ca45aa14f"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/lean/Solidity/Assurance/NonVacuityH28/LoopContracts.lean.wip",
+      "sha256": "0a1c947b23bba1292cbd0bb518b42306556b0f3b873e5d7d763518e49ec2a8cf"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/prepare-cache.py",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/prepare-cache.py.wip",
+      "sha256": "e8128378982443fcf13fb79504261c40f3f411ba93b784c28f67ae06fc0d771b"
+    },
+    {
+      "path": "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+      "draft": "tests/h28-sol/non-vacuity/retirement-h82/drafts/tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs.wip",
+      "sha256": "78eed8ffb9e146aef27bd3fea7f059e98e4520fb52ac6c7e9b20ccb7d31063e7"
+    }
+  ],
+  "raw_evidence": [
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-01.json",
+      "sha256": "e4db0071492e080a489e5537b34e9d6851e8a4022f1e08f3ed550d878a171568",
+      "bytes": 9773
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-01.log",
+      "sha256": "c27668f9273d4c79b98f08213e323c68bca82e91d7942004f9091799888c2cc3",
+      "bytes": 2721
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-01.rusage.json",
+      "sha256": "c0c3f15fddb41b5cc22d87dd2a8d360967ea84d3effbb9ff02846aa203bf0297",
+      "bytes": 417
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-02.json",
+      "sha256": "62727ea7e36dbb7a389b2d1c94ddafbf6755c2ad8bf27aa8f2c1aaf1dd16815f",
+      "bytes": 11189
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-02.log",
+      "sha256": "9db4f89c940aa06f5d0771fbf217c3b1344bf131fe1c0725679b97a798327996",
+      "bytes": 1629
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-02.rusage.json",
+      "sha256": "03589d03976e4955e9997bbdc882bdd9aa12c803dac5d891b82a3cdf4c75d7ac",
+      "bytes": 429
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-03.json",
+      "sha256": "1f7ebcc58ece1028058a9b56658b42fdc6871276791aabb21fe29dedde1cccdd",
+      "bytes": 11180
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-03.log",
+      "sha256": "afbea873f6428bb125881a6beb11d5dc04d3ca7529147c31f1a813decc947af2",
+      "bytes": 2095
+    },
+    {
+      "path": "/workspace/solidity-lean/tests/h28-sol/non-vacuity/sealed/retirement-h82-final/evidence/h82-turn-03.rusage.json",
+      "sha256": "7b5acd8ec364de95bbf937a5eba9c84f91cc7a0ab93cbc1c67b3df47ac7a3df0",
+      "bytes": 419
+    }
+  ],
+  "restoration": "Every modified live tracked file restored byte-exact to working_base only after its complete WIP copy and binary diff were preserved. No work discarded.",
+  "pause_request": {
+    "requested": "PAUSED",
+    "tool": "mcp__codex_apps__codex_goals_stop_goal",
+    "attempted_argument": {
+      "outcome": "paused"
+    },
+    "failure": "Parameters failed connector schema validation: outcome [enum]: Value 'paused' not in allowed enum",
+    "available_outcomes": [
+      "complete",
+      "blocked"
+    ],
+    "goal_complete_marked": false,
+    "implementation_stopped_by_user": true
+  }
+}
