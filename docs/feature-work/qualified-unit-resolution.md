@@ -1,11 +1,12 @@
 # Qualified multi-unit declaration resolution (SOL-QN / G12)
 
-Status: active and incomplete. The signature-aware resolver now agrees with
-all 17 direct compiler queries, including the two inherited-overload cases.
-Legacy resolver observations remain preserved. Independent C3/bound and
-normalization adequacy, complete supported-type coverage, central registration
-and final full validation remain open. No G13/G15, cross-unit typing,
-Solidity-wide correctness, source-to-EVM or RUNTIME_GATE_PASS claim is made.
+Status: moved to a Claude VM (moved4, 2026-11-06); see "Moved4 Claude-VM
+checkpoint" at the end for the current state. The final target relation,
+the independent C3 judgment with the `idUniverse` bound, target
+completeness and supported-type adequacy are proved, each with the
+boundaries stated there. The signature-aware resolver agrees with all 17
+direct compiler queries. No G13/G15, cross-unit typing, Solidity-wide
+correctness, source-to-EVM or RUNTIME_GATE_PASS claim is made.
 
 ## Checkout, inputs and protected interfaces
 
@@ -88,10 +89,10 @@ separate. dependency-20261104.json records commands and review findings.
 
 | Item | Status | Remaining |
 |---|---|---|
-| Inventory and independent relation | partial | Complete structural inventory and universal reference/owner proofs; final target relation still needs inherited-overload behavior |
-| Arbitrary finite qualified lookup | partial | Signature-aware integration and 17 direct queries pass; independent C3/bound and normalization adequacy remain |
-| Soundness/completeness and preservation | partial | Candidate-relation equivalence, identities, no-clash and actual owner-body layout proved; full target completeness awaits integration |
-| Fixtures, acceptance and handoff | partial | All 112 source constructor rows, 15 main fixtures, seven supplementary probes and 17 queries pass; supported-type adequacy and final registration/runtime gates remain |
+| Inventory and independent relation | done (moved4) | `Target.Target` is the final relation, including inherited overloads; its overload hierarchy is the independent C3 `Linearization.Linear`. Executable leaves (`normalize`, `hides`, `overload`, `group`) are stated in its docstring. |
+| Arbitrary finite qualified lookup | done (moved4) | `Linearization.order_iff` covers C3 existence and the `idUniverse` bound, with no premise. Precedence is `Linear.precedence` and acyclicity is `Linear.acyclic`. Adequacy against Source elaboration is `NormalizationAdequacy.types_adequate`. |
+| Soundness/completeness and preservation | done (moved4) | `Target.target_iff` (premise-free), plus `Target.identity`, `Target.noClash` and `refused_no_target`. |
+| Fixtures, acceptance and handoff | see moved4 checkpoint | The supported-type adequacy theorems are `types_sound`, `types_complete` and `types_adequate`. A cross-unit control discharges their premises. The gate outcomes are listed in the moved4 checkpoint. |
 
 H27 authorizes the owned normalization repair. Required resolver integration
 and full acceptance remain outstanding. The separately assigned G25 packet
@@ -693,3 +694,82 @@ acceptance remain pending. Frozen Source transitive G0 remains outside the
 owned repair; no RUNTIME_GATE_PASS or full-lane completion is claimed.
 The existing persistent goal remains incomplete; get_goal/per-file Lean MCP
 are unavailable, and no goal was created/reset. Separate G25 work is preserved.
+
+
+## Moved4 Claude-VM checkpoint (2026-11-06)
+
+The lane moved from the Codex VM to a Claude VM. Branch
+`cloud/moved4-20261105/qualified-units` merges the move branch
+`cloud/qualified-units-move` (f94495e3) and current origin/master. The lane
+base is aec9adf1ad8666a7e591e42a537069a93dc858cb.
+
+None of the following were reachable from this VM, and none are cited as
+evidence here:
+- the Codex evidence directory;
+- the H44 bulk bundle (`bulk-evidence-H44.json` indexes it);
+- the Codex Docker runner.
+
+All validation below was re-run on this VM.
+
+### New modules
+
+| Module | Content |
+|---|---|
+| `Linearization.lean` | Fuel-free C3 judgment `Linear`, built from `Routes`/`Bases` and `MergeSpecification.Merge` (see note 1). `order_iff`: `SignatureMembers.order` is sound and complete for `Linear` with no premise, so the `idUniverse` depth bound and the `bound * bound + 2` merge budget never refuse a valid hierarchy. Also `Linear.unique`, `Linear.bounded` (duplicate-free linearizations; cycles have no derivation), `Linear.members`, `Merge.sublist` (C3 monotonicity), `Linear.precedence` (base linearizations and the reversed local base list are sublists) and `Linear.acyclic`. |
+| `Target.lean` | The final relation `Target` (see note 2). `target_iff`: `SignatureResolution.resolve` is sound and complete for it, with no premise. Also `identity`, `noClash` and `refused_no_target`. |
+| `NormalizationAdequacy.lean` | `erase` keeps only the Source `DeclName`. `types_sound` holds for every constructor. `types_complete` and `types_adequate` hold on every supported signature category (see note 3). `fields_refused` covers struct members and variable declarations. |
+| `TargetControls.lean` | Kernel controls: the diamond linearization and its local precedence; no linearization for a self-cycle or a missing base; both inherited-overload targets; a multi-hop target. Refusals: missing, ambiguous, local shadow, failed signature, visible barrier. Adequacy: a function type, refused struct members, and `adequacy_instance` (see note 4). |
+
+Notes:
+1. `Linear` never mentions `linearize`, `mergeOwners`, `bases` or `order`. It shares only `basePaths` with the executable code.
+2. `Target` copies `SignatureResolution.Resolved`, with the hierarchy replaced by `Linear` and readiness replaced by `Normalized`. Its docstring names the trusted executable leaves: `normalize`, `hides`, `overload` and `group`.
+3. The premises `LeafSound`/`LeafComplete` range only over `references s`, the paths written in the signature syntax.
+4. `adequacy_instance` discharges those premises for a program where unit A imports B, and both B and an unimported C declare enum `T`.
+
+### Proof boundaries
+
+These follow from the finder and skeptic reviews.
+- `target_iff` is completeness against an implementation-shaped relation. Only its hierarchy part is independent. It is not independent Solidity semantics.
+- `Target`'s plain branch and global barrier use `InheritedMember`. That is reachability along the syntactic base graph, and it does not require a valid linearization. Only the overload branch requires `Linear`.
+- C3 precedence is proved as monotonicity. Agreement with solc's exact order rests on the deterministic first-head rule and on pinned fixtures. There is no compiler differential of `Linear`.
+- Normalization adequacy is relative to Source `Syn.tys`. Where Source `userTy` cannot follow a written path, the localized premises fail for that syntax, and the theorem says nothing about it. This covers unit aliases, paths with more than one qualifier, and homonyms visible in its flat environment.
+- Adequacy is stated for `types`, the parameter elaborator that `normalize` uses. It is not stated for `ownerScope`/`parts`. `Source.arrayLen` folding is reused.
+- No G13/G14/G15, source-to-EVM or RUNTIME_GATE_PASS claim is made.
+
+### Queue items 5-8 of the move handoff
+
+- check-trust passes with 0 findings. The two `References.lean` `@[implemented_by]` sites are inventoried, in `tests/trust-inventory.json` near lines 1388 and 1393.
+- Registration: all 28 lane modules are in the generated `Solidity.lean` root (`register.sh --check` passes). Each has a module-map row; this checkpoint adds rows for 4 new and 6 previously missing modules to `docs/module-map/frontend.d/qualified-units.md`. The 12 pending central registration proposals are closed.
+- `scripts/coord-tools/fragments.sh` also regenerated master's stale combined `docs/module-map/v08-adapters.md`, which failed `fragments.sh --check` on master.
+- `check-doc-paths.sh` fails on master before this lane. `docs/feature-work/after-roadmap-va1.md` cites a Bridge Mathlib cache path. This lane does not own or change that file.
+
+### Claude-VM gate driver
+
+`tests/sol-qualified-units/claude-gates.py` replaces the Docker runner here. On this VM the shell refuses `lean` and `lake build`; Lean evidence comes from language-server elaboration of generated probe files in `tests/sol-qualified-units/claude-evidence/`.
+- `probe M` writes the probe, deletes any old output and records source digests.
+- The queries and declarations probes write their own `.out` files through `IO.FS.writeFile`.
+- `record M F` requires the saved language-server diagnostics `F` to contain no errors. It also requires the sources to be unchanged since `probe`, and the output to be newer than its input.
+- The axioms log is re-derived from the saved diagnostics by the checker (`--claude-vm`).
+- Build and repository receipts come from `scripts/coord-tools/gate.sh full`'s own PASS/FAIL lines and per-gate logs.
+- KeySort runs the built `solkeycheck` against the vendored solkey taclets.
+- The pins grew without changing any old entry:
+  - 1857 reflected declarations; all 1575 previous entries are unchanged.
+  - 414 axiom pins; all 353 previous ones are unchanged.
+  - New theorems use only `propext`, `Quot.sound` and `Classical.choice`, or no axiom at all.
+  - The three compiler-generated `_unsafe_rec` helpers of `erase`, `eraseList` and `Supported` are listed in `partial-helpers.json`.
+
+The compiler differentials ran on npm `solc@0.8.38` `soljson.js`.
+- SHA-256 `0b15fcb2…`; tarball integrity `sha512-DsDLa7uA…`.
+- binaries.soliditylang.org is refused by this VM's proxy, so the pinned `6c74ffba…` artifact was unavailable.
+- Both report `0.8.38+commit.1835d247.Emscripten.clang`, but they are not byte-identical.
+- The accepted set is pinned in the checker's code, and each report records the artifact that actually ran.
+
+Limitations of this driver, from the tooling reviews:
+- The diagnostics JSON carries no language-server session binding.
+- Sources are hashed at probe time and at record time, not inside the elaboration.
+- `minimum_available_bytes` is null: there is no monitored run. A point-in-time `MemAvailable` is recorded separately.
+- `private theorem`s are outside the axiom probe, as on the Codex runner. Their transitive use is covered by the public theorems.
+
+### Gates at this checkpoint
+
+GATES_PENDING
