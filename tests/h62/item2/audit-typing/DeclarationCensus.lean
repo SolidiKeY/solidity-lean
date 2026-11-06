@@ -79,3 +79,25 @@ elab "#audit_witness " original:ident " via " witness:ident : command => do
     unless ← isDefEq expected witnessInfo.type do
       throwError "premise mismatch for {original.getId}"
     logInfo m!"AUDIT-WITNESS {original.getId} via {witness.getId}: exact premise bundle"
+
+/-- Preserve every original input, including proof binders and dependencies,
+in one existential telescope. Restricted to the reviewed default statements. -/
+elab "#audit_full_inputs " original:ident " via " witness:ident : command => do
+  liftTermElabM do
+    let names := [`Solidity.SVal.dfltBelow_irrel, `Solidity.SVal.dfltBelow_dflt,
+      `Solidity.SFields.dfltBelow_eq, `Solidity.SVal.dflt_all,
+      `Solidity.SFields.dflt_all, `Solidity.SVal.dfltBelow_all]
+    unless names.contains original.getId do
+      throwError "unreviewed full-input signature"
+    let originalInfo ← getConstInfo original.getId
+    let witnessInfo ← getConstInfo witness.getId
+    unless originalInfo.levelParams.isEmpty do
+      throwError "unreviewed universe parameters"
+    let expected ← forallTelescope originalInfo.type fun xs _ => do
+      let mut bundle := mkConst ``True
+      for x in xs.toList.reverse do
+        bundle ← mkAppM ``Exists #[← mkLambdaFVars #[x] bundle]
+      pure bundle
+    unless ← isDefEq expected witnessInfo.type do
+      throwError "full-input mismatch for {original.getId}"
+    logInfo m!"AUDIT-FULL-INPUTS {original.getId} via {witness.getId}: exact input telescope"

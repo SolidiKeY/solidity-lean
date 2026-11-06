@@ -45,7 +45,7 @@ def main():
             assert hashlib.sha256(artifact.read_bytes()).hexdigest() == record["olean_sha256"]
         env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(EVIDENCE/"olean"))
         results = []
-        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean"]:
+        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean"]:
             current = int(Path("/sys/fs/cgroup/memory.current").read_text())
             cap = int(Path("/sys/fs/cgroup/memory.max").read_text())
             assert cap-current >= 4*1024**3, "Insufficient 4 GiB reserve"
@@ -112,7 +112,14 @@ def main():
         assert len(values_census) == len({r["name"] for r in values_census})
         assert set(expected_values) <= {r["name"] for r in values_census}
         (EVIDENCE/"values-census.json").write_text(json.dumps(values_census, sort_keys=True, indent=2)+"\n")
-        print("23 Closure and 9 Values-list witnesses checked; full assignment pending")
+        defaults_log = (EVIDENCE/"ValuesDefaultsFidelity-checked.log").read_text()
+        default_checked = re.findall(r"^AUDIT-FULL-INPUTS (\S+) via", defaults_log, re.M)
+        expected_defaults = {"Solidity."+n for n in ["SVal.dfltBelow_irrel", "SVal.dfltBelow_dflt",
+            "SFields.dfltBelow_eq", "SVal.dflt_all", "SFields.dflt_all", "SVal.dfltBelow_all"]}
+        assert len(default_checked) == len(set(default_checked)) == 6
+        assert set(default_checked) == expected_defaults
+        assert "sorryAx" not in defaults_log
+        print("38 source witnesses checked; full assignment pending")
 
 if __name__ == "__main__":
     main()
