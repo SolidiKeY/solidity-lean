@@ -1,0 +1,80 @@
+[
+  {
+    "id": "identifiers",
+    "path": "tests/solc/Shadowing.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "overrideDeclarations",
+    "path": "tests/solc/EntryPointsLeft.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functions",
+    "path": "tests/solc/DeclarationMetadata.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "receiveFunction",
+    "path": "tests/solc/EntryPointsLeft.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "fallbackFunction",
+    "path": "tests/solc/EntryPointsLeft.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "publicGetters",
+    "path": "tests/solc/EntryPointsLeft.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "blocks",
+    "path": "tests/solc/Shadowing.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "whileStatement",
+    "path": "tests/solc/QuantifiedDiamond.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "forStatement",
+    "path": "tests/solc/QuantifiedDiamond.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionSelector",
+    "path": "tests/solc/DeclarationMetadata.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "functionAddress",
+    "path": "tests/solc/DeclarationMetadata.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "panicCodes",
+    "path": "tests/solc/SelfPowerData.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  },
+  {
+    "id": "revertPayloads",
+    "path": "tests/solc/SelfPowerData.sol",
+    "trackedAtBase": true,
+    "verdict": "owner-review-required"
+  }
+]

@@ -527,3 +527,11 @@ Read-only finder and skeptic subagents, no Lean server.
 - **Remaining for G45.03:** the execution meaning of the expansion;
   `break`/`continue`/`return` with an environment of exit labels; a block
   type whose `code` excludes jump opcodes and carries a stack effect.
+
+## Label execution development checkpoint
+
+The new [label execution component](backend-label-exec.md) proves fetched
+branch packets and actual assembled loop header/backedge transfers. It is a
+gasless numeric/control slice, not the whole-block/source execution theorem
+still listed above. See that page for scope and the
+remaining composition work.

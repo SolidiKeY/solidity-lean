@@ -1,0 +1,27 @@
+{
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.addSum": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.buildLen": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.evenFour": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.payDownDirect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Recursion.lean:Solidity.Examples.Tactics.Recursion.payDownNoPanic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

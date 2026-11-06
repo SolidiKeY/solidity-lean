@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.checked_controls": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.nontrivial_positive": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.override_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/P8/SourceMetadataObligations.lean:Solidity.Lowering.P8.SourceMetadataObligations.strict_before_refusal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

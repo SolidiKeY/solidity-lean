@@ -144,7 +144,7 @@ are. -/
 
 private def retsφ : Fml SE [] :=
   .all (.user "x") .uint (.modal .box
-    (.cons (.call "h" .nil (.rets ((Binders.nil.snoc .uint (.user "a")).snoc .uint (.user "b"))) .nil)
+    (.cons (.call "h" .nil (.rets ((RetBinders.nil.snoc .uint (.user "a")).snoc .uint (.user "b"))) .nil)
       (.cons (.declLocal .uint (.user "y") (some (.simple (.local (.there .here))))) .nil))
     .nil .tt)
 

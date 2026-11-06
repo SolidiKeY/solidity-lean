@@ -1,25 +1,24 @@
 {
  "version": 1,
- "lane": "CF1 abi-entry-decoding",
- "batch": "relocated-20261031",
- "branch": "cloud/relocated-20261031/abi-entry-decoding",
- "baseCommit": "aaa9db5ce1d62f4c8ae3bb9e0778ddf0e727ee07",
- "recordedAt": "2026-11-01T05:05:59Z",
+ "lane": "FU2-C fu2-calldata-access (after column rerun; before kept from CF1)",
+ "batch": "fu2-20261102",
+ "branch": "cloud/fu2-20261102/fu2-calldata-access",
+ "baseCommit": "84a2a4beedcb72c99570e8d03751f0ddd06d9609",
+ "recordedAt": "2026-11-02T08:35:00Z",
  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
- "command": "scripts/abi-entry-fixtures.sh SOLJSON {before|after3}: node scripts/solidity-upstream.mjs run --compiler SOLJSON --filter test/libsolidity/semanticTests/PATH --batch-size 1 --out .lake/upstream/cf1-{before|after3}/N",
+ "command": "scripts/abi-entry-fixtures.sh SOLJSON fu2c4; scripts/abi-entry-collect.py --keep-before OLD.json .lake/upstream/cf1-fu2c4 OUT.json META.json",
  "runtimePolicy": "unchanged: 120000 ms per pipeline, 1000 loop fuel, every required pipeline",
  "before": "base Solidity/Tools/Upstream.lean (byte-identical gate), model and runner at aaa9db5c",
- "after": "typed entry decoder (Semantics/AbiEntry.lean, Tools/UpstreamEntry.lean) after the CF1+CF2 integration merge, with top-level v2 enum parameters (Kind.enumBelow); runner relaxes enum metadata for top-level v2 enums only",
- "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt. The after column is cf1-after3 (final model); cf1-after (pre-enum) had the same 21 working fixtures.",
+ "after": "typed entry decoder with access-time calldata reads (Semantics/AbiAccess.lean: cpart, cat, verdictA; Tools/UpstreamEntry.lean guarded bodies), calldata parameters as slice origins (974dd1de reapplied); ABI coder v1 value parameters cleaned (UpstreamEntry.v1Plan); calldata slice index checked at the view (#sliceIndex); runner scalarArg reads a negative 256-bit unsigned literal as its word; entry returns of any primitive/bytes/string mix (EntryReturn.byteRets); slice index read without a copy, no len <= len check for b[i:]",
+ "note": "Observations are complete and in order (byte lists hex-encoded). Fixture list: tests/upstream/cf1-abi-entry-fixtures.txt. The before column is CF1's (copied with --keep-before); the after column is cf1-fu2c4, rerun on lane FU2-C.",
  "counts": {
   "before": {
    "blocked": 29,
    "working": 13
   },
   "after": {
-   "working": 21,
-   "blocked": 20,
-   "broken": 1
+   "working": 31,
+   "blocked": 11
   }
  },
  "fixtures": [
@@ -172,10 +171,10 @@
     }
    },
    "after": {
-    "reportSha256": "f2f5cf7fb96c8577abd936d87daac9a7a087940b80767c86b6c77f180b96985f",
-    "outputDirectory": ".lake/upstream/cf1-after3/1",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "6cef0b01ae627639a3c58a868f066a27ec5b53f6d79c98335494849a8152b3f1",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/1",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_length_v2.sol",
      "stage": "lean-runtime",
@@ -611,10 +610,10 @@
     }
    },
    "after": {
-    "reportSha256": "aeaf9cdf7a3ed8bcb2c71788305554ba4ba5ba529642664f8e37b04b95555f0b",
-    "outputDirectory": ".lake/upstream/cf1-after3/2",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "35887880104099ea1f4234efcaed4c4ae092b587239323faee71103ae16ea3c9",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/2",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_1d_2d_v2.sol",
      "stage": "lean-runtime",
@@ -922,10 +921,10 @@
     }
    },
    "after": {
-    "reportSha256": "01c9b246ab66b89ca2f5f4666192870be6ab809622c8edddd5dd57f12218f74f",
-    "outputDirectory": ".lake/upstream/cf1-after3/3",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "19014c0fa9325e9d65403084f332a2bd8a7e786bd3a7faa3769ae11ca500e297",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/3",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_array_indexing_3d_v2.sol",
      "stage": "lean-runtime",
@@ -1103,23 +1102,23 @@
     }
    },
    "after": {
-    "reportSha256": "4dabab1eddb3315321ea964163235d16a8c169278c99b4d5c47879acc1e57c9d",
-    "outputDirectory": ".lake/upstream/cf1-after3/4",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "8170185ddac69e5cd7613e5e8e39a9f730ee24d1e6a577cc8b8e45e493b4d9d8",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/4",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata element fails only on access: needs access-time calldata semantics",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy",
       "viaIR"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata element fails only on access: needs access-time calldata semantics",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
        "observed": [
@@ -1146,12 +1145,76 @@
          "returnBytes": "0x",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005"
         }
        ]
       },
       {
-       "status": "blocked",
-       "reason": "calldata element fails only on access: needs access-time calldata semantics",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "viaIR",
        "path": "test/libsolidity/semanticTests/abicoder/calldataDecoding/array/calldata_nested_array_static_reencode_v2.sol",
        "observed": [
@@ -1178,6 +1241,70 @@
          "returnBytes": "0x",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[][3])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(uint256[2][2])",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000300000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000005"
         }
        ]
       }
@@ -1238,10 +1365,10 @@
     }
    },
    "after": {
-    "reportSha256": "a88e3c80c3f6ec7468f0b59d2489d7f91bbad0d9247870dca916aa829ebd99d1",
-    "outputDirectory": ".lake/upstream/cf1-after3/5",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "a3c95a40db65188260c1e6b4078cf427c9f1d6c23d829ebdee367e66524e7315",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/5",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/validation/array_exceeds_calldatasize_no_revert_string.sol",
      "stage": "lean-runtime",
@@ -1355,10 +1482,10 @@
     }
    },
    "after": {
-    "reportSha256": "8e4036a6f03824e691610911b80c8da0d8d4a1cd6ba3cd939d6b6f2c1f608ca9",
-    "outputDirectory": ".lake/upstream/cf1-after3/6",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "003e46fce67d14fc7297a6662fcd488bb11972756a93e88bd356cbaabf5f03f9",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/6",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/calldata_array_bounds_check_nested_bytes.sol",
      "stage": "lean-runtime",
@@ -1472,10 +1599,10 @@
     }
    },
    "after": {
-    "reportSha256": "d55e3d72bcd70feccb88d0f8147b1ea7620941d52c5497b7bb52255279917f47",
-    "outputDirectory": ".lake/upstream/cf1-after3/7",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "8df3395f61d0c6991f1db599d33b4a9a6efb875a4a32fb5f27037ba9676378a1",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/7",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/concat/bytes_concat_nested.sol",
      "stage": "lean-runtime",
@@ -1557,10 +1684,10 @@
     }
    },
    "after": {
-    "reportSha256": "576f65f77c86d37c34c7c05309ba6cfbdb035716b3b3748e21da23f79248dd4c",
-    "outputDirectory": ".lake/upstream/cf1-after3/8",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "57fcb3bfd1148a94348667dac7b67c2531e0ce321d5bc051b52970c0c04c3321",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/8",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/calldata_2d_bytes_to_memory_2.sol",
      "stage": "lean-runtime",
@@ -1658,10 +1785,10 @@
     }
    },
    "after": {
-    "reportSha256": "ff9928fbc2a9a24084c246d9a3f5b988df21021bd75d9cdcc917674aec39cd6b",
-    "outputDirectory": ".lake/upstream/cf1-after3/9",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "ce9a53f7f93a3053fcee4187f22eab9d04792c1adb2f6dc6b5dd51b477fbfc55",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/9",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_calldata_to_memory.sol",
      "stage": "lean-runtime",
@@ -1889,10 +2016,10 @@
     }
    },
    "after": {
-    "reportSha256": "0db119917ac11351be6f3aab4c085c4a5316d8015946db9c83d1c5daacd44196",
-    "outputDirectory": ".lake/upstream/cf1-after3/10",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "c6129dadb19f77ad5aee0dd734288361d9754633c64d936d1f5cd8b6f21c6ce4",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/10",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/copying/nested_array_element_memory_to_memory.sol",
      "stage": "lean-runtime",
@@ -2072,10 +2199,10 @@
     }
    },
    "after": {
-    "reportSha256": "f5b29105ca949bc135ad156c3ca4b15abd6605d30337beb9e7cf00fa5bf7df51",
-    "outputDirectory": ".lake/upstream/cf1-after3/11",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "744b579549fb43331f8bce6cd0777572dd9459f00b8765a69483908684df2a17",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/11",
+    "modelSha256": "430b7933464dc3b4b30cf38a41743efe6b6cbaac6bfbae98f3613f1d29868a47",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/array/indexAccess/arrays_complex_memory_index_access.sol",
      "stage": "lean-runtime",
@@ -2157,23 +2284,23 @@
     }
    },
    "after": {
-    "reportSha256": "412da1e0e64835e9d234c0275be7ef07b675ffc92513d17b6efa13a05065c785",
-    "outputDirectory": ".lake/upstream/cf1-after3/12",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "1f93d75598bcd23c61a571a0d5ee19620fe6e0dae34abe29fab8e0750c5259b5",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/12",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/smoke/bytes_and_strings.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "entry return bridge needs a primitive prefix and one final bytes/string memory result",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy",
       "viaIR"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "entry return bridge needs a primitive prefix and one final bytes/string memory result",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/smoke/bytes_and_strings.sol",
        "observed": [
@@ -2200,12 +2327,36 @@
          "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003ab33ff0000000000000000000000000000000000000000000000000000000000",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003ab33ff"
+        },
+        {
+         "values": [],
+         "signature": "f()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003616e7900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "g()",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000003616e7900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "h()",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
         }
        ]
       },
       {
-       "status": "blocked",
-       "reason": "entry return bridge needs a primitive prefix and one final bytes/string memory result",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "viaIR",
        "path": "test/libsolidity/semanticTests/smoke/bytes_and_strings.sol",
        "observed": [
@@ -2232,6 +2383,30 @@
          "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003ab33ff0000000000000000000000000000000000000000000000000000000000",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003ab33ff"
+        },
+        {
+         "values": [],
+         "signature": "f()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000003616e7900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "g()",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000002a00000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000003616e7900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "h()",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000003616e790000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x"
         }
        ]
       }
@@ -2274,10 +2449,10 @@
     }
    },
    "after": {
-    "reportSha256": "5c3025c804bd0e98aa5a537d77842168183774eeaffbba77db10106a6080e4af",
-    "outputDirectory": ".lake/upstream/cf1-after3/13",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "47eaeb3b0b879a8707ad486c9912f964c09c981ed82427d968aac73d213ebb09",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/13",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/strings/concat/string_concat_nested.sol",
      "stage": "lean-runtime",
@@ -2339,10 +2514,10 @@
     }
    },
    "after": {
-    "reportSha256": "222b79916a25e6d8c9c6723c3450acde562408661026e6657b32e0fb79890232",
-    "outputDirectory": ".lake/upstream/cf1-after3/14",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "94ff56e00b84677abae1a80057de118afdf89eb61a81340abe214e1db2b390a5",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/14",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v1.sol",
      "stage": "lean-runtime",
@@ -2366,10 +2541,10 @@
     }
    },
    "after": {
-    "reportSha256": "acba812f1e553a5c9d080c3eb43154f993d7805e3e887ac4ee509515ec918af6",
-    "outputDirectory": ".lake/upstream/cf1-after3/15",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "6c26029e0793167fb1ef94f2bb982d91b3909e5a971e9c82ab89b7d6cadc2b21",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/15",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/abicoder/cleanup/enum_v2.sol",
      "stage": "lean-runtime",
@@ -2414,22 +2589,22 @@
     }
    },
    "after": {
-    "reportSha256": "68dc87e2735f6eaa018a866abb0c5fc0176e2d48874433db4733cbffe60cc943",
-    "outputDirectory": ".lake/upstream/cf1-after3/16",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "347352ddc130d64d16a1f63558fb43659a1f4ebde5549ba3644e3f61f2b8797c",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/16",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v1.sol",
        "observed": [
@@ -2440,6 +2615,30 @@
          "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000fffe",
          "failed": false,
          "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000fffe0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(uint16,uint16)",
+         "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ffff0000000000000000000000000000000000000000000000000000000000000001"
         }
        ]
       }
@@ -2548,10 +2747,10 @@
     }
    },
    "after": {
-    "reportSha256": "151974fa15b1da46f9b6d5539f3712a36ee79008a6ec8ded0f7e203418cdf129",
-    "outputDirectory": ".lake/upstream/cf1-after3/17",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "1081fd2a50b6354e98e9aeaad1f59ec25629b5b64750c3e1e8a2840a168c6cc2",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/17",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/arithmetics/checked_add_v2.sol",
      "stage": "lean-runtime",
@@ -2673,25 +2872,42 @@
     }
    },
    "after": {
-    "reportSha256": "a7f7320be8b08bd01c8ce43ef9d973a570e6d4d6a5dc85ee70f8eb3f179e962d",
-    "outputDirectory": ".lake/upstream/cf1-after3/18",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "f5d0d4ce3696c1ac45f7d6c9e3906cb973cdc3d764b5df7f1742a7b3672086e6",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/18",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(address)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000ffff1234567890123456789012345678901234567890"
+        },
+        {
+         "values": [],
+         "signature": "g(address)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000ffff1234567890123456789012345678901234567890"
+        }
+       ]
       }
      ]
     }
@@ -2766,10 +2982,10 @@
     }
    },
    "after": {
-    "reportSha256": "0015d54ace4e1b8e64995ef9862670f09bbe5715b1b476f8bca0c4b912017ae2",
-    "outputDirectory": ".lake/upstream/cf1-after3/19",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "c903b5aa514d61ae0de708c21f5a177eeb61fb271c9a3a54f3722b30520b663f",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/19",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_address_types_v2.sol",
      "stage": "lean-runtime",
@@ -2859,25 +3075,34 @@
     }
    },
    "after": {
-    "reportSha256": "c108e922d92afd747402e839a3cef36e1f3a14357083a3ce3cc70a073d834881",
-    "outputDirectory": ".lake/upstream/cf1-after3/20",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "237858b09158ce5204e21c7cf409389fb0b1b05330410f169692b9ff3cadcc4d",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/20",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/cleanup/cleanup_bytes_types_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(bytes2,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x61626300000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040102"
+        }
+       ]
       }
      ]
     }
@@ -2898,43 +3123,177 @@
     }
    },
    "after": {
-    "reportSha256": "57e9a5ef2389b3d0413dd7b678f4899ec7f858d6b936052981de9f38e7e09544",
-    "outputDirectory": ".lake/upstream/cf1-after3/21",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "216349adc1a22787cdb39fbf6c2368ddb610826f6a8769ee2c461b07d64590c0",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/21",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
      "stage": "lean-runtime",
-     "status": "broken",
-     "reason": "frontend import gaps",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy",
       "viaIR"
      ],
      "variants": [
       {
-       "status": "broken",
-       "reason": "frontend import gaps",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
-       "gaps": [
+       "observed": [
         {
-         "status": "unsupported",
-         "reason": "enum_with_256_members.sol:47: ABI decoding of enum values requires nominal cardinality checks",
-         "function": "decodeEnum(bytes)"
+         "values": [],
+         "signature": "getMinMax()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000100"
         }
        ]
       },
       {
-       "status": "broken",
-       "reason": "frontend import gaps",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "viaIR",
        "path": "test/libsolidity/semanticTests/enums/enum_with_256_members.sol",
-       "gaps": [
+       "observed": [
         {
-         "status": "unsupported",
-         "reason": "enum_with_256_members.sol:47: ABI decoding of enum values requires nominal cardinality checks",
-         "function": "decodeEnum(bytes)"
+         "values": [],
+         "signature": "getMinMax()",
+         "revertBytes": "0x",
+         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "intToEnum(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "enumToInt(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000100"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "decodeEnum(bytes)",
+         "revertBytes": "0x",
+         "returnBytes": "0x",
+         "failed": true,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000100"
         }
        ]
       }
@@ -2957,10 +3316,10 @@
     }
    },
    "after": {
-    "reportSha256": "26eff3717a025de52c7c94640fba76d82367aa925b31f3dc25ebc890c2b1f066",
-    "outputDirectory": ".lake/upstream/cf1-after3/22",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "54338df442615ab1e1197d3a0d50069208d49519d994e9f53ffc51e38ff793fc",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/22",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v1.sol",
      "stage": "lean-runtime",
@@ -2984,10 +3343,10 @@
     }
    },
    "after": {
-    "reportSha256": "fd73dc0b529484ded727f0a620127a44268cb3dce03860f19e45230d05563a4d",
-    "outputDirectory": ".lake/upstream/cf1-after3/23",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "37037a87f70ddb1431346bb48d06ff5b3d3d0267cc8c0fb6abfc7586d15530ef",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/23",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_signed_v2.sol",
      "stage": "lean-runtime",
@@ -3011,10 +3370,10 @@
     }
    },
    "after": {
-    "reportSha256": "744cb8a40f7dfdc00ace7a9edbd200cea0b17bd03393ccfc952cae8197b99231",
-    "outputDirectory": ".lake/upstream/cf1-after3/24",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "a70d18f709a93f43968cd0c18ba1eeeed7ed1d52a632cf9e1fcbc585f3ffa6a3",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/24",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v1.sol",
      "stage": "lean-runtime",
@@ -3038,10 +3397,10 @@
     }
    },
    "after": {
-    "reportSha256": "e6277f4256612db6b55dc953ac3957df8b4f2375120384783fed2fffc9a70f6c",
-    "outputDirectory": ".lake/upstream/cf1-after3/25",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "a68fd3d3c413ac6621831cb362991deaf0bd7701240091d75aeb22c2ab67ec58",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/25",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_garbled_v2.sol",
      "stage": "lean-runtime",
@@ -3077,25 +3436,66 @@
     }
    },
    "after": {
-    "reportSha256": "a4fe0384fb1a5c2afd7b96a6b9fa6fc318b7faf78f0fe94d258f1ead2b1b0c56",
-    "outputDirectory": ".lake/upstream/cf1-after3/26",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "7f50870edf597a4b28ec2bdc982d728f2bf0ff620955ef2da0652b952da1076e",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/26",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int16,uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000ff990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -3218,10 +3618,10 @@
     }
    },
    "after": {
-    "reportSha256": "195f7bd54dc92dd4adc4c62d06dead0b5e01c7d63b7a7b34e6063737fd198660",
-    "outputDirectory": ".lake/upstream/cf1-after3/27",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "77c879c96b959ca2ccaaa41a3a7a5b4572880ea24bccb4232733f969e1739b26",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/27",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int16_v2.sol",
      "stage": "lean-runtime",
@@ -3359,25 +3759,66 @@
     }
    },
    "after": {
-    "reportSha256": "4a216bb3c7ddec87688e15173ed461c0634387628fb1f557bef86bd5c7964887",
-    "outputDirectory": ".lake/upstream/cf1-after3/28",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "88ce528a0ecf3f001da54b6d190f7d7989f031711174e889ce4bda6fe799c988",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/28",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int32,uint32)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000ffffff990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -3500,10 +3941,10 @@
     }
    },
    "after": {
-    "reportSha256": "302f6a89abce03c7ddedc97247cd70af09d463239cf6b17f4b2de59bef236e8f",
-    "outputDirectory": ".lake/upstream/cf1-after3/29",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "6dad65702a04b6a325e5ad527a6579c0731fd9d2a1abc0769e51323495bdf2a5",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/29",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int32_v2.sol",
      "stage": "lean-runtime",
@@ -3641,25 +4082,66 @@
     }
    },
    "after": {
-    "reportSha256": "6ca2777ada7bf530ae746d5ad7346adbfd76d57f34931a00d66241d126b7dd40",
-    "outputDirectory": ".lake/upstream/cf1-after3/30",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "2a9bfcd97ec852e4b97376acc10dde43646ba7537de2f3b46261582dc9a2c61b",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/30",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v1.sol",
-       "observed": []
+       "observed": [
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff99",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcc",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe6",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000004"
+        },
+        {
+         "values": [],
+         "signature": "f(int8,uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000990000000000000000000000000000000000000000000000000000000000000008"
+        }
+       ]
       }
      ]
     }
@@ -3782,10 +4264,10 @@
     }
    },
    "after": {
-    "reportSha256": "ef7b1df5648c216a0d56eeea48fb3ebbd48a8c9c8e1b082e7e2ff00e8d47759e",
-    "outputDirectory": ".lake/upstream/cf1-after3/31",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "60eeaaec9e279c26e130c7eb8db40179bac7808e02cf9e2346a110343f5ce974",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/31",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_right_negative_lvalue_signextend_int8_v2.sol",
      "stage": "lean-runtime",
@@ -3965,10 +4447,10 @@
     }
    },
    "after": {
-    "reportSha256": "66a40fdcf7a543fc88a482941bb330dd37ac68e3da6f0044ef07b73d493f4d2b",
-    "outputDirectory": ".lake/upstream/cf1-after3/32",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "645f5bad8eddd55997e700e70991e28bbd5c5c9e297293b78794c1c3105dad3b",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/32",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/operators/shifts/shift_underflow_negative_rvalue.sol",
      "stage": "lean-runtime",
@@ -3986,20 +4468,22 @@
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_underflow_negative_rvalue.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(int256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(int256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       },
@@ -4010,20 +4494,22 @@
        "path": "test/libsolidity/semanticTests/operators/shifts/shift_underflow_negative_rvalue.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(int256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(int256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       }
@@ -4046,10 +4532,10 @@
     }
    },
    "after": {
-    "reportSha256": "66d60c7fbbc6736254c6260127344017b443d68f5e8cc76bec35037841cdd8e1",
-    "outputDirectory": ".lake/upstream/cf1-after3/33",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "351ea7d0f390a1887f53b182b3b9de0ab5047b02f382de603dcfee15f8c12cf1",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/33",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup.sol",
      "stage": "lean-runtime",
@@ -4073,10 +4559,10 @@
     }
    },
    "after": {
-    "reportSha256": "395d68baf229c2dd21b4aaa2bfe0ab29b18fbc21787d00ada3e45b6e66cd7108",
-    "outputDirectory": ".lake/upstream/cf1-after3/34",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "d18b05b63236eab79c2c2c163f72a81034fb492b9aacd0e739e84fdb7b18a357",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/34",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/cleanup_abicoderv1.sol",
      "stage": "lean-runtime",
@@ -4506,10 +4992,10 @@
     }
    },
    "after": {
-    "reportSha256": "7e3bdef6578d241dafa8cb0ef009ada112854528e59a488bc57eb7164f3dfebd",
-    "outputDirectory": ".lake/upstream/cf1-after3/35",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "79ba57973b9a652d9cabbe21e5b14790fcd4fb9e317131b86be8c63d26cab484",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/35",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion.sol",
      "stage": "lean-runtime",
@@ -5032,22 +5518,22 @@
     }
    },
    "after": {
-    "reportSha256": "1463808b0dc714e50ba7223d0ec2a0bbc2996239cf61e9788d747d3715936f4a",
-    "outputDirectory": ".lake/upstream/cf1-after3/36",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "c51f9fc4d0c503ba891f2d437a9766c7b14ef3b4e49bfee210d6ee7932ce8fe4",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/36",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
      "stage": "lean-runtime",
-     "status": "blocked",
-     "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+     "status": "working",
+     "reason": "functional runtime vectors match in every required source evaluation mode",
      "requiredPipelines": [
       "legacy"
      ],
      "variants": [
       {
-       "status": "blocked",
-       "reason": "calldata requires lazy/noncanonical ABI decoder replay",
+       "status": "working",
+       "reason": "all supported runtime vectors match",
        "pipeline": "legacy",
        "path": "test/libsolidity/semanticTests/userDefinedValueType/conversion_abicoderv1.sol",
        "observed": [
@@ -5130,6 +5616,118 @@
          "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
          "failed": false,
          "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "h(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "i(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fa",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000fa"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "j(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "k(uint8)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000001"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000002",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
+         "failed": false,
+         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff"
+        },
+        {
+         "values": [],
+         "signature": "m(uint16)",
+         "revertBytes": "0x",
+         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000001",
+         "failed": false,
+         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000101"
         }
        ]
       }
@@ -5152,10 +5750,10 @@
     }
    },
    "after": {
-    "reportSha256": "3af4585cd1011d8d3feb4a0b4567b6a8ba3f8efab5aff6ec2679f500ef173f3d",
-    "outputDirectory": ".lake/upstream/cf1-after3/37",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "25860b8dc9f2acf1b494512b96917fcfe4741a0806b7d335b082962a967e9433",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/37",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/userDefinedValueType/parameter.sol",
      "stage": "lean-runtime",
@@ -5313,10 +5911,10 @@
     }
    },
    "after": {
-    "reportSha256": "6aae0f3dbc61ce524f418d12ad7ca36ce55b7dd097ceb7defca6e9e4017407a6",
-    "outputDirectory": ".lake/upstream/cf1-after3/38",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "875c42ce0b7abf47d6e9528e3a539124917fab8984fa888c1626e89dd2711f85",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/38",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
      "stage": "lean-runtime",
@@ -5334,60 +5932,61 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "11"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000b",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "192"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000c0",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000040"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "255"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000007f"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000080"
+         "failed": true
         }
        ]
       },
@@ -5398,60 +5997,61 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_add_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "11"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000000b",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "192"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000c0",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000040"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "255"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000007f"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000080"
+         "failed": true
         }
        ]
       }
@@ -5704,10 +6304,10 @@
     }
    },
    "after": {
-    "reportSha256": "d0bab7c4ed5c87e2f6bfb78c075bb9c6fe9bd3f5ebefb3504ce1cfb0fa5014a6",
-    "outputDirectory": ".lake/upstream/cf1-after3/39",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "dabb39bf1cd2407c007f2d5317980e2b3524b15d3590add0aff9461f33a227e5",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/39",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_div_overflow.sol",
      "stage": "lean-runtime",
@@ -5725,108 +6325,113 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_div_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "3"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000003",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000003"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639933"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60000000000000000000000000000000000000000000000000000000000000003"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "3"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000003",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(int8,int8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639808"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff800000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "64"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000040",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639872"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff800000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(int8,int8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "127"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000007f",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "h(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x8000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       },
@@ -5837,108 +6442,113 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_div_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "3"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000003",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000003"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639933"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60000000000000000000000000000000000000000000000000000000000000003"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "3"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000003",
-         "failed": false,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(int8,int8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000012",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff60000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639808"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff800000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "64"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000040",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639872"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffc0",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff800000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(int8,int8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff80ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "127"
+         ],
          "signature": "g(int8,int8)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000007f",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff81ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "h(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x8000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       }
@@ -6399,10 +7009,10 @@
     }
    },
    "after": {
-    "reportSha256": "7124815b5149e321ef00bf43e4aba0cfdb0971dd4f93928e4119eb2d0512e2df",
-    "outputDirectory": ".lake/upstream/cf1-after3/40",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "5b5afc43131548165c362c8ef381a74cf1330280e92d6605d6be05d28c3f22af",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/40",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/detect_mul_overflow.sol",
      "stage": "lean-runtime",
@@ -6420,212 +7030,218 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_mul_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "30"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000001e",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
-         "failed": false,
-         "calldataBytes": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907852929702298719625575994209400481361428480"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffff00000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907852929702298719625575994209400481361428480"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffff00000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000200000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "30"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000001e",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "254"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fe",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000007f0000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "254"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fe",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007f"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "255"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000000000000000000000000000000000000000000011"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000000000000000000000000000000000000000000012"
+         "failed": true
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000f"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       },
@@ -6636,212 +7252,218 @@
        "path": "test/libsolidity/semanticTests/viaYul/detect_mul_overflow.sol",
        "observed": [
         {
-         "values": [],
+         "values": [
+          "30"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000001e",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
-         "failed": false,
-         "calldataBytes": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000028000000000000000000000000000000000000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639934"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907852929702298719625575994209400481361428480"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffff00000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907852929702298719625575994209400481361428480"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffff00000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000100000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000001"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x000000000000000000000000000000010000000000000000000000000000000200000000000000000000000000000000ffffffffffffffffffffffffffffffff"
+         "failed": true
         },
         {
          "values": [],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff0000000000000000000000000000000100000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0000000000000000000000000000000000000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "f(uint256,uint256)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "30"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x000000000000000000000000000000000000000000000000000000000000001e",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000050000000000000000000000000000000000000000000000000000000000000006"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000002"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "254"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fe",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000007f0000000000000000000000000000000000000000000000000000000000000002"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "254"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000fe",
-         "failed": false,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000007f"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000010"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "255"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000000000000000000000000000000000000000000011"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000f0000000000000000000000000000000000000000000000000000000000000012"
+         "failed": true
         },
         {
          "values": [],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x4e487b710000000000000000000000000000000000000000000000000000000000000011",
          "returnBytes": "0x",
-         "failed": true,
-         "calldataBytes": "0x0000000000000000000000000000000000000000000000000000000000000012000000000000000000000000000000000000000000000000000000000000000f"
+         "failed": true
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x00000000000000000000000000000000000000000000000000000000000000ff0000000000000000000000000000000000000000000000000000000000000000"
+         "returnBytes": "0x",
+         "failed": false
         },
         {
-         "values": [],
+         "values": [
+          "0"
+         ],
          "signature": "g(uint8,uint8)",
          "revertBytes": "0x",
-         "returnBytes": "0x0000000000000000000000000000000000000000000000000000000000000000",
-         "failed": false,
-         "calldataBytes": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ff"
+         "returnBytes": "0x",
+         "failed": false
         }
        ]
       }
@@ -6864,15 +7486,15 @@
     }
    },
    "after": {
-    "reportSha256": "4518f706dd32fb221218a00a52dd13d83dd9270f7214547e0789d63e2cd8c092",
-    "outputDirectory": ".lake/upstream/cf1-after3/41",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "2c81fa87bf58e4ac655cf56e0227ad75639eaab57b138c716c5608103b34d352",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/41",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/function_entry_checks.sol",
      "stage": "lean-runtime",
      "status": "blocked",
-     "reason": "noncanonical ABI input requires ABI decoder replay"
+     "reason": "unsupported runtime expectation: h(), 1 ether -> 0"
     }
    }
   },
@@ -6891,10 +7513,10 @@
     }
    },
    "after": {
-    "reportSha256": "2d7d3c82dd0f41f221e9cf605991a39e5ac5bae47f4f003548013d55de828b96",
-    "outputDirectory": ".lake/upstream/cf1-after3/42",
-    "modelSha256": "9c7cda6deaf5f3ca285253cfa4033a4e6601910ae10bb79c41eca2870fd6445b",
-    "runnerSha256": "6c9a004ad698c6beb59ac10eeebb87c93990574d98cd55d26af1921145d13c43",
+    "reportSha256": "cecae09be8ac0f6babf45d1f68165887bf24b4843ef6a36d274260f8d05577db",
+    "outputDirectory": ".lake/upstream/cf1-fu2c4/42",
+    "modelSha256": "b83585342c047bb4d2db26028f6069f1589a837c014bcd7303fbbb671b6cb703",
+    "runnerSha256": "f19499625a28442793bfc67e22a8743e21678bd18a568b5d731e1b1d55e31adf",
     "result": {
      "path": "test/libsolidity/semanticTests/viaYul/unary_operations.sol",
      "stage": "lean-runtime",

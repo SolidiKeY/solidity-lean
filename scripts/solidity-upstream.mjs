@@ -151,6 +151,9 @@ function scalarArg(token, type) {
   if (type.startsWith('int') && n >= 2n**255n && n < 2n**256n) n -= 2n**256n;
   const signed = type.startsWith('int');
   const bits = type.startsWith('address') ? 160 : Number(type.match(/\d+/)?.[0] ?? 256);
+  // TestFileParser writes a negative literal as its two's-complement word:
+  // for a 256-bit unsigned type that word is canonical (`-2` is 2^256 - 2).
+  if (!signed && !type.startsWith('address') && bits === 256 && n < 0n && n >= -(2n**255n)) n += 2n**256n;
   if (n < (signed ? -(2n**BigInt(bits-1)) : 0n) || n >= 2n**BigInt(signed ? bits-1 : bits))
     throw new Error('noncanonical ABI input requires ABI decoder replay');
   return n.toString();
@@ -280,8 +283,8 @@ function checkAbiMetadata(p, top = false) {
   // A top-level enum parameter/return (ABI `uint8`) of an ABI coder v2 entry is
   // replayed at its declared cardinality from the source declaration (Lean
   // `paramRanges`, `Semantics/AbiEntry.lean` `Kind.enumBelow`); nested enums
-  // stay refused. Lean's raw path still refuses an enum return of a function
-  // without an enum parameter.
+  // stay refused. Lean's raw path replays enum parameters and returns by
+  // position (`Tools/Upstream.lean`), refusing an unmatched position.
   if (/^enum\s/.test(p.internalType ?? '') && !(top && p.type === 'uint8'))
     throw new Error('nominal enum ABI range not adapted');
   for (const c of p.components ?? []) checkAbiMetadata(c);

@@ -1,0 +1,23 @@
+{
+  "failed_iterations": [
+    "located token case variable and closed numeric decide goals corrected",
+    "actual Option bind nesting retained before case splitting static yield",
+    "Nat closed multiplication and actual-yield existential normalization",
+    "some-length singleton flattening normalized explicitly",
+    "generic root helper initial broad simp produced a60s partial timeout; ownedMCP stopped; same statement repaired by primitive Bool conjunction extraction",
+    "full diagnostics caught unused arithmetic simp args and Quot.sound in atom instances from broad goal simp; local hflat/rw removed dependency before acceptance"
+  ],
+  "failed_iteration_exact_timings": "not captured; timeout/partial/error/trust-failing requests never passes",
+  "before_sources": [
+    "parser-lengths-before-root-repair.txt",
+    "parser-lengths-before-trust-fix.txt"
+  ],
+  "failed_trust_diagnostics": "mcp-before-lengths-trust-fix.json",
+  "passing_gate": "h28-type-3509681f8c6e.json",
+  "fresh_diagnostics": [
+    "mcp-fresh-lengths-ParserLengths.json",
+    "mcp-fresh-lengths-AxiomAudit.json"
+  ],
+  "proof_budgets": "unchanged",
+  "limitations": "Arbitrary expression atom support remains explicit; no constant evaluation or resolution. Global allconstructor closure and final whole-project gates open"
+}

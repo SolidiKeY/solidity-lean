@@ -87,7 +87,7 @@ No worker-visible coordinator journaled-resume/receipt helper exists; the
 coordinator's receipt/turn reconciliation remains explicitly deferred, not
 fabricated or re-dispatched. See [delivery](diamond-try-osaka-validation/delivery.json).
 
-Evidence: /workspace/next10-diamond-try-evidence/osaka-validation, including exact
+Evidence: VM location: next10-diamond-try-evidence/osaka-validation, including exact
 commands/logs, complete native/reference receipts, source/dependency hashes,
 preflight failures and [machine-readable results](diamond-try-osaka-validation/results.json).
 

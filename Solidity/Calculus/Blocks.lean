@@ -103,6 +103,15 @@ def Binders.declsThen {Δ : Ctx} : {ρ : Ctx} → Binders ρ → Prog C (ρ ++ �
       (fun bs p x rest => Binders.declsThen bs (.cons (.declLocal p x none) rest))
   termination_by structural _ bs => bs
 
+/-- `T r; …; rest` for several return variables: a value one at its
+default, a memory one a fresh default object (`T memory r;`). -/
+def RetBinders.declsThen {Δ : Ctx} : {ρ : Ctx} → RetBinders ρ → Prog C (ρ ++ Γ) Δ → Prog C Γ Δ
+  | _, bs => RetBinders.casesOn (motive := fun ρ _ => Prog C (ρ ++ Γ) Δ → Prog C Γ Δ) bs
+      (fun rest => rest)
+      (fun bs p x rest => RetBinders.declsThen bs (.cons (.declLocal p x none) rest))
+      (fun bs R x hd hm rest => RetBinders.declsThen bs (.cons (.declMem R x none hd hm) rest))
+  termination_by structural _ bs => bs
+
 /-- A call (`callStep`): its leftmost argument that is not simple captured
 (`functionCallArgCapture`), or, with every argument simple, one update where
 the callee calls and has a summary (`internalCallSummary`,
@@ -247,7 +256,7 @@ callee when it fails. -/
 def ExtCall.selfFails {Γ ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) : Fml C Γ :=
   .not (.modal .diamond (.cons (.require call.isSelf)
-    (.cons (.call call.fn sargs (.rets rets) sbody) .nil)) .nil .tt)
+    (.cons (.call call.fn sargs (.rets rets.toRet) sbody) .nil)) .nil .tt)
 
 /-! ## Revert data -/
 
@@ -430,7 +439,7 @@ def trySelfStep {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall 
   let up := (call.wk (Thin.ofExt (Ext.append Γ ρ)))
   let nx := some (call.selfFails rets sargs sbody)
   .branches [⟨Binders.nil, .cons (.require call.hasCode) (.cons (.require call.isSelf)
-      (.cons (.call call.fn sargs (.rets rets) sbody) ok)), none⟩,
+      (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok)), none⟩,
     ⟨rets, .cons (.require up.hasCode) (.cons (.require up.notSelf) ok), none⟩,
     ⟨Binders.nil, err, nx⟩, ⟨code.binders, code.guard call sbody.panicCodes pnc, nx⟩,
     ⟨Binders.nil, other, nx⟩]
@@ -561,7 +570,7 @@ def Args.readsIn (μ : Mutability) : {ps : Ctx} → Args C Γ ps → Bool
 
 /-- No memory return (its body would allocate, which no frame allows). -/
 def CallRet.noMem {rs Γ' : Ctx} (r : CallRet Γ rs Γ') : Bool :=
-  CallRet.casesOn (motive := fun _ _ _ => Bool) r true (fun _ _ _ => true) (fun _ => true)
+  CallRet.casesOn (motive := fun _ _ _ => Bool) r true (fun _ _ _ => true) (fun bs => bs.noMem)
     (fun _ _ _ _ => false) (fun _ _ => true)
 
 /-- A position of `Γ'` read as one of the context `d` locals below it, if it

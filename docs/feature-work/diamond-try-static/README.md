@@ -16,7 +16,7 @@ are byte-for-byte identical to the retained outputs: three pre-Byzantium forks
 plus Byzantium/Osaka controls, not20successful executions. The12additional
 Osaka compilations obtain metadata for the six blocked source rows, not replay.
 Exact input/output/source hashes and full artifacts are in
-`/workspace/next10-diamond-try-evidence/static-frontier/compile-account.json`.
+VM location `next10-diamond-try-evidence/static-frontier/compile-account.json`.
 The sources declare `f(bool)` and `g(bool)`; there is no `validf` declaration.
 
 ## Static entry, frame and branch correspondence
@@ -227,7 +227,7 @@ clarified instead of claiming a global ABI absence. Skeptic's final wording
 correction distinguishes the try's handlers from constructor handlers. Earlier
 owner `this.g` substring mistake and all prior maps are preserved externally.
 No failed report is erased or reclassified as runtime success. Final evidence:
-`/workspace/next10-diamond-try-evidence/static-frontier/reviews.txt`,
+VM location `next10-diamond-try-evidence/static-frontier/reviews.txt`,
 `attribution-corrections.txt`, `validation.json`, raw logs and exact hashed
 compiler/engine/harness artifacts. Original assignment remains12/8native strict1
 and18/2reference; no additional fixture gate is closed by static evidence.

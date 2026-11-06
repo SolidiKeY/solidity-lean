@@ -59,3 +59,31 @@ private def check (C : Contract) (rows : List ImportRow) (text expected : String
       let report := replay C rows (Json.mkObj [("vectors", toJson [v])])
       unless (report.getObjValAs? String "status").toOption == some status do
         throw (IO.userError report.pretty) : IO Unit)
+
+-- The raw path's refusals (integration review, round 2): a constructor's
+-- nominal range and a vector flagged `canonicalOnly` (the flag the runner
+-- sets for ABI coder v1 sources; these fixtures are v2, so this pins the
+-- flag's gate, not v1 masking) keep "nominal enum ABI range needs a
+-- declaration adapter"; neither reaches the typed entry decoder. In-range
+-- words: the refusal does not depend on the value. (An element range is not
+-- pinned here: no fixture has an enum-array parameter beside only admitted
+-- functions; `EnumInputRefusal` stops at its other functions' import gaps.)
+#eval (do
+  let raw (sig : String) (words : List Nat) (inputs : List String) (extra : List (String × Json)) :=
+    Json.mkObj ([("signature", toJson sig),
+      ("calldata", toJson ((words.flatMap Semantics.wordBytes).map UInt8.toNat)),
+      ("inputTypes", toJson inputs), ("outputTypes", toJson (if sig == "constructor" then [] else ["uint256"])),
+      ("expectedBytes", toJson ([] : List Nat)), ("failure", toJson true)] ++ extra)
+  let cases : List (Contract × List ImportRow × Json) := [
+    (AbiLegacy.EnumAbiCtorRanges, AbiLegacy.EnumAbiCtorRanges.report, raw "constructor" [1] ["uint8"] []),
+    (AbiIR.EnumAbiCtorRanges, AbiIR.EnumAbiCtorRanges.report, raw "constructor" [1] ["uint8"] []),
+    (AbiLegacy.EnumAbiRanges, AbiLegacy.EnumAbiRanges.report,
+      raw "read(uint8)" [1] ["uint8"] [("canonicalOnly", toJson true)]),
+    (AbiIR.EnumAbiRanges, AbiIR.EnumAbiRanges.report,
+      raw "read(uint8)" [1] ["uint8"] [("canonicalOnly", toJson true)])]
+  for (C, rows, v) in cases do
+    let report := replay C rows (Json.mkObj [("vectors", toJson [v])])
+    unless (report.getObjValAs? String "status").toOption == some "blocked" &&
+        (report.getObjValAs? String "reason").toOption ==
+          some "nominal enum ABI range needs a declaration adapter" do
+      throw (IO.userError report.pretty) : IO Unit)

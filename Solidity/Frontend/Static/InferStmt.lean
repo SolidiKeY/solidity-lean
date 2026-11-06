@@ -87,7 +87,17 @@ def simpleRes {k : SCtx} (L : Locals) : (i : Syn .simple) → List (Σ L', StmtD
           else Option.none
       else []
     | Option.none => []
-  | _ => []
+  | .declTuple h d ds e =>
+    match hs : C.tupleSlots h d ds with
+    | Option.some slots =>
+      (tysOf (C.at L) (infer (C.at L) e)).filterMap fun p =>
+        match p with
+        | ⟨.tuple σs, de⟩ =>
+          if hf : slotsFit C.isBase (slots.map (Option.map Prod.snd)) σs = true then
+            Option.some ⟨pushSlots slots L, .declTuple hs de hf⟩
+          else Option.none
+        | _ => Option.none
+    | Option.none => []
 
 /-- An optional loop condition. -/
 def condOpt (L : Locals) : (c : Syn (.opt .expr)) → List (OptCond (C.at L) c)
@@ -160,6 +170,35 @@ def rethrowRes {k : SCtx} (L : Locals) (fl : List String) (body : Syn (.list .yu
         | _ => Option.none
       | _ => Option.none
   else []
+
+/-- `try c.f(args) returns (…) { … } catch … { … }` (FU2-B), from the
+success block's results at its locals and the catch block's derivations. -/
+def tryRes {k : SCtx} (L : Locals) (c : Syn .expr) (f : String) (args : Syn (.list .expr))
+    (rets : Syn (.list .param)) (bl : Syn (.block k)) (cl : Syn (.catchClause k)) (x : Option String)
+    (cb : Syn (.list (.item k))) (hcb : CatchD cl x cb)
+    (rok : (L' : Locals) → List (SRes C (.block k) bl L')) (rc : List (Σ L₂, ItemsD C (catchLocals x L) cb L₂)) :
+    List (SRes C (.stmt k) (.tryStmt (.call (.member c f) (.positional args)) rets bl cl .nil) L) :=
+  (tysOf (C.at L) (infer (C.at L) c)).flatMap fun pc =>
+  match pc with
+  | ⟨.contract dn, dc⟩ =>
+    (argsOf (C.at L) (infer (C.at L) args)).flatMap fun pa =>
+    match ho : extOverloads C.env C.isBase dn f pa.1 with
+    | [d] =>
+      match hs : d.fnSig C.env with
+      | Option.some (ps, rs) =>
+        if hf : argsFit C.isBase pa.1 ps = true then
+          match ht : rets.tys C.env C.scope .memory with
+          | Option.some tys =>
+            if hsame : (tys.isEmpty || STy.sameList tys rs) = true then
+              (rok ((tryLocals rets.paramNames rs).reverse ++ L)).flatMap fun r =>
+              match r with
+              | .block dok => rc.map fun q => .stmt (.tryCall dc pa.2 ho hs hf ht hsame dok hcb q.2)
+            else []
+          | Option.none => []
+        else []
+      | Option.none => []
+    | _ => []
+  | _ => []
 
 /-- **Statement checking**: every derivation S01 gives the tree with the
 locals `L`, by rule. -/
@@ -237,6 +276,14 @@ def inferS : {c : Cat} → (s : Syn c) → (L : Locals) → List (SRes C c s L)
   | _, .emit ev a, L => emitRes C L ev a
   | _, .revert er a, L => revertRes C L er a
   | _, .assembly false fl body, L => rethrowRes C L fl body
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets bl (.catchPlain (.block cb)) .nil, L =>
+    tryRes C L c f args rets bl (.catchPlain (.block cb)) Option.none cb (.plain cb) (fun L' => inferS bl L')
+      (itemsOf C (inferS cb L))
+  | _, .tryStmt (.call (.member c f) (.positional args)) rets bl
+      (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) x) .nil (.block cb)) .nil, L =>
+    tryRes C L c f args rets bl (.catchSig Option.none (.param (.elem .bytes) (Option.some .memory) x) .nil (.block cb))
+      (Option.some (x.getD "")) cb (.bytes x cb) (fun L' => inferS bl L')
+      (itemsOf C (inferS cb (catchLocals (Option.some (x.getD "")) L)))
   | _, _, _ => []
 
 end

@@ -1,0 +1,62 @@
+{
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.initial_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.inputs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.locate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.no_dropped_installation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.ordered_reset": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.ordered_world": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.reset_image": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.source_balance_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.source_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.source_external_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.source_installed_balance": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V08/WorldCatalogueControls.lean:Solidity.Lowering.V08.WorldCatalogueControls.wrong_raw_funds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

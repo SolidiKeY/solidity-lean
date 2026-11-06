@@ -1,0 +1,40 @@
+ERROR 129:58 Tactic `rewrite` failed: Did not find an occurrence of the pattern
+  fromByteArrayBigEndian (blake_one.extract 0 4)
+in the target expression
+  0 < fromByteArrayBigEndian ((input blake_one).calldata.extract 0 4)
+
+header : fromByteArrayBigEndian (blake_one.extract 0 4) = 1
+sz : blake_one.size = 213
+flag : blake_one[212]! = 0
+badsz : blake_bad_flag.size = 213
+badflag : blake_bad_flag[212]! = 2
+⊢ 0 < fromByteArrayBigEndian ((input blake_one).calldata.extract 0 4)
+ERROR 130:71 maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+ERROR 131:71 maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+ERROR 135:42 maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+ERROR 136:42 maximum recursion depth has been reached
+use `set_option maxRecDepth <num>` to increase limit
+use `set_option diagnostics true` to get diagnostic information
+ERROR 130:33 'change' tactic failed, pattern
+  ?m.192 ≤ 1
+is not definitionally equal to target
+  fromByteArrayBigEndian ((ExecutionEnv.calldata ?m.172).extract 0 4) ≤ UInt256.toNat ?m.170
+ERROR 131:33 'change' tactic failed, pattern
+  ?m.199 ≤ 2
+is not definitionally equal to target
+  fromByteArrayBigEndian ((ExecutionEnv.calldata ?m.178).extract 0 4) ≤ UInt256.toNat ?m.176
+ERROR 136:36 Application type mismatch: The argument
+  badsz
+has type
+  blake_bad_flag.size = 213
+but is expected to have type
+  (ExecutionEnv.calldata ?m.189).size = 213
+in the application
+  blake_invalid_flag ?m.186 ?m.187 ?m.188 ?m.189 badsz
+diag: 8 errors

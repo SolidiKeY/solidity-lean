@@ -82,7 +82,8 @@ theorem LinkedProgram.reference {code : List Instr} (program : LinkedProgram cod
   exact ⟨word_nat n hf.2.1, hm, program.scanner.valid _ hm⟩
 
 /-- The exact certified destination array supplied to the upstream driver.
-Equality to opaque D_J is not silently assumed. -/
+Its equality to the vendored `D_J` is proved separately, within the H7 bound,
+in `BoundedScannerInterface`. -/
 def LinkedProgram.validJumps {code : List Instr} (program : LinkedProgram code) : Array EvmYul.UInt256 :=
   program.scanner.destinations.toArray
 

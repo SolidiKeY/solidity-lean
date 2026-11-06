@@ -1,0 +1,10 @@
+{
+  "build": "3491afe47f49e1cb454a60ee6879fbc8ab2929d2866cfb234a1005b63b3f87a1",
+  "kernelBuild": null,
+  "assets": 19,
+  "assetBytes": 31085445,
+  "htmlBytes": 41479671,
+  "compression": null,
+  "runtimeSha256": "438752bdf472e64e086fb6a0a0b81f83039d36818012ea63b2bfbd10c7ca1884",
+  "compiledOnly": true
+}

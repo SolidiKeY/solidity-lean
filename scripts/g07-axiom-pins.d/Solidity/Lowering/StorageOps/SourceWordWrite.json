@@ -1,0 +1,22 @@
+{
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.read_after": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.source_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceWordWrite.lean:Solidity.Lowering.StorageOps.SourceWordWrite.storeVal_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

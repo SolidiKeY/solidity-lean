@@ -6,10 +6,12 @@ solc_import "AggregateErrorControls.viaIR.ast.json" hash 0x4e0b11581b66a097 as G
 
 #eval (do
   for report in [Group10.AggregateLegacy.AggregateErrorControls.report,Group10.AggregateIR.AggregateErrorControls.report] do
+    -- Lane FU2-C: the calldata named-argument reverts are admitted (calldata
+    -- parameters are slice origins); their replayed encodings are pinned in
+    -- `AggregateErrorControls.lean`. No row is refused.
     let refused := report.filter (fun r => r.status == .unsupported)
-    unless refused.length == 2 && refused.all (fun r =>
-        (r.reason.splitOn "a calldata slice ordinary alias without a known calldata origin").length > 1) do
-      throw (IO.userError "exact calldata provenance refusals changed")
+    unless refused.isEmpty do
+      throw (IO.userError s!"calldata provenance refusals changed: {refused.map (·.reason)}")
   for C in [Group10.AggregateLegacy.AggregateErrorControls,Group10.AggregateIR.AggregateErrorControls] do
     let some d := Semantics.lookupBy "PairError" C.errors | throw (IO.userError "missing PairError")
     let parameter : Option (Solidity.Name × Ty) := d.params[1]?

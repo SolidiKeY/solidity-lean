@@ -375,7 +375,11 @@ theorem loop_compiles :
       Solidity.Prog StandardExample [] _) := by
   decide +kernel
 
-/-- info: (some 6, some 3) -/
+/--
+warning: unannotated literal-bounded loop `while (age < 3)`; keeping symbolic unrolling
+---
+info: (some 6, some 3)
+-/
 #guard_msgs in #eval
   let P : Solidity.Prog StandardExample [] _ :=
     sol{ total = 0; age = 0; while (age < 3) { total = total + 2; age = age + 1; } }

@@ -1,0 +1,7 @@
+modality normalBox: box, normal, proved
+modality normalDiamond: diamond, normal, proved
+modality revertBox: box, revert, proved
+modality revertDiamond: diamond, revert, refuted
+modality panicBox: box, panic, refuted
+modality panicDiamond: diamond, panic, refuted
+Captured modality observations; frozen checks/review remain required.

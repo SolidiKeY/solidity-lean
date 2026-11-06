@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/FreshCopyAccess.lean:Solidity.Backend.StorageOps.FreshCopyAccess.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/FreshCopyAccess.lean:Solidity.Backend.StorageOps.FreshCopyAccess.represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -28,7 +28,9 @@ export function sourceLocations(ast, bytes) {
   const contracts = new Map();
   for (const contract of ast.nodes ?? []) {
     if (contract.nodeType !== 'ContractDefinition') continue;
-    const functions = new Map((contract.nodes ?? [])
+    const lineage = new Set(contract.linearizedBaseContracts ?? [contract.id]);
+    const members = [contract, ...(ast.nodes ?? []).filter(base => base !== contract && base.nodeType === 'ContractDefinition' && lineage.has(base.id))];
+    const functions = new Map(members.flatMap(member => member.nodes ?? [])
       .filter(node => node.nodeType === 'FunctionDefinition')
       .map(node => [node.id, sourceRange(bytes, node.src,sourceId)]));
     contracts.set(contract.name, { functions, range: sourceRange(bytes, contract.src,sourceId) });

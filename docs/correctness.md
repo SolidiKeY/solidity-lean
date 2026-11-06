@@ -40,6 +40,28 @@ in the [lifetime layer](lifetime.md). Its `AG`, `EF` and `AGEF` describe
 transaction-boundary safety and possible reachability; commits require actual
 successful outcomes, so an exhausted diamond does not witness reachability.
 
+A function statement can also be read only at a contract's reachable
+starting states: `ValidStart (.reachable M) φ`
+([options.md, O12](options.md#o12-reachable-starting-states-lean-only),
+`Theory/Reachable/Mode.lean`), discharged by a contract invariant proved once
+over the entry points; `ValidTail .clean` statements carry over
+(`ValidTail.validStart_reachable`).
+
+## Assumption records
+
+A verdict's readings (callbacks, overflow, tails, order, hash, address `0`)
+are one record, `Assumptions` (`Calculus/Assumptions.lean`,
+[options.md](options.md) O10), and `ValidA I a φ` the validity it selects:
+`ValidC I` of the formula under the record's tail premise and payment flag,
+for a contract elaborated in the record's order. `ValidT` and `ValidTail`
+statements are cases (`validA_iff_validT`, `validA_of_validTail`). A policy
+reports a row proved only when it entails a record the policy accepts, and
+the row is then valid under it (`Policy.verdict_proved_iff`,
+`Policy.admits_sound`). `ValidA` reads the callback flag, the tail mode and
+the order; overflow, hash and address `0` are labels (`ValidA.labels`). The
+CLI's verdicts mirror these definitions and are checked against them on a
+table, not proved ([options.md](options.md), O10).
+
 ## Model choices behind the statements
 
 - **Payments.** Transfers and sends check both available funds and the
@@ -71,3 +93,18 @@ Regressions: `Examples/Tactics/AuditRepairs.lean`,
 `Examples/Tactics/Net.lean`, `Examples/Tactics/RunnerAudit.lean`.
 Correctness is relative to the model: full solc/EVM equivalence, gas and
 static-call restrictions are outside the proved fragment.
+
+## Caller models (O11)
+
+`ValidM M ts φ` (`⊨ᶠₘ[M; ts] φ`, `Calculus/CallerModel.lean`) reads `φ`
+with callees that call back as the caller model `M` allows: `none` (no
+callback: `Fml.Valid`), `staticOnly` (read, change nothing),
+`nonReentrant R` (call back into `R`'s entries, a guarded one only while the
+lock is free) or
+`any` (`ValidT ts`, `validM_any`). It is an internal formula validity like
+`ValidT`; no `Spec` statement reads it yet. A box proved under a stronger
+model holds under a weaker one (`ValidM.weaken`, positive modalities only),
+so a `ValidT` proof is one under every model (`ValidM.of_validT`); the
+converse fails at each level, `none < staticOnly` by the invariant owed on
+exit (`Examples/Tactics/CallerModel.lean`). See
+[options.md](options.md#o11-caller-models-lean-only).

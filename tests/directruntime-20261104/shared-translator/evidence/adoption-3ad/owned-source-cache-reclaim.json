@@ -1,0 +1,7 @@
+{
+  "beforeMemoryCurrentBytes": 12389564416,
+  "afterMemoryCurrentBytes": 11969773568,
+  "ownedFilesHinted": 10030,
+  "ownedBytesHinted": 501165159,
+  "action": "Read-only POSIX_FADV_DONTNEED on owned pinned source checkout only;no content mutation/global cache change/limit or reserve change."
+}

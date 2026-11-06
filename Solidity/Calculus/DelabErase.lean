@@ -77,6 +77,11 @@ partial def bindersNames? (bs : Expr) : MetaM (Option (List Expr)) := do
   if bs.isAppOfArity ``Binders.snoc 4 then
     let some xs ← bindersNames? (bs.getArg! 1) | return none
     return some (bs.getArg! 3 :: xs)
+  -- a call's several returns (`CallRet.rets`), a memory one among them
+  if bs.isAppOf ``RetBinders.nil then return some []
+  if bs.isAppOfArity ``RetBinders.snoc 4 || bs.isAppOfArity ``RetBinders.snocMem 6 then
+    let some xs ← bindersNames? (bs.getArg! 1) | return none
+    return some (bs.getArg! 3 :: xs)
   return none
 
 /-- The length of a context, when it computes. -/

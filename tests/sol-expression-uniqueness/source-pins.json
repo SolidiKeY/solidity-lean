@@ -1,0 +1,10 @@
+{
+  "Solidity/Frontend/Checked/Print.lean": "df481269236679b9934ee1cb60e00a980ff5a1f13bbb2407c1e9859af7b5b660",
+  "Solidity/Frontend/Checked/Prec.lean": "1ba7dd728814ee45008755c139701560565f0fbb6557b8e68930f373e45f5bdf",
+  "Solidity/Frontend/Checked/Parser.lean": "e7f3df06490946870a43712ecbd93f6f0a6140bbdb561665e665935158c745c3",
+  "Solidity/Frontend/Checked/Check.lean": "080f2cf13448d87033e9454f460663a155975ea412050077f629819dae7f19cf",
+  "Solidity/Frontend/Checked/Token.lean": "6eee8ccd98f4e70a4ff9d8632d81b594bff98e0732254ad88039f4a66de3787a",
+  "Solidity/Frontend/Checked/ExprExamples.lean": "65af159ac5cbde49c0cd897b8f31bcb5d1489afbbd0c55846dacd070a97d6a57",
+  "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+  "tests/upstream/grammar-0.8.38/SolidityParser.g4": "663afb0d91d482a886a6879c801ba6b6f83f34e250d3e8d9406b1ab198272b6a"
+}

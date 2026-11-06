@@ -1,11 +1,11 @@
 'use strict';
 const assert = require('node:assert/strict');
-const {readFileSync,writeFileSync,appendFileSync,existsSync} = require('node:fs');
+const {readFileSync,writeFileSync,appendFileSync,existsSync,mkdirSync} = require('node:fs');
 const {join} = require('node:path');
 const {performance} = require('node:perf_hooks');
 const {createHash}=require('node:crypto');
 const {observe} = require('./observe.cjs');
-const {workload,symbolPosition} = require('./workloads.cjs');
+const {workload,symbolPosition,verificationOutcomes,servicesWorkload,assertServiceResponse} = require('./workloads.cjs');
 
 async function run() {
   const vscode = require('vscode');
@@ -21,12 +21,14 @@ async function run() {
   };
   const extension=vscode.extensions.getExtension(target==='dafny'?'dafny-lang.ide-vscode':'SolidiKeY.solidity-lean');
   assert.ok(extension,'target extension is installed');
-  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null);
+  const observation = observe(vscode,record,extension.extensionPath,config.recordProtocol?config.trace:null,config.workspace);
   const heartbeat = [];
   let last = performance.now();
   const timer = setInterval(()=>{const now=performance.now();heartbeat.push(Math.max(0,now-last-25));last=now;},25);
   const result = {schemaVersion:1,runId:config.runId,target,startedWallTime:Date.now(),metrics,scenarios,observations:{},checks:[],status:'running'};
   let api, client, activeScenario = null;
+  let localStatus;
+  const visual=config.suite==='visual',traceSessions=new WeakMap(),sessionFor=doc=>{if(!traceSessions.has(doc))traceSessions.set(doc,require('node:crypto').randomUUID());return traceSessions.get(doc);};
   const timeout = config.operationTimeoutMs;
   async function bounded(promise,label) {
     let timer;
@@ -59,15 +61,15 @@ async function run() {
     await vscode.window.showTextDocument(doc,{preview:false}); return doc;
   }
   function current(doc) { const state=states.get(doc.uri.toString());return state?.version === doc.version ? state : null; }
-  async function verify(doc,count) {
+  async function verify(doc,count,expected='proved') {
     if (target==='local') {
       const report=await api.verify(doc);
       assert.ok(report,'verification discarded');
-      assert.equal(report.errors.length,0,JSON.stringify(report.errors));
-      assert.equal(report.results.filter(r=>/^f\d+$/.test(r.function)).length,count,'all paired obligations must be reported');
+      verificationOutcomes(target,report,count,expected);
       return report;
     }
     await until(()=>{const state=current(doc);return state?.namedVerifiables.length===count && state.namedVerifiables.every(s=>s.status>=4);},'final current-version symbol status');
+    verificationOutcomes(target,current(doc),count,expected);
     return current(doc);
   }
   function snapshot(doc) {
@@ -101,6 +103,140 @@ async function run() {
       // multicast event so observation cannot replace its UI handlers.
       client.OnVerificationSymbolStatus(params=>{states.set(params.uri,params);record('symbolStatus',params);});
     }
+    if(['trace-visibility','trace-light-show'].includes(config.suite)){
+      await scenario(config.suite==='trace-light-show'?'native-trace-light-show-hide':'native-trace-tab-visibility-theme',async()=>{
+        const tools=require('./trace-presentation.cjs'),records=()=>readFileSync(config.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line));let doc=await open('trace-visibility',1,true);await verify(doc,1,'failed');
+        const snapshot=()=>{assert.ok(!doc.isClosed&&vscode.workspace.textDocuments.includes(doc));assert.equal(vscode.window.activeTextEditor?.document,doc);const wire=tools.wireDocument(records(),records().length,doc.uri.toString());assert.equal(wire.version,doc.version);assert.equal(wire.textHash,tools.digest(doc.getText()));return{uri:doc.uri.toString(),version:doc.version,textHash:wire.textHash,protocolOpenIndex:wire.openIndex,session:sessionFor(doc)};};
+        const capture=async(phase,trace,options)=>{const binding=snapshot(),reply=await require('./phase-capture.cjs').requestPhase(config.dir,config.runId,phase,{binding,trace,...options},timeout);assert.deepEqual(snapshot(),binding);return reply;};
+        const show=async()=>{const start=records().length,binding=snapshot();await bounded(vscode.commands.executeCommand('dafny.showVerificationTrace'),'native visibility trace');assert.deepEqual(snapshot(),binding);const response=tools.traceResponse(records(),start,binding);record('trace.visibilityResponse',response);return response.result;};
+        const workbench=vscode.workspace.getConfiguration('workbench',doc.uri),previousTheme=workbench.inspect('colorTheme')?.workspaceValue,observations={};
+        try{
+          if(config.suite==='trace-light-show'){await workbench.update('colorTheme','Default Light Modern',vscode.ConfigurationTarget.Workspace);const trace=await show();observations.lightExplicit=await capture('trace-light-explicit',trace,{shown:true,menu:'hide',theme:'vs',colors:{backgroundColor:'rgb(187, 222, 251)',color:'rgb(16, 32, 39)'}});await vscode.commands.executeCommand('dafny.hideVerificationTrace');observations.lightHidden=await capture('trace-light-explicit-hidden',[],{shown:false,menu:'show',theme:'vs'});return{status:'partial',observations,scope:'Independent actual show/hide under default light theme. Does not replace failed existing-trace theme continuity, document close, local producer or paired parity obligations.'};}
+          let trace=await show();observations.shown=await capture('trace-visibility-shown',trace,{shown:true,menu:'hide'});await doc.save();const oldDoc=doc,old=snapshot(),start=records().length;await tools.closeSourceTabs(vscode,doc);assert.ok(!vscode.window.tabGroups.all.flatMap(g=>g.tabs).some(t=>t.input?.uri?.toString()===old.uri),'exact source tab absent');observations.afterTabClose={old,modelClosed:doc.isClosed,protocol:records().slice(start)};
+          doc=await vscode.workspace.openTextDocument(doc.uri);await vscode.window.showTextDocument(doc,{preview:false});if(doc!==oldDoc)await until(()=>{try{return tools.wireDocument(records(),records().length,doc.uri.toString()).openIndex>old.protocolOpenIndex;}catch{return false;}},'actual new wire model when one exists');await verify(doc,1,'failed');observations.tabReopen={sameDocumentObject:doc===oldDoc,old,current:snapshot(),classification:doc===oldDoc?'cached live model tab reopen; NOT document close/reopen':'new document model'};observations.reopened=await capture('trace-tab-reopened',[],{observeOnly:true});
+          await vscode.commands.executeCommand('dafny.hideVerificationTrace');trace=await show();await workbench.update('colorTheme','Default Light Modern',vscode.ConfigurationTarget.Workspace);observations.light=await capture('trace-light',trace,{shown:true,menu:'hide',theme:'vs',colors:{backgroundColor:'rgb(187, 222, 251)',color:'rgb(16, 32, 39)'}});await vscode.commands.executeCommand('dafny.hideVerificationTrace');observations.lightHidden=await capture('trace-light-hidden',[],{shown:false,menu:'show',theme:'vs'});
+          return{status:'partial',observations,scope:'Actual default dark/light native presentation and tab visibility. Cached model tab reopening is not true document close/reopen or instance disposal; original close deadline failure remains retained.'};
+        }finally{writeFileSync(join(config.dir,'trace-visibility-observations.json'),JSON.stringify(observations,null,2));await workbench.update('colorTheme',previousTheme,vscode.ConfigurationTarget.Workspace);if(!doc.isClosed){await vscode.window.showTextDocument(doc,{preview:false});await vscode.commands.executeCommand('dafny.hideVerificationTrace');}}
+      });
+    }else if(['commands','custom-commands','custom-default-commands'].includes(config.suite)){
+      assert.ok(target==='local'||config.suite==='custom-default-commands','paired source default-custom scenario only');
+      let commandDocument;const custom=['custom-commands','custom-default-commands'].includes(config.suite),withImports=config.suite==='custom-commands';
+      await scenario(withImports?'command-custom-build-keybinding':custom?'command-custom-default-build-keybinding':'command-build-keybinding',async()=>{
+        if(target==='dafny'){
+          const terminal=vscode.window.createTerminal({name:'Parity pinned SDK',cwd:config.workspace});observation.ownTerminal(terminal);terminal.show();await until(()=>terminal.shellIntegration,'real terminal shell integration');const start=events.length,probeCommand='command -v dotnet && dotnet --version && dotnet --list-runtimes';terminal.shellIntegration.executeCommand(probeCommand);let probeId;
+          await until(()=>{const matches=events.slice(start).filter(e=>e.kind==='terminal.start'&&e.data.commandLine===probeCommand);assert.ok(matches.length<=1);probeId=matches[0]?.data.executionId;return probeId!==undefined&&events.some(e=>e.kind==='terminal.end'&&e.data.executionId===probeId)&&events.some(e=>e.kind==='terminal.output.end'&&e.data.executionId===probeId);},'native terminal SDK identity');const owned=events.slice(start).filter(e=>e.data?.executionId===probeId),output=owned.filter(e=>e.kind==='terminal.output').map(e=>e.data.data).join('');writeFileSync(join(config.dir,'terminal-sdk.txt'),output);assert.equal(owned.find(e=>e.kind==='terminal.end').data.exitCode,0);assert.ok(!owned.some(e=>e.kind==='terminal.output.error'));const identity=require('./core.cjs').terminalSdkIdentity(output,config.dotnetExecutable,config.dotnetVersion);result.observations.terminalSdk={...identity,executionId:probeId,output};
+        }
+        const doc=commandDocument=await open('commands',1);if(withImports){mkdirSync(join(config.workspace,'vendor with spaces/lib'),{recursive:true});writeFileSync(join(config.workspace,'vendor with spaces/lib/Dependency.sol'),'pragma solidity ^0.8.34; contract Dependency {}');await replace(doc,doc.getText().replace('contract Parity {','import \"alias/Dependency.sol\";\ncontract Parity {'));}const lineEnding=new vscode.WorkspaceEdit();lineEnding.set(doc.uri,[vscode.TextEdit.setEndOfLine(vscode.EndOfLine.CRLF)]);assert.equal(await vscode.workspace.applyEdit(lineEnding),true);assert.equal(doc.eol,vscode.EndOfLine.CRLF);await replace(doc,doc.getText()+'\r\n// unsaved UTF16 edit 🦀\r\n');assert.equal(doc.isDirty,true,'keyboard build begins with unsaved source');const source=doc.getText(),version=doc.version;
+        await vscode.commands.executeCommand('workbench.action.focusActiveEditorGroup');
+        const fs=require('node:fs'),artifactSnapshot=()=>Object.fromEntries(fs.readdirSync(config.workspace,{recursive:true}).filter(name=>/\.(cs|csproj|dll)$/.test(name)&&fs.lstatSync(join(config.workspace,name)).isFile()).map(name=>[name,createHash('sha256').update(fs.readFileSync(join(config.workspace,name))).digest('hex')])),beforeArtifacts=target==='dafny'?artifactSnapshot():{},eventStart=events.length;
+        const requestId=require('node:crypto').randomUUID();
+        writeFileSync(join(config.dir,'keybinding-request.json'),JSON.stringify({runId:config.runId,requestId,uri:doc.uri.toString(),version,sourceHash:createHash('sha256').update(source).digest('hex'),customInput:custom&&target==='local'?JSON.stringify({includePaths:withImports?['vendor with spaces']:[],remappings:withImports?['alias/=lib/']:[]}):undefined}));
+        await until(()=>existsSync(join(config.dir,'keybinding-reply.json')),'renderer keybinding dispatch');
+        const reply=JSON.parse(readFileSync(join(config.dir,'keybinding-reply.json'),'utf8'));assert.equal(reply.runId,config.runId);assert.equal(reply.requestId,requestId,reply.error);assert.equal(reply.observation.focusedEditor,true);assert.ok(reply.observation.contextMenu.labels.some(label=>label.includes(target==='local'?'Build Compiler Artifact with Import Options':'Build with Custom Arguments')),'actual context submenu contains custom compiler action');
+        if(target==='dafny'){
+          assert.equal(reply.observation.chord,'f6');assert.equal(reply.observation.prompt.before.value,reply.observation.prompt.submitted.value,'upstream default custom arguments preserved');assert.match(reply.observation.prompt.submitted.value,/^build\b/);assert.ok(!reply.observation.prompt.submitted.value.includes('--no-verify'),'default build proof profile not weakened');
+          assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false);assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);
+          assert.ok(observation.terminalSupported,'native terminal integration required, no synthetic exit');
+          const expectedSuffix=' '+reply.observation.prompt.submitted.value.split(' ').map(arg=>JSON.stringify(arg)).join(' ')+' '+JSON.stringify(doc.uri.fsPath),pinnedExecutableHash=createHash('sha256').update(readFileSync(config.dafnyExecutable)).digest('hex');
+          const starts=()=>events.slice(eventStart).filter(e=>{if(e.kind!=='terminal.start')return false;const command=e.data.commandLine,match=/^"([^"]+)"(.*)$/.exec(command);return !!match&&match[2]===expectedSuffix&&fs.existsSync(match[1])&&createHash('sha256').update(readFileSync(match[1])).digest('hex')===pinnedExecutableHash;});let executionId;
+          await until(()=>{const candidates=starts();assert.ok(candidates.length<=1,'ambiguous native build terminal execution');executionId=candidates[0]?.data.executionId;return executionId!==undefined&&events.some(e=>e.kind==='terminal.end'&&e.data.executionId===executionId)&&events.some(e=>e.kind==='terminal.output.end'&&e.data.executionId===executionId);},'same native Dafny build execution completion');
+          const owned=events.slice(eventStart).filter(e=>e.data?.executionId===executionId),end=owned.find(e=>e.kind==='terminal.end'),output=owned.filter(e=>e.kind==='terminal.output').map(e=>e.data.data).join('');writeFileSync(join(config.dir,'compiler-terminal.txt'),output);assert.ok(!owned.some(e=>e.kind==='terminal.output.error'),'complete terminal output required');assert.equal(end.data.exitCode,0,'actual default Dafny custom Build exit');assert.ok(vscode.workspace.textDocuments.includes(doc),'same live document still owned');assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false);assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);const afterArtifacts=artifactSnapshot(),outputs=Object.entries(afterArtifacts).filter(([name,hash])=>beforeArtifacts[name]!==hash).map(([name,sha256])=>({path:name,bytes:fs.statSync(join(config.workspace,name)).size,sha256}));writeFileSync(join(config.dir,'compiler-artifacts.json'),JSON.stringify(outputs,null,2));assert.ok(outputs.length,'new or changed upstream compiler artifacts required');
+          result.observations.commandScope='Actual Linux F6/default upstream prompt, save, real terminal execution and exit. External Dafny verification/compiler evidence, not Lean kernel or Solidity equivalence.';return{request:reply,version,source,terminal:end.data,scope:result.observations.commandScope};
+        }
+        let report;
+        await until(()=>{const packets=events.slice(eventStart).filter(e=>e.kind==='output').flatMap(event=>{try{return[JSON.parse(event.data.text)];}catch{return[];}}),operation=custom?'buildCustomArgs':'build',sourceHash=createHash('sha256').update(source).digest('hex'),starts=packets.filter(p=>p.kind==='source-command'&&p.phase==='started'&&p.operation===operation&&p.uri===doc.uri.toString()&&p.version===version&&p.sourceHash===sourceHash);assert.ok(starts.length<=1,'ambiguous source command ownership');const failure=starts[0]&&packets.find(p=>p.kind==='source-command'&&p.phase==='failed'&&p.commandId===starts[0].commandId&&p.sourceSession===starts[0].sourceSession&&p.uri===doc.uri.toString()&&p.version===version&&p.sourceHash===sourceHash);if(failure){assert.equal(doc.version,version);assert.equal(doc.getText(),source);writeFileSync(join(config.dir,'source-command-failure.json'),JSON.stringify(failure,null,2));throw Object.assign(Error(failure.message),{code:failure.code});}report=packets.find(p=>p.operation==='build'&&p.source===doc.uri.fsPath);return !!report;},'native compiler Build output after key dispatch');
+        assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false,'Build saved the current buffer');assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);assert.equal(report.sourceHash,createHash('sha256').update(source).digest('hex'));assert.equal(report.kind,'compiler-ast');assert.equal(report.verification,'not-run');
+        const artifact=JSON.parse(readFileSync(report.artifact,'utf8'));assert.ok(artifact.ast||artifact.sourceUnits,'actual compiler artifact has source AST');assert.equal(artifact.header?.sourceSha256??artifact.sourceUnits?.find(unit=>unit.name===artifact.header.mainSource)?.sourceSha256,report.sourceHash,'artifact header binds exact current source');if(custom){assert.equal(reply.observation.chord,'f6');assert.deepEqual(report.compilerOptions,{includePaths:withImports?['vendor with spaces']:[],remappings:withImports?['alias/=lib/']:[]});if(withImports)assert.equal(artifact.sourceUnits.length,2);assert.ok(events.some(e=>e.kind==='output'&&e.data.text==='buildCustomArgs: '+doc.uri.fsPath),'actual custom handler, not ordinary Build');}writeFileSync(join(config.dir,'compiler.ast.json'),readFileSync(report.artifact));
+        result.observations.commandScope='Actual Linux keyboard and real input prompt when custom -> registered compiler action -> source-bound native solc AST. Not kernel proof or macOS evidence.';
+        return {request:reply,report,version,source,scope:result.observations.commandScope};
+      });
+      if(target==='dafny'&&config.suite==='custom-default-commands')for(const operation of ['run','test'])await scenario('native-dafny-'+operation+'-action',async()=>{
+        const doc=commandDocument;assert.ok(doc);const program=operation==='run'?'method Main() { print "parity-native-run\\n"; }\n':'method {:test} NativeTest() { expect 1 == 1; }\n';await replace(doc,program.replaceAll('\n','\r\n'));const version=doc.version,source=doc.getText(),start=events.length;assert.equal(doc.isDirty,true);await bounded(vscode.commands.executeCommand('dafny.'+operation),'actual upstream '+operation+' action');
+        const expectedSuffix=' '+[operation,'--no-verify',doc.uri.fsPath].map(arg=>JSON.stringify(arg)).join(' '),pinned=createHash('sha256').update(readFileSync(config.dafnyExecutable)).digest('hex');let executionId;
+        await until(()=>{const candidates=events.slice(start).filter(e=>{if(e.kind!=='terminal.start')return false;const match=/^"([^"]+)"(.*)$/.exec(e.data.commandLine);return !!match&&match[2]===expectedSuffix&&existsSync(match[1])&&createHash('sha256').update(readFileSync(match[1])).digest('hex')===pinned;});assert.ok(candidates.length<=1,'ambiguous native action execution');executionId=candidates[0]?.data.executionId;return executionId!==undefined&&events.some(e=>e.kind==='terminal.end'&&e.data.executionId===executionId)&&events.some(e=>e.kind==='terminal.output.end'&&e.data.executionId===executionId);},'native upstream '+operation+' output and exit');
+        const owned=events.slice(start).filter(e=>e.data?.executionId===executionId),output=owned.filter(e=>e.kind==='terminal.output').map(e=>e.data.data).join(''),end=owned.find(e=>e.kind==='terminal.end');writeFileSync(join(config.dir,operation+'-terminal.txt'),output);assert.ok(!owned.some(e=>e.kind==='terminal.output.error'));assert.equal(end.data.exitCode,0);assert.ok(vscode.workspace.textDocuments.includes(doc));assert.equal(doc.version,version);assert.equal(doc.getText(),source);assert.equal(doc.isDirty,false);assert.equal(readFileSync(doc.uri.fsPath,'utf8'),source);const plain=require('node:util').stripVTControlCharacters(output);assert.ok(plain.includes(operation==='run'?'parity-native-run':'NativeTest: PASSED'),'authentic runtime/test output');return{version,sourceHash:createHash('sha256').update(source).digest('hex'),execution:end.data,output,scope:'Actual upstream registered action and default --no-verify arguments observed, not a locally selected profile or Lean/EVM equivalence; keyboard/macOS correspondence remains pending.'};
+      });
+      if(target==='dafny'&&config.suite==='custom-default-commands')await scenario('native-trace-show-copy-hide',async()=>{
+        const doc=commandDocument;assert.ok(doc);await replace(doc,workload('dafny',1,true).replaceAll('\n','\r\n'));await verify(doc,1,'failed');const version=doc.version,text=doc.getText(),session=sessionFor(doc),binding={uri:doc.uri.toString(),version,textHash:createHash('sha256').update(text).digest('hex'),session};
+        const stable=()=>{assert.ok(!doc.isClosed&&vscode.workspace.textDocuments.includes(doc));assert.equal(vscode.window.activeTextEditor?.document,doc);assert.equal(doc.version,version);assert.equal(doc.getText(),text);};
+        const records=()=>readFileSync(config.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line));
+        binding.protocolOpenIndex=require('./trace-presentation.cjs').wireDocument(records(),records().length,binding.uri).openIndex;
+        const responseAfter=start=>{stable();const response=require('./trace-presentation.cjs').traceResponse(records(),start,binding);record('trace.boundResponse',response);return response.result;};
+        const capture=async(phase,trace)=>{stable();const value=await require('./phase-capture.cjs').requestPhase(config.dir,config.runId,phase,{binding,trace,shown:phase!=='trace-hidden',menu:phase==='trace-hidden'?'show':'hide'},timeout);stable();return value;};
+        let start=records().length;await bounded(vscode.commands.executeCommand('dafny.showVerificationTrace'),'actual trace show');const shown=responseAfter(start);assert.ok(shown.some(item=>typeof item.assumption==='string'&&item.position?.line>=0),'nonempty positioned native trace required');const shownCapture=await capture('trace-shown',shown);
+        const previousClipboard=await vscode.env.clipboard.readText();let copy,copyCapture;
+        try{await vscode.env.clipboard.writeText('parity-'+config.runId);start=records().length;await bounded(vscode.commands.executeCommand('dafny.copyVerificationTrace'),'actual trace copy');copy=responseAfter(start);const expected=copy.map(item=>item.assumption).join('\n\n');assert.ok(expected);const deadline=Date.now()+timeout;let actual;do{actual=await vscode.env.clipboard.readText();if(actual===expected)break;if(Date.now()>=deadline)throw Object.assign(Error('Native trace clipboard did not match response'),{code:'TIMEOUT'});await new Promise(r=>setTimeout(r,20));}while(true);copyCapture=await capture('trace-copied',copy);}
+        finally{await vscode.env.clipboard.writeText(previousClipboard);}
+        await bounded(vscode.commands.executeCommand('dafny.hideVerificationTrace'),'actual trace hide');const hiddenCapture=await capture('trace-hidden',[]);
+        return{status:'partial',version,shown,copy,shownCapture,copyCapture,hiddenCapture,clipboardRestored:true,scope:'Actual pinned Dafny counterexample producer/show/copy/hide and native pixels; no local positioned trace or kernel equivalence established.'};
+      });
+      if(target==='dafny'&&config.suite==='custom-default-commands')await scenario('native-trace-lifecycle',async()=>{
+        const traceTools=require('./trace-presentation.cjs'),records=()=>readFileSync(config.trace,'utf8').trim().split('\n').map(line=>JSON.parse(line));
+        const snapshot=doc=>{assert.ok(!doc.isClosed&&vscode.workspace.textDocuments.includes(doc));assert.equal(vscode.window.activeTextEditor?.document,doc);const result={uri:doc.uri.toString(),version:doc.version,textHash:traceTools.digest(doc.getText()),session:sessionFor(doc)};const wire=traceTools.wireDocument(records(),records().length,result.uri);assert.equal(wire.version,result.version);assert.equal(wire.textHash,result.textHash);result.protocolOpenIndex=wire.openIndex;return result;};
+        const stable=(doc,binding)=>assert.deepEqual(snapshot(doc),binding,'same active document lifetime/source for entire observation');
+        const capture=async(phase,doc,options)=>{const binding=snapshot(doc),reply=await require('./phase-capture.cjs').requestPhase(config.dir,config.runId,phase,{binding,...options},timeout);stable(doc,binding);return reply;};
+        const resultFor=async(start,doc)=>{const binding=snapshot(doc);await until(()=>{const list=records(),requests=list.slice(start).filter(r=>r.direction==='client'&&r.message?.method==='dafny/counterExample'&&r.message.params?.textDocument?.uri===binding.uri);return requests.some(request=>list.some(r=>r.direction==='server'&&r.message?.id===request.message.id&&Array.isArray(r.message.result)));},'native lifecycle trace reply');stable(doc,binding);const value=traceTools.traceResponse(records(),start,binding);const bodyLine=doc.getText().split('\n').findIndex(line=>line.includes('{ r := 1; }'));assert.ok(bodyLine>=0);assert.ok(value.result.length&&value.result.every(item=>item.position.line===bodyLine),'trace positions match unchanged semantic workload body');record('trace.lifecycleResponse',value);return value;};
+        const show=async doc=>{const start=records().length;await bounded(vscode.commands.executeCommand('dafny.showVerificationTrace'),'actual lifecycle show');return resultFor(start,doc);};
+        let doc=commandDocument,other;assert.ok(doc);const observations={};
+        const configuration=vscode.workspace.getConfiguration('dafny',doc.uri),previousColor=configuration.inspect('colorVerificationTrace')?.workspaceValue;
+        try{
+          let value=await show(doc);observations.initial=await capture('trace-lifecycle-shown',doc,{trace:value.result,shown:true,menu:'hide'});
+          await replace(doc,'// trace edit 🦀\r\n'+doc.getText());await verify(doc,1,'failed');await until(()=>{try{return traceTools.wireDocument(records(),records().length,doc.uri.toString()).version===doc.version;}catch{return false;}},'edited wire source');const list=records(),editIndex=list.findLastIndex(r=>r.direction==='client'&&r.message?.method==='textDocument/didChange'&&r.message.params.textDocument.uri===doc.uri.toString()&&r.message.params.textDocument.version===doc.version);value=await resultFor(editIndex+1,doc);observations.edited=await capture('trace-edited',doc,{trace:value.result,shown:true,menu:'hide'});
+          other=await open('trace-other',1);await verify(other,1,'proved');observations.switched=await capture('trace-switched',other,{trace:[],shown:false});
+          const start=records().length;await vscode.window.showTextDocument(doc,{preview:false});value=await resultFor(start,doc);observations.returned=await capture('trace-returned',doc,{trace:value.result,shown:true,menu:'hide'});
+          await configuration.update('colorVerificationTrace',{backgroundColor:'#224466',fontColor:'#ddeeff'},vscode.ConfigurationTarget.Workspace);await vscode.commands.executeCommand('dafny.hideVerificationTrace');value=await show(doc);observations.customColor=await capture('trace-custom-color',doc,{trace:value.result,shown:true,menu:'hide',colors:{backgroundColor:'rgb(34, 68, 102)',color:'rgb(221, 238, 255)'}});
+          const raceStart=records().length,pending=vscode.commands.executeCommand('dafny.showVerificationTrace');await vscode.commands.executeCommand('dafny.hideVerificationTrace');await bounded(pending,'in-flight show after hide');value=await resultFor(raceStart,doc);observations.hideInFlight=await capture('trace-hide-inflight',doc,{observeOnly:true});observations.hideInFlight.annotationsReappeared=observations.hideInFlight.capture.tracePresentation.annotations.some(a=>a.uri===doc.uri.toString());observations.hideInFlight.cancellations=records().slice(raceStart).filter(r=>r.direction==='client'&&r.message?.method==='$/cancelRequest'&&r.message.params.id===value.requestId);
+          await vscode.commands.executeCommand('dafny.hideVerificationTrace');observations.cleanup=await capture('trace-cleanup',doc,{trace:[],shown:false,menu:'show'});
+          await configuration.update('colorVerificationTrace',previousColor,vscode.ConfigurationTarget.Workspace);value=await show(doc);observations.beforeClose=await capture('trace-beforeclose',doc,{trace:value.result,shown:true,menu:'hide'});await doc.save();const old=snapshot(doc);await traceTools.closeSourceTabs(vscode,doc);await until(()=>doc.isClosed,'old trace source closed');const reopened=await vscode.workspace.openTextDocument(doc.uri);await vscode.window.showTextDocument(reopened,{preview:false});await verify(reopened,1,'failed');await until(()=>{try{const wire=traceTools.wireDocument(records(),records().length,reopened.uri.toString());return wire.openIndex>old.protocolOpenIndex&&wire.version===reopened.version&&wire.textHash===traceTools.digest(reopened.getText());}catch{return false;}},'new wire open lifetime');const fresh=snapshot(reopened);assert.notEqual(old.session,fresh.session);assert.notEqual(old.protocolOpenIndex,fresh.protocolOpenIndex);observations.reopenedBeforeAction=await capture('trace-reopened-observed',reopened,{observeOnly:true});doc=reopened;
+          await vscode.commands.executeCommand('dafny.hideVerificationTrace');value=await show(doc);observations.reopened=await capture('trace-reopened-shown',doc,{trace:value.result,shown:true,menu:'hide'});await vscode.commands.executeCommand('dafny.hideVerificationTrace');observations.reopenedHidden=await capture('trace-reopened-hidden',doc,{trace:[],shown:false,menu:'show'});
+          const closeStart=records().length,closing=snapshot(doc),closingShow=vscode.commands.executeCommand('dafny.showVerificationTrace');await doc.save();await traceTools.closeSourceTabs(vscode,doc);await until(()=>doc.isClosed,'in-flight trace source close');await bounded(closingShow,'show settling after source close');await vscode.window.showTextDocument(other,{preview:false});observations.closeInFlight=await capture('trace-close-inflight',other,{observeOnly:true});await until(()=>records().slice(closeStart).some(r=>r.direction==='client'&&r.message?.method==='textDocument/didClose'&&r.message.params.textDocument.uri===closing.uri),'wire close barrier');try{const historical=traceTools.traceResponse(records(),closeStart,closing);observations.closeInFlight.stableIntervalAccepted=true;observations.closeInFlight.historicalInterval=historical;}catch(error){observations.closeInFlight.stableIntervalAccepted=false;observations.closeInFlight.authorityRejection=error.message;}observations.closeInFlight.protocol=records().slice(closeStart);observations.closeInFlight.currentAuthority=!doc.isClosed&&vscode.workspace.textDocuments.includes(doc);assert.equal(observations.closeInFlight.currentAuthority,false,'closed source never receives current authority; historical response may have won the race');
+          return{status:'partial',observations,scope:'Native pinned lifecycle observations, including upstream race/menu state; observeOnly phases are recorded, not claimed successful suppression. No local positioned producer, rendered parity, native macOS or extension-decoration disposal proof.'};
+        }finally{writeFileSync(join(config.dir,'trace-lifecycle-observations.json'),JSON.stringify(observations,null,2));await configuration.update('colorVerificationTrace',previousColor,vscode.ConfigurationTarget.Workspace);if(!doc.isClosed){await vscode.window.showTextDocument(doc,{preview:false});await vscode.commands.executeCommand('dafny.hideVerificationTrace');}if(other&&!other.isClosed){await vscode.window.showTextDocument(other,{preview:false});await other.save();await vscode.commands.executeCommand('workbench.action.closeActiveEditor');}}
+      });
+    }else if(visual){
+      const {requestPhase,phaseObserved}=require('./phase-capture.cjs');
+      const localStates=new Map();
+      if(target==='local'){
+        assert.ok(api.service,'Visual lifecycle needs the real persistent service');
+        localStatus=p=>{localStates.set(p.uri,p);record('localStatus',p);};api.service.on('status',localStatus);
+      }
+      let visualDoc;
+      const native=()=>{const s=target==='local'?localStates.get(visualDoc.uri.toString()):current(visualDoc);return s?.version===visualDoc.version?s:null;};
+      const capture=async phase=>{
+        const before=native(),version=visualDoc.version,source=visualDoc.getText();
+        // Request overview pixels before awaiting a language provider: provider latency can miss early phases.
+        const value=await requestPhase(config.dir,config.runId,phase,{state:snapshot(visualDoc),source,uri:visualDoc.uri.toString(),nativeBefore:before},timeout);
+        const after=native();assert.equal(visualDoc.version,version,'capture source version stable');assert.equal(visualDoc.getText(),source,'capture source text stable');
+        const observed=phaseObserved(phase,before,after);
+        const observation={status:observed?'partial':'missing',capture:value,nativeBefore:before,nativeAfter:after,phaseObserved:observed,
+          scope:observed?'Native state brackets this capture; actual visible differences still require independent inspection.':'Requested early phase was missed or ambiguous; this image is not evidence for that phase.'};
+        if(['verified','proof-broken','proof-fixed'].includes(phase)){
+          const pos=symbolPosition(target,source),editor=vscode.window.activeTextEditor;
+          assert.equal(editor?.document,visualDoc,'hover capture uses the same active file');editor.selection=new vscode.Selection(pos.line,pos.character,pos.line,pos.character);
+          const hover=await vscode.commands.executeCommand('vscode.executeHoverProvider',visualDoc.uri,new vscode.Position(pos.line,pos.character));
+          await vscode.commands.executeCommand('editor.action.showHover');
+          const hoverCapture=await requestPhase(config.dir,config.runId,phase+'-hover',{version,source,uri:visualDoc.uri.toString(),hover},timeout);
+          observation.hover={status:hoverCapture.capture.hoverCount>0?'partial':'missing',capture:hoverCapture,provider:hover,
+            scope:'Only a rendered visible hover widget can evidence appearance; provider data alone cannot.'};
+          const hide=(await vscode.commands.getCommands(true)).find(c=>c==='hideHover'||c==='editor.action.hideHover');if(hide)await vscode.commands.executeCommand(hide);
+          assert.equal(visualDoc.version,version,'hover source version stable');assert.equal(visualDoc.getText(),source,'hover source text stable');
+        }
+        writeFileSync(join(config.dir,'phases',phase,'observation.json'),JSON.stringify(observation,null,2));return observation;
+      };
+      const automatic=async(expected,count)=>{
+        await until(()=>target==='local'?
+          localStates.get(visualDoc.uri.toString())?.version===visualDoc.version&&localStates.get(visualDoc.uri.toString())?.state==='complete'&&api.reports.has(visualDoc.uri.toString()):
+          current(visualDoc)?.namedVerifiables?.length===count&&current(visualDoc).namedVerifiables.every(s=>s.status>=4),'automatic current-version verification');
+        const report=target==='local'?api.reports.get(visualDoc.uri.toString()):current(visualDoc);verificationOutcomes(target,report,count,expected);
+      };
+      await scenario('visual-open',async()=>{visualDoc=await open('visual',config.obligations);return capture('open');});
+      await scenario('visual-first-feedback',async()=>{
+        await until(()=>target==='local'?localStates.get(visualDoc.uri.toString())?.version===visualDoc.version:!!current(visualDoc),'first native status feedback');return capture('first-feedback');
+      });
+      await scenario('visual-verified',async()=>{await automatic('proved',config.obligations);return capture('verified');});
+      await scenario('visual-proof-broken',async()=>{await replace(visualDoc,workload(target,config.obligations+1,true));await automatic('failed',config.obligations+1);return capture('proof-broken');});
+      await scenario('visual-proof-fixed',async()=>{await replace(visualDoc,workload(target,config.obligations+2));await automatic('proved',config.obligations+2);return capture('proof-fixed');});
+    }else{
     const initialStart=performance.now();
     let doc;
     await scenario('initial-verification',async()=>{
@@ -151,27 +287,14 @@ async function run() {
           scope:id==='hover'?'verified declaration hover':'Discovery probe at declaration; dedicated trigger/call-site tests are required.'};
       });
     }
-    if(config.suite==='full'&&target==='local')await scenario('language-services-callsite',async()=>{
-      const path=file('language-services');
-      const body='// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract Services { function helper(uint a, uint b) public pure returns(uint) {return a+b;} function caller() public pure returns(uint) {return helper(1,2);} }\n';
-      writeFileSync(path,body);const languageDoc=await vscode.workspace.openTextDocument(path);
-      const offset=body.lastIndexOf('helper('),point=languageDoc.positionAt(offset+2);
-      const definition=await request('vscode.executeDefinitionProvider',languageDoc,point,[]);
-      assert.ok(definition.value?.length,'call-site definition');
-      const references=await request('vscode.executeReferenceProvider',languageDoc,point,[]);assert.ok(references.value?.length>=2);
-      const completion=await request('vscode.executeCompletionItemProvider',languageDoc,point,[]);assert.ok(completion.value?.items.some(i=>i.label==='helper'));
-      const signature=await request('vscode.executeSignatureHelpProvider',languageDoc,languageDoc.positionAt(offset+'helper(1,'.length),[]);
-      assert.equal(signature.value?.activeParameter,1);assert.match(signature.value.signatures[0].label,/helper/);
-      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',languageDoc.uri,point,'renamed');
-      assert.equal(rename.get(languageDoc.uri).length,2);
-      return {status:'partial',definitions:definition.value.length,references:references.value.length,renameEdits:rename.get(languageDoc.uri).length,
-        scope:'Actual local compiler-backed providers at a call site. Cross-language semantic parity is unexamined.'};
+    if(config.suite==='full')await scenario('symbols-and-formatting',async()=>{
+      const symbols=await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',doc.uri);
+      const names=[];const visit=rows=>{for(const s of rows||[]){names.push(s.name);visit(s.children);}};visit(symbols);
+      assert.ok(names.some(n=>n.includes('f0')),'function document symbol');
+      const formatting=await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',doc.uri,{tabSize:2,insertSpaces:true});
+      assert.ok(Array.isArray(formatting),'formatter response (already formatted input may have no edits)');
+      return {status:'partial',symbols,formatting,scope:'Document symbols and formatter invocation; formatting edit semantics need dedicated fixtures.'};
     });
-    if(config.suite==='full')await scenario('symbols-and-formatting',async()=>({
-      status:target==='local'&&!api.service?'missing':'partial',
-      symbols:await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider',doc.uri),
-      formatting:await vscode.commands.executeCommand('vscode.executeFormatDocumentProvider',doc.uri,{tabSize:2,insertSpaces:true})
-    }));
     await scenario('incremental-verification',async()=>{
       const start=performance.now();await replace(doc,workload(target,config.obligations+1));
       await verify(doc,config.obligations+1);metrics.incrementalVerificationMs=performance.now()-start;return snapshot(doc);
@@ -212,7 +335,7 @@ async function run() {
       return {status:'partial',saveBoundary,state:snapshot(doc),scope:'The obsolete request is suppressed. Latest verification requires explicit Save after this VS Code persistence race; automatic recovery remains open.'};
     });
     if(config.suite==='full')await scenario('failure-diagnostics',async()=>{
-      await replace(doc,workload(target,config.obligations,true));await verify(doc,config.obligations);
+      await replace(doc,workload(target,config.obligations,true));await verify(doc,config.obligations,'failed');
       const state=snapshot(doc);assert.ok(state.diagnostics.length>0,'false postcondition must be visible');return state;
     });
     if(config.suite==='full')await scenario('counterexamples',async()=>{
@@ -224,8 +347,8 @@ async function run() {
       await vscode.workspace.getConfiguration('solidityLean').update('counterexamples',true,vscode.ConfigurationTarget.Workspace);
       const report=await api.verify(doc);
       const rows=report.results.filter(r=>/^f\d+$/.test(r.function));
-      assert.ok(rows.some(r=>r.status==='refuted'&&r.counterexample),'certified counterexample evidence');
-      return {status:'partial',rows:rows.map(r=>({function:r.function,status:r.status,counterexample:r.counterexample})),scope:'Certified model prestate, without a positioned trace.'};
+      assert.ok(rows.some(r=>r.status==='refuted'&&r.counterexample),'counterexample evidence');
+      return {status:'partial',rows:rows.map(r=>({function:r.function,status:r.status,counterexample:r.counterexample})),scope:'Model prestate, without a positioned trace. Certificate presence is retained per row.'};
     });
     await scenario('concurrent-files-and-requests',async()=>{
       const start=performance.now();
@@ -275,6 +398,36 @@ async function run() {
       metrics.restartMs=performance.now()-start;
       const restarted=await open('restarted',1);await verify(restarted,1);return snapshot(restarted);
     });
+    if(config.suite==='full')await scenario('language-services-callsite',async()=>{
+      const fixture=servicesWorkload(target);
+      const project=join(config.workspace,'language-services-project');mkdirSync(project,{recursive:true});
+      if(target==='dafny')writeFileSync(join(project,'dfyconfig.toml'),'includes = ["*.dfy"]\n');
+      const path=join(project,'language-services'+(target==='dafny'?'.dfy':'.sol'));
+      writeFileSync(path,fixture.text);const languageDoc=await vscode.workspace.openTextDocument(path);
+      await vscode.window.showTextDocument(languageDoc,{preview:false});
+      const definition=await request('vscode.executeDefinitionProvider',languageDoc,fixture.call,[]);
+      assertServiceResponse('definition',fixture,languageDoc.uri.toString(),definition.value);
+      const references=await request('vscode.executeReferenceProvider',languageDoc,fixture.call,[]);
+      assertServiceResponse('references',fixture,languageDoc.uri.toString(),references.value);
+      const signature=await request('vscode.executeSignatureHelpProvider',languageDoc,fixture.signature,[]);
+      assert.match(signature.value?.signatures?.[0]?.label||'',/helper/);
+      const secondParameter=await request('vscode.executeSignatureHelpProvider',languageDoc,fixture.signatureSecond,[]);
+      const point=new vscode.Position(fixture.call.line,fixture.call.character);
+      const rename=await vscode.commands.executeCommand('vscode.executeDocumentRenameProvider',languageDoc.uri,point,'renamed');
+      assertServiceResponse('rename',fixture,languageDoc.uri.toString(),{changes:{[languageDoc.uri.toString()]:rename?.get(languageDoc.uri)||[]}});
+      let completion;
+      const completionEdit=new vscode.WorkspaceEdit();completionEdit.insert(languageDoc.uri,new vscode.Position(fixture.completionInsertion.line,fixture.completionInsertion.character),' + this.');
+      assert.equal(await vscode.workspace.applyEdit(completionEdit),true);
+      try{
+        completion=await request('vscode.executeCompletionItemProvider',languageDoc,fixture.completion,['.']);
+        assert.ok(completion.value?.items.some(i=>(typeof i.label==='string'?i.label:i.label.label)==='helper'),'member completion on incomplete receiver');
+        metrics.completionMs=completion.elapsedMs;
+      }finally{await replace(languageDoc,fixture.text);}
+
+      return {status:'partial',definitions:definition.value,references:references.value,completionLabels:completion.value.items.map(i=>i.label),signature:signature.value,secondParameter:secondParameter.value,renameEdits:rename.get(languageDoc.uri),
+        scope:'Paired real call-site APIs; additional language-specific behavior remains unexamined.'};
+    });
+    }
     result.observations.commands=(await vscode.commands.getCommands(true)).filter(c=>c.startsWith(target==='local'?'solidityLean.':'dafny.'));
     result.observations.decorations=observation.decorations;
     result.observations.testEvents=events.filter(e=>e.kind.startsWith('test.'));
@@ -286,6 +439,7 @@ async function run() {
       scenarios.every(s=>s.status==='passed')?'passed':'passed-with-gaps';
   } catch(error) {result.status=error.code==='TIMEOUT'?'timeout':'broken';result.error=error.stack;}
   finally {
+    if(localStatus)api.service.removeListener('status',localStatus);
     clearInterval(timer);observation.restore();result.elapsedMs=performance.now()-started;
     writeFileSync(config.result,JSON.stringify(result,null,2));
     if(target==='local') api?.cancel();

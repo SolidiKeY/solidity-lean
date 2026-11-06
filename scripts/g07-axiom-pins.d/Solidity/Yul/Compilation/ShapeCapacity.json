@@ -1,0 +1,33 @@
+{
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.capacity_shift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_lift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.code_total": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.framed_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.instruction_lift": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ShapeCapacity.lean:Solidity.Yul.Compilation.ShapeCapacity.trace_shift": [
+  "Quot.sound",
+  "propext"
+ ]
+}

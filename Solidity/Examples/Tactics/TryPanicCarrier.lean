@@ -70,7 +70,7 @@ theorem normal_return {Γ : Ctx} (i : Idx Γ (.val .uint)) (σ : State C Γ)
   have hc := call_halt σ
   rw [TryPanicProducer.raw_halt] at hc
   have hs : (selfCall.addr.evalT σ).val = σ.tx.selfAddress.val := rfl
-  simp only [normalTry, TRun.tryCall, hs, decide_true, Bool.true_and, hc,
+  simp only [normalTry, TRun.tryCall, Binders.toRet, hs, decide_true, Bool.true_and, hc,
     TryPanicProducer.no_error_decode, computed36_decode, if_neg hnz, if_true]
   rfl
 

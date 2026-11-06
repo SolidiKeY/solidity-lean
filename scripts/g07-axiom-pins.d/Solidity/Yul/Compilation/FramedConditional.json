@@ -1,0 +1,20 @@
+{
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.conditional": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.forward": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.irStack_cons": [
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedConditional.lean:Solidity.Yul.Compilation.FramedConditional.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

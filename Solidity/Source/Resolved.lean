@@ -164,6 +164,10 @@ theorem zero_u256 (B : DeclName → DeclName → Bool) :
     STy.implicit B (.rational (Q.ofInt 0)) (.int IntTy.u256) = true :=
   decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
 
+/-- The constant `0` is an index (an absent slice bound). -/
+theorem zero_isIndex : STy.isIndex (.rational (Q.ofInt 0)) = true :=
+  decide_eq_true (p := (Q.ofInt 0).FitsInt IntTy.u256) (by decide)
+
 mutual
 
 /-- **Resolved expressions** over environment `E`, intrinsically typed. -/
@@ -230,6 +234,18 @@ inductive RExpr (E : Env) (Γ : RCtx) : STy → Type where
   | abiEncode {σs : List STy} (k : AbiKind) (args : RArgs E Γ σs) : RExpr E Γ (.bytes .memory)
   /-- A copy into storage. -/
   | assignCopy {τ σ : STy} (l : RLVal E Γ τ) (e : RExpr E Γ σ) (h : σ.copiesTo τ = true) : RExpr E Γ τ
+  /-- `abi.decode`: the data, decoded at types the decoder reads. -/
+  | abiDecode {σ : STy} {τs : List STy} (data : RExpr E Γ σ) (hs : σ.decodeSrc = true)
+      (hd : τs.all (STy.decodable E) = true) : RExpr E Γ (STy.ret τs)
+  /-- A slice of a `calldata` array or `bytes`: the start and end indices
+  (an absent start is `0`; an absent end is the length, `toEnd`). -/
+  | slice {τ σ ρ : STy} (a : RExpr E Γ τ) (hτ : τ.sliceable = true) (s : RExpr E Γ σ) (hs : σ.isIndex = true)
+      (e : RExpr E Γ ρ) (he : ρ.isIndex = true) (toEnd : Bool) : RExpr E Γ τ
+  /-- `[e₁, …, eₙ]`: a new memory array of the converted elements. -/
+  | inlineArray {σ : STy} {n : Nat} (args : RConvArgs E Γ (List.replicate n σ)) (hσ : σ.oneWord = true) :
+      RExpr E Γ (.array .memory σ (some n))
+  /-- `new T[](n)`, `new bytes(n)`, `new string(n)`: `n` zeroed elements. -/
+  | newArray {τ σ : STy} (hτ : τ.newable = true) (len : RExpr E Γ σ) (hl : σ.isIndex = true) : RExpr E Γ τ
 
 /-- Resolved argument lists. -/
 inductive RArgs (E : Env) (Γ : RCtx) : List STy → Type where
@@ -346,6 +362,14 @@ def Typed.toR {Γ : Ctx} {e : Syn .expr} {τ : STy} : Typed Γ e τ → RExpr Γ
   | .send da dv h => .send da.toR (.conv dv.toR (.inl h))
   | .abiEncode (k := k) _ _ da _ => .abiEncode k da.toR
   | .assignCopy l db h _ => .assignCopy l.toR db.toR h
+  | .abiDecode _ dx hs _ hd => .abiDecode dx.toR hs hd
+  | .slice da hτ ds hs de he => .slice da.toR hτ ds.toR hs de.toR he false
+  | .sliceFrom da hτ ds hs => .slice da.toR hτ ds.toR hs (.const (Q.ofInt 0)) zero_isIndex true
+  | .sliceTo da hτ de he => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex de.toR he false
+  | .sliceAll da hτ => .slice da.toR hτ (.const (Q.ofInt 0)) zero_isIndex (.const (Q.ofInt 0)) zero_isIndex true
+  | .inlineArray (τs := τs) d ds _ hσ hf =>
+    .inlineArray (n := τs.length + 1) (RArgs.convert _ (RArgs.cons d.toR ds.toR) hf) hσ
+  | .newArray _ hτ dx hl => .newArray hτ dx.toR hl
 
 /-- Elaboration of argument lists. -/
 def TypedArgs.toR {Γ : Ctx} {es : Syn (.list .expr)} {τs : List STy} :
@@ -423,6 +447,17 @@ inductive RStmt (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx →
       (args : RConvArgs E Γ ps) : RStmt E R M k Γ Γ
   /-- The canonical rethrow of a `bytes memory` local. -/
   | rethrow {k : SCtx} {Γ : RCtx} (i : Idx Γ (.bytes .memory)) : RStmt E R M k Γ Γ
+  /-- A tuple declaration (lane FU2-B): the tuple's components converted to
+  the declared slots' types and pushed, holes discarded. -/
+  | declTuple {k : SCtx} {Γ : RCtx} {σs : List STy} (slots : List (Option STy)) (e : RExpr E Γ (.tuple σs))
+      (h : slotsFit E.isBase slots σs = true) : RStmt E R M k Γ (pushTys slots Γ)
+  /-- `try` (lane FU2-B): an external call without value; on success its
+  returns are pushed and `ok` runs, on a revert `cat` runs (the revert data
+  pushed as `bytes memory` when `cbind`). -/
+  | tryCall {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} {dn : DeclName} {ps rs : List STy} (target : RExpr E Γ (.contract dn))
+      (d : Decl) (h : d.fnSig E = some (ps, rs)) (args : RConvArgs E Γ ps)
+      (ok : RItems E R M k (rs.reverseAux Γ) Γ₁) (cbind : Bool) (cat : RItems E R M k (catchCtx cbind Γ) Γ₂) :
+      RStmt E R M k Γ Γ
 
 /-- Resolved blocks. -/
 inductive RItems (E : Env) (R : List STy) (M : Bool) : SCtx → RCtx → RCtx → Type where
@@ -447,6 +482,11 @@ def OptExpr.toR {Γ : Ctx} {c : Syn (.opt .expr)} : OptExpr Γ c → ROptExpr Γ
   | .none => .none
   | .some d => .some d.toR
 
+/-- The success block's local types of a `try` (lane FU2-B). -/
+theorem tryOk_tys (ns : List (Option String)) (rs : List STy) (L : List (String × STy)) :
+    tysOf ((tryLocals ns rs).reverse ++ L) = rs.reverseAux (tysOf L) := by
+  simp only [tysOf, List.map_append, List.map_reverse, tryLocals_tys, List.reverseAux_eq]
+
 mutual
 
 /-- **Elaboration of statements.** -/
@@ -456,7 +496,18 @@ def StmtD.toR {C : Ctx} {k : SCtx} {L L' : List (String × STy)} {s : Syn (.stmt
   | .placeholder h => .placeholder h
   | .declVar (τ := τ) _ _ => .declVar τ
   | .declInit _ _ d h => .declInit d.toR h
+  | .declTuple (slots := slots) (L := L) _ d h =>
+    cast (congrArg (RStmt C.env C.rets C.inModifier k (tysOf L)) (pushSlots_tys slots L).symm)
+      (RStmt.declTuple (E := C.env) (R := C.rets) (M := C.inModifier) (k := k) (Γ := tysOf L)
+        (slots.map (Option.map Prod.snd)) d.toR h)
   | .block b => .block b.toR
+  | .tryCall (rs := rs) (rets := rets) (x := x) (L := L) (L₁ := L₁) (L₂ := L₂) dc da _ hd hf _ _ dok _ dcb =>
+    .tryCall dc.toR _ hd (RArgs.convert _ da.toR hf)
+      (cast (congrArg (fun Γ' => RItems C.env C.rets C.inModifier k Γ' (tysOf L₁))
+        (tryOk_tys rets.paramNames rs L)) dok.toR)
+      x.isSome
+      (cast (congrArg (fun Γ' => RItems C.env C.rets C.inModifier k Γ' (tysOf L₂)) (catchLocals_tys x L))
+        dcb.toR)
   | .ifThen dc _ ds => .ifThen dc.toR ds.toR
   | .ifElse dc _ _ ds dt => .ifElse dc.toR ds.toR dt.toR
   | .whileLoop dc _ ds => .whileLoop dc.toR ds.toR

@@ -128,7 +128,7 @@ theorem Binders.defaultsT_eq {H : HTy} : {ρ : Ctx} → (bs bs' : Binders ρ) �
 at every such call: each enters the body with the return variables at their
 defaults, whatever the targets' names. -/
 theorem FunContract.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : Fml C ps}
-    {ens : Fml C (rs ++ (Olds ++ ps))} (bs : Binders rs) (h2 : 2 ≤ rs.length)
+    {ens : Fml C (rs ++ (Olds ++ ps))} (bs : RetBinders rs) (h2 : 2 ≤ rs.length)
     (h : FunContract (Γ := []) (CallRet.rets bs) b req ens m) :
     ∀ {Γ Γ' : Ctx} (ret : CallRet Γ rs Γ'), FunContract ret b req ens m := by
   intro Γ Γ' ret
@@ -139,10 +139,11 @@ theorem FunContract.forall_rets {Γf : Ctx} {b : Prog C (rs ++ ps) Γf} {req : F
   | storage => simp at h2
   | rets bs' =>
     intro σ hσ
-    have := h σ hσ
-    simp only [CallRet.enterT] at this ⊢
-    rw [Binders.defaultsT_eq bs bs'] at this
-    exact this
+    have e : (CallRet.rets (Γ := Γ) bs').enterT σ = (CallRet.rets (Γ := []) bs).enterT σ :=
+      RetBinders.enterT_eq σ bs' bs
+    show m.afterRunTR _ ((Prog.run ((CallRet.rets (Γ := Γ) bs').enterT σ).st b).map _)
+    rw [e]
+    exact h σ hσ
 
 theorem Prog.within_nil {μ : Mutability} {Γ : Ctx} : Prog.within μ (.nil : Prog C Γ Γ) = true :=
   rfl

@@ -1,0 +1,2 @@
+docs/module-map/frontend.md: | `Frontend/SolcJson/IrImport.lean` | Exact extraction of solc's IR output channels This frontend boundary retains a derivation of the selected JSON string. |
+docs/module-map/bytecode-selection.md: | `SolcValidation/Dialect.lean` | # solc 0.8.38 object-dialect operation interface EVM operations reuse the owner's arity-indexed builtin type. |

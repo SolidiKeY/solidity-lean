@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/StorageOps/TargetFreshMapping.lean:Solidity.Backend.StorageOps.TargetFreshMapping.complete_numeric": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetFreshMapping.lean:Solidity.Backend.StorageOps.TargetFreshMapping.run_source_header": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

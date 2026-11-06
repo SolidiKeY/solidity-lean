@@ -1,0 +1,79 @@
+{
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.disjoint_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.disjoint_sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pop_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pop_push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pop_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pop_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pop_update_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.popTouches": [],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.popUpdates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.push_pop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.push_push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.push_realized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.push_sequence_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.push_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pushTouches": [],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.pushUpdates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NumericCommutation.lean:Solidity.Backend.StorageOps.NumericCommutation.update_touched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

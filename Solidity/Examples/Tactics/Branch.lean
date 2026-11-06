@@ -191,7 +191,11 @@ The same holds for a `for` loop's init. -/
 #eval IO.println (Prog.toStr []
   (sol{ bool c = true; { bool x = true; } if (c) { uint x = 1; } } : Prog StandardExample [] _))
 
-/-- info: bool c = true; int i_1 = 0; while (i_1 < 1) { i_1++; } if (c) { uint i = 1; } else { } -/
+/--
+warning: unannotated literal-bounded loop `for (i < 1)`; keeping symbolic unrolling
+---
+info: bool c = true; int i_1 = 0; while (i_1 < 1) { i_1++; } if (c) { uint i = 1; } else { }
+-/
 #guard_msgs in
 #eval IO.println (Prog.toStr []
   (sol{ bool c = true; for (int i = 0; i < 1; i++) { } if (c) { uint i = 1; } } : Prog StandardExample [] _))
@@ -200,6 +204,10 @@ The same holds for a `for` loop's init. -/
 its name. -/
 
 /--
+warning: unannotated literal-bounded loop `for (i < 2)`; keeping symbolic unrolling
+---
+warning: unannotated literal-bounded loop `for (i < 3)`; keeping symbolic unrolling
+---
 info: uint n = 0; uint i_1 = 0; while (i_1 < 2) { n += i_1; i_1++; } uint i = 0; while (i < 3) { n += i; i++; }
 -/
 #guard_msgs in

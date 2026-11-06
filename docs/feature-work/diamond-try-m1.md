@@ -171,4 +171,4 @@ in [validation](diamond-try-m1/validation.json),
 kernel checkpoint with explicitly incomplete execution validation, not a
 complete original assignment or an integration delivery.
 
-Across actual bounded commands, maximum sampled aggregate RSS was4962772KiB and maximum cgroup peak1331539968bytes, with memory.max12884901888/swap.max0 and no max/OOM events. Resource figures include failed proof/diagnostic attempts; they do not establish a cold-build or target-execution bound. Source collection/check scripts use disk files, no backend binary/load. Full logs live at /workspace/next10-diamond-try-evidence/m1-producer.
+Across actual bounded commands, maximum sampled aggregate RSS was4962772KiB and maximum cgroup peak1331539968bytes, with memory.max12884901888/swap.max0 and no max/OOM events. Resource figures include failed proof/diagnostic attempts; they do not establish a cold-build or target-execution bound. Source collection/check scripts use disk files, no backend binary/load. Full logs live at VM location: next10-diamond-try-evidence/m1-producer.

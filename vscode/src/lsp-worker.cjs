@@ -5,6 +5,8 @@ const {pathToFileURL}=require('node:url');
 const {createHash}=require('node:crypto');
 const {LeanSession}=require('./lean-session.cjs');
 const projects=require('./project.cjs');
+const {checkDirect}=require('./direct-runtime.cjs');
+const {unknownResult}=require('./direct-model.cjs');
 
 let session,compiler,locations;
 function checkpointRows(path,contract,contracts=[]){
@@ -33,21 +35,36 @@ async function execute(task){
   if(createHash('sha256').update(text).digest('hex')!==(compiled.sourceHash??compiled.fixture?.header.sourceSha256))throw new Error('Compiler snapshot hash mismatch');
   if(compiled.proofGap)return {results:[],errors:[{source,stage:'admission',reason:compiled.proofGap}]};
   writeFileSync(join(directory,'source.ast.json'),compiled.text);
-  const results=[],errors=[];
+  const results=[],errors=[],benchmarkLog=[],directChecks=[];let usedLegacy=false,wasmBuild;
   const primary=compiled.primaryAst??compiled.fixture.ast;
   const allAsts=compiled.fixture.sourceUnits?.map(u=>u.ast)??[primary];
   const allContracts=allAsts.flatMap(a=>a.nodes).filter(n=>n.nodeType==='ContractDefinition');
   const contracts=primary.nodes.filter(n=>n.nodeType==='ContractDefinition'&&(!options.contract||n.name===options.contract));
   const locate=locations.sourceLocations(primary,Buffer.from(text));
-  session??=new LeanSession(root,directory);
   for(const contract of contracts){
     if(!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(contract.name))throw new Error('Unsupported contract name');
+    const direct=await checkDirect(root,contract,options) ||
+      (options.certify!==true&&!options.auditPreconditions&&process.env.SOLIDITY_LEAN_DIRECT!=='0'
+        ? unknownResult(contract,options,'The compiled verifier is unavailable or does not support this input.',allContracts) : null);
+    if(direct){
+      directChecks.push({contract:contract.name,backend:'unavailable',environmentImports:0,...direct.timings});wasmBuild=direct.build;
+      errors.push(...(direct.errors||[]).map(error=>({source,contract:contract.name,...error})));
+      for(const row of direct.results){
+        const range=locate(contract.name,row);
+        results.push({...row,source,contract:contract.name,sourceHash:compiled.sourceHash??compiled.fixture.header.sourceSha256,...(range?{range}:{}),...(row.counterexample?{counterexample:locations.sourceWitness(primary,contract.name,row)}:{})});
+      }
+      continue;
+    }
+    if(task.deferLegacyBuild)return {needsLegacyBuild:true};
+    usedLegacy=true;session??=new LeanSession(root,directory);
     const output=join(directory,`result-${task.id}-${contract.id}.json`);
     rmSync(output,{force:true});
     const name=`SolTests.«${contract.name}»`;
     const command=`#solkey_test ${name}${options.function?` only ${JSON.stringify(options.function)}`:''}${options.listing?' listing':''}${options.auditPreconditions&&!options.listing?' audit_preconditions':''}${options.counterexamples&&!options.listing?' counterexamples':''} to ${JSON.stringify(output)}`;
-    const wrapper=`import Solidity.Frontend.Testing\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
+    const wrapper=`import Solidity.Frontend.Testing\nset_option sol.testing.closedSpecs ${options.closedSpecs!==false}\nset_option sol.testing.direct ${options.certify!==true}\nset_option sol.benchmark ${options.benchmark===true}\nsolc_import "source.ast.json" hash ${compiled.hash} as ${name} testing\nsolc_scoped_problems ${name} decl\n${command}\n`;
+    if(options.benchmark)session.stderr='';
     const diagnostics=await session.check(wrapper,options.timeoutMs??60000);
+    if(options.benchmark){await new Promise(setImmediate);benchmarkLog.push(session.stderr,...diagnostics.map(d=>d.message||''));}
     for(const diagnostic of diagnostics)if(importDiagnostic(diagnostic))
       errors.push({source,contract:contract.name,stage:'lean',reason:diagnostic.message});
     const checkpoint=checkpointRows(output,contract,allContracts);
@@ -62,7 +79,7 @@ async function execute(task){
     else if(!errors.length)throw new Error('Lean completed without a verification checkpoint');
   }
   if(!contracts.length)errors.push({source,stage:'discovery',reason:'No contracts selected'});
-  return {results,errors,backend:{workerPid:process.pid,leanServerPid:session.child.pid,leanDocumentVersion:session.version}};
+  return {results,errors,backend:{workerPid:process.pid,directChecks,...(!usedLegacy&&directChecks.length?{kind:directChecks.every(c=>c.backend==='generated-c-wasm')?'generated-c-wasm':directChecks.every(c=>c.backend==='generated-c-native')?'generated-c-native':'compiled-unknown',wasmBuild,native:{active:directChecks.every(c=>c.backend==='generated-c-native'),reason:directChecks.every(c=>c.backend==='generated-c-native')?'standalone-native':'standalone-wasm-or-unavailable'}}:{kind:directChecks.length?'mixed':'lean',leanServerPid:session?.child?.pid,leanDocumentVersion:session?.version,native:session?.native??{active:false,reason:'no-contracts'}}),...(options.benchmark?{benchmarkMessages:benchmarkLog,phases:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/SOLKEY_BENCH (\{[^\r\n]*\})/g)].map(m=>JSON.parse(m[1])),nativeDirectNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_DIRECT_CHECK (\d+)/g)].map(m=>Number(m[1])),nativeWalkNanos:[...benchmarkLog.join(String.fromCharCode(10)).matchAll(/NATIVE_SPEC_WALK (\d+)/g)].map(m=>Number(m[1]))}:{})}};
 }
 if(require.main===module){
 process.on('message',async task=>{

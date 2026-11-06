@@ -453,6 +453,12 @@ def sendT (σ : State C Γ) (pv : Idx Γ (.val .bool)) (addr amt : PrimTy.uint.D
 def ExtCall.keyT (σ : State C Γ) (c : ExtCall C Γ) : ExtKey :=
   ⟨c.addr.evalT σ, c.fn, c.args.map fun a => Semantics.CallValue.ofTyped (a.2.evalT σ)⟩
 
+/-- The key does not read the call's mode or invocation (decision H22: they
+are recorded, not yet interpreted). -/
+theorem ExtCall.keyT_mode_invocation (σ : State C Γ) (c : ExtCall C Γ) (m : CallMode)
+    (i : InvocationId) : ({ c with mode := m, invocation := i } : ExtCall C Γ).keyT σ = c.keyT σ :=
+  rfl
+
 /-- A call's arguments, each read in the caller's state, in order. -/
 def Args.evalT (σ : State C Γ) : {ps : Ctx} → Args C Γ ps → TRes (TEnv C σ.H ps)
   | _, as => Args.casesOn (motive := fun ps _ => TRes (TEnv C σ.H ps)) as (pure ())
@@ -501,6 +507,34 @@ def CodeBinder.decodeT {H : HTy} {κ : Ctx} (code : CodeBinder κ) (c : Semantic
     TEnv C H κ :=
   CodeBinder.casesOn (motive := fun κ _ => TEnv C H κ) code () (fun _ => (c, ()))
 
+/-- Entering a call of several returns: its return variables declared in
+order on the frame's parameters, a value one at its default, a memory one a
+fresh default object (as solc allocates one on entry). -/
+def RetBinders.enterT {ps : Ctx} :
+    {ρ : Ctx} → RetBinders ρ → (τ : State C ps) → Out C τ.H (ρ ++ ps)
+  | _, bs => RetBinders.casesOn
+      (motive := fun ρ _ => (τ : State C ps) → Out C τ.H (ρ ++ ps)) bs
+      (fun τ => ⟨τ, List.prefix_refl _⟩)
+      (fun bs p _ τ =>
+        let o := RetBinders.enterT bs τ
+        ⟨o.st.push (t := .val p) (PrimTy.dflt p), o.ext⟩)
+      (fun bs R _ _ hm τ =>
+        let o := RetBinders.enterT bs τ
+        let g := o.st.allocDefaultG R hm
+        ⟨g.st.push (t := .mem R) (some g.val), o.ext.trans g.ext⟩)
+  termination_by structural _ bs => bs
+
+/-- Value binders entered as a call's: at their defaults, nothing allocated
+(a self `try`'s callee). -/
+theorem Binders.enterT_toRet {ps : Ctx} : {ρ : Ctx} → (bs : Binders ρ) → (τ : State C ps) →
+    bs.toRet.enterT τ =
+      ⟨τ.withEnv (TEnv.append ρ (Binders.defaultsT bs) τ.env), List.prefix_refl _⟩
+  | _, .nil, _ => rfl
+  | _, .snoc (ρ := ρ) bs p _, τ =>
+    congrArg (fun o : Out C τ.H (ρ ++ ps) =>
+        (⟨o.st.push (t := .val p) (PrimTy.dflt p), o.ext⟩ : Out C τ.H (.val p :: (ρ ++ ps))))
+      (Binders.enterT_toRet bs τ)
+
 /-- Entering a call: its return variables at their defaults on the frame's
 parameters (a memory return a fresh default object). -/
 def CallRet.enterT {Γ : Ctx} {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {ps : Ctx}
@@ -508,7 +542,7 @@ def CallRet.enterT {Γ : Ctx} {rs Γ' : Ctx} (ret : CallRet Γ rs Γ') {ps : Ctx
   CallRet.casesOn (motive := fun rs _ _ => Out C τ.H (rs ++ ps)) ret
     ⟨τ, List.prefix_refl _⟩
     (fun p _ _ => ⟨τ.push (t := .val p) (PrimTy.dflt p), List.prefix_refl _⟩)
-    (fun {rs} bs => ⟨τ.withEnv (TEnv.append rs (Binders.defaultsT bs) τ.env), List.prefix_refl _⟩)
+    (fun bs => bs.enterT τ)
     (fun R _ _ hm =>
       let g := τ.allocDefaultG R hm
       ⟨g.st.push (t := .mem R) (some g.val), g.ext⟩)
@@ -882,7 +916,7 @@ def tryCall {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : ExtCall C Γ) (
     (sbody : TStep C (ρ ++ ps) Γf) (self : Bool) : TStep C Γ Γ := fun σ =>
   if (call.addr.evalT σ).1 = 0 then .error .revert else
   if self && decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1) then
-    match TRun.call sargs (.rets rets) hs sbody σ with
+    match TRun.call sargs (.rets rets.toRet) hs sbody σ with
     | .ok o => (ok o.st).map fun o' =>
       ⟨o'.st.drop ((Ext.append Γ ρ).trans h₁), o.ext.trans o'.ext⟩
     | .error .revert => (other σ).map fun o => ⟨o.st.drop h₄, o.ext⟩
@@ -975,7 +1009,7 @@ def catchBytes {ρ ps Γf : Ctx} (c : ExtCall C Γ) (rets : Binders ρ) (sargs :
     TRes (List UInt8) :=
   if (c.addr.evalT σ).1 = 0 then .error .revert else
   if self && decide ((c.addr.evalT σ).1 = σ.tx.selfAddress.1) then
-    match call sargs (.rets rets) hs sbody σ with
+    match call sargs (.rets rets.toRet) hs sbody σ with
     | .ok _ => .error .revert
     | .error .revert => .ok []
     | .error (.revertWith d) => .ok d

@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/Passes/RuntimeReturnFailure.lean:Solidity.Backend.Passes.RuntimeReturnFailure.capture_revert": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "Solidity/Frontend/Checked/TypeExamples.lean:Solidity.Frontend.Checked.declCtors_covered": [
+  "propext"
+ ],
+ "Solidity/Frontend/Checked/TypeExamples.lean:Solidity.Frontend.Checked.parseType_derives": [
+  "propext"
+ ]
+}

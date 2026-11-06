@@ -60,7 +60,12 @@ function scan(extension,server) {
     'cache-invalidation-and-migration':['Synchronization/CachingTest.cs'],
     'scheduling-fairness-and-contention':['Synchronization/VerificationOrderTest.cs','Synchronization/VerificationOrderTest2.cs'],
     'concurrent-interactions-and-large-projects':['Various/ConcurrentInteractionsTest.cs','Performance/LargeFilesTest.cs'],
-    'thread-retention':['Performance/ThreadUsageTest.cs']};
+    'thread-retention':['Performance/ThreadUsageTest.cs'],
+    'proof-code-actions-and-resolution':['CodeActions/CodeActionsTest.cs'],
+    'symbol-lookup-and-diagnostic-migration':['Synchronization/SymbolMigrationTest.cs','Synchronization/LookupMigrationTest.cs','Various/DiagnosticMigrationTest.cs'],
+    'solver-process-retention':['Various/ResourceUsageTest.cs'],
+    'stdlib-and-refinement-navigation':['Various/StandardLibraryTest.cs','Refinement/RefinementTests.cs'],
+    'hover-before-verification-completes':['Lookup/HoverTest.cs']};
   for(const [id,paths]of Object.entries(families))for(const path of paths) {
     const file='Source/DafnyLanguageServer.Test/'+path;
     add('behavior:'+id,'independent-audit-family',source(server,file,'dafny-lang/dafny'),{scope:id});
@@ -101,7 +106,16 @@ function assess(feature) {
   if(feature.kind==='custom-protocol') {status='missing';reason='Local extension implements its own Solidity LSP methods rather than this Dafny-specific protocol. Related editor observations are listed separately.';}
   const implemented=/handler:Dafny(Definition|References|Rename|Completion|SignatureHelp|Formatting|DocumentSymbol|WorkspaceSymbol|CodeAction)Handler|commands:dafny.restartServer|behavior:(project-discovery-and-ownership|project-includes-and-solver-options|gutter-status|compilation-status|status-bar-actions|language-editing-configuration|launch-and-concurrency|cache-invalidation-and-migration|parse-resolution-verification-diagnostics|member-and-attribute-completion)|grammars:|languages:/.test(id);
   if(implemented){status='partial';reason='Persistent Solidity LSP provides related functionality; complete Dafny behavior and semantic parity are not established.';
-    scenarios.push(/restartServer/.test(id)?'server-restart':/cache/.test(id)?'warm-snapshot-cache':/Handler|completion/.test(id)?'language-services-callsite':'initial-verification');
+    const scenario=/restartServer/.test(id)?'server-restart':/cache/.test(id)?'warm-snapshot-cache':
+      /Dafny(?:Formatting|DocumentSymbol)Handler/.test(id)?'symbols-and-formatting':
+      /Dafny(?:WorkspaceSymbol|CodeAction)Handler/.test(id)?null:
+      /Handler|completion/.test(id)?'language-services-callsite':'initial-verification';
+    if(scenario)scenarios.push(scenario);
+    const stdio={Definition:'definition',References:'references',Rename:'rename',Completion:'completion',SignatureHelp:'signature-help',Formatting:'formatting',DocumentSymbol:'document-symbols',WorkspaceSymbol:'workspace-symbols'};
+    const handler=id.match(/^handler:Dafny(\w+)Handler$/)?.[1];
+    if(stdio[handler])scenarios.push(stdio[handler]);
+    if(handler==='Completion')scenarios.push('completion-after-full-replacement');
+    if(handler==='SignatureHelp')scenarios.push('signature-active-parameter');
     local.push('vscode/src/lsp-server.cjs','vscode/src/language-services.cjs','vscode/src/editor-services.cjs','vscode/src/worker-pool.cjs','vscode/src/project.cjs','vscode/src/solidity-text.cjs');}
   return {...feature,assessment:{status,reason,localSource:local,scenarioIds:scenarios,testEvidence:[]}};
 }
@@ -120,7 +134,8 @@ function validate(inventory) {
       if(!a.testEvidence?.length)errors.push('unsupported completeness claim '+feature.id);
       for(const t of a.testEvidence||[]) {
         let actual;try{const path=resolve(root,t.artifact);if(!path.startsWith(root+'/'))throw new Error('escaping evidence');actual=JSON.parse(readFileSync(path,'utf8'));}catch{}
-        if(t.status!=='passed'||!t.assertion||!actual?.checks?.includes(t.assertion)||actual.target!==t.target||!actual.runId)errors.push('unsupported completeness claim '+feature.id);
+        if(t.status!=='passed'||!t.assertion||!a.scenarioIds?.includes(t.assertion)||!actual?.checks?.includes(t.assertion)||
+          !['passed','passed-with-gaps'].includes(actual?.status)||!actual?.scenarios?.some(s=>s.id===t.assertion&&s.status==='passed')||actual.target!==t.target||!actual.runId)errors.push('unsupported completeness claim '+feature.id);
       }
       if(!['local','dafny'].every(target=>a.testEvidence?.some(t=>t.target===target)))errors.push('completeness needs both targets '+feature.id);
     }
@@ -132,19 +147,19 @@ function validate(inventory) {
 function main(args=process.argv.slice(2)) {
   const path=join(root,'docs/dafny-editor-features.json');
   if(args[0]==='--check') {
-    const inventory=JSON.parse(readFileSync(path,'utf8')),errors=validate(inventory);
+    const inventory=require('./inventory.cjs').loadInventory(path),errors=validate(inventory);
     if(errors.length)throw new Error(errors.join('\n'));process.stdout.write(`Validated ${inventory.features.length} editor features; no untested completeness claims.\n`);return;
   }
   const extension=args[args.indexOf('--extension')+1],server=args[args.indexOf('--server')+1];
   if(!args.includes('--extension')||!args.includes('--server'))throw new Error('Use --check or --extension DIR --server DIR [--write]');
   const inventory=scan(resolve(extension),resolve(server));inventory.features=inventory.features.map(assess);
   if(args.includes('--check-source')) {
-    const expected=JSON.parse(readFileSync(path,'utf8'));
+    const expected=require('./inventory.cjs').loadInventory(path);
     if(JSON.stringify(expected.upstream)!==JSON.stringify(inventory.upstream)||JSON.stringify(expected.sources)!==JSON.stringify(inventory.sources)||
       JSON.stringify(expected.features.map(f=>f.id))!==JSON.stringify(inventory.features.map(f=>f.id)))throw new Error('Pinned source or discovered feature set drifted; inspect and reconcile the inventory');
     process.stdout.write('Pinned editor source and feature discovery match.\n');
   }
-  else if(args.includes('--write'))writeFileSync(path,JSON.stringify(inventory,null,2)+'\n');
+  else if(args.includes('--write'))require('./inventory.cjs').saveInventory(inventory,path);
   else process.stdout.write(JSON.stringify(inventory,null,2)+'\n');
 }
 module.exports={scan,assess,validate,files};

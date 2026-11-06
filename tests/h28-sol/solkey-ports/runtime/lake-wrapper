@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /workspace/shared/downloads/lean-4.24.0-linux/bin/lake.actual -f /workspace/solidity-lean/tests/h28-sol/solkey-ports/runtime/lakefile.toml "$@"

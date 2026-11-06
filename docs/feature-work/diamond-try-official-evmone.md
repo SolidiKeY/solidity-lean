@@ -9,7 +9,7 @@ M1/P4/P5b/P8 remain design proposals awaiting review. No implementation approval
 is inferred. A's observational relation, historical runner/backend instrumentation,
 physical producer/D3/admission/ABI changes remain unimplemented and unapproved.
 
-Evidence directory: `/workspace/next10-diamond-try-evidence/official-evmone`.
+Evidence directory: VM location `next10-diamond-try-evidence/official-evmone`.
 `requests.json` records exact requested official URLs/ref, UTC acquisition time,
 HTTP status/response headers, content SHA256/size, and failed paths. The official
 source archive was read in memory, not unpacked as a checkout; its whole-content

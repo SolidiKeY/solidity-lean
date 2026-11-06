@@ -1,0 +1,292 @@
+[
+  {
+    "constructor": "index",
+    "boundary": "e [ i? ]",
+    "level": 15,
+    "precNode": "base.level >= 15 and not base.isNew",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.index_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_index exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "slice",
+    "boundary": "e [ i? : j? ]",
+    "level": 15,
+    "precNode": "base.level >= 15 and not base.isNew",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.slice_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_slice exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "member",
+    "boundary": "e . name",
+    "level": 15,
+    "precNode": "base.level >= 15 and not base.isNew; address uses Tok.elem address",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.member_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_member exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "callOptions",
+    "boundary": "e { name : arg (, name : arg)* }",
+    "level": 15,
+    "precNode": "base.level >= 15; at least one named argument",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.callOptions_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_callOptions exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "call",
+    "boundary": "e args",
+    "level": 15,
+    "precNode": "base.level >= 15",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.call_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_call exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "payableConv",
+    "boundary": "payable args",
+    "level": 16,
+    "precNode": "true",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.payableConv_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_payableConv exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "metaType",
+    "boundary": "type ( typeName )",
+    "level": 16,
+    "precNode": "direct type is not elem addressPayable, mapping or fnType",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.metaType_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_metaType exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "unaryPrefix",
+    "boundary": "prefix e",
+    "level": 13,
+    "precNode": "operand.level >= 13 and operand.level != 14",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.unaryPrefix_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unaryPrefix exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "unarySuffix",
+    "boundary": "e suffix",
+    "level": 14,
+    "precNode": "operand.level >= 15",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.unarySuffix_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_unarySuffix exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "exp",
+    "boundary": "a ** b",
+    "level": 12,
+    "precNode": "a.level >= 13 and b.level >= 12",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.exp_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_exp exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "mulDivMod",
+    "boundary": "a (* / %) b",
+    "level": 11,
+    "precNode": "a.level >= 11 and b.level >= 12",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.mulDivMod_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_mulDivMod exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "addSub",
+    "boundary": "a (+ -) b",
+    "level": 10,
+    "precNode": "a.level >= 10 and b.level >= 11",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.addSub_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_addSub exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "shift",
+    "boundary": "a (<< >> >>>) b",
+    "level": 9,
+    "precNode": "a.level >= 9 and b.level >= 10",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.shift_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_shift exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "bitAnd",
+    "boundary": "a (&) b",
+    "level": 8,
+    "precNode": "a.level >= 8 and b.level >= 9",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.bitAnd_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitAnd exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "bitXor",
+    "boundary": "a (^) b",
+    "level": 7,
+    "precNode": "a.level >= 7 and b.level >= 8",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.bitXor_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitXor exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "bitOr",
+    "boundary": "a (|) b",
+    "level": 6,
+    "precNode": "a.level >= 6 and b.level >= 7",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.bitOr_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_bitOr exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "order",
+    "boundary": "a (< > <= >=) b",
+    "level": 5,
+    "precNode": "a.level >= 5 and b.level >= 6",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.order_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_order exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "equality",
+    "boundary": "a (== !=) b",
+    "level": 4,
+    "precNode": "a.level >= 4 and b.level >= 5",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.equality_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_equality exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "and",
+    "boundary": "a (&&) b",
+    "level": 3,
+    "precNode": "a.level >= 3 and b.level >= 4",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.and_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_and exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "or",
+    "boundary": "a (||) b",
+    "level": 2,
+    "precNode": "a.level >= 2 and b.level >= 3",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.or_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_or exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "cond",
+    "boundary": "c ? t : f",
+    "level": 1,
+    "precNode": "c.level >= 2 and f.level >= 1; t unrestricted at root",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.cond_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_cond exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "assign",
+    "boundary": "a assignOp b",
+    "level": 0,
+    "precNode": "a.level >= 2; b unrestricted at root",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.assign_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_assign exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "new",
+    "boundary": "new typeName",
+    "level": 16,
+    "precNode": "true",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.new_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_new exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "tuple",
+    "boundary": "( component? (, component?)* )",
+    "level": 16,
+    "precNode": "true; first optional component always present in representation",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.tuple_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_tuple exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "inlineArray",
+    "boundary": "[ e (, e)* ]",
+    "level": 16,
+    "precNode": "true; at least one expression",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.inlineArray_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_inlineArray exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "ident",
+    "boundary": "Tok.ident name",
+    "level": 16,
+    "precNode": "true",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.ident_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_ident exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "lit",
+    "boundary": "literal token(s)",
+    "level": 16,
+    "precNode": "true; fragments for str, hexStr, unicodeStr",
+    "layout": "Choice.frags for string families; none for bool/num",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.literal_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_lit exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "litUnit",
+    "boundary": "Tok.num n Tok.denom u",
+    "level": 16,
+    "precNode": "true",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.unit_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_litUnit exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  },
+  {
+    "constructor": "elemType",
+    "boundary": "Tok.elem e",
+    "level": 16,
+    "precNode": "true; intrinsic proof e != addressPayable",
+    "layout": "descendant choices in preorder; no choice at this node",
+    "root_reconstruction": "proved: actual certified root level/family/operator and child-word cuts derive internally; structural step Solidity.Frontend.ExpressionUniqueness.elementary_expr_word_unique and exhaustive recursive_yield_property yield full tree identity",
+    "uniqueness": "proved by certified_expression_yield_unique / certifiedYieldUnique over the unchanged original Derives+prec target, arbitrary structures and independent layouts",
+    "controls": "Solidity.Frontend.ExpressionUniqueness.constructor_elemType exact finite accepted-root fixture; original universal refusals, all17level/34operator ledgers and arbitrary inhabited function/tuple/postfix/group/array families supplement the arbitrary-tree proof"
+  }
+]

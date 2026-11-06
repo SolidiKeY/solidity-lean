@@ -1,0 +1,133 @@
+ERROR 113:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 0) default (input blake_one)).1 = false
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_BLAKE2_F default (UInt256.ofNat 0) default (input blake_one)).1 false
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_BLAKE2_F default (UInt256.ofNat 0) default (input blake_one)).1, false with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 113:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input blake_one)).1 = true
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input blake_one)).1 true
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input blake_one)).1, true with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 113:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_one)).2.2.1.toNat = 1
+because its `Decidable` instance
+  instDecidableEqNat (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_one)).2.2.1.toNat 1
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_one)).2.2.1.toNat.beq 1 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 113:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).1 = false
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).1 false
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).1, false with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 113:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).2.2.1.toNat = 0
+because its `Decidable` instance
+  instDecidableEqNat (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).2.2.1.toNat 0
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (Ξ_BLAKE2_F default (UInt256.ofNat 2) default (input blake_bad_flag)).2.2.1.toNat.beq 0 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 120:13 Tactic `decide` failed for proposition
+  fromByteArrayBigEndian ((array [1]).extract 0 4) = 1
+because its `Decidable` instance
+  instDecidableEqNat (fromByteArrayBigEndian ((array [1]).extract 0 4)) 1
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (fromByteArrayBigEndian ((array [1]).extract 0 4)).beq 1 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 120:13 Tactic `decide` failed for proposition
+  (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input (array [1]))).1 = false
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input (array [1]))).1 false
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_BLAKE2_F default (UInt256.ofNat 1) default (input (array [1]))).1, false with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 126:13 Tactic `decide` failed for proposition
+  fromByteArrayBigEndian ((array [1, 2, 3, 4]).extract 0 4) = 16909060
+because its `Decidable` instance
+  instDecidableEqNat (fromByteArrayBigEndian ((array [1, 2, 3, 4]).extract 0 4)) 16909060
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (fromByteArrayBigEndian ((array [1, 2, 3, 4]).extract 0 4)).beq 16909060 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 152:13 Tactic `decide` failed for proposition
+  (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).1 = true
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).1 true
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).1, true with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 152:13 Tactic `decide` failed for proposition
+  (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).2.2.1.toNat = 0
+because its `Decidable` instance
+  instDecidableEqNat (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).2.2.1.toNat 0
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (Ξ_EXPMOD default (UInt256.ofNat 200) default (input (array []))).2.2.1.toNat.beq 0 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+ERROR 162:13 Tactic `decide` failed for proposition
+  (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).1 = true
+because its `Decidable` instance
+  instDecidableEqBool (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).1 true
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).1, true with
+  | false, false => isTrue ⋯
+  | false, true => isFalse ⋯
+  | true, false => isFalse ⋯
+  | true, true => isTrue ⋯
+ERROR 162:13 Tactic `decide` failed for proposition
+  (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).2.2.1.toNat = 453
+because its `Decidable` instance
+  instDecidableEqNat (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).2.2.1.toNat 453
+did not reduce to `isTrue` or `isFalse`.
+
+Reduction got stuck at the `Decidable` instance
+  match h : (Ξ_EXPMOD default (UInt256.ofNat 6000) default (input (array oversized_modexp))).2.2.1.toNat.beq 453 with
+  | true => isTrue ⋯
+  | false => isFalse ⋯
+diag: 12 errors

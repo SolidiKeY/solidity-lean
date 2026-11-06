@@ -77,21 +77,21 @@ theorem Val.eq_int {t : IntTy} (x : Val D (.int t)) : ∃ v h, x = .int v h := b
   | int v h => exact ⟨v, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_fixed {t : FixTy} (x : Val D (.fixed t)) : ∃ v h, x = .fixed v h := by
   cases x with
   | fixed v h => exact ⟨v, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_bool (x : Val D .bool) : ∃ b, x = .bool b := by
   cases x with
   | bool b => exact ⟨b, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_fixedBytes {n : Nat} {hn : 1 ≤ n ∧ n ≤ 32} (x : Val D (.fixedBytes n hn)) :
     ∃ bs h, x = .fixedBytes bs h := by
@@ -99,7 +99,7 @@ theorem Val.eq_fixedBytes {n : Nat} {hn : 1 ≤ n ∧ n ≤ 32} (x : Val D (.fix
   | fixedBytes bs h => exact ⟨bs, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 /-! ## Arithmetic -/
 
@@ -180,14 +180,14 @@ theorem Val.eq_address {p : Bool} (x : Val D (.address p)) : ∃ a, x = .address
   | address a => exact ⟨a, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_enum {d : DeclName} (x : Val D (.enum d)) : ∃ i, x = .enum i := by
   cases x with
   | enum i => exact ⟨i, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 theorem Val.eq_extFn {ps rs : List STy} {m : Option Mutability} (x : Val D (.fn true ps rs m)) :
     ∃ a sel h, x = .externalFn a sel h := by
@@ -195,7 +195,7 @@ theorem Val.eq_extFn {ps rs : List STy} {m : Option Mutability} (x : Val D (.fn 
   | externalFn a sel h => exact ⟨a, sel, h, rfl⟩
   | memRef h _ => cases h
   | storRef h _ => cases h
-  | cdRef h _ => cases h
+  | cdRef h _ _ => cases h
 
 /-! ## Comparisons -/
 
@@ -298,14 +298,14 @@ theorem amount_ok {σ : STy} (hσ : σ.isAmount = true) (v : RVal D σ) : NotStu
       cases x with
       | memRef hl _ => cases hl
       | storRef hl _ => cases hl
-      | cdRef hl _ => cases hl
+      | cdRef hl _ _ => cases hl
     | const _ => cases h
   · cases v with
     | val x =>
       cases x with
       | memRef hl _ => cases hl
       | storRef hl _ => cases hl
-      | cdRef hl _ => cases hl
+      | cdRef hl _ _ => cases hl
     | hex _ _ => cases h
 
 /-! ## Elaborated terms stay in the domains -/
@@ -343,6 +343,10 @@ def RExpr.OpsOK {E : Env} {Γ : RCtx} : {τ : STy} → RExpr E Γ τ → Prop
   | _, .transfer a v | _, .send a v => RExpr.OpsOK a ∧ RExpr.OpsOK v
   | _, .abiEncode _ args => RArgs.OpsOK args
   | _, .assignCopy l e _ => RLVal.OpsOK l ∧ RExpr.OpsOK e
+  | _, .abiDecode d _ _ => RExpr.OpsOK d
+  | _, .slice a _ s _ e _ _ => RExpr.OpsOK a ∧ RExpr.OpsOK s ∧ RExpr.OpsOK e
+  | _, .inlineArray args _ => RConvArgs.OpsOK args
+  | _, .newArray _ len _ => RExpr.OpsOK len
 
 def RArgs.OpsOK {E : Env} {Γ : RCtx} : {τs : List STy} → RArgs E Γ τs → Prop
   | _, .nil => True
@@ -433,6 +437,14 @@ theorem Typed.toR_opsOK {Γ : Ctx} : {e : Syn .expr} → {τ : STy} → (d : Typ
   | _, _, .send da dv _ => And.intro (Typed.toR_opsOK da) (Typed.toR_opsOK dv)
   | _, _, .abiEncode _ _ da _ => TypedArgs.toR_opsOK da
   | _, _, .assignCopy l db _ _ => And.intro (LVal.toR_opsOK l) (Typed.toR_opsOK db)
+  | _, _, .abiDecode _ dx _ _ _ => Typed.toR_opsOK dx
+  | _, _, .slice da _ ds _ de _ => And.intro (Typed.toR_opsOK da) (And.intro (Typed.toR_opsOK ds) (Typed.toR_opsOK de))
+  | _, _, .sliceFrom da _ ds _ => And.intro (Typed.toR_opsOK da) (And.intro (Typed.toR_opsOK ds) trivial)
+  | _, _, .sliceTo da _ de _ => And.intro (Typed.toR_opsOK da) (And.intro trivial (Typed.toR_opsOK de))
+  | _, _, .sliceAll da _ => And.intro (Typed.toR_opsOK da) (And.intro trivial trivial)
+  | _, _, .inlineArray dx ds _ _ _ =>
+    RArgs.convert_opsOK _ _ _ (And.intro (Typed.toR_opsOK dx) (TypedArgs.toR_opsOK ds))
+  | _, _, .newArray _ _ dx _ => Typed.toR_opsOK dx
 
 theorem TypedArgs.toR_opsOK {Γ : Ctx} : {es : Syn (.list .expr)} → {τs : List STy} →
     (d : TypedArgs Γ es τs) → RArgs.OpsOK d.toR
@@ -481,6 +493,8 @@ def RStmt.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : R
   | _, _, _, .retVal _ e _ => e.OpsOK
   | _, _, _, .retTuple es => RConvArgs.OpsOK es
   | _, _, _, .emit _ _ args | _, _, _, .revertError _ _ args => RConvArgs.OpsOK args
+  | _, _, _, .declTuple _ e _ => e.OpsOK
+  | _, _, _, .tryCall t _ _ args ok _ cat => t.OpsOK ∧ RConvArgs.OpsOK args ∧ RItems.OpsOK ok ∧ RItems.OpsOK cat
 
 def RItems.OpsOK {E : Env} {R : List STy} {M : Bool} : {k : SCtx} → {Γ Γ' : RCtx} → RItems E R M k Γ Γ' → Prop
   | _, _, _, .nil => True
@@ -494,7 +508,17 @@ theorem TypedArgs.ofSlots_opsOK {Γ : Ctx} : {es : Syn (.list (.opt .expr))} →
   | _, _, .nil => trivial
   | _, _, .cons d ds => And.intro (Typed.toR_opsOK d) (TypedArgs.ofSlots_opsOK ds)
 
+/-- A cast of a block's input context keeps `OpsOK`. -/
+theorem RItems.opsOK_castIn {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ₁ Γ₂ Γ' : RCtx} (h : Γ₁ = Γ₂)
+    (b : RItems E R M k Γ₁ Γ') (hb : b.OpsOK) : (cast (congrArg (fun Γ => RItems E R M k Γ Γ') h) b).OpsOK := by
+  subst h; exact hb
+
 mutual
+
+/-- A cast of a statement's output context keeps `OpsOK`. -/
+theorem RStmt.opsOK_cast {E : Env} {R : List STy} {M : Bool} {k : SCtx} {Γ Γ₁ Γ₂ : RCtx} (h : Γ₁ = Γ₂)
+    (s : RStmt E R M k Γ Γ₁) (hs : s.OpsOK) : (cast (congrArg (RStmt E R M k Γ) h) s).OpsOK := by
+  subst h; exact hs
 
 /-- **Elaborated statements stay in the operations' domains.** -/
 theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)} → {s : Syn (.stmt k)} →
@@ -503,6 +527,8 @@ theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)}
   | _, _, _, _, .placeholder _ | _, _, _, _, .declVar _ _ | _, _, _, _, .brk | _, _, _, _, .cont
   | _, _, _, _, .ret _ | _, _, _, _, .rethrow _ _ _ _ => trivial
   | _, _, _, _, .declInit _ _ d _ => Typed.toR_opsOK d
+  | _, L, _, _, .declTuple (slots := slots) _ d _ =>
+    RStmt.opsOK_cast (pushSlots_tys slots L).symm _ (Typed.toR_opsOK d)
   | _, _, _, _, .block b => ItemsD.toR_opsOK b
   | _, _, _, _, .ifThen dc _ ds => And.intro (Typed.toR_opsOK dc) (StmtD.toR_opsOK ds)
   | _, _, _, _, .ifElse dc _ _ ds dt =>
@@ -519,6 +545,10 @@ theorem StmtD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)}
     RArgs.convert_opsOK _ _ _ (And.intro (Typed.toR_opsOK d) (TypedArgs.ofSlots_opsOK ds))
   | _, _, _, _, .emit da _ => RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da)
   | _, _, _, _, .revertError da _ => RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da)
+  | _, L, _, _, .tryCall (rs := rs) (rets := rets) (x := x) dc da _ _ _ _ _ dok _ dcb =>
+    And.intro (Typed.toR_opsOK dc) (And.intro (RArgs.convert_opsOK _ _ _ (TypedArgs.toR_opsOK da))
+      (And.intro (RItems.opsOK_castIn (tryOk_tys rets.paramNames rs L) _ (ItemsD.toR_opsOK dok))
+        (RItems.opsOK_castIn (catchLocals_tys x L) _ (ItemsD.toR_opsOK dcb))))
 
 theorem ItemsD.toR_opsOK {C : Ctx} : {k : SCtx} → {L L' : List (String × STy)} → {b : Syn (.list (.item k))} →
     (d : ItemsD C L b L') → d.toR.OpsOK
@@ -689,7 +719,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
         | contract a => exact ⟨a, rfl⟩
         | memRef h _ => cases h
         | storRef h _ => cases h
-        | cdRef h _ => cases h
+        | cdRef h _ _ => cases h
       rw [show convVal (D := D) (.contract d') (Val.contract (d := d) a) = pure (.contract a) from rfl]
       exact NotStuckR.pure _
     · rename_i e ps rs m e' ps' rs' m'
@@ -740,7 +770,7 @@ theorem convVal_ok (B : DeclName → DeclName → Bool) {σ τ : STy} (hσ : σ.
         | contract a => exact ⟨a, rfl⟩
         | memRef h _ => cases h
         | storRef h _ => cases h
-        | cdRef h _ => cases h
+        | cdRef h _ _ => cases h
       rw [show convVal (D := D) (.contract d) (Val.contract (d := d) a) = pure (.contract a) from rfl]
       exact NotStuckR.pure _
     · cases x <;> exact convVal_self_ok _ rfl

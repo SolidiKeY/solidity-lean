@@ -1,0 +1,80 @@
+{
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.dirty_unmatched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.fallback_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.first_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.for_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.for_source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.later_match": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.nested_dirty_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.nested_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.nested_source_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.nested_visit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.oversized": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.skipped_arm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.skipped_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.skipped_structured": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.untaken_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/WordStructuredCompilationControls.lean:SolidityBridge.Yul.WordStructuredCompilation.Controls.untaken_structured": [
+  "Quot.sound",
+  "propext"
+ ]
+}

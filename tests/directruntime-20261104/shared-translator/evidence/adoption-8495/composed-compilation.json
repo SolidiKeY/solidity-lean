@@ -1,0 +1,13 @@
+{
+  "compiler": {
+    "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8"
+  },
+  "sourceSha256": "17716e4117c6e073fc063a1b83bc1d89a082108c6a68be50a03748bc8229bd30",
+  "rawAstSha256": "5bcbf2dfa25697239ada2af0d8868c535056a4b5555e27d92f040bc266f45382",
+  "fixture": "tests/directruntime-20261104/shared-translator/ComposedReaders.ast.json",
+  "fixtureSha256": "b3ffe6724c42ccdb7e2dd50aa085881cd965820d3a92636b8826423ef496cdc3",
+  "compilerMetadataFieldsRetainedBySourceRange": 273,
+  "canonicalSyntaxAndBuiltinNormalizationUnchanged": true,
+  "boundary": "Test-only retention of typeIdentifier/tryCall metadata on existing normalized producer AST. Existing builtin-ID normalization and loopSpec extraction are retained; no new translation semantics/source proof."
+}

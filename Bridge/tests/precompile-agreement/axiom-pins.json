@@ -1,0 +1,335 @@
+{
+  "SolidityBridge.PrecompileAgreement.byte_list": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.byte_length": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.ofNat_nat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.subtract_nat": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.words_multiple": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.words_next": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.words_last": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.words_boundary": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.words_rounding": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.array": [],
+  "SolidityBridge.PrecompileAgreement.Controls.filled": [],
+  "SolidityBridge.PrecompileAgreement.Controls.zeros": [],
+  "SolidityBridge.PrecompileAgreement.Controls.input": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.lengths": [],
+  "SolidityBridge.PrecompileAgreement.Controls.identity_lengths": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.sha_lengths": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.ripemd_lengths": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.identity_nonzero_output": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.identity_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.sha_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.ripemd_boundary": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.invalid_recovery": [],
+  "SolidityBridge.PrecompileAgreement.Controls.ecrecover_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.bad_point": [],
+  "SolidityBridge.PrecompileAgreement.Controls.bnadd_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.bnmul_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.pairing_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_one": [],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_bad_flag": [],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_short_mismatch": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_byte_order": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.point_controls": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.ffi_logical_mismatch": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.modexp_empty_mismatch": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.oversized_modexp": [],
+  "SolidityBridge.PrecompileAgreement.Controls.modexp_bound_mismatch": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.unsupported": [],
+  "SolidityBridge.PrecompileAgreement.Controls.unsupported_core": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_core_lengths": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_final_one": [],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_final_one_control": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.bls_discount_boundaries": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.blake_high_header": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.Controls.wide_base": [],
+  "SolidityBridge.PrecompileAgreement.Controls.modexp_base_truncation": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.address_table": [],
+  "SolidityBridge.PrecompileAgreement.address_complete": [
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.sha_price": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.ripemd_price": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.pairing_price": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.ecrecover_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.sha_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.ripemd_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.bnadd_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.bnmul_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.pairing_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.point_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.big_reader": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.first_four": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.zero_padding": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_padding": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_zero_header": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_price": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_valid": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_insufficient": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_invalid_flag": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_valid_one": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_invalid_size": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.blake_zero_gas": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_gas": [
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_output": [
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_run": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_success": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_failure": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_charged": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_success_iff": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_exact": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_one_short": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "SolidityBridge.PrecompileAgreement.identity_unaffordable": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ]
+}

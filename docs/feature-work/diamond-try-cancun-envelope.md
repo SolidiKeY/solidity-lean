@@ -60,7 +60,7 @@ installed, loaded as a backend or substituted from another tree.
 ## Existing API: useful hook, no unchanged-script envelope
 
 Exact installed universal @ethereumjs/evm10.1.3 CommonJS sources are copied inert
-under /workspace/next10-diamond-try-evidence/cancun-envelope/installed-*.
+under VM location: next10-diamond-try-evidence/cancun-envelope/installed-*.
 [Provenance](diamond-try-cancun-envelope/installed-source-provenance.json) gives
 SHA256 and actual paths. The relevant API/source chain is:
 

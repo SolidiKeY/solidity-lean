@@ -1020,7 +1020,7 @@ theorem tryCall {g : Bool} {ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (call : 
   split at h
   · split at h
     · rename_i o₁ hc
-      have h1 := CKeeps.call sargs (.rets rets) hs hsb hg σ o₁ hσ hc
+      have h1 := CKeeps.call sargs (.rets rets.toRet) hs hsb hg σ o₁ hσ hc
       cases hr : ok o₁.st with
       | error => rw [hr] at h; cases h
       | ok o' =>

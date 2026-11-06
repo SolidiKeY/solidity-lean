@@ -1,3 +1,4 @@
+<!-- Generated from docs/README.d/ by scripts/coord-tools/fragments.sh; edit the fragments there, not this file. -->
 # The documents
 
 Open [module-map.md](module-map.md) first. Each fact lives in one document;
@@ -8,17 +9,31 @@ history is in git.
 
 | Document | Holds |
 |---|---|
+| [feature-work/integration-20261105T1200Z.md](feature-work/integration-20261105T1200Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
+| [feature-work/integration-20261105T0840Z.md](feature-work/integration-20261105T0840Z.md) | Reviewed bounded lane increments and retained producer boundaries. |
+| [feature-work/integration-20261105-deferred.md](feature-work/integration-20261105-deferred.md) | Deferred standalone parser, builder, target and derived-formula checkpoints, with retained producer obligations. |
+| [feature-work/integration-20261105-checkpoints.md](feature-work/integration-20261105-checkpoints.md) | Bounded scheduled lane increments, producer commits and retained integration boundaries. |
+| [feature-work/integration-20261103-checkpoints.md](feature-work/integration-20261103-checkpoints.md) | Reviewed scheduled lane increments, fixes, validation requirements and retained producer boundaries. |
+| [feature-work/hash-xi-context.md](feature-work/hash-xi-context.md) | Actual Xi/Theta hash-query transport for arbitrary world and context, with explicit fixed-code/gas and native/source limits. |
+| [feature-work/h7-bounded-interfaces.md](feature-work/h7-bounded-interfaces.md) | H7 logical padding/scanner APIs, bounds and native/source limits. |
 | [dafny-parity.md](dafny-parity.md) | Pinned Dafny feature audit, Solidity relevance, support and remaining semantic gaps. |
 | [feature-work/compiler-project-services.md](feature-work/compiler-project-services.md) | Multi-file compiler/LSP support, scoped specifications, formatting, refactoring and concurrent function proofs. |
 | [feature-work/solidity-lsp.md](feature-work/solidity-lsp.md) | Persistent Solidity LSP, warm Lean workers, editor services, validation and remaining limits. |
-| [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor comparison harness, feature discovery, measurements and completeness limits. |
+| [testsuite-performance.md](testsuite-performance.md) | All 83 Velvet TestSuite functions: compiled native, extension, offline browser and matched SolKey timings. |
+| [compact-verifier.md](compact-verifier.md) | Standalone generated-C/WASM verifier, admission limits, rebuild instructions and fresh-source benchmark method. |
+| [extension-proof-performance.md](extension-proof-performance.md) | Desktop closed-derivation proposals, checked fallback, worker timings and limits. |
+| [generated-c-performance.md](generated-c-performance.md) | Generated C call paths, native walk/certificate timings and optimization limits. |
+| [simp-performance.md](simp-performance.md) | Simplifier profiles, guarded joined preparation, measured gains and completeness limits. |
+| [browser-simple-benchmarks.md](browser-simple-benchmarks.md) | Matched small-program SolKey/native/browser timings, audit optimization and remaining cold/simplifier costs. |
+| [web-ide.md](web-ide.md) | Offline static browser workbench, WASM runtime, storage contract and real-editor comparison. |
+| [dafny-editor-parity.md](dafny-editor-parity.md) | Real Dafny/Solidity Lean editor and stdio comparison harnesses, independent feature/test discovery, measurements and completeness limits. |
 | [feature-work/dafny-verification.md](feature-work/dafny-verification.md) | Typed loop measures, finite membership, entry audits, certified source witnesses and editor integration. |
 | [feature-work/filtered-membership.md](feature-work/filtered-membership.md) | Finite literal filters, typed binders, snapshots, capture handling and semantic limits. |
-| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: 18 VM lanes of eight to ten hours covering 115 proof work packages, dependencies, explicit exclusions and source-to-bytecode completion gates. |
+| [coverage-plan.md](coverage-plan.md) | Full compiler/proof roadmap: VM lanes of eight to ten hours, proof work packages, dependencies, the full-scope extension and source-to-bytecode completion gates. |
 | [feature-work/roadmap-g01-interfaces.md](feature-work/roadmap-g01-interfaces.md) | Roadmap G01: intrinsic layer interfaces, observations, the six final theorem contracts, pass certificates, reuse map and the decisions they implement. |
 | [feature-work/frontend-parse.md](feature-work/frontend-parse.md) | Lane V05 (G08–G11): the checked lexer and parser to S00's syntax: lexical certificate, token yield and layouts, precedence, whole-source parsing, coverage, corpus regression and G05 parse-stage instance. |
 | [feature-work/roadmap-g05-frontend.md](feature-work/roadmap-g05-frontend.md) | Roadmap G05: audit of frontend, provenance and unsafe elaborator paths; checked certificate interfaces for raw input, parse, resolution and metadata; link settings and admitted settings. |
-| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy (model, abstract, exclude) and the exclusions. |
+| [solidity-scope.md](solidity-scope.md) | The pinned language audit: scope policy, the full-scope decision and the reopened former exclusions. |
 | [feature-work/roadmap-g00-scope.md](feature-work/roadmap-g00-scope.md) | Roadmap G00: pins and their disagreements, evidence for each recorded exclusion, manifest/ledger reconciliation, owners and open scope questions. |
 | [feature-work/roadmap-g03-ledger.md](feature-work/roadmap-g03-ledger.md) | Roadmap G03: constructor/feature → admission → lowering → backend → EVM → theorem ledger with combinations and decision rows, and the module/lemma dependency ledger (`scripts/roadmap-g03-ledger.py`, generated JSON). |
 | [solidity-feature-inventory.md](solidity-feature-inventory.md) | Generated from `solidity-features.json`: each feature's requirement, scope, status and evidence. Do not edit. |
@@ -49,9 +64,16 @@ history is in git.
 | [feature-work/backend-assembler.md](feature-work/backend-assembler.md) | Roadmap G45.05/G45.04 lane: the Osaka instruction datatype, byte encoder/decoder and jump-destination analysis, then the assembler; a handoff per checkpoint. |
 | [feature-work/precompiles.md](feature-work/precompiles.md) | Osaka's 18 precompiles as computed core functions with gas and failure laws, G06's `Fixed` instance, the vector provenance and the Bridge agreement. |
 | [feature-work/stipend-cost-rule.md](feature-work/stipend-cost-rule.md) | The compiler-independent stipend cost rule (G06 Q3): which `receive`/fallback bodies fit 2300 gas under cold access costs, its examples and the compiler obligation (G43). |
+| [feature-work/full-scope.md](feature-work/full-scope.md) | Full scope (2026-11-04): every exclusion withdrawn, optimizing compiler and solc translation validation; groups X/O/T, decisions D1–D6, parallel lanes and waves. |
 | [feature-work/inline-assembly.md](feature-work/inline-assembly.md) | Authorized inline assembly extension: the exclusions it reopens, tiers, groups Y01–Y10, lanes VY1–VY5 and approved decisions YQ1–YQ7; implementation gates remain open. |
+| [feature-work/compiler-transport-proofs.md](feature-work/compiler-transport-proofs.md) | Compiler transport proofs, reached failure controls, full small-frame output and remaining Source/EVM obligations. |
+| [feature-work/memory-operation-proofs.md](feature-work/memory-operation-proofs.md) | Typed Source/heap/word memory-operation lemmas, reached decrement failures and the remaining physical/backend boundary. |
+| [feature-work/primitive-return-projection.md](feature-work/primitive-return-projection.md) | Primitive return-byte validation before binding/discard, checked controls and the remaining O1 operational boundary. |
 | [calldata-slice-copies.md](calldata-slice-copies.md) | Calldata slices: fresh copies, aliases and their origins. |
 | [source-inputs.md](source-inputs.md) | EVM input premises of imported obligations and canonical self addresses. |
+| [feature-work/constant-depth.md](feature-work/constant-depth.md) | SOL-CB: the public `levels` bound suffices for acyclic constants; rank, correspondence, controls and pins. |
+| [feature-work/calldata-packets-1105-RawInt.md](feature-work/calldata-packets-1105-RawInt.md) | G35-INT-RAW-1105: raw intN calldata copies, width-specific acceptance, frame binding and controls. |
+| [feature-work/decisions-20261106.md](feature-work/decisions-20261106.md) | Coordination decisions of 2026-11-06 (H53–H64): full scope, the G49/G50 pass template, refactors, gate checks and fleet programs. |
 
 **The calculus and its proofs**
 
@@ -66,6 +88,7 @@ history is in git.
 | [function-specs.md](function-specs.md) | Per-function `requires`/`ensures`/`\old`/`\forall`, invariants, `sol_spec`. |
 | [lifetime.md](lifetime.md) | Transaction traces from the constructor, whole-contract safety, invariant induction. |
 | [automation.md](automation.md) | The deciding closer: M0–M8, the decision theorem's features and gaps, M7-next. |
+| [feature-work/m7-next.md](feature-work/m7-next.md) | M7-next lane handoff: the route-refusal `Fml.Residue`, `DecisionTheorem'` (not a completeness result), fixtures, reviews and gates. |
 | [complete-verification.md](complete-verification.md) | The exact-reduction pipeline, its stages, tools and limits. |
 | [assurance.md](assurance.md) | Trust gates, the memory compiler's invariants, remaining assurance work. |
 | [rule-repair.md](rule-repair.md) | How to repair a broken rule: semantics first, rejection gates, soundness. |
@@ -106,6 +129,49 @@ history is in git.
 | Preparation lane | Document |
 |---|---|
 | G31 environment/metadata opcode lowering | [backend-environment-lowering.md](feature-work/backend-environment-lowering.md) |
+
+V08's partial world-lowering checkpoint is recorded in
+[roadmap-v08-world-lowering](feature-work/roadmap-v08-world-lowering.md):
+intrinsic world/callable adapters and one-step Source-boundary components
+(custom errors, ABI, emit, Keccak, transient journals, payments). No theorem
+yet links Source executions to the intrinsic world or to bytecode.
+
+V15 P10 partial checkpoint: [fetched-byte EVM steps against EvmYul](feature-work/roadmap-v15-p10.md),
+including the frozen CALL/RETURNDATA/JUMP interface consumed by later lanes.
+
+P1 runtime-frame partial checkpoint: [foundation, frozen interfaces v1–v3 and producers](feature-work/runtime-frame-p1.md); [P1-CALL value-call producer](feature-work/p1-call-producer.md) and [G37.03/P4 typed dispatch](feature-work/roadmap-g37-dispatch-p4.md).
+G33 finite struct defaults: [pair and nested struct default construction](feature-work/roadmap-g33-struct-defaults.md).
+G22/G42 read-only calls: [typed source calls, callbacks and the static-world frame](feature-work/g22-readonly-calls.md); [world-call consumers](feature-work/g42-world-call-consumers.md).
+G21 closed failure lowering: [literal, boolean custom-error and slice failures](feature-work/g21-failure-lowering.md).
+V07 source lowering (G16–G18.01): [scalar/effectful lowering, P12 context map, declaration-location graphs](feature-work/roadmap-v07-lowering.md).
+P6 physical memory: [word frames, byte journal, uint arrays, reference stores](feature-work/physical-memory-interface.md).
+G18.02/.03 aggregates: [storage path typing, graph fields, memory writes and aliases](feature-work/g18-aggregates.md).
+G36.01 structured flow: [target branch and exit selectors](feature-work/roadmap-g36-structured-flow.md).
+V09 compiler passes: [G24–G31 pass components](feature-work/roadmap-v09-compiler-passes.md).
+V10 storage operations: [copy, clear, push and pop over storage graphs and targets](feature-work/roadmap-v10-storage-operations.md).
+Inline assembly VY1: [Yul syntax, checking and word semantics](feature-work/inline-assembly-vy1.md).
+Inline assembly VY2: [physical memory views, adapters and recursive loops](feature-work/yul-physical-memory.md).
+Label execution: [byte-PC control edges](feature-work/backend-label-exec.md). Diamond try H8: [bounded source model](feature-work/diamond-try-h8-source-model.md).
+
+P8 partial checkpoints: [admission and failure resources](feature-work/p8-admission.md), including the [P8a frozen interface](feature-work/p8-admission.md#frozen-interface) and [settings and assembly boundary](feature-work/p8-admission.md#all-settings-and-producer-assembly), and the [P8b frozen consumer interface](feature-work/p8b-frozen-interface.md).
+
+P9 and Source soundness checkpoints: [checked call graphs](feature-work/p9-checked-callgraphs.md), [allocation and frame preservation](feature-work/source-preservation-allocations.md) and [checked call-program progress](feature-work/source-progress-checked.md).
+
+Feature-work records write the cloud VM's workspace root as `${VM_WORKSPACE}` and its setup directory as `${VM_SETUP}`.
+
+- [G18 storage cells](feature-work/g18-storage-cells.md): operation-level Source/IR cell consumers and inhabited controls; full aggregate lowering remains open.
+- [Integer-valued mapping copy](feature-work/g18-scalar-mapping-copy.md): all-key storage relations and a captured-slot copy consumer; physical/runtime closure remains open.
+- [Dynamic storage array access](feature-work/g18-array-access.md): actual length/bounds and selected-cell transports, with invalid-representation controls.
+- Source callback history producer components: [G22 Source histories](feature-work/g22-source-history-producer.md).
+- Compiler-pass integration checks and retained local applications are described in [the compiler-pass record](feature-work/roadmap-v09-compiler-passes.md#integration-checks).
+- V10 Source operation clients and remaining integration: [storage operations](feature-work/roadmap-v10-storage-operations.md#source-operation-clients-c145).
+- Registered V10 Source operation clients: [storage operation views and Source clients](feature-work/roadmap-v10-storage-operations.md#operation-views-and-source-clients).
+- [V16 correctness consumers](feature-work/roadmap-v16-correctness.md): scoped actual allocation-memory preservation, bounded Source transaction pairs and exact rollback/specification observations; full composition remains open.
+- [P7 transient target](feature-work/p7-transient-target.md): typed transient target, Source correspondence and remaining G39/G42 obligations.
+- [Executable bytecode selection](feature-work/executable-bytecode-selection.md) and [memory defaults and copies](feature-work/memory-copies.md): G45 and G33/G35 statement-only interfaces and premises.
+- [ABI entry](feature-work/abi-entry.md): G40 interfaces, word validators, entry transport and pending view premises.
+
+G41 result/failure codec and terminal observations: [ABI packet consumers](feature-work/abi-world-packets.md).
 | V13 ABI/world independent preparation (parent open) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md) |
 | V13 intrinsic catch consumer recovery (parent blocked) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md#recovery-catch-consumer-checkpoint) |
 | V13 published compiled-memory-call consumer (parent open) | [roadmap-v13-abi-world.md](feature-work/roadmap-v13-abi-world.md#published-memory-call-consumption) |

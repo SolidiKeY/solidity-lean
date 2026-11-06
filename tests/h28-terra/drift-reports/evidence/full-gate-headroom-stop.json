@@ -1,0 +1,12 @@
+{
+  "event": "HEADROOM_STOP",
+  "memoryCurrentBytes": 12887789568,
+  "vmMemoryMaxBytes": 17179869184,
+  "requiredHeadroomBytes": 4294967296,
+  "containerMemoryMaxBytes": 12884901888,
+  "containerSwapMaxBytes": 0,
+  "dockerExit": 137,
+  "lastCompletedTarget": "[158/3342] Solidity.Backend.Creation.ExecutionChecks",
+  "command": "bash run-lean.sh in python:3.12-bookworm container, LEAN_NUM_THREADS=1, temporary Lake configuration with weakLeanArgs -j1, --memory=12g --memory-swap=12g --cpus=1",
+  "outcome": "incomplete: stopped by VM headroom guard; no full-gate pass"
+}

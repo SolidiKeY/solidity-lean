@@ -1,0 +1,51 @@
+{
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.failed_query_alias_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.fixed_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.fixed_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.pop_push_aliases": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.pop_push_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.pop_push_complete_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.pop_push_identity_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.pop_push_outside_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/AggregatePopFrameControls.lean:Solidity.Backend.StorageOps.AggregatePopFrameControls.whole_fixture_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
