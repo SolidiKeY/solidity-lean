@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "delivery": "Saved for local coordinator retrieval; relay.sh not present in this VM; no original-file edit requested or performed",
+  "blockers": [
+    {
+      "id": "FROZEN-DISPATCH-EMPTY",
+      "type": "FROZEN_STATEMENT_UNINHABITABLE",
+      "owner": "RO (compiler10/readonly-external)",
+      "declarations": [
+        "Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ",
+        "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ"
+      ],
+      "evidence": "ImpossibleDispatch.lean; proof-impossible-final.log",
+      "question_id": "Q-DISPATCH",
+      "question": "The two frozen dispatch cuts have contradictory hypotheses. How should their owner resolve the all-statements witness requirement while preserving this frozen audit?",
+      "options": [
+        "Owner prepares a separately versioned reachable dispatch partition and explicit contract migration; frozen audit remains blocked until authorized scope is supplied.",
+        "Keep the frozen signatures unchanged and retain the proven witness blocker; no all-witness completion claim."
+      ]
+    },
+    {
+      "id": "G42-NONEMPTY-TARGET-REVERT",
+      "type": "PUBLIC_SUCCESS_CONTRACT_MISSING",
+      "owner": "V13 (v12-v17/v13-abi-world)",
+      "dependencies": [
+        "V15/P10 outcome observation producer"
+      ],
+      "declarations": [
+        "Solidity.Backend.WorldCalls.ExternalCalls.fetched",
+        "Solidity.Backend.WorldCalls.ExternalCalls.declared_return",
+        "Solidity.Backend.WorldCalls.ExternalCalls.decoded"
+      ],
+      "evidence": "AlwaysRevert.lean; proof-always-revert-controls.log",
+      "question_id": "Q-SUCCESS",
+      "question": "The exact frozen external consumers admit a nonempty fetched target that reverts while Source decoding succeeds. Which owner repair should supply the required public compiler success contract?",
+      "options": [
+        "Add a separate supported-program compiler totality/success theorem with independently fixed Source/target outcome observations.",
+        "Publish a new producer interface version enforcing independent input coverage and fixed P10 outcome/returndata correspondence.",
+        "Retain these as conditional transport consumers and keep public compiler adequacy blocked pending genuine producer contracts."
+      ]
+    }
+  ]
+}

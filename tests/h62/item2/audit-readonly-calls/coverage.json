@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "source_name": "Solidity.Backend.WorldCalls.Callbacks.returned",
+      "signature_sha256": "799e18d0ae4f845ab6aba02351da1850bfde6bf050ab261c424addcf36a16474",
+      "status": "joint-witness",
+      "proof": "Solidity.H62.ReadonlyAudit.SupportedCalls.returned_joint",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-supported.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.fetched",
+      "signature_sha256": "5339d979bf6ea66d1decf8c55b1dc06bc4fb1b6579b2c4bb1adce3c4220c8a93",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_fetched",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.declared_return",
+      "signature_sha256": "1f70110e5988db81fd0883c1e745fb118f61aeb1f28001c03586748350d60701",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_declared_return",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Backend.WorldCalls.ExternalCalls.decoded",
+      "signature_sha256": "0a32fef24ce90d6411b0c3738b18da3860749425e189632f7d63dc200430688f",
+      "status": "joint-witness-target-failure",
+      "proof": "Solidity.H62.ReadonlyAudit.AlwaysRevert.accepted_decoded",
+      "global_premises": "Same concrete Invocation, Premises and (where required) FetchedPremises constructors; no standalone inhabitance inference",
+      "per_input": "Same actual Step/Fetched input and actual decoder for decoded; see accepted application",
+      "evidence": "proof-always-revert-controls.log"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_getter_empty_succ",
+      "signature_sha256": "f97a0e65679c104e5ed64dd546ae0d1a0b3f07cd61944cdb022f3baf12ada740",
+      "status": "joint-premises-refuted",
+      "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.getter_empty_infeasible",
+      "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
+      "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
+      "evidence": "proof-impossible-final.log"
+    },
+    {
+      "source_name": "Solidity.Lowering.Readonly.SourceHistory.dispatch_special_empty_succ",
+      "signature_sha256": "216a881f37ac2fa742d861583d581a1806d8721ae2a7b4728d68b1e8e668b2d9",
+      "status": "joint-premises-refuted",
+      "proof": "Solidity.H62.ReadonlyAudit.ImpossibleDispatch.function_empty_infeasible",
+      "global_premises": "At G n is a global bounded history structure; its inhabitance cannot repair the contradictory per-input equalities",
+      "per_input": "Empty input contradicts selected getter/function selector; refutation needs only a subset of exact hypotheses",
+      "evidence": "proof-impossible-final.log"
+    }
+  ]
+}
