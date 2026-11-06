@@ -629,3 +629,40 @@ metadata cases. Independent read-only finder and skeptic reviews found no
 material issues; their ambiguity-wording refinement is incorporated. Generated
 roots and fragment checks pass. Required executed-inspection, checkpoint/full
 build and performance gates remain pending; this is not whole-lane completion.
+
+
+## Saved source/product bindings and static associations
+
+The source-only `source_bindings.py` checker reconstructs the frozen import
+closure from Git, checks the saved prefix order and exact compiler arguments,
+and rehashes each retained product. It pins the five input receipts and the five
+tool source files, and rejects changes during checking. These checks reproduce
+saved receipt consistency; they do not attest to a process or accept a closure,
+an inspection, statement correspondence or any simultaneous witness. Log hashes
+capture the files as read now; the original verifier supplied no historical log
+digests. The stopped native PowerBounds gate was not rerun.
+
+The actual report binds 625 saved source/product records and retains 78 pending
+planned sources. Static classification covers the 227 frozen mapped files,
+associating products with 150 of them. It retains all 1,660 named source theorem
+candidates, 764 private candidates, 75 record candidates, 248 direct fields and
+nine source parent edges. Kernel names, proof types and instantiated inherited
+obligations remain unresolved. The terminal workload remains RED, with zero
+accepted inspection links or witnesses. The 37 Bridge files are source-classified
+only; no Bridge inspection or package acceptance follows.
+
+All 58 affected Python tests pass, including 14 new synthetic binding controls.
+The synthetic products are fixture bytes, not Lean artifacts or process evidence.
+Finder and skeptic reviews prompted checks for terminal exit/identity agreement,
+receipt stability, exact external import roots and imported-helper hashes. Those
+findings are fixed; source/statement/feasibility and process-attestation limits
+remain explicit. No Lean source, interface, premise, exclusion, axiom set or proof
+budget changed. Full 703-source/190-core/37-Bridge validation, producer/source
+adequacy, remaining witnesses, runtime/gas/fork and performance gates remain open.
+
+Evidence is retained under
+`/workspace/parallel-20261103/executable-bytecode/source-product-bindings/`.
+The coordinator confirmed that master's kernel-check serialization change does
+not discharge or permit an unchanged retry of the prior PowerBounds stop.
+Legacy RuntimeConsumer live semantic ownership remains coordinator-pending;
+migrate-root-gate's known scope is the isolated v4.35 overlay.
