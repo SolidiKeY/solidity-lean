@@ -453,3 +453,24 @@ independent read-only reviewers found no issue. This ledger adds zero verified
 proofs and supplies no generic instance or correspondence acceptance; the
 1623-claim implementation queue and all existing timing/resource holds remain
 open. No production source, premise, definition or axiom inventory was edited.
+
+## Target-only self-copy case ledger
+
+C220 accounts for all three frozen SourceSelfCopyTargetControls statements.
+The first is actual structured Evm.run returning the original whole Machine
+after consuming equal source/destination operands. The second records the
+original and self-copy ten-slot views plus nine sampled context fields. The
+third is only a different-empty-source afterCopy view equation, not an execution
+or refusal theorem. It clears the live destination prefix while preserving
+older nested tail11, older outer child2 header1/payload71 and outside sentinel99.
+The historical SourceSelfCopy filename and compatibility namespace supply no
+ordinary Source evaluator, numeric/physical bridge, static-call, gas or world
+rollback adequacy.
+
+The two ledgers reuse one source-accounting builder. A regression compares the
+entire retained-cycle report with its frozen C218 generator; every prior field
+and manual obligation remains identical. Exact module bytes, all three original
+statements and fixture support remain pinned. Source/case/observation/statement
+and fabricated-proof-acceptance mutations are rejected. This adds three manual
+source plans and zero new verified proofs or generic correspondence instances;
+the full 1623-claim queue remains unfinished. Production sources are unchanged.

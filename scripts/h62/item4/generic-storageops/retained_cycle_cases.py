@@ -40,19 +40,24 @@ CASES = {
 }
 
 
-def build(source):
-    if hashlib.sha256(source).hexdigest() != SOURCE_SHA256:
+def build_packet(source, path, source_sha256, prefix, cases, boundary):
+    if hashlib.sha256(source).hexdigest() != source_sha256:
         raise ValueError("frozen module byte drift")
-    rows = census.declarations(source.decode('utf-8'), PATH)
+    rows = census.declarations(source.decode('utf-8'), path)
     claims = [r for r in rows if r['candidate_case']]
-    if {r['name'] for r in claims} != {PREFIX+n for n in CASES} or len(claims) != 5:
+    if {r['name'] for r in claims} != {prefix+n for n in cases} or len(claims) != len(cases):
         raise ValueError("original control case omission/duplication")
-    return dict(schema_version=1, base=census.BASE, path=PATH, source_sha256=SOURCE_SHA256,
-                boundary="Manual source obligations for five exact frozen controls only; no new Lean, generic-law instance, elaborated equivalence, runtime test, timing or physical/Source/compiler/world adequacy acceptance.",
+    return dict(schema_version=1, base=census.BASE, path=path, source_sha256=source_sha256,
+                boundary=boundary,
                 fixture_support=[dict(name=r['name'], declaration_sha256=r['declaration_sha256']) for r in rows if not r['candidate_case']],
                 cases=[dict(name=r['name'], statement=r['statement'], statement_sha256=r['statement_sha256'],
-                            ambient_binders=r['ambient_binders'], source_plan=copy.deepcopy(CASES[r['name'][len(PREFIX):]]),
+                            ambient_binders=r['ambient_binders'], source_plan=copy.deepcopy(cases[r['name'][len(prefix):]]),
                             status="manual-source-plan; generic instance/correspondence pending", counts_as_new_verified_proof=False) for r in claims])
+
+
+def build(source):
+    return build_packet(source, PATH, SOURCE_SHA256, PREFIX, CASES,
+        "Manual source obligations for five exact frozen controls only; no new Lean, generic-law instance, elaborated equivalence, runtime test, timing or physical/Source/compiler/world adequacy acceptance.")
 
 
 def validate(report, source):
