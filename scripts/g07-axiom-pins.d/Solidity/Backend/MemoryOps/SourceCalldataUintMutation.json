@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceCalldataUintMutation.lean:Solidity.Backend.MemoryOps.source_cd_uint_bind_assign": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceCalldataUintMutation.lean:Solidity.Backend.MemoryOps.SourceUintMemoryAt.write_observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

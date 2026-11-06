@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlan.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.demand_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingOuterPlan.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingOuterPlan.return_from_entry": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

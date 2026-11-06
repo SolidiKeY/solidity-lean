@@ -1,0 +1,17 @@
+{
+ "Solidity/Backend/MemoryOps/PhysicalPointerWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.materialize_checked_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_dirty_world_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/PhysicalPointerWorldUnwind.lean:Solidity.Backend.MemoryOps.Physical.ReferenceArrayAt.materialize_world_unwind": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

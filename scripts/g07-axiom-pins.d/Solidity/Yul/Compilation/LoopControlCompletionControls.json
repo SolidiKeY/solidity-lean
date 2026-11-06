@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/LoopControlCompletionControls.lean:Solidity.Yul.Compilation.LoopControlCompletion.Controls.pending_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LoopControlCompletionControls.lean:Solidity.Yul.Compilation.LoopControlCompletion.Controls.recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LoopControlCompletionControls.lean:Solidity.Yul.Compilation.LoopControlCompletion.Controls.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LoopControlCompletionControls.lean:Solidity.Yul.Compilation.LoopControlCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

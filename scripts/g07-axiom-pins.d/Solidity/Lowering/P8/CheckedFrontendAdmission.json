@@ -1,0 +1,21 @@
+{
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.accepted_extraction": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.admitted_unique": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.check_false_refuses": [],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.classification_false_refuses": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.frontend_iff": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.pipeline_certificate": [
+  "propext"
+ ],
+ "Solidity/Lowering/P8/CheckedFrontendAdmission.lean:Solidity.Lowering.P8.CheckedFrontendAdmission.rejection_iff": [
+  "propext"
+ ]
+}
