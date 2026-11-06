@@ -134,6 +134,23 @@ it again together with the reported version.
 A raw NUL/DEL fixture travels as a JSON string. The runner's
 `sourceSha256` binds the exact bytes.
 
+Follow-up reviews (read-only, no Lean server):
+
+- Finder: the model rows, `.yul 7`, byte spellings, coverage JSON and
+  `audit.py` are correct. It found three doc defects, all fixed in
+  1ff1c163: the stale status line, a stale "Not fixed" entry for these
+  fixtures, and a wrong merge date.
+- Skeptic: all five claims confirmed: pinned SHA256 and version, the 116
+  earlier observations unchanged, all 13 verdicts for solc and the model,
+  "PASS 71 cases", and that solc reads the raw bytes (`unicode-raw-TAB` span
+  `134:12:0`; plain cases fail with 8936 "Invalid character"). Caveats:
+  - The exact-span assertion runs only for accepted cases. The five
+    refused raw-byte cases are pinned by their frozen error locations in
+    `check` mode.
+  - The runner does not compare the model with solc. Agreement rests on
+    the `FullControls` kernel rows and `audit.py`; the kernel check
+    itself comes from the `run-lean.sh` build below.
+
 ### Queue item 4: backfill (suffix, byte-length and encoding properties)
 
 `Lengths.lean` (13 theorems):
