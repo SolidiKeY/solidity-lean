@@ -273,3 +273,16 @@ fixtures, all pins):
   raised the selector point, resolved by the check above. The receipt now
   records `allowDrift` and the H102 authority at its top level. `--allow-drift`
   does not distinguish added from removed keys; here all were additions.
+
+### Checkpoint gate after H102
+
+`gate.sh checkpoint` on `701d4520`, with `LEAN_NUM_THREADS=1`:
+
+- PASS: build-touched ("Build completed successfully (6148 jobs)"), library
+  (6,130 jobs), trust, orphans, layers, roots and fragments.
+- An earlier attempt with default threads was killed with exit 137 (out of
+  memory) in master modules `Source.Horizon` and
+  `Yul.Composition.RawCatchPhysical`; neither is touched here.
+- doc-paths FAIL: five misses, all from master (`h62-*` notes and scripts).
+- axiom-pins FAIL with 0 errors and 99 unrecorded changes. None is in a module
+  this lane touched.
