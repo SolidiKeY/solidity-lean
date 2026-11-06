@@ -1187,3 +1187,21 @@ faithfulness only (added memory-faithfulness and nonnull negatives); a fact
 was credited to the wrong theorem and two controls lacked pins. Remaining,
 recorded: the P12 fixture relates one reference per location, so the
 positive distinct-references direction is unexercised.
+
+### CP75/CP76 gates
+
+At head `6dd57aa8`, `scripts/coord-tools/gate.sh checkpoint` results:
+build-touched (all of `Solidity`, 5390 jobs), library, trust, orphans,
+layers and roots PASS. doc-paths FAIL on one inherited reference
+(`docs/feature-work/after-roadmap-va1.md` cites a Mathlib test file).
+axiom-pins FAIL with 0 errors but 3703 unrecorded changes; master fails the
+same way (3659 unrecorded there). Neither failure involves a file from this
+lane. Lean MCP diagnostics on the four new modules: no errors, no `sorry`,
+no `native_decide`, no new axioms. `tests/v07/check-effect-fixtures.mjs`
+passes (173 cases).
+
+Still open in this lane: G16, G17 and G18.06 (it waits for V16/V14). Also
+open: `GraphPremises` derived from accepted Source, the VY5 Source repair
+(`SourceRefusal.envLocOK`), refusal for parameters, returns and tuples,
+P12 selection from admitted syntax and effectful reference paths, and
+P8-SPEC-LAW1 (all `P8a.Producer`-indexed results stay vacuous until then).
