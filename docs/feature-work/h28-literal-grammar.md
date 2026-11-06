@@ -1,6 +1,6 @@
 # H28 G08 nonnumeric literal decoder completeness
 
-Status: **done except the fresh solc fixture rerun** (see "Claude VM
+Status: **partial: done except the fresh solc fixture rerun** (see "Claude VM
 completion"). The lane moved from a Codex VM to a Claude VM on 2026-11-05;
 all 26 `Solidity/Frontend/LiteralGrammarH28/**` modules are registered in the
 generated `Solidity.lean` root, so the former registration blocker
@@ -34,7 +34,7 @@ fragment `docs/module-map/frontend.d/literal-grammar.md`. Read-only inputs
 1. Independent Escape, Body, Quoted, HexBody, Plain, UnicodeLiteral, HexLiteral, Scan, Fragments, ModeLiteral and ModeSequence grammar/value relations are implemented independently of decoder outcomes. Body.toStrBody reuses existing strBody_sound. Numeric/EIP55 implementations remain immutable.
 2. Arbitrary-length completeness/soundness covers simple, hex and Unicode escapes, escaped line ends, both quote modes and exact values. Scan/split theorems preserve every arbitrary suffix. Scanner iff is for literal delimiters 34/39; q=92 is an explicit negative boundary control.
 3. Exact pair/underscore rules, independent byte/codepoint arithmetic, lengths, fragment concatenation values, universal classification iff/refusal consequences and all-byte constructive round trips are proved. All modes are characterized, including asm raw-source length/quote guards and unsupported pragma/Yul literal classes. Mixed-kind sequences are lexical; no parser-expression admission is claimed.
-4. 242 kernel rows (28 hex, 53 body, 56 boundaries, 105 classification), inhabited positive and universal negative controls, 217 public theorem signatures/axiom pins (200 before the backfill) and 58 fixed compiler cases in both pipelines are implemented.
+4. 242 kernel rows (28 hex, 53 body, 56 boundaries, 105 classification), inhabited positive and universal negative controls, 219 public theorem signatures/axiom pins (200 before the backfill) and 58 fixed compiler cases in both pipelines are implemented.
 5. Backfill (2026-11-05, `Lengths`, `Utf8Shape`): see below.
 
 The old StrBody relation overlaps at escaped CRLF for an always-true predicate; the decoder emits empty but that relation can derive LF. Body models CRLF priority without excluding accepted inputs. Both the old overlap and new exact result remain visible kernel witnesses.
@@ -49,8 +49,148 @@ soljson 0.8.38+commit.1835d247.Emscripten.clang SHA256: `6c74ffba0ea4cf9521e78b1
 
 Initial strict comparison failed six rows (three cases times two pipelines), retained in evidence. Exact observation checking retains these differences: Unicode surrogate escape encodings are accepted by the byte model but rejected downstream by solc with SyntaxError 8452; plain surrogate escape compiles. solc accepts empty and single-quoted assembly flags, while the pinned model refuses raw length two and non-double quotes. Frozen producer/alignment files were not changed. JSON cannot transport arbitrary invalid UTF8 source bytes; byte-level kernel controls cover those cases.
 
-## Claude VM completion (2026-11-05)
+## Claude VM completion (2026-11-05/06)
 
-In progress: fresh `./run-lean.sh`, audit against a fresh axiom log, and
-finder/skeptic reviews of the backfill and audit repair. Receipts follow when
-they finish. Codex-era receipts (evidence/ subdirectories) are historical.
+Branch `cloud/moved4-20261105/literal-grammar`, started from
+`cloud/literal-grammar-move` (3b327d00, which restores `solc-fixtures.mjs`)
+merged with master aec9adf1. Lean 4.24.0 / Lake from `lean-toolchain`; 4
+cores, 15 GB, no swap.
+
+### Queue item 1: fresh validation
+
+- `./run-lean.sh` at 079ef4ac (25m36s): every target built except
+  `Solidity.Examples.Tactics.OpenLoops`, which another lane owns. Lean was
+  killed with exit 137 (out of memory) after 801 s while other jobs ran in
+  parallel. The final head's run is recorded under "Final gates".
+- In that build `FullPins` was built fresh. `audit.py --record` copied its
+  `#print axioms` and `ProofSafety` reports to `evidence/axioms.log`, and
+  `proof-source-identities.json` binds that log's SHA256 to all 26 source
+  hashes. All 219 axiom sets and the 8 `DECL_SAFETY … safe` lines match
+  `pins.json`. Every set is within {propext, Classical.choice, Quot.sound}.
+- `register.sh --check` passes. `check-orphans.mjs` reports 5810 reachable,
+  0 orphaned. `check-doc-paths.sh` reports one missing path, which is not
+  from this lane: `docs/feature-work/after-roadmap-va1.md` cites a Mathlib
+  file under `Bridge/.lake` that is not fetched here.
+
+### Queue item 2: audit repair
+
+`audit.py` used to verify an adoption chain of Codex-VM commits (0858098f,
+9cbd923a, 405995c1, 59c3e31c). Those commits were never published, so the
+audit could not run. It now reads only committed files, git, and an optional
+fresh Lean log:
+
+- **Axiom reports.** It takes the `FullPins` reports from a supplied log or
+  from the committed `evidence/axioms.log`. A supplied log must show
+  `FullPins` being built or replayed. The committed log must match its
+  SHA256 in `proof-source-identities.json`. A supplied log is not otherwise
+  bound to the sources; `--record` makes it the committed evidence.
+- **Wrapped lists.** Axiom lists that Lean wraps onto continuation lines are
+  rejoined before matching.
+- **Scope.** It checks changes against the merge base with origin/master,
+  or `--scope-base`, using `--no-renames`. It fails if neither base
+  resolves.
+- **Shared files.** `Solidity.lean` and `docs/module-map/frontend.md` may
+  change only in lines that name this lane.
+- **What scope no longer covers.** The Codex-era history from 6f3eedf was
+  audited on the Codex VM and is not re-checked.
+- **Removed.** The obsolete `adopted-master.json`, the Codex
+  `runtime-bin/lake` wrapper and `runtime.toml`.
+
+### Queue item 3: solc fixture rerun (blocked)
+
+The environment's network policy denies `binaries.soliditylang.org` (proxy
+CONNECT 403). The npm `solc@0.8.38` package's `soljson.js` has a different
+SHA256 (0b15fcb2…), and running it as a substitute was not permitted. So
+`solc-fixtures.mjs` was not rerun. The committed `solc-observations.json`
+(116 observations, 58 cases × legacy/viaIR) remains the Codex-era record.
+The skeptic review rebuilt every fixture source and input exactly as the
+runner does; all 116 `sourceSha256`/`inputSha256` values match. It also
+confirmed the recorded differences, e.g. the surrogate SyntaxError 8452.
+
+To rerun the gate, allow that host (or supply the pinned soljson), then run
+`node tests/h28-sol/literal-grammar/solc-fixtures.mjs <soljson.js> <out.json>`.
+
+### Queue item 4: backfill (suffix, byte-length and encoding properties)
+
+`Lengths.lean` (13 theorems):
+
+- **Scanner.**
+  - `Scan.deterministic`: the split is unique for a literal delimiter.
+  - `Scan.isSuffix`, `Scan.length_eq`.
+  - `Scan.length_lt`: at least the closer is consumed, so the suffix is
+    strictly shorter.
+- **Plain and unicode literals.** `Plain.length_le` (out + 2 ≤ raw) and
+  `UnicodeLiteral.length_le` (out + 9 ≤ raw). These are one-sided: an
+  escaped line end decodes to nothing.
+- **Hex literals.**
+  - `HexLiteral.length_bounds`: 2·out + 5 ≤ raw ≤ 3·out + 5.
+  - `HexBody.length_tight` and `HexLiteral.length_le_tight`: raw ≤ 3·out + 4
+    for a nonempty value, reached by `hex"00_00"`.
+- **Fragment sequences.** `Fragments.length_eq`,
+  `Fragments.flatten_length_le`, and the plain/hex/unicode `FragmentValue`
+  sums.
+
+`Utf8Shape.lean` (6 theorems):
+
+- `CodepointBytes.shape` and `uniEscape_shape`: every `\uHHHH` escape emits
+  UTF-8 lead/continuation bit patterns, never an overlong form.
+- `CodepointBytes.value`, `uniEscape_value` and `utf8_injective`: the code
+  point is recovered exactly.
+- Surrogates keep the shape. The model adds no scalar check, matching the
+  documented deviation.
+- Controls: a surrogate and a two-byte value (inhabited), and overlong
+  C0 80 and E0 80 80 (negative).
+
+All 19 theorems are pinned in `FullPins`/`pins.json`. The module-map
+fragment `docs/module-map/frontend.d/literal-grammar.md` gives rows for the
+17 lane modules master lacked.
+
+### Queue item 5: reviews
+
+Read-only finder and skeptic reviewed the backfill and the audit repair;
+neither used the Lean server. Both found the new statements true and
+non-vacuous, with no hidden premise. The `cp < 65536` premise is always met
+by `\u` escapes (`hexQuad_lt65536`), and `IsQuote q` is necessary for
+`Scan.deterministic`. Confirmed findings, all fixed:
+
+- The hex upper bound was not tight. Added the tight theorems and corrected
+  the docstring.
+- The module docstring overclaimed "linear relation".
+- `Lengths.lean` had an unused import, and the fragment theorems lacked
+  docstrings.
+- There was no three-byte overlong control or two-byte positive control.
+- The audit pins had no committed Lean output. Fixed by the fresh log.
+- A supplied log was accepted without any marker.
+- Renames could bypass the scope check, and the check was skipped silently
+  without origin/master.
+- Shared files were allowed wholesale.
+- `adopted-master.json` was stale.
+
+Not fixed:
+
+- **Printable-boundary fixtures.** No compiler fixture has a raw control
+  byte, or the other quote raw inside a literal. These are covered only by
+  kernel rows, and new fixtures need the blocked compiler.
+- **Model/compiler hex agreement.** Agreement on cases both accept is a
+  property of the data, not asserted by the gate. This is by design.
+
+### Final gates
+
+Final-head `./run-lean.sh`: pending (recorded when it finishes).
+
+### Retained deviations
+
+- Unicode surrogate escapes: the model accepts them, but solc rejects
+  unicode-literal surrogates downstream (SyntaxError 8452).
+- Empty or single-quoted assembly flags: solc accepts them, the model
+  refuses them.
+
+Neither theorem statements nor frozen inputs were weakened. No sorry, axiom
+or `maxHeartbeats` change.
+
+### Codex-era history
+
+The Codex VM's adoption, cache and blocked-registration narrative, and its
+receipts, live in `tests/h28-sol/literal-grammar/evidence/` and in git
+history before this section. They are historical. The bulk logs, the cache
+pack and `codex/h28-preserved-6492f34c` stayed on the Codex VM.
