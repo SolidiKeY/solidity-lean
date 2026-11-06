@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsTarget.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.resolved_write_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

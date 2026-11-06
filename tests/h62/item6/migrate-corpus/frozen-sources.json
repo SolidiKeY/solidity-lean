@@ -1,0 +1,11 @@
+{
+  "Solidity/Corpus/Basic.lean": "3b7c99cb0bb28225554a0a9eb53cc4b44afbca8b827a0a6cd8ec8c39ea7aed7b",
+  "Solidity/Corpus/Imported.lean": "0e3d84952194e77b61a233a3049f6e586bbecf9230a796ec6ee3cb6f73dc9c6a",
+  "Solidity/Corpus/SolcArrays.lean": "50ceaec33665d5b3df806b9097766b5cbf2105891590d765ab349f5a3e3de453",
+  "Solidity/Corpus/SolcControlFlow.lean": "0943781767be1c8d159d9f8d1b7705ad8674541408676f05032d4ad50857e1f2",
+  "Solidity/Corpus/SolcExpressions.lean": "847dd7a421b582e680f679b0d5f8960b9f67163d5cfe384ce162bc0a9b4610fb",
+  "Solidity/Corpus/SolcMappings.lean": "23b7d7ba1c1bb922d16aa029c56f717e91be0150192bfbcf4221d226323996ce",
+  "Solidity/Corpus/SolcMemory.lean": "8b4721e00351884c15e3411fc1aa51f7468b4736d7661be7b7a0f869dc515426",
+  "Solidity/Corpus/SolcStructs.lean": "a7c4fb909cb79f604caf0b61fb6095967b8251c8d811f4c9a58a20c7d4232aae",
+  "Solidity/Corpus/TestSuite.lean": "b41047c169e5106a2f4129a60f331e96a84d9c6e67006f406d41a6bef8183d89"
+}

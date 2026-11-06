@@ -1,0 +1,955 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h62-2-20261106",
+  "slug": "audit-bytecode-selection",
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-2-20261106/audit-bytecode-selection",
+  "handoff_to": "solidity-parallel-20261103/executable-bytecode",
+  "area": "bytecode-selection",
+  "frozen_module_map": {
+    "path": "docs/module-map/bytecode-selection.md",
+    "sha256": "517647d10056e5d7830bd6e7983ed25364f8a03fe14c91421b195f4b324fd21f"
+  },
+  "mapped_sources": [
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/AbiWord.lean",
+      "sha256": "1bff9c609e47c9f383d0c1f4795decfe5b0d9468cf348fe7d8fe615588c66103"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/AbiWordControls.lean",
+      "sha256": "c1f6b684ade55eca6a8a177434fe41510adffa1bf418652a536a841cd230ab71"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/AbiWordInterface.lean",
+      "sha256": "68927b116493aaf27cf7f169da75bf2bd83e24eaf6dbeffcc7f62e3eb225a9d7"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/ByteWorldInterface.lean",
+      "sha256": "94a53ce22fff938be9a694848b4e8f57047d3ea1a2881ff7da645289402906eb"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/ByteWorldLoad.lean",
+      "sha256": "606bdb63392f94cf6ca501358a8b35bc994e1020b9c29688bf813ed614b29f34"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/ByteWorldLoadControls.lean",
+      "sha256": "519f316723cda3eba4004d5451040800aa885bd667f813714e0eecff9fc648fc"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/ByteWorldNumeric.lean",
+      "sha256": "5fff747dcc4bfe62af08cc4e7427fb3df5fd2c16a664fb0b1002e65af7403cc9"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/ByteWorldNumericInterface.lean",
+      "sha256": "942064d050976040c729b090bfa5f4bae9be97c1bcd9563f3f825d6edae99973"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/Calldata.lean",
+      "sha256": "a6c5d8f854dd9ca35755759d87df79e679a71105ca9ffffef185acc68bb34016"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/EmptyCopy.lean",
+      "sha256": "b389ba65c3c148795154ac62561bfd4951e54f1d01fb774fae40b1dd5a940a18"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/EmptyCopyControls.lean",
+      "sha256": "9e690d9b7b1fa717195f5e3e47b5a454a21dcffed69f1acffe4519ecea8ffa7a"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/EmptyCopyInterface.lean",
+      "sha256": "15d1a729bf12520f3b2feca20e63df70dd74d886e8ddff66c17ad58116712d92"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/HeadSize.lean",
+      "sha256": "285744ae28de6effb9922814d9698aa0d18e9650bb27f6fd707399dadb9fa383"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/HeadSizeControls.lean",
+      "sha256": "039dd45a877b1bb91558d068d8d8c61a3b8ac0f0c1d82ff1660b88c124edf21f"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/HeadSizeInterface.lean",
+      "sha256": "1ea827b1470a488a0f1c6526d06e17a22897fd52bdf93520af8bf01384b90232"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/HostWriteControls.lean",
+      "sha256": "622d23d604d2ce55a94ca3441da56dd45d86c0fa95a95d0aa7b94b7ed1f7aa3f"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/Interface.lean",
+      "sha256": "a9eb54f40aa5680cde47f387be2ff471f496bc346438ba88b0608c4eda1c1e31"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryCharged.lean",
+      "sha256": "ce12f717bdc1557ea1420d0be9a469a1d5cde8cc1249e31db76a47197bb418c6"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryControls.lean",
+      "sha256": "469a7265ad0e6bd54031f26e6651fd77fef78a61d0c77a663d3f08729f976059"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryInterface.lean",
+      "sha256": "226e2007516474804e9211c7984e1c664c280a096edc3a148effc13f074acac9"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoad.lean",
+      "sha256": "3b691405079dfa765b05542678432d26240570cb32810d730486f760d3a391df"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadControls.lean",
+      "sha256": "953155e340041dfa20745876a97454d998250988e717a3f36f8859c276704340"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadExecution.lean",
+      "sha256": "bfb9f6e33d210acbdf96742a4c1f3dcdbca35b681173b90d2d1fef0c91d5ee7a"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadExecutionInterface.lean",
+      "sha256": "70046e1c38d7613e59423de92a92ce230edd30ca51a5135996fe5404657de4bf"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtent.lean",
+      "sha256": "22e9b9485c40ac16e8ce6b31e8a6967bfc8e0f0f67c5b8bf1de64547d671ec46"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentControls.lean",
+      "sha256": "168ccf361a90c8376b4fba1d7b8eaf697db40be6ebeb25d8eecfbf0fa68dfaa1"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadExtentInterface.lean",
+      "sha256": "f08e734143e1e21b240ba21c55cd15041d578095bf2314ca31cbbdba00a117ca"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemoryLoadInterface.lean",
+      "sha256": "fe1e57fffd2b6da29b5ca3fbd3513a53b36467d23234405b8de27d0e73e0239f"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemorySizeExecution.lean",
+      "sha256": "25c3d870e900bc705c0f1f0c2f88a348ad0933cf8f4a23169d27be89fefaaab3"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionControls.lean",
+      "sha256": "28021d6b976c083462b359a96f60f159e05ec4024320eedf410a61f00d689bf0"
+    },
+    {
+      "path": "Bridge/SolidityBridge/AccessBridge/MemorySizeExecutionInterface.lean",
+      "sha256": "e6fa7d033ba11de02654c7987e9ca9138471de389eb067f90694c2f75a4c7df2"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicOperational.lean",
+      "sha256": "f232b62789acd9bdbbd58c5a632b58260fccdc71a702d54e8b860ec7c649ccfa"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicRelative.lean",
+      "sha256": "ffce4511b53f3df1f7783af5a8db054174c055a0ad59a40b4a166a842146d1a9"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicSourcePadding.lean",
+      "sha256": "d97fe721a8ebbf08412e3c1a69e22ab68c198a3ec77c80174cdd34310c8f8262"
+    },
+    {
+      "path": "Bridge/SolidityBridge/ExternalEvm/TryPanicSourceScanner.lean",
+      "sha256": "8e3a45bf57fffc5784cfa0466c77ecb58b1a1112b35b545918517a9505052ee5"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionAgreement.lean",
+      "sha256": "8345e8c98392de474a183ea78360e3cae5fed57153cde09bbeafd5d8b619f39d"
+    },
+    {
+      "path": "Bridge/SolidityBridge/RoadmapV15/P10/StackSelectionControls.lean",
+      "sha256": "335261c7663326256512b1b9806041a526c0452156aab85ea220d64363007126"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBinding.lean",
+      "sha256": "4f6b447ddb4f7c916421d05dff7be9e3eff9fff39bb2ec2fa106b431624d6888"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBindingBody.lean",
+      "sha256": "39a8ad2ab7ec82a526d66d26a61a74b6be3e0af44b860ab799230d7491f6b43a"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBindingBodyControls.lean",
+      "sha256": "6e1a9d6420af13ef662654d9d40fa8e2769806bea8c448e67c05bc6c7919490a"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBindingBodyInterface.lean",
+      "sha256": "d76fad803b74e48667af9e4bb7e3a2f579655023bc101840bf5ce743c09e125c"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBindingControls.lean",
+      "sha256": "e24243711f3eaa7d6ce9ed9a9bd4b24e9b47ed163df0be9144e2a7a099727554"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BoolBindingInterface.lean",
+      "sha256": "183ae0a84a048ea1da2446e59f9dd8c2fcbb29bfdc13e31354913769de2e8ab4"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BytesGate.lean",
+      "sha256": "ff2ee3d6a00a01e342f7c631648d088478362fd23049cdd05b2bc4e7b942e07d"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/BytesGateInterface.lean",
+      "sha256": "c46e0ef6ee3ac49a1a76aa0366d7ddab264b4b7403ac31e535af4398bb3ddd07"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CalldataWord.lean",
+      "sha256": "93d95bd9156032123d7d1b54d74a8146811326d30d1f2a692465c5c6144cc384"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CalldataWordInterface.lean",
+      "sha256": "c15bcb9a22f5730a822b59b9aba2b0fa824d6a740dc9cc55b6be530877c6a407"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreDispatch.lean",
+      "sha256": "4c3f5ace89959be8fa78f2a5a7fc3b89fab8da92e128eaf679193e365deddabf"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreDispatchControls.lean",
+      "sha256": "b1f086d3dcafc5cffb5caf8b1ec35e90c90c82c8b6fd76fde1e60e989fb75cbb"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreDispatchInterface.lean",
+      "sha256": "f1630eb0945bbe5260725d8f65a2f76f2576cc38d7822d9ad2d0ef004b3dd396"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreJoin.lean",
+      "sha256": "26ffd382f3cd410ad7d254729d0e818e153805cde4d9ba43afae33ed3807b448"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreJoin/Shared.lean",
+      "sha256": "f7476fc3914cff9378b7155049d5d56ec78032764454edb225942465414cea87"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreJoinControls.lean",
+      "sha256": "3dcd0abbca4bc985cdd98674baff921a519cefb3351dfb82b3de2a591c771a5f"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreJoinInterface.lean",
+      "sha256": "a678f726eaa8ce17e44aba86e81b8314e737071c5a1a7d7e67e6dc444c322fd7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreSpecial.lean",
+      "sha256": "8b23527ad92489beeeab88d94d52cef92f9f2e0b5e8b42976eff667d2a25e9fd"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreSpecialControls.lean",
+      "sha256": "7a2562247fb554f7480655113b136e5f4a610c34fe6c2734b70823bdae55231d"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/CoreSpecialInterface.lean",
+      "sha256": "776086d0b78fc04d457e8f6ebe000437c2fdfee551ba393cb3dbb5c4a9353e31"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/DispatchRefusal.lean",
+      "sha256": "b806d5012daf1fc33960eb598b1dbcd0e6211444b71d4fe39cd13d3111a84ac9"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/DispatchRefusalControls.lean",
+      "sha256": "6adaf82d929fee9e2dfe105da39aaa188812837e26b992f7b1c8aa6300e1792f"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/DispatchRefusalInterface.lean",
+      "sha256": "a1989760684b4808736b59edc9e6ccb60c3a5d0f93feca1eb4d8b3954c9bfde2"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/EntryRoutes.lean",
+      "sha256": "06c2d85bfc76928d1b220738650a659a4f6b82b62dc77340618625d6c3e9b68a"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/EntryRoutesControls.lean",
+      "sha256": "42fe99262f9a8f4cb1cf08615bba9fb96d7754d23dd0a1f714c7de88f35ad3f0"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/EntryRoutesInterface.lean",
+      "sha256": "d81b4a5c0fdfd0dcb2c8e256ee868fad895357b569328e0b27548035928501a7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/GetterRoutes.lean",
+      "sha256": "db1b0c0efb6befaaedf279550b9a0741d73a7368895d336b8f3d10772c023096"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/GetterRoutesControls.lean",
+      "sha256": "03eb0fb309d9c11cba9f06749d14890bd370ca6799d042b56ea26a6bd26bf644"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/GetterRoutesInterface.lean",
+      "sha256": "e9baf4f89262cb843224e59f61b0aac9bcfc9df11de16712c7002d226d25a976"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadCheck.lean",
+      "sha256": "dcb7bf9555246f5dd7fb6d33fe68f08d759469ad2cfdc0e1b2182444557e4393"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadCheckControls.lean",
+      "sha256": "64034162d46b7fab616e0ed46c4dcba17491eb65a3b9ccc3524627882c126c3e"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadCheckInterface.lean",
+      "sha256": "181a64108db257cef40c0e449d33a0e07c6c632c61a175144a9d4b98f0c6ed39"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadGate.lean",
+      "sha256": "7f65534794e5fc2d326961379cd6c006e02859b844e5db47f082c3098d046fea"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadGateControls.lean",
+      "sha256": "ac80be3002e15cbcfe51daa58af56617fe1d94b9f6219685932a4f7471e98546"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/HeadGateInterface.lean",
+      "sha256": "484e17000feae22666430e26c6f9a7983dcdc322aeffc63916af764b99fd8546"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/LengthCheck.lean",
+      "sha256": "821f237ceb18eeceb83c1fc852a46fe5032f52619ba84bad0bf827b191a47a2c"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/LengthCheckControls.lean",
+      "sha256": "850f10bc0cc77a22b6a9fcdcea26e03a619354a7bce4f9c482a81f1e00be20ce"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/LengthCheckInterface.lean",
+      "sha256": "89362bafbec6aac5b5f444a9caf8377855a03a9365036a2f9f366600baa93691"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/OffsetChecks.lean",
+      "sha256": "16652eb267abb41f9fe3b8808be532d74915783fd1ec85753a2f54fe36ef2c40"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/OffsetChecksControls.lean",
+      "sha256": "5ce0315b3e7b0934ab5e4e20c8fc821f24888383ed8ae8396840c8e243b72f57"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/OffsetChecksInterface.lean",
+      "sha256": "0485cc8782044751f2d605025d674f06478c434f96b256ec054b6740d7e00499"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/PayableRoutes.lean",
+      "sha256": "9e50f405ec603227a15a10a9221d1007d98b0ae8aeadbfedc89de87f8c7e8be8"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/PayableRoutesControls.lean",
+      "sha256": "703467075468957139561ed5c3ad73b4259e645ca0632db554eded8f5d415feb"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/PayableRoutesInterface.lean",
+      "sha256": "c1d1e2ba887e9d364fb1eb09aded79a0e418ae4a9a26c02eabe5eeabf6202d2d"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/RawTailGuard.lean",
+      "sha256": "19fcbb2ce700ea747f1e1e4ef5434f4f23b660caabb7feea47f5fa06a9874c93"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/RawTailGuardControls.lean",
+      "sha256": "17241b9d4fb63f9112d39ae16e791906448ff16e8a80e54bcbef0520e15afed7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/RawTailGuardInterface.lean",
+      "sha256": "2a2e46025664e08c0373169cfefa3f66e32d79985b967e778ba206e2ed1159f7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorBranches.lean",
+      "sha256": "974a215dd8ebe838c597eb244aa27af37b0be1fac8e79eb8f4c91d2e73e9d310"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorBranchesControls.lean",
+      "sha256": "d2e4810eaa0e2ba7cabf9e7eee86357794c8d293b54ab01680c2b7c415ec3010"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorBranchesInterface.lean",
+      "sha256": "f2b01485421e504ce044270353236b3acb1355788302f8d70c98b4e890eb7d50"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorGateBody.lean",
+      "sha256": "8d5558602b70184ad5d8fc30c0e2d31d29caae8986e22e9e038fd8de3b7bae45"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorGateBodyControls.lean",
+      "sha256": "533114d1e198b7066ddd1ac8c1cea011642d54390b47e0d25d60774725d0ffb7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorGateBodyInterface.lean",
+      "sha256": "7c3da085412666f4dbf0cca001fdf1c7b82057bea60bea74b8b147100fa44d55"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorMatch.lean",
+      "sha256": "25d6aa27bb509743cc55614ea06fdafde7f37b9a68496a32c46ae86e113ca255"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorMatchControls.lean",
+      "sha256": "e4f4f205d44bdcc1916a35137a746647275e1cfe01d612299d1a36fbdcbff3ea"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorMatchInterface.lean",
+      "sha256": "e4916fdff0ef483607a18720bb1cbddadaa41030d50423d86e432b07ce577bdc"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorRoutes.lean",
+      "sha256": "a609f15cf236131f69eebb135a5ba130894c29af95733e1270bc215bee45cc1e"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorRoutesControls.lean",
+      "sha256": "688a6f387d39bb9395a28b63603eb70e0e83b608123b1620096cc620807aef49"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SelectorRoutesInterface.lean",
+      "sha256": "ab64f614186604fd66cfb39386a9e91001df48c6c442f8741f7934cab3b07b80"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ShortRoutes.lean",
+      "sha256": "ee722491c00f2216a73368b856fc31dd0121467a542e34331191f5dae1b811f9"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ShortRoutesControls.lean",
+      "sha256": "c65517311b90a0c933b1f066b7152761294ae4c7315b431d3dab487181c1183b"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ShortRoutesInterface.lean",
+      "sha256": "120637e4f6b012281aa1fc5cf9ab5a356f1b8fbd329996c5b1683c88c2e34bb9"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedBinding.lean",
+      "sha256": "b94acbc50e95c520a4b3c691d5b606f999af9f9e3c86704823fbc4c4dde932e5"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedBindingControls.lean",
+      "sha256": "d175013b6d7fd8c75ec2c8e2df08410ce0975a680333f803e5ae91ea2e73bfca"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedBindingInterface.lean",
+      "sha256": "4ed2b755777e9721613cc5c63e6dc363cf34ea377ef2939067bd99f4871cce87"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedEntryBody.lean",
+      "sha256": "9658558d573fcd29bc4f8f1462f2e21620568097de02f4f31b13d7b5381b0c32"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean",
+      "sha256": "fc363a39b6b3184a339c3b6da2f027e57ae9de69bd080e4431e2cb533fae4eac"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedEntryBodyInterface.lean",
+      "sha256": "3408295f1425b54ddcc1f4fa4083ae283f935f97cbe12bb0f4eb969637f2f7f8"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedGate.lean",
+      "sha256": "648d683f97e402d881eaf3155783c572a542bf80382407bf9e8e71bc6f1dc42f"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedGateControls.lean",
+      "sha256": "6c024590d875f07154cf862fa41920cd1d245450f48d4a7ac93ea0580c76b908"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SignedGateInterface.lean",
+      "sha256": "7f50c1c642ae1e31fb0f23b271e5defbdd3c25dbba911f2cd4f34a337c0ddce3"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SingleWordGate.lean",
+      "sha256": "f0739106ba96861d31f94d0e8870a34d5e12a00d36c6f02255c6e7a2869053f8"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SingleWordGateControls.lean",
+      "sha256": "8e9d03fc1d903d6a7fccb936d706ded547b06e9799402d86fcd7815ef336f1b6"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SingleWordGateInterface.lean",
+      "sha256": "db00c51d760895ceebd51a4e1cbed3d81ecf54c619bad09bd050862303a21e36"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SizeBranches.lean",
+      "sha256": "6b8c5f5b378488c47291d1fe5962e7cbf9d9786c5fe627f976ed0f8cae242110"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SizeBranchesControls.lean",
+      "sha256": "0d31152acd8cca746ad41e50b25258e25ae03e0a9333cc7918b660d4ecfde4d3"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SizeBranchesInterface.lean",
+      "sha256": "c494af8f6adb40470f9e5dd1c6e1b3a138eb3def6f500efa2536bef8703895ae"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourcePayable.lean",
+      "sha256": "0d7f37fd3d63b87510f143fad1445641d632b91f60dfcc3359bf1217ca0bc335"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourcePayableControls.lean",
+      "sha256": "3cdbfcafaed3d76aa07f6646ab630eab12c3d73a4f8c21e1684eb7edaaf2e286"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourcePayableInterface.lean",
+      "sha256": "2132680966b0ba3bbdb3d062de48d0614d3254ee5de6682654c63b8688e1a664"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourceRoutes.lean",
+      "sha256": "dc6dd0da4d493128ccb29e429919e81fdc36ac4bf2bbade138ff28358b4af674"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourceRoutesControls.lean",
+      "sha256": "2923f3d4c1badeab436f67ec891f62601dc62512d624c11984a1513376da2b1c"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SourceRoutesInterface.lean",
+      "sha256": "bd77c7b621b47496f0525759697ffcf5cfe59ca4f937e3aaf3193c13c0f34ff6"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SpecialRoutes.lean",
+      "sha256": "a3a4c6cc489c84cb174d834e566602c6d94fa25230f81a87d15af98ed2adc3c8"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SpecialRoutesControls.lean",
+      "sha256": "705865c473d8ce8842b5ad0cf7ce399058d56d8d42af75b7c74fceca11f4f597"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/SpecialRoutesInterface.lean",
+      "sha256": "f780fbedb8834dc29a54aa8e2693ce665a1369e2ec79bee6de0fae6cc755868b"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/TailGuard.lean",
+      "sha256": "443b10fe13c1e694452af038eaf36faff57555a3d3d02a0ef8f2118ee40455b5"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/TailGuardControls.lean",
+      "sha256": "b137d94e3f935c7a36457af4485ff7ede84f9c4d543cfa66e057705259a90d78"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/TailGuardInterface.lean",
+      "sha256": "e4918e843b36dd7e5e9267bfd08a57d80b11d1c1efaec82025ff0422673f9917"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBinding.lean",
+      "sha256": "a12ee90f1b17f4f53436bbc4d3a266d744d0935b3620cad5e0f0dcc0d3fb3591"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBindingBody.lean",
+      "sha256": "5ec7c046c4ad929b1bff7e9f13a8e61283dd02bfeb99d0702940905c865681d1"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBindingBodyControls.lean",
+      "sha256": "e2e3b4cae450508a67504e74fae5c7793905cf8ac3642393fe4114cb006119fb"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBindingBodyInterface.lean",
+      "sha256": "273c4fa1b91c5264f08b31f578bde4dc48143655da3fea82a95cb35b8472bafa"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBindingControls.lean",
+      "sha256": "7dce8eb4643ead97982a41b2ec28c883421141b94f0b2205b40c241e9e716f16"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UIntBindingInterface.lean",
+      "sha256": "32a32e9f1a7be65e56f65f5768ca74fe08ead88df8afae27cb6d12791be455b7"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UnsignedGate.lean",
+      "sha256": "1c7876305427dfcd47af40b59dd820bd65ee9847301db4ea8eab704ae2037420"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UnsignedGateControls.lean",
+      "sha256": "918eff1e6054001c7a0ed9312f5c3ce6fc67477f64d40cda1e73034ec0c53d5f"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/UnsignedGateInterface.lean",
+      "sha256": "e4023423c87c81098cb19c16b76ded8e0e496f5c40fbd15e9dcfa7d67c446b88"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueCheckedBodies.lean",
+      "sha256": "9ef9f9bb4f9bcfec269c89f8a1c9dc67986ca2b59f18d1385d79c3fc18cf8669"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueCheckedBodiesControls.lean",
+      "sha256": "6799ab6e76a58183a2586986576601221a6586e1d67f0d7b396f0ad785c02745"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueCheckedBodiesInterface.lean",
+      "sha256": "8c428ec8745e5dfb606a974d3fd1bad15d2ba563a028844704275dda6325f709"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGate.lean",
+      "sha256": "b80084782398e2e0ffab8c77654a912c2745530979c1d94a1225bc4a80a8531b"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGateBody.lean",
+      "sha256": "660667975c7d70e91af3d5c3436f3869b23d8f5281544fad894cb77de9f0f75a"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGateBodyControls.lean",
+      "sha256": "0df05cd424f21f93cd95e5fdb3db30f689747bd3c74bf7d5d163794744de2d96"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGateBodyInterface.lean",
+      "sha256": "63a5adf2c7351cafd3093206376a0fa735260603df44ccc4f0acd31ff241f267"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGateControls.lean",
+      "sha256": "561c510dfa0702f7e19762aa5377348fbc891a114d41c65ae6af1d4a5406427a"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/ValueGateInterface.lean",
+      "sha256": "077fc85d09dfc27cf008ffb9fc856e6e14332c2192b8398c111b11d34e080b43"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierBinding.lean",
+      "sha256": "0fcb949c3feedcf172c59262c3e5dea553ae842cfe30e1deffc8bc4b9035db33"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierBindingControls.lean",
+      "sha256": "89f8cf40e09bbb30a2f66842a48793eb6e3ab91b2241ba6f04cdbe9df7b2d4cc"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierBindingInterface.lean",
+      "sha256": "304d670b2582484d8c13b73ab26c692fe8206249d14a6a0ef5e1d46dfd598b69"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierEntryBody.lean",
+      "sha256": "b60e9cc0b63177830912c50f9e5ef9a5c3ce5fcefe090a8e0364182e43143cf6"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierEntryBodyControls.lean",
+      "sha256": "f8539d9e4b552a0f12810e5e14722b7eca78da5287ae92a804b67b21c889f246"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordCarrierEntryBodyInterface.lean",
+      "sha256": "fc77e80aa7a2fb39d85ee6fcce8d2052c5238868c70fa2469184dd9ad02ee377"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordGate.lean",
+      "sha256": "139a84663d20e4635616e8f520a22ce6b8a2cc61bbabb10bfe2db9adce9a839c"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordGateControls.lean",
+      "sha256": "fbbb623736901ebc305bdd0f9c343eed201d63bb1c791a2877a5fffbf7b24668"
+    },
+    {
+      "path": "Solidity/Backend/AbiEntry/WordGateInterface.lean",
+      "sha256": "f9fb6dbcd58aad1a86036c1187e325f9067c9945c6f8f8b563cc3e6249be1204"
+    },
+    {
+      "path": "Solidity/Backend/CalldataPackets/RawUint/Controls.lean",
+      "sha256": "8f7382f7b99f86d719a9905cc962d55d4d952ef8f416991bd193d2ae1cb8dc72"
+    },
+    {
+      "path": "Solidity/Backend/CalldataPackets/RawUint/Execution.lean",
+      "sha256": "854d9ab73f2d7c1eaea142202503601221a68d65fc5877c7263fd114986282c6"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationFreshness.lean",
+      "sha256": "64e6d76bc15ce418dbbc8920238c0b4aa58126c1b6b640297130b3455d6c39f0"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationFreshnessControls.lean",
+      "sha256": "f5ab55fc238ce9512d1d648d6246f77c1af9adf19f65e8ec406feb79a6c7901a"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationLinkIdentity.lean",
+      "sha256": "f90459e0a860d1952b57ed03f3ab32de0923792a7a1d7f8ff8c9c4f84769f7ba"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationLinkIdentityControls.lean",
+      "sha256": "31d8b6201c0e02367997faebf29d7fdd941b0de7f41bd9067efcee9ccda82ab5"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationReturnPartition.lean",
+      "sha256": "7c58e743389c45770477c1415a220d875816eef72f34f2e83d29c1bd1c87431c"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationReturnPartitionControls.lean",
+      "sha256": "5dc291fa8c03bc0fd0351a767f92d20da0a740f5225e0e085248d4e767a22778"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationReturnProducer.lean",
+      "sha256": "a600f1ca73b99fa86208a171899f77959cc02b4f43778f70eb96dc5067b3e266"
+    },
+    {
+      "path": "Solidity/Backend/Executable/CreationReturnProducerControls.lean",
+      "sha256": "e8d41065f64ba34accf1bda20d4ef6a2f052d80efc41e3644c78afe75a73c69f"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/BooleanReturn.lean",
+      "sha256": "d85a005c83c36cf7a5d6bda6671dfa28d39cc1ba9362422896496eeda9032b89"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/BooleanReturnControls.lean",
+      "sha256": "9c34a780a56c7bfe5965ab6dc5f6b1568332937ec7d6a21e5dd7efc8f5fbac81"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Controls.lean",
+      "sha256": "b6e50d91aad57123aa792ba65c85cbba7014608f4f997ac7c8633042f6e44fe1"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Interface.lean",
+      "sha256": "02e9c359d446a6ba32e960faae3d630c75525bf6c457518a912812bf20576d8f"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Parametric.lean",
+      "sha256": "2ca1009793a7c182342e7a1845d6c39a604e111d82661b2911669c0fc44fa955"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/ParametricControls.lean",
+      "sha256": "5b1e8156d546beec6f9ddd9763ddfd7c29113f21965d9a5809901093af82c418"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Premises.lean",
+      "sha256": "d0c61786b14746711642c243b649ea51569499245709659fec64d74dad889b46"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/ReasonCodec.lean",
+      "sha256": "8ae2805bb6da02320da0c24aaa2e80e67fcd3570807c19084a55e29acfb2c5a4"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/ReasonCodecControls.lean",
+      "sha256": "cdf55b4760d03b7b5b17d655efa2d9316c0e278a95b3d09520066efedbec52db"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Returns.lean",
+      "sha256": "720873b8e5f96f1149b219c8d2053e31ee2529afe50c017a7a2d598b2a2702fa"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/Statements.lean",
+      "sha256": "aad5335d108b313bf1331b639f4ae1d347b73e3ca014010a157958143310d5a7"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientCallback.lean",
+      "sha256": "50a09ca9bab4955c13f20a839f507c9a9b914a41b7eff9fee55c16424738ab65"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientComposition.lean",
+      "sha256": "94c7cb5a6118ec99a1b5c5a742d807d6b7f56196eb9869dc3c58386cd849931a"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientControls.lean",
+      "sha256": "e7f23b85dc7720c2d0f58126b256d67aa6cd740a85c9613c9254c637890dcb18"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientSharing.lean",
+      "sha256": "6a1ee203764ed0ae53670668f450374eb70915b48a0f68d450d7a925a4f8e72d"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientSharingControls.lean",
+      "sha256": "19d924bc677985d00df6b96e1d418ea435e17f6e59f05dcfb448436841c80e3e"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/TransientUnwind.lean",
+      "sha256": "3e90ec2852734ac1ffd440d8a7074c473e78ac5b8ac12609d27d83ddced6798d"
+    },
+    {
+      "path": "Solidity/Backend/FailurePaths/WorldUnwind.lean",
+      "sha256": "60bc9dfcf06718a38090550df410b6583a7a0c4d9cd58bdb4291731154c704ba"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ArithmeticSelection.lean",
+      "sha256": "ea4f669b22fc1cc78a9dd71e1ad776bf07a08e9ee9d63dcc0ab65a5ca0831fc5"
+    },
+    {
+      "path": "Solidity/Backend/Selection/BitwiseSelection.lean",
+      "sha256": "b6c6734f0599f8d3040d16b45cb1bf8e067fc6be751bfd96e8ce117f9c139f61"
+    },
+    {
+      "path": "Solidity/Backend/Selection/BranchControls.lean",
+      "sha256": "3e62273b9a8d613bf74149e3b6f95e6f142c7fb9d19734c00e012d4655f4ab24"
+    },
+    {
+      "path": "Solidity/Backend/Selection/BranchExecution.lean",
+      "sha256": "8bbc79ac1a2e7fffc2cb166eddca4eb623fe1191caf9d364bd65802a3887cdc6"
+    },
+    {
+      "path": "Solidity/Backend/Selection/BranchLayout.lean",
+      "sha256": "d815b6b102fb2eb989b7184520fc731bd6e92b2a511f3527db80fba0be8dd1f7"
+    },
+    {
+      "path": "Solidity/Backend/Selection/BranchPackets.lean",
+      "sha256": "2043251162ed96f412460379207b2dd3ff996a53b2e9e6183bdc3703dc1a3d65"
+    },
+    {
+      "path": "Solidity/Backend/Selection/Composition.lean",
+      "sha256": "c75fa9190d8c8e68a7fc7686a376f3d2fd18e0fe332a19b4b317ad909656e652"
+    },
+    {
+      "path": "Solidity/Backend/Selection/CompositionControls.lean",
+      "sha256": "912546422d4af12b0ad8fba9b1bc676adbcf24638d8c9e292fc2a7a6a9d1357e"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ControlPacketControls.lean",
+      "sha256": "806c99e434f485423b93f4dc0f61e47a15bcc5bd5169012fd8119b41ece6cab8"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ControlPackets.lean",
+      "sha256": "b2faaf2213ef33bfb374125ff84a7f8d57e8ff78fe89c4a689317017ab4916f0"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ExecutionTrace.lean",
+      "sha256": "c46a68446f053d152b845e9e154c3b8f0e4bd8857fa686324a2c4c565e7b61d8"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ExecutionTraceControls.lean",
+      "sha256": "ab254eeb49383de72b00f3ce804c3767b4f46dbcc34bdb8d452048aeed6152d7"
+    },
+    {
+      "path": "Solidity/Backend/Selection/FrameCapacityV2.lean",
+      "sha256": "da93c8332c310dfa451fa646c24216ec8b2d87df8145215197e0c8e2c4d5d330"
+    },
+    {
+      "path": "Solidity/Backend/Selection/FramedLowering.lean",
+      "sha256": "2337cbe4ca3a5d9939ee4df5a51ba7a40e6584ce787d008100396341a604b6d0"
+    },
+    {
+      "path": "Solidity/Backend/Selection/FramedLoweringInterface.lean",
+      "sha256": "ca518585cd1f8e586da234b978fc65d05b65496c547cadd50908a181989a903e"
+    },
+    {
+      "path": "Solidity/Backend/Selection/IRBranchLowering.lean",
+      "sha256": "fd1ab5dbfb8d4e5ebc82bbc62342c464afc14653535ed54664de30d62525af2a"
+    },
+    {
+      "path": "Solidity/Backend/Selection/IRBranchPackets.lean",
+      "sha256": "33241de681a87551d6fc09d795f33669d50549d5d4186013c94a9beac4c5678d"
+    },
+    {
+      "path": "Solidity/Backend/Selection/IRLoopLowering.lean",
+      "sha256": "9d4616bec9fd1e65890690c9e0e2b12cbadd6fc5b6f92aa7c6db560de54c0881"
+    },
+    {
+      "path": "Solidity/Backend/Selection/IRLoopPackets.lean",
+      "sha256": "4c7ccbc9a617f8ec86843dc5dc36900ac33096e81c9f1bedf91b2a4b77e73bb3"
+    },
+    {
+      "path": "Solidity/Backend/Selection/Interface.lean",
+      "sha256": "07faf4434d6ef93a5cbcdc2c317a58b8773f32d0c89231e6479d387655b36250"
+    },
+    {
+      "path": "Solidity/Backend/Selection/InterfaceV2.lean",
+      "sha256": "0c4d31640864ac6e9a4f16765d03e03298ed3699f6e70ca67713bfbb02b360e4"
+    },
+    {
+      "path": "Solidity/Backend/Selection/InterfaceV2Controls.lean",
+      "sha256": "c1eed9cda5b87d21539c9423526def3698e00112884cb34b54a70d2a761355a5"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LiteralSelection.lean",
+      "sha256": "33d746f79d6f3ca6c24d3775dca435a7eb9f584ac0a774be815e046a9d4506fa"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LiteralSelectionControls.lean",
+      "sha256": "bea11e774f76d815a60219e59155b0fb98947e7493b6880f8a0718e6fc16ef34"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LoopControls.lean",
+      "sha256": "7c82de5eb256027456514b880cbe13f63a6bbbb0fa7859f4f57fda15e22993a1"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LoopExecution.lean",
+      "sha256": "ff1c01fc2032d61fb2ec2a1385a72796b4e5d5ada23b5a57762d949afb8433a4"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LoopLayout.lean",
+      "sha256": "985427e30fc00c47d4ea7b3e3f7bfb6edfc2abc056ba0a6a0499e1176eb7bb23"
+    },
+    {
+      "path": "Solidity/Backend/Selection/LoopPackets.lean",
+      "sha256": "4582a714a913c7ae2754686e0e3e15b323415097bdc533f510ac8a74e730dca9"
+    },
+    {
+      "path": "Solidity/Backend/Selection/MixedSelection.lean",
+      "sha256": "20401ea16cb195c56c082057db8f4ce40cd519b0fd32a1d7fce80ce9501c0d69"
+    },
+    {
+      "path": "Solidity/Backend/Selection/NumericSequence.lean",
+      "sha256": "349bdea00eaff2b7d7d037a4fbb11656b4b15ee2dfa1d33bd523c8b42a621b80"
+    },
+    {
+      "path": "Solidity/Backend/Selection/P20Consumer.lean",
+      "sha256": "56c902bf03d6235f0b12e9283e9461f5fda3e8773de7fb9aa4804775ec22f11b"
+    },
+    {
+      "path": "Solidity/Backend/Selection/P20ConsumerControls.lean",
+      "sha256": "146a9de384214e1675d65922fc888fb13a03224ea62222a09e72d0db06bb239c"
+    },
+    {
+      "path": "Solidity/Backend/Selection/P20ConsumerInterface.lean",
+      "sha256": "2ac8c743c9a23b2622760acdcc3145b110d4c9b5d48cbdafdb39f38d375245c5"
+    },
+    {
+      "path": "Solidity/Backend/Selection/Premises.lean",
+      "sha256": "95e3ac7e486a8749fab1383b2ad503bef93d4d18153740789ce33c6137f6921f"
+    },
+    {
+      "path": "Solidity/Backend/Selection/PremisesV2.lean",
+      "sha256": "fe5eacf6561b9c9e5b899338083281eafa8106b8b546fbccdd166b740734fc76"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ScalarSequence.lean",
+      "sha256": "1453d7357ec6e305c08dab94dbfceb5f7f91c4be25fec3fc0ed4273a73a33d1c"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ScalarSequenceControls.lean",
+      "sha256": "673b414af85ceb8a77ed16b6812822b1c6938000ad0abaf4374e3af284297c82"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ScalarSequenceFrameControls.lean",
+      "sha256": "69a528b38c61f8b7d40f4d4b509c7c4506df36506ad49d4798c2d16be423a10a"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ScalarSequenceFrames.lean",
+      "sha256": "dc497856d0aa65aad17e13f0a05e801c595da490f0c6521b066ca364e28d5148"
+    },
+    {
+      "path": "Solidity/Backend/Selection/ScalarSequenceResources.lean",
+      "sha256": "2af06356d7703b97eb1c7285c788b65844dc5fcde0863a8818bdd826773ec5ac"
+    },
+    {
+      "path": "Solidity/Backend/Selection/SignedSelection.lean",
+      "sha256": "449541d307db97c375da4788a131d0b2e4583113d928cbced405cfbad755e54e"
+    },
+    {
+      "path": "Solidity/Backend/Selection/StackSelection.lean",
+      "sha256": "4f9e1b6f3f7ad5e478c7e4aa8eaf647ab4b0730150d7b87a3b751b5a71ecd71d"
+    },
+    {
+      "path": "Solidity/Backend/Selection/StructuredExecution.lean",
+      "sha256": "c927579630fafa65731df217e55ce80d944e40ce549c37a98571788eda8979eb"
+    },
+    {
+      "path": "Solidity/Backend/Selection/StructuredIRComposition.lean",
+      "sha256": "94506b4b0dce5f0af921dfceeb36588bb74fd367209c0a869913ee1f21ab2da5"
+    },
+    {
+      "path": "Solidity/Backend/Selection/StructuredIRControls.lean",
+      "sha256": "d193b864542d66273078dbe596f6adeb06b5e72e18c5518ba6073c0a3a913dba"
+    },
+    {
+      "path": "Solidity/Backend/Selection/UnsignedSelection.lean",
+      "sha256": "6d7f41ff4cb1678d69361136354e61a6542efd5a27e057189c4bb099df7b6974"
+    }
+  ],
+  "original_write_scope": [
+    "tests/h62/item2/audit-bytecode-selection/**",
+    "scripts/h62/item2/audit-bytecode-selection/**",
+    "docs/feature-work/h62-2-audit-bytecode-selection.md"
+  ],
+  "h82": "Standing authorization for statement-preserving proof/additive/import/doc work in any file replaces exact-file agreements, without expanding semantic assignment. Existing statement/dependent definition/interface/budget/axiom/exclusion changes still require owner; frozen ones require H57 versioned pair.",
+  "retirement": "Worker stopped after preservation checkpoint; successor integrates final head; no new implementation continuation authorized.",
+  "original_prompt_source": "Complete initial user message copied from this original thread; no original prompt file or get_goal API available.",
+  "original_prompt_file_sha256": "ab5b9aa3ec27a1b1cfff60ce53d04476643d0b3f83bb7a9947e6d7101b8c925e",
+  "historical_launcher_prompt_sha256": "361608a45a000cb8b29a5b031ef22ea04588a0d905a9895dc65f0dbc4d416c18",
+  "prompt_identity_limit": "Transcript copy has a different byte digest from the historical launcher-rendered-prompt digest. Do not claim byte identity to an unavailable launcher payload; full visible original assignment including owner table is retained.",
+  "proof_invariants": [
+    "no weakened statements/premises/exclusions/observations",
+    "no sorry/new axioms/native_decide/trust shortcuts",
+    "no raised proof budgets",
+    "intrinsic dependency-free core",
+    "preserve interfaces/generated roots/module maps/axiom pins/toolchain",
+    "joint all-hypothesis witnesses including global self records",
+    "intentional contradictions stay distinct from positive witness coverage"
+  ],
+  "runtime": {
+    "existing_cgroup_bytes": 17179869184,
+    "swap": "disabled",
+    "available_reserve_gib": 4,
+    "lean_threads": 1,
+    "lean_j": 1,
+    "lean_heap_mib": 8192,
+    "per_file_timeout_seconds": 300,
+    "systemd_run": "not used"
+  },
+  "push": "Not performed: H71 text/authorization is absent from available inputs; original explicit no-push instruction remains applicable.",
+  "pause": "Requested by retirement instruction. Exposed goal tool supports only outcome complete|blocked; no PAUSED/get_goal/update capability. No substitute goal mutation performed."
+}

@@ -23,7 +23,7 @@ theorem value_bridge {D : Source.Layout} (d : Source.DeclName) (bits : Nat)
 
 theorem allowed (E : Source.Env) (d : Source.DeclName) (bits : Nat)
     (width : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) :
-    (Source.STy.int (ty bits width)).explicit E.isBase (.enum d) = true := rfl
+    (Source.STy.int (ty bits width)).explicit E.isBase E.mapFree (.enum d) = true := rfl
 
 theorem source_value {D : Source.Layout} (d : Source.DeclName) (bits : Nat)
     (width : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) (x : Int)

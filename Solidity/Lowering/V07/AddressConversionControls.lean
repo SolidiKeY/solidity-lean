@@ -142,9 +142,9 @@ def check (p : Roadmap.Pipeline) (checked : Bool) (old rhs : Roadmap.Address) : 
 /-- info: true -/
 #guard_msgs in
 #eval IO.println (reprStr (
-  !(Source.STy.int .u256).explicit E.isBase (.address false) &&
-  !(Source.STy.int ty).explicit E.isBase (.address true) &&
-  !(Source.STy.int ⟨true,160,by decide⟩).explicit E.isBase (.address false)))
+  !(Source.STy.int .u256).explicit E.isBase E.mapFree (.address false) &&
+  !(Source.STy.int ty).explicit E.isBase E.mapFree (.address true) &&
+  !(Source.STy.int ⟨true,160,by decide⟩).explicit E.isBase E.mapFree (.address false)))
 
 -- Low bits alone do not establish the canonical address representation relation.
 /-- info: true -/
