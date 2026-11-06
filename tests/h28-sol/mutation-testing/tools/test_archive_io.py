@@ -45,17 +45,24 @@ class ArchiveInputControls(unittest.TestCase):
                 else:
                     with self.assertRaises(ValueError): archive_io.read_json(mirror, repo)
 
-    def test_archived_support_and_current_code_have_distinct_anchors(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            base = Path(tmp); repo = base / "repo"; repo.mkdir(); root = base / "bulk"
-            rel = str(bulk_inputs.PREFIX / "evidence/fixture/verify.py")
-            mirror = repo / rel; mirror.parent.mkdir(parents=True); mirror.write_bytes(b"reviewed current source")
-            external = root / rel; external.parent.mkdir(parents=True); external.write_bytes(b"original archived source")
-            git(repo, "init", "-q"); git(repo, "add", rel); git(repo, "commit", "-qm", "reviewed verifier source")
-            entries = {rel: {"bytes": len(external.read_bytes()), "sha256": hashlib.sha256(external.read_bytes()).hexdigest()}}
-            manifest = {"root": str(root), "retained_reviewable_support_files": [rel]}
-            self.assertEqual(verify_bulk.verify_snapshot_files(repo, manifest, entries), len(external.read_bytes()))
-            mirror.write_bytes(b"uncommitted source")
-            with self.assertRaises(ValueError): verify_bulk.verify_snapshot_files(repo, manifest, entries)
-            mirror.write_bytes(b"reviewed current source"); external.write_bytes(b"forged archive copy")
-            with self.assertRaises(ValueError): verify_bulk.verify_snapshot_files(repo, manifest, entries)
+    def test_tracked_mirror_must_match_both_head_and_index(self):
+        for fault in ["same-length-committed-change", "different-length-committed-change", "uncommitted-change", "external-change"]:
+            with self.subTest(fault=fault), tempfile.TemporaryDirectory() as tmp:
+                base = Path(tmp); repo = base / "repo"; repo.mkdir(); root = base / "bulk"
+                rel = str(bulk_inputs.PREFIX / "evidence/fixture/verify.py")
+                data = b"original indexed source"
+                mirror = repo / rel; mirror.parent.mkdir(parents=True); mirror.write_bytes(data)
+                external = root / rel; external.parent.mkdir(parents=True); external.write_bytes(data)
+                git(repo, "init", "-q"); git(repo, "add", rel); git(repo, "commit", "-qm", "indexed verifier source")
+                entries = {rel: {"bytes": len(data), "sha256": hashlib.sha256(data).hexdigest()}}
+                manifest = {"root": str(root), "retained_reviewable_support_files": [rel]}
+                self.assertEqual(verify_bulk.verify_snapshot_files(repo, manifest, entries), len(data))
+                if fault == "external-change":
+                    external.write_bytes(b"X" + data[1:])
+                else:
+                    mirror.write_bytes((b"X" + data[1:]) if fault != "different-length-committed-change" else data + b"changed")
+                    if fault != "uncommitted-change":
+                        git(repo, "add", rel); git(repo, "commit", "-qm", "HEAD changes without updating sealed index")
+                        self.assertEqual(bulk_inputs.read(repo, mirror), mirror.read_bytes())
+                with self.assertRaises(ValueError):
+                    verify_bulk.verify_snapshot_files(repo, manifest, entries)

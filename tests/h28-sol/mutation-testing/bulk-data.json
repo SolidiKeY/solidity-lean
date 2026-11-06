@@ -1,20 +1,20 @@
 {
   "schema": 1,
   "authorization": "H44",
-  "source_head": "be546c1dc41728361a687eeb979f3b9261a08d4a",
-  "delivery_base": "32dd5befce264eb9a5d1b622b9270e71c50a0f5a",
+  "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+  "delivery_base": "86253aba9aad8b457190f9e5f14c77c7ad030318",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "root": "/workspace/h28-h44-bulk-be546c1dc/files",
-  "index": "/workspace/h28-h44-bulk-be546c1dc/files.json",
-  "index_sha256": "3f8aba9680548515f26851f7d64803774ac5ce82af2e6b515d8b7d4a495057a9",
+  "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
+  "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
+  "index_sha256": "b41dddfc7338a3172a08237277d36713b6ac927efc6ce7c32e4141c18a00c905",
   "file_count": 1029,
-  "uncompressed_bytes": 6446281,
-  "archive": "/workspace/h28-h44-bulk-be546c1dc/bulk-data.tar.gz",
-  "archive_sha256": "4a1eb27e2142d7464b9c705350f7ef803c2db4aceea474bf0e902eb0773e73e5",
-  "archive_bytes": 885301,
-  "backup_ref": "codex/solidity-h28-sol-20261104/mutation-testing-pre-h44-be546c1dc",
-  "backup_bundle": "/workspace/h28-h44-bulk-be546c1dc/pre-h44.bundle",
-  "backup_bundle_sha256": "c2fb38b1007804d651760b4b36a0f1fb7a0720821eaf9b2a6795f5d05095cf3d",
+  "uncompressed_bytes": 6450844,
+  "archive": "/workspace/h28-h44-bulk-61724cdf-strict/bulk-data.tar.gz",
+  "archive_sha256": "ccc5ed10c94d60fd0746756ff749ce145e08b3e2bac6d586a4137b91a4fcaa06",
+  "archive_bytes": 886528,
+  "backup_ref": "codex/solidity-h28-sol-20261104/mutation-testing-strict-snapshot-61724cdf",
+  "backup_bundle": "/workspace/h28-h44-bulk-61724cdf-strict/snapshot.bundle",
+  "backup_bundle_sha256": "431da8acb0496fd0b53969b90adf887ba8747b75d593e30b544dc4d878a6eebf",
   "boundary": "Bulk data stays on this VM; exact bytes pinned by this manifest and hashed per-file index. No transfer or full assignment completion claimed.",
   "off_git_file_count": 1012,
   "retained_reviewable_support_files": [
@@ -92,5 +92,85 @@
     "finder": "PASS",
     "skeptic": "PASS",
     "no_lean_or_gate_budget_change": true
+  },
+  "previous_snapshot": {
+    "source_head": "be546c1dc41728361a687eeb979f3b9261a08d4a",
+    "root": "/workspace/h28-h44-bulk-be546c1dc/files",
+    "index": "/workspace/h28-h44-bulk-be546c1dc/files.json",
+    "index_sha256": "3f8aba9680548515f26851f7d64803774ac5ce82af2e6b515d8b7d4a495057a9",
+    "file_count": 1029,
+    "uncompressed_bytes": 6446281,
+    "archive": "/workspace/h28-h44-bulk-be546c1dc/bulk-data.tar.gz",
+    "archive_sha256": "4a1eb27e2142d7464b9c705350f7ef803c2db4aceea474bf0e902eb0773e73e5",
+    "archive_bytes": 885301,
+    "backup_ref": "codex/solidity-h28-sol-20261104/mutation-testing-pre-h44-be546c1dc",
+    "backup_bundle": "/workspace/h28-h44-bulk-be546c1dc/pre-h44.bundle",
+    "backup_bundle_sha256": "c2fb38b1007804d651760b4b36a0f1fb7a0720821eaf9b2a6795f5d05095cf3d"
+  },
+  "snapshot_revision": {
+    "reason": "Restore strict indexed size/SHA comparison for every tracked mirror; no HEAD-only exception",
+    "support_source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
+    "refreshed_support_files": [
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/alias-pilot-64d7def6/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/bounds-pilot-e852854d/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/verify-pack.py",
+        "previous_sha256": "44ca7c0c2348aad319b5a801a971d5f5dc0b06054d8edabb47c7fd8a2e0cf12a",
+        "sha256": "c4ebfd5fb22bab782aee648bc5c3a1bcc880419682615857d887ef8f065f8c6d",
+        "previous_bytes": 1832,
+        "bytes": 2676
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/h35-vm-build/archive-verify.py",
+        "previous_sha256": "e48b763e108c7018a0fc35100d69b0d48bb07ce4bc54b8268420378dbac6b545",
+        "sha256": "a235d0353db34e24d5dd283d542097b844bddfd4e609d27afa2a296476a40309",
+        "previous_bytes": 2016,
+        "bytes": 2177
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/payment-pilot-5b2317f3/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/pop-delete-pilot-5b488a11/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/push-pilot-ea111ccf/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      },
+      {
+        "path": "tests/h28-sol/mutation-testing/evidence/rebase-pilot-f664b046/verify-pack.py",
+        "previous_sha256": "11a4011c3c9bb64cc195862674aad234ed26aa67a3adca6a65112c057fb96ac8",
+        "sha256": "2bb439fa969b1237897648bf50d83a38f211f08bd3be7506b26ca2806311f60d",
+        "previous_bytes": 1562,
+        "bytes": 2155
+      }
+    ],
+    "unchanged_files": 1021,
+    "unchanged_off_git_files": 1012,
+    "unchanged_frozen_manifests": 9,
+    "prior_relaxed_bulk_gate_passes": "Historical only; superseded for strict tracked-mirror acceptance by the new post-fix gates"
   }
 }

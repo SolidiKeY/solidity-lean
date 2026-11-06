@@ -25,7 +25,8 @@ def verify_snapshot_files(repo, manifest, entries):
         require(len(data) == expected['bytes'] and digest(data) == expected['sha256'], 'external snapshot identity mismatch: ' + rel)
         mirror = repo / name
         if rel in support:
-            bulk_inputs.read(repo, mirror)
+            mirror_data = bulk_inputs.read(repo, mirror)
+            require(len(mirror_data) == expected['bytes'] and digest(mirror_data) == expected['sha256'], 'tracked mirror identity mismatch: ' + rel)
         else:
             require(mirror.is_file() and (not mirror.is_symlink()) and (mirror.read_bytes() == data), 'bulk mirror identity mismatch: ' + rel)
         total += expected['bytes']
