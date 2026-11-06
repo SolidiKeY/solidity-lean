@@ -108,12 +108,12 @@
       "item": "Known+19.655883% timing STOP remains; no unchanged Lean/timing rerun."
     },
     {
-      "lane": "coordinator",
-      "item": "Exact H80 editor/H81 resource-policy text before affected execution."
-    },
-    {
       "lane": "V17",
       "item": "Original G52-G55/backfills and457release rows remain incomplete; H12pauseditems unchanged."
+    },
+    {
+      "lane": "move5/v12-p1",
+      "item": "Full session/profile/origin producer and all-outcome native frame observation transports; published G49 generic adapters do not supply them."
     }
   ],
   "kernelValidated": false,
@@ -128,5 +128,27 @@
       "/workspace/h62-audit-h70-evidence/gates.json"
     ],
     "boundary": "Owned 27-path bytes verified live or in local H44 archive; no historical proof/gate acceptance."
+  },
+  "policyInspection": {
+    "path": "/workspace/h62-coordinator-inputs/H80-H81-H89-H93-policy.txt",
+    "sha256": "0e5e6d47a500278d571079555ead8350d0b7b0325a64721ad16eab9703a26a2f",
+    "verified": true,
+    "H80": "Dafny CLI/frontend dependency and12GiB serial scope; compiler-only CLI artifacts, runtime/test equivalence incomplete",
+    "H81": "16GiB pre-gates at most2 until named VY2 module split; then8GiB x3",
+    "H89": "No solkey checker gate wait",
+    "H93": "Further h55b cold-timing runs deferred",
+    "executionAuthorizedByReceipt": false
+  },
+  "g49Inspection": {
+    "publishedCheckpoint": "5f7c70b16090b25ea706dddf3e666d94fb5a09fe",
+    "inspectedMaster": "706e36825",
+    "modules": {
+      "Solidity/Roadmap/G49Final/PassCorrect.lean": "70720d8797f575590c1f6e59cbc1d1e33dda791d05d7ed11762e0746cd2aad58",
+      "Solidity/Roadmap/G49Final/PassCorrectAdapters.lean": "ec8bd48c5227607dc4fca58aaafa86b77cef670c88f37a14c93f2a19b6cd70c5",
+      "Solidity/Roadmap/G49Final/FoldedPublic.lean": "28319b9042c16adf0385b5cd7106abebdb34b6c81d94b87690d559562f4a0925"
+    },
+    "available": "Behaviour.ofLang, cert_adapter and carrier adapters; full PassCorrect need/back/env transports; PassList.fold and explicit PublicObligations",
+    "boundary": "These adapters require existing full certificates. They do not construct canonical P1 source/target sessions, native outcome-prefix transports, profile/origin admission, or p1_frame_bridge. No assumed full certificate added.",
+    "kernelValidatedLocally": false
   }
 }
