@@ -1,4 +1,5 @@
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedCheckControls
+import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingScopedTransport
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterPlanControls
 import Solidity.Backend.InternalFlow.RuntimeFrameV3AllocatingOuterZeroControls
 
@@ -35,7 +36,7 @@ theorem actual (p : PrimTy) (name : Var) (depth : Nat) (enough : 1<depth) :
  have same : (call p name depth).run caller=(AllocatingOuterFamily.source depth).run caller :=
    congrFun (AllocatingSourceCertificate.call_run (checked p name depth)) caller
  have scopedRun : (call p name depth).run caller=.ok out := same.trans native
- exact ⟨out,scopedRun,AllocatingSourceCertificate.returns (checked p name depth)
+ exact ⟨out,scopedRun,(AllocatingScopedTransport.claims (accepted p name depth)).1
    1 16 caller CountdownWitness.P.base before 9 (AllocatingOuterPlan.Controls.entry depth) out scopedRun⟩
 
 theorem observations (p : PrimTy) (name : Var) (depth : Nat) (enough : 1<depth) :
@@ -69,7 +70,7 @@ theorem zero_actual (p : PrimTy) (name : Var) (depth : Nat) :
  have same : (call p name (depth+1)).run zeroCaller=(AllocatingOuterFamily.source (depth+1)).run zeroCaller :=
    congrFun (AllocatingSourceCertificate.call_run (checked p name (depth+1))) zeroCaller
  have scopedRun : (call p name (depth+1)).run zeroCaller=.ok out := same.trans native
- exact ⟨⟨out,scopedRun,AllocatingSourceCertificate.returns (checked p name (depth+1))
+ exact ⟨⟨out,scopedRun,(AllocatingScopedTransport.claims (accepted p name (depth+1))).1
    1 16 zeroCaller CountdownWitness.P.base zeroBefore 10 (AllocatingOuterZero.Controls.entry (depth+1)) out scopedRun⟩,noOwner⟩
 
 theorem zero_observations (p : PrimTy) (name : Var) (depth : Nat) :
