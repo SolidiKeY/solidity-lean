@@ -129,3 +129,15 @@ fixture extraction. Comments and commands may belong to an adjacent interval.
 No original file or frozen statement was edited. Owner coordination and
 independent reviews remain outstanding; this inventory is not a completed
 checkpoint or proof gate.
+
+## Retirement handoff
+
+The successor is `solidity-directruntime-20261104/shared-translator`. The
+reconstructed assignment and exact path lists are in
+`tests/h62/item1/binding-fixtures/handoff-assignment.md` and
+`tests/h62/item1/binding-fixtures/handoff-scope.json`. The exact original
+rendered prompt was not available as a file or through a goal-read tool, so
+its required hash cannot be verified from this reconstruction. Obtain the
+original from the coordinator. All extraction checkpoints, fixture proofs,
+independent reviews, timing, acceptance and full validation remain open.
+The bounded P12 MCP baseline was interrupted on retirement and did not pass.
