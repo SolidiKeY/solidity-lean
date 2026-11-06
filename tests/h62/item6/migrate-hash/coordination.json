@@ -51,10 +51,24 @@
         }
       ],
       "evidence": "Clean canonical full probe exit1 after4/6389 modules; source hashes unchanged; no resource stop; no full-build timing conclusion."
+    },
+    {
+      "id": "REQ-HASH-BASELINE-NATIVE-TIMEOUT",
+      "type": "BASELINE_NATIVE_COMPILE_TIMEOUT",
+      "recipient": "solidity-h62-6-20261106/migrate-root-gate",
+      "sources": [
+        "H62 checkpoint3",
+        "/workspace/migrate-hash-full/old-full-2/summary.json"
+      ],
+      "files": [
+        "Solidity/Calculus/RuleSyntax/Grammar.lean"
+      ],
+      "action": "Record incomplete clean old baseline:18/6389 modules passed; combined exported/non-exported native build command hit existing300s cap. Preserve supervisor outputs and budgets; root-gate disposition needed before a new matched full baseline. No restart or source repair performed.",
+      "evidence": "/workspace/migrate-hash-evidence/full-old-baseline/Solidity.Calculus.RuleSyntax.Grammar.log"
     }
   ],
   "pending_gates": [
-    "matched clean full-build comparison; corrected old baseline planned at /workspace/migrate-hash-full/old-full-2",
+    "Matched clean full comparison remains unavailable: old baseline terminated by native command cap; new full probe awaits Syntax.Raw owner overlay.",
     "owner-provided Syntax.Raw and further out-of-scope migration overlays",
     "full affected importer validation and ./run-lean.sh",
     "migrate-root-gate receipt"
@@ -96,5 +110,42 @@
       "upd_oracleOf",
       "upd_upd"
     ]
+  },
+  "baseline_terminal": {
+    "pid": 36556,
+    "command": [
+      "flock",
+      "/tmp/solidity-lean-feature-groups-20261025/writer.lock",
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "/workspace/migrate-hash/scripts/h62/item6/migrate-hash/full_measure.py",
+      "/workspace/.setup/tools/lean-4.24.0-linux",
+      "/workspace/migrate-hash-full/old-full-2"
+    ],
+    "log": "/workspace/migrate-hash-full/old-full-2-driver.log",
+    "directory": "/workspace/migrate-hash-full/old-full-2",
+    "head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "state": "terminal: MODULE_TIMEOUT; controller PID36556 is zombie; no active heavy jobs; no restart performed",
+    "no_duplicate_job": true,
+    "not_a_new_goal": true,
+    "summary": {
+      "exit": -9,
+      "completed_modules": 18,
+      "total_modules": 6389,
+      "full_gate_pass": false,
+      "wall_seconds": 463.80747677099953,
+      "max_rss_kib": 826256,
+      "inputs_unchanged": true,
+      "resource_stop": "MODULE_TIMEOUT"
+    },
+    "measurement_boundary": "Incomplete old full-build attempt. Grammar Lean elaboration finished in36s; combined native facet command timed out at300s. Killed-wrapper RSS is not a completed descendant/group RSS measurement; no full-build wall/RSS comparison."
+  },
+  "routed_requester_heads": {
+    "solidity-h62-1-20261106/infer-helpers": "5652c3e3d75d586d4edbd7ea2f95e3fe9f908d35",
+    "solidity-h62-2-20261106/audit-roadmap": "4ce2bfb8bc2ed558f4efd7423229363719b6625b",
+    "solidity-h62-2-20261106/audit-v10-storage": "2d53437157aeb2385aeaaab7b7bb891e92566058",
+    "solidity-h62-4-20261106/generic-primitive-packets": "2ef21b5bc7c769a99a45109b1963f922beb5d448",
+    "solidity-h62-5-20261106/statement-graph": "d8c1eaf4f0d4aedfb5d650d12ad6a40b2d9dd3b7",
+    "solidity-h62-6-20261106/migrate-roadmap": "1498f324e0def23f2eb727c6638179df6743c050",
+    "solidity-inline-assembly5-20261031/vy2-physical": null
   }
 }

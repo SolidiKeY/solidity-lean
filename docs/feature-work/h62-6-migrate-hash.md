@@ -141,11 +141,12 @@ This is an out-of-scope owner migration dependency, not a performance verdict.
 
 The original old full attempt was interrupted for the independent review's native
 object serialization correction; its `aborted.json` excludes it from performance
-claims. The corrected clean old baseline is planned at
-`/workspace/migrate-hash-full/old-full-2`; inspect `baseline-controller.json` in the
-evidence directory for controller PID, command and log before resuming. A running
-controller owns the global writer lock and heavy job slot. Never start a duplicate.
-The baseline remains pending until its summary reports a completed final gate.
+claims. The corrected clean old baseline at
+`/workspace/migrate-hash-full/old-full-2` terminated at its existing native command
+cap after 18 / 6389 modules. Inspect `baseline-controller.json` and the preserved
+summary before any future baseline disposition; no controller is actively running.
+No complete clean full-build baseline is available.
+
 
 Pending: owner overlays for Syntax.Raw and any further full-graph migration errors,
 completed old baseline, matched successful clean full-build comparison, full affected
@@ -164,7 +165,8 @@ confirmed actual frozen statements, definition bodies and proof budgets unchange
 Findings fixed: guaranteed kill/reap on timeout/resource exceptions; fail-closed
 scanner handling of modifiers/indentation/standalone attributes; definition-body
 hashes; explicit four-instance checks; source-bound logs including Inventory and
-Controls; and >10% slowdown stop per module as well as aggregate. Final reviews
+Controls; and per-module growth reporting. Later coordinator steering makes
+per-module growth nonblocking; matched full-build escalation belongs to root gate. Final reviews
 approve the production patch and corrected serial native-object driver, explicitly
 retaining the out-of-scope Syntax.Raw and full-gate blockers. Full review record is `/workspace/migrate-hash-evidence/reviews.md`.
 
@@ -196,11 +198,35 @@ the coordinator, never to a self-created replacement goal.
 
 ## H70 consolidated producer delivery
 
-The coordinator routed twelve consumers of CollisionBound. The reviewed production
+The coordinator routed sixteen consumers of CollisionBound. The reviewed production
 repair is exported as `/workspace/migrate-hash-evidence/hash-owner-overlay.patch`
 (two files) and `collision-bound-overlay.patch` (CollisionBound only). Exact base,
-committed head, before/after file hashes, patch hashes, all twelve requester IDs,
+committed head, before/after file hashes, patch hashes, all sixteen requester IDs,
 validation boundaries and live-owner changes are in `producer-overlay.json`. These
 are ready for coordinator retrieval/approved consumption; no direct cross-VM write,
 push, merge, ownership transfer or full-gate claim is made. The source census at the
 pinned base and all frozen axiom-message guards remain intact.
+
+## H70 routed continuation: supervisor inspected, no restart
+
+The corrected old supervisor has terminated. PID 36556 is a zombie, not an active
+controller; no active Lean/compiler job remains. Its saved summary records 18 of
+6389 modules passed, unchanged inputs and MODULE_TIMEOUT during the 300-second
+combined native command for Solidity.Calculus.RuleSyntax.Grammar. The Lean log
+reports that module elaborated in 36s; native object compilation remained pending.
+No restart, budget change, source change or new Lean run was performed during this
+continuation. Prior supervisor/worktree/output files are preserved. Terminal
+metadata and logs are copied to `full-old-baseline` in the evidence package.
+This incomplete prefix cannot establish clean full-build timing or RSS; in
+particular, killed-wrapper RSS does not represent completed descendant/group RSS.
+REQ-HASH-BASELINE-NATIVE-TIMEOUT records the root-gate disposition request.
+
+The Hash migration source remains exactly the reviewed commit
+2a18afcdba00a85645b0b3079704f78ffcd78860; this continuation changes only receipts
+and handoff tooling/documentation. Both producer patch SHA256 values and both
+production file hashes remain unchanged. Newly routed recipients audit-roadmap,
+statement-graph, migrate-roadmap and vy2-physical are included in the expanded
+sixteen-consumer delivery record. Other staged requester payloads were neither
+applied nor reviewed; only their explicit Hash prerequisite requests are recorded.
+The coordinator has staged/routed the reviewed overlay. Wait for migrate-syntax's
+Raw.lean overlay and root-gate baseline disposition before full comparison.

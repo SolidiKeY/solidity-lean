@@ -42,6 +42,8 @@ builds the entire 6,389-module closure with both `+module:o` and `+module:o.noex
 unchanged `run-lean.sh` after serial executable linking. Module timeout is 300s; final aggregate gate timeout is
 1800s. Both arms have identical private package configuration and fresh caches.
 The new full probe is blocked outside Hash at `Solidity.Syntax.Raw`; no full-build
-comparison is available. An old baseline controller may continue on the VM; inspect
+comparison is available. The saved old baseline terminated at its 300s native
+command cap after 18 / 6389 modules; no active controller remains. Inspect
 `/workspace/migrate-hash-evidence/baseline-controller.json` and its output directory
-before launching another heavy job. Do not duplicate or terminate another owner.
+and the preserved summary before root-gate disposition. No restart or budget
+change is authorized by the latest relay. Do not duplicate or terminate another owner.
