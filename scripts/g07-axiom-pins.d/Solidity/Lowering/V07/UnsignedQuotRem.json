@@ -1,0 +1,46 @@
+{
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.locals_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.result_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.source_pair_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/UnsignedQuotRem.lean:Solidity.Lowering.V07.UnsignedQuotRem.value_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
