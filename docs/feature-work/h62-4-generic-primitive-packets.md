@@ -101,7 +101,7 @@ ownership remains intact. Logs: `/workspace/h62-generic-primitive-packets-eviden
 No dependency failure is accepted as proof or axiom evidence.
 
 **B-OWNER-RELAY**: Existing family originals are read-only. No exact-file owner
-agreement has arrived. relay.sh is absent at this base; no original was changed.
+agreement has arrived. relay.sh is host-only; no worker installation is needed. No original was changed.
 V09 coordinates family owners. Any migration patch remains owner-applied only.
 
 ## Remaining checkpoints and committed handoff
@@ -206,3 +206,17 @@ External final handoff, original patch, checksum manifest and evidence archive
 are under `/workspace/h62-generic-primitive-packets-evidence/`. Their exact head
 and hashes are recorded after the final commit in `handoff.md`, `result.json`
 and `SHA256SUMS`. Large raw inventory, logs and distribution archive stay off git.
+
+## H70 routing receipt
+
+Coordinator routed the tickets from head
+`56a137f709aa737d2e3886aca2daf9f52b40261c`; both migration-hash and MRS accepted
+their owner tickets. Continue waiting for `Solidity/Hash/CollisionBound.lean`
+and the MRS exact-file agreement on
+`Solidity/Backend/PrimitivePackets/CheckedSub/Controls.lean`. Ticket acceptance
+is not original-file permission, a delivered fix, or a passing gate.
+The coordinator reports some VM reads failed; no unavailable file is treated
+as retrieved or forwarded, and no unspecified error is invented here.
+`relay.sh` is host-only and is not a worker installation task. Requests remain
+in the result and typed blocker file. Proved arithmetic fixtures remain separate
+from pending compiler correspondence. No goal, scope, budget or gate changed.

@@ -16,7 +16,8 @@
         660,
         680
       ],
-      "required_resolution": "Coordinator relays the migration owner\u2019s reviewed compatible prerequisite with explicit exact-file application authority; keep theorem statements and trust policy unchanged."
+      "required_resolution": "Coordinator relays the migration owner\u2019s reviewed compatible prerequisite with explicit exact-file application authority; keep theorem statements and trust policy unchanged.",
+      "routing_receipt": "H70: owner ticket relay accepted; dependency and exact-file agreement remain pending; no write authorization implied."
     },
     {
       "id": "B-OWNER-RELAY",
@@ -28,7 +29,8 @@
       "owner": "solidity-compiler10-20261028/memory-reference-structs",
       "coordinator": "V09",
       "required_resolution": "Owner reviews semantic generic lemma/correspondence once dependencies check, then owner applies exact-instance migration; no existing family write is authorized here.",
-      "relay_status": "relay.sh absent at pinned base; this saved request has not been sent externally"
+      "relay_status": "H70 coordinator router confirms owner ticket accepted. relay.sh is host-only; no worker installation task. Exact-file agreement remains pending.",
+      "routing_receipt": "H70: owner ticket relay accepted; dependency and exact-file agreement remain pending; no write authorization implied."
     }
   ],
   "questions": [],
