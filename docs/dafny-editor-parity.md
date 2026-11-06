@@ -907,22 +907,24 @@ remain outstanding. Goal status is untouched. Full receipts and hashes are in
 ### Human decisions H47-H50 and serial resource authorization —2026-11-05
 
 The five prior questions now have answers, recorded in docs/dafny-human-decisions.json.
-H49 excludes the proof-help action only: it is removed and the mixed status-actions
-row records that human exclusion without waiving other aspects or changing gates.
+Historical H49 exclusion claims in this checkpoint are superseded by incoming H80:
+proof help links project README and calculus guide; no current exclusion is assumed.
 The official VSCode1.108.0 archive provisioned at /workspace/vscode-official/ passes
 sha256sum -c against the saved official API hash. docs/dafny-provisioned-assets.json
 records exact paths/sizes/hashes. Editor/version is1.108.0/94e8ae2b28cb5cc932b86e1070569c4463565c37;
 archive, extraction and cached Xvfb remain offgit under H44; no download retried.
 Rendered rows remain open until fresh paired evidence is collected.
 
-Q-CLI-01 chooses the existing concrete typed-model CLI, documented in vscode/README.md.
+Historical concrete-model CLI work is documented in vscode/README.md. H80 now
+specifies compiler-only Build and keeps runtime/test equivalence incomplete.
 Build writes a real compiler AST/source-hash artifact; Run selects Contract::function;
 Test executes concrete cases and compares exact status/text. None publishes proof
 or EVM-equivalence evidence. Source/dependency/function identity, pending prompt
 nonces/resource config, stale errors and physical child retirement are guarded.
 Reviewer failures were retained before fixes;25 targeted command/status and39
 command/editor checks pass. The initial full Node run retained an old contextual
-help assertion failure; its H49-excluded action was replaced by ordinary output,
+help assertion failure; that checkpoint replaced help with ordinary output. H80
+has since restored proof documentation help, superseding the H49 claim,
 while unrelated-folder picker ownership assertions remain. No budgets increased.
 
 Q-REL-01 is authorized but not implemented: whole-goal kernel refutation cannot
@@ -956,7 +958,7 @@ Final paired observations: pinned Dafny five phases partial, local open missing/
 
 Bulk, prior failed attempts, ordered logs and review findings remain on this VM. Committed `docs/dafny-decisions-evidence-manifest.json` binds the external archive and official provisioning assets by absolute path, size and SHA256; no screenshots/log dumps committed (H44). Final exact-head receipts follow outside git in the same artifact root. All484 rows and frozen270 retained; no row newly complete.
 
-Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Five prior questions are answered as recorded in `docs/dafny-human-decisions.json`; H49 excludes proof-help alone. No goal mutation or push/merge/PR.
+Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Incoming H80 scoped answers are recorded in `docs/dafny-human-decisions.json`; the earlier H49 exclusion claim is superseded and no row is waived. No goal mutation or push/merge/PR.
 
 ### H44 inventory bulk follow-up — 2026-11-06
 
@@ -1257,3 +1259,24 @@ switch/configuration/disposal/trust rejection and no backend restart. Finder and
 skeptic found no concrete defect; this is source evidence, not native UI parity
 or either fresh row judgment. Metadata and mandatory proof gates continue after
 dependency provisioning; no local positioned trace is fabricated.
+
+H80 documentation follow-up: guide and index are now independently selectable,
+opening actual calculus.md and README.md respectively. Missing/incomplete or
+escaping documentation produces a configuration-oriented message instead of raw
+ENOENT. Current-state, trust and picker lifetime guards remain. Native rendered
+help evidence remains pending; injected tests are not kernel/visual parity.
+
+H80 provisioning result: existing pinnedLean4.24.0/Lake5.0.0-src+797c613 was reused
+with recorded archive/binary/config hashes. Source-pinned CLI/Frontend now builds
+under12GiB virtual address cap, aggregateRSS/no-swap/12GiBreserve monitoring and
+serial-j1. A TermSize thread-stack ENOMEM was diagnosed; standardElab.async=false
+serializes declaration checking without changing proof statements or budgets.
+Dependencyresume exits0 (peak1,780,371,456bytes RSS); KeySort sourcecheck exits0
+with exact versions. No full/TestSuite/timedstrict or overall runtime pass follows.
+An environmenttransition monitoringgap, previous failures and invalidinitial
+pipe-close fixture remain explicitly classified. The hardened source supervisor
+checks resource admission/terminal state, prevents receipt overwrites, retains
+root identity for unsampled private-session readback and fails on retirement or
+survivors. Native process fixtures are not proof or rendered-editor evidence.
+[The small H80 manifest](dafny-h80-provision-evidence-manifest.json) binds VM-only
+logs, reviews and immutable installed artifact copies; bulk remains offgit.
