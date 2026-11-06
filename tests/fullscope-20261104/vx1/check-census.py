@@ -10,6 +10,20 @@ parser.add_argument('--upstream', required=True, type=Path)
 parser.add_argument('--census', type=Path, default=HERE / 'environment-census.json')
 args = parser.parse_args()
 census = json.loads(args.census.read_text())
+EXPECTED_SOURCE_PATHS = {
+    'libsolidity/ast/Types.cpp', 'libsolidity/analysis/GlobalContext.cpp',
+    'libsolidity/analysis/TypeChecker.cpp', 'liblangutil/EVMVersion.h',
+    'docs/units-and-global-variables.rst', 'libsolidity/codegen/ExpressionCompiler.cpp',
+    'libevmasm/Instruction.h',
+}
+EXPECTED_FORK_BOUNDARIES = {
+    'hasChainID': 'istanbul', 'hasBaseFee': 'london',
+    'hasBlobBaseFee': 'cancun', 'hasBlobHash': 'cancun',
+    'hasSlotNum': 'amsterdam', 'hasPrevRandao': 'paris',
+}
+source_paths = [pin['path'] for pin in census['upstream']['sources']]
+assert len(source_paths) == 7 and set(source_paths) == EXPECTED_SOURCE_PATHS, 'SOURCE_IDENTITY_CENSUS_MISMATCH'
+assert census['forkBoundaries'] == EXPECTED_FORK_BOUNDARIES, 'FORK_BOUNDARY_CENSUS_MISMATCH'
 manifest = json.loads((ROOT / 'docs/solidity-features.json').read_text())
 assert census['upstream']['commit'] == manifest['upstream']['commit']
 pins = {x['path']: x for x in manifest['upstream']['sources']}
@@ -88,5 +102,5 @@ for control in census['expectedBoundaryControls']:
         available = control['index'] < control['length']
     assert control['available'] == available, control
 assert len(census['combinationFixtures']) == 5
-print('CENSUS_PASS: 14 fields/functions; 7 source identities; 6 fork boundaries; 11 boundary expectations; 5 combination fixtures')
+print(f"CENSUS_PASS: {len(rows)} fields/functions; {len(texts)} source identities; {len(census['forkBoundaries'])} fork boundaries; {len(census['expectedBoundaryControls'])} boundary expectations; {len(census['combinationFixtures'])} combination fixtures")
 print('Boundary arithmetic is fixture consistency only; combinations are expectations, not production execution results.')

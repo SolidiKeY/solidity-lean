@@ -2993,6 +2993,8 @@ import Solidity.Hash.CollisionBound
 import Solidity.Hashes
 import Solidity.Keccak
 import Solidity.KeySort
+import Solidity.Language.EnvironmentFields.ContractControls
+import Solidity.Language.EnvironmentFields.Contracts
 import Solidity.Language.FeatureInfo
 import Solidity.Language.Features
 import Solidity.Language.FixedPoint
