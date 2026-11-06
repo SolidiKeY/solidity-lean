@@ -4019,7 +4019,7 @@
     "tests/primitive-packets-1105/Constants/validate-fresh.py": "c04a8d30a0fe8f0d06e4212d8ef41307de9f51335a214c6fc17df5b5b32de6ea",
     "tests/primitive-packets-1105/Constants/check.py": "41f29f00e41e7e4496aabef57bd3bad402de6ca10fe8ed17128d655b57fc61de",
     "tests/primitive-packets-1105/Constants/manifest.json": "5f51e5e96bfe9ad17b33a44a0b327ce91120f9613190f05c0823eb91e76ce222",
-    "tests/sol-numeric-literals/packetlib.py": "1602a8f2ddba4b1f6df9524bed1fd15d1601f4b61a44707bbd5fceff7257c9bc",
+    "tests/sol-numeric-literals/packetlib.py": "579e067bb55891803d780a3059e45f6e0910630cf444e79c0beed0d943451b66",
     "tests/sol-numeric-literals/make-manifest.py": "5a80779accd02a2186e39b9edf729132454eee9ae929610a9df177f14004682e",
     "tests/sol-numeric-literals/adoption.json": "289cce4ff3b5c2c329864155eaf24aaa0ca3fe4117f804cb1b29c17f95715267",
     "tests/sol-numeric-literals/test-adoption.py": "01080db7de2fdde9f7d9ee87a9973a24914a5ee605457eb3d97e850a05ce4a90",

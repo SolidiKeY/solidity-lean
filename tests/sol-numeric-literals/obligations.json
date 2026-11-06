@@ -53,7 +53,7 @@
   {
     "id": "coordinator-registration",
     "status": "blocked",
-    "evidence": "All42Numeric root imports present. Exact33Numeric missing map rows included with Constants.Controls in tests/primitive-packets-1105/Constants/registration-current.patch; coordinator-only application."
+    "evidence": "All42Numeric root imports present. Exact33Numeric missing map rows included with Constants.Controls in tracked tests/sol-numeric-literals/registration.module-map.patch; expanded Constants proposal is VM-only H44 payload data; coordinator-only application."
   },
   {
     "id": "full-runtime-gate",

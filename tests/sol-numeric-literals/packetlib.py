@@ -17,9 +17,18 @@ def h44_bulk_bindings():
  if (ROOT/relative).read_bytes()!=result.stdout:raise ValueError('uncommitted H44 manifest')
  return verify_h44_bulk(manifest)
 
+def h44_storage_available(directory,vm_required):
+ if directory.exists():return True
+ if vm_required:raise ValueError('H44 VM bulk directory missing '+str(directory))
+ print('H44 binding: VM-only evidence unavailable; omitted from tree acceptance')
+ return False
+
 def verify_h44_bulk(manifest):
  if manifest['schema']!='sol-numeric-literals-h44-v1':raise ValueError('H44 manifest schema')
  directory=pathlib.Path(os.environ.get('SOL_NL_BULK_DIR',manifest['directory']))
+ # Managed-worker setup identifies the VM; an explicit relocation must also exist.
+ required=pathlib.Path('/workspace/.setup/activate.sh').exists() or 'SOL_NL_BULK_DIR' in os.environ
+ if not h44_storage_available(directory,required):return {}
  index=directory/'files.json';raw=index.read_bytes();spec=manifest['file_manifest']
  if len(raw)!=spec['bytes'] or hashlib.sha256(raw).hexdigest()!=spec['sha256']:raise ValueError('H44 file manifest digest differs')
  entries={}
@@ -97,5 +106,6 @@ def case_families():
  families += [dict(family='checksum length/case/nibble boundaries',theorems=['checksum_controls','checksum_length_controls','eip55_other_length']),dict(family='all fixed compiler spellings and lexical/compiler stage differences',fixtures=[r['id'] for r in json.loads((FOLDER/'spellings.json').read_text())],theorems=['fixture_observations_pass']),dict(family='all word-table prefix cases',prefix_proofs=439,theorems=['solWordTable_no_num'])]
  return families
 
-# Exact union of the original SOL-NL scope and human-assigned H10/H12 Constants scope.
+# H26 assigns SOL-NL; coordinator H10/H12 idle-lane rebalance assigns G25-CONST-1105.
+# permitted() is the exact union of those two authorized exclusive scopes.
 def permitted(path):return path.startswith(('Solidity/Frontend/NumericLiteralProofs/','tests/sol-numeric-literals/','Solidity/Backend/PrimitivePackets/Constants/','tests/primitive-packets-1105/Constants/')) or path in ('scripts/check-sol-numeric-literals.py','docs/feature-work/numeric-literal-proofs.md','docs/feature-work/primitive-packets-1105-Constants.md')

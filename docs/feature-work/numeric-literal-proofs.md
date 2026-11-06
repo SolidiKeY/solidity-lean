@@ -5,7 +5,8 @@ full `run-lean.sh` gate stops at generated-root registration. The assignment
 reserves roots and module maps for coordinator integration, so this lane has not
 edited them. All 42 modules and their proposed rows/imports are listed in
 [registration.json](../../tests/sol-numeric-literals/registration.json); the exact
-root-only proposal is [registration.patch](../../tests/sol-numeric-literals/registration.patch).
+module-map proposal is [registration.module-map.patch](../../tests/sol-numeric-literals/registration.module-map.patch).
+All owned root imports are already published; the old root-only patch is empty.
 No push, merge, PR, producer edit or source representation change occurred.
 
 Batch `solidity-sol2-20261104`, task `numeric-literals`.

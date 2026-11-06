@@ -1,19 +1,19 @@
 {
   "schema": "sol-numeric-literals-h44-v1",
-  "source_head": "dc787dca085a6813b62d2055071d102f01deeb89",
+  "source_head": "c805bf3a07e030aa12401ebc6ced7cdef4294dc3",
   "base": "4095d848297d87e374b4f069692511cfe4a36cf7",
-  "directory": "/workspace/sol-numeric-literals-h44-dc787dca",
+  "directory": "/workspace/sol-numeric-literals-h44-portable-c805bf3a",
   "file_count": 65,
   "uncompressed_bytes": 492557,
   "file_manifest": {
-    "path": "/workspace/sol-numeric-literals-h44-dc787dca/files.json",
-    "bytes": 22564,
-    "sha256": "7c52a619cc3fc1b0ded0c84733f89d99f99368cb86e13fdc6151bfdb3a84622a"
+    "path": "/workspace/sol-numeric-literals-h44-portable-c805bf3a/files.json",
+    "bytes": 23149,
+    "sha256": "a7a292b07ccdc05d9b46ebe47c989bce8bed567b6968e3ec0ae87ac629e54bed"
   },
   "archive": {
-    "path": "/workspace/sol-numeric-literals-h44-dc787dca/payload.tar.gz",
-    "bytes": 43413,
-    "sha256": "698e6234da33e282e9b241a0906fa86668e923a0203ef02be951fee1b97e5817"
+    "path": "/workspace/sol-numeric-literals-h44-portable-c805bf3a/payload.tar.gz",
+    "bytes": 43430,
+    "sha256": "a12126d79d001eb23c9a1da71b9822cbee5dca218a569297eea11fc6a266d08d"
   },
-  "policy": "H44: bulk data stays on VM; commit only this hash manifest; unchanged gate inputs must be materialized at listed logical paths"
+  "policy": "H44: bulk remains VM-only; absent off-VM binding is reported, not tree acceptance evidence; managed VM and explicit relocation fail closed"
 }
