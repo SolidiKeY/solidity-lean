@@ -1,0 +1,59 @@
+# Frozen v10-storage audit blockers
+
+This is an owner-ticket and resumption queue, not a proof certificate.
+Base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
+The official v4.35.0 archive matches coordinator toolchain-pin.json SHA256
+7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d.
+No files listed below were edited. The coordinator retrieves this committed ticket;
+no relay.sh is available in the checkout, so no direct owner delivery is claimed.
+
+| ID | Exact file and evidence | Migration owner | Required disposition |
+|---|---|---|---|
+| B-MIG-SYNTAX | Solidity/Syntax/Raw.lean: String.Slice/String mismatches, unavailable String.dropRight, endsWith function mismatch; dependency log | solidity-h62-6-20261106/migrate-syntax | Supply compatible owned migration commit/overlay; keep original signature audit frozen |
+| B-MIG-HASH | Solidity/Hash/CollisionBound.lean:407 unsolved goal; :660/:680 omega failures; :950 onward guard-message mismatches | solidity-h62-6-20261106/migrate-hash | Supply compatible owned proof migration commit/overlay; no premise repair authorized here |
+| B-MIG-SOURCE | Solidity/Source/Ctor.lean:641 simp error; :715 dependent elimination errors | solidity-h62-6-20261106/migrate-source | Supply compatible owned migration commit/overlay |
+
+Reproduce from the repository root:
+
+```sh
+bash scripts/h62/item2/audit-v10-storage/validate.sh --evidence /workspace/audit-v10-storage-evidence/reproduce dependencies
+```
+
+The fixed TOML build directory is /workspace/audit-v10-storage-evidence/build-v4.35.0;
+--evidence selects logs/cache, not a new build tree. The wrapper serializes writers.
+Dependency reproduction exited 1, elapsed 54.7867672 seconds, observed peak group RSS
+1608388608 bytes, no resource stop. This is a failed gate, not a slowdown comparison.
+
+## Resume after owner resolution
+
+1. Preserve the assigned branch and exact frozen inputs. Do not cherry-pick repairs
+   to owned originals without coordinator authorization; review overlay ancestry.
+2. Re-run pinned version/KeySort prerequisite and affected dependencies. Then use
+   per-file MCP diagnostics or repository run-lean policy for additive proof modules.
+3. Obtain elaborated declaration names/types and classify every interface statement:
+   global premise structures versus per-input feasibility, retaining all binders.
+   The conservative source census includes controls/private helpers; none may be
+   silently reclassified as a proved interface witness.
+4. First witness candidates: LoopLaws.turn_step (same rc/rb/machine/result/flag must
+   satisfy nonzero, condition and step together); LoopLaws.turn_exit (actual zero
+   condition); LoopLaws.run_single_loop (actual terminating run, not merely a separate
+   inhabited structure). SourceWordRead.read_total/complete must use the same env,
+   frame/path/value/state/machine/slot and discharge ordinary/present/coherent together.
+   Existing controls are possible inputs, not replacements for new simultaneous proofs.
+5. Prove supported-program success/totality; negative reject-all/always-revert controls
+   must fail the same success contract. Preserve observable failure and distinguish
+   Source fuel from gas and EVM fork boundaries. Evm.Machine documents no gas model;
+   its symbolic-slot success cannot establish bytecode/gas/fork correctness.
+6. Complete all remaining statement witnesses, verification/census, finder/skeptic
+   reviews, acceptance/full gates, proof budgets, and comparable timing checks.
+   Emit one exact theorem-specific ESCALATE line for any established weakened/vacuous
+   statement, with evidence and repair options; none has been established by this
+   preliminary lexical census. Do not infer absence of vacuity from that fact.
+
+All 3281 conservative declaration rows remain uncovered. No new Lean proof, axiom,
+sorry, native_decide, heartbeat override, root registration or interface edit exists.
+
+B-TIMING-REPEAT: final repeated KeySort 1.814585664 s versus prior guarded
+1.617805099 s (+12.163%). Further Lean runs stopped under the threshold rule.
+This is not an attribution to a proof change (there is none); proper comparable
+before/after timing remains required after migration blockers are resolved.
