@@ -32,5 +32,15 @@
     "Classical.choice",
     "Quot.sound",
     "propext"
+  ],
+  "Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_core": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "Solidity.Backend.AbiWorld.PublicCompilerTotal.compile_agrees": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
   ]
 }
