@@ -1,6 +1,7 @@
 import Solidity.Optimizer.Loads
 import Solidity.Optimizer.DeadStore
 import Solidity.Optimizer.LICM
+import Solidity.Optimizer.Pipeline
 
 /-!
 # X06 memory-optimization controls
@@ -317,5 +318,36 @@ def mul2 : Val C G .uint := .binop .mul rfl rfl iRead (lit 2)
 def readsWritten : Stmt C G G := .loop .auto lt3 (.cons (.assignLocal xv mul2) (.cons incI .nil))
 
 theorem licm_local_rejected : Stmt.licm readsWritten = readsWritten := rfl
+
+/-! ## The certified pipeline -/
+
+/-- `total = 3; total = 4; uint a = total;` becomes `total = 4; uint a = 4;` in one
+round: the load is forwarded from the last store, and the first store is dead. -/
+def e2e : Prog C [] [.val .uint] :=
+  .cons (setTotal (lit 3)) (.cons (setTotal (lit 4)) (.cons (.declLocal .uint (.user "a") (some total)) .nil))
+
+theorem e2e_optimized : Prog.optimize 1 e2e =
+    .cons (setTotal (lit 4)) (.cons (.declLocal .uint (.user "a") (some (lit 4))) .nil) := rfl
+
+theorem e2e_same : Prog.runC (Prog.optimize 1 e2e) = Prog.runC e2e := Prog.optimize_runC 1 e2e
+
+/-- The loop of `invLoop` inside a program, hoisted by the pipeline. -/
+theorem e2e_licm : Prog.optimize 1 (.cons invLoop .nil) =
+    .cons (.ite lt3 (.cons (.assignLocal xv (add total (lit 1)))
+      (.cons (.loop .auto lt3 (.cons incI .nil)) .nil)) .nil) .nil := rfl
+
+#print axioms Prog.rle_empty_runC
+#print axioms Prog.rle_runC
+#print axioms rle_preserves
+#print axioms Prog.dstore_runC
+#print axioms sstore_dead_runC
+#print axioms mstore_dead_runC
+#print axioms dstore_preserves
+#print axioms licm_runC
+#print axioms Prog.licm_runC
+#print axioms licm_preserves
+#print axioms Prog.optimize_runC
+#print axioms wrong_kill_differs
+#print axioms licm_witness
 
 end Solidity.Optimizer.X06Controls
