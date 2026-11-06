@@ -11,7 +11,7 @@ FILES = {
     "EnvironmentCredit.lean": ("known", "unknown", "failed", "callback_credit_failed"),
 }
 
-def scan(root):
+def scan(root, migrated=False):
     failed = False
     for filename, expected in FILES.items():
         path = root / "Solidity/Lowering/Readonly" / filename
@@ -28,7 +28,9 @@ def scan(root):
             end = declarations[i + 1].start() if i + 1 < len(declarations) else len(text)
             if re.search(r"\brun_bind\b", text[match.end():end]):
                 users.append(match.group(1))
-        ok = len(helpers) == 1 and tuple(users) == expected
+        ok = (len(helpers) == (0 if migrated else 1) and tuple(users) == expected
+              and (not migrated or "import Solidity.Source.Hoare" in text)
+              and (not migrated or not re.search(r"(?<![\w.])run_bind\b", text)))
         failed |= not ok
         print("{}: helpers={} consumers={} {}".format(
             path.relative_to(root), len(helpers), ",".join(users), "OK" if ok else "DRIFT"))
@@ -37,4 +39,6 @@ def scan(root):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=ROOT)
-    raise SystemExit(scan(parser.parse_args().root))
+    parser.add_argument("--migrated", action="store_true")
+    args = parser.parse_args()
+    raise SystemExit(scan(args.root, args.migrated))

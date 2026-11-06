@@ -2,7 +2,7 @@
 """Negative controls for the textual census, using isolated temporary copies."""
 import importlib.util
 from pathlib import Path
-import shutil
+import subprocess
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -21,7 +21,8 @@ class CensusControls(unittest.TestCase):
         self.dest = self.root / "Solidity/Lowering/Readonly"
         self.dest.mkdir(parents=True)
         for filename in census.FILES:
-            shutil.copyfile(SOURCE / filename, self.dest / filename)
+            data = subprocess.run(["git", "show", "c6f550e281a7e5affa9a99bc2cdaed556dec00e4:Solidity/Lowering/Readonly/" + filename], cwd=census.ROOT, check=True, capture_output=True).stdout
+            (self.dest / filename).write_bytes(data)
 
     def tearDown(self):
         self.temp.cleanup()
@@ -56,6 +57,10 @@ class CensusControls(unittest.TestCase):
         path = self.dest / "CapturePhases.lean"
         path.write_text(path.read_text(encoding="utf-8") + "\ntheorem extra := by simp only [run_bind]\n", encoding="utf-8")
         self.assertEqual(self.scan(), 1)
+
+    def test_migrated_files(self):
+        with redirect_stdout(StringIO()):
+            self.assertEqual(census.scan(census.ROOT, migrated=True), 0)
 
     def test_missing_file(self):
         (self.dest / "CaptureFailures.lean").unlink()

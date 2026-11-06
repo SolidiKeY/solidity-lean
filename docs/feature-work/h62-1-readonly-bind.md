@@ -86,3 +86,26 @@ It proves those states differ, success applies the continuation to the returned
 state, and timeout retains that state and bypasses the continuation. It does
 not instantiate the remaining actual capture-phase failure premises. The file
 elaborated under the bounded overlay setup; new phase fixtures remain pending.
+
+## H82 migration and retirement handoff
+
+H82 permits the statement-preserving proof changes directly. The three original
+modules now match the previously checked overlay: the private duplicates are
+replaced with the existing `Solidity.Source.Hoare.run_bind`. The generator now
+uses the pinned Git base as its source and checks both the overlay and migrated
+files. The migrated census reports zero private copies and the same ten direct
+consumers. Seven Python controls pass against frozen-source copies and the
+migrated tree. The three migrated modules and their three direct control modules
+built serially (73 jobs). `PhaseControls.lean` supplies actual value and argument
+timeout witnesses using the original theorem types, in addition to the existing
+receiver-failure and code-rejection controls. Encoding-failure inhabitation
+remains open; synthetic `BindControls` do not establish it.
+
+The full `./run-lean.sh` run was interrupted deliberately at 38/4372 jobs to
+allow remaining fixture work; it exited 130 and is not a passing gate. Complete
+affected and full validation, direct theorem axiom audit after migration,
+independent finder and skeptic reviews, remaining fixture/acceptance coverage,
+and before/after timing confirmation on the final tree remain open. Prior
+paired timings cover the text-identical overlay; they exclude initial Hoare build
+cost. No statement, premise, definition body, proof budget or exclusion was
+intentionally changed. See the checksum manifest in the VM evidence handoff.

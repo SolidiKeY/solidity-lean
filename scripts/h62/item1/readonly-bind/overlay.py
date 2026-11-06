@@ -4,6 +4,7 @@ import argparse
 import hashlib
 from pathlib import Path
 import re
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[4]
 SRC = ROOT / "Solidity/Lowering/Readonly"
@@ -20,7 +21,7 @@ def main():
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     for name, digest in HASHES.items():
-        data = (SRC / (name + ".lean")).read_bytes()
+        data = subprocess.run(["git", "show", "c6f550e281a7e5affa9a99bc2cdaed556dec00e4:Solidity/Lowering/Readonly/" + name + ".lean"], cwd=ROOT, check=True, capture_output=True).stdout
         if hashlib.sha256(data).hexdigest() != digest:
             raise SystemExit("source hash mismatch: " + name)
         text, count = PATTERN.subn("", data.decode("utf-8"), count=1)
@@ -30,7 +31,7 @@ def main():
         text = re.sub(r"(?<![\w.])run_bind\b", "Solidity.Source.Hoare.run_bind", text)
         target = OUT / (name + ".lean")
         if args.check:
-            if not target.exists() or target.read_text(encoding="utf-8") != text:
+            if not target.exists() or target.read_text(encoding="utf-8") != text or (SRC / (name + ".lean")).read_text(encoding="utf-8") != text:
                 raise SystemExit("overlay drift: " + name)
         else:
             target.parent.mkdir(parents=True, exist_ok=True)
