@@ -1,0 +1,45 @@
+{
+  "boundary": "Guarded integrity evidence only; complete acceptance FAILS",
+  "files": [
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/driver.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/gate.json",
+      "bytes": 1214,
+      "sha256": "ade71dbdaddaea27f3a6922e997aab2d5ecfb5cd18cf25b55c5c582600926824"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/guarded-run/acceptance.log",
+      "bytes": 1223,
+      "sha256": "53c8aac433ab87e2f01dfbb939c9e3ca8fd7d8bfab502315ef31ff540240727e"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/guarded-run/evidence-view/baseline/lean-commands.jsonl",
+      "bytes": 779770,
+      "sha256": "a6dce9a63929e4466323f716c9fb2423a7c4c3555034632b10501c92b75f0ca6"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/guarded-run/evidence-view/source-census.json",
+      "bytes": 10578591,
+      "sha256": "a2aa6d5e5837eac11ad80fc4eb59e4c3903e9d7f9d52e41bcbccb1e24dccc2da"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/guarded-run/outcome.json",
+      "bytes": 549,
+      "sha256": "94203096ce361778eb168d5adc4bc8d8dd0d3f66aa33289adf72c1ac1d40d9b3"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/guarded-run/preflight.json",
+      "bytes": 637,
+      "sha256": "cc46b0398aef0a9d6903c4be07eeddd1993968410646ef26fab29b98f73cf1d9"
+    },
+    {
+      "path": "/workspace/h62-successor-evidence/acceptance-guard-checkpoint-v1/python-controls.json",
+      "bytes": 388,
+      "sha256": "7ae1d38dbdeb3b49d4e582186a39ce08369c6a6870b8c35721fd4af80f89417d"
+    }
+  ]
+}
