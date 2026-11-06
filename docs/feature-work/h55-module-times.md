@@ -633,3 +633,24 @@ historical manifest verifies against that snapshot. The other current evidence
 and CPU-policy review manifests verify against their respective paths. The
 failed check and corrected historical check are retained separately; this does
 not retroactively claim the old review covered the changed CPU files.
+
+## Candidate Lake invocation control
+
+The published master gate now invokes `lake lean`; this additive constructor
+prepares a serial candidate with `--no-build`, pinned executable hashes and
+an explicit environment allowlist. It rejects unrecognized environment
+variables, including `LEAN`, `LAKE_OVERRIDE_LEAN` and cache overrides. The
+allowlist fix addresses the independent finder and skeptic finding that Lake
+can otherwise select a different Lean executable despite a pinned PATH. The
+focused synthetic control exercises the override pair and a cache override.
+
+Both reviewers worked read-only without a Lean server or build. The finder
+rechecked the fix and noted that HOME and XDG_CACHE_HOME still affect Lake
+cache location; neither cache contents nor toolchain installation is
+authenticated by this constructor. The skeptic identified that workspace
+loading, configuration and dependency materialization can precede build
+actions: `--no-build` is not containment, a write-free guarantee, or a cold
+build equivalent. Source, toolchain, cache, VM and effective resource
+provenance, production deadline enforcement and full integration remain
+unproved. This is not an H56 measurement or a runtime/proof gate pass.
+Installed versions inspected: Lean 4.24.0 (797c613), Lake 5.0.0-src+797c613.
