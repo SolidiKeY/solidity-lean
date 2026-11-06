@@ -3565,6 +3565,7 @@ import Solidity.Lowering.V08.BoolErrorLowering
 import Solidity.Lowering.V08.BoolErrorStatement
 import Solidity.Lowering.V08.BoolErrorStatementControls
 import Solidity.Lowering.V08.Callable
+import Solidity.Lowering.V08.CallableBodyPremises
 import Solidity.Lowering.V08.CallableMetadata
 import Solidity.Lowering.V08.CallableReflection
 import Solidity.Lowering.V08.CallbackControls
