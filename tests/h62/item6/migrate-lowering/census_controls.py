@@ -10,11 +10,12 @@ assert "Hidden" not in m.uncomment("/- outer /- nested -/ import Hidden -/")
 import subprocess
 with tempfile.TemporaryDirectory() as d:
     root=Path(d); p=root/"Solidity/Lowering/Test.lean"; p.parent.mkdir(parents=True)
-    p.write_text("import Solidity.Dependency\n/- import Solidity.Hidden -/\nlocal instance : Decidable True := inferInstance\nprivate instance named : Decidable True := inferInstance\nexample : True := by trivial\n")
+    p.write_text("import Solidity.Dependency\n/- import Solidity.Hidden -/\nlocal instance : Decidable True := inferInstance\nprivate instance named : Decidable True := inferInstance\nexample : True := by trivial\nderiving instance DecidableEq for Nat\nattribute [instance] named\n")
     dep=root/"Solidity/Dependency.lean"; dep.write_text("def answer : Nat := 42\n")
     subprocess.run(["git","init","-q",d],check=True)
     subprocess.run(["git","-C",d,"-c","user.name=Control","-c","user.email=control@example.invalid","commit","--allow-empty","-qm","fixture"],check=True)
     c=m.census(root)
+    assert len(c["modules"][0]["api_directives"]) == 2
     assert c["closure_order"] == ["Solidity.Dependency", "Solidity.Lowering.Test"]
     assert c["direct_external_edges"]==[{"from":"Solidity.Lowering.Test","to":"Solidity.Dependency"}]
     assert [x["kind"] for x in c["modules"][0]["declarations_lexical"]]==["instance","instance","example"]

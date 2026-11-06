@@ -84,18 +84,32 @@ Both prerequisites passed:
 versioned binary. Old: exit 0, 3.012218324 s, sampled peak 257,933,312 bytes.
 New: exit 0, 2.276659811 s, sampled peak 506,077,184 bytes.
 The RSS increase is about 96%, while wall time improved about 24%.
-QPERF1 asks whether this prerequisite RSS comparison triggers STOP immediately
-or whether the clean full-build comparison should govern. No new-toolchain full
-gate is launched while that decision is pending. No RUNTIME_GATE_PASS claim.
+QPERF1 was resolved by the coordinator on this continuation. Verbatim answer:
 
-The clean old full gate is running via `./run-lean.sh`, using a private config
+> a per-module time or memory increase does not stop a migration lane. Record
+> the before/after numbers for that module and continue to the matched clean
+> full-build comparison the task requires; the coordinator reports memory/time
+> growth to the human with the cut-over escalation.
+
+The KeySort numbers are retained as escalation evidence. They do not block the
+matched clean full-build comparison. No RUNTIME_GATE_PASS claim.
+
+The first old full gate was INVALIDATED: its timing/guard runner died across
+the previous turn boundary while its child continued. The skeptic detected
+this on resume. Only the verified owned orphan group was stopped; partial
+logs and build were preserved under invalid-* artifacts and are not accepted
+measurements.
+
+The clean old full gate is restarted via a detached `supervise.py` using
+`nohup setsid -f`, then `./run-lean.sh`, using a private config
 created by `prepare_config.py`: cache disabled, fresh .lake/build, private empty
 XDG cache, and -j1 -M11000 on all Lean libraries/executables. A process snapshot
 confirmed one Lean worker and the actual bounded arguments. Its final outcome
 and complete wall/RSS measurement remain pending. Old/master artifact caches
 are not used. The configuration and full log are off Git.
 
-`pipeline.py` is saved but NOT started. After the metric decision it can wait
+The initial waiting pipeline also died and was not accepted. The replacement
+`supervise.py` starts `pipeline.py` only after a passing old gate. It waits
 for old results, acquire the writer lock, verify source/configuration provenance,
 preserve the old build, create an empty new build, and pass the same held lock
 into the new bounded run. Both wall and sampled RSS regressions escalate;
@@ -116,13 +130,25 @@ Lean server or Lean checks. Findings and resolutions:
   to its child without an unlocked transition, checks provenance, and compares
   both wall and RSS. Missing metrics now have a typed blocker/nonzero exit.
 
+The resumed finder additionally found two deriving commands and two instance
+attribute commands missing from the lexical inventory. API directives are now
+recorded, with regression controls and explicit pinned-base source/path checks.
+
+The resumed skeptic detected the dead runner/pipeline and invalidated the old
+run. Both reviewers checked the replacement detached supervisor, atomic
+five-second runner heartbeats/results, inherited-lock transfer, and reliable
+owned-group cleanup even after a leader exits. Lightweight controls passed for
+normal completion, inherited locks, signals/descendants, and dead-leader cleanup.
+The detached smoke process survived a tool return. Monitoring continuity and
+complete final metrics remain required before accepting the restarted run.
+
 Both reviewers confirmed those fixes. Full migration milestone reviews remain
 pending; these reviews accept no unrun gate or semantic compatibility claim.
 
 ## Outstanding work and handoff
 
 1. Complete clean old baseline and census/API compatibility (checkpoint 1).
-2. Resolve QPERF1; obtain exact-file owner coordination for any required edit;
+2. Obtain exact-file owner coordination for any required edit;
    compile with the identical new toolchain, fixing only assigned originals
    and preserving all types/semantics/proof budgets (checkpoint 2).
 3. Build every assigned module, final repository gate, before/after wall/RSS
