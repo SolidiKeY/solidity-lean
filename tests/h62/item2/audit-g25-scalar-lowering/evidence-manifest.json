@@ -1,0 +1,39 @@
+{
+  "artifact_root": "/workspace/h62-audit-g25-artifacts",
+  "evidence_root": "/workspace/h62-audit-g25-artifacts/evidence",
+  "checkpoint": "C1/C2/C3 verified; C4 partial; worker retired and stopped",
+  "proof_credit": 311,
+  "primary_files": {
+    "source-census.json": "311437958bc5325c424fb1ea706d8f4f4943eed340f1e4ef4f40d54c1c251dd9",
+    "kernel-census-v424.json": "279a2ca7f4967edfb114b5bd62f1c812dc3ff5a3467076b1f9739533acf84f5d",
+    "premise-structures-v424.json": "98c4243ef5345042bc1b29625033ef43859b2a480358f34ea99fd48accd28db6",
+    "statement-inventory-v424.json": "ef2e026a8183987cdbf91034823d74e90fee2d1a64de57e3ca21a3a19dbf2fd9",
+    "witness-verification-v424.json": "523a895f65b20734e96a1230f3e889de205e5242bfc6961938a952211af5f42c",
+    "coverage-ledger.json": "49f11ee89c1765fee8f1bda22db8cb132e3137edb469c7c693464d84bcedc9cd",
+    "reviews-c1-c2.json": "10b29376988b06a998681dadb90f775253fa77e14fbfa3cab3228e5e88e0542c",
+    "owner-tickets.json": "d3be4d06ec8dc5af41b4e8afb6d3420c1df6ec2d085e8ef83d2bb4b240a10cdb",
+    "coordinator-toolchain-clarification.txt": "b01f37e6a4203500fabf99dca8cd8515092523a27206f8668da3677ec23ea6d9",
+    "acceptance-results.json": "6a66b6425260ca7b89720ea883f649693a55f3bc1d9d63ba4454f66dd5eb353e",
+    "reviews-c3.json": "8be0d7a9e959bdbcbd65e58d183b1f06782e3f381777e41cfce44b92ecfc7304",
+    "boundary-vectors.json": "e9bd8bd550168bfce68453281a2f3226ae14ecc898914a4dd90f5b033c3e5fac",
+    "reference-boundaries.json": "41adfac95feb51febaa933e1e548756825401ed07b55d5a99223f4dd857f97c4",
+    "success-evidence.json": "152260c7c91a1b606a87a873e8020fee788ad71241ba1bb1f8f45fa467a2d2e5",
+    "original48-timings.json": "6c461dbf1a632e0e73d27fbd22051b9b597a6e4a2e7eb7177eb9b28a1f0215ff",
+    "unused-cache-release.json": "3bebf79d387152204537acf69b4bf01d5262c7ca96a24231df2e7155a604f755",
+    "reviews-c4-partial.json": "cbc8b5cbe834348f390d51cfb58cb98dc9a25fac279fb9a125051159e9fea1cd",
+    "retirement-state.json": "74fc8c2a2a461f3dd4f3373b860c58ad26e83d45a8ac90e58a03283fb5d4c6c9",
+    "pause-capability.json": "74af36964f8a88ba7c521966464e161d565700ecd597ad47afb244e3d5f755e4",
+    "full-gate-retirement-interruption.json": "3809ee5266182927601ec2e86af7c69f2e38514a8f38dce8690a5da557a4d9e0",
+    "keysort-final-v424.json": "cb2fc779b65b9f5100306c4dc47b975e1fa155e7a6c7a4948a1b6009ee14a605",
+    "serial-lake-probe-v424.json": "cb20cad74285a7a71afdd42fda34b09a9baed6562454e3d83ad82e527b3c15f1",
+    "preservation-checks.json": "149e83d7f3f5bdece401c19c76221a8c5e4eedadb82321a4184c85d89ca532ed"
+  },
+  "cache_index": {
+    "path": "/workspace/h62-audit-g25-artifacts/audit-v424/cache-index.json",
+    "sha256": "8132d2c08ae23619f5b2d4d555189f8ca7aa0e7335283509607abbf0924c6a83"
+  },
+  "historical_checkpoint": "/workspace/h62-audit-g25-artifacts/checkpoints/c29f0b555159f6b7cc4c3b94b542b62c2dcaed7e",
+  "new_public_success_theorems": 55,
+  "handoff_to": "solidity-compiler10-20261028/memory-reference-structs",
+  "implementation_continuation_authorized": false
+}
