@@ -108,3 +108,5 @@
 | `Source/Agreement/BoolSlotNotControls.lean` | Total-initial-locals client, Source horizon and both negation polarity controls. |
 | `Source/Agreement/BoolSlotConditional.lean` | Actual local-conditioned boolean literal initializer, with internally derived guard and preserved primitive locals. |
 | `Source/Agreement/BoolSlotConditionalControls.lean` | Concrete conditional client, branch/horizon controls and separately scoped Source selected/unselected-write traces. |
+| `Source/Agreement/BoolSlotAnd.lean` | Actual short-circuit conjunction initializer with corresponding local left operand and literal right operand. |
+| `Source/Agreement/BoolSlotAndControls.lean` | Internally instantiated conjunction client, Source selected/skipped right-hand effects and fuel, and operator-distinction controls. |

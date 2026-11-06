@@ -3674,6 +3674,8 @@ import Solidity.SortCheck.Annotations
 import Solidity.SortCheck.Faithfulness
 import Solidity.SortCheck.Parser
 import Solidity.Source.Agreement.BoolSlot
+import Solidity.Source.Agreement.BoolSlotAnd
+import Solidity.Source.Agreement.BoolSlotAndControls
 import Solidity.Source.Agreement.BoolSlotAssign
 import Solidity.Source.Agreement.BoolSlotConditional
 import Solidity.Source.Agreement.BoolSlotConditionalControls
