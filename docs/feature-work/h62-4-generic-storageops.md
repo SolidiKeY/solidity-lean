@@ -261,3 +261,50 @@ passes all 13 classifier regressions and the exact final artifact digest. Neithe
 reviewer ran Lean or wrote files. No new Lean validation is claimed in H70; the
 earlier pinned 4.35 prerequisite/failure evidence above remains explicitly prior
 run evidence on unchanged original sources.
+
+## H70 fixture/equivalence work plan
+
+`fixture_plan.py` produces a complete, explicitly unproved work ledger for all
+1,623 control claims (1,007 public, 616 private) in 84 module packets. Each row
+retains the exact original parameters, result type, ambient binders, proposition
+shape and hashes. Each packet retains every local fixture/adapter; this is
+conservative support retention, not a resolved dependency graph. Imported
+fixtures remain covered by the pinned original family sources. The bulk ledger
+stays outside git; `fixture-plan-manifest.json` pins deterministic reproduction.
+
+This advances checkpoint 2 planning only. No ledger row is an inhabited Lean
+fixture, semantic equivalence proof, permission or passing Lean gate. Source
+repeat groups remain candidates; singleton obligations are never discharged by
+grouping. All original files remain read-only.
+
+The first proposed generic law is the existing typed scheduler composition:
+`modifyMany effect (left ++ right) slots =
+ (modifyMany effect left slots).bind (modifyMany effect right)`.
+Quantify the existing K/DecidableEq, n/Schema, element Ty, slots, effect and lists.
+Prove by induction on left, generalizing slots, using the actual modifyMany
+cons equation and Option.bind_assoc. This must not assume success or omit
+repeated keys. Its failure corollary must preserve none after any suffix; a
+successful fixture must also rule out an always-failing scheduler. This law is
+a proposal, not a checked theorem in this handoff.
+
+The initial typed fixture design retains dependent Schema/Ty and keyed Slot
+inputs, actual partial effects, both runtime key lists, and the original typed
+observation function. Expected outputs remain data; a generic operation theorem
+must derive them independently. Arbitrary runtime parameters stay quantified.
+Use the original OperationControls forward/reverse late-failure, family-success
+and same-key-order countercontrols as initial exact-instance obligations after
+the Raw dependency is supplied. V10 agreement is still required before changing
+OperationControls. Subsequent packets use their own graph/representation/target
+strategy and exact contracts; the scheduler law is not claimed to cover them all.
+
+Reproduce plan coverage with `python3 -B
+scripts/h62/item4/generic-storageops/fixture_plan.py --output
+/workspace/h62-generic-storageops/evidence/fixture-plan.json`. Scope and all
+three outstanding proof/validation checkpoints remain unchanged.
+
+Independent finder and skeptic reviews pass for this plan: all 1,623 contracts,
+84 packets and 3,214 local fixture definitions retained, no equivalence or
+permission claimed. Deterministic plan reproduction passes. The fixture-plan
+tests check full coverage and reject five corruptions: case omission,
+duplication, changed result, removed fixture and fabricated proved equivalence.
+No Lean validation was run for this planning-only follow-up.
