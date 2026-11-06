@@ -982,15 +982,15 @@ Consumer declaration names (vt1, vo1 and every X/O/T lane):
 | `V1.D1 source target domain machine compiler environment aligned` | `abbrev` (Type) | `RunIndexed.Certificate … .exact` |
 | `V1.targetRunOf` | `def` | the target run a certificate assigns to an eligible source run |
 | `V1.D1.forward_oracle`, `V1.D1.backward_oracle` | theorems | executed queries read the actual target reader |
-| `V1.D2 attempt` | `abbrev` (Prop) | `CreationSizeFailures attempt` (EIP-170/3860) |
-| `FullScope.PackedField.read`, `FullScope.PackedField.Disjoint` | defs | low-order-first packed field content; byte disjointness |
+| `V1.D2 attempt` | structure (Prop) | `failures : CreationSizeFailures attempt` (EIP-170/3860), `live`: some fitting creation succeeds |
+| `V1.fieldRead`, `V1.fieldsDisjoint`, `V1.creationFitsDecidable` | defs, instance | low-order-first packed field content; byte disjointness; decidable limits |
 | `V1.Layout`, `V1.Layout.Agrees`, `V1.MemoryAgrees`, `V1.Physical`, `V1.Physical.Representable` | defs/structures | D3 data |
 | `V1.D3 physical` | structure (Prop) | `agrees` on related states, `total` on representable ones, `live`: some representable state |
 | `V1.Assembly`, `V1.D4 assembly` | structure, structure (Prop) | `writeback : UnsafeWriteback …`, `opaqueBlocks : Opaque …`, `live`: some execution and some unsafe block |
 | `V1.D5 source target environment`, `V1.d5_of_certificate` | def, theorem | environment correspondence; every certificate proves it |
 | `V1.D6 …` | `abbrev` (Type) | `RunIndexed.Certificate … .optimizer` |
 | `V1.Mode.observe_le`, `V1.Mode.observe_optimizer`, `V1.D1.toD6` | theorems/def | quotient monotone, idempotent; exact ⇒ optimizer |
-| `V1.Contract source target domain machine compiler environment aligned mode attempt physical assembly` | structure | `run`, `creation`, `layout`, `assemblyBoundary` |
+| `V1.Contract source target domain machine compiler environment aligned mode attempt physical assembly` | structure | `run`, `admitsSome`, `creation`, `layout`, `assemblyBoundary` |
 | `V1.Contract.compiles`, `V1.rejecting_refused`, `V1.forward_completes` | theorems | totality, rejecting compiler refused, adequacy on completion |
 
 `Solidity/Language/EnvironmentFields/FrozenControls.lean`
@@ -1002,8 +1002,9 @@ representable nonzero layout (`d3_live`). Negative controls:
 `rejecting_refused`, `reverting_refused` (both modes), `empty_relation_refused`,
 `shifted_relation_refused`, `overlap_refused`, `rewriting_optimizer_refused`,
 `extra_event_refused` (an extra non-gas observation with equal gas reads and
-outcome fails in both modes).
-`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 22 declarations:
+outcome fails in both modes), `always_failing_refused` (D2),
+`nothing_admitted_refused` (an empty domain with a compiler compiling nothing).
+`tests/fullscope-20261104/vx1/FrozenAxioms.lean` inventories 24 declarations:
 only `propext`/`Quot.sound`. MCP diagnostics: no errors or warnings on all three.
 
 Binding for consumers: vt1's `fun_<name>_<id>` simulations state their
@@ -1043,3 +1044,21 @@ choice of state types, extent or an empty `executes`/`isUnsafe`); fixed by the
 non-gas-change control); `extra_event_refused` added, degeneracy and the
 gas-only control recorded above. C3–C5 hold; fixed the doc's "byte-identical"
 wording, section numbering and the dot-notation caveat.
+
+Finder: A1 (an empty `Admitted` with a compiler compiling nothing satisfied
+the bundle) fixed by `Contract.admitsSome` and `nothing_admitted_refused`; A2
+(always-failing `attempt`, empty D3/D4 models) fixed by `D2.live`, `D3.live`,
+`D4.live` and `always_failing_refused`; A4 fixed by keeping the D3 helpers and
+the instance named inside `V1`. Remaining by design, recorded as limitations:
+`V1.D3` allows `Var := Empty` (a contract without state variables) and does
+not state that steps preserve `Related` (the producer's simulation proof does);
+`admitsSome` does not say *which* inputs are admitted (G07 ties `Admitted` to
+the catalog); the toy's guards are `True` and `legality` is `Iff.rfl`
+(exercised non-trivially by the earlier `specified_run_cannot_be_filtered` in
+`tests/fullscope-20261104/vx1/ContractsControls.lean`); the H38 Source (VY5)
+and EVM (V14/V15) reviews of `Legal`/`Aligned` are not recorded in this
+repository, so the freeze stands on the coordinator's VX1 assignment. Adapter
+E1 (generated `inProfile`/`outsideScope` still scope-only), E2 (anchor not
+checked), E3 (`python -O`) and E4 (`Admission/Profile.lean` census) fixed in
+the patch, `adapter.py` and ADAPTERS.md. PowerBounds and registration: no
+defect.

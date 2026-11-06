@@ -17,6 +17,10 @@ Textual consumer census (Unmodelled, BlockField, outsideScope, exclusion_complet
 - 306: outsideDiagnostic matches use.feature.unmodelled? and emits .excluded. VY5 must preserve unsupported rejection without treating full-language obligations as exclusions. Audit ScopeScan.certify and its WithinProfile certificate together; changing catalog scope must not silently admit unimplemented constructs. ScopeScan.requireCompilerCode also retains its independent validated-artifact check.
 
 
+## Solidity/Frontend/Admission/Profile.lean
+
+- 34-48: `ScopeScan.certify_iff` proves `certify` accepts exactly `WithinProfile`; it moves together with the `inProfile` change above.
+
 ## Solidity/Backend/Environment/Frames.lean
 
 - 110: /-- Every excluded BlockField and the raw msg/tx fields remain absent from the
@@ -51,14 +55,23 @@ Producer ownership: Source stays VY5; other frontend producers retain owners; ge
 - **Provenance:** a withdrawn row carries `diagnostic: unsupported` and
   `withdrawal {question: H37/H70, date, record, prior}`; the old G00 Q1
   decision moves to `prior` and is validated against its record, never left
-  active. Seven mutations (decision kept, either marker alone, `present`,
-  re-excluded, wrong prior outcome, missing record) are rejected.
+  active; the record's file and heading anchor are checked. Eight mutations
+  (decision kept, either marker alone, `present`, re-excluded, wrong prior
+  outcome, missing record, missing anchor) are rejected; `adapter.py` refuses
+  to run under `python -O`.
 - **Report:** withdrawn rows show "open, unsupported diagnostic until admitted".
 - **Staging:** `--stage DIR` renders the 30-row transition (`staged/`, ignored;
   hashes in `staged.SHA256SUMS`, H44) and `Check.lean`, which kernel-checks
   (MCP diagnostics, no errors).
 
-Activation (writing the staged manifest and outputs) is blocked on VY5:
+The staged outputs are evidence, not activatable: with the patch alone the
+generated `Feature.inProfile`/`WithinProfile`/`ProfileSyntax` still test scope
+only, and `outsideScope := Unmodelled.all` lists the 30 withdrawn features.
+Before activation the generator must also render `Feature.inProfile` as
+`(scope = model ∨ abstract) ∧ unmodelled? = none` and split `outsideScope`
+(excluded) from the unsupported diagnostics.
+
+Activation (writing the staged manifest and outputs) is also blocked on VY5:
 `ScopeScan.certify` tests `scope = model ∨ abstract` before
 `Feature.unmodelled?`, so the 30 withdrawn features would be silently admitted.
 `adapter.py` prints that impact list. The Source fix is to reject on

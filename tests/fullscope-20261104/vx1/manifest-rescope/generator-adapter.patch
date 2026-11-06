@@ -82,7 +82,7 @@
              if 'decision' in r:
                  d = r['decision']
                  refs += f"; [decision {d['question']}, {d['date']}](../{d['record']}): {d['outcome']}"
-@@ -259,7 +285,29 @@
+@@ -259,7 +285,32 @@
      return '\n'.join(section), f'**User decision ({date}):**'
  
  
@@ -102,6 +102,9 @@
 +    assert w['question'] == 'H37/H70' and re.fullmatch(r'\d{4}-\d{2}-\d{2}', w['date']), w
 +    path, _, anchor = w['record'].partition('#')
 +    assert anchor and (ROOT / path).is_file(), ('withdrawal record not found', w['record'])
++    slug = lambda h: re.sub(r'[^a-z0-9 -]', '', h.lower()).replace(' ', '-')
++    assert any(line.startswith('#') and slug(line.lstrip('#').strip()) == anchor
++               for line in (ROOT / path).read_text().splitlines()), ('withdrawal anchor not found', w['record'])
 +    prior = w['prior']
 +    assert prior['question'] == 'G00 Q1' and prior['outcome'] == 'approvedExclusion', prior
 +    decision_marker(prior['record'], prior['date'])
@@ -112,7 +115,7 @@
      d = r.get('decision')
      if r['scope'] in DECIDED_SCOPES:
          assert d and d['question'] == DECIDED_SCOPES[r['scope']], ('scope without its decision', r['id'])
-@@ -324,10 +372,15 @@
+@@ -324,10 +375,15 @@
      p = argparse.ArgumentParser(description=__doc__)
      p.add_argument('--check', action='store_true', help='fail instead of rewriting generated files')
      p.add_argument('--upstream', type=Path, help='also check exact source hashes and symbol coverage against a checkout')

@@ -101,23 +101,28 @@ theorem D1.backward_oracle {source : Source} {target : Target} {domain : SourceR
 /-! ## D2: creation-size failures -/
 
 /-- **D2.** Creation beyond Osaka's EIP-170/EIP-3860 limits fails observably
-(`creationFits`). Exact failure gas is the EVM owner's separate obligation. -/
-abbrev D2 (attempt : Bytes → Bytes → Evm.Halt) : Prop :=
-  CreationSizeFailures attempt
+(`creationFits`), and some creation within them succeeds, so an attempt that
+always fails does not satisfy it. Exact failure gas is the EVM owner's
+separate obligation. -/
+structure D2 (attempt : Bytes → Bytes → Evm.Halt) : Prop where
+  failures : CreationSizeFailures attempt
+  live : ∃ initcode runtime, creationFits initcode runtime ∧
+    (attempt initcode runtime).observe.1 = true
 
 /-- The limits are decidable, so a producer can branch on them. -/
-instance (initcode runtime : Bytes) : Decidable (creationFits initcode runtime) :=
+instance creationFitsDecidable (initcode runtime : Bytes) :
+    Decidable (creationFits initcode runtime) :=
   inferInstanceAs (Decidable (_ ∧ _))
 
 /-! ## D3: byte memory and packed physical slots -/
 
 /-- The value a packed field holds in its slot word: `width` bytes starting
 `offset` bytes from the low-order end (solc's packing order). -/
-def _root_.Solidity.Roadmap.FullScope.PackedField.read (field : PackedField) (slotValue : Word) : Nat :=
+def fieldRead (field : PackedField) (slotValue : Word) : Nat :=
   slotValue.val / 256 ^ field.offset.val % 256 ^ field.width.val
 
 /-- Two fields share no byte. -/
-def _root_.Solidity.Roadmap.FullScope.PackedField.Disjoint (a b : PackedField) : Prop :=
+def fieldsDisjoint (a b : PackedField) : Prop :=
   a.slot ≠ b.slot ∨ a.offset.val + a.width.val ≤ b.offset.val ∨
     b.offset.val + b.width.val ≤ a.offset.val
 
@@ -126,12 +131,12 @@ distinct variables of one space never share a byte. -/
 structure Layout (Var : Type) where
   space : Var → SlotSpace
   field : Var → PackedField
-  disjoint : ∀ a b, a ≠ b → space a = space b → (field a).Disjoint (field b)
+  disjoint : ∀ a b, a ≠ b → space a = space b → fieldsDisjoint (field a) (field b)
 
 /-- Every source value is the content of its physical field. -/
 def Layout.Agrees {Var : Type} (layout : Layout Var) (value : Var → Nat)
     (slots : SlotSpace → Word → Word) : Prop :=
-  ∀ v, value v = (layout.field v).read (slots (layout.space v) (layout.field v).slot)
+  ∀ v, value v = fieldRead (layout.field v) (slots (layout.space v) (layout.field v).slot)
 
 /-- The source's memory view is the target's byte memory, extent included. -/
 def MemoryAgrees (extent : Nat) (view : Word → UInt8) (memory : ByteMemory) : Prop :=
@@ -279,6 +284,10 @@ structure Contract (source : Source) (target : Target) (domain : SourceRuns sour
     (mode : Mode) (attempt : Bytes → Bytes → Evm.Halt) (physical : Physical)
     (assembly : Assembly) where
   run : Certificate source target domain machine compiler environment aligned mode
+  /-- Some input is admitted, so `domain.Admitted := fun _ => False` with a
+  compiler that compiles nothing does not satisfy the contract. Which inputs
+  must be admitted (the feature catalog) is G07's obligation. -/
+  admitsSome : ∃ resolved, domain.Admitted resolved
   creation : D2 attempt
   layout : D3 physical
   assemblyBoundary : D4 assembly

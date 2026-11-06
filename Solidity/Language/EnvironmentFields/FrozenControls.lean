@@ -205,7 +205,7 @@ theorem d5 : D5 source target id := d5_of_certificate d1
 def creation (initcode runtime : Bytes) : Evm.Halt :=
   if creationFits initcode runtime then .success runtime else .exceptional
 
-theorem d2 : D2 creation := by
+theorem d2_failures : CreationSizeFailures creation := by
   intro initcode runtime oversized
   simp only [creation, if_neg oversized, Evm.Halt.observe]
 
@@ -213,6 +213,17 @@ theorem creation_at_limits :
     creation (List.replicate 49152 0) (List.replicate 24576 0) =
       .success (List.replicate 24576 0) :=
   if_pos (by simp only [creationFits, List.length_replicate]; exact ⟨Nat.le_refl _, Nat.le_refl _⟩)
+
+theorem d2 : D2 creation :=
+  ⟨d2_failures, ⟨List.replicate 49152 0, List.replicate 24576 0,
+    by simp only [creationFits, List.length_replicate]; exact ⟨Nat.le_refl _, Nat.le_refl _⟩,
+    by rw [creation_at_limits]; rfl⟩⟩
+
+/-- An attempt that always fails meets the failure obligation but not D2. -/
+theorem always_failing_refused : ¬ D2 (fun _ _ => Evm.Halt.exceptional) := by
+  intro alleged
+  obtain ⟨_, _, _, succeeds⟩ := alleged.live
+  cases succeeds
 
 /-! ## Physical layout (D3) -/
 
@@ -238,7 +249,7 @@ def physical : Physical where
   memory := fun t => t.2
   Related := fun s t => s.1 < 256 ∧ t.1.val = s.1 ∧ t.2 = s.2
 
-theorem lowByte_read (w : Word) (small : w.val < 256) : lowByte.read w = w.val := by
+theorem lowByte_read (w : Word) (small : w.val < 256) : fieldRead lowByte w = w.val := by
   show w.val / 256 ^ 0 % 256 ^ 1 = w.val
   rw [Nat.pow_zero, Nat.div_one, Nat.pow_one]
   exact Nat.mod_eq_of_lt small
@@ -248,7 +259,7 @@ theorem d3 : D3 physical where
     intro s t related
     obtain ⟨small, word, mem⟩ := related
     refine ⟨fun _ => ?_, ?_, fun _ => ?_⟩
-    · change s.1 = lowByte.read t.1
+    · change s.1 = fieldRead lowByte t.1
       rw [lowByte_read t.1 (word ▸ small), word]
     · change t.2.size = s.2.size
       rw [mem]
@@ -287,12 +298,12 @@ theorem d4 : D4 boundary :=
 /-- **Joint satisfiability**: every frozen hypothesis at once, exact mode. -/
 def witness : Contract source target domain machine compiler id aligned .exact creation
     physical boundary :=
-  ⟨d1, d2, d3, d4⟩
+  ⟨d1, ⟨(), trivial⟩, d2, d3, d4⟩
 
 /-- The same model in optimizer mode. -/
 def optimizerWitness : Contract source target domain machine compiler id aligned .optimizer
     creation physical boundary :=
-  ⟨d6, d2, d3, d4⟩
+  ⟨d6, ⟨(), trivial⟩, d2, d3, d4⟩
 
 /-- The witness is live: an admitted input compiles, its source run executes a
 gas query, completes successfully, and the assigned target run completes with
@@ -315,6 +326,16 @@ theorem oracle_live :
     (fun _ _ => show (5 : Word) ≠ 0 by decide) trivial (List.mem_singleton_self _)
 
 /-! ## Negative controls -/
+
+/-- A compiler that compiles nothing, over a domain admitting nothing, has a
+certificate but no contract: `admitsSome` fails. -/
+theorem nothing_admitted_refused (attempt : Bytes → Bytes → Evm.Halt) (p : Physical)
+    (a : Assembly) (mode : Mode) :
+    ¬ Nonempty (Contract source target { domain with Admitted := fun _ => False }
+      machine (fun _ => none) id aligned mode attempt p a) := by
+  intro ⟨alleged⟩
+  obtain ⟨_, impossible⟩ := alleged.admitsSome
+  exact impossible
 
 /-- A compiler that compiles nothing has no certificate in either mode. -/
 theorem rejecting_refused (mode : Mode) :
@@ -399,13 +420,13 @@ theorem shifted_relation_refused :
   intro alleged
   have agrees := (alleged.agrees ((7, ByteMemory.empty) : Nat × ByteMemory)
     ((8 : Word), ByteMemory.empty) ⟨by decide, rfl, rfl⟩).1 ()
-  change 7 = lowByte.read 8 at agrees
+  change 7 = fieldRead lowByte 8 at agrees
   rw [lowByte_read 8 (by decide)] at agrees
   cases agrees
 
 /-- Two fields overlapping in byte 0 of slot 0 are not disjoint, so no layout
 places two variables there. -/
-theorem overlap_refused : ¬ lowByte.Disjoint ⟨0, 0, 2, by decide, by decide⟩ := by
+theorem overlap_refused : ¬ fieldsDisjoint lowByte ⟨0, 0, 2, by decide, by decide⟩ := by
   intro disjoint
   rcases disjoint with different | below | below
   · exact different rfl

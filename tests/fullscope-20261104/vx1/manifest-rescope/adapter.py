@@ -16,6 +16,11 @@ real ledger and decision records and writes nothing outside --stage:
    because it tests scope before `Feature.unmodelled?`. Activation waits for the
    Source owner (VY5) to reject on `unmodelled?` first.
 
+Staged outputs are evidence, not activatable: with the patch alone the
+generated `WithinProfile`/`Feature.inProfile` still test scope only, so the
+staged `Features.lean` lists the 30 withdrawn features in `outsideScope` and
+admits them through `ProfileSyntax` as well as `ScopeScan.certify`.
+
 Usage: adapter.py [--stage DIR]   (default: no staging, identity check only)
 """
 import argparse, contextlib, copy, hashlib, io, json, subprocess, sys
@@ -71,6 +76,7 @@ def mutation_controls(source, staged):
         'kept excluded': lambda f: (f.__setitem__('scope', 'exclude'), f.__setitem__('current', 'notApplicable')),
         'wrong prior outcome': lambda f: f['withdrawal'].__setitem__('prior', dict(prior, outcome='approved')),
         'missing record': lambda f: f['withdrawal'].__setitem__('record', 'docs/nowhere.md#h70'),
+        'missing anchor': lambda f: f['withdrawal'].__setitem__('record', RECORD.split('#')[0] + '#no-such-heading'),
     }
     for name, mutate in mutations.items():
         mutant = copy.deepcopy(staged)
@@ -115,6 +121,8 @@ def main():
                 if f.get('diagnostic') == 'unsupported' and f['scope'] in ('model', 'abstract')]
     print(f'impact: {len(admitted)} withdrawn features pass the scope test of ScopeScan.certify '
           'and need its unmodelled? test first (VY5):', ', '.join(admitted))
+    if __debug__ is False:
+        raise SystemExit('run without -O: validation and --check are assertions')
     if args.stage:
         args.stage.mkdir(parents=True, exist_ok=True)
         manifest = args.stage / 'solidity-features.json'
