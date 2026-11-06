@@ -2066,6 +2066,7 @@ import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
+import Solidity.Calculus.DecisionResidue
 import Solidity.Calculus.DecisionResidueReasons
 import Solidity.Calculus.DecisionSourceAnswer
 import Solidity.Calculus.DecisionSourceBoundary
