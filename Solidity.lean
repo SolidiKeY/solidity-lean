@@ -708,6 +708,9 @@ import Solidity.Backend.MemoryCopies.FixedReferencePathCopy
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopyControls
 import Solidity.Backend.MemoryCopies.FixedReferencePathCopyInterface
 import Solidity.Backend.MemoryCopies.FixedReferencePathInterface
+import Solidity.Backend.MemoryCopies.FixedReferenceRebind
+import Solidity.Backend.MemoryCopies.FixedReferenceRebindControls
+import Solidity.Backend.MemoryCopies.FixedReferenceRebindInterface
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoop
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopControls
 import Solidity.Backend.MemoryCopies.FixedReferenceStorageLoopInterface
@@ -774,6 +777,9 @@ import Solidity.Backend.MemoryCopies.NestedMemoryTurnInterface
 import Solidity.Backend.MemoryCopies.NestedStorageHeader
 import Solidity.Backend.MemoryCopies.NestedStorageHeaderControls
 import Solidity.Backend.MemoryCopies.NestedStorageHeaderInterface
+import Solidity.Backend.MemoryCopies.NestedStorageLive
+import Solidity.Backend.MemoryCopies.NestedStorageLiveControls
+import Solidity.Backend.MemoryCopies.NestedStorageLiveInterface
 import Solidity.Backend.MemoryCopies.NestedStorageLoop
 import Solidity.Backend.MemoryCopies.NestedStorageLoopControls
 import Solidity.Backend.MemoryCopies.NestedStorageLoopInterface
