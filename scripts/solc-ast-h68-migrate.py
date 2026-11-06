@@ -177,7 +177,8 @@ def main():
             os.replace(new_path, row["fixture"])
             row["applied"] = True
     counts = collections.Counter(r["status"] for r in rows)
-    result = {"authority": "H68 option 1", "producer": "scripts/solc-ast.mjs",
+    result = {"authority": "H68 option 1" + ("; drift keys " + ",".join(a.allow_drift) + " allowed (H102)" if a.allow_drift else ""),
+              "producer": "scripts/solc-ast.mjs", "allowDrift": a.allow_drift,
               "applied": a.apply, "counts": dict(counts), "fixtures": rows}
     text = json.dumps(result, indent=1, sort_keys=True) + "\n"
     if a.receipt:

@@ -230,3 +230,46 @@ fixtures, all pins):
 - axiom-pins FAIL with 0 errors and 4,415 foreign unrecorded changes. None is
   in this lane's module.
 - The SolKey checker is no longer a gate (master `a897dac76`) and was not run.
+
+## Decisions H102 (2026-11-06): drift and upstream-sourced fixtures
+
+- **Q1, migrate with checks.** The seven `functionSelector`-drift fixtures
+  (ContractWorld, SliceCopies, SourceAdmission, SourceCoder{,IR},
+  SourceIdentifiers, SourceLiterals) were applied with `--allow-drift
+  functionSelector`. Each differs from its parent only by added
+  `typeIdentifier`, `tryCall` and `functionSelector` keys; headers are equal.
+  - Old-versus-new `solc_import` comparison: 14 pairs, 61 rows, **0 changed
+    rows** (`tests/cr-canonical-reader/h68-pairs-observed-h102.txt`).
+  - ContractWorld's world/library imports (`solc_world_factory`,
+    `solc_world_library`) are covered by per-file diagnostics only.
+  - Selector check (`SelectorCheck.lean.txt`): each newly present compiler
+    selector was compared with the importer's previous fallback,
+    `Keccak.selector` of its own `sourceAbiSignature`. 70 of 71 agree.
+  - The exception is the library function `WorldLibrary.mutate(WorldBox
+    storage)`. The fallback hashed `mutate((uint256))` (`be124f7d`), but
+    Solidity's library selector is `c10a0c2b`, from `mutate(WorldBox storage)`.
+    The migration therefore replaces a wrong fallback with the compiler's value.
+    No Lean file pins either value, and `ContractWorldSource.lean` elaborates
+    with 0 errors.
+- **Q2, upstream sources.** The sources for CreationTry{,IR} and
+  LibraryTry{,IR} were taken from the tracked
+  `tests/upstream/solidity-0.8.38.tar.gz`, so no network fetch was needed.
+  - Their sha256 equals the recorded `sourceSha256`: `574de0c7…` for
+    `create.sol`, `4376fed4…` for `try_catch_library_call.sol`.
+  - LibraryTry records an absolute `/workspace/solidity-lean/…` source path,
+    provided by a symlink to this checkout outside the repository.
+  - All four regenerate exact modulo H68 and were applied. Their
+    `solc_creation_try` and `solc_library_try` modules elaborate with 0 errors.
+- **Pins.** 29 hash-pin lines in 9 modules, with no stale value. The
+  shared-translator hash-only re-pin covers 15 entries and 179 occurrences
+  (`shared-translator-repins-h102.json`); no owner generator was run.
+- **Not rewritten.** `tests/contract-world-certificates/validation.json`
+  `baseline.fixtureSha256` keeps the old ContractWorld hash as a historical
+  baseline.
+- **Result.** All 46 modern fixtures now carry H68 metadata. Per-file
+  diagnostics on all 9 affected modules: 0 errors.
+- **Review** (read-only finder and skeptic in one pass): no blocking defect.
+  It confirmed the fixture, pin, re-pin and `--allow-drift` gating claims. It
+  raised the selector point, resolved by the check above. The receipt now
+  records `allowDrift` and the H102 authority at its top level. `--allow-drift`
+  does not distinguish added from removed keys; here all were additions.

@@ -1,6 +1,9 @@
 {
+ "allowDrift": [
+  "functionSelector"
+ ],
  "applied": true,
- "authority": "H68 option 1",
+ "authority": "H68 option 1; drift keys functionSelector allowed (H102)",
  "counts": {
   "current": 35,
   "drift": 7,
