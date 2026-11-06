@@ -1,8 +1,8 @@
 {
   "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
-  "adopted_master": "e2c8268ec917f4080d438da52e1adad7bb085029",
-  "pre_adoption_head": "462422d4f32af164a4e511e9f186eae25cbfa140",
-  "merge_commit": "e2c8268ec917f4080d438da52e1adad7bb085029",
+  "adopted_master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+  "pre_adoption_head": "8e5d497ebf4b24977976d66fd22b47be1f8c44f0",
+  "merge_commit": "9442e5b6d29b41a3b4bf8907705574b79fec79b4",
   "authorization": "Coordinator merged head as e2c8268ec and required rebase; H26/H10/H12 scopes unchanged.",
   "owned_proofs_unchanged": true,
   "preserved_work": "462422d4f32af164a4e511e9f186eae25cbfa140",
@@ -55,5 +55,5 @@
     "merge_commit": "3c9defec680288dfcba76337e84c18557041ab69"
   },
   "integration_method": "Published4095 baseline containing all42 Numeric proof modules; legacy merge_commit field records that checkpoint, not a new merge performed here.",
-  "baseline_reason": "Coordinator requested rebase onto reviewed e2c8268ec; previous local head is its ancestor;47ownedproofs unchanged. Two additive SAR APIs rechecked by fresh Constants build/audit,45owned+1importedcontinuity inventoried explicitly."
+  "baseline_reason": "Existing merge9442e5b6d of coordinator-published3883c64e found on resume and preserved. Constants sources/APIpins verified unchanged; held8e5work retained."
 }

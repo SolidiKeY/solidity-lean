@@ -3,7 +3,7 @@
 import copy,difflib,hashlib,json,pathlib,re,runpy,subprocess,sys,tempfile,os
 ROOT=pathlib.Path(__file__).resolve().parents[3]
 F=pathlib.Path(__file__).resolve().parent
-BASE='e2c8268ec917f4080d438da52e1adad7bb085029'
+BASE='3883c64ef750dd49acdb7d83adcdf0f101d42c6c'
 DEST='docs/module-map/frontend.md'
 INPUT_ROOT=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))
 INPUT_FOLDER=INPUT_ROOT/'tests/primitive-packets-1105/Constants'

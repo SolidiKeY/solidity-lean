@@ -1,7 +1,7 @@
 {
   "assignment": "G25-CONST-1105",
   "published_base": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
-  "owned_start": "e2c8268ec917f4080d438da52e1adad7bb085029",
+  "owned_start": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
   "modules": {
     "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
     "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
@@ -243,9 +243,9 @@
     "tests/sol-numeric-literals/evidence/integrationb86-committed.log": "0960084d6ccaf13d0bc93d405e2aac2a81601d142758c4425457f7a46b499d5f"
   },
   "published_delivery": {
-    "master": "e2c8268ec917f4080d438da52e1adad7bb085029",
-    "receipt": "e2c8268ec917f4080d438da52e1adad7bb085029",
-    "receipt_source": "Coordinator-reviewed publication; exact fetched commit verified",
+    "master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "receipt": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "receipt_source": "Coordinator-provided master; existing merge9442e5b6d preserved",
     "integrated": {
       "Solidity/Backend/PrimitivePackets/Constants/Agreement.lean": "2cfaadb8bf655ba6cb432ec7689a6c7d59476eb1d3890354c1fcc3fa1a296ec4",
       "Solidity/Backend/PrimitivePackets/Constants/Controls.lean": "fd8800797115a46d975313f371b9c86d3e8882cc920c2ca0616879508272c397",
@@ -254,11 +254,19 @@
       "Solidity/Backend/PrimitivePackets/Constants/Target.lean": "f5d69a578368b4c930ab483d6e3cfb5f631638b5d9130a75682cdb4d3fe7f68e"
     },
     "remaining": [],
-    "adoption": "47proofs unchanged;two additive SAR inputs rebuilt and all45owned+1importedcontinuity axioms freshly checked",
-    "receipt_master": "e2c8268ec917f4080d438da52e1adad7bb085029",
-    "merge_notice": "Coordinator notice e2c8268ec verified in origin/master"
+    "adoption": "Inherited merge preserved; fiveConstants sources and13API pins exact",
+    "receipt_master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "merge_notice": "Coordinator master3883c64ef750dd49acdb7d83adcdf0f101d42c6c"
   },
   "rebase": {
+    "mode": "integrated_checkpoint",
+    "target": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "pre_rebase_head": "462422d4f32af164a4e511e9f186eae25cbfa140",
+    "post_rebase_head": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "rebased_owned_start": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
+    "held_head_preserved": "8e5d497ebf4b24977976d66fd22b47be1f8c44f0"
+  },
+  "previous_rebase": {
     "mode": "integrated_checkpoint",
     "target": "e2c8268ec917f4080d438da52e1adad7bb085029",
     "pre_rebase_head": "462422d4f32af164a4e511e9f186eae25cbfa140",
@@ -266,16 +274,6 @@
     "rebased_owned_start": "e2c8268ec917f4080d438da52e1adad7bb085029",
     "proof_files_unchanged": 47,
     "backup_commit": "462422d4f32af164a4e511e9f186eae25cbfa140"
-  },
-  "previous_rebase": {
-    "mode": "integrated_checkpoint",
-    "target": "4095d848297d87e374b4f069692511cfe4a36cf7",
-    "pre_rebase_head": "f404c929af6b00201c3130b91dae4c811b606305",
-    "post_rebase_head": "4095d848297d87e374b4f069692511cfe4a36cf7",
-    "rebased_owned_start": "4095d848297d87e374b4f069692511cfe4a36cf7",
-    "backup": "/workspace/sol-numeric-literals-rebase-4095d848/preservation.json",
-    "proof_files_unchanged": 47,
-    "untracked_files_preserved": 10
   },
   "previous_inputs": {
     "Solidity/Backend/PrimitivePackets/CheckedAdd/Selected.lean": "9bb0b89b0be284b84f2befd8dd40f97c764bc3f76ebebbe1244339c38646c4bd",

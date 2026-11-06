@@ -20,6 +20,15 @@ def validate_inventory(rows):
   assert r['signature'] and r['kind'] not in ('axiom','opaque'),'invalid kernel declaration'
   assert not r['isUnsafe'] and not r['isPartial'],'unsafe or partial'
   assert set(r['axioms']) <= {'propext','Classical.choice','Quot.sound'},'unapproved axiom'
+def validate_helper_rename(historical,current):
+ before=M['continuity']['renamed_helper']['before'];after=M['continuity']['renamed_helper']['after']
+ old={row['name']:row for row in historical};new={row['name']:row for row in current}
+ assert before in old and after in new and before not in new and after not in old,'helper rename identity drift'
+ left=old[before];right=new[after]
+ assert set(left)==set(right),'helper fields differ'
+ for field in left:
+  if field!='name':assert left[field]==right[field],'helper rename changed '+field
+
 def validate_current_execution(row,kind):
  assert row['exit']==0 and not row['resource_stop'],'current execution failed'
  assert row['limits']==dict(memory_max=12884901888,memory_swap_max=0,lean_num_threads=1)
@@ -34,7 +43,7 @@ def validate_current_execution(row,kind):
  else:assert row['command']==['lake','build','Solidity.Backend.PrimitivePackets.Constants.Controls']
 
 def current_record(spec):
- path=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))/spec['path']
+ path=ROOT/spec['path']
  raw=path.read_bytes();assert hashlib.sha256(raw).hexdigest()==spec['sha256'],'current execution digest differs'
  return json.loads(raw)
 
@@ -108,6 +117,15 @@ def main():
  raw=subprocess.check_output(['git','show',history['commit']+':'+history['path']],cwd=ROOT)
  assert hashlib.sha256(raw).hexdigest()==history['sha256'],'historical inventory drift'
  historical=json.loads(raw)
+ validate_helper_rename(historical,actual)
+ renamed=M['continuity']['renamed_helper']['after']
+ original=next(row for row in actual if row['name']==renamed)
+ for field in original:
+  if field=='name':continue
+  bad=copy.deepcopy(actual);entry=next(row for row in bad if row['name']==renamed);entry[field]=None
+  try:validate_helper_rename(historical,bad)
+  except AssertionError:pass
+  else:raise AssertionError('helper field mutation accepted '+field)
  # Historical diagnostics stay bound to their original exact inventory.
  for label in ['source-diagnostics','selected-diagnostics','target-diagnostics','agreement-diagnostics','controls-final-diagnostics','axioms-diagnostics','rebase-axioms','integrated-axioms','latest-integration-axioms']:
   printed={}
@@ -125,12 +143,12 @@ def main():
  audit_row=current_record(current['gate']);validate_current_execution(audit_row,'audit')
  build_row=current_record(current['build']);validate_current_execution(build_row,'build')
  for kind,row in [('audit',audit_row),('build',build_row)]:
-  for field,value in [('exit',137),('resource_stop',True),('minimum_parent_headroom_bytes',0)]:
+  for field,value in [('exit',137),('resource_stop',True),('minimum_parent_headroom_bytes',0),('dependency_sources',{}),('proof_sources',{}),('command',[])]:
    bad=copy.deepcopy(row);bad[field]=value
    try:validate_current_execution(bad,kind)
    except AssertionError:pass
    else:raise AssertionError('current execution mutation accepted '+kind+'/'+field)
- audit=pathlib.Path(os.environ.get('SOL_NL_VALIDATION_INPUTS',str(ROOT)))/current['log']
+ audit=ROOT/current['log']
  text=audit.read_text();assert hashlib.sha256(text.encode()).hexdigest()==current['sha256'],'current audit digest differs'
  assert sha(F/'Audit.lean')==current['script_sha256'],'audit script drift'
  printed={name:{a.strip() for a in axioms.split(',') if a.strip()} for name,axioms in re.findall(r"'([^']+)' depends on axioms: \[([^\]]*)\]",text,re.S)}
@@ -164,5 +182,5 @@ def main():
  else:raise AssertionError('unlisted module mutation accepted')
  for p in M['modules']:
   text=(ROOT/p).read_text();assert not re.search(r'\b(sorry|admit|axiom|unsafe|native_decide|maxHeartbeats)\b',text),'forbidden proof token'
- print('PASS: five modules, 34 authored,45 owned kernel declarations and1 imported continuity entry, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds and eight mutation controls')
+ print('PASS: five modules, 34 authored,45 owned kernel declarations and1 imported continuity entry, all actual axiom prints/signatures, every positive/negative family, 13 pinned read-only inputs, resource bounds; eight prior acceptance, twelve execution and seven helper-field mutation controls')
 if __name__=='__main__':main()

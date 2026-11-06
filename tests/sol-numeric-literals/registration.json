@@ -1,5 +1,5 @@
 {
-  "adopted_master": "e2c8268ec917f4080d438da52e1adad7bb085029",
+  "adopted_master": "3883c64ef750dd49acdb7d83adcdf0f101d42c6c",
   "missing_root_imports": [],
   "module_map_rows_to_add": [
     "| `Backend/PrimitivePackets/Constants/Controls.lean` | Kernel integer-constant controls for every legal width/sign, endpoints, saved stack and invalid values. |",
@@ -86,8 +86,8 @@
     "Solidity.Frontend.NumericLiteralProofs.WordTable"
   ],
   "generated_root": "Solidity.lean",
-  "current_root_sha256": "f057659a9f182ffba5e11cc788c4d9a760600ce51478f85d0b9b6e8135024d79",
-  "desired_root_sha256": "f057659a9f182ffba5e11cc788c4d9a760600ce51478f85d0b9b6e8135024d79",
+  "current_root_sha256": "6f45c88cd68a1d4c38921b4d12188bd83fc18383db3e9fba976243a51e78336c",
+  "desired_root_sha256": "6f45c88cd68a1d4c38921b4d12188bd83fc18383db3e9fba976243a51e78336c",
   "root_patch_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "module_map_file": "docs/module-map/frontend.md",
   "module_map_rows": [
