@@ -1,0 +1,1224 @@
+{
+  "schema": 1,
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "classification_boundary": "Manual frozen-source premise classification and joint feasibility plans for twenty-five selected declarations; not Lean proofs or coverage promotion. All3281 rows remain uncovered.",
+  "hold": "H70: no Lean runs pending migrate-syntax/hash/source and migrate-root-gate timing disposition.",
+  "bundles": [
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_step",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "rc",
+        "rb",
+        "machine",
+        "result",
+        "flag",
+        "nonzero",
+        "cond",
+        "step"
+      ],
+      "shared_inputs": {
+        "rc": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.yes",
+        "rb": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.body",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial",
+        "result": "Solidity.Backend.StorageOps.LoopLawsControls.after",
+        "flag": "Evm.wmod 1"
+      },
+      "hypotheses": [
+        {
+          "name": "nonzero",
+          "classification": "per-input scalar feasibility",
+          "obligation": "flag.val ≠ 0"
+        },
+        {
+          "name": "cond",
+          "classification": "per-input execution equation",
+          "obligation": "rc machine = .ok { machine with stack := .val flag :: machine.stack } 0"
+        },
+        {
+          "name": "step",
+          "classification": "per-input execution equation",
+          "obligation": "rb machine = .ok result 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional single-turn success adapter; condition/body success are premises.",
+      "proof_plan": "After hold release: one existential tuple over rc/rb/machine/result/flag, followed by nonzero ∧ cond ∧ step; discharge on the SAME assignments using the frozen definitions. Do not prove three unrelated existential claims.",
+      "negative_candidate": "Changing only flag to Evm.wmod 0 must invalidate nonzero; malformed condition must invalidate cond.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.turn_exit",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "rc",
+        "rb",
+        "machine",
+        "cond"
+      ],
+      "shared_inputs": {
+        "rc": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.no",
+        "rb": "Evm.run Solidity.Backend.StorageOps.LoopLawsControls.pending",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [
+        {
+          "name": "cond",
+          "classification": "per-input execution equation",
+          "obligation": "rc machine = .ok { machine with stack := .val ⟨0,by decide⟩ :: machine.stack } 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional zero-guard exit adapter; rb is unrestricted.",
+      "proof_plan": "After hold release: one existential tuple rc/rb/machine with its sole cond equation. The chosen body faults if executed but is not run on this exit. Do not add a body-success premise.",
+      "negative_candidate": "Replacing only rc with Evm.run LoopLawsControls.yes invalidates the zero-condition equation.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LoopLaws.run_single_loop",
+      "path": "Solidity/Backend/StorageOps/LoopLaws.lean",
+      "binder_order": [
+        "cond",
+        "body",
+        "machine",
+        "result",
+        "finished"
+      ],
+      "shared_inputs": {
+        "cond": "Solidity.Backend.StorageOps.LoopLawsControls.no",
+        "body": "Solidity.Backend.StorageOps.LoopLawsControls.pending",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial",
+        "result": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [
+        {
+          "name": "finished",
+          "classification": "per-input whole-loop success feasibility",
+          "obligation": "Evm.loopRun (Evm.run cond) (Evm.run body) machine = .ok result 0"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Conditional execution wrapper. Whole-loop success is explicitly assumed; this theorem alone is not an independent termination/totality proof.",
+      "proof_plan": "After hold release: one existential tuple cond/body/machine/result plus finished, deriving finished with Evm.loopRun_of_iterN (n:=1) and the actual frozen zero-guard loopIterN equation. Source precedent: LoopLawsControls.single_loop_actual.",
+      "negative_candidate": "Positive candidate exits without body execution. It establishes no general nonzero-loop termination; nonzero-guard/body-fault cases require separate failure controls.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.read_total",
+      "path": "Solidity/Lowering/StorageOps/SourceWordRead.lean",
+      "binder_order": [
+        "E",
+        "Γ",
+        "frame",
+        "path",
+        "locals",
+        "state",
+        "_ordinary"
+      ],
+      "shared_inputs": {
+        "E": "Solidity.Lowering.StorageOps.SourceWordWriteControls.env",
+        "Γ": "[]",
+        "frame": "Solidity.Lowering.StorageOps.SourceWordWriteControls.frame",
+        "path": "Solidity.Lowering.StorageOps.SourceWordWriteControls.left",
+        "locals": ".nil (at Source.Locals E.layout [])",
+        "state": "Solidity.Lowering.StorageOps.SourceWordWriteControls.state"
+      },
+      "hypotheses": [
+        {
+          "name": "_ordinary",
+          "classification": "per-input raw environment observation",
+          "obligation": "E.transientRoot path = false"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Total outcome equation, including missing-cell failure; not an all-input success theorem.",
+      "proof_plan": "After hold release: one existential tuple E/Γ/frame/path/locals/state plus ordinary. Value and target machine/slot are NOT binders of this theorem. Keep both match branches in the frozen signature.",
+      "negative_candidate": "The same environment/frame with missing path is a candidate for the explicit missing-cell outcome; this does not falsify read_total or establish complete.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "initial-forall"
+    },
+    {
+      "theorem": "Solidity.Lowering.StorageOps.SourceWordRead.complete",
+      "path": "Solidity/Lowering/StorageOps/SourceWordRead.lean",
+      "binder_order": [
+        "E",
+        "Γ",
+        "frame",
+        "path",
+        "locals",
+        "state",
+        "_ordinary",
+        "value",
+        "_present",
+        "machine",
+        "slot",
+        "_coherent"
+      ],
+      "shared_inputs": {
+        "E": "Solidity.Lowering.StorageOps.SourceWordWriteControls.env",
+        "Γ": "[]",
+        "frame": "Solidity.Lowering.StorageOps.SourceWordWriteControls.frame",
+        "path": "Solidity.Lowering.StorageOps.SourceWordWriteControls.left",
+        "locals": ".nil (at Source.Locals E.layout [])",
+        "state": "Solidity.Lowering.StorageOps.SourceWordWriteControls.state",
+        "value": "Source.Val.int 11 (by decide)",
+        "machine": "Solidity.Lowering.StorageOps.SourceWordWriteControls.machine",
+        "slot": "Evm.Slot.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "_ordinary",
+          "classification": "per-input raw environment observation",
+          "obligation": "E.transientRoot path = false"
+        },
+        {
+          "name": "_present",
+          "classification": "per-input raw storage observation",
+          "obligation": "(state.ex.world.accounts frame.this).storage.read path = some value"
+        },
+        {
+          "name": "_coherent",
+          "classification": "per-input raw source/target observation",
+          "obligation": "value.word = some (machine.store.cells slot)"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "Parameters and dependent data are instantiated in one shared bundle; none of these five signatures takes a global premise structure.",
+      "role": "Source and fixed readCode target success derived from input observations; neither success is a premise. No arbitrary compiler selection contract occurs in the signature.",
+      "proof_plan": "After hold release: one existential tuple preserving dependent env/path/value/local/state types and the SAME frame/state/machine/slot, with ordinary ∧ present ∧ coherent together. Existing SourceWordReadControls.certificate applies complete using this shared tuple and rfl observations. New audit module must still prove the simultaneous bundle and be checked.",
+      "negative_candidate": "The stored read value is 11, NOT SourceWordWriteControls.value (53). Changing only slot to root 1 (17), or value to 53, invalidates coherent or present. A missing path invalidates present.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "initial-forall"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.ofSlot_toSlot",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "l",
+        "fits"
+      ],
+      "shared_inputs": {
+        "l": "Solidity.Storage.Loc.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit l"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Conditional inverse conversion, not source path liveness.",
+      "proof_plan": "After hold release: one l=root0 bundle with fits=True.intro, then instantiate the unchanged conversion theorem.",
+      "negative_candidate": "Key bounds concern hashed keys; root offsets and source liveness are not additional premises.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_ofSlot",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Total inverse conversion over intrinsic symbolic slots.",
+      "proof_plan": "After hold release: retain the slot data binder; there is no logical hypothesis to invent. Its fitting proof is constructed by the frozen expression, not supplied as a theorem premise.",
+      "negative_candidate": "Any malformed-address/source-liveness control belongs to a separate boundary; this theorem accepts intrinsic Evm.Slot values.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.toSlot_injective",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "a",
+        "b",
+        "fa",
+        "fb",
+        "equal"
+      ],
+      "shared_inputs": {
+        "a": "Solidity.Storage.Loc.root 0",
+        "b": "Solidity.Storage.Loc.root 0"
+      },
+      "hypotheses": [
+        {
+          "name": "fa",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit a"
+        },
+        {
+          "name": "fb",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit b"
+        },
+        {
+          "name": "equal",
+          "classification": "per-input converted-address equality",
+          "obligation": "toSlot a fa = toSlot b fb"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Injectivity under simultaneous fitting and equality.",
+      "proof_plan": "After hold release: one a/b tuple, fa/fb=True.intro and equal=rfl on the same root0. Do not inhabit equality independently of a/b.",
+      "negative_candidate": "Changing only b to root1 leaves fitting possible but invalidates equal.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.add_keysFit",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "l",
+        "fits",
+        "offset"
+      ],
+      "shared_inputs": {
+        "l": "Solidity.Storage.Loc.root 0",
+        "offset": "7"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit l"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Preserves key-word bounds through symbolic offset addition.",
+      "proof_plan": "After hold release: one l=root0/offset7 tuple with fits=True.intro. No offset bound or live-cell premise may be added.",
+      "negative_candidate": "This is not a numeric storage overflow or source liveness guarantee.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_read",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed symbolic readCode success; no execution-success premise.",
+      "proof_plan": "After hold release: data-only bundle with populated initial machine; target read is expected to push stored11 and preserve context. Kernel validation still required.",
+      "negative_candidate": "Future negative selection control: empty/reverting code cannot satisfy the same pushed-stack result. Do not change the frozen readCode statement.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_write",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "word",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "word": "Solidity.Backend.StorageOps.ProducerInterfaceControls.word",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed writeCode success; no execution-success premise.",
+      "proof_plan": "After hold release: data-only bundle uses bool-true word1 against populated root0=11, making the write observable; result must preserve full other context.",
+      "negative_candidate": "Future negative selection control: empty/reverting code cannot satisfy the changed-store result; no compiler parameter appears in this frozen theorem.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "dst",
+        "src",
+        "machine"
+      ],
+      "shared_inputs": {
+        "dst": "Evm.Slot.root 1",
+        "src": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Unconditional fixed current-store SLOAD/SSTORE copy success.",
+      "proof_plan": "After hold release: one dst/root1,src/root0,machine tuple; populated source11 and destination0 make runtime copy observable. No source payload oracle is supplied.",
+      "negative_candidate": "Future wrong-code/revert controls must use these same original inputs and expected destination11; no arbitrary compiler correctness is inferred.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.run_copy_self",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "slot",
+        "machine"
+      ],
+      "shared_inputs": {
+        "slot": "Evm.Slot.root 0",
+        "machine": "Solidity.Backend.StorageOps.LoopLawsControls.initial"
+      },
+      "hypotheses": [],
+      "global_premise_structures": [],
+      "global_data_note": "No global premise-structure argument. Data and local fitting/equality proofs, if present, must share the same tuple.",
+      "role": "Fixed self-copy preserves the entire intrinsic Machine.",
+      "proof_plan": "After hold release: slot/root0 and populated machine; no success premise. This identity alone is not a useful reject-empty-code negative.",
+      "negative_candidate": "Empty code can also preserve the machine here; use nonself run_copy and changing run_write for nontrivial selection controls. Always-revert still cannot yield ok machine.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.step_keysFit",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "n",
+        "G",
+        "A",
+        "B",
+        "step",
+        "base",
+        "fits"
+      ],
+      "shared_inputs": {
+        "n": "SC.n",
+        "G": "SC.G",
+        "A": "SC.A",
+        "B": "SC.B",
+        "base": "SC.base",
+        "step": ".key true"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit base"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Typed one-step key bounds, not successful source lookup.",
+      "proof_plan": "After hold release: one SC graph/mapping-to-bool step/base tuple; fits=True.intro. Boolean-key bound is built by the original theorem, not an added admission premise.",
+      "negative_candidate": "No liveness, source path compilation or hash injectivity may be inferred from this fitting result.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.path_keysFit",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "n",
+        "G",
+        "A",
+        "B",
+        "path",
+        "base",
+        "fits"
+      ],
+      "shared_inputs": {
+        "n": "SC.n",
+        "G": "SC.G",
+        "A": "SC.A",
+        "B": "SC.B",
+        "base": "SC.base",
+        "path": "SC.src"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit base"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Typed finite-path key bounds.",
+      "proof_plan": "After hold release: one nonempty SC.src path and root base with fitting proof; all implicit graph/type arguments remain the SC tuple.",
+      "negative_candidate": "An intrinsically typed path can fit while an independent read is invalid; fitting is not liveness.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.query_keysFit",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "n",
+        "G",
+        "A",
+        "query",
+        "base",
+        "fits"
+      ],
+      "shared_inputs": {
+        "n": "SC.n",
+        "G": "SC.G",
+        "A": "SC.A",
+        "base": "SC.base",
+        "query": "Query.word SC.src"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit base"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Query address key bounds.",
+      "proof_plan": "After hold release: reuse SC graph/source word query and base; retain the exact query.location result.",
+      "negative_candidate": "A supported query location does not itself establish representation or a successful query read.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.represented_read",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "n",
+        "G",
+        "A",
+        "value",
+        "queries",
+        "base",
+        "fits",
+        "store",
+        "machine",
+        "before",
+        "initial",
+        "query",
+        "member",
+        "word",
+        "read"
+      ],
+      "shared_inputs": {
+        "n": "SC.n",
+        "G": "SC.G",
+        "A": "SC.A",
+        "base": "SC.base",
+        "value": "SC.root",
+        "queries": "SC.queries",
+        "store": "SC.store",
+        "machine": "SC.target",
+        "query": "Query.word SC.src",
+        "word": "SC.one"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input key-word bound",
+          "obligation": "KeysFit base"
+        },
+        {
+          "name": "before",
+          "classification": "per-input representation certificate",
+          "obligation": "Represented value queries base store"
+        },
+        {
+          "name": "initial",
+          "classification": "per-input finite query/target agreement",
+          "obligation": "∀ q ∈ queries, machine.store.cells (toSlot (q.location base) (query_keysFit q base fits)) = encodeWord (store (q.location base))"
+        },
+        {
+          "name": "member",
+          "classification": "per-input query membership",
+          "obligation": "query ∈ queries"
+        },
+        {
+          "name": "read",
+          "classification": "per-input graph observation",
+          "obligation": "query.read value = some word"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "SLOAD success derived from one successful graph read plus input representation/agreement.",
+      "proof_plan": "After hold release: one SC tuple, singleton nonempty query list, before/initial/member/read jointly. Initial target cells encode this SAME symbolic store; derive agreement through ofSlot_toSlot. Source word is true/1.",
+      "negative_candidate": "Changing only machine source cell or word invalidates initial/read; compiler selection and ordinary Source path validation are absent.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.write_agreement",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "locations",
+        "fits",
+        "dst",
+        "dstFits",
+        "word",
+        "store",
+        "machine",
+        "before"
+      ],
+      "shared_inputs": {
+        "locations": "SC.locations",
+        "dst": "SC.dl",
+        "word": "SC.one",
+        "store": "SC.store",
+        "machine": "SC.target"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "per-input selected-location fitting family",
+          "obligation": "∀ l ∈ locations, KeysFit l"
+        },
+        {
+          "name": "dstFits",
+          "classification": "per-input destination key bound",
+          "obligation": "KeysFit dst"
+        },
+        {
+          "name": "before",
+          "classification": "per-input selected target/symbolic observation family",
+          "obligation": "∀ l (member : l ∈ locations), machine.store.cells (toSlot l (fits l member)) = encodeWord (store l)"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Post-write agreement for all selected locations; not a compiler or bytecode contract.",
+      "proof_plan": "After hold release: same SC two-location family, fitting proofs for bool keys0/1, destination dl initially0, input target derived from SC.store, write word1; preserve the source location observation.",
+      "negative_candidate": "A distinct target backing store breaks before. This theorem does not include an execution-success hypothesis or execution conclusion.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix",
+      "universal_conclusion_retained": true,
+      "retained_conclusion": "∀ l (member : l ∈ locations), post-write target/symbolic agreement, for EVERY member of this same locations list; not an existential selected l."
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.TargetOperations.represented_copy",
+      "path": "Solidity/Backend/StorageOps/TargetOperations.lean",
+      "binder_order": [
+        "n",
+        "N",
+        "L",
+        "R",
+        "G",
+        "A",
+        "p",
+        "H",
+        "P",
+        "locations",
+        "run",
+        "store",
+        "numeric",
+        "transport",
+        "root",
+        "result",
+        "dst",
+        "src",
+        "value",
+        "source",
+        "performed",
+        "queries",
+        "base",
+        "baseFits",
+        "represented",
+        "supported",
+        "apart",
+        "nonalias",
+        "sourceCovered",
+        "targetCovered",
+        "queryCovered",
+        "fitting",
+        "target",
+        "initial"
+      ],
+      "shared_inputs": {
+        "n": "SC.n",
+        "N": "SC.N",
+        "L": "SC.L",
+        "R": "SC.R",
+        "G": "SC.G",
+        "A": "SC.A",
+        "p": "SC.p",
+        "H": "SC.H",
+        "P": "SC.P",
+        "locations": "SC.locations",
+        "store": "SC.store",
+        "numeric": "SC.numeric",
+        "root": "SC.root",
+        "result": "SC.result",
+        "dst": "SC.dst",
+        "src": "SC.src",
+        "queries": "SC.queries",
+        "base": "SC.base",
+        "value": "true",
+        "target": "SC.target"
+      },
+      "hypotheses": [
+        {
+          "name": "run",
+          "classification": "selected finite-run premise structure; mixed quantifier scope",
+          "obligation": "FiniteRun N L R H P locations"
+        },
+        {
+          "name": "transport",
+          "classification": "per-input selected numeric/symbolic observation",
+          "obligation": "Transport N H locations store numeric"
+        },
+        {
+          "name": "source",
+          "classification": "per-input graph read",
+          "obligation": "root.find src = some (.prim value)"
+        },
+        {
+          "name": "performed",
+          "classification": "per-input graph operation success",
+          "obligation": "recursiveCopyAt root dst src = some result"
+        },
+        {
+          "name": "baseFits",
+          "classification": "per-input base key bound",
+          "obligation": "KeysFit base"
+        },
+        {
+          "name": "represented",
+          "classification": "per-input nonempty query representation",
+          "obligation": "Represented root (.word src :: queries) base store"
+        },
+        {
+          "name": "supported",
+          "classification": "per-input destination-path support",
+          "obligation": "PathSupported dst"
+        },
+        {
+          "name": "apart",
+          "classification": "per-input graph separation family",
+          "obligation": "∀ q ∈ queries, q.apart dst"
+        },
+        {
+          "name": "nonalias",
+          "classification": "per-input symbolic address separation family",
+          "obligation": "∀ q ∈ queries, q.location base ≠ pathLoc dst base"
+        },
+        {
+          "name": "sourceCovered",
+          "classification": "per-input source footprint membership",
+          "obligation": "pathLoc src base ∈ locations"
+        },
+        {
+          "name": "targetCovered",
+          "classification": "per-input destination footprint membership",
+          "obligation": "pathLoc dst base ∈ locations"
+        },
+        {
+          "name": "queryCovered",
+          "classification": "per-input query footprint family",
+          "obligation": "∀ q ∈ queries, q.location base ∈ locations"
+        },
+        {
+          "name": "fitting",
+          "classification": "per-input selected key-bound family",
+          "obligation": "∀ l ∈ locations, KeysFit l"
+        },
+        {
+          "name": "initial",
+          "classification": "per-input selected target/symbolic observation family",
+          "obligation": "∀ l (member : l ∈ locations), target.store.cells (toSlot l (fitting l member)) = encodeWord (store l)"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Fixed target copy composed with graph operation, finite-run transport and retained query observations.",
+      "proof_plan": "After hold release: prove all fourteen premises on one SC tuple. Source keytrue and destination keyfalse differ; query list is NONEMPTY and observes source. Source word1 copies into destination0. Prove performed for getD-defined result instead of assuming its fallback succeeds. N8/L1/R1 hash maps entry00 to2, entry10 to4 and all other preimages0; prove every FiniteRun field, including global hash bound, disjoint selected regions, recursive coverage and location bounds. Prove all query and target agreements jointly.",
+      "negative_candidate": "Constant hash0 cannot replace SC.H: root separation and region disjointness may fail. Empty queries/self-copy are not substituted for this selected nonempty distinct-address plan.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "quantified_fields": {
+        "run.hash_bound": "∀ pre, H pre < N, including preimages outside P",
+        "run.regions": "RegionsDisjoint N L H (List.range R) P",
+        "run.bounded": "∀ l ∈ locations, Loc.Bounded L R l",
+        "run.covered": "∀ l ∈ locations, ∀ pre ∈ Loc.pres N H l, pre ∈ P"
+      },
+      "retained_conclusion": "All five let-bindings d/s/afterStore/afterNumeric/afterTarget and all four conjuncts remain in the frozen attached signature.",
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolve_bounded",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "L",
+        "R",
+        "ty",
+        "base",
+        "address",
+        "path",
+        "offset",
+        "fits",
+        "placed",
+        "accepted"
+      ],
+      "shared_inputs": {
+        "L": "LS.L",
+        "R": "LS.R",
+        "ty": "LS.ty",
+        "base": "LS.base",
+        "address": "Solidity.Storage.Loc.root 1",
+        "path": "[.field 1]",
+        "offset": "0"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "layout-wide bound at selected L",
+          "obligation": "ty.Fits L"
+        },
+        {
+          "name": "placed",
+          "classification": "per-input root placement family",
+          "obligation": "Placed L R ty base"
+        },
+        {
+          "name": "accepted",
+          "classification": "per-input successful path/offset resolution",
+          "obligation": "resolve ty base path offset = some address"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Bounded selected resolved address, not a success producer for every request.",
+      "proof_plan": "After hold release: two-word struct LS.ty at root0 with L1/R2, nonempty field1 path offset0. Prove fits, placement of both in-place words and the same accepted root1 equation.",
+      "negative_candidate": "Offset1 at scalar endpoint, or missing field2, must fail accepted; no failed request is dropped.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolveMany_length",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "ty",
+        "base",
+        "requests",
+        "addresses",
+        "accepted"
+      ],
+      "shared_inputs": {
+        "ty": "LS.ty",
+        "base": "LS.base",
+        "requests": "LS.repeated",
+        "addresses": "LS.repeated_addresses"
+      },
+      "hypotheses": [
+        {
+          "name": "accepted",
+          "classification": "per-input all-or-failure resolution",
+          "obligation": "resolveMany ty base requests = some addresses"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Preserves request count including duplicates once resolution succeeds.",
+      "proof_plan": "After hold release: three requests field0/field0/field1 resolve to root0/root0/root1 in order; retain duplicate request rather than normalize it away.",
+      "negative_candidate": "One invalid request makes the whole resolveMany fail, rather than filtering it to a shorter successful result.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolveMany_bounded",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "L",
+        "R",
+        "ty",
+        "base",
+        "fits",
+        "placed",
+        "requests",
+        "addresses",
+        "accepted"
+      ],
+      "shared_inputs": {
+        "L": "LS.L",
+        "R": "LS.R",
+        "ty": "LS.ty",
+        "base": "LS.base",
+        "requests": "LS.repeated",
+        "addresses": "LS.repeated_addresses"
+      },
+      "hypotheses": [
+        {
+          "name": "fits",
+          "classification": "layout-wide bound at selected L",
+          "obligation": "ty.Fits L"
+        },
+        {
+          "name": "placed",
+          "classification": "per-input root placement family",
+          "obligation": "Placed L R ty base"
+        },
+        {
+          "name": "accepted",
+          "classification": "per-input all-or-failure resolution",
+          "obligation": "resolveMany ty base requests = some addresses"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Selected family boundedness under same layout/placement and accepted list.",
+      "proof_plan": "After hold release: reuse the SAME nonempty repeated request/address list and L1/R2 layout as the other resolution plan; prove all three premises together.",
+      "negative_candidate": "Bounds for a separate accepted list cannot replace this list-specific accepted premise.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix",
+      "universal_conclusion_retained": true,
+      "retained_conclusion": "∀ address ∈ addresses, address.Bounded L R for the ENTIRE same resolved addresses list, including repetitions."
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.mem_runPreimages",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "N",
+        "hash",
+        "addresses",
+        "address",
+        "pre",
+        "access",
+        "hashed"
+      ],
+      "shared_inputs": {
+        "N": "8",
+        "hash": "fun _ => 0",
+        "addresses": "[Solidity.Storage.Loc.hash 0 (.root 0) 0]",
+        "address": "Solidity.Storage.Loc.hash 0 (.root 0) 0",
+        "pre": "Solidity.Storage.Pre.entry 0 0"
+      },
+      "hypotheses": [
+        {
+          "name": "access",
+          "classification": "per-input selected access membership",
+          "obligation": "address ∈ addresses"
+        },
+        {
+          "name": "hashed",
+          "classification": "per-input recursive preimage membership",
+          "obligation": "pre ∈ address.pres N hash"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Preserves occurrence membership in flattened recursive preimages; no separation or hash bound assumed.",
+      "proof_plan": "After hold release: one nonempty hashed address and its actual entry00 preimage, not an empty-list witness. Prove access and hashed using the SAME N/hash/address.",
+      "negative_candidate": "Omitting the hashed address from addresses invalidates access; an unrelated preimage invalidates hashed.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolved_families_commute",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "n",
+        "N",
+        "L",
+        "R",
+        "G",
+        "E",
+        "hash",
+        "ty",
+        "base",
+        "hH",
+        "hL",
+        "hR",
+        "fits",
+        "placed",
+        "left",
+        "right",
+        "a",
+        "b",
+        "leftAccepted",
+        "rightAccepted",
+        "regions",
+        "separate",
+        "slots",
+        "f",
+        "g"
+      ],
+      "shared_inputs": {
+        "n": "LS.n",
+        "N": "LS.N",
+        "L": "LS.L",
+        "R": "LS.R",
+        "G": "LS.G",
+        "E": "LS.E",
+        "hash": "LS.hash",
+        "ty": "LS.ty",
+        "base": "LS.base",
+        "left": "LS.left",
+        "right": "LS.right",
+        "a": "LS.a",
+        "b": "LS.b",
+        "slots": "LS.slots",
+        "f": "LS.f",
+        "g": "LS.g"
+      },
+      "hypotheses": [
+        {
+          "name": "hH",
+          "classification": "global function-range bound at selected N/hash",
+          "obligation": "∀ pre, hash pre < N"
+        },
+        {
+          "name": "hL",
+          "classification": "numeric region bound",
+          "obligation": "L ≤ N"
+        },
+        {
+          "name": "hR",
+          "classification": "numeric root bound",
+          "obligation": "R ≤ N"
+        },
+        {
+          "name": "fits",
+          "classification": "layout-wide bound at selected L",
+          "obligation": "ty.Fits L"
+        },
+        {
+          "name": "placed",
+          "classification": "per-input root placement family",
+          "obligation": "Placed L R ty base"
+        },
+        {
+          "name": "leftAccepted",
+          "classification": "per-input complete left resolution",
+          "obligation": "resolveMany ty base left = some a"
+        },
+        {
+          "name": "rightAccepted",
+          "classification": "per-input complete right resolution",
+          "obligation": "resolveMany ty base right = some b"
+        },
+        {
+          "name": "regions",
+          "classification": "per-input combined recursive preimage separation",
+          "obligation": "RegionsDisjoint N L hash (List.range R) (runPreimages N hash (a ++ b))"
+        },
+        {
+          "name": "separate",
+          "classification": "per-input cross-family symbolic disjointness",
+          "obligation": "∀ x ∈ a, ∀ y ∈ b, x ≠ y"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Commutation including possible effect failures; no success premise for either modifyMany.",
+      "proof_plan": "After hold release: both operation families NONEMPTY, resolving field0/root0 and field1/root1. Both partial effects succeed on LS.slots (root0 false becomes true, root1 true becomes false) as an additional positive plan, without adding that success to the frozen theorem. Root-only preimage list is empty because these actual addresses hash nothing. Still prove global hash range0<8, L1/R2 bounds, layout fits/placement, both resolutions, regions and separate jointly.",
+      "negative_candidate": "Replacing right with left invalidates separate; f=true/g=false on an overlapping slot is the planned noncommutation control. A failing effect must retain matching failure orders, not be excluded.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "quantified_fields": {
+        "hH": "∀ pre, hash pre < N; not restricted to runPreimages"
+      },
+      "binder_order_scope": "declaration-prefix"
+    },
+    {
+      "theorem": "Solidity.Backend.StorageOps.LayoutAccess.resolved_family_outside",
+      "path": "Solidity/Backend/StorageOps/LayoutAccess.lean",
+      "binder_order": [
+        "n",
+        "N",
+        "L",
+        "R",
+        "G",
+        "E",
+        "hash",
+        "ty",
+        "base",
+        "hH",
+        "hL",
+        "hR",
+        "fits",
+        "placed",
+        "requests",
+        "addresses",
+        "accepted",
+        "queryPath",
+        "queryOffset",
+        "query",
+        "queryAccepted",
+        "regions",
+        "outside",
+        "slots",
+        "result",
+        "effect",
+        "performed"
+      ],
+      "shared_inputs": {
+        "n": "LS.n",
+        "N": "LS.N",
+        "L": "LS.L",
+        "R": "LS.R",
+        "G": "LS.G",
+        "E": "LS.E",
+        "hash": "LS.hash",
+        "ty": "LS.ty",
+        "base": "LS.base",
+        "requests": "LS.left",
+        "addresses": "LS.a",
+        "queryPath": "[.field 1]",
+        "queryOffset": "0",
+        "query": "Solidity.Storage.Loc.root 1",
+        "slots": "LS.slots",
+        "result": "LS.result",
+        "effect": "LS.f"
+      },
+      "hypotheses": [
+        {
+          "name": "hH",
+          "classification": "global function-range bound at selected N/hash",
+          "obligation": "∀ pre, hash pre < N"
+        },
+        {
+          "name": "hL",
+          "classification": "numeric region bound",
+          "obligation": "L ≤ N"
+        },
+        {
+          "name": "hR",
+          "classification": "numeric root bound",
+          "obligation": "R ≤ N"
+        },
+        {
+          "name": "fits",
+          "classification": "layout-wide bound at selected L",
+          "obligation": "ty.Fits L"
+        },
+        {
+          "name": "placed",
+          "classification": "per-input root placement family",
+          "obligation": "Placed L R ty base"
+        },
+        {
+          "name": "accepted",
+          "classification": "per-input whole family resolution",
+          "obligation": "resolveMany ty base requests = some addresses"
+        },
+        {
+          "name": "queryAccepted",
+          "classification": "per-input outside query resolution",
+          "obligation": "resolve ty base queryPath queryOffset = some query"
+        },
+        {
+          "name": "regions",
+          "classification": "per-input family-plus-query preimage separation",
+          "obligation": "RegionsDisjoint N L hash (List.range R) (runPreimages N hash (addresses ++ [query]))"
+        },
+        {
+          "name": "outside",
+          "classification": "per-input query exclusion from actual resolved family",
+          "obligation": "query ∉ addresses"
+        },
+        {
+          "name": "performed",
+          "classification": "per-input family operation success",
+          "obligation": "modifyMany effect (addresses.map (Solidity.Storage.Loc.word N hash)) slots = some result"
+        }
+      ],
+      "global_premise_structures": [],
+      "global_data_note": "No universal compiler producer. Selected shared data/certificates must be instantiated jointly; quantified hash bounds remain universal over preimages, not merely selected lists.",
+      "role": "Outside query observation after one actual successful family; performed is a success hypothesis.",
+      "proof_plan": "After hold release: nonempty field0/root0 family writes true, outside query field1/root1 was true and remains true. Derive accepted, queryAccepted, bounds, global hash range, exact combined preimage regions, outside and performed together. The getD-defined LS.result needs an actual success proof; fallback must not be used to manufacture one.",
+      "negative_candidate": "Query field0 violates outside. An always-failing effect invalidates performed, so this conditional theorem alone cannot rule out an always-failing producer.",
+      "status": "source-classified; Lean witness blocked",
+      "counts_as_verified_witness": false,
+      "quantified_fields": {
+        "hH": "∀ pre, hash pre < N; all preimages"
+      },
+      "binder_order_scope": "declaration-prefix"
+    }
+  ],
+  "name_boundary": "Fully qualified names are read from the frozen explicit namespaces; Lean elaboration/name verification remains held.",
+  "expected_bundle_count": 25,
+  "planned_definitions": {
+    "boundary": "SC and LS below are local plan aliases, not existing Lean declarations or checked definitions. Every referenced property must be proved jointly after hold release.",
+    "SC": {
+      "n": "0",
+      "G": "Solidity.Backend.StorageOps.ProducerInterfaceControls.graph",
+      "A": ".mapping .bool (.prim .bool)",
+      "p": ".bool",
+      "B": ".prim .bool",
+      "src": ".cons (.key true) .nil",
+      "dst": ".cons (.key false) .nil",
+      "base": "Solidity.Storage.Loc.root 0",
+      "root": ".mapping (fun k => .present (.prim k))",
+      "result": "(recursiveCopyAt SC.root SC.dst SC.src).getD SC.root",
+      "one": "PrimTy.toWord (p:=.bool) true",
+      "zero": "PrimTy.toWord (p:=.bool) false",
+      "sl": "Solidity.Storage.Loc.hash 1 SC.base 0",
+      "dl": "Solidity.Storage.Loc.hash 0 SC.base 0",
+      "store": "fun l => if l = SC.sl then SC.one else SC.zero",
+      "target": "{ LoopLawsControls.initial with store := ⟨fun s => TargetOperations.encodeWord (SC.store (Solidity.Storage.ofSlot s))⟩ }",
+      "N": "8",
+      "L": "1",
+      "R": "1",
+      "H": "fun p => if p = .entry 0 0 then 2 else if p = .entry 1 0 then 4 else 0",
+      "P": "[.entry 0 0, .entry 1 0]",
+      "locations": "[SC.sl, SC.dl]",
+      "numeric": "fun a => if a = 4 then SC.one else SC.zero",
+      "queries": "[Query.word SC.src]"
+    },
+    "LS": {
+      "n": "0",
+      "G": "Solidity.Backend.StorageOps.ProducerInterfaceControls.graph",
+      "E": ".prim .bool",
+      "N": "8",
+      "L": "1",
+      "R": "2",
+      "hash": "fun _ => 0",
+      "ty": "Solidity.Storage.STy.strct [.word, .word]",
+      "base": "Solidity.Storage.Loc.root 0",
+      "left": "[([.field 0], 0)]",
+      "right": "[([.field 1], 0)]",
+      "a": "[Solidity.Storage.Loc.root 0]",
+      "b": "[Solidity.Storage.Loc.root 1]",
+      "slots": "fun k => .present (.prim (decide (k = 1)))",
+      "f": "fun _ _ => some (.prim true)",
+      "g": "fun _ _ => some (.prim false)",
+      "repeated": "[([.field 0], 0), ([.field 0], 0), ([.field 1], 0)]",
+      "repeated_addresses": "[.root 0, .root 0, .root 1]",
+      "result": "(modifyMany LS.f [0] LS.slots).getD LS.slots"
+    }
+  }
+}
