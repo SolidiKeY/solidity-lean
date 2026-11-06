@@ -71,8 +71,8 @@ theorem zero_timeout (pipeline : Roadmap.Pipeline) (static : Bool) :
       (.error .timeout,(Source.L0 E,opening)) := rfl
 
 theorem complete_vector :
-    (afterArgs.ex.world.accounts sender).balance.val = 93 ∧
-    (afterArgs.ex.world.accounts self).balance.val = 7 ∧
+    (afterArgs.ex.world.accounts sender).balance = 93 ∧
+    (afterArgs.ex.world.accounts self).balance = 7 ∧
     (afterArgs.ex.world.accounts self).code = some 0 ∧
     (afterArgs.ex.world.accounts self).nonce = 1 ∧
     (afterArgs.ex.world.accounts self).storage.read saved = some (.bool true) ∧

@@ -1,0 +1,18 @@
+{
+  "commit": "e5934822410d79093183ee16cae566d9e5616048",
+  "files": {
+    "Solidity/Roadmap/V16/CalculusConsumer.lean": "720816ff9c92de7fe720c25a18042a1565bc580c3564ef7e44a4cc05a9fa30d2",
+    "Solidity/Roadmap/V16/LoopControls.lean": "ee343592abff53fa80b38d55d6e1166ec9bd504bcb359bc0aa65257d38870526",
+    "docs/README.md": "0d798180131216405555d5dc82b810ba2f2fbb1d8c95892329ff117a97b1158a",
+    "docs/feature-work/roadmap-v16-correctness.md": "1bd19c0b56bf22242f01ce66504cfe256d4c01c75b1f44ee2ef2b0142730bd74",
+    "docs/module-map.md": "cf0954c3749c70b5e354f943d73293a44b77bc18ada1d8f42d509861036a8f78",
+    "scripts/roadmap-v16-parallel-interface.py": "7e556c72fbc3473003e852f55e8970c270b8b4ad1357ed79ab2249a71b968250",
+    "tests/roadmap-v16/CalculusControls.lean": "ca87bc4456f4885a15405cfa4989ccfd4bed54b581f2a2afa5330abb4736cf2a",
+    "tests/roadmap-v16/parallel-premises.json": "bbeb698364f92833b4b38f03299fe5286cefd32bf12a973aedf72f1282ee3b37"
+  },
+  "archiveSha256": "1164b3de72c26e28c8b78843e151ff23e17ba8046a18de5e4682d472afcee60a",
+  "ownershipSnapshot": {
+    "path": "/workspace/h55-ownership-after.json",
+    "sha256": "f4baf22b3eac583398a90c021d91600c2c7074f7ff8e3b6ee328a373fefe5b73"
+  }
+}

@@ -1,0 +1,13 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.checked_cons": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3EffectfulSourceCheck.lean:Solidity.Backend.InternalFlow.RuntimeFrame.EffectfulSourceCheck.write_complete": [
+  "propext"
+ ]
+}

@@ -1,0 +1,25 @@
+{
+ "Solidity/Yul/Compilation/GuardedFor.lean:Solidity.Yul.Compilation.GuardedFor.body_completed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedFor.lean:Solidity.Yul.Compilation.GuardedFor.lower": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedFor.lean:Solidity.Yul.Compilation.GuardedFor.machine": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedFor.lean:Solidity.Yul.Compilation.GuardedFor.source_nonzero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/GuardedFor.lean:Solidity.Yul.Compilation.GuardedFor.source_to_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -22,7 +22,7 @@ theorem checked_builtin_statement (res : Resolution) (G : Glob res.env) (c : Str
     (F : Fr) (hF : F.contract = c) (n nps : Nat) (ph : Option (Ph res.env))
     {R : List STy} {M : Bool} {k : SCtx} {Γ : RCtx} {ts : List STy}
     (b : Builtin) (args : RArgs res.env Γ ts) (t : STy)
-    (ht : b.callTy res.env.isBase ts = some t)
+    (ht : b.callTy res.env.isBase res.env.mapFree ts = some t)
     (hf : BuiltinFragment (fun d => d ∈ Solidity.Lowering.P9.WholeProgram.functions res) b args t)
     (l : Locals res.env.layout Γ) :
     NS (execS G F (n+1) nps ph
