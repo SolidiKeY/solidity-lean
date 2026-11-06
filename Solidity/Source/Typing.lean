@@ -774,14 +774,6 @@ def STy.decodable (E : Env) : STy → Bool
   | .array .memory σ none => σ.decodableElem E
   | τ => τ.decodableElem E
 
-/-- A reference type moved to a location (nested arrays with it). -/
-def STy.withLoc (l : DataLoc) : STy → STy
-  | .bytes _ => .bytes l
-  | .string _ => .string l
-  | .array _ τ n => .array l (τ.withLoc l) n
-  | .struct _ d => .struct l d
-  | τ => τ
-
 /-- A copy into storage (`s = m`): the source is the target's type in
 `memory` or `calldata`, or a string literal into `bytes`/`string`
 `storage` (solc copies member by member; S01's `assign` covers pointer

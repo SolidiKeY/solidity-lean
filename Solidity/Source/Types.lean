@@ -201,12 +201,24 @@ def STy.sameList : List STy → List STy → Bool
 
 end
 
+/-- A reference type moved to a location (nested arrays with it). -/
+def STy.withLoc (l : DataLoc) : STy → STy
+  | .bytes _ => .bytes l
+  | .string _ => .string l
+  | .array _ τ n => .array l (τ.withLoc l) n
+  | .struct _ d => .struct l d
+  | τ => τ
+
 /-- solc's location rule for an implicit reference conversion: a copy to
 `memory`, or the same location (a pointer). -/
 def DataLoc.implicit (l l' : DataLoc) : Bool := l' == .memory || l == l'
 
 /-- **Implicit conversion** between types, given the inheritance relation
-on contracts (`isBase d d'`: `d'` is `d` or one of its bases). -/
+on contracts (`isBase d d'`: `d'` is `d` or one of its bases). An array's
+element types are compared at the target's location (`STy.withLoc`, as
+`STy.copiesTo` does): the location change of a nested copy to `memory`
+(`uint256[2][] calldata` to `uint256[2][] memory`) is implicit, as in solc
+(user decision 2026-11-06). -/
 def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Bool
   | .int t, .int t' => t.implicit t'
   | .bool, .bool => true
@@ -217,7 +229,7 @@ def STy.implicit (isBase : DeclName → DeclName → Bool) : STy → STy → Boo
   | .enum d, .enum d' | .udvt d, .udvt d' => d == d'
   | .contract d, .contract d' => isBase d d'
   | .bytes l, .bytes l' | .string l, .string l' => l.implicit l'
-  | .array l τ n, .array l' τ' n' => τ.same τ' && n == n' && l.implicit l'
+  | .array l τ n, .array l' τ' n' => (τ.withLoc l').same τ' && n == n' && l.implicit l'
   | .struct l d, .struct l' d' => d == d' && l.implicit l'
   | .mapping k v, .mapping k' v' => k.same k' && v.same v'
   | .fn e ps rs m, .fn e' ps' rs' m' => e == e' && STy.sameList ps ps' && STy.sameList rs rs' && m == m'
