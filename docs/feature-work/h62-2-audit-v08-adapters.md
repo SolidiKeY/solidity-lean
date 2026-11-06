@@ -222,3 +222,56 @@ original.patch, checkpoint.bundle, handoff.md, evidence.tar.gz, evidence-files.s
 checksums.sha256 and export.json with full committed head/base and hashes. Previous
 checkpoint exports are preserved. The current full head is recorded in export.json
 rather than introducing a self-referential commit hash into this document.
+
+## H70 continuation — frozen proof-field/predicate census
+
+Starting head: 373ead4dc06fb853201a0ac80d1127379121c83b. Same base/branch,
+master v4.24.0 and all original limits retained. No original interface edited.
+The full goal and all four checkpoints remain unfinished.
+
+H70 routes PREMISE-P8-001 to
+`solidity-v12-v17-20261031/v16-correctness-transfer`.
+Current-owner delivery is pending for
+`claudecloud/moved2-20261105/vy5-composition` and
+`claudecloud/moved3-20261105/v07-lowering`.
+Host relay journals determine delivery acceptance; this worker has no such
+acceptance evidence. Routing is not owner agreement or producer validation.
+Wait remains V16/current Claude P8 producer on
+DeclarationGraphAdmission.Producer.base.failures for CreationPremises,
+LibraryPremises and global SourceSpec joint witnesses. This routing update
+supersedes earlier destination hints, without transferring ownership.
+
+Two additive exporters now inventory their unchanged defining modules:
+
+| Module | Declarations | Proof fields | Predicate definitions | Carriers |
+|---|---:|---:|---:|---:|
+| Solidity.Lowering.P8.FrozenInterface | 157 | 14 | 0 | 8 |
+| Solidity.Backend.InternalFlow.RuntimeFrameInterfaceV1 | 137 | 24 | 7 | 7 |
+
+All 294 records remain PENDING, including theorem/generated/support declarations.
+No new witness, impossibility classification or global carrier inhabitant is
+claimed. Existing coverage remains 13 source theorems plus four additional
+coherent proof fields; the broader inventory is still incomplete.
+
+Raw types, universes, original kinds, definition values and carrier-field names
+are retained. Field roles derive from structure field metadata, not name guesses
+or theorem-keyword scanning. Defining module is not producer ownership.
+The inventory includes P8 FailureProjection/SourceRealization/Producer obligations
+and runtime ReturnClaim/BareRevertClaim/RealizableEntry and Pending carriers.
+
+Commands and gates: bounded_prerequisite.py --audit-module with
+P8StatementCensus.lean and RuntimeFrameStatementCensus.lean; exact per-file Lean
+commands, versions, exits, digests and timings are in h70-p8-census/results.json
+and h70-runtime-census/results.json under the existing evidence root. Both runs
+passed with final source-stability manifests; verified reuse is labelled.
+h70_inventory.py --repo /workspace/solidity-lean --evidence
+/workspace/h62-audit-v08-adapters-evidence --out
+/workspace/h62-audit-v08-adapters-evidence/h70-inventory.json passes inventory-only
+reconciliation. No full-root/runtime/performance gate pass is added.
+
+Independent finder and skeptic reviewed read-only without Lean/server or edits.
+They confirmed correct defining-module targets and no satisfiability/delivery
+inference; final review evidence is h70-reviews.json. Export under
+/workspace/h62-audit-v08-adapters-export/h70 includes the original base-to-head
+patch, handoff, bundle, inventory archive and SHA256 manifest. Continue the
+remaining all-kind census while the ordinary global producer witnesses wait.
