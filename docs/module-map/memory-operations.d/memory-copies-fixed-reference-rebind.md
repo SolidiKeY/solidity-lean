@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/FixedReferenceRebindInterface.lean` | Contract only for checked fixed-reference local rebinding with intrinsic TRun/post-StateRepr, old-object preservation and machine capacity refusal. |
