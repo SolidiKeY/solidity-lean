@@ -1,0 +1,2 @@
+| `Backend/AbiWorld/PublicCompilerTotal.lean` | H62/H69 compiler-success theorem: the public `Compiler.compile` accepts every program of an independently stated alias-free scalar domain through its core branch, and `Compilation.Agrees` holds there. |
+| `Backend/AbiWorld/PublicCompilerTotalControls.lean` | Inhabited loop/branch/storage/call program accepted by the theorem and by kernel evaluation; signed-bitwise and self-balance refusals outside the domain. |
