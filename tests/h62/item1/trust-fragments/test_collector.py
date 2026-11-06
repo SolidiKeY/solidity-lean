@@ -62,7 +62,7 @@ class CollectorTests(unittest.TestCase):
                             candidate.replace(b'``propext', b'``propExt', 1)]:
                 with self.subTest(altered=altered[:80]), self.assertRaises(ValueError):
                     MIGRATION.accept(lanes, altered)
-            with mock.patch.object(COLLECTOR, 'collect_lanes', return_value=base):
+            with mock.patch.object(COLLECTOR, 'collect_lane_snapshot', return_value=base):
                 with self.assertRaisesRegex(ValueError, 'cover exactly'):
                     MIGRATION.accept(lanes)
             bad_patch = root / 'invalid.patch'
@@ -72,7 +72,8 @@ class CollectorTests(unittest.TestCase):
                     MIGRATION.accept(lanes)
             installed = root / 'installed.lean'
             installed.write_bytes(candidate)
-            with mock.patch.object(COLLECTOR, 'AUDIT', installed):
+            with mock.patch.object(COLLECTOR, 'AUDIT', installed), \
+                 mock.patch.object(MIGRATION, 'read_commit_audit', return_value=candidate):
                 with self.assertRaisesRegex(ValueError, 'prior commit'):
                     MIGRATION.accept(lanes, require_installed=True)
                 with self.assertRaisesRegex(ValueError, 'canonical lane directory'):
@@ -94,6 +95,109 @@ class CollectorTests(unittest.TestCase):
                 installed.write_bytes(candidate + b'-- changed\n')
                 with self.assertRaises(ValueError):
                     MIGRATION.accept(lanes)
+
+    def test_snapshot_order_preserves_owner_then_filename_sort(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        files = {
+            'a-b/z.json': json.dumps({'imports': [], 'headlines': ['Solidity.Fixture.second']}).encode(),
+            'a/z.json': json.dumps({'imports': [], 'headlines': ['Solidity.Fixture.first']}).encode()}
+        result = COLLECTOR.collect_lane_snapshot(base, files)
+        self.assertLess(result.index(b'``Solidity.Fixture.first'), result.index(b'``Solidity.Fixture.second'))
+        self.assertEqual(result, COLLECTOR.collect_lane_snapshot(base, dict(reversed(list(files.items())))))
+
+    def test_preservation_uses_one_captured_input_map(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            lanes = pathlib.Path(tmp) / 'lanes'
+            lane = lanes / 'owner-a'
+            lane.mkdir(parents=True)
+            path = lane / 'extra.json'
+            path.write_text(json.dumps({'imports': [], 'headlines': ['Solidity.Fixture.new']}))
+            tracked = {'owner-a/extra.json': path.read_bytes()}
+            candidate = COLLECTOR.MARKER + COLLECTOR.collect_lanes(base, lanes)
+            installed = pathlib.Path(tmp) / 'audit.lean'
+            installed.write_bytes(candidate)
+            prior = {'owner-a': {'imports': set(), 'headlines': {'Solidity.Fixture.old'}}}
+            # Legacy repeated live reads could see old restored just for preservation.
+            with mock.patch.object(COLLECTOR, 'AUDIT', installed), \
+                 mock.patch.object(COLLECTOR, 'LANES', lanes), \
+                 mock.patch.object(HISTORY, 'read_commit_files', return_value=tracked), \
+                 mock.patch.object(HISTORY, 'read_commit', return_value=prior), \
+                 mock.patch.object(HISTORY, 'read_current', return_value=prior), \
+                 mock.patch.object(MIGRATION, 'read_commit_audit', return_value=candidate):
+                with self.assertRaisesRegex(ValueError, 'removed or reassigned'):
+                    MIGRATION.accept(lanes, require_installed=True, prior_commit='1'*40)
+
+    def test_acceptance_rechecks_raw_fragments_and_lane_entry_types(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            lanes = pathlib.Path(tmp) / 'lanes'
+            with mock.patch.object(COLLECTOR, 'collect', side_effect=[base, base+b'changed']):
+                with self.assertRaisesRegex(ValueError, 'raw fragments changed'):
+                    MIGRATION.accept(lanes)
+            lane = lanes / 'owner-a'
+            lane.mkdir(parents=True)
+            path = lane / 'extra.json'
+            path.write_text(json.dumps({'imports': [], 'headlines': ['Solidity.Fixture.new']}))
+            other = pathlib.Path(tmp) / 'same.json'
+            other.write_bytes(path.read_bytes())
+            real_coverage = MIGRATION.coverage
+            def swap(*args):
+                result = real_coverage(*args)
+                path.unlink()
+                path.symlink_to(other)
+                return result
+            with mock.patch.object(MIGRATION, 'coverage', side_effect=swap):
+                with self.assertRaisesRegex(ValueError, 'invalid lane fragment'):
+                    MIGRATION.accept(lanes)
+
+    def test_installed_gate_requires_committed_audit(self):
+        base = COLLECTOR.AUDIT.read_bytes()
+        with tempfile.TemporaryDirectory() as tmp:
+            lanes = pathlib.Path(tmp) / 'lanes'
+            installed = pathlib.Path(tmp) / 'audit.lean'
+            installed.write_bytes(COLLECTOR.MARKER + base)
+            with mock.patch.object(COLLECTOR, 'AUDIT', installed), \
+                 mock.patch.object(COLLECTOR, 'LANES', lanes), \
+                 mock.patch.object(HISTORY, 'read_commit_files', return_value={}), \
+                 mock.patch.object(MIGRATION, 'read_commit_audit', return_value=base):
+                with self.assertRaisesRegex(ValueError, 'audit does not match committed HEAD'):
+                    MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)
+
+    def test_resource_limit_and_process_group_abort(self):
+        with mock.patch.object(FIXTURE.resource, 'setrlimit') as setlimit:
+            FIXTURE.limit_memory()
+            setlimit.assert_called_once_with(FIXTURE.resource.RLIMIT_AS, (8*1024**3, 8*1024**3))
+        process = mock.Mock(pid=12345)
+        process.communicate.side_effect = [subprocess.TimeoutExpired('fake', .25), ('', None)]
+        with mock.patch.object(FIXTURE, 'headroom'), \
+             mock.patch.object(FIXTURE.subprocess, 'Popen', return_value=process) as launch, \
+             mock.patch.object(FIXTURE.time, 'monotonic', side_effect=[0, 2]), \
+             mock.patch.object(FIXTURE.os, 'killpg') as kill:
+            with self.assertRaises(TimeoutError):
+                FIXTURE.run_bounded(['fake'], ROOT, {}, 1)
+            self.assertTrue(launch.call_args.kwargs['start_new_session'])
+            kill.assert_called_once_with(12345, FIXTURE.signal.SIGKILL)
+            self.assertEqual(process.communicate.call_count, 2)
+        process = mock.Mock(pid=12346)
+        process.communicate.side_effect = [subprocess.TimeoutExpired('fake', .25), ('', None)]
+        with mock.patch.object(FIXTURE, 'headroom', side_effect=[None, RuntimeError('reserve crossed')]), \
+             mock.patch.object(FIXTURE.subprocess, 'Popen', return_value=process), \
+             mock.patch.object(FIXTURE.os, 'killpg') as kill:
+            with self.assertRaisesRegex(RuntimeError, 'reserve crossed'):
+                FIXTURE.run_bounded(['fake'], ROOT, {}, 1)
+            kill.assert_called_once_with(12346, FIXTURE.signal.SIGKILL)
+            self.assertEqual(process.communicate.call_count, 2)
+
+    def test_fixture_rejects_unpinned_toolchain(self):
+        with self.assertRaisesRegex(ValueError, 'toolchain paths'):
+            FIXTURE.pinned_tools(pathlib.Path('/tmp/other/lean'), pathlib.Path('/tmp/archive.tar.zst'))
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            archive = root / 'lean-4.35.0-linux.tar.zst'
+            archive.write_bytes(b'not the official archive')
+            with self.assertRaisesRegex(ValueError, 'archive checksum mismatch'):
+                FIXTURE.pinned_tools(root/'lean-4.35.0-linux/bin/lean', archive)
 
     def test_prior_lane_entries_cannot_disappear_or_change_owner(self):
         with tempfile.TemporaryDirectory() as directory:
