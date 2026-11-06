@@ -17,6 +17,16 @@ BASE = "c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 ROOT = Path(__file__).resolve().parents[4]
 MAP = "docs/module-map/theories.md"
 
+def module_to_path(name):
+    """Lean quoted name components may contain dots; split only outside «…»."""
+    parts=re.findall(r"«[^»]+»|[^.«»]+",name)
+    if not parts or ".".join(parts)!=name:
+        raise ValueError("Unsupported Lean module name: "+name)
+    components=[part[1:-1] if part.startswith("«") else part for part in parts]
+    if any("/" in part or "\\" in part or part in (".","..") for part in components):
+        raise ValueError("Non-local Lean module path: "+name)
+    return Path(*components[:-1],components[-1]+".lean")
+
 def sha(s):
     return hashlib.sha256(s.encode()).hexdigest()
 

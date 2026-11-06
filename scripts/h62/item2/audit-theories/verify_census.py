@@ -10,7 +10,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from census import BASE, ROOT, MAP, mask, producer, scan
+from census import BASE, ROOT, MAP, mask, producer, scan, module_to_path
 
 FINGERPRINTS={}
 VERSION=None
@@ -20,7 +20,7 @@ def fingerprint_text(text):
     for line in mask(text).splitlines():
         if line.startswith("import "):
             for module in line.split()[1:]:
-                path=module.replace(".","/")+".lean"
+                path=module_to_path(module).as_posix()
                 if (ROOT/path).is_file(): dependencies.append(fingerprint(path))
     return sha((VERSION+text+"".join(dependencies)).encode())
 

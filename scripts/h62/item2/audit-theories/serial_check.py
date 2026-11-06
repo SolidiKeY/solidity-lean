@@ -5,7 +5,7 @@ container/host available reserve, <=300s per module. All artifacts off Git.
 """
 import argparse, fcntl, hashlib, json, os, resource, signal, subprocess, sys, time
 from pathlib import Path
-from census import ROOT, mask
+from census import ROOT, mask, module_to_path
 
 GIB=1024**3
 
@@ -56,14 +56,15 @@ def main():
         env=os.environ.copy(); env["LEAN_NUM_THREADS"]="1"; env["LEAN_PATH"]=str(lib)
         def check(path):
             path=Path(path); module=".".join(path.with_suffix("").parts)
-            if module in visited: return
+            key=path.as_posix()
+            if key in visited: return
             source=(ROOT/path).read_text()
             deps=[]
             for line in mask(source).splitlines():
                 if line.startswith("import "):
                     for imp in line.split()[1:]:
-                        dep=Path(imp.replace(".","/")+".lean")
-                        if (ROOT/dep).is_file(): check(dep); deps.append(hashes[imp])
+                        dep=module_to_path(imp)
+                        if (ROOT/dep).is_file(): check(dep); deps.append(hashes[dep.as_posix()])
             digest=hashlib.sha256((version+source+"".join(deps)).encode()).hexdigest()
             target=lib/path.with_suffix(".olean"); target.parent.mkdir(parents=True,exist_ok=True)
             stamp=target.with_suffix(".audit-hash")
@@ -77,7 +78,7 @@ def main():
                     hashlib.sha256(target.read_bytes()).hexdigest()==original["olean_sha256"] and
                     old_log.exists() and hashlib.sha256(old_log.read_bytes()).hexdigest()==original["log_sha256"]):
                     record({"module":module,"cache_hit":True,"seconds":0,"original_check":original})
-                    visited.add(module); hashes[module]=digest; return
+                    visited.add(key); hashes[key]=digest; return
             if available()<4*GIB: raise RuntimeError("Available reserve below 4GiB before "+module)
             log=out/(module+"."+digest[:12]+".log")
             cmd=[str(lean),"-j1","--tstack=131072","-o",str(target),str(path)]
@@ -106,7 +107,7 @@ def main():
             row["olean_sha256"]=hashlib.sha256(target.read_bytes()).hexdigest()
             row["log_sha256"]=hashlib.sha256(log.read_bytes()).hexdigest()
             provenance.write_text(json.dumps(row,indent=2)+"\n")
-            stamp.write_text(digest); visited.add(module); hashes[module]=digest
+            stamp.write_text(digest); visited.add(key); hashes[key]=digest
         # Runtime prerequisite: every invocation checks/reuses the exact KeySort tree first.
         check(Path("Solidity/KeySort.lean"))
         for target in a.targets: check(Path(target))

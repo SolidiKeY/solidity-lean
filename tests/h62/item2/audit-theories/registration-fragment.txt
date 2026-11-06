@@ -26,3 +26,7 @@ source tests/h62/item2/audit-theories/PathWitnesses.lean
 candidate Solidity/Theory/Audit/H62/PathWitnesses.lean
 import Solidity.Theory.Audit.H62.PathWitnesses
 row Theory/Audit/H62/PathWitnesses.lean | Sixteen joint path/observation algebra input witnesses; no storage realizability or runtime claim.
+
+Totality modules remain optional audit tests. Do not promote blindly: their
+quoted test-to-test imports and compiler/fork dependencies need owner-approved
+module paths and layer checks before any generated-root registration.

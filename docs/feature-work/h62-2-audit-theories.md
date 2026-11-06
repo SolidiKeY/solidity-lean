@@ -1,4 +1,4 @@
-# H62 item 2: audit-theories — H69 continuation
+# H62 item 2: audit-theories — continuing audit
 
 This is a reviewable partial audit, not completion of the frozen assignment.
 The strict acceptance command exits 1. No RUNTIME_GATE_PASS is claimed.
@@ -248,3 +248,86 @@ links without duplicating H55; run all required affected/final gates and indepen
 all blockers until discharged. Deferred registration suggestions are supplied
 in tests/h62/item2/audit-theories/registration-fragment.txt; no registration was
 applied. The census metaprogram must remain outside dependency-free core roots.
+
+## Continuation: actual compiler totality and explicit model boundaries
+
+Before this item, git fetch origin master advanced the observed remote to
+5f7bb1441. Git log and code comparison found no landed duplicate or changed
+Theory/Evm.Compiler/Compile/Correct prerequisite. The assigned branch therefore
+remains on its frozen base; no unrelated rebase was performed. Exact commands,
+outputs and decision are in master-check.json in
+/workspace/h62-audit-theories-totality-evidence.
+
+Three additive modules implement this milestone:
+
+- CoreTotality proves a source-success corollary of unchanged compile_exact,
+  preserving Sim and stack. Its bool declaration has actual source success,
+  a fragment certificate, non-payment and a jointly inhabited fresh simulation
+  input. The bound Lmax is STORAGE ARRAY GROWTH, not machine stack room: this
+  program contains zero storage pushes, so the concrete bound is 1 ≤ 2^64.
+- CompilerAdmission proves admission through the actual Compiler.compile entry
+  for EVERY existing core-fragment certificate. Both bool literals meet the
+  additional finite-observer success predicate. Reject-all, always-REVERT and
+  always-no-op candidates fail it. FullSuccess is stronger: actual admission,
+  original Input, correlated source .ok, target .ok with zero pending skip,
+  original stack equality and entire original result.Rep, plus source/target
+  bool observations. success_retains_public_contract reconstructs unchanged
+  public Agrees. The finite-observer predicate is not a replacement for public
+  correctness. StandardExample true supplies a closed nonempty-domain packet.
+- FailureGasForkBoundary proves actual source require(false) reverts while
+  assert(false) panics; compiled core code maps both to REVERT. This explicitly
+  does not prove ABI failure-byte preservation. The SAME bool program costs2
+  SOURCE RULE units, fits at50*2+300=400 and fails at399; Osaka's source rule
+  admits it, the custom zero-stipend contrast refuses it even though the gas-
+  blind core IR succeeds. Prague is a limited contrast record without a G06
+  target pin; the custom contrast is not a claimed Ethereum fork. Source-rule
+  cost is not target gas used. G43 Fitted/Enforced and target gas/fork execution
+  agreement remain unproved.
+
+The milestone adds26 checked theorems; it does not increase the22 original
+interface joint-witness count or erase any census gap. All original public
+statements remain untouched. No newly invented premise was used to rescue a
+frozen theorem: the conditional success corollary's real source-success and
+non-payment requirements are discharged by the concrete family, together with
+its full compiler input. This is substantive progress on checkpoint3, not full
+completion of the assignment or all compiler branches.
+
+During provenance verification, the audit runner was found to skip quoted Lean
+imports such as tests.h62.item2.«audit-theories».CoreTotality. Lean itself loaded
+the module, but the old freshness hash omitted it. The shared resolver now
+handles quoted components, including embedded dots, and cache keys use canonical
+source paths. Five regression tests include mutating a quoted dependency and
+checking that the parent fingerprint changes. All three proof modules were
+rechecked after the fix; old failed attempts remain historical and are never
+accepted as current proof receipts. All11 Python tests pass. No statement,
+maxHeartbeats, custom axiom, native_decide or model dependency was changed.
+
+Current proof commands/exits/axiom sets are checked by verify_totality.py
+--evidence /workspace/h62-audit-theories-totality-evidence and written to
+verified-totality.json. The three current source/import/artifact/log receipts
+pass with only the existing standard axiom set. Independent read-only finder
+and skeptic reviewed all three modules and the quoted-import fix, without
+Lean/server/build jobs; no residual findings for this milestone.
+
+Next independent work remains: finish theory statement witnesses and their
+inventory, classify generated candidates, extend supported-program coverage,
+and run required full affected/acceptance gates. Do not call the remaining
+compiler work an external dependency without first inspecting existing code.
+If a real missing producer is found, record its exact symbol, owner and missing
+artifact; never replace it with an invented premise or altered statement.
+
+Milestone gates:11 Python tests pass; totality receipt verification passes26
+theorems; layer check passes857 core modules with zero elaborator/parser
+reachability; register/fragments checks pass with unchanged roots/maps.
+Global doc-path check still exits1 for the existing off-scope
+after-roadmap-va1.md MathlibTest/SplitIfs reference. Full run-lean and strict
+whole-assignment acceptance remain pending. Exact commands/exits are in
+checkpoint-gates.json. The authorized census timing pair remains
+30.298344s→30.926679s (+2.073826%); no extra pair was run for this milestone.
+
+Committed milestone handoff:26 new proof theorems (57 additive proof theorems
+total),8 new fixture/predicate definitions (11 total), the quoted-import
+provenance fix and regression controls. All frozen statements are unchanged;
+new sorry/custom axiom/native_decide counts are zero. The current evidence
+directory is /workspace/h62-audit-theories-totality-evidence. Next work is
+the remaining typed-path statement witnesses, after fetching/checking master.
