@@ -23,5 +23,6 @@
   "status": "current-owner delivery pending; exact-file agreement pending",
   "dependency": "DEP-435-RAW; require reviewed pinned-4.35 dependency overlay before validation",
   "delivery": "Saved for host-only coordinator relay; no VM relay installation requested.",
-  "current_routing": "Latest H70: syntax ticket destination migrate-syntax; current V12 delivery pending to claudecloud/move5-20261106/v12-p1. Host journals govern acceptance; no owner agreement or validation inferred."
+  "current_routing": "Latest H70: syntax ticket destination migrate-syntax; current V12 delivery pending to claudecloud/move5-20261106/v12-p1. Host journals govern acceptance; no owner agreement or validation inferred.",
+  "H82_disposition": "Exact-file agreement request withdrawn for statement-preserving proof-only edits. Owner still required for statement/semantic definition/interface/budget/axiom/exclusion changes. Retirement: no further implementation; successor owns integration. No Claude-owned source edited or messaged."
 }

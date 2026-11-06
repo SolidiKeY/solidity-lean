@@ -401,3 +401,37 @@ items. Coordinator should continue this exact VM, branch and existing goal; no
 replacement goal/thread is self-launched. Next independent read-only work remains
 unclassified embedded Checks/Client regions, with explicit region inventory and
 full per-declaration semantic accounting. Do not declare full checkpoint completion.
+
+## H82 retirement checkpoint
+
+No new proof implementation. Prior implementation head c98a7d018f528c9b049d32ee82baa40ea4aa7f6d.
+Only handoff records/owner-request dispositions changed. Original visible assignment,
+full work/backfill queue, original owner map, scope manifest and all open obligations
+are committed under tests/h62/item4/generic-internalflow/handoff/. Prompt provenance
+explicitly states that byte-exact frozen rendered SHA verification is unavailable;
+the visible assignment was reconstructed from this thread, not a coordinator-local
+path. The recorded rendered SHA is provenance only, not a verified file digest.
+
+Retirement handoff_to solidity-inline-assembly5-20261031/vy4-world. Integration
+belongs to successor after final stopped/head acknowledgement. The later generic
+continue instruction conflicts with explicit retirement; clarification requested,
+and only safe handoff packaging performed. Implementation stopped. No new goal,
+VM, thread, source change, proof or push. H71 original-lane push permission is not
+available; original no-push remains binding. No master push.
+
+H82 standing agreements withdraw proof-only exact-file agreement requests; owner
+permission still governs statement, dependent definition, interface, budget, axiom
+and exclusion changes. Raw remains unapplied with30axiom-growth entries awaiting
+root review. ClaudeV12 current-owner forwarding is staged, not agreement. No Claude
+source edit/message. All original files and evidence preserved.
+
+Goal PAUSED could not be set: the exposed goal tool accepts only complete|blocked;
+no pause/update/get tool exists in this context. Do not interpret local stopping
+as a successful persistent-goal pause. No complete/block transition substituted.
+No automatic implementation continuation is authorized under the retirement order.
+
+Final sealed export: /workspace/h62-artifacts/generic-internalflow/retirement/,
+with cumulative patch, lane.bundle, full handoff input files, evidence archive,
+open-items.json and SHA256SUMS. Earlier artifacts remain intact. No Lean recheck or
+known timing STOP rerun for these handoff-only changes. Historical validation
+boundaries remain; full assignment is unfinished.
