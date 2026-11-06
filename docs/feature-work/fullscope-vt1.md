@@ -681,3 +681,113 @@ diagnosed above; it is still unidentified. Next step: replace the one-shot
 once and composed with `rw`, so each kernel check is small. `checked_div_t_int256`,
 `checked_exp_*`, ABI and storage helpers were not started in this
 continuation.
+
+## C09: the remaining helper proofs (follow-up session, 2026-11-06)
+
+Base: branch head `9717636c` merged with origin/master `e5d25cb3` (no
+conflicts). All proofs below are kernel-checked (per-file Lean diagnostics, no
+`sorry`, no new axiom, no `maxHeartbeats` change); `#print axioms` gives only
+`propext`, `Classical.choice`, `Quot.sound` (or a subset).
+
+**Cause of the earlier kernel deep recursion.** It was neither `Pure.sub`'s
+`2^256` nor the cleanup collapse itself, but the one-shot `simp` over a whole
+helper body: the proof term it builds rewrites under a large nested `do`
+continuation, and checking it recursed too deeply in the kernel (bisected:
+`simp only [run_ok_bind]` after the first rewrite already triggered it, while
+the same rewrite by a statement lemma did not). The fix is the coordinator's
+suggestion in its general form: `SolcValidation/IrHelperSteps.lean` proves one
+lemma per statement shape over an abstract environment and abstract values
+(`assign_cleanupU`, `assign_pure2`, `if_panic11`, `items_stmt_normal`,
+`items_stmt_map`, `items_last`, `op1_gen`/`op2_gen` for call-free expressions at
+any fuel above a bound, …) and composes them with `rw`, so each kernel check is
+small. No literal `2^256` is unfolded: `sub` is kept folded and characterized by
+`pure_sub_val`/`sub_gt` (stated with `rw`).
+
+### Checked arithmetic (namespace `Solidity.SolcValidation.IrSyntax`)
+- `checked_sub_body (k) (x y : Word) (s : σ) : evalBlock M ctx (k + 30) helperEnv bodySub (.cons x (.cons y (.cons 0 .nil))) s = if y.val ≤ x.val then .ok (s, …word (x.val - y.val)…, .normal) else (fun s => (s, …Pure.eval .sub (word2 x y)…, .normal)) <$> panicRun M 0x11 s`
+- `checked_sub_sim (k) (x y) (s) : evalExpr M ctx (k + 34) helperEnv subCall (argVals x y) s = if y.val ≤ x.val then .ok (s, fun _ => word (x.val - y.val)) else … <$> panicRun M 0x11 s` (call site).
+- `checked_mul_sim` (the call-site form of `checked_mul_body`, closing C08's
+  "body-level only" gap) via the generic `call2`.
+- `checked_div_body (k) (x y) (s) : evalBlock M ctx (k + 60) helperEnv bodyDiv (…x, y, 0…) s = panicIf M (y.val == 0) 0x12 s >>= fun s => panicIf M (x.val == 2^255 && y.val == 2^256 - 1) 0x11 s >>= fun s => .ok (s, …Pure.eval .sdiv (word2 x y)…, .normal)`.
+  `panicIf M b code s` is `panicRun M code s` when `b`, else `.ok s`: the first
+  panic is not the last statement, so on a machine whose `revert` returns the body
+  continues, and the theorem says exactly that.
+- Source matches (`IrHelperSource.lean`, `BinOp.evalNum`):
+  `sourceSub_eq`, `checked_sub_matches_source` (`uint -`, call site),
+  `checked_mul_call_matches_source` (`uint *`, call site),
+  `sourceDiv_eq`, `tdiv_inRange` (the `int256` range fact: `Int.tdiv` of two
+  in-range values is in range unless `min / -1`), `checked_div_matches_source`
+  (`int /`, words read by `Yul.signed`; a source value `v` is returned as
+  `iword v`; a source revert is `panicRun M (if y.val = 0 then 0x12 else 0x11) s >>= …`).
+
+### `checked_exp_t_uint256_t_uint256`
+`IrExpHelpers.lean`: the six functions of the group (`checked_exp_t_uint256_t_uint256`,
+`checked_exp_unsigned`, `checked_exp_helper`, `shift_right_1_unsigned`,
+`cleanup_t_uint256`, `panic_error_0x11`), cut verbatim from the saved Census IR
+(`extract-helpers.py`), printed from the parser's output (`IrLeanGen.lean`),
+split by `gen-helper-modules.py` (`--check` in `check-ir.sh`), and certified by
+`expHelpers_certified` (`decide +kernel`, the `Parsed.sound` statement).
+`IrExpModel.lean`: `expLoop`/`expUnsigned`, a natural-number model of solc's
+algorithm (special cases, the `(b < 11 ∧ e < 78) ∨ (b < 307 ∧ e < 32)` shortcut,
+the square-and-multiply loop with its `base > max / base` test), and
+- `expLoop_spec`: below an overflow the loop is exact with `1 ≤ p ≤ b` and
+  `p * b ^ e` preserved; it panics only if `p * b ^ e ≥ 2^256`;
+- `expUnsigned_correct (b e) (bW : b < 2^256) : expUnsigned b e = if b ^ e < 2^256 then some (b ^ e) else none`
+  (including `306^31 < 2^256` and `10^77 < 2^256`, the shortcut's bounds).
+`IrExpSim.lean`: the interpreter runs as the model, on any machine:
+`loop_run` (strong induction on the exponent; fuel `j + steps e + 45`, with
+`steps e ≤ 255` by `steps_le`), `helper_run`, `u1_*`…`u7_run` (the seven
+statements of `checked_exp_unsigned`), `unsigned_run`, and
+- `checked_exp_body (j) (x y : Word) (s : σ) : (x.val ^ y.val < 2^256 → evalBlock M ctx (j + 420) expEnv expExpU256 (…x, y, 0…) s = .ok (s, …word (x.val ^ y.val)…, .normal)) ∧ (¬ x.val ^ y.val < 2^256 → ∃ cont, evalBlock … = panicRun M 0x11 s >>= cont)`:
+  no machine effect when the power fits; otherwise the first effect is solc's
+  panic sequence from the entry state (`∃ cont`: what follows, on a machine
+  whose `revert` returns, is left unspecified).
+- `checked_exp_matches_source` (`IrHelperSource.lean`): the same against
+  `sourceExp` = `BinOp.evalNum .uint … .pow`.
+This generalizes `Evm/Exp.lean` by an adapter over the imported IR (that module
+is not edited).
+
+### ABI and storage helpers (machine level)
+- `IrAbiHelpers.lean`/`IrAbiSim.lean` (the five functions of
+  `abi_decode_tuple_t_uint256`): `validator_body` (no effect: the `uint256`
+  cleanup is the identity), `decodeU256_body`, and
+  `decodeTuple_body (k) (h d) (s)`: with `short := decide (signed (sub(d, h)) < 32)`,
+  `short = true → ∃ cont, evalBlock … = M.run .revert (word2 0 0) s >>= cont` and
+  `short = false → evalBlock … = (fun r => (r.1, …r.2 0…, .normal)) <$> M.run .calldataload (fun _ => h) s`.
+- `IrPushHelpers.lean`/`IrPushSim.lean` (the thirteen functions of
+  `array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr`):
+  `slice_zero` (`update_byte_slice_dynamic32(old, 0, v) = v`), `updateStorage_body`,
+  `index_body`, and `push_body (k) (a v) (s)`: the body equals the explicit effect
+  script `sload(a)`; `Panic(0x41)` if the length `l ≥ 2^64`; `sstore(a, l + 1)`;
+  `sload(a)` again and `Panic(0x32)` unless `l <` that; `mstore(0, a)`;
+  `keccak256(0, 32)` giving `h`; `sload(h + l)`; `sstore(h + l, v)` — each on
+  the state the previous step returned, for any machine.
+What a calldata word or a storage slot means for the source (ABI decoding and
+solc's storage layout, D3) is G01's relation; these theorems state the exact
+machine behaviour and assume nothing about the machine.
+
+### Tests (`IrHelperChecks.lean`, Lean server)
+`IR_HELPER_PASS 576` (unchanged), `IR_EXP_HELPER_PASS 144 checked_exp/source
+agreements on edge words` (bases around 0/1/2/10/11/306/307/2^128/2^255/2^256-1,
+exponents up to 300 so the oracle can compute `x ^ y`; larger exponents are
+covered by the theorem), provenance passes for all four fixtures
+(`IR_HELPER_PROVENANCE_PASS 8`, `IR_EXP_PROVENANCE_PASS 6`,
+`IR_ABI_PROVENANCE_PASS 5`, `IR_PUSH_PROVENANCE_PASS 13`).
+`VT1_SKIP_LEAN=1 check-ir.sh`: ARTIFACTS_CHECK_PASS, HELPERS_CHECK_PASS,
+HELPER_MODULES_CHECK_PASS, VT1_IR_CHECKS_PASS.
+
+### Still open
+- `fun_<name>_<id>` simulations and dispatcher/constructor composition (T02's
+  per-function and per-contract layer): they need X01's frozen G01 relations
+  (source argument/return ↔ ABI words, revert ↔ return data, storage layout).
+  Master has none frozen (only VX1's unfrozen stub), so they wait on G01; no
+  stub is proved against.
+- The helper theorems are about the extracted helper groups' own environments
+  (`helperEnv`, `expEnv`, `abiEnv`, `pushEnv`), not the contracts' parsed
+  function groups: transferring them needs a lookup lemma for the parsed Census
+  tree (open, as in C08). Tree uniqueness for a token stream is still not proved.
+- A fresh solc run is blocked: `binaries.soliditylang.org` returns 403 here and
+  running an unpinned compiler is not allowed; the fixtures remain the Codex
+  VM's pinned-binary outputs.
+- The physical byte-memory machine (VX4/X06) and world (VY4) as `Machine`
+  instances, gas (D1/D2), calls/creates: unchanged from C07.
