@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "frozen_base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "frozen_module_sha256": "48adeb83c21c5dc16bf1e6191c1efa30e5362652e077e659d6c6a95c4b7668a4",
+  "kind": "joint-premise",
+  "rows": [
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Lifecycle.lean:42:push_reused_reference",
+      "theorem": "Solidity.Backend.StorageOps.push_reused_reference",
+      "signature": "theorem push_reused_reference {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (v result : Value G (.array E)) (i : Index)\n    (aggregate : E.isPrimitive = false) (retained : i.val < v.extent.val)\n    (pushed : v.push = some result) :\n    TypeGraph.Step.get Value.dflt (.index i) result =\n      TypeGraph.Step.get Value.dflt (.index i) v",
+      "signature_sha256": "71d6362a21792cac939efed19bb8ec979a9cad5a41537c2ce466fc13a78632b4",
+      "witness": "H62.StorageAudit.PushWitnesses.semantic_kept_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Lifecycle.lean:52:push_fresh_default",
+      "theorem": "Solidity.Backend.StorageOps.push_fresh_default",
+      "signature": "theorem push_fresh_default {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (v result : Value G (.array E))\n    (fresh : v.extent.val = v.length.val) (pushed : v.push = some result) :\n    TypeGraph.Step.get Value.dflt (.index v.length) result = some (Value.dflt E)",
+      "signature_sha256": "7b86fed2007fb890d49cd9cb07ae18b00ae975a5beedb5243f59d65640bee097",
+      "witness": "H62.StorageAudit.PushWitnesses.semantic_fresh_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    },
+    {
+      "frozen_id": "Solidity/Backend/StorageOps/Lifecycle.lean:71:pop_invalidates_live",
+      "theorem": "Solidity.Backend.StorageOps.pop_invalidates_live",
+      "signature": "theorem pop_invalidates_live {n : Nat} {G : Schema n} {E : TypeGraph.Ty n}\n    (v result : Value G (.array E)) (i : Index)\n    (last : i.val + 1 = v.length.val) (popped : v.pop = some result) :\n    TypeGraph.Step.getLive Value.dflt (.index i) result = none",
+      "signature_sha256": "ba101401afb358f9671369248416dbb848be96b144e900f193d31f68e04c79f0",
+      "witness": "H62.StorageAudit.PushWitnesses.pop_joint",
+      "status": "kernel-checked input reference; independent fidelity reviews passed"
+    }
+  ]
+}

@@ -568,3 +568,19 @@ bundles and nine data inhabitants, with 3237 unmapped and nine pinned witness
 modules. These graph lifecycle inputs do not establish Source allocation
 identity, physical target lifecycle, compiler adequacy or world rollback.
 The failed full checkpoint and all original producer holds remain open.
+
+## Semantic push and pop inputs
+
+The lifecycle extension retains the semantic push premises separately from the
+operation adapter: nonprimitive retained reuse and fresh defaults share the
+same original values and actual successful results. Pop uses the exact former
+last index of a populated child. Its successful result keeps allocated extent,
+clears the retained raw word and invalidates the live read. One pop succeeds
+and the second fails; this Option result supplies no world rollback theorem.
+
+All 22 guards in the combined push/lifecycle test module pass. Independent
+read-only finder and skeptic found no fidelity issue. Five more frozen rows
+are mapped: three joint bundles and two data-only failure-iff inputs. The
+conservative registry now maps 49 of 3281 rows, with 38 joint bundles, eleven
+data inhabitants and 3232 unmapped rows. Original Source/physical/compiler
+obligations and broad validation remain unfinished.

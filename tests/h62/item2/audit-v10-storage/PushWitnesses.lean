@@ -104,4 +104,56 @@ theorem reset_apply : Step.get Value.dflt (.index scalar.length) scalarAfter =
 #guard_msgs (whitespace := lax) in #print axioms fresh_apply
 /-- info: 'H62.StorageAudit.PushWitnesses.reset_apply' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms reset_apply
+
+/-- Same concrete results, now using the original semantic push premises. -/
+theorem semantic_kept_joint : (.array (.prim .bool) : TypeGraph.Ty 0).isPrimitive = false ∧
+    zero.val < aggregate.extent.val ∧ aggregate.push = some aggregateAfter := by
+  exact ⟨rfl, by decide, rfl⟩
+
+theorem semantic_fresh_joint : fresh.extent.val = fresh.length.val ∧
+    fresh.push = some freshAfter := by exact ⟨rfl, rfl⟩
+
+def popped := child.pop.getD child
+
+theorem pop_joint : zero.val + 1 = child.length.val ∧ child.pop = some popped := by
+  exact ⟨rfl, rfl⟩
+
+theorem semantic_kept_apply : Step.get Value.dflt (.index zero) aggregateAfter =
+    Step.get Value.dflt (.index zero) aggregate :=
+  push_reused_reference aggregate aggregateAfter zero semantic_kept_joint.1
+    semantic_kept_joint.2.1 semantic_kept_joint.2.2
+
+theorem semantic_fresh_apply : Step.get Value.dflt (.index fresh.length) freshAfter =
+    some (Value.dflt (.prim .bool)) :=
+  push_fresh_default fresh freshAfter semantic_fresh_joint.1 semantic_fresh_joint.2
+
+theorem pop_apply : Step.getLive Value.dflt (.index zero) popped = none :=
+  pop_invalidates_live child popped zero pop_joint.1 pop_joint.2
+
+/-- Pop preserves allocated extent, clears its old live word, and invalidates liveness. -/
+theorem pop_observations : popped.length.val = 0 ∧ popped.extent.val = 1 ∧
+    Step.get Value.dflt (.index zero) popped = some (.prim false) ∧
+    Step.getLive Value.dflt (.index zero) popped = none := by
+  exact ⟨rfl, rfl, rfl, rfl⟩
+
+/-- One real pop succeeds; the next fails. This is not a world rollback theorem. -/
+theorem pop_twice_fails : child.pop = some popped ∧ popped.pop = none ∧
+    child.pop.bind Value.pop = none := by exact ⟨rfl, rfl, rfl⟩
+
+/-- info: 'H62.StorageAudit.PushWitnesses.semantic_kept_joint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_kept_joint
+/-- info: 'H62.StorageAudit.PushWitnesses.semantic_fresh_joint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_fresh_joint
+/-- info: 'H62.StorageAudit.PushWitnesses.pop_joint' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_joint
+/-- info: 'H62.StorageAudit.PushWitnesses.semantic_kept_apply' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_kept_apply
+/-- info: 'H62.StorageAudit.PushWitnesses.semantic_fresh_apply' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms semantic_fresh_apply
+/-- info: 'H62.StorageAudit.PushWitnesses.pop_apply' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_apply
+/-- info: 'H62.StorageAudit.PushWitnesses.pop_observations' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_observations
+/-- info: 'H62.StorageAudit.PushWitnesses.pop_twice_fails' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms pop_twice_fails
 end H62.StorageAudit.PushWitnesses
