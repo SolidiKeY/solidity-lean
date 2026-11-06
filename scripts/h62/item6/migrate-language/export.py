@@ -16,7 +16,7 @@ subprocess.run(['git','merge-base','--is-ancestor',base,head],cwd=root,check=Tru
 (out/'original.patch').write_bytes(git('format-patch','--stdout',base+'..'+head))
 bundle=out/'migration.bundle'
 if bundle.exists(): bundle.unlink()
-subprocess.run(['git','bundle','create',str(bundle),base+'..'+head],cwd=root,check=True)
+subprocess.run(['git','bundle','create',str(bundle),base+'..'+branch],cwd=root,check=True)
 r=subprocess.run(['git','bundle','verify',str(bundle)],cwd=root,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,check=True)
 (out/'bundle-verify.log').write_bytes(r.stdout)
 def digest(p): return hashlib.sha256(p.read_bytes()).hexdigest()
