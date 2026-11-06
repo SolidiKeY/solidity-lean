@@ -337,3 +337,13 @@ passed. Logs remain off Git at shared-consumers-check.json and
 shared-consumers-files/1.log under /workspace/sol-numeric-literals-gate-output.
 This is premise transport for three existing consumers, not full inference
 equivalence, compiler totality, production migration or a speed comparison.
+
+### Canonical adoption scope question
+
+Q-NL-SHARED-ADOPT1 was sent through the coordinator-prescribed coord-ask
+question channel at coord-q/codex/solidity-sol2-20261104/numeric-literals/20261106T212727Z.
+The published migration proposal needs producer-owned definition-body changes
+and a coordinated test Shared import shim to avoid duplicate canonical constants.
+The question offers owner adoption with registration/full gates, or retention of
+the additive interface without production deduplication. No producer patch has
+been applied, and only the question ref—not this source branch—was pushed.
