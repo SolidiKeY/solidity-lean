@@ -579,11 +579,45 @@ def Env.hasMapping (E : Env) : Nat → STy → Bool
 mapping it contains visits each struct at most once. -/
 def Env.structCount (E : Env) : Nat := (E.decls.filter (·.kind == .struct)).length
 
+/-- Whether a type name or member list names a mapping outside any user
+type, and the user types it names (through arrays and members). -/
+def Syn.mappingRefs : {c : Cat} → Syn c → Bool × List IdPath
+  | _, .mapping _ _ _ _ => (true, [])
+  | _, .array t _ => t.mappingRefs
+  | _, .structMember t _ => t.mappingRefs
+  | _, .userType p => (false, [p])
+  | _, .cons x xs => let a := x.mappingRefs; let b := xs.mappingRefs; (a.1 || b.1, a.2 ++ b.2)
+  | _, _ => (false, [])
+
+/-- Whether the struct a user type name denotes holds a mapping through its
+members, nested structs read `n` levels deep. -/
+def Env.structHoldsMapping (E : Env) : Nat → Option String → IdPath → Bool
+  | 0, _, _ => false
+  | n + 1, scope, p =>
+    match E.lookupPath scope p with
+    | [d] =>
+      match d.kind, d.top, d.node with
+      | .struct, _, .struct _ m ms =>
+        let r := (Syn.cons m ms).mappingRefs
+        r.1 || r.2.any (E.structHoldsMapping n d.scope)
+      | _, _, _ => false
+    | _ => false
+
 /-- **Whether struct `d` holds no mapping** (through its members, arrays and
-nested structs): a struct a conversion may copy out of `storage`
-(`STy.implicit`'s `mapFree`; solc refuses the copy otherwise). -/
+nested structs, one level per struct declaration): a struct a conversion
+may copy out of `storage` (`STy.implicit`'s `mapFree`; solc refuses the
+copy otherwise). It reads the members' type names, not their elaborated
+types (`Env.hasMapping`), so that it depends on no axiom: a conversion
+proof embedded in an elaborated term mentions it. -/
 def Env.mapFree (E : Env) (d : DeclName) : Bool :=
-  !E.hasMapping (E.structCount + 1) (.struct .storage d)
+  match E.declOf .struct d with
+  | Option.some dc =>
+    match dc.kind, dc.top, dc.node with
+    | .struct, _, .struct _ m ms =>
+      let r := (Syn.cons m ms).mappingRefs
+      !(r.1 || r.2.any (E.structHoldsMapping E.structCount dc.scope))
+    | _, _, _ => true
+  | Option.none => true
 
 /-- Which structs of the environment hold no mapping (`Env.mapFree`). -/
 abbrev Ctx.mapFree (Γ : Ctx) : DeclName → Bool := Γ.env.mapFree
