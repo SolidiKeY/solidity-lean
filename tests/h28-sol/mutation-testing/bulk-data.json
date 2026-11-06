@@ -2,7 +2,7 @@
   "schema": 1,
   "authorization": "H44",
   "source_head": "61724cdfbb1ee466c884d1e2ccf6f0a5742ce37a",
-  "delivery_base": "af972480b7eb44498a7d754f0761dd3adf5e39eb",
+  "delivery_base": "79e4972532b0628c539911dc80c4904d776e81ef",
   "semantic_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
   "root": "/workspace/h28-h44-bulk-61724cdf-strict/files",
   "index": "/workspace/h28-h44-bulk-61724cdf-strict/files.json",
@@ -350,7 +350,7 @@
     }
   },
   "frame_proof_pack": {
-    "authorization": "H41",
+    "authorization": "H44",
     "status": "ready-for-coordinator-pull",
     "archive": "/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz",
     "bytes": 6363366,
@@ -373,6 +373,7 @@
     "member_manifest": "tests/h28-sol/mutation-testing/evidence/frame-pilot-e198e3fb/manifest.json",
     "coordinator_pull_observed": false,
     "archive_seconds": 5.854443480000555,
-    "process_maxrss_kib": 23556
+    "process_maxrss_kib": 23556,
+    "cache_delivery_authorization": "H41"
   }
 }

@@ -895,8 +895,9 @@ pin, explicitly marked in the manifest and `bulk-data.json.frame_profile_inputs`
 and authenticated by the existing frozen bulk index and runner. The inventory
 itself is tracked, so this mixed-input profile is separate from the legacy
 two-off-Git-input declarations. Current census counts are 34 fixtures, 12
-profiles and 19 distinct variants. Development passes are unscored; the frozen
-whole pilot run, reviews and evidence seal remain pending.
+profiles and 19 distinct variants. Development passes were unscored; the frozen
+pilot subsequently passed at `e198e3fbe0d29687129e571cdc5a192b7755b753`,
+with the run, reviews and evidence seal recorded below.
 
 
 Coordinator publication `af972480b7eb44498a7d754f0761dd3adf5e39eb` is merged
@@ -919,7 +920,8 @@ passed. Finder/skeptic development and actual-evidence reviews are separate from
 seal replay. `verify_combined.py --profile frame` uses fixed 2/1 accounting and
 the unchanged strict certificate/source/artifact/resource checks.
 
-H41 frame pack `/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
+H44 frame evidence pack (subject to H41 cache delivery)
+`/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
 `16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6`, with 41 H44-pinned regular members. It stays
 on this VM for coordinator pull; no transfer is claimed. Normal dependencies
 are separately pinned; mutant objects remain isolated. Frame semantics are
@@ -927,3 +929,13 @@ restricted to the typed selected call and its pending caller callback, and
 provide no whole-compiler correctness claim. Full queue acceptance remains false:
 final selection ledger, expanded combined execution, and final repository gates
 are still pending.
+
+
+Coordinator follow-up: the first frame section now points to the completed
+frozen pilot rather than leaving its status pending. The frame pack and member
+manifest both label evidence authorization H44; the separate
+`cache_delivery_authorization` field records H41. Delivery remains pending.
+Published master `79e4972532b0628c539911dc80c4904d776e81ef` is integrated
+by rebase after verifying identical owned files in its rebased delivery. Engine
+and bulk delivery anchors advance together; immutable semantic/cache and
+historical snapshot pins remain unchanged.
