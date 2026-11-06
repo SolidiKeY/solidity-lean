@@ -199,3 +199,98 @@ Typed dependent-item blockers (not blanket permission to stop useful work):
 `B-SOURCE-GAS` (existing primitive source model has no gas observation).
 Independent EEST/reference and accounting backfill can continue while these
 are resolved. No scope exclusion or premise change is requested or approved.
+
+
+## EEST reference milestone and authorized master update
+
+The coordinator explicitly instructed merging origin/master before the next
+commit. The lane backed up its uncommitted work under H44, verified that the
+published master contains d448d0f7658bec8e4a41e0d35b00dea98154c580, and fast-forwarded
+to 5f14596531efea2be64f1a5e7a83afa5e151e865. Existing lane work was preserved.
+The original base/goal and branch remain unchanged in identity. This explicit
+merge authorization does not authorize pushing, publishing, or another merge.
+H82 now replaces exact-file agreement for statement-preserving work; no such
+agreement request is pending here. Frozen statements/interfaces/budgets and
+axioms remain unchanged. All29 previously checked producer sources retain their
+original recorded hashes after this integration.
+
+New reference evidence supersedes the earlier pending-only EEST census:
+all19,093 unique Osaka state-test variants were selected;18,315 match the pinned
+fixture state-root and logs-hash expectations;778 expected-invalid transactions
+remain unsupported by the rejection adapter. There are zero reference mismatches
+or engine errors in the corrected bounded run. These results are **not source
+semantics differential matches**: all19,093 source adapters remain unsupported,
+reference_complete=false and differential_complete=false. Strict exit2 means
+incomplete conformance, never a gate pass. Return/revert bytes and gas are retained
+as observations; the fixtures provide no direct expectations for those fields.
+
+The deterministic gzip stream retains every original fixture identity, post-state
+variant/index, pre-state, environment, transaction bytes and expected post-state.
+Its SHA256 is d7dcc3b6f969359d44bfdaec88b7dffcbd80cddacc2b06b8a135964e2cbbc602.
+Export verifies the archive and census/fixture bytes; the runner verifies the
+stream/census binding and every selected identity. It runs a fresh VM and full
+signed transaction for each fixture, checks all fork blob parameters, and compares
+complete state-root and log-hash commitments. The archive's absent block history
+uses the explicitly recorded zero-hash state-test convention.
+
+Real cryptography is pinned: micro-eth-signer0.20.1 and
+@paulmillr/trusted-setups0.3.0, full npm integrity lock and127 installed public-file
+hashes at evidence/kzg-pin.json. No stub is used. All cryptographic package loads
+are serial to avoid an observed Node CJS/ESM loader race.
+
+The engine's optional step tracer caused huge-memory REVERT allocation errors
+before gas validation; the isolated index6551 stack trace is retained at
+ evidence/eest-reference-memory-reproducer.jsonl. The production adapter instead
+counts calls to the unchanged original Interpreter.runStep with a transparent
+Reflect.apply forwarding wrapper. The five-million-instruction bound is preserved;
+no opcode implementation or installed engine file is edited. Index6551 now matches
+its fixture. This is a reference-observer root cause, not a Solidity theorem or
+compiler mismatch; no source-semantics mismatch ticket is fabricated.
+
+Each case runs serially in an owned worker with a60-second limit,4GiB V8 old-space
+limit,12GiB aggregate RSS guard,4GiB available-memory reserve and zero-swap
+prerequisite. Worker replacement waits for termination. The full bounded replay
+required352.501seconds and peaked at1,059,794,944 sampled aggregate RSS bytes.
+No resource stop occurred. No checking-speed refactor or Lean budget changed, so
+checking regression delta remains inapplicable. No speedup is claimed from the
+interrupted exploratory run.
+
+Reproduce after bootstrap/census:
+
+```sh
+python3 scripts/h62/item3/g52-differential/eest_export.py --bulk "$BULK"
+node --test tests/h62/item3/g52-differential/eest_observation.test.mjs
+node scripts/h62/item3/g52-differential/eest_reference.mjs "$BULK" 19093 bounded
+```
+
+Optional arguments select LIMIT,LABEL,INDEX. Partial/rejected cases return exit2;
+engine errors/mismatches return1. Read the summary boolean and exact counts, not
+just process success. The complete-run evidence is
+ evidence/eest-reference-bounded-summary.json and its JSONL; provenance and
+regression gates are in evidence/eest-acceptance.json. Historical failed KZG and
+loader runs remain saved as failures; they are never added to successful counts.
+
+Independent finder and skeptic reviewed read-only without Lean/server. Both
+verified exact fixture accounting, unchanged executor forwarding, and explicit
+unsupported semantics. Finder found a queued IPC-success/resource-stop race;
+it is fixed by guardedResult and a negative control. Three Node control tests pass,
+including changed roots/logs, altered fork parameters, and stop-over-success.
+The full-run adapter hash records the actual pre-race-fix source; no resource stop
+occurred in that run. A final20-case pilot verifies the unchanged normal path;
+the targeted race control verifies the changed stop path. Earlier ten accounting
+controls,732 generated reference observations,320 real primitive comparisons and
+fail-closed unsupported accounting were rerun successfully with the new lock.
+
+Continue the existing goal. Next independent items: implement expected-invalid
+transaction rejection classification for all778 cases, reproduce the deterministic
+export, expand archive-format census, and inspect newly integrated
+scripts/roadmap-v17-differential.py for the live producer adapter. Dependent waits
+must be reported as {lane,item} per H82; they never justify stopping independent
+backfill. Full source/runtime integration, applicable gas/world/deployment evidence,
+actual mismatch minimization/owner relay, and final original gates stay open.
+
+Finder's final lifecycle review also required ignoring queued messages after a
+stop request until onExit resets the worker; this is implemented and cleared.
+The final20-case pilot reports20reference matches and strict incomplete exit2.
+No independent work is blocked by these completed fixes. The pre-merge source
+backup retains the actual full-run adapter before the targeted IPC-stop fixes.
