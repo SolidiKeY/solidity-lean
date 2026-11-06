@@ -751,3 +751,45 @@ The delivery-only anchor is published `7d8a48cabffa81e7cea2a1e5a87013b0fca79db4`
 already included in coordinator-reviewed merge `54e50f69d`. The semantic base
 remains `6f3eedf0788ee1f8a3bcf230558c712ecdca04d5`. Repository-wide final gates
 and broader original-assignment acceptance remain open.
+
+### Repository gate on published c460 and return to updated master
+
+The clean owned head `60a068ddf3d32e2a41244fe44f7ce5ed14eb5b82` had identical
+tracked content to published `c460b20c15fd99d207a1297b49eb340608a129ee`. A detached
+owned worktree ran `bash scripts/coord-tools/gate.sh full` with an untracked
+resource-only alternate TOML, private serialized Lean -j1 wrapper, hard 10 GiB
+limit, zero swap and 5,391,495,168 bytes estimated initial reserve. Actual
+Lean 4.24.0 (797c613) and Lake 5.0.0-src+797c613 versions and a passing KeySort
+check precede RUNTIME_GATE_PASS. Tracked sources, HEAD and configuration hashes
+were checked before and after; owned container cleanup is confirmed.
+
+The full gate exited 1 after 2917.871 seconds. Corpus passed (2865 seconds),
+as did trust, layers, fragments, TestSuite audit and strict automatic
+classification. Peak process RSS was 6,094,752 KiB; cgroup peak was
+9,390,170,112 bytes. run-lean stopped before its default build because the
+published root omitted CatchCoverage and CatchListCoverage; orphan and root
+checks failed on those same modules. Axiom pins failed with zero errors and
+4241 unrecorded changes. These failures remain failed, not accepted exclusions.
+
+A separate documentation-path failure was a private-worktree preparation gap:
+the primary checkout already held the cited Mathlib source. After linking that
+dependency, a bounded 2 GiB/no-swap doc check passed with confirmed cleanup and
+unchanged tracked sources. This establishes path availability, not a Bridge
+proof build. The first launch's relative-shell execv failure (exit 127) and
+the uncorrected full-gate log are retained separately. Finder and skeptic
+confirmed the actual outcomes and source attribution without Lean-server use.
+
+A fresh fetch then found published `812aeb301f27d70dad4acc3b3bd92d1c41d7c948`;
+it was merged without resetting history, producing `d9687ad3f`. Its generated
+root repairs the missing imports. Fresh root/orphan checks pass (6334 reachable,
+zero orphans); the axiom check still fails with zero errors and 4293 unrecorded
+changes. Default-build validation on this newer source remains pending. The
+delivery-only boundary now advances to that published commit; semantic/cache
+base 6f3eedf0 and all frozen mutation inputs remain unchanged.
+
+`bulk-data.json.repository_gate_validation` pins the immutable off-Git evidence
+archive, commands, raw statuses, runtime identities, resource measurements and
+reviews. The normal mutable build cache stays in the detached worktree; it is
+not a sealed whole-repository passing cache. Existing H41 semantic proof-world
+packs remain unchanged and ready for coordinator pull. Full assignment
+acceptance, broader candidate scope and the shared axiom inventory remain open.
