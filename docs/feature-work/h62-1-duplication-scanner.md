@@ -384,3 +384,22 @@ fixture workload is not a matched performance comparison; production scanner
 code did not change in this checkpoint. Full repository gates remain pending.
 The three additional Lean files are test-only modules; any eventual area-module
 registration requires owner approval and must not be inferred from this fixture.
+
+### Incremental report after import-observation fixtures
+
+Two bounded scans of the same selection and caller-pinned baseline completed
+in 95.035 and 93.739 seconds. Their full output bytes match, SHA256
+`42000b1f3a5eacf6d262a98c60a97e8d7198faf35b91fc512636510bd292c42d`.
+The report selects 6,664 Lean files and recognizes 114,509 declarations, with
+no file errors or unmatched globs. It records exactly the three new
+`SignatureEnvironment`, `SignatureEnvironmentProbe` and
+`SignatureObservedConsumer` fixtures as added, no changed or removed inputs,
+and no statement or body group delta. Scanner and registry identities are
+unchanged from the caller-pinned baseline. All recognized declaration owners
+remain unknown; these lexical observations do not establish complete Lean
+coverage or live ownership. The runs include three more inputs than the prior
+performance pair and do not constitute a matched before/after performance gate.
+
+Finder and skeptic independently checked the input selection and interpretation
+without Lean. Full reports, commands and timing records are outside Git at
+`/workspace/h62-duplication-scanner-evidence/environment-incremental/`.
