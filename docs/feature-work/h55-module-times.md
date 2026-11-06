@@ -1156,3 +1156,32 @@ Independent read-only source reviews examined these current fixture groups:
 These are source-backed classifications, not observed Lean runs. The other
 standalone rows, generated controls, H56 provenance and the complete execution
 inventory remain open; no fixture is excluded or accepted by this note.
+
+## G25 and Yul fixture rows
+
+`h62_fixture_classify.py` provides a static per-path projection of 63
+tracked standalone candidates: 57 G25 scalar-lowering fixtures and six Yul
+migration fixtures. The G25 rows comprise 46 witness modules and eleven
+aggregator, exporter, totality, fixture, census, axiom or command controls.
+Its private `bounded_lean.py` driver is a source reference, not a verified
+invocation for every row. Witness and guarded-refusal controls are not
+process-level expected failures. In particular `KernelCensus.lean` writes
+both fixed `kernel-census-v424.json` and `premise-structures-v424.json`,
+`AllWitnesses.lean` writes witness verification, and `BoundaryVectors.lean`
+writes external-test input JSON; these effects require owned destinations.
+VM-produced external vectors do not prove source/EVM equivalence.
+
+The Yul `ExportInterfaces` module writes/truncates a selected output only
+when run with module/output arguments; its self-test does not export. The
+other five rows include a serializer fixture, two version-specific string
+controls, a reserved-name candidate and original axiom report; exact current
+drivers and outcomes remain unverified. The full per-path v4 artifact and
+three superseded drafts are hash-bound by
+`tests/h55/module-times/h62-g25-yul-evidence.sha256`. The classifier accepts
+subsets, uses lexical imports and does not establish an authenticated head,
+complete input/side-effect coverage or successful execution.
+
+Independent read-only reviews found that the first draft omitted the second
+KernelCensus output and did not distinguish Yul self-test from export; both
+were corrected and rechecked. No Lean server or build was used. Remaining
+standalone rows, generated drivers and complete H56 execution remain open.
