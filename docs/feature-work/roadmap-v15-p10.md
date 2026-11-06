@@ -2046,3 +2046,25 @@ left most `Θ` inputs existential, its empty branch unguarded, and the docs
 overstated buffer replacement, nonempty output and the flag control. The law
 now pins every input and guards the empty branch, and the wording above is
 corrected.
+
+### G49 `p10_execution_bridge` status (move6)
+
+[`bridge-requests.json`](../../tests/h55/g49-final-theorem/bridge-requests.json)
+routes the P10 family to V15 as `p10_execution_bridge : (x : NativeContext_opcode)
+→ Approved_opcode x → BridgeGoal …` over `G49Final.PassCorrect`
+(`Solidity/Roadmap/G49Final/BridgeGoal.lean`). It is not delivered. Its two
+endpoints do not exist in the repository: there is no concrete pinned-Osaka
+`EvmSpec` (`Solidity/Roadmap/Evm.lean` defines no EVM; only the toy controls in
+`Solidity/Yul/Composition/CorrectnessControls.lean` instantiate `Execution`), and no
+canonical assembly-session `Lang` on the same loaded `Artifact`. The concrete
+assembly `SourceSpec` and session semantics are VY1 inputs, and the unified
+log/emit `Event` extension is a VY4 input
+([assembly correctness instances](assembly-correctness-instances.md)). An
+`EvmSpec` instance over the vendored EvmYul would further need the G06 session,
+failure-point and hash-preimage observations. The Codex lane's four missing
+obligations (endpoints, observation equations and approved coverage, fixed
+environment map and independent resource bound, two-sided failure/prefix
+transport) therefore all remain open. No placeholder `BridgeGoal`, assumed
+certificate or narrowed domain is introduced. `FrozenV1.API` and the
+CALL/RETURNDATA laws above are the existing local evidence that `Local_opcode`
+must retain.
