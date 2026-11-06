@@ -7,11 +7,11 @@ APIs are reused; machine capacity refusal does not claim H16 Source adequacy. -/
 namespace Solidity.Backend.MemoryCopies
 open Evm Evm.Memory
 
-def nestedStoragePathCode {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def nestedStoragePathCode {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (b : Nat) (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive)))))) : List Instr :=
   compileSPath b path ++ nestedStorageHeaderCode
 
-def NestedStoragePathResult {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def NestedStoragePathResult {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (b frame : Nat) (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)
     (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive))))))
     (value : SVal (.ref (.array (.ref (.array (.prim primitive))))))
@@ -30,11 +30,11 @@ def NestedStoragePathResult {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     heapWords grown.heap = heapWords state.heap + nestedStorageParentDemand (nestedStorageLiveRows value)
 
 
-def nestedStoragePathDeclareCode {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def nestedStoragePathDeclareCode {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (b : Nat) (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive)))))) : List Instr :=
   nestedStoragePathCode b path ++ [.mstore (cell (b + Γ.length))]
 
-def NestedStoragePathDeclareResult {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def NestedStoragePathDeclareResult {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (L b frame : Nat) (frag : Frag Γ) (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)
     (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive))))))
     (value : SVal (.ref (.array (.ref (.array (.prim primitive))))))
@@ -54,12 +54,12 @@ def NestedStoragePathDeclareResult {C : Contract} {Γ : Ctx} {primitive : PrimTy
     MVal.copyMToSt grown.heap grown.val = value.strip
 
 
-def nestedStoragePathRebindCode {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def nestedStoragePathRebindCode {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (b : Nat) (destination : Idx Γ (.mem (.array (.ref (.array (.prim primitive))))))
     (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive)))))) : List Instr :=
   nestedStoragePathCode b path ++ [.mstore (cellOf b destination)]
 
-def NestedStoragePathRebindResult {C : Contract} {Γ : Ctx} {primitive : PrimTy} 
+def NestedStoragePathRebindResult {C : Contract} {Γ : Ctx} {primitive : PrimTy}
     (L b frame : Nat) (frag : Frag Γ) (state : State C Γ) (base : Nat → Fin W) (cursor : Fin W) (machine : Machine)
     (destination : Idx Γ (.mem (.array (.ref (.array (.prim primitive))))))
     (path : SPath C Γ (.ref (.array (.ref (.array (.prim primitive))))))
