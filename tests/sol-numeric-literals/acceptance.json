@@ -4014,7 +4014,7 @@
   ],
   "kernel_inventory_sha256": "c51f9c03712a18703c5fb94684ae63d6c2d676c90d1b15ad8b020cdd4f98f5ea",
   "gate_scripts": {
-    "scripts/check-sol-numeric-literals.py": "7e66307eb9f5349d389e8a1f5cb03ddc162c915ab28adfc53e9326f7ca0191ab",
+    "scripts/check-sol-numeric-literals.py": "3e0c6d2e1d1098b26cbee855806c6ce2cd48e957df512923364182eaf83a5a60",
     "tests/primitive-packets-1105/Constants/registration-plan.py": "8ac5a420593edc2b30a5adce0e18afdddaff5ab8fc0084d6006cd592f8bc52e1",
     "tests/primitive-packets-1105/Constants/validate-fresh.py": "d8e75b2a9071e32020ce50394c8b39fb1ca23a1a4900aa9d5a1695d7a8d4a410",
     "tests/primitive-packets-1105/Constants/check.py": "2cc3746b3fa30a15448c9cbca671fddb17d077feae62db3c6a6698baa9145a1d",
@@ -4022,7 +4022,7 @@
     "tests/sol-numeric-literals/packetlib.py": "7f8b39de42eaaf3fccc8ad34c67bf3ba3c53ce661884eda6a6d0926637eeebef",
     "tests/sol-numeric-literals/make-manifest.py": "3ce4d5433433ac97419d29be19c52d2a6a061e9be7360cddbe98aea244e99aa9",
     "tests/sol-numeric-literals/adoption.json": "8d68298bd7990030a58b0dc06f8148a16c7f8f732ec20be56a836630dace131e",
-    "tests/sol-numeric-literals/test-adoption.py": "01080db7de2fdde9f7d9ee87a9973a24914a5ee605457eb3d97e850a05ce4a90",
+    "tests/sol-numeric-literals/test-adoption.py": "72fea71e0d5cb496cfd6c8d85f6724b5af4b8ec3c2496f02072ea8460f934ef4",
     "tests/sol-numeric-literals/generate-wordtable.py": "6616a6a82834c542fd36199dc760f16ccfcd4753a6f66456fd5459007a018ae4",
     "tests/sol-numeric-literals/test-wordtable-annotation.py": "d999e035af7a1a575ccb8cc648c7db681fa2a8f783deff1a73cdb6fd6e9cf184",
     "tests/sol-numeric-literals/generate-fixtures.py": "3262d2638ff1ad0076951f38decaa4195acfb305c672bcd0d8c81c5d9708ff88",
@@ -4031,14 +4031,15 @@
     "tests/sol-numeric-literals/runtime/check.py": "59c1ce71ce994377ef8cc86771a6d1e2fe1e1cbc62c8915a855696fe6e03f65b",
     "tests/sol-numeric-literals/runtime/test-check.py": "1276b7fc76c4808941e689dc6e37fa0d410fa8fd3ac408c8ff9e24c63ce37a91",
     "tests/sol-numeric-literals/runtime/timed.py": "97b7287568f22268fcec1b77847bc088d9deca3307509bebefb35071eb1db665",
-    "tests/sol-numeric-literals/runtime/bin/lake": "0181726d1b58265986df4c26a9b2c853a183736c4456b8f3c2255572bbab2394",
+    "tests/sol-numeric-literals/runtime/bin/lake": "08c86b14b1579dfbd65867fde21830f49beb5a9690180d4d2f0177b31340cb5b",
     "tests/sol-numeric-literals/runtime/lakefile.toml": "3060ca5e6636a012763981beeaa15bea5421bf1cbb99ed87d8ed2ccd3639b3cf",
     "tests/sol-numeric-literals/h35/validate-axioms.py": "7da5767e5457ebfa2691e47d73831544fb3d5a3be4310153bc4cafbf18ba21bf",
     "tests/sol-numeric-literals/h35/prepare-owned-cache.py": "b5a3f208f29d7697626b5a4780fbb9994128cafed82fb0c3b615cc81561d7904",
     "tests/sol-numeric-literals/h35/PrintAxioms.lean": "cd06f8dcadb53a715b5c9260306ed0090f09989adb5f208b30dbc1e8dc3d1139",
     "tests/sol-numeric-literals/h35/PrintAllAxioms.lean": "4a94b3c555cdbbcc9633da8beaccbb19fef33319280a2ec8080ec98188a725ec",
     "tests/sol-numeric-literals/h35/expected.json": "328705b0446aa2b8bb617392d34e6407908199c49c894d3ab361016c4eec5cd9",
-    "tests/sol-numeric-literals/h35/test-h41.py": "a6bc79d648644c09aeb0137dad275d7e52b95276938d5dfc5e03c662c1062349"
+    "tests/sol-numeric-literals/h35/test-h41.py": "a6bc79d648644c09aeb0137dad275d7e52b95276938d5dfc5e03c662c1062349",
+    "tests/sol-numeric-literals/runtime/mcp-server.sh": "ae71b2fd534b1833bf8ba510334f21ea14d276f99a3ad82100792e7649a65746"
   },
   "audit_boundary": "Every imported declaration in owned proof modules, including compiler-generated helpers; Audit has no persistent declarations (run_cmd uses withoutModifyingEnv).",
   "generated_partial_boundary": "underscoreOk._unsafe_rec is a Lean-generated partial implementation helper, isUnsafe=false and no axioms; the kernel definition and proofs remain safe."

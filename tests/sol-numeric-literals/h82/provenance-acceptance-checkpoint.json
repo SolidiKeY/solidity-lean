@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "inherited_tree": "1f1d428a64231f3a2eeb160daaac7000aa54d05c",
+  "published_adoption_unchanged": true,
+  "implementation_acceptance": {
+    "exit": 0,
+    "modules": 42,
+    "authored_declarations": 652,
+    "kernel_declarations": 991,
+    "inhabited_constructors": 32,
+    "scanner_controls": 68,
+    "paired_fixtures": 42
+  },
+  "negative_provenance_controls": "pass including consolidation-only deletion",
+  "review": "Skeptic PASS after F-INHERIT-01 fixed; exact tree comparison retained",
+  "self_test": {
+    "exit": 1,
+    "reason": "H41 cache sources differ",
+    "boundary": "Historical archive approval preserved; no relabeling or replacement of evidence"
+  },
+  "open_obligations": [
+    "static-gates",
+    "coordinator-registration",
+    "full-runtime-gate",
+    "immutable-handoff"
+  ]
+}

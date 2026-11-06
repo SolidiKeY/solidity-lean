@@ -3,7 +3,7 @@
 import os,pathlib,runpy,subprocess,tempfile
 root=pathlib.Path(__file__).resolve().parents[2]
 ns=runpy.run_path(str(root/'scripts/check-sol-numeric-literals.py'))
-published=ns['ADOPTED_MASTER'];validate=ns['validate_foreign_paths']
+published=ns['INHERITED_TREE'];validate=ns['validate_foreign_paths']
 validate(['AGENTS.md'],set(),published)
 with tempfile.TemporaryDirectory(prefix='numeric-adoption-') as directory:
  env=dict(os.environ,GIT_INDEX_FILE=directory+'/index')
@@ -26,6 +26,17 @@ with tempfile.TemporaryDirectory(prefix='numeric-adoption-') as directory:
  try:validate([added],set(),deleted_tree)
  except ValueError as e:assert 'differs from adopted publication' in str(e)
  else:raise AssertionError('deleted inherited foreign addition bypassed scope')
+ # Consolidation-only additions must not disappear from both older diffs.
+ git('read-tree',published)
+ consolidated='scripts/h62/item1/infer-helpers/census.py'
+ for reference in (ns['BASE'],ns['ADOPTED_MASTER']):
+  assert subprocess.run(['git','cat-file','-e',reference+':'+consolidated],cwd=root,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode!=0
+ git('update-index','--force-remove',consolidated)
+ missing_tree=git('write-tree').decode().strip()
+ assert consolidated in ns['changed_paths'](missing_tree)
+ try:validate([consolidated],set(),missing_tree)
+ except ValueError as e:assert 'differs from adopted publication' in str(e)
+ else:raise AssertionError('deleted consolidation-only input bypassed scope')
  # A genuine upstream modification reverted to BASE also vanishes there.
  git('read-tree',published)
  modified='scripts/coord-tools/handoff.sh'

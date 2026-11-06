@@ -37,12 +37,16 @@ def run(command):subprocess.run(command,cwd=ROOT,check=True)
 
 def changed_paths(tree=None):
  target=[tree] if tree else []
- return set(git('diff','--name-only',BASE,*target,'--').splitlines()) | set(git('diff','--name-only',ADOPTED_MASTER,*target,'--').splitlines()) | set(git('ls-files','--others','--exclude-standard').splitlines())
+ return set().union(*(set(git('diff','--no-renames','--name-only',reference,*target,'--').splitlines()) for reference in (BASE,ADOPTED_MASTER,INHERITED_TREE))) | set(git('ls-files','--others','--exclude-standard').splitlines())
+
+# Exact authenticated H82 consolidation checkpoint, separate from published master.
+INHERITED_TREE='1f1d428a64231f3a2eeb160daaac7000aa54d05c'
 
 def validate_foreign_paths(foreign,untracked,tree=None):
  require(not (set(foreign)&set(untracked)),'untracked foreign write')
  if foreign:
-  command=['git','diff','--quiet',ADOPTED_MASTER]+([tree] if tree else [])+['--',*sorted(foreign)]
+  run(['git','merge-base','--is-ancestor',INHERITED_TREE,'HEAD'])
+  command=['git','diff','--quiet',INHERITED_TREE]+([tree] if tree else [])+['--',*sorted(foreign)]
   result=subprocess.run(command,cwd=ROOT)
   require(result.returncode==0,'foreign work differs from adopted publication')
 
