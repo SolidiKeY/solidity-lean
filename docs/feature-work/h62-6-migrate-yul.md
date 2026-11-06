@@ -287,3 +287,28 @@ The full ticket is not staged in this VM and was not inspected here. The
 routing reports unfinished audit gates/51 ownership questions; this lane has
 not taken over witness/producer work. No permission, budget change, merge,
 publication or passing-gate claim is inferred from that routing.
+
+## Passed resource probe; next full clean attempt
+
+`old-horizon-guard-v3` passed: actual fresh `Solidity.Source.Horizon` build,
+exit 0, 658.2082 seconds, sampled peak group RSS 8,399,425,536 bytes,
+minimum estimated availability 7,187,349,504 bytes, no resource stop.
+Both read-only reviewers verified the successful build, source bindings and
+unchanged numeric limits. This is a **non-clean resource probe**, not the full
+old baseline or a migration performance delta. The first two failures remain
+failures in their original directories.
+
+Probe metadata caveat: its `config_sha256` hashes an unused generated probe
+config. The command actually consumes
+`/workspace/migrate-yul-artifacts/old-yul-clean/lakefile.toml`, SHA256
+`224bbb0131bef03069aab1fcc37447c1f6cfc60e280547f768f47ac73521dc19`.
+That checksum matches the preserved original build report and the static
+checkpoint manifest. Additional binding evidence:
+`/workspace/migrate-yul-artifacts/evidence/horizon-v3-config-reference.json`.
+Future arbitrary probes must bind consumed `-f` files explicitly; normal full
+build mode directly consumes the generated config whose hash it records.
+
+Next full gate is a fresh `old-yul-clean-v3 --kind yul --clean`, using empty
+private build outputs and the reviewed v3 driver. No original source, frozen
+statement, toolchain pin, proof budget or numerical resource limit changed.
+All four migration checkpoints remain unfinished; B-KEYSORT-API remains open.
