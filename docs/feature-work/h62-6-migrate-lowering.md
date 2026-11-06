@@ -312,3 +312,45 @@ for this receipt, and the existing serial supervisor was preserved. CollisionBou
 therefore changes from input missing to partial input received, awaiting affected
 validation; Raw and Ctor inputs/comparisons also remain pending. No routing or
 receipt check is treated as original-file edit permission.
+
+## H82 retirement: STOPPED, handoff to migrate-root-gate
+
+Human-approved retirement explicitly selected successor
+solidity-h62-6-20261106/migrate-root-gate and prohibits automatic implementation
+continuation. This lane stopped its verified runner43924 via SIGTERM. The runner
+cleaned process group43946 and supervisor43923 exited without starting the new
+stage. No live owned supervisor/runner/group remains. The old run ended with
+exit125 after9911.253174743s and sampled aggregate peak9010499584 bytes; this
+intentional retirement interruption is NOT an accepted clean baseline or a
+completed performance comparison. It built333 of661 assigned old-toolchain
+modules; zero new-toolchain modules were built. All four checkpoints remain
+incomplete. Historical running-job sections above are superseded by this section.
+
+The later generic H82 standing message says Continue, conflicting with the
+specific retirement/accepted-successor instruction. QRETIRE1 was raised; no
+reply was available during preservation. No proof work resumed. The latest
+standing rules and retirement text are both retained in the handoff packet.
+
+PAUSED cannot be requested with the exposed goal tool: only complete|blocked
+outcomes exist. No pause/get-goal tool is exposed. Do not claim a PAUSED tool
+transition or goal completion. The final exported report records the actual
+available halt-tool outcome and the capability failure; no automatic
+implementation continuation is authorized. No new/reset goal or VM was created.
+
+The authenticated patch/bundle includes files under
+`tests/h62/item6/migrate-lowering/handoff/`: the full visible original assignment
+transcribed from this thread, original goal objective, original work/backfill
+queues, exact664-entry scope manifest (661 original Lean files plus three support
+paths), owner map, later H82 messages, all open items/waits, and SHA256SUMS.
+No local raw launcher/thread export was found. The saved visible assignment is
+honestly distinguished from unestablished byte identity to launcher hash762a63…;
+its actual hash is recorded. This is not a fabricated matching launcher export.
+
+No H71 push grant was supplied or found in the available records. This lane did
+not push any branch; master was never pushed or merged. All original production
+sources, frozen statements, budgets and the tracked toolchain remain unchanged.
+Successor is responsible for integrating the final stopped head. Original VM,
+branch, source tree, build/cache diagnostics and bulk evidence are preserved.
+The final cumulative exports and closed evidence archive are under
+`/workspace/migrate-lowering-artifacts/retirement/`; the exported report supplies
+exact final head, clean/dirty status, absolute paths and checksums.
