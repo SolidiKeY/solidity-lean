@@ -4,8 +4,8 @@
   "publishedProducerApis": "89373e34cdfd6bb5db7054b1c204d01edffc5fa7",
   "counts": {
     "knownKinds": 58,
-    "existingFixtures": 78,
-    "sourceAnchoredFixtures": 71,
+    "existingFixtures": 77,
+    "sourceAnchoredFixtures": 70,
     "selectedFixtures": 8,
     "modernKindsWithAnchoredWitnesses": 57
   },
@@ -1761,30 +1761,30 @@
       "nodeType": "NewExpression",
       "existingSourceWitnesses": [
         {
-          "fixture": "tests/solc/CanonicalReaderContract.ast.json",
-          "fixtureSha256": "65a1a2a31162a520528dc38fa1cee44fd897b945080d6e10c119f29c986c42b9",
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
           "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
           "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "anchors": [
             {
-              "sourceName": "tests/solc/CanonicalReaderContract.sol",
-              "sourceSha256": "400be2bd165ebea28af2245318e1bace3b474dde3fec1bc12801ca3cecabda49"
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
             }
           ],
-          "pointer": "/ast/nodes/1/nodes/5/body/statements/0/initialValue/expression",
+          "pointer": "/ast/nodes/8/nodes/0/body/statements/0/expression/expression/expression",
           "function": {
-            "id": 84,
-            "name": "memoryArray",
-            "src": "789:143:0",
-            "line": 29
+            "id": 162,
+            "name": "make",
+            "src": "1092:109:0",
+            "line": 46
           },
           "contract": {
-            "id": 85,
-            "name": "CanonicalReaderContract"
+            "id": 296,
+            "name": "WorldFactory"
           },
           "nodeId": null,
-          "src": "883:13:0",
-          "line": 30
+          "src": "1165:16:0",
+          "line": 47
         }
       ],
       "status": "source-anchored fixture occurrence",
@@ -2324,30 +2324,30 @@
           "line": 17
         },
         {
-          "fixture": "tests/solc/TransientSource.ast.json",
-          "fixtureSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
-          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
-          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "anchors": [
             {
-              "sourceName": "tests/solc/TransientSource.sol",
-              "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e"
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
             }
           ],
-          "pointer": "/ast/nodes/1/nodes/5/body/statements/2/clauses/0",
+          "pointer": "/ast/nodes/8/nodes/1/body/statements/0/clauses/0",
           "function": {
-            "id": 101,
-            "name": "selfSharing",
-            "src": "468:186:0",
-            "line": 16
+            "id": 188,
+            "name": "trySuccess",
+            "src": "1206:213:0",
+            "line": 49
           },
           "contract": {
-            "id": 154,
-            "name": "TransientSource"
+            "id": 296,
+            "name": "WorldFactory"
           },
           "nodeId": null,
-          "src": "577:21:0",
-          "line": 19
+          "src": "1304:65:0",
+          "line": 50
         }
       ],
       "status": "source-anchored fixture occurrence",
@@ -2383,30 +2383,30 @@
           "line": 17
         },
         {
-          "fixture": "tests/solc/TransientSource.ast.json",
-          "fixtureSha256": "96e23c1debf4aa351a90d529dc18236d762cc072e860762c66710eb344ac0b9d",
-          "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
-          "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+          "fixture": "tests/solc/ContractWorld.ast.json",
+          "fixtureSha256": "40838a2e74e4e0bb8de1b2d74afb5b37264daf634e31f8e0a629fbb3356e4dad",
+          "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+          "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
           "anchors": [
             {
-              "sourceName": "tests/solc/TransientSource.sol",
-              "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e"
+              "sourceName": "tests/solc/ContractWorld.sol",
+              "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
             }
           ],
-          "pointer": "/ast/nodes/1/nodes/5/body/statements/2",
+          "pointer": "/ast/nodes/8/nodes/1/body/statements/0",
           "function": {
-            "id": 101,
-            "name": "selfSharing",
-            "src": "468:186:0",
-            "line": 16
+            "id": 188,
+            "name": "trySuccess",
+            "src": "1206:213:0",
+            "line": 49
           },
           "contract": {
-            "id": 154,
-            "name": "TransientSource"
+            "id": 296,
+            "name": "WorldFactory"
           },
           "nodeId": null,
-          "src": "561:46:0",
-          "line": 19
+          "src": "1270:143:0",
+          "line": 50
         }
       ],
       "status": "source-anchored fixture occurrence",
@@ -2875,7 +2875,7 @@
     "tests/solc/source-units/SourceUnits.ast.json",
     "tests/solc/SourceAdmission.ast.json",
     "tests/solc/SliceReferenceCopies.ast.json",
-    "tests/solc/CanonicalReaderContract.ast.json",
+    "tests/solc/ContractWorld.ast.json",
     "tests/solc/Group07.ast.json",
     "tests/solc/TransientSource.ast.json"
   ],

@@ -181,6 +181,15 @@ Coordinator relay of user decisions on this lane's questions:
     hashes changed here. Now that identifiers and `tryCall` are present,
     re-observing them may change outcomes; for example, the memory reader
     requires `typeIdentifier`. That re-observation is the owner's.
+  - Finder correction: running the owner's `fixture-census.py` as a check
+    regenerated `fixture-census.json` (counts and two witnesses changed). That
+    file was restored to its parent and only the sha substitution reapplied, so
+    every re-pinned file now differs from its parent only in `fixtureSha256`
+    values. Owner generators are not to be run on the owner's files.
   - Not rewritten: the historical `tests/upstream/*.json` validation receipts
-    (10 files) and the two h28-terra manifests. They record what was validated
-    at their time.
+    (10 files, old sha256; no gate asserts them). Old FNV hashes also remain in
+    uncompiled text records: `tests/upstream/revert-power/ConditionalBefore.lean.txt`,
+    `tests/upstream/step08-transient-world/baseline-probes.txt`,
+    `docs/feature-work/roadmap-g06-osaka.md` and the intentional old-bytes record
+    `tests/cr-canonical-reader/H68Pairs0.lean.txt`. The two h28-terra manifests
+    list fixture paths only and hold no hashes.
