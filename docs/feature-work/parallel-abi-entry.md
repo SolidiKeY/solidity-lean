@@ -199,3 +199,28 @@ coherence, reached-entry demand/guard composition, emitted decoder selection and
 whole G40 execution remain open. Standalone missing words still zero-pad; this
 does not assert that truncated guarded entries succeed. MRS remains a consumer
 of the open whole-decoder result.
+
+### Raw-view checkpoint validation
+
+At source head 90a50be6d711ddc23ddbf812bb62886c3cbccfd0, the checkpoint
+touched gate passed in 102 seconds and the library build passed all 6,049 jobs
+in 1,482 seconds. Trust passed with 6,468 sources, 289 inventoried sites and
+zero findings; orphan, layer, generated-root and fragment checks also passed.
+The checkpoint remains failed: documentation paths report four missing
+references in other owners' files, and axiom pins report zero errors but
+4,483 unrecorded changes. An external proposal records the five new owned
+standard-axiom pins; the shared inventory and checker are unchanged.
+
+Independent read-only finder and skeptic reviews verified the exact seven-pass,
+two-failure outcome and the five-pin proposal. Actual tools are Lean 4.24.0
+(commit 797c613) and Lake 5.0.0-src+797c613; the explicit KeySort build passed
+(two jobs). This is not RUNTIME_GATE_PASS, full run-lean validation or whole
+G40/G46 completion. No unchanged heavy failed gate is scheduled again.
+
+The old inactive helper cache was consolidated by verified no-overwrite copying
+and duplicate-only cleanup; missing input mappings were added after the gate.
+Six existing differing mappings were preserved. Cache conditions changed
+during this run, so its timing is not a matched-cache before/after comparison.
+The canonical retired-member thread-copy transcription remains e270551e; the
+unavailable historical 22740ba5 rendering is UNVERIFIABLE under H30/H86 and
+is neither claimed to match nor reconstructed.
