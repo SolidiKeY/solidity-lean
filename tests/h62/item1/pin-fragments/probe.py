@@ -68,6 +68,55 @@ class FragmentProbes(unittest.TestCase):
             self.assertTrue(any("changed on both sides" in note for note in notes))
             self.assertEqual(file.read_bytes(), before)
 
+    def test_cleanup_removes_stale_fragments_and_keeps_live_pins(self):
+        with tempfile.TemporaryDirectory() as root:
+            write_fragments(root, {"Solidity/Old/Nested.lean:x": [], "Solidity/Keep.lean:a": []})
+            write_fragments(root, {"Solidity/Keep.lean:a": ["propext"]})
+            self.assertFalse((pathlib.Path(root) / FRAGMENTS / "Solidity/Old").exists())
+            text, errors = generated(root)
+            self.assertEqual(errors, [])
+            self.assertEqual(json.loads(text), {"Solidity/Keep.lean:a": ["propext"]})
+
+    def test_bad_writer_keys_refused_before_cleanup(self):
+        for key in ("missing-delimiter", "../escape.lean:x", "Solidity/../escape.lean:x", "Solidity/F.lean:"):
+            with self.subTest(key=key), tempfile.TemporaryDirectory() as root:
+                write_fragments(root, {"Solidity/Keep.lean:x": []})
+                live = pathlib.Path(root) / FRAGMENTS / "Solidity/Keep.json"
+                before = live.read_bytes()
+                with self.assertRaises(subprocess.CalledProcessError):
+                    write_fragments(root, {key: []})
+                self.assertEqual(live.read_bytes(), before)
+
+    def test_cleanup_rejects_symlink_without_touching_target(self):
+        with tempfile.TemporaryDirectory() as root, tempfile.TemporaryDirectory() as outside:
+            directory = pathlib.Path(root) / FRAGMENTS
+            directory.mkdir(parents=True)
+            victim = pathlib.Path(outside) / "victim.json"
+            victim.write_text("preserve")
+            (directory / "link").symlink_to(outside, target_is_directory=True)
+            with self.assertRaises(subprocess.CalledProcessError):
+                write_fragments(root, {})
+            self.assertEqual(victim.read_text(), "preserve")
+
+    def test_invalid_combined_inputs_are_refused_without_mutation(self):
+        bad = ('{"Solidity/F.lean:x": [], "Solidity/F.lean:x": ["propext"]}',
+               '{"../escape.lean:x": []}', '{"missing": []}', '{"Solidity/F.lean:x": null}')
+        for combined in bad:
+            with self.subTest(combined=combined), tempfile.TemporaryDirectory() as root:
+                file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
+                file.parent.mkdir(parents=True)
+                file.write_text('{"Solidity/F.lean:x": []}\n')
+                before = file.read_bytes(); notes = []; old = os.getcwd()
+                try:
+                    os.chdir(root)
+                    accepted = fragments.apply_json(FixtureTree(root), "inventory.json", FRAGMENTS,
+                        '{"Solidity/F.lean:x": []}', combined, "lane", notes, False)
+                finally:
+                    os.chdir(old)
+                self.assertFalse(accepted)
+                self.assertTrue(notes)
+                self.assertEqual(file.read_bytes(), before)
+
     def test_duplicate_json_key_is_rejected(self):
         with tempfile.TemporaryDirectory() as root:
             file = pathlib.Path(root) / FRAGMENTS / "Solidity/F.json"
