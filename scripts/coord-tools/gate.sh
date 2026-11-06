@@ -96,7 +96,7 @@ PY
   [ -z "$targets" ] || serial_lake build $targets
 }
 if [ "$mode" = meaning ]; then
-  run_gate meaning node scripts/check-meaning.mjs
+  run_gate meaning node scripts/check-meaning.mjs --build
   exit "$failed"
 fi
 if [ "$mode" = per-file ]; then
@@ -122,7 +122,11 @@ else
     run_gate doc-paths bash scripts/check-doc-paths.sh
     run_gate axiom-pins node scripts/check-axiom-pins.mjs
   fi
-  run_gate meaning node scripts/check-meaning.mjs
+  if [ "$mode" = touched ]; then
+    run_gate meaning node scripts/check-meaning.mjs --build --touched
+  else
+    run_gate meaning node scripts/check-meaning.mjs --build
+  fi
   if [ "$mode" = full ]; then
     run_gate testsuite bash scripts/check-testsuite.sh
     run_gate corpus bash scripts/check-corpus.sh

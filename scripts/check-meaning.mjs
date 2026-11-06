@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// H64: source policy plus live #print-axioms dependency checks. Run after builds.
+// H64: source policy, optional bounded artifact preparation, and live axiom checks.
 import { execFileSync, spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
@@ -75,8 +75,116 @@ ${Array.from({length: Math.ceil(frozen.length / 100)}, (_, i) => '  let frozen :
 `;
 }
 
+// One inventory owns both build requests and audit imports. Explicit olean
+// facets avoid unrelated executables, native code and optional package roots.
+export function productionPackages(root, files) {
+  return [
+    [root, [...new Set(files.filter(p => /^Solidity\//.test(p) && !p.startsWith('Solidity/Scratch/')).map(p => p.slice(0, -5).replaceAll('/', '.')))].sort()],
+    [join(root, 'Bridge'), [...new Set(files.filter(p => /^Bridge\/Solidity(?:Bridge|Velvet)\//.test(p)).map(p => p.slice(7, -5).replaceAll('/', '.')))].sort()],
+  ];
+}
+
+// Read import headers, including 4.24's public/meta/all forms and multiline
+// module lists. Stop at the first non-header command; comments are blanked.
+export function headerImports(src) {
+  const tokens = blankLean(src).match(/«[^»]*»|[\p{L}_][\p{L}\p{N}_'.]*|[^\s]/gu) ?? [];
+  const out = [];
+  let i = 0;
+  if (tokens[i] === 'module') i++;
+  if (tokens[i] === 'prelude') i++;
+  const keywords = new Set(['import', 'public', 'meta', 'namespace', 'section', 'open', 'export',
+    'set_option', 'attribute', 'variable', 'universe', 'noncomputable', 'private', 'protected',
+    'def', 'abbrev', 'theorem', 'lemma', 'instance', 'class', 'structure', 'inductive',
+    'axiom', 'opaque', 'example', 'initialize', 'builtin_initialize', 'syntax', 'macro', 'elab']);
+  while (i < tokens.length) {
+    if (tokens[i] === 'public') i++;
+    if (tokens[i] === 'meta') i++;
+    if (tokens[i++] !== 'import') break;
+    if (tokens[i] === 'all') i++;
+    while (i < tokens.length && !keywords.has(tokens[i]) && /^[\p{L}_«]/u.test(tokens[i])) out.push(tokens[i++]);
+  }
+  return out;
+}
+
+// Include roots as traversal vertices even though only audited modules are
+// returned as build targets. Dependency closure is needed by Lake as well.
+export function touchedProduction(root, files, changed) {
+  const modules = new Map();
+  for (const [cwd, names] of productionPackages(root, files)) {
+    for (const name of names) modules.set(name, join(cwd, name.replaceAll('.', '/') + '.lean'));
+  }
+  const production = new Set(modules.keys());
+  for (const file of files.filter(p => !p.includes('/') || /^Bridge\/[^/]+\.lean$/u.test(p))) {
+    modules.set(file.replace(/^Bridge\//u, '').slice(0, -5), join(root, file));
+  }
+  const reverse = new Map(), forward = new Map(), selected = new Set();
+  for (const [name, file] of modules) {
+    if (changed.has(file.slice(root.length + 1))) selected.add(name);
+    const imports = headerImports(readFileSync(file, 'utf8'));
+    forward.set(name, imports);
+    for (const dep of imports) {
+      if (!reverse.has(dep)) reverse.set(dep, new Set());
+      reverse.get(dep).add(name);
+    }
+  }
+  const pending = [...selected];
+  while (pending.length) for (const name of reverse.get(pending.pop()) ?? []) {
+    if (!selected.has(name)) { selected.add(name); pending.push(name); }
+  }
+  // A root reached only as a dependent is traversal-only. Pulling all of
+  // that root's imports here would turn every core edit into a full build.
+  const dependencies = [...selected].filter(name => production.has(name));
+  const visited = new Set();
+  while (dependencies.length) {
+    const current = dependencies.pop();
+    if (visited.has(current)) continue;
+    visited.add(current);
+    for (const name of forward.get(current) ?? []) if (modules.has(name)) {
+      selected.add(name);
+      dependencies.push(name);
+    }
+  }
+  return new Set([...selected].filter(name => production.has(name)));
+}
+
+// weakLeanArgs preserve artifact hashes. Both Lake's scheduler and each Lean
+// child are single-threaded. The temporary config lives beside lakefile.toml
+// so relative dependency paths retain their meaning.
+export function serialConfig(text) {
+  return text.split(/(?=^\[\[lean_(?:lib|exe)\]\])/mu).map(part => {
+    if (!part.startsWith('[[lean_')) return part;
+    if (/^weakLeanArgs\s*=/mu.test(part)) return part.replace(/(weakLeanArgs\s*=\s*\[)([^\]]*)(\])/u,
+      (_, a, b, c) => a + b + (b.trim() ? ', ' : '') + '"-j1"' + c);
+    return part.replace('\n', '\nweakLeanArgs = ["-j1"]\n');
+  }).join('');
+}
+
+export function buildProduction(cwd, imports, run) {
+  if (!imports.length) return 0;
+  const dir = mkdtempSync(join(cwd, '.coord-h64-'));
+  const config = dir + '.toml';
+  // Keep the config in the package root, including for Bridge path dependencies.
+  try {
+    writeFileSync(config, serialConfig(readFileSync(join(cwd, 'lakefile.toml'), 'utf8')));
+    // Never compile external libraries or a path dependency with its original
+    // threading options. They must already be fresh. This also prevents a
+    // Bridge build from silently rebuilding core outside its serial config.
+    const selected = new Set(imports), prerequisites = new Set();
+    for (const name of imports) for (const dep of headerImports(readFileSync(join(cwd, name.replaceAll('.', '/') + '.lean'), 'utf8'))) {
+      if (!selected.has(dep) && !/^(?:Init|Lean|Std)(?:\.|$)/u.test(dep)) prerequisites.add(dep);
+    }
+    if (prerequisites.size) {
+      const fresh = run(cwd, ['-f', config, '--rehash', '--no-build', 'build', ...[...prerequisites].sort().map(m => '+' + m + ':olean')]);
+      if (fresh) return fresh;
+    }
+    return run(cwd, ['-f', config, '--rehash', 'build', ...imports.map(m => '+' + m + ':olean')]);
+  } finally { rmSync(config, { force: true }); rmSync(dir, { recursive: true, force: true }); }
+}
+
 export function main(args = process.argv.slice(2)) {
-  if (args.some(x => x !== '--source-only' && !x.startsWith('--base='))) throw new Error('usage: check-meaning.mjs [--base=REF] [--source-only]');
+  if (args.some(x => !['--source-only', '--build', '--touched'].includes(x) && !x.startsWith('--base='))) throw new Error('usage: check-meaning.mjs [--base=REF] [--source-only | --build [--touched]]');
+  if (args.includes('--touched') && !args.includes('--build')) throw new Error('--touched requires --build');
+  if (args.includes('--source-only') && args.includes('--build')) throw new Error('--source-only cannot build');
   const start = performance.now();
   const base = args.find(x => x.startsWith('--base='))?.slice(7) ?? process.env.GATE_BASE ?? 'origin/master';
   const sourceOnly = args.includes('--source-only');
@@ -107,15 +215,22 @@ export function main(args = process.argv.slice(2)) {
     if (roots.status !== 0) return roots.status ?? 1;
     const dir = mkdtempSync(join(tmpdir(), 'h64-meaning-'));
     try {
-      const packages = [
-        [root, [...new Set(files.filter(p => /^Solidity\//.test(p) && !p.startsWith('Solidity/Scratch/')).map(p => p.slice(0, -5).replaceAll('/', '.')))]],
-        [join(root, 'Bridge'), [...new Set(files.filter(p => /^Bridge\/Solidity(?:Bridge|Velvet)\//.test(p)).map(p => p.slice(7, -5).replaceAll('/', '.')))]],
-      ];
+      const packages = productionPackages(root, files);
       const run = (cwd, args) => {
         const result = spawnSync('lake', args, { cwd, stdio: 'inherit', env: { ...process.env, LEAN_NUM_THREADS: '1' } });
         if (result.error) throw result.error;
         return result.status ?? 1;
       };
+      if (args.includes('--build')) {
+        const touched = args.includes('--touched') ? touchedProduction(root, files,
+          new Set([...changed, ...files.filter(p => !tracked.has(p))])) : null;
+        for (const [cwd, imports] of packages) {
+          const targets = touched ? imports.filter(m => touched.has(m)) : imports;
+          console.log(`meaning: prepare ${targets.length} production targets in ${cwd}; Lake rebuilds stale artifacts only`);
+          const built = buildProduction(cwd, targets, run);
+          if (built) return built;
+        }
+      }
       const currentPins = collect(root);
       for (const [cwd, imports] of packages) {
         // No compiler runs here: stale/missing artifacts fail closed. Build
