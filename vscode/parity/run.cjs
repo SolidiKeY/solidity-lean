@@ -65,13 +65,14 @@ async function launch(config,options) {
     'dafny.verificationVirtualCores':config.workers,'dafny.verificationCachingPolicy':cache,'dafny.verificationTimeLimit':20,
     'dafny.automaticVerification':'onchange','dafny.displayGutterStatus':true,'dafny.markGhostStatements':true} : {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
+  if(config.target==='dafny'&&process.platform==='linux'){const sdk=dirname(resolve(options.dotnet));settings['terminal.integrated.env.linux']={PATH:sdk+':${env:PATH}',DOTNET_ROOT:sdk};}
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
   if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
-  const hostConfig={...config,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  const hostConfig={...config,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
   const logfile=openSync(join(config.dir,'editor.log'),'w');

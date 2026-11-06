@@ -256,11 +256,16 @@ test('terminal observer retains real output/exit and stops subscriptions on rest
 
 test('paired default custom suite cannot omit its partial native trace observation',()=>{
  const id='command-custom-default-build-keybinding',config={runId:'pair',target:'dafny',suite:'custom-default-commands'},report={schemaVersion:1,...config,status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
- assert.ok(hostEvidenceErrors(report,config).includes('missing native trace observation'));
- assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,{id:'native-trace-show-copy-hide',status:'partial'}]},config),[]);
+ assert.ok(hostEvidenceErrors(report,config).includes('missing native observation native-trace-show-copy-hide'));
+ assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,...['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action'].map(id=>({id,status:'partial'}))]},config),[]);
 });
 test('terminal execution IDs cannot combine output and exit from distinct executions (injected boundary)',async()=>{
  let start,end;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
  const observer=observe(vscode,(kind,data)=>records.push({kind,data}),'/unused',null,'/owned');
  try{const make=()=>({commandLine:{value:'build /owned/main.dfy'},async *read(){yield 'data';}}),a=make(),b=make();start({execution:a});start({execution:b});end({execution:b,exitCode:3});end({execution:a,exitCode:0});await new Promise(r=>setImmediate(r));const starts=records.filter(r=>r.kind==='terminal.start');assert.notEqual(starts[0].data.executionId,starts[1].data.executionId);for(const [executionId,exit] of [[starts[0].data.executionId,0],[starts[1].data.executionId,3]]){assert.equal(records.find(r=>r.kind==='terminal.end'&&r.data.executionId===executionId).data.exitCode,exit);assert.ok(records.some(r=>r.kind==='terminal.output.end'&&r.data.executionId===executionId));}observer.restore();const length=records.length;start({execution:a});end({execution:a,exitCode:0});assert.equal(records.length,length);}finally{observer.restore();}
+});
+
+test('terminal SDK observation strips native shell control sequences but rejects suffix paths or wrong versions',()=>{
+ const {terminalSdkIdentity}=require('../parity/core.cjs'),raw='\x1b]633;C\x07'+process.execPath+'\r\n\x1b[?1h\x1b='+process.version+'\r\n';
+ const observed=terminalSdkIdentity(raw,process.execPath,process.version);assert.equal(observed.executable,require('node:fs').realpathSync(process.execPath));assert.match(observed.sha256,/^[a-f0-9]{64}$/);assert.throws(()=>terminalSdkIdentity('/other'+process.execPath+'\n'+process.version,process.execPath,process.version),/differs/);assert.throws(()=>terminalSdkIdentity(process.execPath+'\nwrong',process.execPath,process.version),/differs/);
 });

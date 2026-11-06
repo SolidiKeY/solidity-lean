@@ -1,6 +1,6 @@
 // Concrete typed-model execution and compiler artifacts; never verification verdicts.
 'use strict';
-const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process'),{createHash}=require('node:crypto');
+const fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process'),{createHash,randomUUID}=require('node:crypto');
 const {terminateTree}=require('./backend.cjs'),{trackChild,waitForClose,waitForGroup}=require('./child-lifetime.cjs'),{processState}=require('./process-state.cjs');
 const digest=text=>createHash('sha256').update(text).digest('hex');
 function selection(text){const parts=text.split('::');if(parts.length!==2||!/^[$A-Za-z_][$\w]*$/.test(parts[0])||!parts[1].trim())throw Error('Use Contract::function or Contract::function(type,...)');return{contract:parts[0],function:parts[1].trim()};}
@@ -61,7 +61,8 @@ function install(vscode,context,{settings,output,cancelVerification}){
  const isCurrent=(doc,version,text,epoch)=>epochs.get(doc.uri.toString())===epoch&&!disposed&&!doc.isClosed&&doc.version===version&&doc.getText()===text&&vscode.window.activeTextEditor?.document===doc&&vscode.workspace.isTrusted;
  const command=operation=>async()=>{
   const doc=vscode.window.activeTextEditor?.document;if(disposed||!vscode.workspace.isTrusted||doc?.uri.scheme!=='file'||!doc.uri.fsPath.endsWith('.sol'))return;
-  const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri);let version=doc.version,text=doc.getText(),job;
+  const uri=doc.uri.toString();documents.set(uri,doc);touch(uri);const epoch=epochs.get(uri),commandId=randomUUID();let version=doc.version,text=doc.getText(),job;
+  const receipt=(phase,extra={})=>output.appendLine(JSON.stringify({schemaVersion:1,kind:'source-command',commandId,operation,phase,uri,version,sourceHash:digest(text),sourceSession:epoch,verification:'not-run',...extra}));
   try{
    if(doc.isUntitled||!await doc.save())return;version=doc.version;text=doc.getText();let input={};
    if(operation==='buildCustomArgs'){
@@ -75,16 +76,16 @@ function install(vscode,context,{settings,output,cancelVerification}){
    }
    if(!isCurrent(doc,version,text,epoch))return;if(fs.readFileSync(doc.uri.fsPath,'utf8')!==text)throw Error('Save the source before running commands');
    await stop(uri);if(!isCurrent(doc,version,text,epoch))return;cancelVerification?.(doc.uri);
-   const abort=new AbortController();job={abort,document:doc,version,text};output.show(true);output.appendLine(operation+': '+doc.uri.fsPath);
+   const abort=new AbortController();job={abort,document:doc,version,text};output.show(true);output.appendLine(operation+': '+doc.uri.fsPath);receipt('started');
    job.promise=execute(operation,settings(doc),doc.uri.fsPath,input,abort.signal);jobs.set(uri,job);
    job.promise.catch(error=>{if(error.cleanupFailed&&!retiring.has(uri)){const poison=Promise.reject(error);poison.catch(recordFailure);retiring.set(uri,poison);}});
    try{
     const report=await job.promise;if(!isCurrent(doc,version,text,epoch)||abort.signal.aborted||jobs.get(uri)!==job)return;
-    if(report.sourceHash!==digest(text))throw Error('Source changed before command admission');output.appendLine(JSON.stringify(report,null,2));if(report.passed===false)vscode.window.showErrorMessage('Concrete '+operation+' failed; see output. No verification verdict was produced.');return report;
+    if(report.sourceHash!==digest(text))throw Error('Source changed before command admission');output.appendLine(JSON.stringify(report,null,2));receipt('completed');if(report.passed===false)vscode.window.showErrorMessage('Concrete '+operation+' failed; see output. No verification verdict was produced.');return report;
    }finally{if(jobs.get(uri)===job)jobs.delete(uri);}
   }catch(error){
    if(error.cleanupFailed)recordFailure(error);
-   if(error.code!=='CANCELLED'&&isCurrent(doc,version,text,epoch)&&!job?.abort.signal.aborted)vscode.window.showErrorMessage(error.message);
+   if(error.code!=='CANCELLED'&&isCurrent(doc,version,text,epoch)&&!job?.abort.signal.aborted){if(job)receipt('failed',{message:error.message,code:error.code||'SOURCE_COMMAND_FAILED'});vscode.window.showErrorMessage(error.message);}
   }
  };
  function dispose(){if(disposal)return disposal;disposed=true;disposal=stop();return disposal;}

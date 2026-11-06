@@ -1175,3 +1175,39 @@ Classification-only strict is not timed strict; no RUNTIME_GATE_PASS. No heavy
 resource-failing gate retried, no goal state changed, no push/merge/PR. Exact-head
 lightweight gates and full-scope handoff are exported under
 `/workspace/dafny-parity-native-f6-20261106/`.
+
+### Existing SDK terminal provisioning and owned source failures (2026-11-06)
+
+The first obligation remains partial. Pinned CsharpBackend emits `net8.0`; the
+existing SDK8.0.427/.NET8.0.33 is now exposed through supported isolated terminal
+environment settings. The actual shell resolves that exact canonical binary and
+version; its hash is recorded. No new SDK/target/profile or Dafny argument change.
+Native Linux F6 now builds successfully after one verified obligation. Separate
+registered upstream Run/Test actions produce the expected real output and exit0,
+using upstream's existing default arguments. Their `--no-verify` is an observed
+upstream default, not a locally selected proof profile. Native macOS and local
+runtime/EVM/kernel correspondence remain pending. Owned descendant readback is
+empty after retirement, including the real dotnet build server.
+
+The unchanged annotated imported local custom fixture still fails the admission
+guard. Current admitted source commands now publish structured started/completed/
+failed receipts bound to command ID, session, URI/version/source hash and explicit
+verification-not-run. The observer reports that real rejection promptly rather
+than waiting for success output. Cancellation/edit/config/close/reopen/disposal
+and registered restart regressions reject stale failures; injected boundaries
+are labeled. No specification admission was bypassed or fixture stripped.
+
+[The checksum manifest](dafny-sdk-failure-evidence-manifest.json) binds VM-only
+provenance, native traffic/artifacts, failures and source review receipts. Finder
+identified weak SDK substring attribution, repaired with exact canonical identity.
+Finder/skeptic final reviews found no further concrete defect. Retained attempts
+include ANSI SDK parsing, CRLF workload mismatch and a wrong-root restart fixture;
+none is counted as a pass. Source reviews do not replace paired row judgments.
+
+All486 row IDs/order, frozen270 and original gates/budgets remain unchanged.
+Full build/TestSuite/timed strict/KeySort, verifier-owned positioned metadata,
+complete paired rendered/lifecycle/performance/adversarial/scaling matrices and
+both fresh judges per row remain unfinished. Classification-only strict is not
+timed strict; no RUNTIME_GATE_PASS, goal mutation, heavy failing retry or
+push/merge/PR. Exact-head handoff/checks live under
+`/workspace/dafny-parity-sdk-failure-20261106/`.
