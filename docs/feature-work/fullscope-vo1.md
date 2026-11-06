@@ -1262,3 +1262,113 @@ TestSuite (`✔ [5832/5833] Built SolkeyTestSuite`), with no Lean errors. `check
 covers 131". These are storage-taclet annotation rows and `save<[Struct<[..]>` tokens
 in the SolKey rule table. This lane changes no `Calculus/`, `scripts/` or SolKey pin
 file, so this is open for the rule-table/SolKey lanes, not for vo1.
+
+## Follow-up 2 (H66): X06 memory optimizations — 2026-11-06
+
+Scope approved by the user (2026-11-06). Three new modules, all over the existing
+intrinsic lowering IR and the existing O01 interface (`Pass`, `Preserves SameRun`); no
+signature of `Optimizer/Pass.lean` changed. "Waits for X06 aliasing facts" in the
+sections above is superseded: the alias analysis below is this lane's own, proved
+against the typed run, with no assumed aliasing facts.
+
+| Pass | Module | Headline theorem (exact) | Kind |
+|---|---|---|---|
+| redundant load elimination | `Optimizer/Loads.lean` | `Prog.rle_empty_runC P : Prog.runC (Prog.rle [] P) = Prog.runC P`; `Prog.rle_runC E P σ (hE : LEnt.Holds E σ)` | run equality |
+| dead store elimination | `Optimizer/DeadStore.lean` | `Prog.dstore_runC P : Prog.runC (Prog.dstore P) = Prog.runC P`; `sstore_dead_runC`, `mstore_dead_runC` | run equality |
+| loop-invariant code motion | `Optimizer/LICM.lean` | `licm_runC a c x e rest (h : LicmOk c x e rest)`; `Prog.licm_runC P : Prog.runC (Prog.licm P) = Prog.runC P` | run equality |
+
+All three are equalities of the typed run (value or halt kind, final storage, heap and its
+typing, ledger, locals), not refinements: no pass removes a behaviour, including errors.
+O01 instances: `rle_preserves`, `dstore_preserves`, `licm_preserves`.
+
+### Redundant load elimination (`Prog.rle`)
+
+Static loads (`Load`): a primitive state variable `v` (`.read (.root v _)`), a primitive
+member `m.f` of a memory local (`.readMem (.field (.var m _) f _)`), a primitive element
+`m[k]` of a memory local at a simple index. Entries `LEnt` record "load `ld` evaluates to
+the simple value `s`" (invariant `LEnt.Holds`); they are created by `x = ld;`/`T x = ld;`
+(holder `x`) and by `v = s;`, `m.f = s;`, `m[k] = s;` with `s` simple (store-to-load
+forwarding), and a later occurrence of a recorded load in any expression position of
+`x = …`, `T x = …`, `require`, `assert`, `if` conditions, storage and memory store values
+is replaced by the holder.
+
+Alias analysis (each rule proved): a local assignment kills entries whose holder or
+location reads the local (`LEnt.reads`); a storage write `l = …` kills only storage
+entries of the state variable `l` starts at (`Loc.root?`, `Loc.resolveT_rootName`,
+`Storage.find_write_other`; a write through a storage alias kills every storage entry)
+and no memory entry; a memory write kills only the memory entries it may alias
+(`MLoc.apartB`, sound by `MLoc.addrT_apart` and `Heap.readAddr_writeAddr_apart`):
+distinct member names of *any* two objects (two memory locals may name the same
+struct), a member and an element, and two elements at distinct literal indices are
+apart; a memory write keeps every storage entry. `require`, `assert` and declarations
+keep entries; every other statement, and the exit of a branch, block or loop, clears
+them; a loop body starts empty. Not covered: loads through storage paths with fields or
+indices (`s.f`, `balances[k]`), loads through memory paths deeper than one step, entries
+across calls, joins or loop back-edges.
+
+### Dead store elimination (`Prog.dstore`)
+
+`v = s; v = e;` → `v = e;` at a primitive state variable when `s` is simple and `e` is
+pure (`Val.isPure`: it reads no storage); `m.f = s₁; m.f = s₂;` / `m[k] = s₁; m[k] = s₂;`
+→ the second store at one static memory location (`mSameB`) when both values are simple;
+applied in every sequence (blocks, branches, loop bodies). Side conditions: the first
+value cannot fail (else its halt is the program's); a state-variable store never fails
+(`write_root`) and the last of two wins (`SFields.set_set`); a memory store fails exactly
+when its address is unset or out of bounds, independently of the value
+(`Heap.writeAddr_none`), so the first store fails exactly when the second would, and the
+heap after both is the heap after the second (`Heap.writeAddr_writeAddr`, from new
+`Objs.set_set`, `MFields.set_set`, `MObj.setElem_setElem`). Only adjacent stores are
+merged; stores through storage paths, aliases or non-simple memory values are kept.
+
+Memory expansion, size and gas: the typed state (`State`: storage, heap typing `H`, heap,
+locals, ledger, balance, transaction) and its step result (`Out`: state and heap-typing
+extension) carry no memory-size or gas field, and the lowering IR has no `msize` or gas
+read. A store at an existing slot leaves the heap typing unchanged (`TRun.assignMem`
+returns `List.prefix_refl`), so there is no expansion effect in this semantics to drop;
+the theorem is equality of the whole typed run, heap typing included. The cost side
+(solc's memory-expansion gas) belongs to the D1 gas oracle (X01), still open.
+
+### Loop-invariant code motion (`Prog.licm`)
+
+`while (c) { x = e; rest }` → `if (c) { x = e; while (c) { rest } }` (`hoist`), applied to
+every loop, innermost first; one hoist per loop per round (`Prog.optimize n` repeats).
+The guard `if (c)` is the zero-iteration side condition, proved: without it a hoisted
+`e` that reverts (e.g. an underflow) would halt a loop that never runs; under it `e` is
+evaluated exactly when the first iteration evaluates it, in the same state, with the same
+halt (`licm_runC`, first iteration matched in `TLoop.hoist_run`). Side conditions
+(`licmB`, packaged as `LicmOk`): `e` and `c` invariant expressions (`Val.invB`: literals,
+locals, environment values, operators, reads of primitive state variables — the
+invariant `sload`s); neither reads `x`; `rest` within `nonpayable` (no memory statement,
+no allocation), writing no local `e` reads and not `x` (`Prog.writesAt`), and only state
+variables `e` does not read (`Prog.storeAt = some L`); invariance across iterations from
+the existing `Prog.run_frame`/`Prog.run_keeps` (`runC_inv`, `runC_local`) and
+`TLoop.run_congr_inv`. Divergence is preserved (`TLoop.run` is the same limit on both
+sides). Not covered: hoisting from the middle of a body, declarations (`T t = e;`
+introduces a local the loop's type does not have), memory loads, loops whose rest reads
+or writes memory, `do`/`for` forms other than the lowered `while`.
+
+### Pipeline and controls
+
+`stages` now runs `[inl, cprop, simplify, cfold, dce, dse, cse, rle, dstore, licm, uve]`;
+`round_preserves`, `optimize_preserves` and `Prog.optimize_runC` (statement unchanged)
+cover them. Controls `tests/fullscope-20261104/vo1/X06Controls.lean` (not imported by the
+generated roots; per-file diagnostics): RLE `rle_forwarded`, `rle_load_load`,
+`rle_other_root`, `rle_mem_apart` (positive), `rle_killed`, `rle_mem_alias` (kept as
+written), negatives `wrong_kill_differs` (kernel) and the aliasing negative
+(`wrongAlias`, `#guard`), witness `entry0_holds`/`rle_entry0` (nonempty entries hold);
+DSE `dstore_removed`, `dstore_mem_removed`, kept `dstore_live_kept`,
+`dstore_failing_kept`, `dstore_mem_other_kept`, negatives `live_runs_two` vs
+`live_dropped_runs_one` and `failing_first_reverts` vs `failing_dropped_returns`
+(kernel), witness `sstore_witness`; LICM `licm_hoisted`, `licm_guarded`, rejected
+`licm_root_rejected`, `licm_local_rejected`, negatives `unguarded` (reverts where the
+loop returns) and `wrongRoot` (`x = 0` vs `2`), witness `licm_witness` (`LicmOk` by
+`decide`); pipeline `e2e_optimized`, `e2e_licm`. Memory and loop runs are pinned with
+`#guard` (the compiled interpreter, as the repository pins initial-store runs) because
+the kernel does not unfold allocation and `TLoop.run` (classical) there; every syntactic
+result and every storage-only run is a kernel `rfl`.
+
+Axioms (`#print axioms` in the controls): `Prog.rle_empty_runC`, `Prog.rle_runC`,
+`Prog.dstore_runC`, `sstore_dead_runC`, `mstore_dead_runC`, `licm_runC`,
+`Prog.licm_runC`, the three `*_preserves`, `Prog.optimize_runC`: `propext`,
+`Classical.choice`, `Quot.sound` only (the classical ones through `TLoop.run`); no
+`sorry`, no `native_decide`, no heartbeat option.
