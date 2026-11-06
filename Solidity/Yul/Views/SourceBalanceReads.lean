@@ -32,7 +32,7 @@ theorem sourceBalanceLocal_run {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : N
   change (do
     let state ← Source.EM.st
     let word := match (state.ex.world.accounts address).code with
-      | some _ => (state.ex.world.accounts address).balance
+      | some _ => Source.Monetary.wordView (state.ex.world.accounts address).balance
       | none => G.fixed.ledger G.balance0 state.events address
     pure (Source.RVal.val (Source.intWrap Source.IntTy.u256 word.val))).run s= _
   rw [Source.Hoare.run_bind,stateRun]
@@ -60,3 +60,6 @@ theorem sourceBalanceLocal_every_H {E Γ} (G : Source.Glob E) (F : Source.Fr) (n
   exact ok
 
 end Solidity.Yul.Views
+
+/-- info: 'Solidity.Yul.Views.sourceBalanceLocal_run' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceBalanceLocal_run

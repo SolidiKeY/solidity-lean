@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViews.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.assemble": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingTurnViews.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingTurnViews.closeConditional": [
+  "propext"
+ ]
+}

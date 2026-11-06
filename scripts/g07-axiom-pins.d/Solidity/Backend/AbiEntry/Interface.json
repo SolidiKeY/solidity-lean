@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/AbiEntry/Interface.lean:Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Interface.lean:Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.empty_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Interface.lean:Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.graph": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/Interface.lean:Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.of_exact_result": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,39 @@
+{
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.checked_append": [
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.public_emitter": [
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.run_append": [],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.safe_append": [
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.source_terminal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.source_writer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.swapped_layout_refused": [],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.terminal_revert": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.writer_checked": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.writer_run": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/FailurePaths/PrefixFailure.lean:Solidity.Backend.FailurePaths.PrefixFailure.writer_safe": [
+  "Quot.sound",
+  "propext"
+ ]
+}

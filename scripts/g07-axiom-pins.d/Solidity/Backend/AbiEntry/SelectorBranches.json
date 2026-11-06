@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.admitted": [
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.branch_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.executed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.join_form": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SelectorBranches.lean:Solidity.Backend.AbiEntry.SelectorBranches.whole_selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
