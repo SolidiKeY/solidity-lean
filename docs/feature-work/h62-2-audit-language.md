@@ -373,3 +373,21 @@ full success contract or uncompiled theorem is claimed. New source counts:
 zero `sorry`, zero `axiom` declarations, zero `native_decide`, no raised proof
 budget. Standard imported axioms are printed; telescope certificates use at
 most `propext`. No merge, push, publish, PR or deployment was performed.
+
+## H82 live witness revalidation
+
+All four inherited witness files pass on unchanged live Lean4.24.0. They contain
+37 authored theorems;12 full-telescope associations were checked against exact
+frozen target-source signatures. The source-bound rerun takes3.067s under the
+serial12GiB/no-swap envelope. Before/after snapshots cover the four witnesses,
+the witness index and three target-source files; the verifier binds these to
+the actual gate receipt, four PASS rows, HEAD and log hashes. A forged matching
+before/after source-hash record is refused before producing a report.
+
+The full census replay failed because its exact frozen ownership input is
+missing: /workspace/h62-coordinator-inputs/ownership.json, SHA256
+7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce.
+No newer ownership metadata was substituted. The subset evidence and this wait
+are recorded in tests/h62/item2/audit-language/live-validation.json.
+No full interface census, all-statement feasibility, compiler success/totality,
+gas/fork coverage or migration acceptance follows from these checks.

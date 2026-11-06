@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "toolchain": "Unchanged live Lean4.24.0",
+  "witness_modules": 4,
+  "authored_theorems": 37,
+  "verified_full_telescope_associations": 12,
+  "before_after_sources": {
+    "Solidity/KeySort.lean": "d47ce39b0149d9701ac32ac36a72b535200ba1a25e59571203a1f4fa6be9f3b0",
+    "Solidity/Language/FeatureInfo.lean": "552d4feb3f8ae75c40bc8c1a751f384e64ed6c7fb4324688c433dd2d5f29fe82",
+    "Solidity/Syntax/CheckedExact.lean": "a34e59991edc627682e66533c0982d7fe7ea0463942c5dd2d20aa6d1d60a9141",
+    "tests/h62/item2/audit-language/AbiEntryWitness.lean": "46d14dd2b10d83d13e03706e63da3791eb11c89b571437aeee29072583dff8d8",
+    "tests/h62/item2/audit-language/FeatureWitness.lean": "a895a4346e3f8a8e9f5b41988b9d0a9052cf82f536a25a6d80f5e968dc496ce2",
+    "tests/h62/item2/audit-language/FullTelescopeWitness.lean": "2fd5c48f12c4a067cc930c56c60d58e1ec4451a0e584c21439ed65cbf95308bf",
+    "tests/h62/item2/audit-language/IndependentWitness.lean": "2b266f408a890aec1f08ed37e49ed1cac5c9f71f9eed43342bd84c89697948e2",
+    "tests/h62/item2/audit-language/witness-index.json": "4803f68ab1f65ada32591649901e2eace3fe1c3104cdd5608b93fa037f020b62"
+  },
+  "execution": {
+    "exit": 0,
+    "seconds": 3.067,
+    "resource_stop": false,
+    "minimum_parent_headroom_bytes": 15890132992,
+    "command": [
+      "env",
+      "GATE_LOGS=/workspace/sol-numeric-literals-gate-output/h82-language-witnesses-bound-files",
+      "bash",
+      "scripts/coord-tools/gate.sh",
+      "per-file",
+      "tests/h62/item2/audit-language/FeatureWitness.lean",
+      "tests/h62/item2/audit-language/IndependentWitness.lean",
+      "tests/h62/item2/audit-language/FullTelescopeWitness.lean",
+      "tests/h62/item2/audit-language/AbiEntryWitness.lean"
+    ]
+  },
+  "artifacts": {
+    "source_binding": {
+      "path": "/workspace/sol-numeric-literals-h82/audit-language-bound-run/source-binding.json",
+      "sha256": "6cce6aa088030b2546ca2025d743e04d569425048a35f486ff866802180f5c7c"
+    },
+    "verified_subset": {
+      "path": "/workspace/sol-numeric-literals-h82/audit-language-verified-subset-v3/verified-subset.json",
+      "sha256": "9f39f45beffda2b1eb450c736b7eb31a633ab369e1607d6bf83a8e9f583abc62"
+    },
+    "gate_record": {
+      "path": "/workspace/sol-numeric-literals-gate-output/h82-language-witnesses-bound.json",
+      "sha256": "607d5eff41c9d6165845128856b21c1ed5ee006e60d57ea06a3a8073038b588e"
+    }
+  },
+  "negative_control": "Matching forged before/after witness hashes refused before report output",
+  "full_census_wait": {
+    "path": "/workspace/h62-coordinator-inputs/ownership.json",
+    "sha256": "7f5d40d46d386ed17731db55ed87f0564f5c9e667bddee00c0f12b28772f9cce",
+    "observed": "Missing; census replay exited1. H82 scope metadata was not substituted."
+  },
+  "limitations": "Only12 exact target signatures/telescopes and37 existing additive theorems rechecked. Full interface/owner census, remaining joint witnesses, compiler totality/success, gas/fork/failure coverage, affected gates and4.35overlay remain unfinished.",
+  "reviews": {
+    "finder": "PASS after execution-source binding fix;8 source hashes,receipt and6loghashes checked",
+    "skeptic": "PASS after bindingfix;4orderedPASSrows and12markers checked"
+  }
+}
