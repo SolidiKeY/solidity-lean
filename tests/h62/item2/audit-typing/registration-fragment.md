@@ -14,6 +14,8 @@ import tests.h62.item2.«audit-typing».ValuesDefaultsFidelity
 import tests.h62.item2.«audit-typing».ValuesDefaultsWitnesses
 import tests.h62.item2.«audit-typing».ValuesListsFidelity
 import tests.h62.item2.«audit-typing».ValuesListsWitnesses
+import tests.h62.item2.«audit-typing».ValuesHeredWitnesses
+import tests.h62.item2.«audit-typing».ValuesHeredFidelity
 ```
 
 All helper/proof modules remain under the authorized additive tests directory. ProvisionedCensus.lean is generated deterministically by provisioned_census.py from the frozen assigned maps and validated build plans. Bulk signatures, uncovered lists, timings and hashes remain off Git.
