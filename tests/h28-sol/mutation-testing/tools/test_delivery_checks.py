@@ -56,6 +56,8 @@ class DeliveryReceiptControls(unittest.TestCase):
             def git(*args):
                 subprocess.run(["git", "-c", "user.name=H28 control", "-c", "user.email=h28@example.invalid", "-c", "commit.gpgsign=false", "-c", "core.hooksPath=/dev/null", *args], cwd=repo, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             git("init", "-q")
+            with self.assertRaisesRegex(ValueError, "member manifest pin missing archive"):
+                verify_bulk.verify_validation_archives({"proof_pack": {"member_manifest": relative}}, repo)
             for fault in (None, "hash", "size", "membership"):
                 members = {"data.txt": {"bytes": 7, "sha256": hashlib.sha256(b"payload").hexdigest()}}
                 if fault == "hash": members["data.txt"]["sha256"] = "0" * 64
