@@ -980,7 +980,7 @@ H44 evidence archive `/workspace/h28-selected-export-f8b65736/proof-worlds.tar.g
 cache-delivery status is ready for coordinator pull; no transfer is claimed.
 It includes the ledger and fresh census proofs alongside all whole-run objects
 and commands; immutable dependency packs remain separately pinned.
-`verify_combined.py --profile selected` authenticates exact 19/15 outcomes and
+`verify_combined.py --profile selected` is intended to authenticate exact 19/15 outcomes and
 all proof/source/resource certificates, then regenerates the full ledger and
 source/kernel census and checks every fixture theorem's successful axiom
 inventory. Dedicated fault controls use these real saved proofs, never mocked
@@ -1017,3 +1017,26 @@ evidence under `selected_proof_pack_f8b65736`; the strengthened validator and
 revised frozen manifest require fresh ledger/census/whole-suite gates before
 final acceptance. Case payloads, theorem statements, input premises, exclusions
 and budgets have not changed.
+
+
+### Fresh strengthened receipt
+
+The held accounting fixes are frozen at `aab23327962bcc278dd8fee43cd85652f9377fc1`. Fresh normal and
+optimized gates each pass 94 controls. Fresh source-complete ledger generation,
+the 294-export census, its independent negative control and all 19 case IDs
+pass. All 15 distinct scored programs are killed; the four explicitly named
+unscored runner controls retain their expected outcomes. This fresh run has
+113 checks, 78 objects and 321 owned axiom exports; summed time
+632.738s, peak RSS 1,468,692 KiB, minimum estimated
+reserve 4,295,225,344 bytes. Separate finder/skeptic
+actual-run and inventory reviews PASS.
+
+The current `selected_proof_pack` now points to **this fresh run**, not f8.
+Archive `/workspace/h28-selected-export-aab23327/proof-worlds.tar.gz` has 56216293 bytes and SHA256
+`32625cd27ee6171cf5d206417d0ae491b6837649521fcd11e9b9de4a2cdc3748`, with 288 committed H44 member hashes. The
+historical f8 receipt and archive remain unchanged under their historical key.
+Both entrypoints consume the current key consistently. Direct strengthened
+accounting replay passed before sealing. Actual published-entrypoint replay
+and all eight fault controls are next; no current full replay acceptance is
+claimed until their results are recorded. H41 delivery remains coordinator
+pending. Whole repository gates and whole-assignment acceptance remain pending.
