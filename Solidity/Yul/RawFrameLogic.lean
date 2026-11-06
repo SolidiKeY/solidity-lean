@@ -289,4 +289,20 @@ theorem holds_snapshot : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul
   intro ctx control mode code policy post state
   cases mode <;> simp only [holds, RawFrame.run_snapshot]
 
+/-- Explicit agreement of all retained frame components transports arbitrary
+whole-outcome posts across either raw modality. -/
+theorem holds_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (post : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (first second : Solidity.Yul.RawFrame.State ctx),
+ first.clean = second.clean → first.world = second.world →
+ Solidity.Yul.RawFrame.view first = Solidity.Yul.RawFrame.view second →
+ (Solidity.Yul.RawFrame.Logic.holds mode code policy post first ↔
+ Solidity.Yul.RawFrame.Logic.holds mode code policy post second) := by
+  intro ctx control mode code policy post first second cleanEq worldEq viewEq
+  have same : ∀ fuel, RawFrame.run code policy fuel first = RawFrame.run code policy fuel second :=
+    fun fuel => RawFrame.run_agrees ctx control code policy fuel first second cleanEq worldEq viewEq
+  cases mode <;> simp only [holds, same]
+
 end Solidity.Yul.RawFrame.Logic
