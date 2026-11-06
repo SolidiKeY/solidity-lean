@@ -1,4 +1,144 @@
-# H62 item 2: exact-verification audit — blocked handoff
+# H62 item 2: H70 independent-module audit — blocked
+
+Same VM `/workspace/solidity-lean`, branch
+`codex/solidity-h62-2-20261106/audit-exact-verification`, frozen base
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. Resumed from
+`dee26790869de6ace73aa7cfd8c72a666c6f34ea` under the H70 router.
+The original persistent goal is unfinished; no replacement goal, merge, push,
+publication, pre-gate, budget increase or original-interface edit was performed.
+
+## H70 outcome
+
+All eight remaining modules have buildability/audit status recorded:
+
+| Frozen module | Source theorem candidates | Current result |
+|---|---:|---|
+| `Solidity/Calculus/BitArith.lean` | 16 | 16 simultaneous input instances kernel checked. |
+| `Solidity/Calculus/LinearDecision.lean` | 80 | 80 simultaneous input instances kernel checked. |
+| `Solidity/Calculus/LinearHypotheses.lean` | 1 | Joint input checked; local success/reject-all/fuel controls checked; timing stop below. |
+| `Solidity/Calculus/LinearSyntax.lean` | 0 | No source or compiler theorem declarations; no padding witnesses added. |
+| `Solidity/Examples/Tactics/Recovery.lean` | 2 | Both unconditional statements checked with empty input tuples; local invalid-parity and reject-all controls checked. |
+| `Solidity/Calculus/LinearCountermodel.lean` | 14 | Blocked by unchanged line 134 under official v4.35. |
+| `Solidity/Calculus/PresburgerDecision.lean` | 88 | Blocked by its LinearCountermodel import. |
+| `Solidity/Examples/LinearDecision.lean` | 34 | Blocked by its LinearCountermodel import; includes anonymous candidates. |
+
+This adds **99** source-statement instances. The nine earlier VisitedSet bundles
+retain their separately validated source/log receipt; they are not called fresh
+H70 Lean replays. Total named source statements accounted for across the six
+buildable modules: **108**.
+
+The compiler-level census includes generated/private theorem declarations:
+BitArith 64, LinearDecision 523, LinearHypotheses 11, LinearSyntax 0,
+VisitedSet 68, Recovery 5: **671 total**, with **563 additional declarations still
+uncovered** beyond those 108 source statements. No generated declaration is
+excluded; full names, exact kernel expressions, signatures, levels, axiom sets
+and unresolved owner labels are off git in
+`/workspace/h62-audit-h70-evidence/h70-compiler-census.json`.
+The earlier conversational total 771/663 was an arithmetic error, corrected
+before handoff. The deterministic checker computes the actual totals from JSON.
+
+The full 305-file source census remains 5,277 candidates. The 5,169 candidates
+outside the 108 accounted named statements and the 563 additional compiler
+entries are separate incomplete sets, not a claim of an exact global remainder.
+Generated declarations from the other 299 modules remain unenumerated by the
+compiler until imports can elaborate. Live producer identities remain unresolved.
+
+## Statement fidelity and proof boundaries
+
+`tests/h62/item2/audit-exact-verification/JointWitness.lean` reads the actual
+unchanged theorem type, head-normalizes aliases/lets that hide binders, and
+constructs a dependent existential for every binder. It checks supplied terms in
+order, applies the original theorem to those same terms, packages explicit
+Exists predicates, rejects unresolved/free/sorry terms, and submits the declaration
+to normal kernel checking. It then rejects transitive axioms outside propext,
+Classical.choice and Quot.sound. No original statement is weakened or replaced.
+
+Nonempty singleton formula sets/frontiers and inhabited predicates witness the
+global exploration/round contracts together with feasible inputs; round length
+is positive, and walkFrom_closed has an actual closed walk. Bounds and all
+nonzero/sign conditions share the same concrete tuple. The synthetic hidden-False
+alias regression is deliberately outside the frozen census and must reject; it
+creates no witness. Every recorded source instance has its original type and
+axiom evidence. H44 bulk outputs remain off git; source inputs/generators are in git.
+
+The five new local controls concern certificate success, reject-all certificate
+or recovery behavior, zero-fuel exhaustion and invalid parity. They do not prove
+supported-program source-to-bytecode compiler success, always-revert compiler
+exclusion, or EVM gas/fork contracts. Checkpoint 3 remains incomplete.
+No frozen theorem has been shown false/vacuous by these results, so no production
+theorem ESCALATE line is asserted.
+
+## Required stop and owner dependencies
+
+**B-PERFORMANCE-STOP:** final
+`python3 scripts/h62/item2/audit-exact-verification/h70-check.py --run` exited 1.
+All four bounded compiler subprocess phases exited 0, but unchanged
+LinearHypotheses measured median **0.520586729 s before → 0.622912645 s after,
++19.655883%**, five samples each under the same tree/cache/resources.
+The assignment says stop above 10%; Lean work stopped immediately. No further
+Lean or timing runs followed. The 0.1-second monitor may quantize these short
+samples, but that explanation is unproved and does not waive the failed gate.
+See `tests/h62/item2/audit-exact-verification/performance-stop.md` and
+`/workspace/h62-audit-h70-evidence/h70-timing.json`.
+
+**B-MIGRATION-LINEAR-COUNTERMODEL:** coordinator relay requested to
+`solidity-h62-6-20261106/migrate-calculus` for unchanged
+`Solidity/Calculus/LinearCountermodel.lean:134:2`, a type mismatch in
+Solidity.Linear.AFml.falseNode_spec. Exact ticket:
+`tests/h62/item2/audit-exact-verification/owner-ticket-linear-countermodel.md`.
+Request owner-reviewed v4.35 proof migration preserving the frozen statement and
+budget, with base/head/patch/hash; otherwise retain the blocker.
+
+**B-MIGRATION-RAW:** the existing ticket to migrate-syntax was accepted by H70;
+the 296 dependent modules remain waiting. Relay is host-only coordinator work;
+relay.sh absence is not an installation task. No original-file permission is
+inferred from these requests.
+
+## Gates and read-only reviews
+
+Actual runtime remains official Lean 4.35.0 commit
+eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Lake 5.0.0-src+eb6cafb. KeySort passes.
+All Lean work uses the unchanged capped runner: one heavy job, explicit -j1,
+LEAN_NUM_THREADS=1, 300s per file, 12GiB memory/no swap, 4GiB host and effective
+outer-VM headroom checked every 0.1s, source/toolchain mounts read only and no
+v4.24 cache. No Lean MCP tools are exposed, so serial per-file checks are used.
+No proof budget was raised. Core remains intrinsic and dependency free.
+
+The H70 checker binds all source/proof/driver hashes, exact four phases, commands,
+plans and ordered CHECK/PASS workloads, compiler versions, resource markers,
+completion/exit records, exact source membership, all axiom reports and positive
+finite timing samples. It separately binds/verifies the earlier VisitedSet
+proof, ledger, checker, receipt, log, exit and source census. Its final result is
+a failed timing gate, not a full passing gate. Full ./run-lean.sh and broader
+acceptance remain blocked/pending.
+
+Independent finder and skeptic used no Lean/server or edits. They found and
+verified fixes for hidden binder aliases, transitive axiom checks, dependent
+Exists packaging, receipt phase omission, workload completeness, finite timing,
+prior-evidence binding and the census arithmetic correction. Full review record
+is exported in `/workspace/h62-audit-h70-evidence/reviews.md`. Lightweight negative
+receipt checks and repository checks are recorded in gates.json. The performance
+failure remains visible and unwaived.
+
+## Handoff and continuation
+
+Five buildable remaining-module items have been handled; request a fresh
+coordinator thread on this exact VM/goal/branch, never self-launch a replacement.
+All four assignment checkpoints remain incomplete. Remaining obligations include
+563 compiler declarations already named, other blocked inventories/witnesses,
+live owners, supported-program totality and negative compiler/gas/fork controls,
+performance resolution and full final validation. Do not mark the goal complete.
+
+New retrieval paths are `/workspace/h62-audit-h70-evidence/original.patch`,
+`/workspace/h62-audit-h70-evidence/handoff.md`,
+`/workspace/h62-audit-h70-evidence/evidence.tar.gz`,
+`/workspace/h62-audit-h70-evidence/receipt.json`, and
+`/workspace/h62-audit-h70-evidence/SHA256SUMS`. Full committed head and hashes are
+in the exported receipt. The initial checkpoint below remains historical evidence.
+
+---
+
+# Initial checkpoint: dee267908 (historical record)
 
 Batch `solidity-h62-2-20261106`, worker `audit-exact-verification`.
 Repository `/workspace/solidity-lean`; branch
