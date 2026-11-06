@@ -213,3 +213,11 @@ no full gate, timing delta or checkpoint completion is claimed.
 Saved evidence: `evidence/h70-hash-consumption.json`,
 `evidence/h70-hash-overlay-check.{json,log}` and
 `evidence/h70-views-dependencies.{json,log}` under the export directory.
+
+## H82 user-authorized stopped handoff
+
+Implementation stopped for accepted successor `solidity-inline-assembly5-20261031/vy2-physical`. No automatic continuation authorized. Exact-file agreement request withdrawn under H82; trust/definition/interface changes still need owner authorization. Current Roadmap/Storage/Language waits remain. New correspondence backfill has three passing external tests and two current literal-free matching types; both independent reviewers found that masking can hide literal/quoted-identifier changes, and preservation dispositions require the separate base-blob check. No general exact lexical or kernel claim is made. No repair was undertaken after retirement.
+
+Handoff files are in `scripts/h62/item4/generic-yul-views/handoff/`: original assignment transcription, scope manifest, full work/backfill queue and retirement limitations. The transcription is incomplete in its long owner-key paragraph; the exact original frozen rendered prompt has NOT been reproduced or hash-verified. Full ownership snapshot is exported off git. Successor needs exact original-thread export before new work.
+
+The exposed goal API cannot set PAUSED: its only outcomes are complete/blocked. No substitute completion or new goal was requested. No push was performed because H71 permission is not present in available inputs. Final cumulative patch, bundle, head and SHA256 manifest are recorded in the export handoff.
