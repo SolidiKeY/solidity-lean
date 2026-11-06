@@ -1993,29 +1993,41 @@ DUP1 through DUP16 short-stack consumers connect the actual indexed certificates
 
 ## CALL/RETURNDATA correspondence validation (move6)
 
-`CallReturndata` validates the fetched CALL/RETURNDATA relation that
+This validates the fetched CALL/RETURNDATA relation that
 [G42](g42-world-call-consumers.md) names as the P10 input of
-`WorldCalls.FetchedPremises.Returndata`. Each CALL law rewrites with the frozen
-`FrozenV1.api.charged.checked_call` field, so it exercises the version-1 API
-consumers import, then evaluates the pinned `EVM.call`, including the callee's
-own code under `Θ`/`Ξ`. Callee 31 either returns `0x2a`
-(`PUSH1 0x2a PUSH1 0 MSTORE8 PUSH1 1 PUSH1 0 RETURN`), reverts with `0x2b`, or is
-absent. The caller's stale return buffer `[0xcc, 0xdd]` differs from every
-callee output.
+`WorldCalls.FetchedPremises.Returndata`. Both modules use only the frozen
+`FrozenV1.api` CALL field and the pinned reference `EVM.call`; the frozen API
+is unchanged.
 
-| Law | Observation |
+`CallReturndataLaw` holds for every CALL site and fuel:
+
+| Law | Statement |
 |---|---|
-| `returning_call` | flag 1, return buffer `[0x2a]`, output window writes `0x2a` over caller memory byte 0. |
-| `reverting_call` | flag 0, yet the revert bytes `[0x2b]` become the return buffer and reach the output window. |
-| `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
-| `returning_then_size`, `absent_then_size` | the following RETURNDATASIZE pushes the callee's output size (1 or 0), never the stale size 2. |
-| `returndata_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and the caller account produce different post-CALL return data. |
+| `call_returnData` | A successful `EVM.call` leaves a return buffer that is either empty (the callee is not entered) or exactly the output of `Θ` on `toExecute .EVM σ t`, the callee's code in the caller's account map. |
+| `fetched_call_returnData` | Lifted through `FrozenV1.api.charged.checked_call`: a successful fetched CALL step exposes the actual gate and seven popped operands, and its buffer is empty or that `Θ` output. The caller's previous buffer is never kept. |
 
-Verdict for the G42 adapter: the return data after a CALL is a function of the
-callee's code. The core `Evm.Machine` has no code map and no return buffer, and
-its `CALL` is a two-operand payment (`ExternalEvm.Obstructions.call_arity_mismatch`).
-So a `FetchedPremises.Returndata` instance built from `FrozenV1.API` needs both a
-callee/world execution producer (V13 WorldCalls steps) and a core-to-reference
-CALL representation. This module supplies neither and assumes neither; the
-frozen API is unchanged. Gas values, `Site` origin, resource, Osaka and
+`CallReturndata` evaluates populated cases in the kernel. The caller has
+memory `[0xaa, 0xbb]` and a stale buffer `[0xcc, 0xdd]`; callee 31 is absent or
+has the one-byte body INVALID.
+
+| Control | Observation |
+|---|---|
+| `absent_call` | flag 1, stale buffer cleared, memory unchanged. |
+| `invalid_call` | flag 0, stale buffer still cleared. |
+| `absent_then_size` | the following RETURNDATASIZE pushes 0, not the stale size 2. |
+| `outcome_needs_callee` | two states that agree on environment, PC, stack, gas, memory, stale buffer and caller account push different CALL flags. |
+
+No populated control returns nonempty data. Kernel evaluation of callee
+instructions is the limit: a three-instruction callee peaked above 14 GB and
+was killed, beyond the 8 GiB module budget, and the identity precompile does
+not reduce in the kernel. Nonempty output is covered only symbolically, by
+`call_returnData`.
+
+Verdict for the G42 adapter: post-CALL return data is the callee's `Θ` output,
+a function of callee code and world. The core `Evm.Machine` has no code map
+and no return buffer, and its `CALL` is a two-operand payment
+(`ExternalEvm.Obstructions.call_arity_mismatch`). A `FetchedPremises.Returndata`
+instance from `FrozenV1.API` therefore needs a callee/world execution producer
+(V13 WorldCalls steps) and a core-to-reference CALL representation. Neither is
+supplied or assumed here. Gas values, `Site` origin, resource, Osaka and
 transaction adequacy are not asserted.

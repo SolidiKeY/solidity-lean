@@ -1,28 +1,26 @@
 import SolidityBridge.RoadmapV15.P10.FrozenWitness
 
-/-! Validation of the fetched CALL/RETURNDATA correspondence that G42's
-`WorldCalls.FetchedPremises.Returndata` names as its P10 input.
+/-! Populated controls for the fetched CALL/RETURNDATA correspondence that
+G42's `WorldCalls.FetchedPremises.Returndata` names as its P10 input; the
+general law is `CallReturndataLaw`.
 
-Every CALL law below is obtained by rewriting with the frozen
-`FrozenV1.api.charged.checked_call` field, so it exercises exactly the version-1
-API that consumers import, and then evaluates the pinned reference `EVM.call`
-(including the callee's own code under `Θ`/`Ξ`) in the kernel. The callees are
-populated: one returns the byte `0x2a`, one reverts with `0x2b`, and one is an
-absent account. The caller's stale return buffer `[0xcc, 0xdd]` is distinct
-from every callee output, so each law shows the buffer is replaced, not kept.
+Each CALL control rewrites with the frozen `FrozenV1.api.charged.checked_call`
+field, so it exercises the version-1 API consumers import, and then evaluates
+the pinned `EVM.call`, including `Θ`/`Ξ` on the callee, in the kernel. The
+caller has memory `[0xaa, 0xbb]` and a stale return buffer `[0xcc, 0xdd]`.
+Callee 31 is either absent or carries the one-byte body INVALID. Kernel
+evaluation of longer callee bodies exceeds the module memory budget (a
+three-instruction callee peaked above 14 GB), and the identity precompile
+does not reduce in the kernel, so no populated control returns nonempty data.
 
-`returndata_needs_callee` is the decisive negative: two reference states that
-agree on every caller-frame field (code, PC, stack, gas, memory, stale return
-data, execution environment and the caller's account) produce different
-post-CALL return data. So the returndata after a CALL is a function of the
-callee's code, which the core `Evm.Machine` (no code map, no return buffer,
-two-operand payment `CALL`, see `ExternalEvm.Obstructions.call_arity_mismatch`)
-does not carry. A `FetchedPremises.Returndata` adapter from this API therefore
-needs a callee/world execution producer and a core-to-reference CALL
-representation; this module supplies neither and assumes neither.
+`outcome_needs_callee`: two states that agree on the execution environment,
+PC, stack, gas, memory, stale buffer and the caller's account push different
+CALL flags, so the CALL outcome depends on callee code, which the core
+`Evm.Machine` (no code map, no return buffer, two-operand payment `CALL`,
+`ExternalEvm.Obstructions.call_arity_mismatch`) does not carry.
 
-`Site` remains a constructed state (no compiler/source origin), and gas,
-resource, Osaka and transaction adequacy are not asserted. -/
+`Site` remains a constructed state (no compiler/source origin); gas, resource,
+Osaka and transaction adequacy are not asserted. -/
 namespace SolidityBridge.RoadmapV15.P10.CallReturndata
 open Solidity Solidity.Backend EvmYul Solidity.Evm.External
 
@@ -116,8 +114,16 @@ theorem outcome_needs_callee :
   rw [absent_call,invalid_call]
   decide
 
-#print axioms absent_call
-#print axioms invalid_call
-#print axioms absent_then_size
-#print axioms outcome_needs_callee
+/-- info: 'SolidityBridge.RoadmapV15.P10.CallReturndata.absent_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms absent_call
+/-- info: 'SolidityBridge.RoadmapV15.P10.CallReturndata.invalid_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms invalid_call
+/-- info: 'SolidityBridge.RoadmapV15.P10.CallReturndata.absent_then_size' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms absent_then_size
+/-- info: 'SolidityBridge.RoadmapV15.P10.CallReturndata.outcome_needs_callee' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in #print axioms outcome_needs_callee
 end SolidityBridge.RoadmapV15.P10.CallReturndata
