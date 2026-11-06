@@ -1,6 +1,6 @@
 # H62 item 2: typing/frontend empty-statement audit
 
-Status: partial; none of the four checkpoints is complete. Persistent goal remains unfinished.
+Status: blocked full completion on RAW-435; none of the four checkpoints is complete. Persistent goal remains unfinished. Unaffected frontend/backfill work is not declared blocked.
 Owner: solidity-h62-2-20261106/audit-typing.
 Branch: codex/solidity-h62-2-20261106/audit-typing.
 Frozen base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4.
@@ -47,7 +47,7 @@ Finder and skeptic agents reviewed read-only, neither using a Lean server or run
 
 Next: use verified official binary and an isolated output/cache configuration to elaborate imports for a Lean environment-based declaration census. Reconcile it with frozen source candidates and resolve owner mapping; do not claim regex as signature fidelity. Maintain the 4 GiB reserve and serial bounded checks. Existing-file edits outside owned paths remain forbidden; owner registration fragments and tickets go through coordinator. No frozen theorem weakness has been established, so no theorem ESCALATE lines or repair premises have been invented.
 
-No get_goal tool is exposed; coordinator explicitly confirmed this is not a blocker. No goal was created/reset/stopped. Two useful items are saved: source backfill and the Closure witness/fidelity subset. Neither completes a global checkpoint; fresh-thread threshold has not been reached. Full affected validation, acceptance, census/witness audits, totality proofs and final finder/skeptic milestone reviews remain pending.
+No get_goal tool is exposed; coordinator explicitly confirmed this is not a blocker. No goal was created/reset/stopped. Three useful items are saved: source backfill, the Closure witness/fidelity subset, and the frozen typing dependency reproduction/owner ticket. No global checkpoint is complete. The 3–5-item fresh-thread handoff threshold is now reached; handoff is to coordinator, with no replacement goal/thread self-launched. Full affected validation, acceptance, census/witness audits, totality proofs and final finder/skeptic milestone reviews remain pending.
 
 ## Closure witness/fidelity subset (second saved work item)
 
@@ -73,3 +73,15 @@ Finder and skeptic independently reviewed the original 21 bundles, then the two 
 Unchanged AST also compiled successfully with the pinned toolchain into isolated output (`ast-build.log`); this is only dependency provisioning, not the typing audit. Next work: build the remaining frozen dependency graph serially, extend elaborated census, resolve producers, then add per-statement feasibility bundles and supported-program/compiler success contracts. The full four-checkpoint assignment remains partial. No weakened/vacuous source interface was established in this subset, so no theorem ESCALATE line was invented.
 
 Final finder caveat retained: no complete Closure-module coverage is claimed. Generated constants are not silently excluded. Full census must settle their interface status and audit included declarations before any checkpoint can close. Both final reviews otherwise passed the current 23-source subset and runner hardening.
+
+## RAW-435 dependency blocker and coordinator handoff (third saved item)
+
+`python3 scripts/h62/item2/audit-typing/build_typing_values.py` constructs the 28-file frozen dependency order for Typing.Values, checks every source byte, and compiles serially with the pinned official binary into isolated outputs. It stops at the first error. Actual results: KeySort/AST/SpecSyntax exit 0; unchanged Syntax.Raw exits 1 with five String/Slice API errors at lines 597, 650, 665, 682, 684. No resource or timeout stop. Commands and measured times are in `typing-values-build-results.json`; decisive diagnostics are in `Solidity_Syntax_Raw.lean.build.log`.
+
+Owner ticket: `tests/h62/item2/audit-typing/RAW-MIGRATION-TICKET.md`, stable blocker RAW-435 and question QRAW-435. It includes the exact import path, diagnostics, constraints, two authorized-handoff alternatives and independent finder/skeptic confirmation. No producer-owned source was edited. No relay is available, so delivery is pending coordinator retrieval rather than claimed sent.
+
+ESCALATE: action compile frozen Solidity/Syntax/Raw.lean on mandated Lean v4.35.0 fails with five String/Slice API errors (RAW-435); options: producer-approved compatibility overlay preserving public interfaces, or coordinator-supplied approved source-correlated dependency overlay with hashes/fidelity evidence. Neither option weakens a theorem or authorizes this worker to edit Raw.
+
+Full completion is blocked until an approved dependency handoff exists; remaining frontend/scanner/fixture backfill is not asserted blocked or exhausted. No 8–10-hour queue completion is claimed. All four checkpoints, all global final gates, live owner resolution and pending generated-constant interface/witness obligations remain unfinished. The persistent goal must remain unfinished, with this typed dependency blocker retained.
+
+Fresh-thread handoff: original VM environment ccarenv_b64_Y2NhcmVudl8zMWE4NTM2NTg3MWM4MTkxYmM5NDM2MzdlNTU1N2FhZQ; repository /workspace/solidity-lean; assigned branch and base above. Existing original persistent goal is the supplied SHA256 38c86c8ae936d7d46882834692303bd39eccdd174f345bb4e862706b89d21d5e. get_goal remains unavailable; no goal creation/reset/replacement is authorized. Coordinator should continue the same saved goal/state after dependency resolution or schedule the remaining unaffected in-scope backfill in the required fresh thread. Never self-launch a replacement.
