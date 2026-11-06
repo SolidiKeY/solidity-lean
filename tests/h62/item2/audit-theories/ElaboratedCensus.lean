@@ -37,6 +37,7 @@ set_option pp.universes true
 set_option pp.explicit true
 
 run_cmd do
+  let auditStarted ← liftIO IO.monoNanosNow
   let env ← getEnv
   let modules : Array String := #[ "Solidity.Theory.Typed.Obs", "Solidity.Theory.Typed.Obs.Paths", "Solidity.Theory.Typed.Obs.Values", "Solidity.Theory.Typed.Obs.Ops", "Solidity.Theory.Typed.Mem", "Solidity.Theory.Typed.MemMirror", "Solidity.Theory.Typed.Leaves", "Solidity.Theory.Segs", "Solidity.Theory.Bridge.Denote", "Solidity.Theory.Mutability.View", "Solidity.Theory.Mutability.Pure", "Solidity.Theory.Mutability.Payable", "Solidity.Theory.Mutability.Assignable", "Solidity.Theory.Mutability.Closer", "Solidity.Theory.Progress.Outcome", "Solidity.Theory.Progress.Tuple", "Solidity.Theory.Progress.Fragment", "Solidity.Theory.Progress.Calls", "Solidity.Theory.Progress.Leaves", "Solidity.Theory.Progress.Program", "Solidity.Theory.Progress.Controls", "Solidity.Theory.CallerModel.Static", "Solidity.Theory.Reachable.Mode", "Solidity.Theory.Reachable.CleanTail", "Solidity.Theory.Reachable.CallerModel" ]
   let mut rows : Array Json := #[]
@@ -65,6 +66,7 @@ run_cmd do
               ("binders", Json.arr binders), ("conclusion", toJson conclusion)]
           rows := rows.push row
     | _ => pure ()
+  let auditExtracted ← liftIO IO.monoNanosNow
   let some path ← liftIO (IO.getEnv "H62_AUDIT_CENSUS_OUT")
     | throwError "H62_AUDIT_CENSUS_OUT is required (absolute off-Git output path)"
   let target : System.FilePath := ⟨path⟩
@@ -81,5 +83,9 @@ run_cmd do
     let actual ← liftIO <| IO.FS.realPath target
     if cwd.components.isPrefixOf actual.components then
       throwError "Census output symlink must not target the checkout"
-  liftIO <| IO.FS.writeFile path ((Json.arr rows).pretty ++ "\n")
+  let auditPayload := (Json.arr rows).compress ++ "\n"
+  let auditRendered ← liftIO IO.monoNanosNow
+  liftIO <| IO.FS.writeFile path auditPayload
+  let auditWritten ← liftIO IO.monoNanosNow
+  logInfo m!"H62_CENSUS_STAGES extraction_ns={auditExtracted - auditStarted} serialization_ns={auditRendered - auditExtracted} write_ns={auditWritten - auditRendered}"
   logInfo m!"H62_ELABORATED_CENSUS: {rows.size} theorem constants; no witness claims"

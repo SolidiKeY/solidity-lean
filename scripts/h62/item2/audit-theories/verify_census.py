@@ -15,16 +15,19 @@ from census import BASE, ROOT, MAP, mask, producer, scan
 FINGERPRINTS={}
 VERSION=None
 
-def fingerprint(source):
-    if source in FINGERPRINTS: return FINGERPRINTS[source]
-    text=(ROOT/source).read_text()
+def fingerprint_text(text):
     dependencies=[]
     for line in mask(text).splitlines():
         if line.startswith("import "):
             for module in line.split()[1:]:
                 path=module.replace(".","/")+".lean"
                 if (ROOT/path).is_file(): dependencies.append(fingerprint(path))
-    value=sha((VERSION+text+"".join(dependencies)).encode())
+    return sha((VERSION+text+"".join(dependencies)).encode())
+
+def fingerprint(source):
+    if source in FINGERPRINTS: return FINGERPRINTS[source]
+    text=(ROOT/source).read_text()
+    value=fingerprint_text(text)
     FINGERPRINTS[source]=value
     return value
 
@@ -35,19 +38,42 @@ WITNESSES={
  "Solidity.Theory.Progress.expr_progress":("ScopeControls","expr_progress_joint_witness"),
  "Solidity.Theory.Progress.items_progress":("ScopeControls","items_progress_joint_witness"),
  "Solidity.Theory.Progress.body_progress":("ScopeControls","body_progress_joint_witness"),
- "Solidity.Theory.Progress.callsOKX_none":("ScopeControls","callsOKX_none_joint_witness")}
+ "Solidity.Theory.Progress.callsOKX_none":("ScopeControls","callsOKX_none_joint_witness"),
+ 'Solidity.Path.append_assoc':("PathWitnesses",'path_append_assoc_joint_witness'),
+ 'Solidity.Path.append_nil_right':("PathWitnesses",'path_append_nil_right_joint_witness'),
+ 'Solidity.Path.strip?_append':("PathWitnesses",'path_strip_append_joint_witness'),
+ 'Solidity.Path.eq_of_strip?':("PathWitnesses",'path_eq_of_strip_joint_witness'),
+ 'Solidity.Path.split_of_labels':("PathWitnesses",'path_split_of_labels_joint_witness'),
+ 'Solidity.Path.strip?_none':("PathWitnesses",'path_strip_none_joint_witness'),
+ 'Solidity.Path.strip?_append_append':("PathWitnesses",'path_strip_append_append_joint_witness'),
+ 'Solidity.ObsLoc.app_path':("PathWitnesses",'obsloc_app_path_joint_witness'),
+ 'Solidity.ObsLoc.strip?_path':("PathWitnesses",'obsloc_strip_path_joint_witness'),
+ 'Solidity.Obs.ext':("PathWitnesses",'obs_ext_joint_witness'),
+ 'Solidity.Obs.find_word':("PathWitnesses",'obs_find_word_joint_witness'),
+ 'Solidity.Obs.find_len':("PathWitnesses",'obs_find_len_joint_witness'),
+ 'Solidity.Obs.find_save_same':("PathWitnesses",'obs_find_save_same_joint_witness'),
+ 'Solidity.Obs.find_save_frame':("PathWitnesses",'obs_find_save_frame_joint_witness'),
+ 'Solidity.Obs.save_word_frame':("PathWitnesses",'obs_save_word_frame_joint_witness'),
+ 'Solidity.Obs.save_len_frame':("PathWitnesses",'obs_save_len_frame_joint_witness')}
 IMPOSSIBLE={
  "Solidity.Theory.Progress.Val.not_tuple":("ProgressWitnesses","no_plain_tuple_input"),
  "Solidity.Theory.Progress.Controls.no_tuple_local":("ProgressWitnesses","no_tuple_locals_input"),
  "Solidity.Ty.Finite.not_array":("FiniteBoundary","no_finite_array_path_input")}
 
+INTENTIONAL_REASONS={
+ "Solidity.Theory.Progress.Val.not_tuple":"Intentional representation refutation: plain Val has no tuple constructor; tuples use RVal.tuple.",
+ "Solidity.Theory.Progress.Controls.no_tuple_local":"Intentional negative boundary: a locals head would require a plain tuple Val, already impossible.",
+ "Solidity.Ty.Finite.not_array":"Intentional separation lemma: finite shapes have no direct path to a dynamic array."}
+H69_POLICY="H69 human decision 2026-11-06: checked joint-impossibility is the audit result for intentional negative controls/separation/refutation theorems; ordinary interfaces require joint witnesses."
+
 def sha(b): return hashlib.sha256(b).hexdigest()
 
-def checked_module(serial, source):
+def checked_module(serial, source, source_text=None):
     target=serial/"olean"/Path(source).with_suffix(".olean")
     meta=json.loads(target.with_suffix(".audit-result.json").read_text())
     assert meta["exit"]==0 and meta["resource_stop"] is None, source
-    assert fingerprint(source)==meta["source_transitive_sha256"],source
+    expected=fingerprint(source) if source_text is None else fingerprint_text(source_text)
+    assert expected==meta["source_transitive_sha256"],source
     assert sha(target.read_bytes())==meta["olean_sha256"], source
     log=Path(meta["log"])
     assert sha(log.read_bytes())==meta["log_sha256"], source
@@ -77,16 +103,37 @@ def main():
     src=json.loads((out/"census/census.json").read_text())
     producer_meta,producer_log=checked_module(out/"serial","tests/h62/item2/audit-theories/ElaboratedCensus.lean")
     receipt=json.loads((out/"census-output-receipt.json").read_text())
-    replay=json.loads((out/"census-replay.json").read_text())
     assert receipt["producer_exit"]==0
     for key in ("source_transitive_sha256","olean_sha256","log_sha256"):
         assert receipt["producer_"+key]==producer_meta[key],key
-    data=(out/"elaborated.json").read_bytes()
-    assert sha(data)==receipt["sha256"]==replay["sha256"]
-    assert data==(out/"elaborated-replay.json").read_bytes()
-    assert len(data)==receipt["bytes"]==replay["bytes"]
-    assert replay["identical"] is True
-    typed=json.loads(data)
+    if receipt.get("kind")=="format-comparison":
+        data=(out/"after.json").read_bytes();comparison=(out/"before.json").read_bytes()
+        assert sha(data)==receipt["sha256"] and sha(comparison)==receipt["comparison_sha256"]
+        assert len(data)==receipt["bytes"] and len(comparison)==receipt["comparison_bytes"]
+        pair=json.loads((out/"matched-pair.json").read_text())
+        assert pair["status"]=="pass" and pair["delta_percent"]<=10
+        assert pair["same_command"] and pair["same_machine"] and receipt["independent_compact_replay"] is False
+        before_text=(out/"before.lean").read_text();after_text=(out/"after.lean").read_text()
+        assert after_text==(ROOT/"tests/h62/item2/audit-theories/ElaboratedCensus.lean").read_text()
+        assert before_text.replace("(Json.arr rows).pretty ++","(Json.arr rows).compress ++")==after_text
+        before=pair["before"];after=pair["after"]
+        assert before["exit"]==after["exit"]==0 and before["resource_stop"] is None and after["resource_stop"] is None
+        assert before["source_transitive_sha256"]==fingerprint_text(before_text)
+        assert before["source_sha256"]==sha(before_text.encode()) and after["source_sha256"]==sha(after_text.encode())
+        assert sha((out/"before.olean").read_bytes())==before["olean_sha256"]
+        assert sha(Path(before["log"]).read_bytes())==before["log_sha256"]
+        for key in ("source_transitive_sha256","olean_sha256","log_sha256"):
+            assert after[key]==producer_meta[key],key
+        typed=json.loads(data)
+        assert receipt["decoded_equal"] is True and typed==json.loads(comparison)
+        assert len(typed)==pair["records"]
+    else:
+        replay=json.loads((out/"census-replay.json").read_text())
+        data=(out/"elaborated.json").read_bytes()
+        assert sha(data)==receipt["sha256"]==replay["sha256"]
+        assert data==(out/"elaborated-replay.json").read_bytes()
+        assert len(data)==receipt["bytes"]==replay["bytes"] and replay["identical"] is True
+        typed=json.loads(data)
     assert f"H62_ELABORATED_CENSUS: {len(typed)} theorem constants" in producer_log
     assert src["base"]==BASE
     frozen_map=subprocess.check_output(["git","show",BASE+":"+MAP],cwd=ROOT).decode()
@@ -125,9 +172,13 @@ def main():
         elif name in WITNESSES:
             row["status"]="joint-witness-checked"
             row["certificate"]=certificate(out/"serial",*WITNESSES[name])
+            row["simultaneous_witness"]=row["certificate"]["theorem"]
         elif name in IMPOSSIBLE:
-            row["status"]="blocked-intentionally-empty-input"
+            row["status"]="intentional-impossibility-checked"
             row["certificate"]=certificate(out/"serial",*IMPOSSIBLE[name])
+            row["intentional_reason"]=INTENTIONAL_REASONS[name]
+            row["policy_source"]=H69_POLICY
+            row["simultaneous_witness"]=None
         elif not t["binders"]:
             row["status"]="no-inputs"
             row["certificate"]={"empty_telescope":"True.intro; no binders in elaborated signature"}
@@ -145,10 +196,11 @@ def main():
        "Logical-vs-data binders are typed; global-vs-per-input obligations still require individual review.",
        "Additional generated theorem constants are retained as pending candidates, not silently excluded.",
        "No compiler success/totality/gas/fork contract has been proved by these source controls."]}
+    payload["intentional_impossibility_policy"]=H69_POLICY
     (out/"verified-census.json").write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n")
     gaps=[{"theorem":r["elaborated"]["name"],"file":r["file"],"line":r["line"],
       "status":r["status"],"documented_producing_lane":r["documented_producing_lane"],
-      "proving_owner":r["proving_owner"]} for r in rows if r["status"] in ("uncovered","blocked-intentionally-empty-input","private-witness-pending")]
+      "proving_owner":r["proving_owner"]} for r in rows if r["status"] in ("uncovered","private-witness-pending")]
     gaps.extend({"theorem":r["name"],"file":r["file"],"line":None,"status":r["status"],
       "documented_producing_lane":r["documented_producing_lane"],"proving_owner":r["proving_owner"]}
       for r in payload["generated_candidates"])

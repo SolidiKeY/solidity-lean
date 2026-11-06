@@ -21,3 +21,8 @@ row Theory/Audit/H62/ScopeControls.lean | Joint expression/block/body inputs; gl
 ElaboratedCensus.lean imports Lean metaprogramming and must remain an optional
 standalone audit tool, outside dependency-free core roots. It is not proposed
 for core registration. Generated constant classification remains pending.
+
+source tests/h62/item2/audit-theories/PathWitnesses.lean
+candidate Solidity/Theory/Audit/H62/PathWitnesses.lean
+import Solidity.Theory.Audit.H62.PathWitnesses
+row Theory/Audit/H62/PathWitnesses.lean | Sixteen joint path/observation algebra input witnesses; no storage realizability or runtime claim.

@@ -1,4 +1,4 @@
-# H62 item 2: audit-theories — blocked handoff
+# H62 item 2: audit-theories — H69 continuation
 
 This is a reviewable partial audit, not completion of the frozen assignment.
 The strict acceptance command exits 1. No RUNTIME_GATE_PASS is claimed.
@@ -35,15 +35,16 @@ they have not been silently excluded from the assignment.
 
 | Explicit declaration disposition | Count |
 |---|---:|
-| Simultaneous witness checked | 6 |
+| Simultaneous witness checked | 22 |
 | Empty elaborated input telescope | 18 |
-| Intentionally empty inputs; certificate checked, acceptance blocked | 3 |
-| Public inputs not yet witnessed | 470 |
+| H69 intentional impossibility checked and accepted | 3 |
+| Public inputs not yet witnessed | 454 |
 | Private declarations retained, witness pending | 3 |
 | Total | 500 |
 
-uncovered.json contains 1,462 unique pending/blocked records: 470 public,
-3 private, 3 impossible-input boundaries and 986 generated candidates. It gives
+uncovered.json contains 1,443 unique pending records: 454 public,
+3 private and 986 generated candidates. The three H69-accepted boundaries are
+reported separately, each with its rationale and checked certificate. It gives
 names, source/module locations, documented producer routing and unresolved live
 owners. verified-census.json retains every full typed record and source header.
 Neither inhabited global structures nor individual premise witnesses are
@@ -79,7 +80,20 @@ and [ScopeControls](../../tests/h62/item2/audit-theories/ScopeControls.lean):
   certify the three impossible joint input telescopes. The third is in
   [FiniteBoundary](../../tests/h62/item2/audit-theories/FiniteBoundary.lean).
 
-There are 15 new proved theorems, 2 fixture definitions and 1 census metaprogram.
+[PathWitnesses](../../tests/h62/item2/audit-theories/PathWitnesses.lean) adds 16
+joint packets covering Path append/strip/label inputs, ObsLoc path operations,
+Obs.ext, primitive/length observations, save/read-back and frame statements.
+Every inherited location-family instance is packed with its concrete inputs;
+find_save_frame retains the complete universally quantified strip premise.
+The fixture auditObs has has=true and len=0. Its selected typed locations satisfy
+exactly the frozen abstract algebraic premises; no Shaped/reachability premise
+is present in those statements. These are not proofs of Storage.obs/SVal.obs
+realizability or successful runtime reads. Ordinary compiler/program totality
+obligations remain separate.
+
+There are 31 proved audit theorems, 3 fixture definitions, 1 private type
+abbreviation and 1 census metaprogram. Sixteen witness packets are new in this
+continuation; the original 15 proofs remain unchanged.
 Final axiom reports use only propext, Classical.choice and Quot.sound, or subsets;
 no new custom axiom, sorry, native_decide, trust option or increased heartbeat
 budget was added. Earlier failed elaboration attempts remain in evidence, but
@@ -87,30 +101,47 @@ only matching successful artifact/log/source provenance is accepted.
 
 ## Owner tickets and required decisions
 
-Q-NEGATIVE-INPUTS was asked during work and has no recorded answer. These are
-intentional negative structural boundaries, not evidence that the original
-classification theorems are defective. Their literal all-input witness
-requirement is contradictory; their frozen statements remain intact.
+H69 (human, 2026-11-06) resolves Q-NEGATIVE-INPUTS: for intentionally
+contradictory hypotheses, a checked proof of joint impossibility IS the audit
+result. Ordinary interfaces still require joint witnesses. The three named
+rows now have status intentional-impossibility-checked, an explicit reason,
+the checked certificate and H69 policy source; simultaneous_witness stays null.
+These are intentional negative structural boundaries, not defective positive
+contracts. No frozen statement changed. The historical escalation lines below
+are retained once each, with the H69 resolution; they are no longer blockers.
 
-ESCALATE: Solidity.Theory.Progress.Val.not_tuple — Tuple.lean:40 assumes a plain tuple Val and concludes False; H62.AuditTheories.no_plain_tuple_input proves no such input exists. Options: accept the checked impossibility certificate as this negative boundary's audit disposition while preserving its statement; retain the literal witness criterion and its typed blocker.
-ESCALATE: Solidity.Theory.Progress.Controls.no_tuple_local — Controls.lean:141 assumes locals headed by a tuple and concludes False; H62.AuditTheories.no_tuple_locals_input proves its input telescope empty. Options: accept its checked impossibility disposition without editing the statement; retain the literal witness criterion and blocker.
-ESCALATE: Solidity.Ty.Finite.not_array — Leaves.lean:305 requires a finite shape plus a direct path to a dynamic array and concludes False; H62.AuditTheories.no_finite_array_path_input refutes that conjunction. Options: accept its checked impossibility disposition while retaining the theorem; retain the literal witness criterion and blocker.
+| Frozen theorem | Why intentional | Checked impossibility proof |
+|---|---|---|
+| Solidity.Theory.Progress.Val.not_tuple | Plain Val excludes tuple constructors; tuples use RVal.tuple | H62.AuditTheories.no_plain_tuple_input |
+| Solidity.Theory.Progress.Controls.no_tuple_local | A tuple-headed local would require an impossible plain tuple Val | H62.AuditTheories.no_tuple_locals_input |
+| Solidity.Ty.Finite.not_array | Separation lemma: finite shape cannot reach a dynamic array directly | H62.AuditTheories.no_finite_array_path_input |
 
-T-PUBLIC-LINK routes the compiler obligation to the coordinator/area producer,
-with H55-G49 consulted for shared final-contract linkage. Source Ends permits
+ESCALATE: Solidity.Theory.Progress.Val.not_tuple — Tuple.lean:40 assumes a plain tuple Val and concludes False; H62.AuditTheories.no_plain_tuple_input proves no such input exists. Options: accept the checked impossibility certificate as this negative boundary's audit disposition while preserving its statement; retain the literal witness criterion and its typed blocker. Resolved by H69: the checked impossibility disposition is accepted; statement unchanged.
+ESCALATE: Solidity.Theory.Progress.Controls.no_tuple_local — Controls.lean:141 assumes locals headed by a tuple and concludes False; H62.AuditTheories.no_tuple_locals_input proves its input telescope empty. Options: accept its checked impossibility disposition without editing the statement; retain the literal witness criterion and blocker. Resolved by H69: the checked impossibility disposition is accepted; statement unchanged.
+ESCALATE: Solidity.Ty.Finite.not_array — Leaves.lean:305 requires a finite shape plus a direct path to a dynamic array and concludes False; H62.AuditTheories.no_finite_array_path_input refutes that conjunction. Options: accept its checked impossibility disposition while retaining the theorem; retain the literal witness criterion and blocker. Resolved by H69: the checked impossibility disposition is accepted; statement unchanged.
+
+T-PUBLIC-LINK records unfinished compiler-linkage investigation; it is not yet
+a demonstrated producer dependency. The coordinator/area producer and H55-G49
+should be consulted if shared final-contract linkage or an owned-file repair
+is needed; do not duplicate H55 implementation work. Source Ends permits
 revert/panic/timeout and CoreEnds classifies every core result. The new source
 success controls do not prove compiler admission or reject-all compiler
 exclusion for a frozen public compiler contract. Program.lean:38 and
 Outcome.lean:32–34 explicitly state gas is unmodelled. legacy/viaIR is a source
 pipeline parameter, not an EVM fork. Required compiler success, observable
-failure-byte/gas/fork linkage remains unproved. Options for the producer ticket:
-supply an existing frozen adapter and exact owning paths for additive audit
-consumption; assign the missing relation proof to its existing owner and retain
-this dependency blocker. No interface repair or new premise is authorized.
+failure-byte/gas/fork linkage remains unproved. Read-only investigation found
+existing candidates in Solidity/Evm/Compiler.lean: Compilation (line 24), compile
+(line 46), Agrees (line 548) and correct (line 562). A next additive audit should
+try a concrete supported program with actual successful source execution,
+compile admission and Input witness; the non-payment case can eliminate the
+permitted payment-revert branch. This is investigation work still to perform,
+not a proof or an assumption that a new premise/owner adapter is required.
+No interface repair or new premise is authorized.
 
 ## Validation and resource evidence
 
-Off-Git evidence directory: /workspace/h62-audit-theories-evidence.
+Current off-Git evidence: /workspace/h62-audit-theories-h69-evidence.
+Historical immutable evidence: /workspace/h62-audit-theories-evidence.
 The final external handoff adds exact committed head, patch paths and checksums.
 Bulk JSON and compiled artifacts are not committed; generators are committed.
 
@@ -124,37 +155,67 @@ One heavy Lean process at a time, LEAN_NUM_THREADS=1, explicit -j1,
 container/host available reserve, 300-second module timeout. The writer lock
 was acquired before writes/checks. No systemd-run or heartbeat increase.
 The initial 118 dependency checks took 771.790s, peak sampled process RSS
-1,714,769,920 bytes. KeySort passed in 2.008s at 256,262,144 bytes. Runtime labels
+1,714,769,920 bytes. KeySort originally passed in 2.008s at 256,262,144 bytes; the fresh matched-pair prerequisite passed in 2.015889s at 260,485,120 bytes. Runtime labels
 are not proofs and no full runtime gate pass is claimed.
 
 | Command / gate | Outcome and decisive evidence |
 |---|---|
-| python3 -m unittest discover -s scripts/h62/item2/audit-theories -p test_*.py -v | 5 pass; census-tests-final.log |
-| serial_check.py --lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --out /workspace/h62-audit-theories-evidence/serial <audit targets> | All 4 final helpers passed individually; matching provenance/axiom logs checked by verifier. No full-build equivalence claimed. |
-| verify_census.py --evidence /workspace/h62-audit-theories-evidence | Exit 0, 500 exact explicit matches; generated candidates retained. verify-census-final.log |
-| Same verifier with --require-full | Exit 1: FULL_ACCEPTANCE_BLOCKED, 1,462 pending/blocked candidates plus unlinked compiler obligations. |
+| python3 -m unittest discover -s scripts/h62/item2/audit-theories -p test_*.py -v | 6 pass; current unit-current.log |
+| Original four-helper checks at commit 304bda598 | Historical passing checks in original immutable evidence; current producer has since changed. |
+| serial_check.py --lean /workspace/.setup/tools/lean-4.24.0-linux/bin/lean --out /workspace/h62-audit-theories-h69-evidence/serial tests/h62/item2/audit-theories/PathWitnesses.lean | Exit 0, 1.207s; path-witness-fixed-driver.log. Current four proof modules plus separate census metaprogram have matching checked provenance. No full-build equivalence claimed. |
+| verify_census.py --evidence /workspace/h62-audit-theories-h69-evidence | Exit 0, 500 exact explicit matches; 22 joint witnesses, 3 H69 results; verify-expanded.log and evidence-controls-current.log. |
+| verify_census.py --evidence /workspace/h62-audit-theories-h69-evidence --require-full | Exit 1: FULL_ACCEPTANCE_BLOCKED, 1,443 pending candidates plus unlinked compiler obligations. |
 | node scripts/check-layers.mjs | Exit 0: 857 core modules, none reach elaborator or checked parser adapters. |
 | bash scripts/coord-tools/register.sh --check | Exit 0; generated roots unchanged. |
 | bash scripts/coord-tools/fragments.sh --check | Exit 0; generated maps/pins unchanged. |
 | bash scripts/check-doc-paths.sh | Exit 1: pre-existing off-scope missing MathlibTest/SplitIfs reference in after-roadmap-va1.md. No authorized fix made. |
-| ./run-lean.sh and complete affected/full acceptance/performance gates | Pending; mandatory heavy-check stop, incomplete witnesses and producer linkage. |
+| ./run-lean.sh and complete affected/full acceptance gates | Pending; incomplete witnesses and producer linkage. The matched tool timing gate passed. |
 
 [ElaboratedCensus](../../tests/h62/item2/audit-theories/ElaboratedCensus.lean)
-uses the unchanged imported environment. The producer validates absolute off-Git
-output paths. Forced replay is byte-identical: 54,772,963 bytes, SHA256
-71ac6a3e7efc088d7d2f4bad700f887bf2e5146052e2fe8e2aa6ab811a9d1a63.
-The verifier checks producer/source/artifact/log provenance, external receipt
-and both replay byte hashes, frozen-map-derived rescanning, module identities
-and unique accounting. The receipt and scanner tests are external bookkeeping,
-not a Lean proof of census correctness or compiler behavior.
+uses the unchanged imported environment and validates absolute off-Git output
+paths. Original evidence is immutable at /workspace/h62-audit-theories-evidence;
+continuation evidence is /workspace/h62-audit-theories-h69-evidence.
 
-Census check: 25.876s before, 33.515s replay (+29.52%) at the same producer and
-transitive dependency fingerprint. ScopeControls warning cleanup: 1.406s to
-2.011s (+43.03%). CPU scheduling/OS page caches were not controlled; these do not
-establish code-caused regression or a passing matching-cache performance gate.
-Further heavy checks stopped at the threshold crossing; no retry hid it.
+The coordinator explicitly authorized optimizing the tool and taking ONE
+matched before/after pair on the same input/machine, continuing if within 10%.
+The optimization changes only final whole-document Json.pretty to Json.compress;
+all field-level ppExpr formatting, raw types, binders and record collection are
+unchanged. The committed measurement generator selects the original unoptimized source
+from commit 304bda598 via --baseline-ref, so the single pair can be reproduced
+without resetting this checkout. Its generated before/after source fixtures are
+checked against the current candidate without running another census trial.
+The exact originally executed script is also retained separately. Both runs use
+the same Lean argv, output path, warmed cache paths,
+resource bounds and machine. No timing retry or extra compact replay was run.
 
-ESCALATE: action serial_check.py::ElaboratedCensus timing gate — 25.876s to 33.515s, +29.52%, exceeds the frozen 10% stop threshold; see timing.json and both driver logs. Options: coordinator investigates a reproducible matching-cache measurement under unchanged resource/proof budgets before resumption; retain the heavy-check stop and continue only non-Lean handoff/backfill.
+| Matched census run | Wall seconds | Peak sampled RSS | Output bytes |
+|---|---:|---:|---:|
+| Before, pretty JSON | 30.298344 | 1,119,334,400 | 54,772,963 |
+| After, compact JSON | 30.926679 | 1,117,376,512 | 54,385,211 |
+
+Overall delta +2.073826%, within 10%; coordinator-authorized continuation is
+therefore permitted. All 1,486 parsed records and every string field match each
+other and the untouched original. Whitespace/key-order bytes differ; the new
+format-comparison receipt retains both hashes and explicitly denies an
+independent compact replay. The verifier validates both producer snapshots,
+source/import/artifact/log fingerprints, parsed equality, frozen-source
+rescanning, module identities and unique accounting. External receipts are not
+Lean proofs of census correctness or compiler behavior.
+
+Pure serialization may be deferred into the write phase. Interpret the recorded
+serialization_ns and write_ns TOGETHER: 1.789787s before, 0.991565s after. Row
+extraction rose from 26.415637s to 28.216629s; overall wall time did not improve.
+No cgroup CPU throttling or resource stop occurred. Scheduling/page-cache noise
+remains possible; the pair supports the threshold decision, not a claim of
+whole-tool speedup. The measurement source snapshot and logs preserve the exact
+executed method; cache warming included the non-imported census output artifact,
+whose hash was equal in both runs.
+
+Earlier unmatched 25.876s→33.515s (+29.52%) and ScopeControls 1.406s→2.011s
+(+43.03%) observations remain in the original evidence. No measurement was
+removed or relabelled as a passing pair.
+
+ESCALATE: action serial_check.py::ElaboratedCensus timing gate — historical 25.876s to 33.515s, +29.52%, exceeded the frozen 10% stop threshold. Options were coordinator investigation under unchanged budgets or retaining the stop. Resolved by explicit coordinator authorization and the single matched 30.298344s→30.926679s pair (+2.073826%); continuation allowed. Historical evidence retained.
 
 ## Independent reviews and fixes
 
@@ -163,26 +224,27 @@ jobs. Confirmed fixes: frozen-map scope guard, comment/string handling,
 unsupported-prefix fail-closed control, structure-style where/let headers,
 cache artifact/log hashes and retained history, absolute off-Git path guard,
 forced side-effectful census replay, producer/output provenance binding,
-frozen-source rescanning, module identity and unique accounting. Both checked
-six witness shapes against exact frozen premises, identified the three empty
-input boundaries, and confirmed source/fuel/pipeline labels do not claim
-compiler/gas/fork correctness. Both report no residual findings for this
-blocked handoff. Their results are saved in reviews.json; this is not a review
+frozen-source rescanning, module identity and unique accounting. Both checked the original six plus 16 new witness shapes against exact frozen
+premises, confirmed the H69 classifications, and distinguished abstract algebraic
+feasibility from realizable storage/runtime/compiler success. They independently
+confirmed all 1,486 matched records and the single timing pair. Both report no residual findings for this
+partial handoff. Their results are saved in reviews.json; this is not a review
 approval of the unfinished assignment.
 
 ## Committed continuation handoff
 
 Request a coordinator-managed fresh thread after these reviewed work items:
-source/typed census, joint-input witnesses, negative/success controls, and
-provenance/acceptance tooling. Use this original VM, branch, evidence and
+matched tool optimization, H69 policy reconciliation, 16 further joint-input
+witnesses, and provenance/acceptance verification. Use this original VM, branch, evidence and
 existing goal. Do not self-launch a replacement, reset the goal, merge, push,
 pre-gate or publish. The goal remains unfinished.
 
-Next work: resolve the heavy-check stop and Q-NEGATIVE-INPUTS; confirm proving owners for nine files and
-current live routing for all 25; classify all generated candidates;
+Next work: H69 and the matched tool-timing question are resolved. Confirm proving
+owners for nine files and current live routing for all 25; classify all generated candidates;
 finish remaining joint witnesses without assuming empty catalogues or global
-structures suffice; consume owner-provided compiler success and failure/gas/fork
-adapters; run all required affected/final gates and independent reviews. Keep
+structures suffice; investigate the existing compiler entry above, consume
+existing owner adapters where available, and prove success/failure/gas/fork
+links without duplicating H55; run all required affected/final gates and independent reviews. Keep
 all blockers until discharged. Deferred registration suggestions are supplied
 in tests/h62/item2/audit-theories/registration-fragment.txt; no registration was
 applied. The census metaprogram must remain outside dependency-free core roots.
