@@ -1,4 +1,6 @@
-# G19 mapped assignment while with a resetting body
+# G19 context-related assignment while with a resetting body
+
+The target program is hand-written. Context mapping relates its locals to Source locals; it does not establish a generated lowering endpoint.
 
 [AssignmentWhileReset](../../Solidity/Lowering/G19/AssignmentWhileReset.lean) consumes V07 ContextMap and the existing mapped assignment prefix. The actual Source statement is `while (i = a) { a = false; }`. A false condition still writes i. A true condition executes the body, restores its scope, re-evaluates the assignment condition and exits with both mapped locals false. The target is an actual intrinsic `loop .auto`, preceded by the condition prefix and repeating that prefix after the donor write. No parallel lowering relation, core semantics or source profile restriction is introduced.
 
