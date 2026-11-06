@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Reproduce supplied Hash-owner blob in an off-Git fixture; no branch overlay."""
-import argparse, fcntl, hashlib, json, os, resource, signal, subprocess, time
+import argparse, fcntl, hashlib, json, os, resource, subprocess
 from pathlib import Path
+from bounded import run, settings, passed
 ap=argparse.ArgumentParser(); ap.add_argument('--out',type=Path,required=True); ap.add_argument('--verify-only',action='store_true'); a=ap.parse_args()
 root=Path.cwd(); out=a.out.resolve(); out.mkdir(parents=True,exist_ok=False)
 lock=open('/tmp/solidity-lean-feature-groups-20261025/writer.lock','w'); fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
@@ -35,28 +36,7 @@ if patch_hash!=expected: raise SystemExit('OWNER_PATCH_SHA256_MISMATCH')
 if a.verify_only:
     print('PASS: exact owner blob and transport SHA256; verification only, no Lean check')
     raise SystemExit(0)
-def available():
-    host=int(next(s.split()[1] for s in Path('/proc/meminfo').read_text().splitlines() if s.startswith('MemAvailable:')))*1024
-    cap=Path('/sys/fs/cgroup/memory.max').read_text().strip(); used=int(Path('/sys/fs/cgroup/memory.current').read_text())
-    return min(host,int(cap)-used) if cap!='max' else host
-def limits(): resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
-if available()<4*1024**3: raise SystemExit('RESOURCE_BLOCK')
 cmd=['/workspace/h62-migrate-semantics-evidence/lean-4.35.0-linux/bin/lean','-j1','--tstack=131072','-o',str(out/'CollisionBound.olean'),str(rel)]
-t=time.monotonic(); stop=None
-with (out/'compile.log').open('w') as f:
-    p=subprocess.Popen(cmd,cwd=out,env=dict(os.environ,LEAN_NUM_THREADS='1'),stdout=f,stderr=subprocess.STDOUT,preexec_fn=limits,start_new_session=True)
-    try:
-        while p.poll() is None:
-            if available()<4*1024**3 or time.monotonic()-t>300:
-                stop='RESOURCE_BLOCK' if available()<4*1024**3 else 'MODULE_300S_STOP'
-                try: os.killpg(p.pid,signal.SIGKILL)
-                except ProcessLookupError: pass
-                p.wait(); break
-            time.sleep(.25)
-    finally:
-        if p.poll() is None:
-            try: os.killpg(p.pid,signal.SIGKILL)
-            except ProcessLookupError: pass
-            p.wait()
-report={'owner':'migrate-hash','owner_ticket_head':'78c110f83dc1a30700acd1b5bd34b19f61da6ccd','owner_source_head':'2a18afcdba00a85645b0b3079704f78ffcd78860','base':base,'file':str(rel),'result_git_blob':blob,'supplied_patch_sha256':expected,'reconstructed_patch_sha256':patch_hash,'patch_transport_hash_equal':patch_hash==expected,'fixture_sha256':hashlib.sha256(new).hexdigest(),'command':cmd,'exit':p.returncode,'stop':stop,'wall_seconds':time.monotonic()-t,'cumulative_peak_child_rss_kib':resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,'boundary':'Owner overlay tested only in an off-Git fixture; branch Hash source unchanged; full gates pending.'}
-(out/'result.json').write_text(json.dumps(report,indent=2)+'\n'); print(json.dumps(report)); raise SystemExit(0 if p.returncode==0 else 1)
+result=run(cmd,log=out/'compile.log',cwd=out,env=dict(os.environ,LEAN_NUM_THREADS='1'))
+report={'owner':'migrate-hash','owner_ticket_head':'a3f49ee0ec1829e63022c90194048d5a1ffe0d22','owner_source_head':'2a18afcdba00a85645b0b3079704f78ffcd78860','base':base,'file':str(rel),'result_git_blob':blob,'supplied_patch_sha256':expected,'reconstructed_patch_sha256':patch_hash,'patch_transport_hash_equal':patch_hash==expected,'fixture_sha256':hashlib.sha256(new).hexdigest(),'command':cmd,'settings':settings(),**result,'cumulative_peak_child_rss_kib':resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss,'boundary':'Owner overlay tested only in an off-Git fixture; branch Hash source unchanged; full gates pending.'}
+(out/'result.json').write_text(json.dumps(report,indent=2)+'\n'); print(json.dumps(report)); raise SystemExit(0 if passed(result) else 1)

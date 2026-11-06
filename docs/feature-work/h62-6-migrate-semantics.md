@@ -61,7 +61,7 @@ No new sorry, axiom, native_decide, premise/exclusion, or heartbeat/recursion li
    match base exactly. These hashes/reviews are not elaborated API equivalence.
    Delivery to migrate-root-gate and final cut-over remain coordinator work.
 
-## Matched samples and escalation
+## Historical matched samples (before H78)
 
 sample-old-02 and sample-new-01 rebuild the same two modified files, using
 identical source hashes, module order, serial settings, corresponding already
@@ -85,6 +85,144 @@ modules, AST and SpecSyntax, then fails Syntax.Raw. Nine attempted modules,
 eight pass, one fails; complete=false. Interrupted wall 59.729785591s, peak child
 RSS 1514316 KiB. This is an incomplete build, not a comparable full-build number.
 The old complete baseline and full before/after comparison remain unresolved.
+
+## H78 resource policy and affected-module measurements
+
+H78 directs migration lanes to continue past memory increases, retain before/after
+peak RSS and wall time, and keep the 8 GiB module cap. No RSS-growth hold remains;
+memory growth must be reviewed at human cut-over. The historical scripts had a
+12 GiB address-space ceiling. Their original measurements/settings are retained;
+they do not demonstrate enforcement of the H78 8 GiB ceiling.
+
+All four diagnostic runners now share bounded.py: 8 GiB per-process RLIMIT_AS
+(a conservative RSS bound for these direct Lean processes), 4 GiB available-memory
+reserve, no host swap, 300-second module timeout, one serial Lean job with -j1 and
+LEAN_NUM_THREADS=1. This is not an aggregate cgroup RSS cap. No systemd-run,
+heartbeat/recursion-limit increase or proof change was made. Existing source
+repairs and all public statements remain unchanged this turn.
+
+The helper uses waitid(WNOWAIT) to retain the exited leader's PID while terminating
+its owned process group, then wait4 for exact per-child ru_maxrss and reaping.
+Timeout/resource stops can never pass, even with exit0. Resource controls exercise
+the actual 8 GiB hard/soft AS limit, refusal of a 9 GiB allocation, separate child
+RSS values, timeout cleanup, normal-leader descendant termination and stopped-exit0
+rejection. Descendant termination is checked; its final reaping belongs to the OS.
+Finder/skeptic findings for normal completion cleanup and the stop/exit race were
+fixed and re-reviewed. h78-resource-controls-02 passes. These non-Lean controls
+establish guard behavior, not proof acceptance.
+
+Matched incremental samples h78-sample-old-02 and h78-sample-new-01 use identical
+source-closure hashes, order and finalized guard/settings. Both modified modules
+pass on both versions with stop=null. compare_samples.py rejects mismatched input,
+settings/order or failed/stopped rows, and refuses matched but non-H78 settings.
+A negative control rejects equal12GiB inputs. Exact per-module measurements:
+
+| Module | Old wall s | New wall s | Old RSS KiB | New RSS KiB | Wall delta | RSS delta |
+|---|---:|---:|---:|---:|---:|---:|
+| AbiAccess | 4.761859098 | 4.515427488 | 341888 | 555376 | -5.18% | +62.44% |
+| AbiEntryProofs | 6.771159879 | 4.016633253 | 432896 | 563108 | -40.68% | +30.08% |
+
+Combined sampled wall: 11.533018977 -> 8.532060741 seconds (-26.02%). Maximum
+sampled module RSS: 432896 -> 563108 KiB (+30.08%). These are single incremental
+samples on the same migrated source tree, not a clean full-directory comparison
+or a statistical speed claim. They supersede neither the original pinned-base
+baseline requirement nor the remaining full performance gate.
+
+Continuing as directed, new-clean-h78-01 uses fresh outputs and the same 8 GiB guard:
+KeySort, five ABI modules, AST and SpecSyntax pass, then Syntax.Raw fails. Nine
+attempts/eight passes, complete=false, interrupted wall63.280466661s and maximum
+per-child RSS1501364KiB. No resource stop occurred. The fresh clean comparison
+cannot complete until the external Raw overlay and other dependency migrations
+are supplied; original old Source.Horizon baseline timeout also remains unresolved.
+Generated API drift and full affected/root gates remain open, with no exemptions.
+
+```sh
+python3 tests/h62/item6/migrate-semantics/resource_controls.py --out /workspace/h62-migrate-semantics-evidence/h78-resource-controls-02
+python3 scripts/h62/item6/migrate-semantics/probe.py --toolchain /workspace/.setup/tools/lean-4.24.0-linux --lib /workspace/h62-migrate-semantics-evidence/old-clean-02/lib --out /workspace/h62-migrate-semantics-evidence/h78-sample-old-02 --only Solidity.Semantics.AbiAccess --only Solidity.Semantics.AbiEntryProofs
+python3 scripts/h62/item6/migrate-semantics/probe.py --toolchain /workspace/h62-migrate-semantics-evidence/lean-4.35.0-linux --lib /workspace/h62-migrate-semantics-evidence/new-clean-h76-01/lib --out /workspace/h62-migrate-semantics-evidence/h78-sample-new-01 --only Solidity.Semantics.AbiAccess --only Solidity.Semantics.AbiEntryProofs
+python3 scripts/h62/item6/migrate-semantics/compare_samples.py --old /workspace/h62-migrate-semantics-evidence/h78-sample-old-02 --new /workspace/h62-migrate-semantics-evidence/h78-sample-new-01 --out /workspace/h62-migrate-semantics-evidence/h78-comparison.json
+python3 scripts/h62/item6/migrate-semantics/measure.py --toolchain /workspace/h62-migrate-semantics-evidence/lean-4.35.0-linux --out /workspace/h62-migrate-semantics-evidence/new-clean-h78-01
+```
+
+The latest Hash-owner receipt a3f49ee0ec1829e63022c90194048d5a1ffe0d22 supplies the
+same exact patch digest as the prior H70 receipt. It is not a new source overlay.
+hash-owner-h78-01 rechecks that same fixture under the finalized8GiB guard: exit0,
+stop=null, wall4.264352025s, exact peak RSS603240KiB. Transport hash and full Git blob
+match. Branch Hash remains unchanged and full affected Hash gates remain pending.
+hash-owner-h78-ack.json records the receipt and fixture-only result for relay.
+
+This continuation completed four local items: guard/resource controls, matched
+samples, a fresh clean attempt, and the Hash-owner cap validation. Full assignment
+remains blocked. Fresh-thread coordination retains this same original VM/branch/
+goal; do not create or reset a goal, or claim the failed clean gate completed.
+
+## Exact-base old clean attempt and controller calibration (H78)
+
+A private detached worktree at `/workspace/h62-migrate-semantics-base-8g` remains
+clean at exact base c6f550e281a7e5affa9a99bc2cdaed556dec00e4. No producer file was
+edited there and no branch/default/master change was made. The finalized collector
+from the assigned branch ran against that worktree with fresh outputs:
+
+```sh
+cd /workspace/h62-migrate-semantics-base-8g
+python3 /workspace/solidity-lean/scripts/h62/item6/migrate-semantics/measure.py --toolchain /workspace/.setup/tools/lean-4.24.0-linux --out /workspace/h62-migrate-semantics-evidence/old-clean-h78-01
+```
+
+111 modules pass, then Source.Horizon aborts with std::bad_alloc (exit-6) after
+99.775619097s, measured RSS1835812KiB. Interrupted total788.722999508s;
+complete=false. This occurred under the conservative8GiB virtual-address ceiling;
+it does not demonstrate an8GiB resident-memory overrun. h78-clean-attempts.json
+checks matching old/new settings and common-prefix order; both full attempts are
+incomplete, so full_wall_delta_percent=null. Existing incremental samples remain
+separately labeled and are not promoted to clean-build results.
+
+To distinguish virtual-address restriction from the actual memory budget, a managed
+Docker diagnostic used the pinned image
+python@sha256:4840d514c583a4d3d8cad3940e68dee6f0f6f3635c12fcd0a3d74c21a5b93a54,
+verified cgroup-v2 memory.max=8589934592 and memory.swap.max=0, disabled network,
+and mounted pinned sources/toolchain/imports read-only. All162 original source
+hashes match the pinned snapshot. Inherited RLIMIT_AS is unlimited in this mode;
+the memory controller still enforces the8GiB job cap. No memory, heartbeat,
+recursion or time budget was raised. The4GiB available-memory guard reads the
+actual ancestor VM controller, not the job's8GiB controller.
+
+The diagnostic uses already-built original dependency artifacts: it is not a clean
+baseline or a timing comparison with the native samples. KeySort passes, then
+Source.Horizon reaches MODULE_300S_STOP: exit-9, wall300.253372037s, process peak
+RSS3612648KiB. Charged job-memory peak3948941312bytes; all OOM counters are0.
+This establishes the unresolved time-bound prerequisite independently of the
+virtual-address allocation failure. It is not evidence that the memory cap was
+exceeded, a theorem failed, or the full old baseline completed.
+
+The original run's outer host writer lock was confirmed busy with fcntl and saved
+alongside pinned-image, read-only mount and controller inspection evidence in
+h78-cgroup-prerequisite-01/launch-inspect.json. lslocks in a nested namespace was
+not a reliable indicator. The reproducible launch_cgroup.py now bind-mounts the
+same physical host writer.lock and the container script acquires it before Lean.
+The wrapper records Docker configuration/state and removes only its own container.
+No systemd-run, privileged mode, host networking or daemon restart is used.
+
+Controller roots in mountinfo are namespace-relative (including /..), so ancestry
+is checked using the actual cgroup kernfs device/inode under the VM controller's
+Docker container ID, not string-prefix inference. Controls reject unverified caps,
+regular directories masquerading as controllers and wrong job identities.
+h78-cgroup-controls-03 passes with an exclusive host-file lock, actual8GiB cap,
+swap disabled and cleanup recorded. Earlier control02 failed closed on overly
+strict namespace-string inference; no Lean ran in that control. Review findings
+were corrected and independently rechecked. Default native fallback controls04
+and the H78 sample comparator also pass after these changes.
+
+```sh
+cd /workspace/solidity-lean
+python3 scripts/h62/item6/migrate-semantics/launch_cgroup.py --out /workspace/h62-migrate-semantics-evidence/h78-cgroup-controls-03 --control-only
+# Optional repeat of the isolated prerequisite; use a fresh output directory:
+python3 scripts/h62/item6/migrate-semantics/launch_cgroup.py --out /workspace/h62-migrate-semantics-evidence/h78-cgroup-prerequisite-repeat
+```
+
+All container runs have ended and owned containers were removed. Full baseline,
+new build, affected validation, generated-interface compatibility and root-gate
+acceptance remain unresolved. Native-AS and container-controller measurements
+are separate environments and must not be combined into a full timing result.
 
 ## Elaborated ABI type evidence (H76)
 
@@ -217,3 +355,7 @@ remains unfinished; maintain all original proof/resource budgets.
 H76/H70 continuation delivered three items: a fresh clean-build attempt, elaborated
 ABI interface evidence, and owner-ticket responses/Hash fixture validation. Fresh
 thread coordination retains the same VM, branch and original unfinished goal.
+
+This H78 continuation preserves the same original VM/branch/goal. Resource calibration,
+matched samples, clean attempts and owner-fixture checks are checkpoint evidence,
+not completion of the frozen assignment. The coordinator owns fresh-thread resumption.
