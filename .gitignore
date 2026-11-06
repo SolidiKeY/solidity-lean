@@ -26,4 +26,4 @@ scripts/__pycache__/
 /tests/editor-parity/parity-gate-report.json
 
 # H44: full parity inventory is restored from its checksum-bound VM bundle.
-/docs/dafny-editor-features.json
+/tests/editor-parity/inventory/

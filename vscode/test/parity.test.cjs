@@ -93,14 +93,14 @@ test('independent audit keeps all upstream registration sites explicitly unexami
   assert.ok(validate(audit).length);
 });
 test('unsupported and untested capabilities cannot be marked complete',()=>{
-  const inventory=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('../parity/inventory.cjs').loadInventory();
   assert.deepEqual(validate(inventory),[]);
   inventory.features[0].assessment.status='complete';assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
   inventory.features[0].assessment.testEvidence=[{status:'skipped',assertion:'something',artifact:'fake.json'}];
   assert.ok(validate(inventory).some(e=>e.includes('unsupported completeness')));
 });
 test('inventory shrinkage and invented upstream evidence fail the offline gate',()=>{
-  const original=JSON.parse(readFileSync(resolve(__dirname,'../../docs/dafny-editor-features.json'),'utf8'));
+  const original=require('../parity/inventory.cjs').loadInventory();
   const fewer=structuredClone(original);fewer.features.pop();assert.ok(validate(fewer).some(e=>e.includes('feature set changed')));
   const tampered=structuredClone(original);tampered.features[0].upstream[0].sha256='0'.repeat(64);
   assert.ok(validate(tampered).some(e=>e.includes('unregistered upstream evidence')));

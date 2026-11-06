@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "kind": "external-dafny-parity-inventory",
+  "inventory": {
+    "path": "tests/editor-parity/inventory/dafny-editor-features.json",
+    "bytes": 670902,
+    "sha256": "6f2ad1a9b5eccdb145e01d122676d97e6ca4b399fc7f22f7c116c1102f5e50fe",
+    "rows": 484,
+    "features": 93,
+    "mechanicalRows": 391
+  },
+  "restoreManifest": "docs/dafny-editor-inventory-manifest.json",
+  "restoreCommand": "python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore",
+  "scope": "Digest only. Full inventory retains all row IDs/assessments/evidence outside git under H44; missing payload is not an empty inventory or a parity pass."
+}

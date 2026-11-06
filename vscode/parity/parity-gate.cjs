@@ -60,7 +60,7 @@ function candidateState(){
   return hash(JSON.stringify(listed.stdout.split('\0').filter(p=>p&&!p.startsWith('docs/')&&!p.startsWith('tests/editor-parity/')&&!p.endsWith('.md')).sort().map(p=>({path:p,sha256:hash(fs.readFileSync(inside(p)))}))));
 }
 function main(args=process.argv.slice(2)){
-  const config=options(args),inventory=JSON.parse(fs.readFileSync(path.join(root,'docs/dafny-editor-features.json')));
+  const config=options(args),inventory=require('./inventory.cjs').loadInventory();
   config.candidateState=candidateState();
   const rows=[...inventory.features,...(inventory.mechanical?.rows||[])],freeze=freezeRows(rows);
   const report={schemaVersion:1,status:'failed',candidateState:config.candidateState,frozen:freeze,inventory:check({...config,inventory}),rows:[]};

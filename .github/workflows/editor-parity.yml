@@ -58,6 +58,7 @@ jobs:
           inventory_args=()
           if [[ -n "$DAFNY_PARITY_INVENTORY_DIR" ]]; then inventory_args+=(--directory "$DAFNY_PARITY_INVENTORY_DIR"); fi
           flock /tmp/solidity-lean-feature-groups-20261025/writer.lock python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore "${inventory_args[@]}"
+          node -e "require('./vscode/parity/inventory.cjs').loadInventory()"
       - name: Validate source inventory and harness
         run: |
           node vscode/parity/discover.cjs --extension .cache/dafny-extension --server .cache/dafny-source --check-source

@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path'),{spawnSync}=require('node:child_process');
 const mechanical=require('./mechanical.cjs'),{validate}=require('./discover.cjs');
 const root=path.resolve(__dirname,'../..');
-function check({extension,server,liveTrace,inventory=JSON.parse(fs.readFileSync(path.join(root,'docs/dafny-editor-features.json')))}={}){
+function check({extension,server,liveTrace,inventory=require('./inventory.cjs').loadInventory()}={}){
   const errors=validate(inventory),rows=inventory.mechanical?.rows||[],ids=new Set();
   for(const row of [...inventory.features,...rows]){if(ids.has(row.id))errors.push('duplicate row '+row.id);ids.add(row.id);}
   for(const [name,dir]of Object.entries({extension,server})){

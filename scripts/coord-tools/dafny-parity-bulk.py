@@ -23,7 +23,7 @@ def main():
         if len(members)!=len(expected) or {m.name for m in members}!=set(expected): raise ValueError('Archive member mismatch')
         for member in members:
             name=pathlib.PurePosixPath(member.name)
-            if not member.isfile() or name.is_absolute() or '..' in name.parts or not (member.name.startswith('tests/editor-parity/') or member.name == 'docs/dafny-editor-features.json'): raise ValueError('Unsafe archive path/type')
+            if not member.isfile() or name.is_absolute() or '..' in name.parts or not member.name.startswith('tests/editor-parity/'): raise ValueError('Unsafe archive path/type')
             target=repo/member.name
             if not target.resolve().is_relative_to(repo) or target.is_symlink() or any(p.is_symlink() for p in target.parents if p!=repo and p.is_relative_to(repo)): raise ValueError('Unsafe destination')
             if subprocess.run(['git','ls-files','--error-unmatch','--',member.name],cwd=repo,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0: raise ValueError('Refusing tracked destination '+member.name)

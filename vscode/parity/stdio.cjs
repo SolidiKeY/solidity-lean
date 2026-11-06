@@ -383,7 +383,7 @@ async function main(args=process.argv.slice(2)){
   const lock=join(tmpdir(),'solidity-lean-editor-parity.lock');fs.mkdirSync(lock);fs.writeFileSync(join(lock,'owner.json'),JSON.stringify({pid:process.pid,output}));
   const save=()=>{
     report.summary=summarize(report.runs);report.parallelScaling=options.scope==='full'?scaling(report.summary):[];
-    const inventory=JSON.parse(fs.readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+    const inventory=require('./inventory.cjs').loadInventory();
     report.featureParity=inventory.features.map(f=>{
       const evidence=report.runs.filter(r=>!r.warmup).flatMap(r=>r.result.scenarios.filter(s=>f.assessment.scenarioIds.includes(s.id)).map(s=>({target:r.target,scenario:s.id,status:s.status,artifact:join(r.artifacts,'result.json')})));
       return {id:f.id,sourceAssessment:f.assessment.status,status:evidence.some(e=>['broken','timeout'].includes(e.status))?'broken':f.assessment.status,

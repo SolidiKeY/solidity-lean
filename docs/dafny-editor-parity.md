@@ -2,8 +2,9 @@
 
 This audit compares the official Dafny extension with `vscode/`, the Solidity
 Lean verification extension. Full parity is not established. The
-[editor inventory](dafny-editor-features.json) records 93 discovered capabilities,
-including explicit missing and unexamined work. This inventory is separate from
+[tracked inventory digest](dafny-editor-features.json) binds the external full inventory:93 discovered capabilities and391 mechanical obligations,
+including explicit missing and unexamined work. Readers verify its SHA256 and fail
+with restoration instructions when the full payload is missing. This inventory is separate from
 the [language and verification inventory](dafny-parity.md).
 
 ## Architecture and placement
@@ -992,3 +993,42 @@ push/merge/PR or goal mutation. Whole original assignment remains partial:484
 obligations, no complete rows; failed parity/full resource-gate attempts and
 remaining kernel/runtime/rendered/performance/adversarial/paired-judge obligations
 from the previous handoff remain binding.
+
+### H44 digest/citation repair and requested rebase — 2026-11-06
+
+Coordinator held `421ce2379080`: deleting the inventory broke clean-checkout
+readers/citations. The original path now holds a small committed JSON digest,
+not the670,902-byte inventory. The exact full484-row inventory is ignored at
+`tests/editor-parity/inventory/dafny-editor-features.json`; its SHA256 remains
+`6f2ad1a9b5eccdb145e01d122676d97e6ca4b399fc7f22f7c116c1102f5e50fe`.
+All executable inventory readers use `vscode/parity/inventory.cjs` to verify
+SHA256, size and counts. Missing bytes fail with restoration instructions;
+corruption fails explicitly. No fallback or empty inventory is accepted.
+Inventory updates preserve prior IDs and refresh the tracked digest; their
+external bundle/index/manifest must also be regenerated while preserving prior
+snapshots. Runtime evidence remains ordinary JSON with its original predicates.
+
+The existing audit manifest and H28 historical file lists still resolve the
+tracked original path. H28 receipts were not rewritten. Comparison/LSP docs now
+explain the digest. CI restores both bundles and immediately verifies the full
+inventory. `docs/dafny-editor-inventory-manifest.json` binds the newly located
+archive/index/raw snapshot under `/workspace/dafny-parity-digest-fix-20261106/`;
+all prior bundles/manifests remain intact. Fresh-checkout tests run the actual
+audit before restoration (explicit failure), restore the verified archive, run
+it successfully, then corrupt bytes and confirm failure.
+
+Finder/skeptic independently caught an accidental runtime-report loader change;
+ordinary JSON parsing was restored, with a retained failing paired-report
+acceptance regression and passing repair. Final reviews found no further defect.
+All484 rows/frozen270, assessments, proof/theorem budgets, gate acceptance and
+judge prompts remain unchanged. No Lean source edits or heavy gates run here.
+
+Rebased as explicitly requested onto
+`4bdd5952823dd6d76f7081719230b27b67f07cbf`; pre-rebase421ce is preserved at
+`refs/archive/solidity-dafny-20261105/dafny-parity-pre-rebase-421ce2379`, with its
+prior artifacts untouched. Exact-head lightweight gates, reviews, source binding,
+patches and checksums follow in the new VM artifact directory. Coordinator
+explicitly authorized pushing this corrected lane head; no merge/PR/default
+branch change or goal mutation is authorized/performed. Whole original parity
+assignment remains partial with all previous kernel/runtime/rendered/performance/
+adversarial/paired-judge obligations and actual failed gates still outstanding.

@@ -204,7 +204,7 @@ async function main(args=process.argv.slice(2)) {
       'Frontend, VC generation and solver phases remain unmeasured unless supplied by native notifications.',
       'Dafny protocol recording adds synchronous disk writes in the extension host; use --trace off for an observer-overhead control.',
       'Missing editor capabilities and incomplete scenarios prevent a claim of full parity.']};
-  const inventory=JSON.parse(readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory();
   const save=()=>{
     report.summary=summarize(runs);report.parallelScaling=scaling(report.summary);
     report.featureParity=inventory.features.map(feature=>{

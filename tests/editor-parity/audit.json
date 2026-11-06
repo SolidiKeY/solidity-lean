@@ -29,7 +29,8 @@
       "registrationSites": 609,
       "allUnportedSites": "unexamined",
       "method": "Read-only skeptic rediscovered features before reading the inventory; separate source scanner enumerated test files and registration sites before inventory reconciliation."
-    }
+    },
+    "inventoryTransport": "Tracked evidence path is a digest descriptor. Full inventory is restored from docs/dafny-editor-inventory-manifest.json and verified by vscode/parity/inventory.cjs; missing/corrupt payload fails explicitly, never counts as an empty inventory or a pass."
   },
   "finderReview": [
     {
