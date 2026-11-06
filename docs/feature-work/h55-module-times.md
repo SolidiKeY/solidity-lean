@@ -485,3 +485,19 @@ newline transformations of the supplied assignment field did not reproduce
 the member objective rendered-prompt hash. Exact prompt-byte provenance and
 the final Git artifact therefore remain waits before H28 integration; no H28
 files were edited.
+
+## Experimental observation and snapshot bridge
+
+`observation_bridge.py` holds the repository writer lock while taking
+source/tool/selected-cache snapshots before and after a supplied experimental
+action. It refuses failed actions, input drift, clock disagreement and invalid
+elapsed values; even its successful result is explicitly marked
+`untrusted-observation`. The 48-method synthetic suite passes, including
+lock contention, fake-clock, failed-action and cache-drift controls.
+
+This bridge cannot impose a timeout on arbitrary actions, authenticate action
+results or H56 identity, establish cache completeness, enforce the container
+resource policy, or produce a production timing receipt. It is not integrated
+with the actual Lean runner. H28 final Git artifact and exact rendered-prompt
+bytes remain unavailable; H56 measurements, full acceptance and independent
+reviews remain pending. No Lean job or production timing pass occurred.
