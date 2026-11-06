@@ -176,7 +176,8 @@ See tests/h62/item6/migrate-solkey/registration-fragment.md: explicit fixture
 checks only; no production roots/module maps/axiom pin edits. Root owns final
 registration/toolchain cut-over. Original producer ownership remains intact.
 
-Resume this **same VM, branch and original launcher goal**, preferably through
+Historical pre-H82 instruction, superseded by retirement below (do not resume
+this retired worker): resume this **same VM, branch and original launcher goal**, preferably through
 the coordinator's fresh thread after this handoff. Do not create/reset a goal.
 Original prompt reference SHA256:
 `ab866875b0fdd2e67bb60485af9eb65d4e10e08992421bac2438d6c726b34b55`.
