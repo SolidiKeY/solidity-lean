@@ -1,8 +1,12 @@
 """Guard equal-count census swaps and forged coverage without running Lean."""
 import copy
+import contextlib
+import io
+import tempfile
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import unittest
 
@@ -59,6 +63,44 @@ class PartitionTests(unittest.TestCase):
         for key in ('raw', 'annotations'):
             with self.subTest(role=key), self.assertRaises(ValueError):
                 self.pinned(**{key: b'[{"name":"A","name":"B"}]'})
+
+    def test_command_roundtrip_rejection_and_missing_file(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            values = {'compiler': json.dumps(self.raw).encode(),
+                      'annotations': json.dumps(self.old).encode(), 'source': self.source}
+            args = []
+            for role, data in values.items():
+                path = directory / (role + '.json')
+                path.write_bytes(data)
+                args += ['--' + role, str(path), '--' + role + '-sha256',
+                         hashlib.sha256(data).hexdigest()]
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                self.assertEqual(p.main(args), 0)
+            self.assertEqual(json.loads(out.getvalue()), self.check())
+            self.assertEqual(err.getvalue(), '')
+            (directory / 'compiler.json').write_bytes(b'[]')
+            for missing in (False, True):
+                if missing: (directory / 'compiler.json').unlink()
+                out, err = io.StringIO(), io.StringIO()
+                with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                    self.assertEqual(p.main(args), 2)
+                self.assertEqual(out.getvalue(), '')
+                self.assertTrue(err.getvalue().startswith('CENSUS_METADATA_REJECT:'))
+
+    def test_file_size_fifo_and_symlink_rejection(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            large = directory / 'large'
+            with large.open('wb') as stream: stream.truncate(p.MAX_INPUT_BYTES + 1)
+            fifo = directory / 'fifo'
+            os.mkfifo(fifo)
+            link = directory / 'link'
+            link.symlink_to(large)
+            for path in (large, fifo, link, directory):
+                with self.subTest(path=path.name), self.assertRaises((OSError, ValueError)):
+                    p.read_input(path)
 
     def test_partition_is_not_witness(self):
         result = self.check()

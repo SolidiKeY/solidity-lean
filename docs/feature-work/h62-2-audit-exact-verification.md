@@ -324,3 +324,17 @@ strict JSON parsing. Ten synthetic host controls pass, including coordinated
 compiler/annotation edits with stale pins. Pins must originate in an independent
 authenticated inventory; this helper cannot certify their provenance or turn
 matching bytes into historical execution evidence. Actual replay remains open.
+
+The helper now exposes a reproduction CLI: provide `--compiler`,
+`--annotations`, `--source` and a corresponding `--compiler-sha256`,
+`--annotations-sha256`, `--source-sha256` from an authenticated inventory.
+Successful metadata comparison prints JSON and exits zero; missing inputs,
+digest drift or inconsistent metadata exit two without a success JSON record.
+The eleventh host test covers CLI roundtrip, changed bytes and missing files.
+A zero exit certifies metadata consistency only. The CLI does not run producers,
+load Lean artifacts, discharge hypotheses or authenticate the supplied inventory.
+
+CLI inputs must be regular files of at most 16 MiB each. Nonblocking, no-follow
+opens reject FIFOs and symlinks; bounded reads also reject growth past the cap.
+A twelfth host test rejects oversized, FIFO, symlink and directory inputs. This
+intake bound does not change any historical proof or timing budget.
