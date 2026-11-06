@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/FramedLoop.lean:Solidity.Yul.Compilation.FramedLoop.iteration_reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedLoop.lean:Solidity.Yul.Compilation.FramedLoop.loop": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedLoop.lean:Solidity.Yul.Compilation.FramedLoop.reflect": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/FramedLoop.lean:Solidity.Yul.Compilation.FramedLoop.singleton_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

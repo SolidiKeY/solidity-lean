@@ -152,19 +152,19 @@ end NSP
 
 /-- An implicit conversion of a hexadecimal constant to anything but
 `bytesN` is never `stuck` (as a rational constant's). -/
-theorem constVal_hex_ok (B : DeclName → DeclName → Bool) {q : Q} {k : Nat} {τ : STy}
-    (h : (STy.hexConst q k).implicit B τ = true) (hτ : ∀ m hm, τ ≠ .fixedBytes m hm) :
+theorem constVal_hex_ok (B : DeclName → DeclName → Bool) (M : DeclName → Bool) {q : Q} {k : Nat} {τ : STy}
+    (h : (STy.hexConst q k).implicit B M τ = true) (hτ : ∀ m hm, τ ≠ .fixedBytes m hm) :
     NotStuckR (constVal (D := E.layout) q τ) := by
   cases τ <;> (try (cases h <;> done))
   · rename_i t
-    exact constVal_ok B (τ := .int t) (by
-      rw [show STy.implicit B (.hexConst q k) (.int t) = decide (q.FitsInt t) from rfl] at h
+    exact constVal_ok B M (τ := .int t) (by
+      rw [show STy.implicit B M (.hexConst q k) (.int t) = decide (q.FitsInt t) from rfl] at h
       exact h)
   · rename_i m hm
     exact absurd rfl (hτ m hm)
   · rename_i f
-    exact constVal_ok B (τ := .fixed f) (by
-      rw [show STy.implicit B (.hexConst q k) (.fixed f) = (q.toFixed? f).isSome from rfl] at h
+    exact constVal_ok B M (τ := .fixed f) (by
+      rw [show STy.implicit B M (.hexConst q k) (.fixed f) = (q.toFixed? f).isSome from rfl] at h
       exact h)
 
 /-- A type of the fragment's conversions has no location. -/
@@ -178,7 +178,7 @@ theorem loc_of_frag {σ : STy} (hσ : σ.isValue = true ∨ (∃ q, σ = .ration
 /-- **`convRV` is never `stuck` on the conversions of the value fragment**:
 an implicit conversion (or the identity) from a value type or a constant
 to a value type. -/
-theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBase σ τ)
+theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBase E.mapFree σ τ)
     (hσ : σ.isValue = true ∨ (∃ q, σ = .rational q) ∨ (∃ q k, σ = .hexConst q k)) (v : RVal E.layout σ) :
     NS (convRV (Γ := Γ) F n τ v) := by
   have hl := loc_of_frag hσ
@@ -189,7 +189,7 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
     split
     · exact NS.pure' _
     · rename_i he
-      exact NS.bind (NS.pure' _) fun _ => NS.bind (NS.lift' (constVal_ok E.isBase (hc.resolve_right he)))
+      exact NS.bind (NS.pure' _) fun _ => NS.bind (NS.lift' (constVal_ok E.isBase E.mapFree (hc.resolve_right he)))
         fun _ => NS.pure' _
   · -- a hexadecimal constant to `bytesN`
     dsimp only
@@ -202,7 +202,7 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
     split
     · exact NS.pure' _
     · rename_i he
-      exact NS.bind (NS.pure' _) fun _ => NS.bind (NS.lift' (constVal_hex_ok E.isBase (hc.resolve_right he)
+      exact NS.bind (NS.pure' _) fun _ => NS.bind (NS.lift' (constVal_hex_ok E.isBase E.mapFree (hc.resolve_right he)
         (fun m hm e => hτ m hm e))) fun _ => NS.pure' _
   all_goals first
     | (exfalso; rcases hσ with h | ⟨_, h⟩ | ⟨_, _, h⟩ <;> cases h)
@@ -220,7 +220,7 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
         · exact (hr q _ rfl HEq.rfl).elim
         · exact (hh q k _ rfl HEq.rfl).elim
       exact NS.bind (NS.pure' _) fun _ =>
-        NS.bind (NS.lift' (convVal_ok E.isBase hv (.inl (hc.resolve_right he)) x)) fun _ => NS.pure' _
+        NS.bind (NS.lift' (convVal_ok E.isBase E.mapFree hv (.inl (hc.resolve_right he)) x)) fun _ => NS.pure' _
   · -- not a plain value: impossible for the fragment's types
     rename_i hr hh _ _ _ hval _ _ _ _
     exfalso
@@ -436,8 +436,8 @@ theorem writeLoc_ok {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (L : Loc E.layout 
 
 /-- The binary operator of a compound assignment is in `binVal`'s domain,
 or the assignment is a shift (`AssignOp.fits`). -/
-theorem compound_dom {B : DeclName → DeclName → Bool} {op : AssignOp} {σ τ : STy} (h : op.fits B σ τ = true) :
-    (op.kind? ≠ some .shift ∧ σ.implicit B τ = true ∧ (AssignOp.binOp op).FitsAt τ) ∨
+theorem compound_dom {B : DeclName → DeclName → Bool} {M : DeclName → Bool} {op : AssignOp} {σ τ : STy} (h : op.fits B M σ τ = true) :
+    (op.kind? ≠ some .shift ∧ σ.implicit B M τ = true ∧ (AssignOp.binOp op).FitsAt τ) ∨
       (op.kind? = some .shift ∧ τ.isBits = true ∧ σ.isAmount = true) := by
   unfold AssignOp.fits at h
   cases op <;> simp only [AssignOp.kind?] at h <;> (try simp only [Bool.and_eq_true] at h)

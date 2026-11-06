@@ -1,0 +1,10 @@
+{
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.fresh_self_burns_exact_wide": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.full_amount_and_prefix": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.full_rollback": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.old_self_keeps_exact_wide": [],
+ "Solidity/Yul/Composition/MonetaryLifecycleControls.lean:Solidity.Yul.Composition.MonetaryLifecycleControls.wide_distinct_refused": []
+}
