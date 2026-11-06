@@ -257,7 +257,7 @@ test('terminal observer retains real output/exit and stops subscriptions on rest
 test('paired default custom suite cannot omit its partial native trace observation',()=>{
  const id='command-custom-default-build-keybinding',config={runId:'pair',target:'dafny',suite:'custom-default-commands'},report={schemaVersion:1,...config,status:'passed',checks:[id],scenarios:[{id,status:'passed'}]};
  assert.ok(hostEvidenceErrors(report,config).includes('missing native observation native-trace-show-copy-hide'));
- assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,...['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action'].map(id=>({id,status:'partial'}))]},config),[]);
+ assert.deepEqual(hostEvidenceErrors({...report,status:'passed-with-gaps',scenarios:[...report.scenarios,...['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'].map(id=>({id,status:'partial'}))]},config),[]);
 });
 test('terminal execution IDs cannot combine output and exit from distinct executions (injected boundary)',async()=>{
  let start,end;const records=[],vscode={tests:{},window:{onDidStartTerminalShellExecution:f=>(start=f,{dispose(){}}),onDidEndTerminalShellExecution:f=>(end=f,{dispose(){}})},languages:{onDidChangeDiagnostics:()=>({dispose(){}})}};
@@ -268,4 +268,13 @@ test('terminal execution IDs cannot combine output and exit from distinct execut
 test('terminal SDK observation strips native shell control sequences but rejects suffix paths or wrong versions',()=>{
  const {terminalSdkIdentity}=require('../parity/core.cjs'),raw='\x1b]633;C\x07'+process.execPath+'\r\n\x1b[?1h\x1b='+process.version+'\r\n';
  const observed=terminalSdkIdentity(raw,process.execPath,process.version);assert.equal(observed.executable,require('node:fs').realpathSync(process.execPath));assert.match(observed.sha256,/^[a-f0-9]{64}$/);assert.throws(()=>terminalSdkIdentity('/other'+process.execPath+'\n'+process.version,process.execPath,process.version),/differs/);assert.throws(()=>terminalSdkIdentity(process.execPath+'\nwrong',process.execPath,process.version),/differs/);
+});
+
+test('native trace visibility suite stays distinct from local or full proof evidence',()=>{
+ assert.equal(parse(['--suite','trace-visibility','--targets','dafny']).suite,'trace-visibility');assert.throws(()=>parse(['--suite','trace-visibility','--targets','local']),/requires --targets dafny/);
+ const config={suite:'trace-visibility',target:'dafny',runId:'native'},report={schemaVersion:1,runId:'native',target:'dafny',status:'passed-with-gaps',checks:[],scenarios:[{id:'native-trace-tab-visibility-theme',status:'partial'}]};assert.deepEqual(hostEvidenceErrors(report,config),[]);assert.ok(hostEvidenceErrors(report,{...config,suite:'full'}).length);assert.ok(hostEvidenceErrors({...report,scenarios:[]},config).length);
+});
+
+test('explicit native light-show observation cannot replace theme continuity, lifecycle or proof scenarios',()=>{
+ assert.equal(parse(['--suite','trace-light-show','--targets','dafny']).suite,'trace-light-show');assert.throws(()=>parse(['--suite','trace-light-show','--targets','local']),/requires --targets dafny/);const config={suite:'trace-light-show',target:'dafny',runId:'light'},report={schemaVersion:1,runId:'light',target:'dafny',status:'passed-with-gaps',checks:[],scenarios:[{id:'native-trace-light-show-hide',status:'partial'}]};assert.deepEqual(hostEvidenceErrors(report,config),[]);for(const suite of ['full','custom-default-commands','trace-visibility'])assert.ok(hostEvidenceErrors(report,{...config,suite}).length);
 });
