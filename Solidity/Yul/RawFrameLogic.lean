@@ -241,4 +241,17 @@ theorem diamond_not_iff_not_box : ∀ (ctx : Solidity.Source.Ctx) (control : Sol
     intro bad
     exact absent ⟨fuel,result,done,bad⟩
 
+/-- Whole-outcome implication is preserved by either actual raw modality.
+No termination or coherence premise is needed. -/
+theorem holds_mono : ∀ (ctx : Solidity.Source.Ctx) (control : Solidity.Yul.Control) (mode : Solidity.Modality)
+ (code : Solidity.Yul.Stmt [] (Solidity.Yul.localExternalTypes ctx) control 0)
+ (policy : Solidity.Yul.Policy.StmtP .A code)
+ (first second : Solidity.Yul.RawFrame.Outcome ctx control → Prop)
+ (state : Solidity.Yul.RawFrame.State ctx),
+ (∀ result, first result → second result) →
+ Solidity.Yul.RawFrame.Logic.holds mode code policy first state →
+ Solidity.Yul.RawFrame.Logic.holds mode code policy second state := by
+  intro ctx control mode code policy first second state implication actual
+  cases mode <;> simp only [holds] at * <;> grind
+
 end Solidity.Yul.RawFrame.Logic
