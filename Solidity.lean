@@ -2628,8 +2628,10 @@ import Solidity.Frontend.QualifiedUnits.Controls
 import Solidity.Frontend.QualifiedUnits.DifferentialControls
 import Solidity.Frontend.QualifiedUnits.Inheritance
 import Solidity.Frontend.QualifiedUnits.Layout
+import Solidity.Frontend.QualifiedUnits.Linearization
 import Solidity.Frontend.QualifiedUnits.Lookup
 import Solidity.Frontend.QualifiedUnits.MergeSpecification
+import Solidity.Frontend.QualifiedUnits.NormalizationAdequacy
 import Solidity.Frontend.QualifiedUnits.NormalizationControls
 import Solidity.Frontend.QualifiedUnits.ReferenceControls
 import Solidity.Frontend.QualifiedUnits.ReferenceCoverage
@@ -2643,6 +2645,8 @@ import Solidity.Frontend.QualifiedUnits.SignatureNormalization
 import Solidity.Frontend.QualifiedUnits.SignatureResolution
 import Solidity.Frontend.QualifiedUnits.SignatureResolutionControls
 import Solidity.Frontend.QualifiedUnits.Specification
+import Solidity.Frontend.QualifiedUnits.Target
+import Solidity.Frontend.QualifiedUnits.TargetControls
 import Solidity.Frontend.QualifiedUnits.TypePaths
 import Solidity.Frontend.QualifiedUnits.UnitPaths
 import Solidity.Frontend.SolcJson
