@@ -2027,6 +2027,7 @@ import Solidity.Calculus.DecisionCompoundFieldReason
 import Solidity.Calculus.DecisionFixedArrayPair
 import Solidity.Calculus.DecisionFixedArrayPath
 import Solidity.Calculus.DecisionFixedArrayStorage
+import Solidity.Calculus.DecisionGapAnswer
 import Solidity.Calculus.DecisionGivenHeapBoundary
 import Solidity.Calculus.DecisionGivenHeapComputedBoundary
 import Solidity.Calculus.DecisionGivenHeapComputedExtension
@@ -2043,6 +2044,7 @@ import Solidity.Calculus.DecisionLeafEquality
 import Solidity.Calculus.DecisionLeafPreparation
 import Solidity.Calculus.DecisionMappingFieldBoundary
 import Solidity.Calculus.DecisionMappingFieldReason
+import Solidity.Calculus.DecisionMappingStruct
 import Solidity.Calculus.DecisionMemoryCoverage
 import Solidity.Calculus.DecisionMemoryExtension
 import Solidity.Calculus.DecisionNegativeInstantiation
@@ -2062,6 +2064,7 @@ import Solidity.Calculus.DecisionNumericStages
 import Solidity.Calculus.DecisionNumericTraversal
 import Solidity.Calculus.DecisionNumericTwoPrefix
 import Solidity.Calculus.DecisionNumericTwoPrefixFormula
+import Solidity.Calculus.DecisionPartialOrFloor
 import Solidity.Calculus.DecisionPrefixNormalizationResidue
 import Solidity.Calculus.DecisionResidueReasons
 import Solidity.Calculus.DecisionSourceAnswer

@@ -241,3 +241,6 @@
 
 | `Calculus/PrimitiveReturnTransport.lean` | Conditional declared-return-byte transport; authentication and frame production remain premises. |
 | `Calculus/StaticStorageTransport.lean` | Unchanged conditional storage-only theorem with a mode-selected witness in conservative opaque havoc semantics. |
+| `Calculus/DecisionGapAnswer.lean` | The extension point for decided M7 gap families without fresh allocation: `gapAnswer?`, consulted by `givenHeapAnswerWithFixed` on its miss, and `Fml.gapCovered`, the disjunct of `Fml.memCovered` (`docs/feature-work/m7-gaps.md`). |
+| `Calculus/DecisionMappingStruct.lean` | Fresh binders of a memory type no heap can hold (a struct with a mapping member, a mapping, a nonempty fixed array of mapping references, `RefTy.memVoid`): vacuously valid, negation refuted; consulted by `structAnswerWithCompound` on its miss. |
+| `Calculus/DecisionPartialOrFloor.lean` | Exact decision of the nested partial-OR floor family (`PartialOrFloor`): recognized from the formula alone, valid exactly at a positive key with matching result (`PartialOrFloor.valid_iff`), otherwise refuted at one symbolic mapping region (`counterState`). |
