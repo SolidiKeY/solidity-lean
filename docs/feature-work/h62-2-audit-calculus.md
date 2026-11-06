@@ -270,3 +270,13 @@ Bulk source roles, ownership decisions, scope bytes, actual commands and review 
 
 
 The updated repository-wide documentation gate still fails exit1 on the same five missing references in citing sources unchanged from inspected master. The exact diagnostics and source comparisons are retained in standing-calculus-owners-v8/doc-gate.json; no owned document introduces a missing reference. This failure is not converted into a passing gate by the successful Python accounting/controls.
+
+
+## Successor world/deployment static role slice (2026-11-06)
+
+After fetching/adopting master8dbbb58e6eda3d7a8e7e55fbb31e24acf5eb5990, classified every declared theorem in the two frozen Calculus world/deployment files:5ContractWorld (including private bridge),6Deploy. Source and exact-signature identities match frozen census/current master. Prior86role rows and all owners remain unchanged. Ledger now97roles reviewed,5186pending;3746owners confirmed,1537unresolved. These11static roles add zero witnesses.
+
+The review retains state-universal validity, fixed-world conditional paid-entry laws and exact assumed successful world operation. Creation conclusions preserve their actual post-state, settlement and address equality without establishing creation existence. Local closure truth, private box/run antecedents and exact payable-or-zero-value guard remain explicit. Modal afterRunTR acceptance still admits exhaustion and is not normal deployment, compiler totality or world/gas/fork adequacy. Both read-only reviews pass without Lean/server or writes. All89Python controls pass; complete CLI acceptance still FAILS exit1. No Lean source changed, no runtime gate/cache claim added. Full evidence and source snapshots remain off Git, referenced by the world-deploy-classification manifest; original queues/pauses/STOPs remain binding.
+
+
+The world/deployment slice documentation check still fails exit1 on the same5missing references in citing sources unchanged from inspected master. Exact diagnostics/comparisons are archived; no whole-gate pass is claimed. Supplied typed constructor programs are not automatically linked to source constructor bodies or compiled code by these transport statements; that adequacy obligation remains separate.
