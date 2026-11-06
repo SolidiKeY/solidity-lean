@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Parse completed Lake timing rows without treating logs as proof of freshness."""
+from fractions import Fraction
 import json
 import math
 import re
@@ -10,12 +11,14 @@ import sys
 ROW = re.compile(r"^\s*[✔✖⚠ℹ]?\s*\[\d+/\d+\]\s+(Built|Replayed)\s+([^\s]+)\s+\(([^()]*)\)\s*$")
 PART = re.compile(r"(\d+(?:\.\d+)?|\.\d+)\s*(ms|s|m|h)")
 ORDER = {"h": 0, "m": 1, "s": 2, "ms": 3}
-FACTOR = {"h": 3600, "m": 60, "s": 1, "ms": .001}
+FACTOR = {"h": Fraction(3600), "m": Fraction(60), "s": Fraction(1), "ms": Fraction(1, 1000)}
 
 
-def seconds(text):
+def seconds_exact(text):
+    if not isinstance(text, str):
+        raise ValueError("invalid duration")
     pos = 0
-    total = 0.0
+    total = Fraction(0)
     last = -1
     found = False
     while pos < len(text):
@@ -27,12 +30,19 @@ def seconds(text):
         if not match or ORDER[match[2]] <= last:
             raise ValueError("malformed duration")
         last = ORDER[match[2]]
-        total += float(match[1]) * FACTOR[match[2]]
+        total += Fraction(match[1]) * FACTOR[match[2]]
         pos = match.end()
         found = True
-    if not found or not math.isfinite(total):
-        raise ValueError("empty or nonfinite duration")
+    if not found:
+        raise ValueError("empty duration")
     return total
+
+
+def seconds(text):
+    value = float(seconds_exact(text))
+    if not math.isfinite(value) or value <= 0:
+        raise ValueError("nonpositive or nonfinite duration")
+    return value
 
 
 def parse(log):
@@ -45,10 +55,10 @@ def parse(log):
                 continue
             try:
                 duration = seconds(match[3])
-            except ValueError:
+            except (ValueError, OverflowError):
                 errors.append(f"line {number}: malformed duration")
                 continue
-            rows.append({"line": number, "action": match[1], "module": match[2], "seconds": duration})
+            rows.append({"line": number, "action": match[1], "module": match[2], "seconds": duration, "duration": match[3]})
         elif re.search(r"\b(?:Built|Replayed)\b", line):
             errors.append(f"line {number}: unrecognized timing row")
     return {"rows": rows, "errors": errors}
@@ -83,8 +93,16 @@ def coverage(inventory, parsed, exit_code):
             errors.append(f"unexpected module: {name}")
         if row["action"] != "Built":
             errors.append(f"replayed module: {name}")
-        if row["seconds"] > 300:
-            errors.append(f"over 300 seconds: {name}")
+        try:
+            exact = seconds_exact(row.get("duration"))
+            shown = row.get("seconds")
+            if (type(shown) not in (int, float) or not math.isfinite(shown)
+                    or shown <= 0 or shown != float(exact)):
+                errors.append(f"inconsistent displayed duration: {name}")
+            if not 0 < exact <= 300:
+                errors.append(f"invalid or over 300 seconds: {name}")
+        except (ValueError, OverflowError):
+            errors.append(f"invalid duration: {name}")
     errors.extend(f"missing module: {name}" for name in sorted(expected - seen))
     return errors
 

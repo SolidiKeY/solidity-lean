@@ -50,6 +50,21 @@ def validate(inspect, plan):
         if (not isinstance(actual, list) or any(not isinstance(v, str) or "=" not in v for v in actual)
                 or len(actual) != len(env) or set(actual) != {k + "=" + v for k, v in env.items()}):
             errors.append("container environment mismatch")
+    # Restart and healthcheck helpers could launch additional Lean processes.
+    restart = host.get("RestartPolicy")
+    if (not isinstance(restart, dict) or restart != {"Name": "no", "MaximumRetryCount": 0}
+            or type(restart.get("MaximumRetryCount")) is not int):
+        errors.append("container restart policy is not disabled")
+    if "Healthcheck" not in config or config["Healthcheck"] not in (None, {"Test": ["NONE"]}):
+        errors.append("container healthcheck is not explicitly disabled")
+    cpu_fields = ("NanoCpus", "CpuQuota", "CpuPeriod", "CpuShares", "CpusetCpus", "CpusetMems")
+    cpu = plan.get("cpu")
+    if (not isinstance(cpu, dict) or set(cpu) != set(cpu_fields) or
+            any(type(cpu.get(key)) is not int for key in cpu_fields[:4]) or
+            any(cpu[key] < 0 for key in ("NanoCpus", "CpuPeriod", "CpuShares")) or cpu["CpuQuota"] < -1 or
+            any(not isinstance(cpu.get(key), str) for key in cpu_fields[4:]) or
+            any(key not in host or type(host[key]) is not type(cpu[key]) or host[key] != cpu[key] for key in cpu_fields)):
+        errors.append("container CPU constraints differ or are missing")
     mem, swap, pids = host.get("Memory"), host.get("MemorySwap"), host.get("PidsLimit")
     if (type(mem) is not int or not 0 < mem <= 12 * GIB or type(swap) is not int or swap != mem
             or type(pids) is not int or not 0 < pids <= 128):

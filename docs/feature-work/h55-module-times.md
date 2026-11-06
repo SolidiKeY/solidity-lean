@@ -520,3 +520,41 @@ identity or Lean execution. It is not wired into the experimental observation
 bridge. The H28 final artifact and exact rendered prompt, H56 measurements,
 full acceptance and independent reviews remain pending; no Lean timing or proof
 pass is claimed.
+
+## Static inventory and runner-control review
+
+The coordinator-delivered H28 rendered prompt at
+`/workspace/h62-coordinator-inputs/router-20261106T200314Z/timing-tools-prompt.txt`
+hashes to the required `1693a6c1af58fbbe4fa6d829f8b464f608e725d0351415a9f2faf78d5780dfac`.
+This resolves the exact-prompt-byte wait; the final H28 Git artifact for
+`28900209b0e221f9e20e07e06921a79527ca4d18` remains unavailable and has not
+been merged. H93 defers the h55b cold-timing experiment; it was not resumed.
+
+On parent `4c2c5d9ccd3038c27ffc17ec322aac4bd3a26b0d`, the tracked-file census
+contains 7,592 Lean paths: 7,088 candidate module names and 504 file-check
+candidates. The census reports no same-context collisions. These are static
+candidate classifications, not approved execution recipes or a complete gate.
+The newer fetched master is `d96f2406d352de7e0b72ba6ac4ab29dc457582c6`.
+
+Independent read-only finder and skeptic reviews examined the Python inventory,
+provenance and runner-acceptance controls without Lean, server, builds or
+writes. The finder identified zero-duration receipt acceptance and decimal
+rounding above 300 seconds; exact Fraction-based Lake duration comparisons,
+positive receipt times and exact Decimal CLI parsing now reject those cases.
+On re-review the finder verified CLI `300.0` succeeds while
+`300.00000000000001`, zero, NaN and Infinity fail. The skeptic identified
+restart policies and healthchecks that could launch extra work, plus unbound
+CPU quota/cpuset fields. The container-spec control now requires disabled
+restart/healthcheck settings and matching explicit CPU fields. On re-review
+the skeptic confirmed those exact examples are rejected. The reviewed input
+hashes are `tests/h55/module-times/static-review-inputs.sha256`.
+
+The skeptic also identified an unresolved production boundary: the watcher
+starts its clock after container startup, so it cannot establish total runtime;
+matching Docker CPU configuration also does not authenticate effective parent
+cgroup quotas/cpusets. These are not fixed by the synthetic controls. The
+51-method synthetic suite passes, but no H56 measurement, production runner
+attestation, full inventory acceptance or Lean proof is claimed. H56 access
+and actual full-inventory measurements, final H28 Git artifact, production
+gates, split qualification, full acceptance and any needed further reviews
+remain outstanding.

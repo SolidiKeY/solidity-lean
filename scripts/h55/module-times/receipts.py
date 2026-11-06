@@ -6,6 +6,7 @@ JSON objects with a matching path, status, elapsed_seconds, and fresh boolean.
 This standalone consumer does not authenticate its input or select the scope.
 """
 import argparse
+from decimal import Decimal
 import json
 import math
 import pathlib
@@ -39,7 +40,9 @@ def validate(inventory, receipts):
         if row.get("status") != "ok" or row.get("fresh") is not True:
             errors.append(f"failed, timed out or not fresh: {path}")
         value = row.get("elapsed_seconds")
-        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+        finite = (type(value) is int or (type(value) is float and math.isfinite(value))
+                  or (type(value) is Decimal and value.is_finite()))
+        if not finite or value <= 0:
             errors.append(f"invalid elapsed time: {path}")
         elif value > 300:
             errors.append(f"over 300 seconds: {path}")
@@ -53,7 +56,10 @@ def main():
     parser.add_argument("receipts", type=pathlib.Path)
     args = parser.parse_args()
     try:
-        errors = validate(json.loads(args.inventory.read_text()), json.loads(args.receipts.read_text()))
+        def reject_constant(value):
+            raise ValueError(f"invalid JSON constant: {value}")
+        receipt_data = json.loads(args.receipts.read_text(), parse_float=Decimal, parse_constant=reject_constant)
+        errors = validate(json.loads(args.inventory.read_text()), receipt_data)
     except (OSError, ValueError, TypeError) as exc:
         print(f"invalid input: {exc}", file=sys.stderr)
         return 1

@@ -41,6 +41,12 @@ class CensusParser(unittest.TestCase):
         inventory = [{"module": "Solidity.A", "path": "Solidity/A.lean"}]
         good = parser.parse("ℹ [1/1] Built Solidity.A (300s)")
         self.assertEqual([], parser.coverage(inventory, good, 0))
+        self.assertTrue(parser.coverage(inventory, parser.parse("✔ [1/1] Built Solidity.A (300.00000000000001s)"), 0))
+        self.assertTrue(parser.coverage(inventory, parser.parse("✔ [1/1] Built Solidity.A (300000.00000000000001ms)"), 0))
+        self.assertTrue(parser.coverage(inventory, parser.parse("✔ [1/1] Built Solidity.A (0ms)"), 0))
+        tampered = parser.parse("✔ [1/1] Built Solidity.A (1s)")
+        tampered["rows"][0]["seconds"] = 0.5
+        self.assertTrue(parser.coverage(inventory, tampered, 0))
         for log in ["", "✖ [1/1] Built Solidity.A (1s)", "✔ [1/1] Replayed Solidity.A (1s)",
                     "✔ [1/1] Replayed Solidity.A", "✔ [1/1] Built Solidity.A (300.1s)",
                     "✔ [1/1] Built Solidity.A (x)",

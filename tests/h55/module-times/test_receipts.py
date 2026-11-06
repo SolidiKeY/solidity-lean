@@ -1,5 +1,8 @@
 import importlib.util
 import pathlib
+import subprocess
+import sys
+import tempfile
 import unittest
 
 path = pathlib.Path(__file__).resolve().parents[3] / "scripts/h55/module-times/receipts.py"
@@ -24,9 +27,22 @@ class Receipts(unittest.TestCase):
         self.check_bad(self.good(), ["Solidity/A.lean", "Solidity/A.lean"])
         self.check_bad(self.good() + [{**self.good()[0], "path": "Bridge/B.lean"}])
 
+    def test_cli_does_not_round_over_budget_decimal(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            inventory = pathlib.Path(tmp) / "inventory.json"
+            receipts = pathlib.Path(tmp) / "receipts.json"
+            inventory.write_text("[\"Solidity/A.lean\"]")
+            receipts.write_text("[{\"path\":\"Solidity/A.lean\",\"status\":\"ok\",\"fresh\":true,\"elapsed_seconds\":300.00000000000001}]")
+            result = subprocess.run([sys.executable, str(path), str(inventory), str(receipts)], capture_output=True, text=True)
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("over 300", result.stderr)
+            receipts.write_text("[{\"path\":\"Solidity/A.lean\",\"status\":\"ok\",\"fresh\":true,\"elapsed_seconds\":300.0}]")
+            result = subprocess.run([sys.executable, str(path), str(inventory), str(receipts)], capture_output=True, text=True)
+            self.assertEqual(0, result.returncode)
+
     def test_fail_closed(self):
         for field, values in {"status": ["timeout", "error", None], "fresh": [False, 1, None],
-                              "elapsed_seconds": [300.001, -1, None, True, "1", float("nan"), float("inf")]}.items():
+                              "elapsed_seconds": [300.001, 0, -1, None, True, "1", float("nan"), float("inf")]}.items():
             for value in values:
                 with self.subTest(field=field, value=value):
                     self.check_bad([{**self.good()[0], field: value}])
