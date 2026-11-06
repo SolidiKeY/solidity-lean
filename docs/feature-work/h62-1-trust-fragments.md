@@ -40,3 +40,15 @@ This is an additive proposal, not owner registration or an approved integration.
 Thirteen external tests cover two independent synthetic lane inputs, omitted imports or headlines, changed allowlists or printed reports, matching changes to baseline and generated inputs, a corrupted patch, invalid and duplicate inputs, installed versus unmodified candidates, and symlink rejection. The synthetic Lean controls exercise the generated form but do not prove any actual project declaration. Independent finder and skeptic reviews remain required; this work is not an independent review and no milestone acceptance is claimed.
 
 The `Solidity/Syntax/Raw.lean` 4.35 blocker and owner remain as recorded above. Do not run the real TrustAudit, its timing gate, or final-gate claim until the owner supplies the migration and the affected imports are built under the pinned toolchain. The ownership registry is not modified and additions are not authorized merely by passing this script.
+
+## H70 requester follow-up: author review and integration proposal
+
+An author review found three integration gaps. First, preflight acceptance can pass with the original central file; `--require-installed` now rejects that state. Second, simply collecting current lane files could miss deletion or reassignment of earlier lane entries; `--prior-commit <full-sha>` now compares every prior lane import and headline by owner against the current files, refusing missing or reassigned entries. Third, the timing helper formerly expected the original file in the checkout and could not run after installation; it now loads the pinned baseline from Git and accepts either the original or the exact generated checkout for comparison. Fifteen external tests cover the installed-state, prior snapshot, ancestry, malformed history, and timing-input cases. These are author findings and tests, not the separately required independent finder and skeptic reviews.
+
+For coordinator review, a proposed post-migration registration command is:
+
+```sh
+python3 -B scripts/h62/item1/trust-fragments/accept_migration.py --require-installed --prior-commit <coordinator-approved-prior-commit>
+```
+
+The placeholder must be replaced with the full lowercase SHA of the appropriate approved prior lane state. The script requires that commit to be an ancestor of the checkout, but does not establish that it is the correct protected prior state, authorize owner claims, or register the command in CI. The coordinator must establish those facts and review integration. The baseline audit still must be elaborated with the prescribed toolchain and the unchanged allowlist; the acceptance command is an external byte and input-coverage check, not a Lean proof. Real elaboration and before/after timings continue to wait on `H62-6-MIGRATE-SYNTAX` for `Solidity/Syntax/Raw.lean`.

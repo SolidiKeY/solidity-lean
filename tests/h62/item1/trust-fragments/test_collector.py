@@ -17,6 +17,10 @@ ACCEPT_SPEC = importlib.util.spec_from_file_location('accept_baseline', ROOT / '
 ACCEPT = importlib.util.module_from_spec(ACCEPT_SPEC)
 ACCEPT_SPEC.loader.exec_module(ACCEPT)
 sys.modules['accept_baseline'] = ACCEPT
+HISTORY_SPEC = importlib.util.spec_from_file_location('lane_history', ROOT / 'scripts/h62/item1/trust-fragments/lane_history.py')
+HISTORY = importlib.util.module_from_spec(HISTORY_SPEC)
+HISTORY_SPEC.loader.exec_module(HISTORY)
+sys.modules['lane_history'] = HISTORY
 MIGRATION_SPEC = importlib.util.spec_from_file_location('accept_migration', ROOT / 'scripts/h62/item1/trust-fragments/accept_migration.py')
 MIGRATION = importlib.util.module_from_spec(MIGRATION_SPEC)
 MIGRATION_SPEC.loader.exec_module(MIGRATION)
@@ -49,6 +53,8 @@ class CollectorTests(unittest.TestCase):
                 'headlines': ['Solidity.Fixture.alpha', 'Solidity.Fixture.beta']}))
             candidate = COLLECTOR.MARKER + COLLECTOR.collect_lanes(base, lanes)
             result = MIGRATION.accept(lanes, candidate)
+            with self.assertRaisesRegex(ValueError, 'not installed'):
+                MIGRATION.accept(lanes, candidate, require_installed=True)
             self.assertEqual((result['new_imports'], result['new_headlines'], result['checkout_state']), (1, 2, 'original'))
             for altered in [candidate.replace(b'``Solidity.Fixture.alpha', b'``Solidity.Fixture.alphx', 1),
                             candidate.replace(b'import Solidity.Fixture\n', b'', 1),
@@ -67,10 +73,71 @@ class CollectorTests(unittest.TestCase):
             installed = root / 'installed.lean'
             installed.write_bytes(candidate)
             with mock.patch.object(COLLECTOR, 'AUDIT', installed):
-                self.assertEqual(MIGRATION.accept(lanes)['checkout_state'], 'migrated')
+                with self.assertRaisesRegex(ValueError, 'prior commit'):
+                    MIGRATION.accept(lanes, require_installed=True)
+                self.assertEqual(MIGRATION.accept(lanes, require_installed=True, prior_commit=ACCEPT.BASE)['checkout_state'], 'migrated')
+                self.assertEqual(TIMING.audit_inputs(lanes), (base, candidate))
                 installed.write_bytes(candidate + b'-- changed\n')
                 with self.assertRaises(ValueError):
                     MIGRATION.accept(lanes)
+
+    def test_prior_lane_entries_cannot_disappear_or_change_owner(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = pathlib.Path(directory)
+            lane = root / 'owner-a'
+            lane.mkdir()
+            data = {'imports': ['Solidity.Fixture'], 'headlines': ['Solidity.Fixture.alpha']}
+            (lane / 'one.json').write_text(json.dumps(data))
+            prior = {'owner-a': {'imports': {'Solidity.Fixture'}, 'headlines': {'Solidity.Fixture.alpha'}}}
+            self.assertEqual(HISTORY.read_current(root), prior)
+            HISTORY.preserve(prior, HISTORY.read_current(root))
+            with mock.patch.object(HISTORY, 'read_commit', return_value=prior):
+                self.assertEqual(MIGRATION.accept(root, prior_commit='1' * 40)['prior_commit'], '1' * 40)
+                (lane / 'one.json').unlink()
+                lane.rmdir()
+                with self.assertRaisesRegex(ValueError, 'removed or reassigned'):
+                    MIGRATION.accept(root, prior_commit='1' * 40)
+                other = root / 'owner-b'
+                other.mkdir()
+                (other / 'one.json').write_text(json.dumps(data))
+                with self.assertRaisesRegex(ValueError, 'removed or reassigned'):
+                    MIGRATION.accept(root, prior_commit='1' * 40)
+        with self.assertRaises(ValueError):
+            HISTORY.read_commit('master')
+        self.assertEqual(HISTORY.read_commit(ACCEPT.BASE), {})
+
+    def test_prior_commit_tree_is_read_and_symlinks_rejected(self):
+        commit = '1' * 40
+        blob = '2' * 40
+        path = 'tests/h62/item1/trust-fragments/lanes/owner-a/one.json'
+        data = json.dumps({'imports': ['Solidity.Fixture'], 'headlines': ['Solidity.Fixture.alpha']}).encode()
+        def output(args, **kwargs):
+            if args[1:3] == ['cat-file', '-t']:
+                return b'commit\n'
+            if args[1] == 'ls-tree':
+                return f'100644 blob {blob}\t{path}\0'.encode()
+            if args[1:3] == ['cat-file', 'blob']:
+                return data
+            raise AssertionError(args)
+        with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=output), \
+             mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=0)):
+            prior = HISTORY.read_commit(commit)
+            self.assertEqual(prior['owner-a']['headlines'], {'Solidity.Fixture.alpha'})
+        def bad_mode(args, **kwargs):
+            value = output(args, **kwargs)
+            return value.replace(b'100644 blob', b'120000 blob') if args[1] == 'ls-tree' else value
+        with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=bad_mode), \
+             mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=0)):
+            with self.assertRaisesRegex(ValueError, 'invalid committed lane entry'):
+                HISTORY.read_commit(commit)
+        with mock.patch.object(HISTORY.subprocess, 'check_output', side_effect=output), \
+             mock.patch.object(HISTORY.subprocess, 'run', return_value=mock.Mock(returncode=1)):
+            with self.assertRaisesRegex(ValueError, 'ancestor'):
+                HISTORY.read_commit(commit)
+        inventory = {}
+        HISTORY.add(inventory, 'owner-a', data.decode())
+        with self.assertRaisesRegex(ValueError, 'duplicate committed headline'):
+            HISTORY.add(inventory, 'owner-b', data.decode())
 
     def test_fragment_symlinks_rejected(self):
         with tempfile.TemporaryDirectory() as directory:

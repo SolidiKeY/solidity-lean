@@ -14,6 +14,7 @@ import tempfile
 
 import accept_baseline
 import collect
+import lane_history
 
 PATCH = collect.ROOT / 'scripts/h62/item1/trust-fragments/migration.patch'
 
@@ -47,7 +48,7 @@ def coverage(original, candidate, lane_root):
             'generated_sha256': hashlib.sha256(candidate).hexdigest()}
 
 
-def accept(lane_root, candidate=None):
+def accept(lane_root, candidate=None, require_installed=False, prior_commit=None):
     original = subprocess.check_output(['git', 'show', f'{accept_baseline.BASE}:TrustAudit.lean'], cwd=collect.ROOT)
     fragments = collect.collect(collect.FRAGMENTS)
     accept_baseline.accept(original, fragments, original)
@@ -63,10 +64,18 @@ def accept(lane_root, candidate=None):
     generated = collect.MARKER + collect.collect_lanes(fragments, lane_root)
     if checked_in not in (original, generated):
         raise ValueError('checkout audit is neither the original nor the generated migration')
+    if require_installed and checked_in != generated:
+        raise ValueError('generated migration is not installed in the checkout')
+    if require_installed and prior_commit is None:
+        raise ValueError('installed gate requires the coordinator-approved prior commit')
+    if prior_commit is not None:
+        prior = lane_history.read_commit(prior_commit)
+        lane_history.preserve(prior, lane_history.read_current(lane_root))
     if candidate is not None and candidate != generated:
         raise ValueError('candidate does not match generated migration')
     result = coverage(original, generated if candidate is None else candidate, lane_root)
     result['checkout_state'] = 'original' if checked_in == original else 'migrated'
+    result['prior_commit'] = prior_commit
     return result
 
 
@@ -74,10 +83,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--lanes', type=pathlib.Path, default=collect.LANES)
     parser.add_argument('--candidate', type=pathlib.Path)
+    parser.add_argument('--prior-commit', help='full SHA of the coordinator-approved prior lane state')
+    parser.add_argument('--require-installed', action='store_true',
+                        help='fail unless the checkout contains the generated audit')
     args = parser.parse_args()
     try:
         data = None if args.candidate is None else args.candidate.read_bytes()
-        result = accept(args.lanes, data)
+        result = accept(args.lanes, data, require_installed=args.require_installed, prior_commit=args.prior_commit)
     except (OSError, ValueError, KeyError, subprocess.CalledProcessError) as exc:
         parser.exit(1, f'migration acceptance failed: {exc}\n')
     print(json.dumps({'status': 'pass', **result}, sort_keys=True))

@@ -74,10 +74,13 @@ def run_one(lake, lean, source):
 
 
 def audit_inputs(lanes):
-    baseline = collect.AUDIT.read_bytes()
+    baseline = subprocess.check_output(['git', 'show', f'{accept_baseline.BASE}:TrustAudit.lean'], cwd=collect.ROOT)
     reconstructed = collect.collect(collect.FRAGMENTS)
     accept_baseline.accept(baseline, reconstructed, baseline)
-    return baseline, collect.MARKER + collect.collect_lanes(reconstructed, lanes)
+    candidate = collect.MARKER + collect.collect_lanes(reconstructed, lanes)
+    if collect.AUDIT.read_bytes() not in (baseline, candidate):
+        raise ValueError('checkout audit is neither the original nor generated migration')
+    return baseline, candidate
 
 
 def main():
