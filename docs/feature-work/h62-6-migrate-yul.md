@@ -8,26 +8,27 @@ The original `/workspace/solidity-lean` checkout and its `work` branch are prese
 `git merge-base --is-ancestor c6f550e281a7e5affa9a99bc2cdaed556dec00e4 origin/master`
 returned 0. No assigned remote branch existed when inspected.
 
-## Queue status — H82 retired/stopped
+## Queue status — resumed after coordinator merge
 
-1. **Partial:** census complete (1774 Yul modules,2143 closure modules); clean
-   v4.24 build passed all2143, wall7291.842 s, peak sampled RSS8441331712 bytes.
-   Full old API export stopped under H82 at261/1774 sealed snapshots;1513 remain.
-2. **Pending successor:** official v4.35 archive SHA and versions verified;
-   additive B05 candidate reviewed and passes both releases; production originals
-   unchanged. H82 withdraws the prior proof-only exact-file agreement request.
-   External migration overlays and new KeySort compatibility remain pending.
-3. **Pending successor:** new clean all-module build, full public/generated API
-   compatibility and clean wall/RSS comparison. No full timing delta available.
-4. **Partial:** cumulative patch/bundle, frozen source hashes, original prompt,
-   full queue/scope, waits and evidence prepared; full migration/root gates pending.
+Coordinator explicitly authorized merging origin/master and continuing after
+H82 retirement. Fetch verified both b5668e3e56c851771a6b1b9c52178e547598aabf and
+reported20e492ee99a3fa8679aa526de0b6e731d85e4134 are origin/master ancestors.
+Assigned branch fast-forwarded to d96f2406d352de7e0b72ba6ac4ab29dc457582c6.
+No default branch, remote branch or original work checkout was modified.
 
-Stopped handoff to `solidity-h62-6-20261106/migrate-root-gate`. The existing goal
-remains unfinished; PAUSED could not be set because the only exposed goal API
-accepts complete|blocked. Neither was used as a substitute. No automatic resume,
-new proof implementation, runtime gate pass, master change, push or PR.
-The sections below retain historical checkpoint evidence; this summary and final
-H82 retirement section supersede earlier permission/continuation statements.
+1. **Partial:** pinned old census2143/1774 and clean baseline passed; old exported
+   inventory remains261/1774 sealed. Current merged census2145/1776 includes two
+   new read-only Yul modules; three previous source hashes changed upstream.
+2. **Partial:** B05 proof-only repair now applied and checked on both official
+   releases; original public signatures/definition/slotnum proof preserved.
+   Full directory migration and external dependency compatibility remain pending.
+3. **Pending:** clean new build/API comparison and same-source performance gates.
+   Old pinned-source baseline cannot be compared directly with changed-tree timing.
+4. **Partial:** reviewable checkpoints and artifacts exist; full root gates pending.
+
+Historical retirement files preserve the earlier stop instruction and evidence.
+The latest explicit continue instruction supersedes that worker retirement;
+no new goal has been created/reset. No runtime pass, push, merge to default or PR.
 
 ## Toolchains and prerequisite evidence
 
@@ -473,3 +474,44 @@ corrected stale top queue summary. Skeptic confirmed integrity and no active
 jobs; clarified external parser equivalence is not an assigned theorem. Exact
 H82 retirement source text saved in handoff/h82-retirement-instruction.md.
 No Lean reruns or proof changes were made for retirement.
+
+## Resumption milestone: production B05 repair
+
+One proof-only production line changed in Solidity/Yul/ReservedNames.lean:
+`reservedNames_count := by decide +kernel`. The definition, both exact theorem
+statements, slotnum proof, import and all budgets remain unchanged. H82 standing
+agreement applies; no exact-file permission request. No sorry/new axiom/native
+shortcut. Generator now reads the immutable starting-commit source via git show,
+so historical fixtures remain deterministic after applying the repair.
+
+Evidence directory `/workspace/migrate-yul-artifacts/resume-d96f2406d/` contains
+merge-state.json, census.json, post-b05-census.json, production probe reports,
+old-production.json/new-production.json (and deterministic gzip raw payloads),
+and production-interface-check.json. All bounded probes use the existing guard,
+-j1,-M12288,stack131072,LEAN_NUM_THREADS=1,no swap and4GiB estimated reserve.
+Original production compile passed old0.754835s/234319872bytes and
+new1.258165s/534036480bytes. These non-clean sampled probes are diagnostics,
+not a full performance comparison or an accepted regression disposition.
+
+Private production snapshots preserve all3 original names/signatures/metadata,
+raw table implementation and slotnum proof. Four declarations on each release:
+the added theorem helper is Solidity.Yul.reservedNames_count._proof_1_1.
+Old/new production declaration snapshots are equal. Count axioms remain none;
+slotnum remains propext. This establishes this module only, not all Yul or H78
+public generated API coverage. Earlier snapshot attempts failed due to Lean's
+package-root resolution across split library roots; copied the hash-bound
+Builtins.olean into each private library and fresh v2 probes passed. Failed
+attempts remain recorded, not relabeled.
+
+Current upstream adds Compilation.Artifact and Compilation.CompletionControls,
+not present in the original exact scope; they remain read-only. Changed upstream
+original sources are Checks.Occurrences,Checks.ScopedSyntax,Checks.WordSyntax.
+No baseline mismatch is hidden: full old/new timing comparison needs a common
+source tree and identical settings. Existing outside-owned v4.35 dependency
+failures and KeySort remain unresolved; no unchanged failing timing gate rerun.
+
+Resumption B05 finder: production signatures/metadata/table/slotnum proof,
+axioms, output bindings, immutable-source reproduction and budgets verified;
+no findings. Skeptic independently verified the same production evidence,
+failed-attempt disposition and timing boundaries; no findings. Neither used Lean
+or wrote files. B05 production checkpoint approved; whole queue remains partial.
