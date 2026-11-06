@@ -613,3 +613,23 @@ The helper now validates recognized strict exit status and the matching final
 summary, retaining raw logs before rejecting infrastructure failures. The fix
 was independently confirmed and all three recorded completions validated.
 No production Lean source changed during this tooling/disposition checkpoint.
+
+## Operation-level totality and rejecting generators
+
+TargetTotality proves existential successful runs of the existing readCode,
+writeCode and copyCode for every typed slot/machine (and typed word for writes),
+using their unchanged public run equations. An always-reverting code generator
+and an empty-code generator cannot match the full public read equation for
+any machine. The empty-code refutation observes actual finite stack-length
+growth. Concrete populated machines establish that the quantified domain is
+inhabited, and write/copy controls observe changed cells with context preserved.
+A revert prefix skips the following write; no after-state or rollback is
+inferred from the revert outcome. The final zero is a jump index, not gas.
+
+All twelve theorem axiom guards passed; independent read-only finder/skeptic
+reviews found no issue. The initial namespace-qualification error is retained
+as a rejected elaboration. This is totality for the existing symbolic-slot
+operation code, not Source compiler admission, packed/physical expansion or
+EVM gas/fork adequacy. The 49 mapped premise/data references and 3232 unmapped
+rows are unchanged. The recent published Source changes require separate
+revalidation of Source-dependent historical witnesses before fresh claims.
