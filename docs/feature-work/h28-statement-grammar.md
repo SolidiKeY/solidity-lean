@@ -2069,3 +2069,72 @@ General compound/item framing, broader true coverage, repository final gates
 and whole-scope acceptance/reviews remain pending. SOL-EU stays excluded and
 SG-CEX-01/02 remain OPEN/REFUTED. Shared generated roots/maps/trust inventories
 remain coordinator-owned.
+
+
+## Checkpoint Y: global atom continuation-token absence
+
+H55-H58 file reservations are honored: all edits stay in the original exclusive
+statement-grammar paths; no reserved Yul file or producer was edited and no HOLD
+was entered. Existing frozen goal and original base are retained. Work starts
+from integrated master `70845978ab616a63b13d0dee8b31b28893ccf591`.
+
+ControlFreePr, ControlFreeAtoms and SyntaxControlFree prove that successful
+expression/type/argument/parameter/declaration/simple yields contain no actual
+else, catch or unchecked keyword tokens anywhere, strengthening the earlier
+head-only fact. The existing boundaryToken predicate and SemiFreeCat footprint
+are reused unchanged. The universal induction covers all42atom constructors
+and recursive nil/cons/none/some wrappers over existing Syn. Only successful
+actual yields and the existing category footprint are premises; no successful
+parse, expression uniqueness or new source/precedence restriction is assumed.
+The three keywords are excluded throughout every flattened token segment,
+including arbitrary expression subtrees and successful layout choices.
+
+ControlFree is a token-list Prop relation with inhabited empty/token/append
+constructors, not an untyped AST. Literal fragment guards and function-type
+attribute arrangements are the existing printer computations. The generic
+keyword lemma states its exact boundaryToken=false side condition, discharged
+for every scalar producer keyword. Punctuation is neutral, including semicolon;
+this distinguishes the new property from SemiFree. Existing semicolon proofs,
+producers, interfaces and budgets were not refactored or changed. New indexed
+syntax induction constructs proofs only; new computational controls match only
+on parameter-only yield options, never on Syn.
+
+ControlFreeControls enumerates actual successful nonempty yields for all42
+constructors with exact Ctor inventories, all5literal classes, four generic
+list/option wrappers, both mapping-key forms, optional array/location/name/init
+fields, empty arguments/tuples and both function-attribute orders. Real else,
+catch and unchecked tokens are negative controls. Identifiers with those
+spellings and fragmented literal payload bytes remain data. An actual inhabited
+if/else yield contains a control keyword and is rejected by ControlFree; invalid
+fragment/layout choices remain refused. This proves token absence, not lexical
+validity, general statement segmentation, parser completeness or whole-language
+uniqueness. No new external solc fixture or compiler correctness claim is made.
+
+Public signature/axiom audit covers all43source theorems,3relation constructors,
+ControlFreeParts and23control theorems (70constants). Inventory and exact
+constructor/clause accounting are in
+`/workspace/h28-statement-grammar-evidence/inventory-y.json`.
+Per-file source diagnostics pass: run-1793932818689100266,
+run-1793932857929873010 and run-1793932917015203868. Final controls diagnostics:
+run-1793933442590916776. Builds have no new warnings and maxHeartbeats is unchanged.
+Initial setup run-1793932748629497010 failed before any source edit/check because
+the documented temporary lock directory was absent after restart. The directory
+was recreated; all subsequent writes/checks acquired the same documented lock.
+That failed setup is retained and never counted as a proof pass.
+
+Separate read-only finder and skeptic source reviews pass with no findings;
+neither used Lean, servers, builds, solc or writes. Final acceptance additionally
+requires exact committed-head VM builds/controls/axiom/KeySort gates and evidence
+review. Results, exact commands/exits/timing/RSS, hashes, cache receipt and sealed
+handoff are linked from
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-validation.json` and
+`/workspace/h28-statement-grammar-evidence/checkpoint-y-locations.json`.
+New modules have only local registration rows; no generated roots, shared maps
+or trust inventories are authored. H41 packs stay on the VM for coordinator
+pull with path/SHA; never run ship-cache.sh here.
+
+Original G11 remains partial: general compound/item framing and association,
+remaining true parser coverage, full repository gates and whole-scope acceptance
+remain open. SOL-EU remains excluded and SG-CEX-01/02 remain OPEN/REFUTED.
+Existing shared inventory/full-build holds remain separate. No goal was created,
+reset, replaced or marked complete by this checkpoint.
