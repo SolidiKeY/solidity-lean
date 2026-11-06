@@ -1,0 +1,12 @@
+{
+ "Solidity/Yul/Compilation/ScopedForCompletion.lean:Solidity.Yul.Compilation.ScopedForCompletion.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ScopedForCompletion.lean:Solidity.Yul.Compilation.ScopedForCompletion.model_to_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

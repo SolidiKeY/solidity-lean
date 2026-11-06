@@ -1,0 +1,7 @@
+{
+ "Solidity/Yul/Views/SourceBalanceReads.lean:Solidity.Yul.Views.sourceBalanceLocal_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

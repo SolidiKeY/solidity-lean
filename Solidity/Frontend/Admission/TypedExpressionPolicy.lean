@@ -15,7 +15,7 @@ theorem expression_allowed : ExpressionPolicy := by
   case magic b m h =>
     simpa only [Solidity.Frontend.Admission.observations, List.all_cons, List.all_nil, Bool.and_true] using Solidity.Frontend.Admission.TypedObservationPolicy.magic_allowed b m _ h
   case builtin b args h ih =>
-    simp only [Solidity.Frontend.Admission.observations, List.all_cons, ih, Solidity.Frontend.Admission.TypedObservationPolicy.builtin_allowed E.isBase b _ _ h, Bool.and_self]
+    simp only [Solidity.Frontend.Admission.observations, List.all_cons, ih, Solidity.Frontend.Admission.TypedObservationPolicy.builtin_allowed E.isBase E.mapFree b _ _ h, Bool.and_self]
   case abiEncode k args ih =>
     cases k <;> simp only [Solidity.Frontend.Admission.observations, List.all_cons, ih, Bool.and_true] <;> decide
   all_goals intros
