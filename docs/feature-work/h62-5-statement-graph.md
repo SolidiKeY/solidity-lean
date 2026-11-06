@@ -510,3 +510,22 @@ probes pass; full clean-tree optional fixture acceptance remains pending at this
 commit. Existing production inventory/full gate waits remain. The separate H55
 size proposal hit +21.4335% timing STOP and is stopped/unaccepted; it was not
 rerun unchanged while these independent controls were developed.
+
+Final committed-tree refusal acceptance passes at the source head recorded in
+h70-controls-evidence.json: 45 Python controls, intended JSON diagnostic bodies
+for all witness refusals, deterministic exports, original graph controls and
+bounded KeySort. Seven-run KeySort medians 1.315427167s before and 1.368037786s
+after (+3.9995%, within 10%); unchanged-core control only. Both independent
+read-only reviews found no blocking delta and used no Lean/server. Source and
+output hashes bind this actual acceptance; no production statement/guard edit,
+axiom/sorry/native_decide, budget change or RUNTIME_GATE_PASS.
+
+The queued trust coverage backfill accounts for all frozen source occurrences:
+44 blocks, 1380 headline occurrences/1373 distinct names, 77 imports and 17 print
+commands. Two regenerations are byte-identical, and all current fragments match
+the pinned central source SHA256 ece2e6cebbee95d82fec246892993662e81dcfd895831981583d2b0867a37482.
+This is current committed-source coverage, not declaration-existence proof or
+authentication of unavailable original worker runtime evidence. The held audit
+was not started. H55 size controls are functionally improved but their +21.4335%
+performance STOP remains binding. No master publication, retired-lane revival,
+fresh-thread creation, goal recreation/reset or claim of whole-goal completion.

@@ -107,3 +107,15 @@ authoritative prior/owner registration inputs, controlled real-audit timings,
 full affected/final gates and coordinator integration are complete. The syntax
 migration dependency is retained. These checks do not prove actual production
 declarations, authorize owners or install the proposed central marker patch.
+
+## H70 queued coverage backfill
+
+Current-source deterministic census records 44 blocks, all 1380 headline
+occurrences (1373 distinct), 77 imports and 17 print commands. Two outputs match;
+concatenated fragments equal the unchanged central bytes and pinned digest.
+Evidence: /workspace/h62-statement-graph-evidence/h70-trust-coverage/ and the
+committed h70-controls-evidence.json in the surviving statement-graph tests.
+No declaration existence, real project audit or unavailable original runtime
+receipt is inferred. H58 generated-audit HOLD remains intact. The coordinator's
+latest consolidated compatibility route is migrate-root-gate for Syntax.Raw and
+Contracts:1104; earlier route names above are historical, no stale owner contact.
