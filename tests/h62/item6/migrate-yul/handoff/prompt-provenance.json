@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "source": "Original user thread transcribed; exact scope supplied from authenticated ownership reservation",
+  "rendered_prompt_sha256": "94e18b7751756b9563620efed46ea50046369443578d300b285ce41eea509f2f",
+  "previously_reported_launcher_objective_sha256": "97ec48be960b9ab7efbf4fb5c674d50e2306820a8ab6c082e8f9e1b6a8139e53",
+  "byte_identity_to_launcher_objective": false,
+  "limitation": "Launcher objective bytes/get_goal not exposed. Transcription preserves the full rendered assignment, queue and exact scope; do not conflate its independently computed SHA with the coordinator-verified goal-objective SHA."
+}
