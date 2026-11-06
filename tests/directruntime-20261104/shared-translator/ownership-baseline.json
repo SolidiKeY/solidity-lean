@@ -1,8 +1,8 @@
 {
-  "commit": "706e36825929d6d0084dc08b88de9349abcd25aa",
+  "commit": "33eb46304cdb536e6c8b686223c6d8e456b703ae",
   "originalBase": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
   "authority": "H82b authenticated translator scope and H90 reader extension; explicit published-master adoption",
-  "publication": "Fetched published706e36825 and merged before H68 static intake; exact CR branch remains unmerged.",
+  "publication": "Fetched/adopted exact33eb46304 publication before historical native evidence intake; no runtime source edits in this checkpoint.",
   "updatePolicy": "Explicit recorded publication update and review; never derive from a moving ref.",
   "exclusiveFiles": [
     "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
