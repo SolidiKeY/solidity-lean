@@ -1658,4 +1658,170 @@ theorem dup_input_observation (perm : Bool) :
  Quot.sound] -/
 #guard_msgs in
 #print axioms dup_input_observation
+open private SolidityBridge.RoadmapV15.P10.swap_facts from SolidityBridge.RoadmapV15.P10.StackFamilyConsumer
+
+private theorem swap_short_scalar (n : Fin 16) (words : Scalar.Stack)
+    (short : words.length<n.val+2) :
+    Scalar.run (Selection.swapCertificate n).code words=none := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | cases words with
+    | nil => rfl
+    | cons a tail =>
+      have missing : tail[n.val]?=none := List.getElem?_eq_none (by
+        simp only [List.length_cons] at short;omega)
+      change ((Scalar.exchange a n.val tail).map (fun pair=>pair.1::pair.2)).bind (fun out=>some out)=none
+      simp only [Selection.exchange_get_set,missing,Option.map_none,Option.bind_none]
+
+private theorem swap_short_gate (valid : Array UInt256) (n : Fin 16) (s : EVM.State)
+    (gas : 3≤s.gasAvailable.toNat) (short : s.stack.length<n.val+2) :
+    Assembly.driverGate valid s (swapCode n)=.error .StackUnderflow := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | have facts := SolidityBridge.RoadmapV15.P10.swap_facts n s
+    have charge : s.gasAvailable-UInt256.ofNat 0=s.gasAvailable := by
+      change UInt256.mk (s.gasAvailable.val-0)=s.gasAvailable
+      rw [sub_zero]
+    simp only [Assembly.driverGate]
+    rw [facts.1,charge]
+    simp only [facts.2.1,facts.2.2.1,Option.getD_some,if_neg (Nat.not_lt_zero _),
+      if_neg (Nat.not_lt_of_ge gas),reduceCtorEq,if_false,if_pos short,bind,Except.bind,pure,Except.pure]
+
+theorem swap_refusal (valid : Array UInt256) (n : Fin 16) (site : Site (.SWAP n))
+    (words : Scalar.Stack) (m : Solidity.Evm.Machine)
+    (represented : m.stack=Selection.irStack words) (short : words.length<n.val+2)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    Solidity.Evm.Instr.step (.swap (n.val+1)) m=.fault ∧
+    Scalar.run (Selection.swapCertificate n).code words=none ∧
+    Assembly.driverSteps 1 (fuel+2) valid (modularSite site words).state=.error .StackUnderflow := by
+  have scalar := swap_short_scalar n words short
+  refine ⟨((Selection.swapCertificate n).refusal words m represented).mpr scalar,scalar,?_⟩
+  have gate := swap_short_gate valid n (modularSite site words).state gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind,DecoderAgreement.referenceOp,gate]
+
+theorem swap_native_refusal (valid : Array UInt256) (n : Fin 16) (site : Site (.SWAP n))
+    (words : Scalar.Stack) (short : words.length<n.val+2)
+    (gas : 3≤site.seed.gasAvailable.toNat) (fuel : Nat) :
+    EVM.X (fuel+1) valid (modularSite site words).state=.error .StackUnderflow := by
+  have gate := swap_short_gate valid n (modularSite site words).state gas
+    (by simpa only [modularSite,Site.state,List.length_map] using short)
+  have decoded := DecoderAgreement.decode_all (modularSite site words)
+  simp only [Assembly.X_unfold,decoded,Option.getD_some,DecoderAgreement.referenceOp,gate]
+
+theorem swap_empty_client (n : Fin 16) (perm : Bool) :
+    let m := {InstructionSelectionControls.ir 7 3 with stack:=Selection.irStack []}
+    Solidity.Evm.Instr.step (.swap (n.val+1)) m=.fault ∧
+    Scalar.run (Selection.swapCertificate n).code []=none ∧
+    Assembly.driverSteps 1 2 #[u 37,u 99]
+      (modularSite (WrappingArithmeticFixtures.site (.SWAP n) 12 perm) []).state=.error .StackUnderflow := by
+  exact swap_refusal _ n _ _ _ rfl (by change 0<n.val+2;omega) (by change 3≤12;decide) 0
+
+theorem swap16_nonzero_client (perm : Bool) :
+    let m := {InstructionSelectionControls.ir 7 3 with stack:=Selection.irStack (List.replicate 16 7)}
+    Solidity.Evm.Instr.step (.swap 16) m=.fault ∧
+    Scalar.run (Selection.swapCertificate ⟨15,by decide⟩).code (List.replicate 16 7)=none ∧
+    Assembly.driverSteps 1 2 #[u 37,u 99]
+      (modularSite (WrappingArithmeticFixtures.site (.SWAP ⟨15,by decide⟩) 12 perm) (List.replicate 16 7)).state=.error .StackUnderflow := by
+  exact swap_refusal _ ⟨15,by decide⟩ _ _ _ rfl (by decide) (by change 3≤12;decide) 0
+
+theorem swap_depth_boundary (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input (.SWAP ⟨15,by decide⟩) 12 perm (7::List.replicate 15 11))=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input (.SWAP ⟨14,by decide⟩) 12 perm (7::List.replicate 15 11))=
+      .ok {WrappingArithmeticFixtures.input (.SWAP ⟨14,by decide⟩) 12 perm (7::List.replicate 15 11) with
+        stack:=List.replicate 15 (u 11)++[u 7],pc:=u 4,gasAvailable:=u 9,execLength:=42} := by
+  first
+  | solve | rfl
+  | solve | decide
+  | cases perm <;> exact ⟨rfl,rfl⟩
+
+theorem swap_priority_controls (n : Fin 16) (perm : Bool) :
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input (.SWAP n) 2 perm [])=.error .OutOfGass ∧
+    Assembly.driverSteps 1 2 #[] (WrappingArithmeticFixtures.input (.SWAP n) 3 perm [])=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (WrappingArithmeticFixtures.input (.SWAP n) 0 perm [])=.error .OutOfFuel := by
+  first
+  | solve | rfl
+  | solve | simp only []
+  | solve | decide
+  | let input := WrappingArithmeticFixtures.input (.SWAP n) 2 perm []
+    have facts := SolidityBridge.RoadmapV15.P10.swap_facts n input
+    have charge : input.gasAvailable-UInt256.ofNat 0=input.gasAvailable := by
+      change UInt256.mk (input.gasAvailable.val-0)=input.gasAvailable
+      rw [sub_zero]
+    have gate : Assembly.driverGate #[] input (swapCode n)=.error .OutOfGass := by
+      simp only [Assembly.driverGate]
+      rw [facts.1,charge,facts.2.1]
+      rfl
+    have decoded := DecoderAgreement.decode_all
+      (modularSite (WrappingArithmeticFixtures.site (.SWAP n) 2 perm) [])
+    change EVM.decode input.executionEnv.code input.pc=some (swapCode n,none) at decoded
+    have low : Assembly.driverSteps 1 2 #[] input=.error .OutOfGass := by
+      simp only [Assembly.driverSteps,decoded,Option.option,bind,Except.bind,
+        DecoderAgreement.referenceOp,gate]
+    have shortage := (swap_refusal #[] n (WrappingArithmeticFixtures.site (.SWAP n) 3 perm) []
+      {InstructionSelectionControls.ir 7 3 with stack:=Selection.irStack []} rfl
+      (by change 0<n.val+2;omega) (by change 3≤3;decide) 0).2.2
+    exact ⟨low,shortage,rfl⟩
+
+theorem swap_native_fuel_boundary (n : Fin 16) (perm : Bool) :
+    EVM.X 1 #[] (modularSite (WrappingArithmeticFixtures.site (.SWAP n) 12 perm) []).state=.error .StackUnderflow ∧
+    Assembly.driverSteps 1 1 #[] (modularSite (WrappingArithmeticFixtures.site (.SWAP n) 12 perm) []).state=.error .OutOfFuel := by
+  exact ⟨swap_native_refusal _ n _ _ (by change 0<n.val+2;omega) (by change 3≤12;decide) 0,rfl⟩
+
+theorem swap_input_observation (perm : Bool) :
+    let input := WrappingArithmeticFixtures.input (.SWAP ⟨15,by decide⟩) 12 perm (7::List.replicate 15 11)
+    input.stack=u 7::List.replicate 15 (u 11) ∧ input.executionEnv.perm=perm ∧
+    input.executionEnv.code.data.toList=[0x60,0x7f,0x50,0x9f,0] ∧
+    input.pc=u 3 ∧ input.gasAvailable=u 12 ∧ input.execLength=41 ∧
+    input.memory.data.toList=[0xaa,0xbb]++List.replicate 30 0 ∧
+    input.returnData.data.toList=[0xcc,0xdd] ∧ input.H_return.data.toList=[0xee,0xff] ∧
+    input.executionEnv.calldata.data.toList=[0x11,0x22,0x33] ∧
+    input.accountMap=WordPushFixtures.accounts ∧ input.σ₀=WordPushFixtures.accounts := by
+  first | rfl | exact ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_native_refusal' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_native_refusal
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_empty_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_empty_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap16_nonzero_client' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap16_nonzero_client
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_depth_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_depth_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_priority_controls' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_priority_controls
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_native_fuel_boundary' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_native_fuel_boundary
+/-- info: 'SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal.swap_input_observation' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound] -/
+#guard_msgs in
+#print axioms swap_input_observation
 end SolidityBridge.RoadmapV15.P10.InstructionSelectionRefusal
