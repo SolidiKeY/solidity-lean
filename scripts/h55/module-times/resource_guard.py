@@ -58,6 +58,11 @@ def preflight():
         return ["resource state unavailable or unsupported"]
 
 
+def _clock_pair():
+    import time
+    return time.monotonic_ns(), time.clock_gettime_ns(time.CLOCK_BOOTTIME)
+
+
 def controlled_process(argv, output, timeout_seconds=300, poll_seconds=0.1):
     """Experimental monitored command. Caller must hold the repository lock.
 
@@ -81,7 +86,7 @@ def controlled_process(argv, output, timeout_seconds=300, poll_seconds=0.1):
     errors = preflight()
     if errors:
         return {"status": "resource-stop", "errors": errors}
-    start = time.monotonic()
+    start_mono, start_boot = _clock_pair()
     try:
         process = subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=output,
                                    stderr=subprocess.STDOUT, start_new_session=True)
@@ -95,8 +100,14 @@ def controlled_process(argv, output, timeout_seconds=300, poll_seconds=0.1):
             if errors:
                 status = "resource-stop"
                 break
-            elapsed = time.monotonic() - start
-            if elapsed < 0 or elapsed > timeout_seconds:
+            now_mono, now_boot = _clock_pair()
+            elapsed = (now_mono - start_mono) / 1e9
+            boot_elapsed = (now_boot - start_boot) / 1e9
+            if (elapsed < 0 or boot_elapsed < 0 or
+                    abs(elapsed - boot_elapsed) > max(0.05, boot_elapsed * 0.01)):
+                status = "invalid-clock"
+                break
+            if elapsed > timeout_seconds or boot_elapsed > timeout_seconds:
                 status = "timeout-or-invalid-clock"
                 break
             # Keep the exited leader unreaped until the process group is
@@ -116,3 +127,15 @@ def controlled_process(argv, output, timeout_seconds=300, poll_seconds=0.1):
             pass
         process.wait()
     return {"status": status, "exit_code": code, "errors": errors}
+
+
+def locked_controlled_process(argv, output):
+    """Acquire the repository writer lock and use the fixed 300s budget."""
+    import fcntl
+    lock_path = pathlib.Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
+    try:
+        with lock_path.open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            return controlled_process(argv, output, timeout_seconds=300)
+    except (OSError, ValueError):
+        return {"status": "lock-or-control-error"}

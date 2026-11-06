@@ -149,3 +149,24 @@ complete inventory and independent finder/skeptic reviews remain outstanding.
 The full synthetic suite passed 14 test methods. An initial commit command for
 the census failed at shell parsing and made no edits; the corrected command
 succeeded.
+
+## Published-master comparison and locked prototype
+
+A fresh `git fetch origin master` resolved master to
+`96788a95383b6295dc13774ef681297adf1337a7`; the assigned base is its ancestor.
+The published tree had no H55 module-times helpers in the assigned paths.
+A read-only Git-tree comparison found 7,328 tracked Lean paths on that master,
+162 more and none removed relative to the assigned base. The candidate mapper
+classified all as 7,034 module-name candidates and 294 standalone file-check
+candidates, with no same-context collisions. This is not a source-hashed or
+approved master inventory, and no rebase or new master measurement is claimed.
+
+The experimental guard now exposes a fixed-300-second wrapper that acquires the
+repository writer lock nonblockingly, and compares monotonic and boot-time
+clocks during monitoring. Tests cover lock contention and deliberate clock
+disagreement. Sixteen synthetic test methods pass without Lean. The wrapper
+still accepts a caller-supplied command, cannot authenticate two falsified
+clocks or the VM/tree/cache/toolchain, cannot guarantee process-tree containment
+against process-group escape, and does not enforce Lean thread or job flags.
+Production acceptance, actual H56 evidence and both independent reviews remain
+pending; the attached executor preflight still cannot be counted as a pass.

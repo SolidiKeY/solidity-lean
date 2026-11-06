@@ -25,9 +25,6 @@ class Resources(unittest.TestCase):
             self.assertTrue(guard.preflight())
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 class MonitoredControls(unittest.TestCase):
     def test_success_failure_timeout_and_resource_stop(self):
         import subprocess
@@ -49,3 +46,27 @@ class MonitoredControls(unittest.TestCase):
         for limit in [0, 301, True, float("nan")]:
             with self.subTest(limit=limit), self.assertRaises(ValueError):
                 guard.controlled_process(["x"], None, limit)
+
+
+class LockAndClock(unittest.TestCase):
+    def test_clock_disagreement_stops(self):
+        import sys
+        safe = {"memory_max": 12*guard.GIB, "memory_current": 1024,
+                "swap_max": 0, "swap_current": 0, "available": 8*guard.GIB}
+        with open("/dev/null", "w") as out, patch.object(guard, "sample", return_value=safe), patch.object(guard, "_clock_pair", side_effect=[(0, 0), (1, 2000000000)]):
+            self.assertEqual("invalid-clock", guard.controlled_process([sys.executable, "-c", "import time; time.sleep(1)"], out, 2)["status"])
+
+    def test_lock_refusal_does_not_spawn(self):
+        import fcntl
+        lock_path = pathlib.Path("/tmp/solidity-lean-feature-groups-20261025/writer.lock")
+        if not lock_path.parent.is_dir():
+            self.skipTest("writer lock directory unavailable")
+        with lock_path.open("a") as held, open("/dev/null", "w") as out:
+            fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            with patch.object(guard, "controlled_process") as controlled:
+                self.assertEqual("lock-or-control-error", guard.locked_controlled_process(["ignored"], out)["status"])
+                controlled.assert_not_called()
+
+
+if __name__ == "__main__":
+    unittest.main()
