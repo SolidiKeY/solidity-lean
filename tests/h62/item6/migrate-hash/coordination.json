@@ -143,9 +143,33 @@
     "solidity-h62-1-20261106/infer-helpers": "5652c3e3d75d586d4edbd7ea2f95e3fe9f908d35",
     "solidity-h62-2-20261106/audit-roadmap": "4ce2bfb8bc2ed558f4efd7423229363719b6625b",
     "solidity-h62-2-20261106/audit-v10-storage": "2d53437157aeb2385aeaaab7b7bb891e92566058",
-    "solidity-h62-4-20261106/generic-primitive-packets": "2ef21b5bc7c769a99a45109b1963f922beb5d448",
+    "solidity-h62-4-20261106/generic-primitive-packets": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
     "solidity-h62-5-20261106/statement-graph": "d8c1eaf4f0d4aedfb5d650d12ad6a40b2d9dd3b7",
     "solidity-h62-6-20261106/migrate-roadmap": "1498f324e0def23f2eb727c6638179df6743c050",
-    "solidity-inline-assembly5-20261031/vy2-physical": null
+    "solidity-inline-assembly5-20261031/vy2-physical": null,
+    "solidity-h62-2-20261106/audit-label-execution": "d89b309029f9ad57f17711432aeef4990005994b",
+    "solidity-h62-2-20261106/audit-language": "c2ffe26194e661f11b6ef4673090fdc97021ed74",
+    "solidity-h62-2-20261106/audit-v07-lowering": "b0729bc582ba51d966e2d05fe85739f3ebe924c3",
+    "solidity-h62-6-20261106/migrate-lowering": "d604931a80481157b5bd56469a852150fa0e5339",
+    "solidity-h62-6-20261106/migrate-solcvalidation": "0bd9e2519c43f1757674d2051a7786ac5688c2bb",
+    "solidity-h62-6-20261106/migrate-root-gate": "ac7d4535b16c9a393a2b86ec91dd44fae2f418f2"
+  },
+  "root_provenance_reply": {
+    "requester": "solidity-h62-6-20261106/migrate-root-gate",
+    "requester_head": "ac7d4535b16c9a393a2b86ec91dd44fae2f418f2",
+    "type": "OVERLAY_PROVENANCE_ONLY",
+    "source_head": "2a18afcdba00a85645b0b3079704f78ffcd78860",
+    "manifest": "/workspace/migrate-hash-evidence/source-provenance-2a18afcdb/manifest.json",
+    "manifest_sha256": "23e366c6e73ab79a4a32e9739db4dae58ff8aadfe69854b6353b54a1edfe1a9a",
+    "bundle": "/workspace/migrate-hash-evidence/source-provenance-2a18afcdb/source.bundle",
+    "bundle_sha256": "a17167daff48fbe5a74b33d95676a66130c88ed92f4309329fc3ca801a60cabc",
+    "status": "ready for coordinator retrieval/static ancestry binding; root acceptance not claimed",
+    "boundary": "No repeat repair, Lean rerun, source application, baseline restart, budget change or STOP disposition."
+  },
+  "peer_resolution": {
+    "source": "coordinator inline H70 generic-primitive-packets blockers.json",
+    "requester_head": "0a34d9c508ca24f6a914553953a0bc4abf5863dc",
+    "reported": "Both Hash modules checked in isolated staged sources; Hash cleared for isolated consumer check; Roadmap.Contracts axiom guard remains with migrate-roadmap",
+    "independently_replayed": false
   }
 }

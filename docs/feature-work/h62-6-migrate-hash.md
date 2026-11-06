@@ -198,10 +198,10 @@ the coordinator, never to a self-created replacement goal.
 
 ## H70 consolidated producer delivery
 
-The coordinator routed sixteen consumers of CollisionBound. The reviewed production
+The coordinator routed twenty-three consumers of CollisionBound. The reviewed production
 repair is exported as `/workspace/migrate-hash-evidence/hash-owner-overlay.patch`
 (two files) and `collision-bound-overlay.patch` (CollisionBound only). Exact base,
-committed head, before/after file hashes, patch hashes, all sixteen requester IDs,
+committed head, before/after file hashes, patch hashes, all twenty-three requester IDs,
 validation boundaries and live-owner changes are in `producer-overlay.json`. These
 are ready for coordinator retrieval/approved consumption; no direct cross-VM write,
 push, merge, ownership transfer or full-gate claim is made. The source census at the
@@ -230,3 +230,29 @@ sixteen-consumer delivery record. Other staged requester payloads were neither
 applied nor reviewed; only their explicit Hash prerequisite requests are recorded.
 The coordinator has staged/routed the reviewed overlay. Wait for migrate-syntax's
 Raw.lean overlay and root-gate baseline disposition before full comparison.
+
+## H70 exact source-commit provenance reply
+
+Root-gate at ac7d4535b16c9a393a2b86ec91dd44fae2f418f2 requested static provenance
+only for the previously reviewed source head 2a18afcdba00a85645b0b3079704f78ffcd78860.
+The immutable package `/workspace/migrate-hash-evidence/source-provenance-2a18afcdb`
+contains the exact source-head bundle, full base-to-source diff, scoped Hash patch,
+raw commit object, before/after Git blob IDs and SHA256 file hashes, plus snapshots
+of retained production results/settings/versions/logs and reviews. `manifest.json`
+is SHA256 23e366c6e73ab79a4a32e9739db4dae58ff8aadfe69854b6353b54a1edfe1a9a;
+`source.bundle` is SHA256 a17167daff48fbe5a74b33d95676a66130c88ed92f4309329fc3ca801a60cabc.
+The source bundle advertises exactly 2a18 as HEAD and requires the pinned base.
+Static checks validate ancestry, raw commit object identity, exact bundle ref and
+patch digest, file/blob hashes and equality of current production source to 2a18.
+No source application or Lean rerun occurs. Root acceptance remains unclaimed.
+
+The delivery catalog now includes twenty-three unique consumers, adding the new
+H55/g49, p16-generator, language/lowering/semantics/solcvalidation and root-gate
+requests without taking any work or ownership from those lanes. The coordinator
+reports generic-primitive-packets checked both Hash modules in isolated staged
+sources and cleared that prerequisite; its separate Roadmap.Contracts trust guard
+remains an owner blocker. That peer result is recorded as reported, not replayed.
+All current STOPs, trust requirements and budgets are retained. The old supervisor
+and its outputs remain untouched; no baseline restart. Full assignment remains
+blocked on Syntax.Raw, old-baseline disposition, matched full comparison and final
+affected/root gates.

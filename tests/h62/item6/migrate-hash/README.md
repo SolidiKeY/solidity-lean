@@ -47,3 +47,10 @@ command cap after 18 / 6389 modules; no active controller remains. Inspect
 `/workspace/migrate-hash-evidence/baseline-controller.json` and its output directory
 and the preserved summary before root-gate disposition. No restart or budget
 change is authorized by the latest relay. Do not duplicate or terminate another owner.
+
+For H70 static provenance, `python3 scripts/h62/item6/migrate-hash/source_provenance.py`
+verifies the immutable exact 2a18 commit package without invoking Lean, applying
+source or restarting any controller. The manifest and source bundle live in
+`/workspace/migrate-hash-evidence/source-provenance-2a18afcdb`; this differs from
+the latest receipt-head bundle. Preserve root-gate holds and await coordinator
+consumption; static bundle verification is not a full gate or cut-over approval.
