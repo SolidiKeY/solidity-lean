@@ -933,5 +933,8 @@ See [P8 admission](../feature-work/p8-admission.md).
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceCertificateControls.lean` | Inhabited scoped recursion success/failure at all supplied indices and uncertifiability of malformed base/quotation inputs. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViews.lean` | Context-generalized intrinsic sequence/statement views and executable exact recBase certification; recursive-head recognition remains open. |
 | `Backend/InternalFlow/RuntimeFrameV3AllocatingSourceViewsControls.lean` | Actual base acceptance and nil/revert/extra-statement refusal receipts, with extracted-certificate revert/exhaustion consumers. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViews.lean` | Generalized typed conditional/callRec/block/declaration/assignment views retaining actual children and constructor equations. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingDeclarationCheck.lean` | Executable exact scoped private bool-array allocation recognition from actual typed views; derives source syntax equality. |
+| `Backend/InternalFlow/RuntimeFrameV3AllocatingHeadViewsControls.lean` | Actual head/allocation receipts, malformed-declaration refusals and the existing public allocation compiler-leaf link. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Kernel-checked DUP/SWAP shortage proofs packaged into the unchanged frozen indexed refusal producer; instruction-local scope only. |
 | `Bridge/SolidityBridge/RoadmapV15/P10/IndexedRefusalWitnessV1.lean` | Checked DUP/SWAP shortage proofs packaged into the frozen indexed refusal producer; instruction-local scope. |
