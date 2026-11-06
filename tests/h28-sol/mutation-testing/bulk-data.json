@@ -332,5 +332,21 @@
     "archive_seconds": 5.760611116998916,
     "process_maxrss_kib": 23024,
     "member_manifest": "tests/h28-sol/mutation-testing/evidence/rollback-pilot-ade0ec29/manifest.json"
+  },
+  "frame_profile_inputs": {
+    "manifest": "tests/h28-sol/mutation-testing/manifests/frame-pilot.json",
+    "inventory": {
+      "path": "tests/h28-sol/mutation-testing/inventory.frame-selected.json",
+      "sha256": "9ebbba8a50d6ef8fabdfb9fa77419b9da7f31814fb953b3a8729f67c4ab78ba3",
+      "availability": "git-tracked"
+    },
+    "cache_manifest": {
+      "role": "cache_manifest",
+      "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+      "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+      "bytes": 36528,
+      "availability": "VM-only",
+      "authorization": "H44"
+    }
   }
 }

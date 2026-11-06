@@ -872,3 +872,28 @@ authenticates every declared member map regardless of its key. The real-Git
 control checks the rollback-pack location and rejects changed member hash, size
 and membership there. Archive integrity had passed; the missing enforcement
 was fixed before checkpoint seal acceptance. No proof or budget changed.
+
+
+### Direct return-frame checkpoint (frozen input)
+
+`frames.return-parameter-projection` changes only the `rets` projection in
+`Premise.expandCall` when return and parameter contexts coincide. Its interface,
+all side conditions and the call body remain unchanged. The actual pure callee
+returns `(42, true)`; the wrong projection exports parameters `(3, false)`.
+Concrete typed landings, an inhabited equal-payload control and universal
+all-state frame projections accompany an unconditional negated `Premise.Sound`.
+The same mutated premise has a callback-modal counterexample in the pending
+caller continuation: the caller's send can resume with changed global state
+while preserving the differing numeric local. This does not claim a callback
+inside the pure callee or coverage of every call form.
+
+`inventory.frame-selected.json` is a small tracked two-span attribution index
+for this pilot and its unchanged independent revert control. It supplements the
+immutable exhaustive 290-declaration/308-unit census; it does not replace or
+shrink that candidate census. The callback cache receipt remains a VM-only H44
+pin, explicitly marked in the manifest and `bulk-data.json.frame_profile_inputs`
+and authenticated by the existing frozen bulk index and runner. The inventory
+itself is tracked, so this mixed-input profile is separate from the legacy
+two-off-Git-input declarations. Current census counts are 34 fixtures, 12
+profiles and 19 distinct variants. Development passes are unscored; the frozen
+whole pilot run, reviews and evidence seal remain pending.
