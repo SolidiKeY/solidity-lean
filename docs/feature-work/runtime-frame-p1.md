@@ -1760,3 +1760,10 @@ the pinned declarations; the pins are recorded; docstrings tightened.
 Still open: a general recursive compiler with per-body `ReturnClaim`
 (the inputs to `of_unrolled` for arbitrary `step`), approved-profile
 provenance, G37.02 divergence and G38 failure classes, and the G49 bridge.
+
+Gate: `./run-lean.sh` built all 6416 default and SolkeyTestSuite jobs
+("Build completed successfully"); its final `scripts/check-solkey.sh` step
+reported 167 sort-annotation mismatches between the SolKey checkout beside the
+repository (`5c448df`) and the annotation table. This change touches neither;
+re-pinning is the SolKey migration's job (`docs/solkey-migration.md`).
+Per-file Lean diagnostics of both new modules are clean.
