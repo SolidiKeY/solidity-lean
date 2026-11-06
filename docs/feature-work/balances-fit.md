@@ -123,7 +123,14 @@ the preceding table, as `fragments.sh` generates it.
   (build-touched, library — `Build completed successfully (6055 jobs)` —,
   trust, orphans, layers, roots, fragments, doc-paths, axiom-pins). This VM had
   no shipped Lake cache, so it was a from-scratch build (~2.5 h).
-- `./run-lean.sh`: see the CLOUD-RESULT marker commit.
+- `./run-lean.sh` (40 min wall): `Build completed successfully (6473 jobs)`,
+  no `error:`; it then exits 1 in its final step, `scripts/check-solkey.sh`,
+  because the sibling `../solkey` checkout is at `b8d5f88`, not the pin
+  `473da8944c` (167 sort mismatches there; this lane touches no rule or
+  annotation).
+- Pinned rerun: `scripts/check-solkey.sh --key tests/migration/solkey/…/solidityProgramRules.key`
+  (the vendored snapshot, byte-identical to `473da8944c`'s file):
+  `solkeycheck: OK — annotations match`.
 
 ## Limitations
 
