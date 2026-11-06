@@ -1,0 +1,16 @@
+{
+  "archive": "/workspace/sol-numeric-literals-h82/current-cache-proposal-v2/owned-cache.tar.gz",
+  "archive_sha256": "02fdd6ae634721bc21f0c240146c954d9a4fc31da05e2c8d0d3582c37e750308",
+  "archive_bytes": 12225053,
+  "modules": 42,
+  "mapping_count": 42,
+  "artifact_count": 126,
+  "status": "prepared_not_approved_or_delivered",
+  "reproduced_byte_identically": true,
+  "generator": "tests/sol-numeric-literals/h82/prepare-current-cache.py",
+  "generator_sha256": "a2313f88d110ab39aa604493ffe4a578f0c846bba0fb6f1d42398ee3c76ca1be",
+  "review": "Finder PASS for limited observed-trace/mapping proposal",
+  "validation_boundary": "SHA256 verifies packaged byte consistency only; source-to-trace freshness and cache-name hashing are not independently validated. Not current-cache acceptance.",
+  "historical_h41_approval": "Preserved unchanged; stale-current-source self-test remains failed.",
+  "request": "Coordinator review/pull only; no VM shipment or substitution into approved evidence."
+}
