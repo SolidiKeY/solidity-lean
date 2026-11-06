@@ -3325,3 +3325,38 @@ is the default, Word ⟨73,_⟩ and Nat 73 agree, doc edit faithful).
 
 Checkpoint PASS @4ffa5a674 (build-touched, library, trust, orphans, layers,
 roots, doc-paths, axiom-pins). The H16 APIs are landable at this head.
+
+### `cdToMem` static-element copies (G18.05, 2026-11-06)
+
+`Source.cdToMem` copies a static array (`uint256[2] calldata` → memory) and
+a dynamic array of static arrays element by element at the element's head
+stride (`STy.cdHeadBytes`) through `cdElems`/`cdStaticToMem`, validating
+every word; inner arrays are allocated first, as `zeroData` does (solc
+allocates the outer first; heap addresses are abstract). The one-word copy
+of `uint256[]` is unchanged; an element that is not statically encoded stays
+`stuck`. `cdToMem_ok` keeps its statement; `cdStaticToMem_ok` and
+`cdToMem_static_ok` (under `STy.cdCopyElem`) prove the new arms keep `MemOK`
+and are never `stuck`. Grow/Const (`Horizon`) and readonly `Effect` lemmas
+cover the helpers; controls are in `Source/CalldataStaticCopyControls.lean`.
+
+Reviews (read-only, without the Lean server):
+
+- **Skeptic.** Confirmed: master's `source_cd_uint_fixed_stuck` stated that a
+  `uint256[n]` memory target is a stuck conversion — the gap this change
+  closes — so it became false. Fixed in 32bc4776f: the theorem and its pin
+  are removed, and its control `empty_and_boundary` states the actual copy.
+  Otherwise the claim survived (statement of `cdToMem_ok` unchanged,
+  `cdCopyElem` satisfiable for `uint256[2]` and `uint256[2][2]`, recursion
+  structural, controls test what they say).
+- **Finder.** Confirmed: the nested arm is not reachable from typed source.
+  `STy.implicit` compares element types with `STy.same`, which compares
+  locations, so `uint256[2][] calldata` does not convert to
+  `uint256[2][] memory`; only the one-level static copy is reachable (e.g.
+  from `xs[i]`). Recorded as open in `source-soundness.md`, the controls
+  docstring and the module map; closing it means comparing elements up to
+  `withLoc`, as `copiesTo` does. Stride, the declared-length choice, the
+  no-wrong-value property and arm order checked clean. Minor: no control
+  runs the reachable copy end to end from elaborated source.
+
+Checkpoint @32bc4776f: all gates PASS except axiom-pins, which reported only
+the removed pin and two new ones; pins rewritten in the next commit.
