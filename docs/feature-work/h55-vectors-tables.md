@@ -199,3 +199,29 @@ the failure. The corrected helper and 19 Python tests pass. The external source
 snapshot archive, parser log, ledger and reconciliation hashes are in
 `master-raw-artifacts.sha256`. Owner handoffs, independent finder and skeptic
 reviews, production changes, full Lean gates and speed comparisons remain open.
+
+## Declaration and grouped-pattern accounting
+
+The 103-file master snapshot remains byte-identical in the Raw area to fetched
+master `0b2a648b32335f35ff323ff468f75907e926fc13`; every snapshot blob hash
+was compared with that master. `ParseContext.lean` and `raw_context.py` associate
+all 2,770 selected parser nodes with 624 enclosing declaration spans. Their
+flattened node stream matches the earlier separate parser pass exactly. Two
+guarded parser runs and extracted context data matched byte-for-byte. The
+off-Git `/workspace/scratch/h55-vectors-tables/master-raw-context.json` records
+headings, spans and source hashes; its manifest and data checksum are committed.
+
+`raw_case_labels.py` further records 1,914 syntactic patterns across 1,821
+alternative nodes, splitting grouped patterns while retaining their shared node,
+declaration spans, and hashes. The external data is
+`/workspace/scratch/h55-vectors-tables/master-raw-case-labels.json`; a second
+extraction matched byte-for-byte. Missing, extra, order, malformed schema and
+invalid span controls pass; 22 Python tests pass in total.
+
+This is parser and source accounting, not exact typed semantic case accounting.
+Identical pattern labels may refer to different types. In particular, a `cases`
+or `induction` tactic can generate implicit subgoals without explicit named
+alternatives; source labels do not establish the number or type of those goals.
+The built-in parser run does not elaborate project imports. Full semantic
+accounting and preservation by parametrisation require elaborated Lean evidence,
+owner handoff, and validation of the actual migration. No owner files changed.
