@@ -986,3 +986,57 @@ for future memory passes (dead allocation, memory dead stores) in O03.
   the ones added later).
 - Unused-variable elimination outside the strengthening fragment and of non-first
   declarations within one pass: not done.
+
+### O02 checkpoint gates (fresh, this VM) — 2026-11-06
+
+Lean 4.24.0 (elan toolchain `leanprover--lean4---v4.24.0`), 4 cores, 15 GB.
+
+- `gate.sh per-file` over all lane files at 23f40bc5: PASS for `Optimizer/{Pass,Laws,
+  ConstFold,StmtFold,Propagate,Simplify,UnusedVar,CSE,RoadmapComposition,Controls}.lean`
+  and `tests/fullscope-20261104/vo1/{O02Controls,O03Controls,PipelineControls,
+  ValueValidatorControls,YulValidatorControls}.lean` (each `lake env lean FILE`,
+  0 errors; 1–16 s each).
+- Lean MCP diagnostics: no errors or warnings on every touched file.
+- `#print axioms` (in the control files): every headline theorem uses only `propext`,
+  `Classical.choice`, `Quot.sound` (`Val.pbeq_eq`: `propext`, `Quot.sound`).
+- `register.sh --check`, `fragments.sh --check`: PASS. `check-layers.mjs`: 857 core
+  modules, 0 reach the elaborator or the checked parser adapters.
+- `gate.sh checkpoint` (`lake build Solidity`, cold): NOT COMPLETED. The cold library
+  build is 5412 jobs on a mostly sequential chain (single modules up to 410 s, e.g.
+  `Backend/Scalar/PowerBounds`); after ~65 min it had built ~280 modules, so it was
+  stopped. No master Lake artifacts were present in this VM's cache. `gate.sh touched`
+  expands to the same full build because the generated root changed. This is a
+  resource stop, recorded as open: the integrated build needs the coordinator's warm
+  cache.
+
+Reviews (separate read-only finder and skeptic, no Lean server):
+- Finder: no high-severity defect; confirmed `SameRun` non-vacuous and the dead-code
+  rewrites against `Run.lean`. Medium: Simplify doc implied a `s*0` rule (now
+  implemented); `Stmt.uve` doc said "every block" (now "explicit blocks"). Low:
+  Propagate doc ("only across require/assert") corrected; duplicate/dead tactic
+  alternatives removed; unused `ofInt?_val` removed; long lines wrapped; namespace
+  names now cited as `ConstFold.*`. All fixed.
+- Skeptic: proofs hold; O02 not complete in the D6/compiler sense (D6 binding and
+  `Compilation.correct` composition are open, waiting on X01/V09 — disclosed above);
+  disclosure fixes applied for unused-variable coverage, omitted solc rules, thin
+  dead-code elimination, the composition caveat (`asserts`/`pays`/`pushes`, partial
+  compilation, `runR_eq`), stale status lines. Added rules `s*0`, `X**1`, `X>>0`,
+  `s<s`/`s>s`/`s<=s`/`s>=s` and controls for loop propagation, `while(false)` removal,
+  short circuit, a storage write left as written.
+
+## O03 checkpoint: common-subexpression elimination — 2026-11-06
+
+`Optimizer/CSE.lean`. After `x = e;` or `T x = e;` completes, later occurrences of `e`
+are replaced by `x` while `x` and the locals `e` reads are unassigned (solc's
+`CommonSubexpressionEliminator`). Theorems: `Val.pbeq_eq` (typed syntactic equality on
+the pure fragment is equality, no classical decision), `Val.cse_evalT (hA : Avail.Holds A σ)`,
+`ConstFold.Prog.cse_runC A P σ hA`, `ConstFold.Prog.cse_empty_runC P` (no premise),
+`cse_preserves`. Entries survive local assignments only when pure and independent of
+the assigned local (`Val.indep`), and survive declarations, `require`, `assert`; any
+other statement or scope exit clears them; loop bodies start empty. Controls
+(`O03Controls.lean`): `cse_replaced`, `cse_killed`, and the run-level negative control
+`wrong_kill_differs` (the unkilled rewrite yields `1` where the program yields `8`).
+
+O03 remaining: internal-function inlining, unused-function pruning (open, below),
+redundant `sload`/`mload`/store elimination and LICM (wait for X06 aliasing facts; no
+assumed facts). CSE does not look inside storage/memory reads or across calls.
