@@ -1,0 +1,22 @@
+import Solidity.Frontend.StatementGrammarH28.ListMeasures
+
+namespace Solidity.Frontend.StatementGrammarH28
+#check list_length_values
+#print axioms list_length_values
+#check list_yield_length
+#print axioms list_yield_length
+#check list_yield_chunks_nonempty
+#print axioms list_yield_chunks_nonempty
+#check nonempty_chunks_token_bound
+#print axioms nonempty_chunks_token_bound
+#check list_yield_token_bound
+#print axioms list_yield_token_bound
+#check statement_list_yield_token_bound
+#print axioms statement_list_yield_token_bound
+#check item_list_yield_token_bound
+#print axioms item_list_yield_token_bound
+#check item_list_many_iteration_budget
+#print axioms item_list_many_iteration_budget
+#check statement_list_many_iteration_budget
+#print axioms statement_list_many_iteration_budget
+end Solidity.Frontend.StatementGrammarH28

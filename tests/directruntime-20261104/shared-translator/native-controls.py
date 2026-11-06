@@ -17,14 +17,14 @@ assert subprocess.check_output(['git','-C',str(source),'rev-parse','HEAD'],text=
 assert not subprocess.check_output(['git','-C',str(source),'status','--porcelain'],text=True)
 requests=[];expected=[];anchors=[]
 for fixtureName,observationsName,modal in [('ComposedReaders.ast.json','direct-result-observations.json',False),('ModalityControls.ast.json','modality-observations.json',True)]:
- fixture=owned/fixtureName;ast=json.loads(fixture.read_text())['ast'];contract=next(n for n in ast['nodes'] if n.get('nodeType')=='ContractDefinition')
+ fixture=owned/'artifacts/h68-bulk'/fixtureName;ast=json.loads(fixture.read_text())['ast'];contract=next(n for n in ast['nodes'] if n.get('nodeType')=='ContractDefinition')
  observations=json.loads((owned/observationsName).read_text())
  for observation in observations:
   row=observation['checker'] if modal else observation
   requests.append(json.dumps({'contract':contract,'function':row['function'],'sourceId':row['sourceId']},separators=(',',':')))
   expected.append(row);anchors.append({'fixture':fixtureName,'fixtureSha256':sha(fixture),'function':row['function'],'sourceId':row['sourceId']})
 assert len(expected)==18
-unknown=json.loads((owned/'ModalityControls.ast.json').read_text())['ast']['nodes']
+unknown=json.loads((owned/'artifacts/h68-bulk/ModalityControls.ast.json').read_text())['ast']['nodes']
 unknown=next(n for n in unknown if n.get('nodeType')=='ContractDefinition');unknown['nodeType']='UnknownCompilerNode'
 requests.extend(['{broken',json.dumps({'contract':unknown})])
 run=out/'empty-runtime-cwd';run.mkdir(exist_ok=True)
