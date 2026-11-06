@@ -8,7 +8,7 @@ namespace Solidity.Lowering.V07.EnumSignedWord
 open WordCasts (signed)
 
 theorem allowed (E : Source.Env) (d : Source.DeclName) :
-    (Source.STy.enum d).explicit E.isBase (.int signed) = true := rfl
+    (Source.STy.enum d).explicit E.isBase E.mapFree (.int signed) = true := rfl
 
 theorem source_value {D : Source.Layout} (d : Source.DeclName) (i : Fin (D.enumSize d)) :
     Source.convExplicitVal (.int signed) (.enum i : Source.Val D (.enum d)) =

@@ -20,7 +20,7 @@ def diamondResidual := initialPackedComplement diamondRegistry diamondTempRegist
 def diamondState : Source.EMState diamondEnv [] :=
   ⟨.nil,⟨⟨⟨fun a => if a = account then
     {Source.Account.empty (D := diamondEnv.layout) (diamondEnv.lay account) with storage := diamondInitialStore}
-    else Source.Account.empty (D := diamondEnv.layout) (diamondEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+    else Source.Account.empty (D := diamondEnv.layout) (diamondEnv.lay a)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem diamond_initial_MemOK : Source.MemOK diamondEnv diamondState.2.heap.ty diamondState :=
   ⟨⟨⟨Source.HeapOK.empty,Source.HeapTy.Le.refl _⟩,trivial⟩,Source.HeapShaped.empty,Source.HeapInner.empty⟩

@@ -126,8 +126,8 @@ theorem ordered_boundaries (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes)
 /-- Preserve every existing populated numeric/cell/heap observation, with whole
 world preservation above covering other fields too. No prior field is removed. -/
 theorem complete_populated_vector (pipeline : Roadmap.Pipeline) (bytes : Roadmap.Bytes) :
-    ((ended pipeline bytes).ex.world.accounts sender).balance.val = 93 ∧
-    ((ended pipeline bytes).ex.world.accounts self).balance.val = 7 ∧
+    ((ended pipeline bytes).ex.world.accounts sender).balance = 93 ∧
+    ((ended pipeline bytes).ex.world.accounts self).balance = 7 ∧
     ((ended pipeline bytes).ex.world.accounts self).code = some 0 ∧
     ((ended pipeline bytes).ex.world.accounts self).nonce = 1 ∧
     ((ended pipeline bytes).ex.world.accounts self).storage.read saved = some (.bool true) ∧

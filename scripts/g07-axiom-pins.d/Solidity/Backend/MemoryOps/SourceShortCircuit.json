@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceShortCircuit.lean:Solidity.Backend.MemoryOps.source_and_enter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceShortCircuit.lean:Solidity.Backend.MemoryOps.source_and_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceShortCircuit.lean:Solidity.Backend.MemoryOps.source_and_skip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceShortCircuit.lean:Solidity.Backend.MemoryOps.word_and_enter": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceShortCircuit.lean:Solidity.Backend.MemoryOps.word_and_skip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

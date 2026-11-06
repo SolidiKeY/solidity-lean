@@ -36,7 +36,7 @@ def initOK (E : Env) (d : Decl) : Bool :=
   | Option.none => true
   | Option.some e =>
     match d.varTy E with
-    | Option.some τ => (inferTys (Ctx.forInit E d.scope) e).any (·.implicit (Ctx.forInit E d.scope).isBase τ)
+    | Option.some τ => (inferTys (Ctx.forInit E d.scope) e).any (·.implicit (Ctx.forInit E d.scope).isBase (Ctx.forInit E d.scope).mapFree τ)
     | Option.none => false
 
 /-- The body check: the frame elaborates, its names are distinct, and its
@@ -64,7 +64,7 @@ def wellFormedB (r : Resolution) : Bool :=
 
 theorem initOK_iff {E : Env} {d : Decl} : initOK E d = true ↔ ∀ e, d.init? = Option.some e →
     ∃ τ σ, d.varTy E = Option.some τ ∧ HasType (Ctx.forInit E d.scope) e σ ∧
-      σ.implicit (Ctx.forInit E d.scope).isBase τ = true := by
+      σ.implicit (Ctx.forInit E d.scope).isBase (Ctx.forInit E d.scope).mapFree τ = true := by
   unfold initOK
   cases hi : d.init? with
   | none => simp only [true_iff]; intro e h; cases h

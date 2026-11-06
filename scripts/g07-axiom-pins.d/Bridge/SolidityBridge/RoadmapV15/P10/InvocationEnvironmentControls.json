@@ -1,0 +1,37 @@
+{
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.address_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.caller_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.callvalue_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.complete_ordered_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.distinct_identities": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.legal_capacity": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/RoadmapV15/P10/InvocationEnvironmentControls.lean:SolidityBridge.RoadmapV15.P10.InvocationEnvironmentControls.resource_order": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/AbiEntry/DispatchRefusal.lean:Solidity.Backend.AbiEntry.DispatchRefusal.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusal.lean:Solidity.Backend.AbiEntry.DispatchRefusal.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusal.lean:Solidity.Backend.AbiEntry.DispatchRefusal.row_classification": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/DispatchRefusal.lean:Solidity.Backend.AbiEntry.DispatchRefusal.source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

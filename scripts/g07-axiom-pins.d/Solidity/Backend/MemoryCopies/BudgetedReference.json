@@ -1,9 +1,4 @@
 {
- "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgetedReference": [
-  "Classical.choice",
-  "Quot.sound",
-  "propext"
- ],
  "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgeted_reference_correct": [
   "Classical.choice",
   "Quot.sound",
@@ -15,6 +10,11 @@
   "propext"
  ],
  "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgeted_reference_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryCopies/BudgetedReference.lean:Solidity.Backend.MemoryCopies.budgetedReference": [
   "Classical.choice",
   "Quot.sound",
   "propext"

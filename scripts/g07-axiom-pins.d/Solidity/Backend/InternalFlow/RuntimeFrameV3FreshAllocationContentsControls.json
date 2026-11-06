@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3FreshAllocationContentsControls.lean:Solidity.Backend.InternalFlow.RuntimeFrame.FreshAllocationContents.Controls.prefixes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -120,7 +120,7 @@ edit to a low module invalidates every other agent's checks.
   Nobody edits `Syntax`, `Semantics` or `Rules` while they run.
 - **Separate checkouts:** a `git worktree` per lane
   (`git worktree add ../solidity-lean-<lane> -b <lane>`). Lake's artifact
-  cache (`AGENTS.md`, "Copies and branches") gives it every module master
+  cache ([contributing.md](../../../docs/contributing.md#worktrees-and-memory)) gives it every module master
   already built, so only its own edits rebuild, and master rebuilds nothing
   after the merge. The MCP server starts one Lean server per project root
   when given absolute paths into the worktree (pass `lean_project_path`).
@@ -145,10 +145,13 @@ edit to a low module invalidates every other agent's checks.
 Run the long ones with `run_in_background`, then `grep -n "error"` the log.
 Do not read a build log back in full.
 
-Checking a single file outside a target — `lake env lean <file>` — needs
-`--tstack=131072`. The lakefile sets it per `lean_lib`, so a bare `lake env
-lean` aborts the process on "deep recursion" rather than reporting an error,
-and the failure looks nothing like the missing flag.
+MCP diagnostics come first. When a single file must be checked outside the
+server, use `scripts/coord-tools/gate.sh per-file FILE`: it runs
+`lake lean FILE -- --tstack=131072`, which builds the file's imports and
+finds modules fetched from the Lake cache. The flag matters: the lakefile
+sets it per `lean_lib`, so a bare `lean` run aborts on "deep recursion"
+rather than reporting an error. `lake env lean` cannot see cache-fetched
+modules unless `scripts/ci/restore-lake-artifacts.py` ran first.
 
 ## Before you call it done
 

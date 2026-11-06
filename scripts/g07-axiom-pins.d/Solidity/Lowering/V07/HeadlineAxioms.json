@@ -1,0 +1,1004 @@
+{
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.branch_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.prefix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.ConditionalAssignments.untouched": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.LocationGraphCompleteness.fields_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.LocationGraphCompleteness.producer_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.related_memory_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.related_reference_assignment_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.related_storage_capture": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.mod_word": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Addition.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.mod_word": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedArithmeticControls.Multiplication.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.add_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.source_add_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowAddition.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.source_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Addition.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.source_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Multiplication.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.narrow_canonical": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.narrow_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.source_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.source_locals": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowArithmeticControls.Subtraction.target_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowing.wrap_of_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowing.wrap_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.mul_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowMultiplication.source_mul_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.source_sub_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedNarrowSubtraction.sub_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.admissible": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.embedding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.source_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCastControls.wrapping": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.allowed": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.assigned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.source_local_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.source_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.word_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWidthCasts.wrap_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.add_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.source_add_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordAddition.unsigned_add_wrap": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.mul_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.source_mul_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordMultiplication.unsigned_mul_wrap": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.source_sub_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.sub_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.unsigned_sub_wrap": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.wrap_of_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.SignedWordSubtraction.wrap_word": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.add_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.source_add_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedAddition.word_add_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.admissible": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.source_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCastControls.value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.allowed": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.assigned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.source_local_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.source_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedCasts.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.assign_read_operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.locals_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.mul_value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.source_assign_read_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.source_from_pair": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.source_locals_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.source_mul_unchecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedMultiplication.word_mul_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.admissible": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.embedding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.source_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.source_value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.target_assignment": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCastControls.value": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.allowed": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.assigned_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.assignment_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.assignment_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.source_local_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.source_of_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.value_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.UnsignedWidthCasts.word_range": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assigned_to_int_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assigned_to_int_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assigned_to_uint_extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assigned_to_uint_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assignment_to_int_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.assignment_to_uint_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.signed_wrap": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.source_to_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.source_to_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.to_int_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.to_int_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.to_uint_eval": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WordCasts.to_uint_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WrappedMultiplicationPair.extension": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WrappedMultiplicationPair.operand_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WrappedMultiplicationPair.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/HeadlineAxioms.lean:Solidity.Lowering.V07.WrappedMultiplicationPair.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

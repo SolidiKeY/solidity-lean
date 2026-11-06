@@ -66,7 +66,7 @@ def wrapRes (T : String) (x : Syn .expr) :
     match hl : d.underlying? with
     | Option.some el =>
       (tysOf Γ (infer Γ x)).flatMap fun p =>
-        if hi : p.1.implicit Γ.isBase (el.ty .memory) = true then
+        if hi : p.1.implicit Γ.isBase Γ.mapFree (el.ty .memory) = true then
           [⟨.udvt ⟨d.scope, d.name⟩, .wrap hr hl ⟨p.2⟩ hi⟩]
         else []
     | Option.none => []
