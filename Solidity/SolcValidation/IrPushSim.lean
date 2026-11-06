@@ -48,16 +48,13 @@ theorem copy_call {F G : List FnSig} (E : FunEnv F) (env : FunEnv G) {nm r : Str
     run_pure, assignAll, Vals.set_there, Vals.set_here, ite_self, Vals.drop_cons, Vals.drop_nil, toFn_single]
 
 /-- `convert_t_uint256_to_t_uint256(x) = cleanup(identity(cleanup(x)))` returns `x`. -/
-theorem convert_call (k : Nat) {L : List String} {n : String} (mv : Mem L n) (vs : Vals L) (s : σ) :
-    evalExpr M ctx (k + 40) (.group [] .nil pushE1)
-      (.call (s := ⟨"convert_t_uint256_to_t_uint256", ["value"], ["converted"]⟩)
-        (.there (.there (.there (.there (.there (.there (.there (.there (.there .here))))))))) (.cons (.var n mv) .nil))
-      vs s = .ok (s, fun _ => vs.get mv) := by
+theorem convert_call (k : Nat) {F : List FnSig} (E : FunEnv F)
+    (m : Mem F ⟨"convert_t_uint256_to_t_uint256", ["value"], ["converted"]⟩)
+    (hE : E.lookup m = ⟨_, pushEnv, pushConvert⟩) {L : List String} {n : String} (mv : Mem L n) (vs : Vals L) (s : σ) :
+    evalExpr M ctx (k + 40) E (.call m (.cons (.var n mv) .nil)) vs s = .ok (s, fun _ => vs.get mv) := by
   simp only [evalExpr.eq_5, evalArgs.eq_3, evalArgs.eq_2, evalExpr.eq_3, run_ok_bind, run_pure, Vals.ofFn, consFn_zero,
     Vals.zeros, Vals.append_cons', Vals.append_nil']
-  have hl : (FunEnv.group [] .nil pushE1).lookup (s := ⟨"convert_t_uint256_to_t_uint256", ["value"], ["converted"]⟩)
-      (.there (.there (.there (.there (.there (.there (.there (.there (.there .here))))))))) = ⟨_, pushEnv, pushConvert⟩ := rfl
-  rw [hl, pushConvert, block_empty, items_last M ctx (k + 36),
+  rw [hE, pushConvert, block_empty, items_last M ctx (k + 36),
     assign_of M ctx (k + 36) _ _ _ _ _ _
       (copy_call M ctx _ pushEnv _ rfl _ _ _ _ 15
         (copy_call M ctx _ pushEnv _ rfl _ _ _ _ 8
@@ -131,6 +128,43 @@ theorem slice_zero (k : Nat) (old v : Word) (s : σ) :
         (op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (var_gen M ctx _ _ _ _)) (k + 44))]
   simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there, and_not_max, or_zero_and_max,
     run_ok_map, Vals.drop_cons, Vals.drop_nil]
+
+theorem consFn_const (a b : Word) : consFn a (fun _ : Fin 1 => b) = word2 a b := by
+  funext i
+  match i with
+  | ⟨0, _⟩ => rfl
+  | ⟨1, _⟩ => rfl
+
+theorem prepare_body (k : Nat) (v : Word) (s : σ) :
+    evalBlock M ctx (k + 4) pushEnv pushPrepareStore (.cons v (.cons 0 .nil)) s = .ok (s, .cons v (.cons v .nil), .normal) := by
+  simp only [pushPrepareStore, evalBlock, evalItems, evalStmt, evalExpr, Vals.get_here, run_ok_bind,
+    run_pure, assignAll, Vals.set_there, Vals.set_here, ite_self]
+
+/-- `update_storage_value_t_uint256_to_t_uint256(slot, 0, v)`: `sload(slot)`, then `sstore(slot, v)`. -/
+theorem updateStorage_body (k : Nat) (sl v : Word) (s : σ) :
+    evalBlock M ctx (k + 120) pushEnv pushUpdateStorage (.cons sl (.cons 0 (.cons v .nil))) s =
+      M.run .«sload» (fun _ => sl) s >>= fun r =>
+        (fun r' => (r'.1, .cons sl (.cons 0 (.cons v .nil)), .normal)) <$> M.run .«sstore» (word2 sl v) r.1 := by
+  have hp : (FunEnv.group [] Bodies.nil pushEnv).lookup (s := ⟨"prepare_store_t_uint256", ["value"], ["ret"]⟩)
+      (.there (.there (.there (.there (.there (.there (.there (.there (.there (.there .here)))))))))) =
+      ⟨_, pushEnv, pushPrepareStore⟩ := rfl
+  have hs : (FunEnv.group [] Bodies.nil pushEnv).lookup (s := ⟨"update_byte_slice_dynamic32", ["value", "shiftBytes", "toInsert"], ["result"]⟩)
+      (.there (.there (.there (.there (.there (.there (.there .here))))))) = ⟨_, pushEnv, pushUpdateSlice⟩ := rfl
+  rw [pushUpdateStorage, block_empty, items_let1 M ctx (k + 117) _ _ _ _ _ _ (convert_call M ctx (k + 77) _ _ rfl _ _ _),
+    items_last M ctx (k + 116)]
+  simp only [evalStmt, evalExpr, evalArgs, evalOp, run_ok_bind, run_pure, Vals.get_here, Vals.get_there,
+    Vals.ofFn, Vals.zeros, Vals.append_cons', Vals.append_nil', consFn_one]
+  rw [hp, hs]
+  rw [prepare_body M ctx (k + 104)]
+  simp only [run_ok_bind, Vals.drop_cons, Vals.drop_nil, toFn_single]
+  rcases M.run .«sload» (fun _ => sl) s with err | ⟨s1, w⟩
+  · simp only [run_error_bind, run_error_map]
+  · simp only [run_ok_bind, consFn_zero, consFn_succ]
+    rw [slice_zero M ctx (k + 52)]
+    simp only [run_ok_bind, Vals.drop_cons, Vals.drop_nil, toFn_single, consFn_const]
+    rcases M.run .«sstore» (word2 sl v) s1 with err | ⟨s2, w2⟩
+    · simp only [run_error_bind, run_error_map]
+    · simp only [run_ok_bind, run_ok_map, Vals.drop_cons, Vals.drop_nil]
 
 end
 
