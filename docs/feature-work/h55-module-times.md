@@ -214,3 +214,14 @@ acceptance. A process can still escape the group; kernel-enforced dedicated
 containment and independent acceptance remain unimplemented. This change does
 not establish timeout cleanup for escaped descendants and does not authorize a
 Lean measurement.
+
+## H70 source and tool identity snapshots
+
+`provenance.py` records a supplied exact clean Git HEAD and tree plus the
+selected tracked source and tool SHA-256. Synthetic temporary-repository
+controls reject wrong HEAD, dirty source and path traversal and detect changed
+tool bytes. It is an identity snapshot, not an authenticated measurement: it
+does not pin ignored files, imported objects, caches, environment, VM identity,
+file stability during execution or an approved tool hash, and it is not wired
+to the runner. The full 21-method synthetic suite passed. Independent finder
+and skeptic reviews, containment and production acceptance remain pending.
