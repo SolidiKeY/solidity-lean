@@ -2,3 +2,4 @@
 | `SolcValidation/IrCensus.lean` | Function definitions and operation uses per object, read off the parsed tree. |
 | `SolcValidation/IrEval.lean`, `SolcValidation/IrEvalFuel.lean` | Fuelled interpreter of the parsed IR over a consumer-supplied EVM `Machine`: object operations through the checked data table, immutables and links; adapter laws and fuel stability. |
 | `SolcValidation/IrHelpers.lean`, `SolcValidation/IrHelperSim.lean`, `SolcValidation/IrHelperSource.lean` | Real solc checked-arithmetic helpers as certified terms; their simulation on any machine and match to the source operators `BinOp.evalNum` (T02 helper level). |
+| `SolcValidation/IrHelperSteps.lean` | Statement-level steps of the helpers (cleanup and panic calls, pure operations, `if` with a panic) composed by `rw`; kernel proofs of `checked_sub_t_uint256`/`checked_div_t_int256` and call-site forms. |
