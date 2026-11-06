@@ -1,0 +1,8 @@
+{
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.credit_success_fits": [
+  "propext"
+ ],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_fits": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.debit_success_without_range": [],
+ "Solidity/Source/MonetaryLaws.lean:Solidity.Source.Monetary.wide_zero_debit": []
+}

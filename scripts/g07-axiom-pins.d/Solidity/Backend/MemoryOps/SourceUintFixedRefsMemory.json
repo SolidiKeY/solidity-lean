@@ -1,0 +1,62 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.child_at": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_nested_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_nested_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_nested_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.eval_parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.indexLoc_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.length_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.observe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.parent_ne_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedRefsMemory.lean:Solidity.Backend.MemoryOps.SourceUintFixedRefsAt.parent_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

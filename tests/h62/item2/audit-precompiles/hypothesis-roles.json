@@ -1,0 +1,126 @@
+{
+  "authority": "Source-level manual classification for frozen BASE. No inhabitance or kernel elaboration is inferred from annotations.",
+  "proof_binders": {
+    "Solidity.Precompiles.words_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.sha256Gas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.ripemd160Gas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.identityGas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Modexp.modexp_length": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Modexp.gas_ge": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Blake2f.blake2f_length": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Bls12381.msmGas_succ": {
+      "hlen": "configuration",
+      "htab": "configuration"
+    },
+    "Solidity.Precompiles.Bls12381.msmGas_mono": {
+      "hlen": "configuration",
+      "htab": "configuration",
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Bls12381.g1MsmGas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Bls12381.g2MsmGas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Bls12381.pairingGas_mono": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.PointEval.bind_check_eq_some": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.PointEval.decode_length": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.PointEval.pointEval_length": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.PointEval.pointEval_result": {
+      "h": "per-input"
+    },
+    "Solidity.Precompiles.Osaka.gas_mono": {
+      "hp": "configuration",
+      "h": "per-input"
+    },
+    "Solidity.Stipend.not_fits_cons": {
+      "h": "per-input"
+    },
+    "Solidity.Stipend.pow_not_fits": {
+      "h": "configuration",
+      "hq": "configuration"
+    },
+    "SolidityBridge.PrecompileAgreement.ofNat_nat": {
+      "h": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.subtract_nat": {
+      "h": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths": {
+      "member": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_zero_header": {
+      "zero": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_price": {
+      "header": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_gas": {
+      "header": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_valid": {
+      "enough": "per-input",
+      "size": "per-input",
+      "flag": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_insufficient": {
+      "short": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_invalid_flag": {
+      "size": "per-input",
+      "flag": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_valid_one": {
+      "enough": "per-input",
+      "size": "per-input",
+      "flag": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_invalid_size": {
+      "size": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.blake_zero_gas": {
+      "zero": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_success": {
+      "enough": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_failure": {
+      "short": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_charged": {
+      "enough": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_exact": {
+      "fits": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_one_short": {
+      "fits": "per-input"
+    },
+    "SolidityBridge.PrecompileAgreement.identity_unaffordable": {
+      "huge": "per-input"
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "status": "blocked_pending_owner_relay_not_permission",
+  "producer_branch": "codex/solidity-h62-6-20261106/migrate-frontend",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "relay": "H70 confirms host-only relay. Coordinator retrieves these saved exact requests; no worker relay installation or external messages.",
+  "requests": [
+    {
+      "id": "R-SOURCE-CTOR",
+      "kind": "OWNER_MIGRATION_DEPENDENCY",
+      "owner": "solidity-h62-6-20261106/migrate-source",
+      "exact_files": [
+        "Solidity/Source/Ctor.lean"
+      ],
+      "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "source_sha256": "2ccaac06787dc1aeab8fe923f6a38bb4a9657b868becafb12732358ca07cfe13",
+      "frozen_declarations": [
+        "Solidity.Source.Syn.nodes_eq",
+        "Solidity.Source.Syn.excl_ctor"
+      ],
+      "failure": "v4.35.0: line641 deterministic isDefEq timeout at existing200000 heartbeats; line715 dependent elimination on reflected Boolean conditions.",
+      "evidence": "/workspace/h62-migrate-frontend-evidence/new-clean-serial/0006-Solidity.Source.Ctor.log",
+      "action": "Supply owner-authored reviewed statement/type/semantic/budget-preserving migration overlay with exact base/head/path/hash. Do not raise heartbeats or weaken premises; this lane will not edit the file."
+    },
+    {
+      "id": "R-EXACT-FILES",
+      "kind": "PENDING_PRODUCER_COORDINATION_NOT_PERMISSION",
+      "owner": "migration root/gate and live directory producer via coordinator",
+      "exact_files": [
+        "Solidity/Frontend/Checked/Token.lean",
+        "Solidity/Frontend/Checked/Parser.lean"
+      ],
+      "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+      "action": "Relay exact-file producer coordination before any original-file edit, or coordinator/producer applies the reviewed candidates through its authorized lane. Originals remain byte-identical here.",
+      "candidate_proposals": [
+        "/workspace/h62-migrate-frontend-evidence/token-overlay-v5/proposal.json",
+        "/workspace/h62-migrate-frontend-evidence/parser-overlay-v3/proposal.json"
+      ],
+      "patches": [
+        {
+          "path": "/workspace/h62-migrate-frontend-evidence/token-overlay-v5/token-v435.patch",
+          "sha256": "4a7a7c2f35cbbf4b6a89366cb91c47b95bf8c66f2c828da9ed3f31083d215287"
+        },
+        {
+          "path": "/workspace/h62-migrate-frontend-evidence/parser-overlay-v3/parser-v435.patch",
+          "sha256": "9e2e03211dc9474aac60a37f60b0d9c539da8e7c2d69d5727f2c6cf5fdb1e992"
+        }
+      ]
+    },
+    {
+      "id": "R-ROOT-AXIOMS",
+      "kind": "FROZEN_AXIOM_ALLOWLIST_REVIEW",
+      "owner": "migrate-root-gate",
+      "exact_files": [
+        "Solidity/Frontend/Checked/Token.lean",
+        "Solidity/Frontend/Checked/Parser.lean"
+      ],
+      "evidence": [
+        "/workspace/h62-migrate-frontend-evidence/token-overlay-v5/proposal.json",
+        "/workspace/h62-migrate-frontend-evidence/parser-overlay-v3/proposal.json"
+      ],
+      "observation": "Unchanged ascii and66 selected Parser declarations gain only Classical.choice/Quot.sound/propext through v4.35 Std. New universal byte control also uses these standard axioms. No new axiom declarations or axioms outside baseline Frontend union.",
+      "action": "Check against existing per-declaration/frozen allowlists. No axiom-pin or premise/exclusion relaxation is authorized. Matching global unions alone is not per-declaration equivalence."
+    },
+    {
+      "id": "R-SYNTAX-STRING",
+      "kind": "SOURCE_LEVEL_API_RECONNAISSANCE_NOT_COMPILER_VERDICT",
+      "owner": "solidity-h62-6-20261106/migrate-syntax",
+      "exact_files": [
+        "Solidity/Syntax/Raw.lean",
+        "Solidity/Syntax/Grammar.lean",
+        "Solidity/Syntax/Elab/Values.lean",
+        "Solidity/Syntax/Elab/Lower.lean",
+        "Solidity/Syntax/LoopWarnings.lean"
+      ],
+      "observation": "Source signatures show String.drop/take now return Slice; old String.trim/trimRight/dropRight public API replaced by trimAscii/trimAsciiEnd/dropEnd. Direct Frontend Import/SolcJson consumers also require later attention.",
+      "action": "Coordinate owner migration as reached; these candidates were not reached by the failed full new build and are not claimed compiled failures."
+    },
+    {
+      "id": "R-ROOT-RESOURCE",
+      "kind": "PRELIMINARY_FIXTURE_RSS_REGRESSION_ESCALATION",
+      "owner": "migrate-root-gate",
+      "exact_files": [
+        "Solidity/Frontend/Checked/Token.lean",
+        "Solidity/Frontend/Checked/Parser.lean"
+      ],
+      "evidence": "/workspace/h62-migrate-frontend-evidence/parser-overlay-v3/commands.json",
+      "observation": {
+        "old_original_controls_wall_seconds": 8.266117,
+        "old_original_controls_sampled_rss_bytes": 843948032,
+        "new_candidate_controls_wall_seconds": 6.231692,
+        "new_candidate_controls_sampled_rss_bytes": 1884155904
+      },
+      "limit": "Isolated fixture observation, not a full clean directory comparison. Full after timing is unavailable; comparison.json correctly has null deltas.",
+      "action": "Investigate observed memory increase at root gate; keep supplied bounds and full greater-than-ten-percent wall-stop policy."
+    },
+    {
+      "id": "R-ROOT-DOC-PATH",
+      "kind": "BASELINE_OUTSIDE_SCOPE_REQUIRED_GATE",
+      "owner": "migrate-root-gate and document owner",
+      "exact_files": [
+        "docs/feature-work/after-roadmap-va1.md"
+      ],
+      "evidence": "/workspace/h62-migrate-frontend-evidence/static-gates/doc-paths-baseline.json",
+      "action": "Reconcile unchanged baseline optional-Mathlib reference; this lane neither edits that document nor adds core dependencies."
+    }
+  ],
+  "incoming_tickets": {
+    "H70_audit_label_execution": {
+      "head": "a107fd353aba492a3144da90cabcbde20032ca0c",
+      "ticket_sha256": "4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1",
+      "coordinator_receipt": "/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T142920Z/solidity-h62-2-20261106__audit-label-execution/66615193dea4-owner-tickets.json",
+      "full_ticket_on_this_VM": false,
+      "response": "Token candidate only; no consumer witness/signature/full acceptance claim."
+    },
+    "H70_generic_source_frontend": {
+      "head": "b450d5c88e85cc1c01865718e9fb30e586b27bea",
+      "response": "R-TOKEN receives unapplied Token candidate plus subsequent isolated Parser repair; both remain pending full gate/axiom/coordination review. No generic statement/numeric refactor work duplicated."
+    },
+    "H70_p16_generator": {
+      "head": "c0f52b16a359237329373e94a4633f45e5d21d01",
+      "handoff_sha256": "06a68fbeeb6b5550e173a331b1007fd33479240cab201f6c289870ca4e687781",
+      "source": "Coordinator-delivered handoff text, not a local replay",
+      "reported_failures": [
+        "Solidity.Hash.CollisionBound:407",
+        "Solidity.Language.FixedPoint:152",
+        "Solidity.Frontend.Checked.Token:38"
+      ],
+      "response": "Token candidate and exact source/axiom/type/control hashes available in this handoff; no original-file permission or full P16 acceptance claimed. Other repairs remain with their migration owners."
+    },
+    "H70_audit_label_execution_latest": {
+      "head": "d89b309029f9ad57f17711432aeef4990005994b",
+      "ticket_sha256": "5f63fe1a9f15bdd857e4bd601f59a36886cc06477474bcbf80bedf6ce2cc6c3d",
+      "source": "Coordinator-delivered JSON, not local gate replay",
+      "reported_blockers": [
+        "Solidity.Syntax.Raw",
+        "Solidity.Hash.CollisionBound",
+        "Solidity.Backend.Scalar.Slice",
+        "Solidity.Source.Ctor",
+        "Solidity.Yul.ReservedNames",
+        "Solidity.Frontend.Checked.Token",
+        "Bridge common4.35 dependency overlay"
+      ],
+      "response": "B06 maps to our unapplied Token candidate; B04 corroborates our measured Source.Ctor blocker. No witness/totality/consumer acceptance claim. All original files stay read-only pending coordination."
+    }
+  },
+  "questions": []
+}

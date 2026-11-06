@@ -5,10 +5,10 @@ feature extraction, full-profile admission or operational adequacy. -/
 namespace Solidity.Frontend.Admission.TypedObservationPolicy
 open Source
 
-theorem builtin_allowed : ∀ (B : DeclName → DeclName → Bool) (b : Builtin)
-    (ts : List STy) (t : STy), b.callTy B ts = some t →
+theorem builtin_allowed : ∀ (B : DeclName → DeclName → Bool) (M : DeclName → Bool) (b : Builtin)
+    (ts : List STy) (t : STy), b.callTy B M ts = some t →
       (ObservationSite.builtin b).allowed = true := by
-  intro B b ts t h
+  intro B M b ts t h
   cases b <;> first | decide | (simp only [Solidity.Source.Builtin.callTy] at h; cases h)
 
 theorem magic_allowed : ∀ (b : Builtin) (m : String) (t : STy),

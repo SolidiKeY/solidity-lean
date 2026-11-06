@@ -1,0 +1,15 @@
+{
+ "Solidity/Backend/AbiEntry/RawTailGuard.lean:Solidity.Backend.AbiEntry.RawTailGuard.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuard.lean:Solidity.Backend.AbiEntry.RawTailGuard.raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/RawTailGuard.lean:Solidity.Backend.AbiEntry.RawTailGuard.reference": [
+  "propext"
+ ]
+}
