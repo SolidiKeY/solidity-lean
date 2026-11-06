@@ -1,0 +1,20 @@
+-- G08 (`docs/feature-work/frontend-parse.md`): the checked lexer's headline
+-- theorems use only the standard axioms.
+run_cmd do
+  let headlines : List Name := [
+    ``Solidity.Frontend.Checked.lex_sound,
+    ``Solidity.Frontend.Checked.lex_reprint,
+    ``Solidity.Frontend.Checked.lex_locate,
+    ``Solidity.Frontend.Checked.lex_error_pos,
+    ``Solidity.Frontend.Checked.lexRules_classified,
+    ``Solidity.Frontend.Checked.lexRules_cover,
+    ``Solidity.Frontend.Checked.classify_reserved]
+  let allowed : List Name := [``propext, ``Classical.choice, ``Quot.sound]
+  for name in headlines do
+    let _ ← getConstInfo name
+    let axioms ← collectAxioms name
+    let extra := axioms.filter (!allowed.contains ·)
+    unless extra.isEmpty do
+      throwError "trust: {name} depends on unexpected axioms {extra}"
+  logInfo m!"trust: {headlines.length} checked-lexer theorems use only the standard axioms"
+
