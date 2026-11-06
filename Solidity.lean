@@ -4040,8 +4040,6 @@ import Solidity.Source.CalldataCopy
 import Solidity.Source.CalldataCopyAccess
 import Solidity.Source.CalldataExamples
 import Solidity.Source.CalldataLayout
-import Solidity.Source.CalldataExamples
-import Solidity.Source.CalldataLayout
 import Solidity.Source.CalldataNestedCopyControls
 import Solidity.Source.CalldataStaticCopyControls
 import Solidity.Source.Const
