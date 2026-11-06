@@ -584,3 +584,32 @@ are mapped: three joint bundles and two data-only failure-iff inputs. The
 conservative registry now maps 49 of 3281 rows, with 38 joint bundles, eleven
 data inhabitants and 3232 unmapped rows. Original Source/physical/compiler
 obligations and broad validation remain unfinished.
+
+## New-head bounded checkpoint and exact documentation baselines
+
+At source head 3eb4734bdcc4da2f3b0b5cbab9368d3edf795229, C210's affected
+build exited 124 after 600.36 seconds under the existing 600-second limit.
+Peak sampled aggregate RSS was 1593192448 bytes, with no resource stop. The
+prerequisite guard blocked the library build. Trust, orphan, layer, root and
+fragment checks passed; this is not checkpoint acceptance. Raw documentation
+checking still fails with five missing and 127 ambiguous references; the
+axiom inventory reports zero errors and 4611 unrecorded changes. Pins were
+not rewritten, and all prior failed receipts remain separate.
+
+compare_doc_trees.py runs the same current strict checker against exact
+committed current, published and frozen trees. Only checker working-directory
+selection is adapted; exclusions and strict logic remain unchanged. Snapshot
+tracked paths are checked, with no untracked cache or rescue files imported.
+The current and published-master trees have identical five-missing/127-ambiguous
+findings, with zero new findings between them. The frozen tree has zero missing
+and twelve ambiguous references under that same checker; its comparison still
+FAILS with 129 new formatted findings and nine removed findings. The published
+comparison does not replace the frozen requirement or make raw strict PASS.
+
+Five helper tests cover root adaptation, unsafe archives, formatted findings,
+committed-tree isolation and infrastructure failure. An independent skeptic
+found that absent checker completion could masquerade as no new findings.
+The helper now validates recognized strict exit status and the matching final
+summary, retaining raw logs before rejecting infrastructure failures. The fix
+was independently confirmed and all three recorded completions validated.
+No production Lean source changed during this tooling/disposition checkpoint.
