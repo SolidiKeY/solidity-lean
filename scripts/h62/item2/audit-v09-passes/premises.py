@@ -196,6 +196,46 @@ def classify(type_text):
     return "unresolved-type; data-or-premise-not-inferred", None
 
 
+def constraint_form(text):
+    """Lexical refinement of the residual source constraints, not type inference."""
+    if "compileProg" in text:
+        return "compiler-acceptance-equation"
+    if "stackBound" in text or ("1024" in text and "length" in text):
+        return "stack-capacity-bound"
+    if ".lo" in text and ".hi" in text:
+        return "numeric-range-bound"
+    if "≤" in text and ("frame" in text or "lo" in text):
+        return "frame-or-arena-bound"
+    if "TEnv.get" in text or "source.1.get" in text:
+        return "source-or-target-environment-read-equation"
+    if "target.mem" in text:
+        return "target-memory-observation-equation"
+    if "op.accepts" in text or ".mapFree" in text or "Evm.Prog.pushes" in text:
+        return "static-fragment-or-operator-condition"
+    if "op.shortT" in text:
+        return "short-circuit-selection-equation"
+    if "++" in text:
+        return "code-decomposition-equation"
+    if "≠ 0" in text:
+        return "nonzero-operand-condition"
+    if text == "F = G":
+        return "fragment-identity-equation"
+    if ".stack = []" in text:
+        return "initial-stack-observation-equation"
+    if text == "n < W":
+        return "word-range-bound"
+    return "unresolved-source-form"
+
+
+def macro_heads(conclusion):
+    result = []
+    for match in re.finditer(r"type_of%\s*\(*\s*([\w.']+)", masked(conclusion)):
+        result.append({"token": match.group(1), "macro_start_in_return_type": match.start(),
+                       "token_span_in_return_type": list(match.span(1)),
+                       "resolution": "lexical callee token only; namespace, type and owner require resolution"})
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
@@ -225,6 +265,8 @@ def main():
             binder["source_role"] = role
             binder["definition_family_reference"] = ref
             binder["inhabitation"] = "unproved"
+            if role.startswith("other-logical"):
+                binder["source_constraint_form"] = constraint_form(binder["type"])
             binder["source_features"] = {
                 "forall_occurs": "∀" in binder["type"] or "forall " in binder["type"],
                 "arrow_occurs": "→" in binder["type"],
@@ -242,6 +284,7 @@ def main():
             "source_binders": binders, "available_section_variables": context,
             "signature_start": signature_start,
             "return_type": conclusion, "source_roles_present": kinds,
+            "macro_callee_tokens": macro_heads(conclusion),
             "return_type_kind": "type_of-macro; expansion-required" if "type_of%" in conclusion else "source-syntax; elaboration-required",
             "return_type_logical_inputs": "pending source review and Lean; return type retained verbatim (including all forall/arrows)",
             "implicit_inclusion_and_name_resolution": "pending Lean",
@@ -252,13 +295,15 @@ def main():
         "inventory_join": "(path,name,signature_sha256,source_sha256); one row per frozen declaration",
         "boundary": "Source role candidates only. No Prop/data inference, resolved elaborated names, implicit-inclusion, satisfiability or proof claim. No exclusions.",
         "simultaneous_requirement": "Choose one common assignment for all theorem parameters and every premise together, including Lean-included context; individual inhabited binders do not suffice.",
-        "migration_dependency": {"path": "Solidity/Syntax/Raw.lean", "owner": "solidity-h62-6-20261106/migrate-syntax", "routing": "Coordinator H70 accepted relay; wait before elaborated witnesses/controls/gates"},
+        "migration_dependency": {"path": "Solidity/Syntax/Raw.lean", "owner": "solidity-h62-6-20261106/migrate-syntax", "routing": "Coordinator H70 reports relay delivery acceptance; owner agreement/validation not established. Wait before value_success_tail proof imports/controls/gates."},
         "definition_family_references": definitions, "declarations": rows,
         "summary": {"rows": len(rows), "source_binder_groups": len(explicit),
                     "available_section_groups_across_rows": sum(len(r["available_section_variables"]) for r in rows),
                     "rows_without_source_binder_groups": sum(not r["source_binders"] for r in rows),
                     "rows_with_global_certificate_or_law": sum(any(b["source_role"].startswith("global-") for b in r["source_binders"]) for r in rows),
                     "rows_with_per_input_role": sum(any(b["source_role"].startswith("per-input-") for b in r["source_binders"]) for r in rows),
+                    "residual_constraint_forms": dict(sorted(Counter(b["source_constraint_form"] for b in explicit if "source_constraint_form" in b).items())),
+                    "macro_callee_token_count": sum(len(r["macro_callee_tokens"]) for r in rows),
                     "type_of_macro_return_rows": sum("type_of%" in r["return_type"] for r in rows),
                     "leading_forall_return_rows": sum(r["return_type"].startswith(("∀", "forall ")) for r in rows),
                     "source_binder_roles": dict(sorted(Counter(b["source_role"] for b in explicit).items())),

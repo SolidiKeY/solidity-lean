@@ -13,6 +13,21 @@ import premises
 
 
 class PremiseAcceptance(unittest.TestCase):
+    def test_residual_constraint_distinctions(self):
+        self.assertEqual(premises.constraint_form("Memory.compileProg b F P = some left"), "compiler-acceptance-equation")
+        self.assertEqual(premises.constraint_form("b + Memory.frameNeedProg Q ≤ frame"), "frame-or-arena-bound")
+        self.assertEqual(premises.constraint_form("tail.length + 2 ≤ 1024"), "stack-capacity-bound")
+        self.assertEqual(premises.constraint_form("t.lo ≤ x ∧ x ≤ t.hi"), "numeric-range-bound")
+        self.assertEqual(premises.constraint_form("unknown x"), "unresolved-source-form")
+
+    def test_macro_callee_tokens_do_not_claim_resolution(self):
+        heads = premises.macro_heads("let x := 0; type_of% ((Controls.f x))")
+        self.assertEqual([h["token"] for h in heads], ["Controls.f"])
+        self.assertIn("require resolution", heads[0]["resolution"])
+        source = "let x := 0; type_of% ((Controls.f x))"
+        a, b = heads[0]["token_span_in_return_type"]
+        self.assertEqual(source[a:b], "Controls.f")
+
     def test_nested_binders_and_return_type_preserved(self):
         statement = "theorem t {C : Contract} (h : (f (a := x)) = y) : ∀ tail, let m := {x with v := tail}; P m → Q m"
         groups, result = premises.telescope(statement)

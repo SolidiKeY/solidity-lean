@@ -56,8 +56,8 @@ needed yet because no Lean module has been added.
 ## Dependency ticket B-MIGRATION-SYNTAX-RAW
 
 Owner/relay destination: `solidity-h62-6-20261106/migrate-syntax`; V09 area
-producer is an affected consumer. Coordinator H70 confirms the owner accepted
-the ticket relay. relay.sh is host-only and is not a VM installation task.
+producer is an affected consumer. Coordinator H70 reports host-journal relay delivery acceptance.
+Delivery establishes neither owner agreement nor validation. relay.sh is host-only and is not a VM installation task.
 No out-of-scope repair was attempted. Wait for the owner before elaborated
 witnesses, supported-success controls and affected gates.
 
@@ -216,3 +216,29 @@ for logical equality. Quantified allocation laws now keep their law role and
 occurrence tags. Final outcomes are saved in reviews-h70.json. Required Lean
 witness, totality, negative-control, fidelity and full gates remain pending on
 B-MIGRATION-SYNTAX-RAW; there is no new runtime or proof-performance pass.
+
+## H70 requester disposition: residual source constraints
+
+The remaining 91 generic logical/resource groups now have a lexical refinement:
+22 numeric ranges, 19 frame/arena bounds, 11 static fragment/operator conditions,
+9 nonzero conditions, 6 stack-capacity bounds, 6 fragment identities,
+5 short-circuit selections, 4 compiler-acceptance equations, 4 environment reads,
+2 code decompositions, and one each of initial-stack observation, target-memory
+observation and word range. These 13 forms partition all 91 groups; they do not
+prove consistency, feasibility or implicit inclusion.
+
+All 27 macro return rows now retain a lexical callee token, its exact token span
+and the separate macro-start offset in the preserved return type. Namespace/type
+resolution and callee-owner attribution remain pending. In particular a
+compiler-acceptance equation is a premise to witness, not evidence that the
+selected compiler succeeded on a supported program.
+
+Evidence: source-premises-disposition/premises.json. The original census is
+unchanged. All 14 Python acceptance tests pass. Independent finder and skeptic
+reviews confirmed the partition and macro token census. Finder identified an
+ambiguous macro/token offset; separately named macro/token coordinates and a
+substring regression correct it. No Lean was run during this disposition.
+All four original checkpoints remain unfinished. Wait for
+solidity-h62-6-20261106/migrate-syntax on Solidity/Syntax/Raw.lean lines
+597/650/665/682/684 before value_success_tail proof imports. Host relay journals
+establish delivery acceptance only; owner agreement and validation are unproved.
