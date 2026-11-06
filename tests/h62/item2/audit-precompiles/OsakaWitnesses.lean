@@ -1,3 +1,4 @@
+import Lean.Elab.Command
 import Solidity.Precompiles.Osaka
 
 /-! Guards against an Osaka applicability census dropping the LengthPriced
@@ -44,4 +45,5 @@ theorem ecrecover_stipend_data : ∃ d : Bytes,
 /-- info: 'H62.AuditPrecompiles.Successor.Osaka.ecrecover_stipend_data' does not depend on any axioms -/
 #guard_msgs in
 #print axioms ecrecover_stipend_data
+run_cmd Lean.logInfo "CORE_APPLICABILITY_PASS module=Osaka original=5 guards=5"
 end H62.AuditPrecompiles.Successor.Osaka

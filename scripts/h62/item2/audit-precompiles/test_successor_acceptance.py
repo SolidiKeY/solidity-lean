@@ -6,7 +6,7 @@ E=audit.ROOT/'tests/h62/item2/audit-precompiles/successor-evidence'
 class ReceiptTests(unittest.TestCase):
  def setUp(self):
   self.temp=tempfile.TemporaryDirectory(prefix='acceptance-',dir=E);self.e=pathlib.Path(self.temp.name)
-  for stem in ['basic-final','core-final','data-final','type-fidelity-final','identity-final424','bridge-fidelity-final424','stipend-control424','keysort424','imported-bridge-axioms424','bytes-gas-final424','header-short-zero424']:
+  for stem in ['basic-final','core-final','data-final','type-fidelity-final','identity-final424','bridge-fidelity-final424','stipend-control424','keysort424','imported-bridge-axioms424','bytes-gas-final424','header-short-zero424','osaka-ledger-final424','bls-ledger-final424','point-ledger-final424','stipend-ledger424','remaining-fidelity-final424','point-success-final424']:
    for ext in ['.json','.log']:shutil.copyfile(E/(stem+ext),self.e/(stem+ext))
  def tearDown(self):self.temp.cleanup()
  def alter(self,fn):
@@ -14,7 +14,7 @@ class ReceiptTests(unittest.TestCase):
  def rejected(self):
   with self.assertRaises(AssertionError):audit.generate(self.e)
  def test_valid_partial_boundary(self):
-  r=audit.generate(self.e);self.assertEqual(r['counts']['case_accounted'],97);self.assertEqual(r['pending'],41);self.assertFalse(r['owner_compiler_success_supplied'])
+  r=audit.generate(self.e);self.assertEqual(r['counts']['case_accounted'],138);self.assertEqual(r['pending'],0);self.assertFalse(r['owner_compiler_success_supplied'])
  def test_failed_job(self):self.alter(lambda m:m.update(exit=1));self.rejected()
  def test_timeout(self):self.alter(lambda m:m.update(timeout=True));self.rejected()
  def test_resource_stop(self):self.alter(lambda m:m.update(resource_stop='cap'));self.rejected()
@@ -60,4 +60,19 @@ class ReceiptTests(unittest.TestCase):
   with self.assertRaises(FileNotFoundError):audit.generate(self.e)
  def test_stale_header(self):
   p=self.e/'header-short-zero424.json';m=json.loads(p.read_text());src=str(audit.ROOT/'tests/h62/item2/audit-precompiles/BridgeHeaderWitnesses.lean');m['input_sha256'][src]='0'*64;p.write_text(json.dumps(m));self.rejected()
+
+ def test_new_core_receipt_mutations(self):
+  for stem in ['osaka-ledger-final424','bls-ledger-final424','point-ledger-final424','stipend-ledger424','remaining-fidelity-final424','point-success-final424']:
+   p=self.e/(stem+'.json');original=p.read_text()
+   for mutation in ['failed','query','stale','missing']:
+    with self.subTest(stem=stem,mutation=mutation):
+     m=json.loads(original)
+     if mutation=='failed':m['exit']=1
+     if mutation=='query':m['command'].insert(-1,'--version')
+     if mutation=='stale':m['input_sha256'][next(iter(m['input_sha256']))]='0'*64
+     if mutation=='missing':p.unlink()
+     else:p.write_text(json.dumps(m))
+     with self.assertRaises((AssertionError,FileNotFoundError)):audit.generate(self.e)
+     p.write_text(original)
+
 if __name__=='__main__':unittest.main()

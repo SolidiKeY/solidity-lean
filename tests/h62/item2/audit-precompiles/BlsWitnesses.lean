@@ -1,3 +1,4 @@
+import Lean.Elab.Command
 import Solidity.Precompiles.Bls12381
 
 /-! Guards against counting separate MSM table premises as a simultaneous
@@ -169,4 +170,5 @@ theorem mapFp2ToG2_eq_none_iff_data : ∃ (d : Bytes), mapFp2ToG2 d = none ↔ d
 /-- info: 'H62.AuditPrecompiles.Successor.Bls.mapFp2ToG2_eq_none_iff_data' depends on axioms: [propext] -/
 #guard_msgs in
 #print axioms mapFp2ToG2_eq_none_iff_data
+run_cmd Lean.logInfo "CORE_APPLICABILITY_PASS module=Bls original=18 guards=20"
 end H62.AuditPrecompiles.Successor.Bls

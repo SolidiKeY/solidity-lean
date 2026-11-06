@@ -61,12 +61,21 @@ def valid_receipt(e,stem,proof,cwd):
 
 def generate(e):
  c=census();d=ROOT/'tests/h62/item2/audit-precompiles'
- for script in ['generate_identity.py','generate_bridge_fidelity.py','generate_bytes_gas.py','generate_header.py','fidelity.py']:
+ for script in ['generate_identity.py','generate_bridge_fidelity.py','generate_bytes_gas.py','generate_header.py','generate_bls.py','generate_remaining_fidelity.py','fidelity.py']:
   subprocess.run([sys.executable,str(ROOT/'scripts/h62/item2/audit-precompiles'/script),'--check'],check=True,stdout=subprocess.DEVNULL)
  subprocess.run([sys.executable,str(ROOT/'scripts/h62/item2/audit-precompiles/coverage.py'),'--evidence',str(e)],check=True,stdout=subprocess.DEVNULL)
  base=json.loads((e/'statement-coverage.json').read_text());assert len(base['rows'])==138 and base['applicability_checked']==24
  baseline={r['name']:r for r in base['rows'] if r['status']!='pending'};assert len(baseline)==24
  for stem,src in [('basic-final','BasicWitnesses'),('core-final','CoreWitnesses'),('data-final','DataWitnesses'),('type-fidelity-final','TypeFidelity')]:valid_receipt(e,stem,d/(src+'.lean'),ROOT)
+ for stem,src,ns,n,guards in [('osaka-ledger-final424','OsakaWitnesses','Osaka',5,5),('bls-ledger-final424','BlsWitnesses','Bls',18,20),('point-ledger-final424','PointEvalWitnesses','PointEval',5,5),('stipend-ledger424','StipendWitnesses','Stipend',12,12)]:
+  _,log=valid_receipt(e,stem,d/(src+'.lean'),ROOT)
+  assert 'CORE_APPLICABILITY_PASS module='+ns+' original='+str(n)+' guards='+str(guards) in log
+  assert (d/(src+'.lean')).read_text().count('#guard_msgs in')==guards
+ _,successlog=valid_receipt(e,'point-success-final424',d/'PointEvalSuccess.lean',ROOT)
+ assert 'H62.AuditPrecompiles.Successor.PointEvalSuccess.pointEval_result_joint :' in successlog
+ assert (d/'PointEvalSuccess.lean').read_text().count('#guard_msgs in')==11
+ _,remaininglog=valid_receipt(e,'remaining-fidelity-final424',d/'RemainingCoreFidelity.lean',ROOT)
+ assert 'REMAINING_CORE_FULL_TYPE_FIDELITY_PASS total=41' in remaininglog
  identity,il=valid_receipt(e,'identity-final424',d/'BridgeIdentityWitnesses.lean',ROOT/'Bridge')
  bg,bgl=valid_receipt(e,'bytes-gas-final424',d/'BridgeBytesGasWitnesses.lean',ROOT/'Bridge')
  hd,hdl=valid_receipt(e,'header-short-zero424',d/'BridgeHeaderWitnesses.lean',ROOT/'Bridge')
@@ -92,7 +101,7 @@ def generate(e):
   for old in f['declarations']:
    name=old['name'];bs,goal=split_declaration(old);bridge=f['path'].startswith('Bridge/')
    if bridge:assert not source_context((ROOT/f['path']).read_text(),old['line'])
-   row=dict(name=name,file=f['path'],signature_sha256=old['signature_sha256'],full_type_fidelity=bridge or f['path'] in core,joint_witness=False,data_domain_sample=False,closed_fidelity=bridge and not bool(bs),witness=None,target='frozen Lean4.24.0; not migrationv4.35')
+   row=dict(name=name,file=f['path'],signature_sha256=old['signature_sha256'],full_type_fidelity=True,joint_witness=False,data_domain_sample=False,closed_fidelity=bridge and not bool(bs),witness=None,target='frozen Lean4.24.0; not migrationv4.35')
    if name in baseline:
     b=baseline[name];row.update(joint_witness=b['status']=='witness-checked',data_domain_sample=b['status']=='data-input-checked',witness=b['witness'])
    if f['path']=='Bridge/SolidityBridge/PrecompileAgreement/Identity.lean':
@@ -101,15 +110,29 @@ def generate(e):
     short=name.split('.')[-1];kind='joint' if short in ['ofNat_nat','subtract_nat'] else 'data';row.update(joint_witness=kind=='joint',data_domain_sample=kind=='data',witness='H62.AuditPrecompiles.Successor.BytesGas.'+short+'_'+kind)
    if f['path']=='Bridge/SolidityBridge/PrecompileAgreement/Header.lean' or name=='SolidityBridge.PrecompileAgreement.Controls.blake_malformed_lengths':
     short=name.split('.')[-1];kind='joint' if short in ['blake_zero_header','blake_price','blake_gas','blake_valid','blake_insufficient','blake_invalid_flag','blake_valid_one','blake_invalid_size','blake_zero_gas','blake_malformed_lengths'] else 'data';row.update(joint_witness=kind=='joint',data_domain_sample=kind=='data',witness='H62.AuditPrecompiles.Successor.Header.'+short+'_'+kind)
+   short=name.split('.')[-1];kind=wn=None
+   if f['path']=='Solidity/Precompiles/Osaka.lean':
+    kind,wn={'fixed_precompileGas':('closed','fixed_gas_fidelity'),'run_eq_none_iff':('data','run_failure_data'),'fixed_precompile_eq_none_iff':('data','fixed_failure_data'),'gas_mono':('joint','gas_mono_joint'),'ecrecover_exceeds_stipend':('data','ecrecover_stipend_data')}[short];ns='Osaka'
+   if f['path']=='Solidity/Precompiles/Bls12381.lean':
+    kind='closed' if short in ['g1Discount_length','g2Discount_length'] else 'joint' if short in ['msmGas_succ','msmGas_mono','g1MsmGas_mono','g2MsmGas_mono','pairingGas_mono'] else 'data'
+    wn=short+('_fidelity' if kind=='closed' else '_'+kind);ns='Bls'
+   if f['path']=='Solidity/Precompiles/PointEval.lean' and short!='pointEval_result':
+    kind,wn={'bind_check_eq_none':('data','bind_failure_data'),'bind_check_eq_some':('joint','bind_success_joint'),'pointEval_eq_none_iff':('data','failure_data'),'decode_length':('joint','decode_length_joint'),'pointEval_length':('joint','pointEval_length_joint')}[short];ns='PointEval'
+   if name=='Solidity.Precompiles.PointEval.pointEval_result':
+    kind='joint';wn='pointEval_result_joint';ns='PointEvalSuccess'
+   if f['path']=='Solidity/Stipend/Rule.lean':
+    kind='joint' if short in ['not_fits_cons','pow_not_fits'] else 'data';wn=short+'_'+kind;ns='Stipend'
+   if kind:row.update(joint_witness=kind=='joint',data_domain_sample=kind=='data',closed_fidelity=kind=='closed',witness='H62.AuditPrecompiles.Successor.'+ns+'.'+wn)
+   assert sum(bool(row[k]) for k in ['joint_witness','data_domain_sample','closed_fidelity'])<=1,'multiple accounting roles'
    if old['visibility']=='private':assert name in private;row['actual_private_constant']=private[name]
    row['case_accounted']=row['joint_witness'] or row['data_domain_sample'] or row['closed_fidelity'];rows.append(row)
  assert len(rows)==len({x['name'] for x in rows})==138
  counts={k:sum(bool(x[k]) for x in rows) for k in ['full_type_fidelity','joint_witness','data_domain_sample','closed_fidelity','case_accounted']}
- assert counts==dict(full_type_fidelity=97,joint_witness=25,data_domain_sample=47,closed_fidelity=25,case_accounted=97),counts
- return dict(schema_version=1,status='partial',target='frozen v4.24; no v4.35 acceptance',statements=138,counts=counts,pending=41,owner_compiler_success_supplied=False,rows=rows,identity_seconds=identity['wall_seconds'],fidelity_seconds=fidelity['wall_seconds'],bytes_gas_seconds=bg['wall_seconds'],header_seconds=hd['wall_seconds'],boundaries=['Closed fidelity is not a fabricated exists-True witness.','Six IDENTITY proof-premise cases construct the same data and hypothesis together.','Astronomical-array witness is symbolic model inhabitance, not practical allocation.','RejectAll negative control is a precompile flag function, not an actual compiler theorem.','H85/H86 host build wrapper/allow-rule verification and migration435/owner success obligations remain.'])
+ assert counts==dict(full_type_fidelity=138,joint_witness=37,data_domain_sample=73,closed_fidelity=28,case_accounted=138),counts
+ return dict(schema_version=1,status='partial',target='frozen v4.24; no v4.35 acceptance',statements=138,counts=counts,pending=0,owner_compiler_success_supplied=False,rows=rows,identity_seconds=identity['wall_seconds'],fidelity_seconds=fidelity['wall_seconds'],bytes_gas_seconds=bg['wall_seconds'],header_seconds=hd['wall_seconds'],boundaries=['Closed fidelity is not a fabricated exists-True witness.','Six IDENTITY proof-premise cases construct the same data and hypothesis together.','Astronomical-array witness is symbolic model inhabitance, not practical allocation.','RejectAll negative control is a precompile flag function, not an actual compiler theorem.','H85/H86 host build wrapper/allow-rule verification and migration435/owner success obligations remain.'])
 
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--evidence',type=pathlib.Path,required=True);p.add_argument('--check',action='store_true');a=p.parse_args();v=generate(a.evidence);s=json.dumps(v,indent=2)+'\n';dest=a.evidence/'successor-coverage.json'
  if a.check:assert dest.read_text()==s
  else:dest.write_text(s)
- print('SUCCESSOR_PARTIAL statements138 full_types97 joint25 data47 closed25 accounted97 pending41; no compiler-success/full-gate claim')
+ print('SUCCESSOR_PARTIAL statements138 full_types138 joint37 data73 closed28 accounted138 pending0; no compiler-success/full-gate claim')

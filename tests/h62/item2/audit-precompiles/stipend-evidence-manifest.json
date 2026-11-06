@@ -3,8 +3,8 @@
   "files": [
     {
       "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/StipendWitnesses.lean",
-      "size_bytes": 6778,
-      "sha256": "96fccf845cd23bfc4b52e89564577f574d0b450a6643456be35332883afa7133"
+      "size_bytes": 6862,
+      "sha256": "b05a91b644f425fb8d0f12a2e3fb4d668b19edea78a05c2f9dd7ea1901f8ffbe"
     },
     {
       "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/stipend-first424.json",
@@ -46,5 +46,6 @@
       "size_bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
-  ]
+  ],
+  "note": "Current file hashes refreshed; historical receipts retain their original recorded source snapshots and are not current acceptance receipts."
 }

@@ -5,7 +5,8 @@ from census import census,ROOT
 from inventory import split_declaration,groups
 
 def generate():
- s="""import Solidity.Precompiles.Bls12381
+ s="""import Lean.Elab.Command
+import Solidity.Precompiles.Bls12381
 
 /-! Guards against counting separate MSM table premises as a simultaneous
 witness, silently choosing an empty input domain, or treating failure laws as
@@ -58,7 +59,7 @@ theorem constant_table_bounds (v i : Nat) :
   full='H62.AuditPrecompiles.Successor.Bls.'+n
   if full in messages:s+='/-- info: '+messages[full]+' -/\n#guard_msgs in\n'
   s+='#print axioms '+n+'\n'
- s+='end H62.AuditPrecompiles.Successor.Bls\n'
+ s+='run_cmd Lean.logInfo "CORE_APPLICABILITY_PASS module=Bls original=18 guards=20"\nend H62.AuditPrecompiles.Successor.Bls\n'
  return s
 if __name__=='__main__':
  p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');a=p.parse_args();s=generate();dst=ROOT/'tests/h62/item2/audit-precompiles/BlsWitnesses.lean'

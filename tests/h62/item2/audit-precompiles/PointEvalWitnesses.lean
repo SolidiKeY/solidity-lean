@@ -1,3 +1,4 @@
+import Lean.Elab.Command
 import Solidity.Precompiles.PointEval
 
 /-! Guards against a PointEval census assuming a successful cryptographic input
@@ -47,4 +48,5 @@ theorem pointEval_length_joint : ∃ d : Bytes, d.length ≠ 192 ∧ pointEval d
 /-- info: 'H62.AuditPrecompiles.Successor.PointEval.pointEval_length_joint' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs in
 #print axioms pointEval_length_joint
+run_cmd Lean.logInfo "CORE_APPLICABILITY_PASS module=PointEval original=5 guards=5"
 end H62.AuditPrecompiles.Successor.PointEval

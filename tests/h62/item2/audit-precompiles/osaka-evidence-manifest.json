@@ -4,8 +4,8 @@
   "files": [
     {
       "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/OsakaWitnesses.lean",
-      "size_bytes": 2314,
-      "sha256": "fab7d3feb6d194f2da7968ac05dda71ac15c04d129475309b148ef655b12efc1"
+      "size_bytes": 2419,
+      "sha256": "6915585d88ec72e4fa8867d4f1162543172ec67273625b0b68cfdc5426d8eea9"
     },
     {
       "path": "/workspace/solidity-lean/tests/h62/item2/audit-precompiles/successor-evidence/osaka424.json",
@@ -37,5 +37,6 @@
       "size_bytes": 0,
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
-  ]
+  ],
+  "note": "Current file hashes refreshed; historical receipts retain their original recorded source snapshots and are not current acceptance receipts."
 }

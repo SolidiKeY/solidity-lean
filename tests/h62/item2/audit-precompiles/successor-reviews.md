@@ -45,3 +45,15 @@ Final Bytes/Header handoff reviews PASS, no findings; both verified all14
 staged files were in scope, current counts and H85/H86/H90 routing. Subsequent
 globaldoc check found5parent-existing out-of-scope references, explicitly
 recorded/routed rather than changed or waived. Trustscan6468sources0findings.
+
+
+## All138 applicability / PointEval success milestone
+
+Finder and skeptic independently approve final ledger and full41core types:
+37joint+73data+28closed=138; every case exactly once;105new public theorem
+axiom guards; actual PointEval infinity input decoding/verification supplies its
+result premise. G43 compiler success and migration435/full gate remain open.
+Neither reviewer used Lean/server/build/tests or edits. Skeptic requested
+charged-price→gas-price wording, corrected before final source-bound receipt.
+Both final handoff reviews pass with no remaining finding; memory failures
+remain unaccepted and cache20-target diagnostic is not a complete inventory.

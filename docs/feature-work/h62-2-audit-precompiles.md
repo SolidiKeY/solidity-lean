@@ -383,3 +383,22 @@ G43 compiler success remains staged for forwarding; Exp integration is separate.
 Current continuation/handoff: BYTES-GAS-HEADER-HANDOFF.md under the audit tests.
 Ready work remains29 BLS/PointEval/Osaka and12Stipend cases; no full-goal,
 full-build, migration435, native-crypto or actual-compiler claim is made.
+
+
+## Frozen v4.24 applicability completion; final integration blocked
+
+The successor now accounts for all138 original statements exactly once:
+37joint witnesses,73data-domain samples,28closed fidelity cases. All138 full
+types are checked separately. PointEval has an actual infinity input decoder
+and verification proof, with gas price and malformed controls; no crypto equality
+or actual compiler-success premise was added. General public-law composition
+avoided four preserved memory-exhaustion attempts without budget increases.
+
+Finder and skeptic read-only reviews pass; skeptic gas-price wording correction
+is applied.26receipt-mutation tests and14inherited census/coverage tests pass.
+Full validation remains open: core cache targets out-of-date, host Bridge wrapper
+execution/allow rule unverified, actual G43 compiler-success missing, migration435
+API/axiom evidence pending and five external documentation references missing.
+No whole-goal completion or RUNTIME_GATE_PASS is claimed. Exact commands,
+failures, limits and remaining producer/setup waits are in
+`tests/h62/item2/audit-precompiles/ALL-CASES-HANDOFF.md`.

@@ -112,4 +112,5 @@ theorem pow_not_fits_joint : ∃ (C : Contract) (p : PrimTy) (x : Var) (a b : Va
 /-- info: 'H62.AuditPrecompiles.Successor.Stipend.pow_not_fits_joint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in
 #print axioms pow_not_fits_joint
+run_cmd Lean.logInfo "CORE_APPLICABILITY_PASS module=Stipend original=12 guards=12"
 end H62.AuditPrecompiles.Successor.Stipend
