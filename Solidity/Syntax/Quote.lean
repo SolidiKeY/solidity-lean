@@ -430,7 +430,7 @@ partial def Stmt.quote (hs : List Name) : {Γ Γ' : Ctx} → Lean.Expr → Lean.
     let Γfe := ctxFrom (rs ++ ps) fre Γf
     pure <| mkAppN (mkConst ``Stmt.call) #[c, Γe, Γ'e, pse, ctxE rs, Γfe, toExpr f, ase,
       CallRet.quote Γe ret, ← Prog.quoteBody hs fre Γfe body]
-  | _, _, Γe, Γ'e, @Stmt.callRec _ _ _ ps rs f d args ret body => do
+  | _, _, Γe, Γ'e, @Stmt.callRec _ _ _ _ps rs f d args ret body => do
     let (ase, pse) := Args.quote c Γe args
     let fre := ctxOnto pse rs
     let head := #[c, Γe, Γ'e, pse, ctxE rs, toExpr f]

@@ -3,7 +3,7 @@
 import argparse,json
 from fractions import Fraction
 from pathlib import Path
-SETTINGS=("cpu","threads","lean_memory_mib","reserve_gib","swap","cache")
+SETTINGS=("cpu","threads","lean_memory_mib","reserve_gib","swap","cache","timeout_seconds")
 def compare(old,new):
  for run in (old,new):
   if run.get("status")!="pass" or not run.get("expected_modules") or run.get("completed_modules")!=run["expected_modules"]:

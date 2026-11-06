@@ -100,7 +100,7 @@ theorem mul_int_exact {M a b : Int} (hM : 0 < M) (ha : -M ≤ a ∧ a < M) (hb :
   rcases Int.lt_or_lt_of_ne ha0 with ha' | ha' <;> rcases Int.lt_or_lt_of_ne hb0 with hb' | hb'
   · -- a < 0, b < 0
     have hp : 0 < a * b := Int.mul_pos_of_neg_of_neg ha' hb'
-    simp only [show ¬ 0 < a by omega, show ¬ 0 < b by omega, if_false]
+    simp only [show ¬ 0 < a by omega, show ¬ 0 < b by omega, ite_false]
     by_cases haM : a = -M
     · subst haM
       have : M ≤ -M * b := by
@@ -119,21 +119,21 @@ theorem mul_int_exact {M a b : Int} (hM : 0 < M) (ha : -M ≤ a ∧ a < M) (hb :
     omega
   · -- a < 0, 0 < b
     have hn : a * b < 0 := Int.mul_neg_of_neg_of_pos ha' hb'
-    simp only [show ¬ 0 < a by omega, hb', if_false, if_true]
+    simp only [show ¬ 0 < a by omega, hb', ite_false, ite_true]
     rw [Int.neg_tdiv, Int.tdiv_eq_ediv_of_nonneg (by omega)]
     have e : (-(M / b) ≤ a) ↔ (-a) * b ≤ M := by
       rw [← Int.le_ediv_iff_mul_le hb']; omega
     rw [e, Int.neg_mul]; omega
   · -- 0 < a, b < 0
     have hn : a * b < 0 := Int.mul_neg_of_pos_of_neg ha' hb'
-    simp only [ha', show ¬ 0 < b by omega, if_true, if_false]
+    simp only [ha', show ¬ 0 < b by omega, ite_true, ite_false]
     rw [Int.neg_tdiv, Int.tdiv_eq_ediv_of_nonneg (by omega)]
     have e : (-(M / a) ≤ b) ↔ (-b) * a ≤ M := by
       rw [← Int.le_ediv_iff_mul_le ha']; omega
     rw [e, Int.neg_mul, Int.mul_comm b a]; omega
   · -- 0 < a, 0 < b
     have hp : 0 < a * b := Int.mul_pos ha' hb'
-    simp only [ha', hb', if_true]
+    simp only [ha', hb', ite_true]
     rw [Int.tdiv_eq_ediv_of_nonneg (by omega), Int.le_ediv_iff_mul_le hb']
     omega
 

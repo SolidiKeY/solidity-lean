@@ -1461,7 +1461,7 @@ members. -/
 def decodeKind? (T : RawExpr) : Option AbiKind :=
   match T with
   | .name t =>
-    if t.endsWith "[]" then (valueKind? (t.dropRight 2)).map .arr
+    if t.endsWith "[]" then (valueKind? ((t.dropEnd 2).copy)).map .arr
     else match C.structName? t with
       | some s => if (AbiKind.ofStruct s).isSome then some (.tuple s) else none
       | none => none
@@ -1588,7 +1588,7 @@ def abiDecodeWith (hoist : RawExpr → ElabM (SProg C × RawExpr))
         word kk (.num (32 * (i + j))) (.assign (.index (.name x) (.num j)))
       pure ([enough, .declMemory (.fixed (.named t) m) x none] ++ reads.flatten)
     | .arr kk, .name t => do
-      let et := t.dropRight 2
+      let et := (t.dropEnd 2).copy
       let o := toString (← freshCapture "se")
       let L := toString (← freshCapture "se")
       let j := toString (← freshCapture "se")

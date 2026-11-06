@@ -788,7 +788,7 @@ def Stmt.tupleCallStr? {Γ Γ₁ Γ₂ : Ctx} (ns : List Var) (s : Stmt C Γ Γ�
     let ts := Prog.retTargets rs 0 (s.outNames ns) P
     if ts.isEmpty then
       if rs.length < 2 then none
-      else some (s!"({String.mk (List.replicate (rs.length - 1) ',')}) = {cs}", 0)
+      else some (s!"({String.ofList (List.replicate (rs.length - 1) ',')}) = {cs}", 0)
     else if rs.length == 1 then some (s!"{((ts.head?).map (·.2)).getD ""} = {cs}", ts.length)
     else
       let slots := (List.range rs.length).map fun i => ((ts.find? (·.1 == i)).map (·.2)).getD ""
@@ -868,7 +868,7 @@ def Prog.receiverExpr? {Γ Γv : Ctx} {E : Ty} (ns : List Var)
 /-- Bytes as a hex literal. -/
 def hexStr (bs : List UInt8) : String :=
   let hex (n : Nat) : Char := "0123456789abcdef".toList.getD n '0'
-  "hex\"" ++ String.mk (bs.flatMap fun b => [hex (b.toNat / 16), hex (b.toNat % 16)]) ++ "\""
+  "hex\"" ++ String.ofList (bs.flatMap fun b => [hex (b.toNat / 16), hex (b.toNat % 16)]) ++ "\""
 
 /-- A part of revert data. -/
 def RevPart.toStr {Γ : Ctx} (ns : List Var) : RevPart C Γ → String

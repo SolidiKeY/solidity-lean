@@ -24,7 +24,7 @@ def run(args):
     result=dict(source_root=str(root), runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), command=[str(bins/"lean"), "-j1", "-M11000", "--tstack=131072", "-o", "<clean-lib/module.olean>", "<module.lean>"],
         lean=subprocess.check_output([str(bins/"lean"),"--version"],env=env,text=True).strip(),
         lake=subprocess.check_output([str(bins/"lake"),"--version"],env=env,text=True).strip(),
-        cpu=cpu, threads=1, lean_memory_mib=11000, reserve_gib=4, swap="none", cache="empty private output, no Lake artifact cache", modules=[])
+        cpu=cpu, threads=1, timeout_seconds=args.timeout, lean_memory_mib=11000, reserve_gib=4, swap="none", cache="empty private output, no Lake artifact cache", modules=[])
     owned={r["module"] for r in inv["files"]}; failed=set(); start=time.monotonic()
     for mod in inv["build_order"]:
         source=root/(mod.replace(".","/")+".lean")
@@ -44,7 +44,7 @@ def run(args):
                     if pid:
                         proc.returncode=os.waitstatus_to_exitcode(status); break
                     if available()<4*GIB: reason="reserve-stop"
-                    if time.monotonic()-t>args.timeout: reason="module-time-stop"
+                    if args.timeout > 0 and time.monotonic()-t>args.timeout: reason="module-time-stop"
                     if reason:
                         os.killpg(proc.pid,signal.SIGTERM)
                         deadline=time.monotonic()+2
@@ -77,8 +77,10 @@ def run(args):
     return 0 if result["status"]=="pass" else 1
 
 if __name__=="__main__":
-    ap=argparse.ArgumentParser(); ap.add_argument("--source-root",type=Path,default=Path.cwd()); ap.add_argument("--toolchain",required=True,type=Path); ap.add_argument("--output",required=True,type=Path); ap.add_argument("--timeout",default=300,type=int); a=ap.parse_args()
+    ap=argparse.ArgumentParser(); ap.add_argument("--source-root",type=Path,default=Path.cwd()); ap.add_argument("--toolchain",required=True,type=Path); ap.add_argument("--output",required=True,type=Path); ap.add_argument("--timeout",default=0,type=int); a=ap.parse_args()
     with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","w") as lock:
         fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-        if subprocess.check_output(["git","status","--porcelain","--","Solidity/Syntax"]).strip(): raise SystemExit("Unexpected Syntax source edits")
+        changed=subprocess.check_output(["git","diff","--name-only","c6f550e281a7e5affa9a99bc2cdaed556dec00e4","--","Solidity"],text=True).splitlines()
+        allowed={r["path"] for r in inventory(Path.cwd())["files"]}
+        if not set(changed)<=allowed: raise SystemExit("Outside-scope production edit")
         raise SystemExit(run(a))

@@ -51,7 +51,7 @@ def inventory(root):
         rows.append(dict(path=str(p.relative_to(root)), module=m,
             source_sha256=hashlib.sha256(p.read_bytes()).hexdigest(), imports=imports(text),
             declaration_lines=[dict(line=i, text=s.strip()) for i,s in enumerate(code.splitlines(),1)
-                if re.match(r"^\s*(?:@\[[^\n]*?\]\s*)*(?:(?:private|protected|noncomputable|partial|unsafe) )*(?:def|theorem|lemma|inductive|structure|abbrev|class|instance)\b", s)],
+                if re.match(r"^\s*(?:@\[[^\n]*?\]\s*)*(?:(?:private|protected|noncomputable|partial|unsafe|local|scoped) )*(?:def|theorem|lemma|inductive|structure|abbrev|class|instance|opaque)\b", s)],
             command_lines=[dict(line=i,text=s.strip()) for i,s in enumerate(code.splitlines(),1) if re.match(r"^\s*(?:scoped\s+|local\s+)?(?:syntax|macro|macro_rules|elab|elab_rules|declare_syntax_cat|deriving|attribute)\b",s)],
             case_lines=[i for i,s in enumerate(code.splitlines(),1) if s.lstrip().startswith("|")],
             budget_lines=[dict(line=i,text=s.strip()) for i,s in enumerate(text.splitlines(),1) if "maxHeartbeats" in s or "maxRecDepth" in s]))

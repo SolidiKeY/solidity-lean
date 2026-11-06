@@ -593,11 +593,11 @@ partial def elabCallReceiver (f : String) (args : List RawExpr)
     (op : (Γ : NCtx) → (E : Ty) → ElabM (ReceiverOp C Γ.ctx E)) :
     ElabM (SProg C) := do
   let (P, _, _) ← elabCallRet f args none
-  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
-  match s with
-  | .call f args (.storage (.array E) r) body =>
+  let [⟨Γ, Γ', s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match Γ', s with
+  | _, .call f args (.storage (.array E) r) body =>
     pure [.of Γ (.callReceiver f args r body (← op Γ E))]
-  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
+  | _, _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
 
 /-- Keep an effectful operand inside `f().push(e)`, in a private caller scope.
 Its prefix is expanded only after the getter has been captured by the taclet. -/
@@ -605,9 +605,9 @@ partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr
     ElabM (SProg C) := do
   let caller ← ctx
   let (P, _, _) ← elabCallRet f args none
-  let [⟨Γ, _, s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
-  match s with
-  | .call f args (.storage (.array E) r) body =>
+  let [⟨Γ, Γ', s⟩] := P | throw s!"{f}: a receiver call must elaborate to one call"
+  match Γ', s with
+  | _, .call f args (.storage (.array E) r) body =>
     let (Q, a) ← hoist a
     let Γv ← nctx
     let value ← (match E with
@@ -628,7 +628,7 @@ partial def elabCallReceiverPush (f : String) (args : List RawExpr) (a : RawExpr
       pure (.of Γ (.callReceiverPush f args r body code (value.wk h)))
     modify fun (_, k) => (caller, k)
     pure [result]
-  | _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
+  | _, _ => throw s!"{f}: push/pop needs a dynamic storage-array return"
 
 /-- `elabCall`, and the fresh return variable of a callee that returns a
 memory reference, with its type and the caller's context: the call's frame
