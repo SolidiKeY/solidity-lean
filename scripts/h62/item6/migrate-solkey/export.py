@@ -48,7 +48,9 @@ def main():
     out.mkdir(parents=True)
     with (out/'migration.patch').open('wb') as f:
         subprocess.run(['git','diff','--binary',BASE,head],cwd=root,stdout=f,check=True)
-    subprocess.run(['git','bundle','create',str(out/'migration.bundle'),BASE+'..'+head],cwd=root,check=True)
+    subprocess.run(['git','bundle','create',str(out/'migration.bundle'),'HEAD','^'+BASE],cwd=root,check=True)
+    bundled = subprocess.check_output(['git','bundle','list-heads',str(out/'migration.bundle')],cwd=root,text=True).strip()
+    if bundled != head+' HEAD': raise SystemExit('Bundle tip differs from committed handoff head')
     subprocess.run(['git','bundle','verify',str(out/'migration.bundle')],cwd=root,check=True)
     (out/'HANDOFF.md').write_text(f'Committed head: `{head}`\nBase: `{BASE}`\nRepository: `{root}`\n\n'+(root/'docs/feature-work/h62-6-migrate-solkey.md').read_text())
     archive_evidence(evidence, out/'evidence.tar.gz')
