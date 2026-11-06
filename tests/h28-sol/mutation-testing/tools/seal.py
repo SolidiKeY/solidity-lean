@@ -71,8 +71,20 @@ def main():
     run = Path(a.run).resolve()
     if a.verify:
         seal = json.loads((run / "seal.json").read_text())
-        bad = [n for n, h in seal["sha256"].items() if sha(repo / n) != h]
-        print(json.dumps({"verified": not bad, "files": len(seal["sha256"]), "mismatch": bad}, indent=1))
+        # H44: a bulk file kept off Git may be absent; it then must carry the
+        # sealed digest in runs/BULK.json (`tools/bulk.py restore` brings it
+        # back, verified, for a full check)
+        bulkm = repo / LANE / "runs/BULK.json"
+        bulk = json.loads(bulkm.read_text())["files"] if bulkm.exists() else {}
+        bad, absent = [], []
+        for n, h in seal["sha256"].items():
+            if not (repo / n).exists():
+                (absent if bulk.get(n, {}).get("sha256") == h else bad).append(n)
+            elif sha(repo / n) != h:
+                bad.append(n)
+        print(json.dumps({"verified": not bad, "files": len(seal["sha256"]), "present_verified":
+                          len(seal["sha256"]) - len(bad) - len(absent), "bulk_absent": absent,
+                          "mismatch": bad}, indent=1))
         sys.exit(1 if bad else 0)
     acceptance = json.loads((run / "acceptance.json").read_text())
     if not acceptance["scope_complete"]:
