@@ -11,7 +11,7 @@ balance; without it a wide balance is observed modulo `2 ^ 256`
 (`sourceBalanceLocal_wide`).
 -/
 namespace Solidity.Yul.Views
-open Solidity.Source (Monetary)
+
 
 /-- **`BALANCE` returns the exact balance** of an instance on a fitting state. -/
 theorem sourceBalanceLocal_exact {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : Nat)
@@ -44,11 +44,11 @@ theorem sourceBalanceLocal_wide {E Γ} (G : Source.Glob E) (F : Source.Fr) (n : 
     (s : Source.EMState E Γ) (index : Source.Idx Γ (.address false)) (address : Roadmap.Address)
     (localValue : s.1.get index = Source.Val.address address) (code : Nat)
     (found : (s.2.ex.world.accounts address).code = some code)
-    (wide : (s.2.ex.world.accounts address).balance = Monetary.wide) :
+    (wide : (s.2.ex.world.accounts address).balance = Source.Monetary.wide) :
     (Source.evalE G F (n+2) (sourceBalanceExpr index)).run s =
       (.ok (.val (uintValueOfWord E.layout ⟨0, by decide⟩)), s) ∧
       ¬ s.2.ex.BalancesFit := by
-  refine ⟨?_, fun fit => Monetary.wide_not_fits (wide ▸ fit.1 address)⟩
+  refine ⟨?_, fun fit => Source.Monetary.wide_not_fits (wide ▸ fit.1 address)⟩
   rw [sourceBalanceLocal_run G F n s index address localValue,
     sourceObservedBalance_system G s address code found, wide]
   rfl
@@ -57,5 +57,9 @@ end Solidity.Yul.Views
 
 /-- info: 'Solidity.Yul.Views.sourceBalanceLocal_exact' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceBalanceLocal_exact
-#print axioms Solidity.Yul.Views.sourceBalanceLocal_exact_int
-#print axioms Solidity.Yul.Views.sourceBalanceLocal_wide
+
+/-- info: 'Solidity.Yul.Views.sourceBalanceLocal_exact_int' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceBalanceLocal_exact_int
+
+/-- info: 'Solidity.Yul.Views.sourceBalanceLocal_wide' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms Solidity.Yul.Views.sourceBalanceLocal_wide
