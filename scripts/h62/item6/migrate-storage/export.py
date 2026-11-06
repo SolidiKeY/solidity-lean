@@ -20,6 +20,13 @@ assert all(p.startswith(("scripts/h62/item6/migrate-storage/","tests/h62/item6/m
 subprocess.run(["git","-C",str(ROOT),"bundle","create",str(E/"migration.bundle"),BASE+".."+branch],check=True)
 subprocess.run(["git","-C",str(ROOT),"bundle","verify",str(E/"migration.bundle")],check=True)
 state={"base":BASE,"head":head,"branch":branch,"repository":str(ROOT),"changed_files":changes,"goal_status":"blocked","production_lean_files_edited":0}
+retirement=ROOT/"tests/h62/item6/migrate-storage/h82-handoff/retirement-status.json"
+if retirement.exists():
+ r=json.loads(retirement.read_text())
+ state.update(goal_status="pause_pending_coordinator",goal_pause_confirmed=False,execution_status=r["execution_status"],handoff_to=r["handoff_to"])
+ snapshot=E/"h82-handoff-scope";snapshot.mkdir(exist_ok=True)
+ for p in sorted(retirement.parent.iterdir()):
+  if p.is_file():(snapshot/p.name).write_bytes(p.read_bytes())
 (E/"committed-state.json").write_text(json.dumps(state,indent=2,sort_keys=True)+"\n")
 (E/"handoff.md").write_text("Committed HEAD: `"+head+"`\n\n"+(ROOT/"docs/feature-work/h62-6-migrate-storage.md").read_text())
 # Historical receipts retain their original absolute manifest; add a relocated
@@ -32,7 +39,7 @@ if (E/"history").exists():
 # Raw Lean artifacts and full compiler trees remain on the VM; the release
 # archive has its own manifest entry below. Archive only review evidence.
 excluded={"checksums.sha256","evidence-files.sha256","evidence.tar.gz","CLOUDVM-RESULT.json"}
-files=sorted(p for p in E.rglob("*") if p.is_file() and not p.is_symlink() and not {"artifacts","toolchains"}.intersection(p.relative_to(E).parts) and p.name not in excluded)
+files=sorted(p for p in E.rglob("*") if p.is_file() and not p.is_symlink() and not {"artifacts","toolchains"}.intersection(p.relative_to(E).parts) and p.name not in excluded and p!=E/"SHA256SUMS")
 (E/"evidence-files.sha256").write_text("".join(sha(p)+"  "+str(p.relative_to(E))+"\n" for p in files))
 files.append(E/"evidence-files.sha256");files.sort()
 with (E/"evidence.tar.gz").open("wb") as out:
@@ -42,5 +49,8 @@ with (E/"evidence.tar.gz").open("wb") as out:
     b=p.read_bytes();entry=tarfile.TarInfo(str(p.relative_to(E)));entry.size=len(b);entry.mode=0o644;entry.mtime=0;tf.addfile(entry,io.BytesIO(b))
 selected=[E/n for n in ["original.patch","migration.bundle","handoff.md","evidence.tar.gz","evidence-files.sha256","frozen-interface-old.json","dependency-report.json","committed-state.json"]]
 selected.append(E/"toolchains/lean-4.35.0-linux.tar.zst")
+if retirement.exists():
+ selected.extend(E/"h82-handoff-scope"/n for n in ["original-assignment.txt","original-goal-objective.txt","original-work-backfill-queue.txt","original-scope-manifest.json","open-queue.json","waits-v1.json","retirement-status.json","SHA256SUMS"])
 (E/"checksums.sha256").write_text("".join(sha(p)+"  "+str(p)+"\n" for p in selected))
+(E/"SHA256SUMS").write_bytes((E/"checksums.sha256").read_bytes())
 print(json.dumps(state));print("ARTIFACT_CHECKSUMS",E/"checksums.sha256")

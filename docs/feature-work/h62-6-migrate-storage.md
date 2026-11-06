@@ -1,3 +1,39 @@
+# H82 final stopped-lane handoff — authoritative current state
+
+**RETIRED / STOP after preservation; assignment incomplete.**
+`handoff_to: solidity-h62-6-20261106/migrate-root-gate`.
+The explicit consolidation resolution confirms that generic Continue broadcasts
+do not revoke retirement. No new proof implementation or known timing STOP rerun
+occurred. No scope takeover is effective until final stopped/head acknowledgement;
+successor integrates final head. Preserve VM/branch/evidence; delete nothing.
+
+Complete visible original assignment/objective, verbatim work/backfill queue,
+exact24-entry/21-module scope and provenance are committed in
+`tests/h62/item6/migrate-storage/h82-handoff/`, alongside current open queue,
+schema-v1 waits, H82 instructions/resolution and retirement status. Its
+`SHA256SUMS` binds all files; exporter copies them into the evidence archive
+under `h82-handoff-scope/`. Original renderer/framing bytes are not exposed;
+the supplied rendered fingerprint remains unverified while full visible task
+text and its separate saved-byte hashes are preserved.
+
+H82 WITHDRAWS historical O-STORAGE-001 proof-only exact-file agreement requests.
+No agreement is needed for a statement-preserving proof tactic repair. The
+technical HashedLayout:376/417/420 failure remains, with zero assigned new-module
+passes; new type hashes, complete matched resources,1576 affected modules and
+final gates remain pending. Current `open-queue.json` and `waits-v1.json` contain
+all obligations. Historical permission language below is superseded.
+
+Only goal `stop_goal(complete|blocked)` is exposed; no PAUSED operation exists.
+Neither outcome substitutes for PAUSED. No goal is created/reset/marked complete.
+Coordinator explicitly will pause the existing goal after final head/idle turn.
+No automatic implementation continuation is authorized. No H71 push authority
+was supplied/found in available inputs, so original no-push restrictions remain.
+The cumulative patch, bundle, archive, full scope files and SHA256SUMS are
+exported with exact final head/base/branch and clean status. Historical validation
+below is retained without new proof work or timing reruns in this checkpoint.
+
+## Historical H70 checkpoint — superseded permission protocol
+
 # H62 Storage migration — H70 partial owner-overlay handoff
 
 Status: **blocked, assignment incomplete**. Checkpoints: 1 done (assigned
