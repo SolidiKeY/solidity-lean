@@ -35,11 +35,11 @@ def candidates(repo, rows):
     return linked
 
 
-def validate_receipts(repo, cache, toolchain, required_evidence=None):
+def validate_receipts(repo, cache, toolchain, required_evidence=None, targets=None):
     index=json.loads((cache/"cache-index.json").read_text())
     compiler=bounded_lean.distribution_hash(toolchain)
     fingerprints={}
-    targets=["tests.h62.item2.audit-g25-scalar-lowering.AllWitnesses",
+    targets=targets or ["tests.h62.item2.audit-g25-scalar-lowering.AllWitnesses",
              "tests.h62.item2.audit-g25-scalar-lowering.KernelCensus"]
     ordered=bounded_lean.dependencies(repo,targets)
     for module in ordered:

@@ -2,9 +2,8 @@ import Solidity.Backend.Scalar.Checked
 import Solidity.Backend.Scalar.Heights
 
 /-!
-Draft success and distinguishing failure/resource controls against the actual
-frozen certificate interfaces and local evaluators. VALIDATION BLOCKED by the
-unchanged Slice import under the required Lean 4.35.0 pin; no proof credit yet.
+Success and distinguishing failure/resource controls against the actual
+frozen certificate interfaces and local evaluators, checked with Lean 4.24.0.
 
 These are gasless Osaka slices. GAS/BASEFEE/CLZ refusal below does not prove gas
 adequacy or execution on another fork. Neither evaluator has a gas/fork input;

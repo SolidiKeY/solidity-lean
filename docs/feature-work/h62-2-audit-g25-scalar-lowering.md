@@ -7,8 +7,7 @@ Batch `solidity-h62-2-20261106`, lane
 `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
 
 **Assignment unfinished:** inventory and all simultaneous witnesses pass;
-broader success guarantees, final affected validation, measurements and final
-reviews are still pending. No full-goal or final runtime-gate completion claim.
+final repository validation, measurements and final reviews are still pending. No full-goal or final runtime-gate completion claim.
 
 ## Authorization, scope and provenance
 
@@ -114,25 +113,75 @@ original types, permitted axioms and report statuses must all agree.
 `coverage-ledger.json` is the authoritative exact-once proof ledger; source scans
 and unverified candidate markers never award proof credit.
 
-## Checkpoints 3–4: remaining authorized queue
+## Checkpoint 3: constructive success and negative controls
 
-Nine initial success/failure controls pass against the actual frozen
-UnaryCertificate/BinaryCertificate/CheckedCertificate and run/guarded/stackBound.
-They cover Boolean not/and, checked add at zero, reject-all/always-revert
-contradictions, division panic versus raw EVM zero, panic-class distinction,
-physical stack capacity, and local GAS/BASEFEE/CLZ refusal. Broader generic
-supported-operator and supported-program totality is still being completed.
-No totality exclusion or premise is invented to avoid an unsupported case.
+PASS, finder/skeptic reviews closed: 55 additive public theorem reports, with
+104 current source/dependency/distribution/output/receipt checks. The dependency
+union is exactly propext, Classical.choice and Quot.sound. There are zero new
+axioms, sorry, native_decide or heartbeat overrides.
 
-These local evaluators are gasless Osaka slices with no gas/fork input. Refusal
-controls do not prove fetched EVM success, gas adequacy or cross-fork agreement.
-Those boundaries remain explicit; proof and external-test results must be
-reported separately. This lane does not take over H55's full compiler theorem.
+ScalarTotality constructs well-ranged successful inputs for every accepted
+unary/binary operator/type pair, proves actual pure/checked selector availability
+and empty-tail capacity, and supplies the explicit division/modular fallbacks.
+Generic certificate success is derived from those constructed source cases;
+no target-success premise is assumed. Reject-all and arbitrary-payload
+always-revert alternatives contradict the unchanged public contracts.
 
-Pending final obligations: broad success controls, full affected validation,
-`./run-lean.sh`, same-tree/cache/resources before/after timings with the >10%
-stop rule, required final finder/skeptic reviews, committed final handoff and
-original patch/checksum exports. The persistent full assignment remains unfinished.
+ClosedTotality constructs intrinsic literal certificates at every primitive type,
+and one unary/binary layer for every available pure operator certificate.
+The binary operands deliberately decline the existing short-circuit test.
+This is constructive coverage of these supported families, not an arbitrary
+recursive compiler grammar, generic reads/calls, or short-circuit compilation.
+Generic certificate-field projections are consistency consumers and earn no
+additional program-totality credit. Literal capacity covers every tail shorter
+than 1024; the full physical boundary is explicitly refused.
+
+EnvironmentTotality proves actual environment selection totality, resolved
+metadata/hash selection success, and coherent nonempty typed hash/namespace
+execution. Generic value/list certificate consumers retain the original state
+and tail quantification. Caller observations distinguish success and panic
+payloads while preserving the frozen equivalence of exceptional halt and empty
+revert. SuccessControls retains its nine Boolean, checked arithmetic, panic,
+capacity and local opcode-refusal controls.
+
+BoundaryVectors kernel-checks two real encoder identities and exports the actual
+bytes with a producer-bound hash. Six finite external EthereumJS cases pass:
+negatedTrue at exactly six gas versus five, metadata PUSH0 on Osaka/Shanghai
+versus Paris refusal, and a synthetic always-revert negative compiler control.
+Two harness negatives reject a wrong value and wrong halt. Installed dependency
+versions are asserted against the unchanged repository pins before reporting;
+vector SHA256 is recorded. Host step-limit errors propagate as harness failures,
+never as EVM out-of-gas or source exhaustion.
+
+The local Lean evaluators have no gas/fork input. These kernel proofs do not
+prove fetched EVM execution or gas/fork agreement. The six reference runs are
+external tests only, not compiler correctness proofs or a universal gas theorem.
+No takeover of H55/G49 or any unassigned compilation scope occurs.
+
+Independent finder and skeptic found no weakened contract or invented success
+premise. Their three tooling findings are fixed: pre-launch 4 GiB headroom refusal
+(with a boundary regression), installed-version provenance assertions, and a
+fresh producer-bound axiom stdout hash required by the C3 evidence verifier.
+A first final-gate attempt was deliberately stopped with exit143 to apply the
+review fix and finish this checkpoint before checkpoint4; no pass is credited.
+
+### Checkpoint 3 committed handoff
+
+Commands: bounded_lean.py --reuse with native4.24 on ScalarTotality,
+ClosedTotality, EnvironmentTotality, SuccessControls, BoundaryVectors (bound
+boundary-vectors.json) and SuccessAxioms all exit0; reference-boundaries.mjs
+reports six cases/two negative controls PASS; success_evidence.py reports
+55 theorem axiom sets/104 valid receipts PASS. Exact command arrays, output,
+source/output hashes and timings are retained in the private receipts/logs.
+Final affected acceptance and checkpoint4 remain pending. Scope questions=[];
+no active producer/interface-repair blocker and no frozen statement modified.
+
+## Checkpoint 4: remaining final obligations
+
+Pending: final affected validation, unchanged ./run-lean.sh, comparable original
+module timings with the >10% stop rule, final finder/skeptic review closure,
+committed final handoff and cumulative patch/checksum exports. The persistent
+full assignment remains unfinished until those obligations pass.
 
 ## Resource policy and measurements
 

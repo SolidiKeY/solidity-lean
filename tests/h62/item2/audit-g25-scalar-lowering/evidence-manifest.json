@@ -1,7 +1,7 @@
 {
   "artifact_root": "/workspace/h62-audit-g25-artifacts",
   "evidence_root": "/workspace/h62-audit-g25-artifacts/evidence",
-  "checkpoint": "C1/C2 verified; C3/final gates pending",
+  "checkpoint": "C1/C2/C3 verified and reviewed; C4 pending",
   "proof_credit": 311,
   "primary_files": {
     "source-census.json": "311437958bc5325c424fb1ea706d8f4f4943eed340f1e4ef4f40d54c1c251dd9",
@@ -13,11 +13,16 @@
     "reviews-c1-c2.json": "10b29376988b06a998681dadb90f775253fa77e14fbfa3cab3228e5e88e0542c",
     "owner-tickets.json": "d3be4d06ec8dc5af41b4e8afb6d3420c1df6ec2d085e8ef83d2bb4b240a10cdb",
     "coordinator-toolchain-clarification.txt": "b01f37e6a4203500fabf99dca8cd8515092523a27206f8668da3677ec23ea6d9",
-    "acceptance-results.json": "5431ae4fbdbd57311610b8a1aa1ae7c8c8e8265b9d77358dcb8c30ccea49d12e"
+    "acceptance-results.json": "6a66b6425260ca7b89720ea883f649693a55f3bc1d9d63ba4454f66dd5eb353e",
+    "reviews-c3.json": "8be0d7a9e959bdbcbd65e58d183b1f06782e3f381777e41cfce44b92ecfc7304",
+    "boundary-vectors.json": "e9bd8bd550168bfce68453281a2f3226ae14ecc898914a4dd90f5b033c3e5fac",
+    "reference-boundaries.json": "41adfac95feb51febaa933e1e548756825401ed07b55d5a99223f4dd857f97c4",
+    "success-evidence.json": "152260c7c91a1b606a87a873e8020fee788ad71241ba1bb1f8f45fa467a2d2e5"
   },
   "cache_index": {
     "path": "/workspace/h62-audit-g25-artifacts/audit-v424/cache-index.json",
-    "sha256": "7566eb82e6096d3903d4f3bd7559e9cbf11be98656aa494efe413d25271501d0"
+    "sha256": "46f195d14ee49568f3012ac5857f4b6380e3a6140a48ae184ff3f64468e6c6b6"
   },
-  "historical_checkpoint": "/workspace/h62-audit-g25-artifacts/checkpoints/c29f0b555159f6b7cc4c3b94b542b62c2dcaed7e"
+  "historical_checkpoint": "/workspace/h62-audit-g25-artifacts/checkpoints/c29f0b555159f6b7cc4c3b94b542b62c2dcaed7e",
+  "new_public_success_theorems": 55
 }
