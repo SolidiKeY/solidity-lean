@@ -1,0 +1,22 @@
+{
+  "batch": "solidity-h62-6-20261106",
+  "slug": "migrate-sortcheck",
+  "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
+  "branch": "codex/solidity-h62-6-20261106/migrate-sortcheck",
+  "original_exclusive_write_scope": [
+    "tests/h62/item6/migrate-sortcheck/**",
+    "scripts/h62/item6/migrate-sortcheck/**",
+    "docs/feature-work/h62-6-migrate-sortcheck.md",
+    "Solidity/SortCheck/Annotations.lean",
+    "Solidity/SortCheck/Faithfulness.lean",
+    "Solidity/SortCheck/Parser.lean"
+  ],
+  "constraints": [
+    "Other existing originals read only under original assignment; no generated roots, module maps or axiom pins.",
+    "Additive Lean helpers under tests until coordinator-approved registration.",
+    "Final lean-toolchain change belongs root migration lane.",
+    "H76 migration-only directory writer exception does not transfer live master producer ownership.",
+    "H82 permits statement-preserving proofs/additive definitions/import/docs fixes without exact-file agreement. Existing statements, dependent definition bodies, interfaces, budgets, axiom set or exclusions still need owner; frozen ones require H57 versioned pairs.",
+    "Retirement permits preservation only; no new implementation."
+  ]
+}

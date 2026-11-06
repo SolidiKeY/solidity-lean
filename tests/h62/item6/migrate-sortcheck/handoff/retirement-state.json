@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "status": "partial",
+  "execution_state": "stopped after preservation checkpoint",
+  "handoff_to": "solidity-h62-6-20261106/migrate-root-gate",
+  "implementation_head": "93ab25f24dcb00c9a07a834a53c030c0f57b70d9",
+  "requested_goal_state": "PAUSED",
+  "goal_pause": {
+    "status": "unavailable",
+    "reason": "No get_goal, pause_goal or goal state update tool exposed. Only codex_goals_stop_goal(outcome=complete|blocked), which cannot express PAUSED. Prior call also rejected absent trusted CCA goal/source-turn context. No false substitute transition, reset or new goal performed."
+  },
+  "push": {
+    "performed": false,
+    "reason": "H71 push permission is not supplied/verified; original no-push instruction remains binding."
+  },
+  "waits": [
+    {
+      "lane": "solidity-h62-6-20261106/migrate-syntax",
+      "item": "DEP-SYNTAX-01: obtain latest reviewed published Solidity/Syntax/Raw.lean overlay with exact base/head/artifact hashes. New reported head c9b3b362946e2968cc82f39e8589ff59e1f645f6 not retrieved or validated here; earlier no-head lookup is historical."
+    },
+    {
+      "lane": "solidity-h62-6-20261106/migrate-root-gate",
+      "item": "H78 complete generated public API and per-declaration trust review; six constructor noConfusion helpers (34 binder slots) remain without old-shape shims. Full Faithfulness and final validation/timing acceptance pending."
+    },
+    {
+      "lane": "COORD",
+      "item": "Deliver latest syntax handoff c00c5ef9579d287c7b958ade456a0773269da2abc2ca0e7b70356fc032455cbd (17581 bytes), solcvalidation handoff 2560ea460b520b6b22401819374aeea9cad35684b2d56232a8f79788dfdae23d (22099 bytes), and generic-v08 handoff b132587155bd438825a5d7f32d2a9f35275689cfc0b8659f8bd0c41067c35b12 (14777 bytes). Host paths in routed messages are provenance, not local artifacts."
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "1 census and old clean baseline",
+      "status": "done",
+      "evidence": "old clean 64/64 Lake leanArts, 382.510216 s, sampled peak 7142703104 bytes; no accepted new full-build delta."
+    },
+    {
+      "name": "2 pinned official toolchain and adaptation",
+      "status": "partial",
+      "remaining": "Parser/Annotations source and controls pass, Faithfulness not v4.35 validated. Full old-shape generated API and per-declaration trust review unresolved."
+    },
+    {
+      "name": "3 assigned modules and matched clean full timing",
+      "status": "blocked",
+      "remaining": "Full directory gate fails external Syntax.Raw. Successful all-module build, matched old/new final harness comparison and final run-lean gate remain pending. Earlier runner revisions are not an accepted timing pair."
+    },
+    {
+      "name": "4 reviewable patch/bundle and dependency handoff",
+      "status": "partial",
+      "remaining": "Reviewed partial source packet exported; survivor must integrate exact final head and complete full frozen interfaces, trust review, dependencies and validation."
+    }
+  ],
+  "backfill": {
+    "completed": [
+      "Lexical/import/declaration census, full old 658 environment records, partial canonical old331/new339.",
+      "Independent kernel maps for all12 numeric constructor cases; five examples/24 guards and AliasMetadata.",
+      "Deterministic fixtures, source overlay reproduction, fail-closed canonical/timing negative controls.",
+      "Committed source/native conformance 377 parsed/131 read-bearing/131 covered OK; independent finder/skeptic reviews."
+    ],
+    "open": [
+      "Complete H78 original public generated declaration inventory, including recOn/casesOn/match_/noConfusion/debug/underscore names. Prior218-name heuristic is not exhaustive.",
+      "Capture full new Faithfulness exported interface after dependency integration; old full658 records retained. Actual visibility metadata was not captured; do not infer exclusion from names.",
+      "Six generated helper old-shape shims and per-name exact signature provenance; no consumer rewrite waiver.",
+      "Review 50 raw binder-name map differences (some internal/hygienic) and20 per-declaration axiom-dependency deltas; unchanged full-old primitive union is not compatibility/trust acceptance.",
+      "Full-directory matched clean timing and final affected repository validation.",
+      "Review incoming requester handoffs without asserting their execution/correspondence/witness/impossibility proof acceptance."
+    ],
+    "registry_cleanup": "No additional unclaimed candidates claimed; no scope transfer."
+  },
+  "source_changes": {
+    "Parser": "Two String API substitutions only: trim to trimAscii.copy; dropRight to dropEnd followed by trimAscii.copy.",
+    "Annotations": "Three protected reducible deprecated toCtorIdx aliases with completion blacklist; target type_of% ctorIdx.",
+    "Faithfulness": "Byte-identical to pinned base.",
+    "new_axioms": 0,
+    "new_sorry": 0,
+    "native_decide_shortcuts": 0,
+    "statement_or_budget_weakening": false
+  },
+  "resource_policy": "Historical checks used serial bounded Lean -j1, LEAN_NUM_THREADS=1, no swap and 4GiB reserve. Latest routed H78/H81 requires 8GiB/module for future checks; exact H81 policy file must be obtained by successor. No new Lean run at retirement. Per-module growth record-only; full comparison still required.",
+  "rendered_prompt_provenance": {
+    "supplied_rendered_sha256": "3dcfa55fe7d5c4d7fb2a286c49936e81d6222d3f51a40a5925ad94dbaf9f5ad7",
+    "local_original": "original-assignment.txt transcribed from original thread; original rendered wrapper not exposed. Local SHA is separately authenticated; no claim of matching supplied rendered wrapper hash."
+  }
+}

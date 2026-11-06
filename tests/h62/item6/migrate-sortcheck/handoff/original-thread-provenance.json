@@ -1,0 +1,11 @@
+{
+  "source": "Original user assignment in this thread, transcribed without rendering wrapper",
+  "supplied_rendered_prompt_sha256": "3dcfa55fe7d5c4d7fb2a286c49936e81d6222d3f51a40a5925ad94dbaf9f5ad7",
+  "rendered_wrapper_available": false,
+  "raw_rendered_hash_reproduced": false,
+  "original_environment": {"cwd":"/workspace", "shell":"bash", "current_date":"2026-11-06", "timezone":"Etc/UTC"},
+  "original_vm": "ccarenv_b64_Y2NhcmVudl9hMDljMDBlNjllZTg4MTkxYTA2NmRhNmRiYzBjYjc4NQ",
+  "actual_repository": "/workspace/migrate-sortcheck",
+  "implementation_head": "93ab25f24dcb00c9a07a834a53c030c0f57b70d9",
+  "final_head_location": "external retirement packet manifest and commit containing this document"
+}
