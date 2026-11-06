@@ -550,6 +550,8 @@ see [the checkpoint boundary](../feature-work/memory-operation-proofs.md).
 | `Backend/MemoryCopies/BudgetedReference.lean` | Division-based runtime budget checking and total complete allocator success/refusal for the unchanged reference constructor. |
 | `Backend/MemoryCopies/BudgetedReferenceControls.lean` | Populated empty/long/reference defaults, oversized unused-child success, overflow/strict-budget refusals and same-heap child contents. |
 | `Backend/MemoryCopies/FixedReferenceLiveInterface.lean` | Signature-only live normalization contract for all fixed primitive-array children, retaining original copy/representation despite storage shadows. |
+| `Backend/MemoryCopies/FixedReferenceLive.lean` | Inhabited intrinsic live normalization preserving exact original storage copy, representation and stripped contents for arbitrary child shadows. |
+| `Backend/MemoryCopies/FixedReferenceLiveControls.lean` | Arbitrary-shadow, zero/long/many controls and represented fixed-parent execution retaining original copied heap and stored shadows. |
 | `Backend/MemoryCopies/FixedReferenceStorageLoopInterface.lean` | Headerless storage-child traversal with exact intrinsic row copying, pointer/framing/gap guarantees and total capacity refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageLoop.lean` | Finite headerless child-loop execution, exact allocator growth and pointer/framing transport, total size refusal. |
 | `Backend/MemoryCopies/FixedReferenceStorageLoopControls.lean` | Mixed 2/0/64-element children, retained pointers/payloads, suffixes, actual later-refusal prefix and zero-count padded reservation. |
