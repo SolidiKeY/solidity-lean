@@ -2,6 +2,7 @@
 from pathlib import Path
 import json,hashlib,collections
 root=Path(__file__).resolve().parents[3];owned=Path(__file__).resolve().parent
+bulk=owned/'artifacts/h68-bulk'
 variants={}
 def tstr(n):return n.get('typeDescriptions',{}).get('typeString') if isinstance(n,dict) else None
 def subtype(n,parent,key):
@@ -34,6 +35,6 @@ for path in sorted((root/'tests/solc').rglob('*.ast.json')):
   elif isinstance(n,list):
    for i,child in enumerate(n):walk(child,pointer+'/'+str(i),parent,key,fun,unit)
  walk(data)
-result={'schemaVersion':1,'basis':'dc2718096308da55e57e713a4d3b37aec4d47606','variantCount':len(variants),'byKind':dict(collections.Counter(v['variant']['nodeType'] for v in variants.values())),'variants':list(variants.values()),'boundary':'Observed variants in existing fixtures, including possible intentional mutations. No support, compiler authenticity, admission, intrinsic or backend proof is inferred.'}
-(owned/'fixture-variants.json').write_text(json.dumps(result,indent=2)+'\n')
+result={'schemaVersion':1,'basis':'4095d848297d87e374b4f069692511cfe4a36cf7','variantCount':len(variants),'byKind':dict(collections.Counter(v['variant']['nodeType'] for v in variants.values())),'variants':list(variants.values()),'boundary':'Observed variants in existing fixtures, including possible intentional mutations. No support, compiler authenticity, admission, intrinsic or backend proof is inferred.'}
+(bulk/'fixture-variants.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps({'variants':result['variantCount'],'byKind':result['byKind']},sort_keys=True))

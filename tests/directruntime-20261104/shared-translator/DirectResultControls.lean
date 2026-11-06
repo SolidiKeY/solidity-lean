@@ -11,7 +11,7 @@ private def require (p : Bool) (message : String) : IO Unit := do
   unless p do throw (IO.userError message)
 private def controls : IO Unit := do
   let owned := "tests/directruntime-20261104/shared-translator/"
-  let fixture ← checked (Json.parse (← IO.FS.readFile (owned ++ "ComposedReaders.ast.json")))
+  let fixture ← checked (Json.parse (← IO.FS.readFile (owned ++ "artifacts/h68-bulk/ComposedReaders.ast.json")))
   let ast ← checked (fixture.getObjVal? "ast")
   let some source := (J.nodes ast).find? (fun n => J.kind n == "ContractDefinition")
     | throw (IO.userError "fixture contract missing")
