@@ -350,3 +350,37 @@ unverified. The scanner acceptance suite passed 21 tests and the audit index
 suite passed 2. This is external tool validation, not a Lean proof. Full Lean
 signature binding, declaration coverage, live ownership, backfill and final
 repository gates remain pending.
+
+## Fixture-local import observation
+
+The isolated fixture now records Lean's effective imports, search path and
+fresh `findOLean` lookups after import. The accompanying observer checks
+first-package-root selection, refuses ambiguous roots and missing artifacts,
+and hashes regular `.olean` files and loader sidecars. It compares snapshots
+before and after the observed consumer, checks the probe and consumer logs,
+and recaptures the currently resolved artifacts. The fixture driver also
+checks selected source and command-path hashes before and after compilation.
+Its completed run observed 1,561 modules and passed all five pinned
+signature controls, the guarded missing-record check and the axiom checks.
+Thirty Python tests passed, including changed and forged snapshots, shadowed
+roots, sidecar and symlink changes, malformed inputs and swapped source paths.
+
+This is a fixture-local observation, not an attestation. The lookup occurs
+after import; matching snapshots cannot exclude transient replacement, prove
+which bytes Lean loaded, or prove a source-to-artifact relationship. The
+command paths and other extra paths are caller-supplied and may be wrappers;
+hidden runtime dependencies and ancestor resource limits are not established.
+Even fabricated mutually consistent logs and artifacts can satisfy the local
+checks. Records remain `environment_binding: unbound`, and the scanner does
+not consume them or promote any ownership candidate. The fixture commands are
+bounded individually; resource headroom checks are point-in-time checks.
+Evidence and its SHA256 manifest are outside Git under
+`/workspace/h62-duplication-scanner-evidence/environment-observation/`.
+
+Independent finder and skeptic reviews used no Lean server and confirmed the
+above boundary. These controls validate tooling behavior; they do not prove
+serializer injectivity or a project-wide signature binding. The expanded
+fixture workload is not a matched performance comparison; production scanner
+code did not change in this checkpoint. Full repository gates remain pending.
+The three additional Lean files are test-only modules; any eventual area-module
+registration requires owner approval and must not be inferred from this fixture.
