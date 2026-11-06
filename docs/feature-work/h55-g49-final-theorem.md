@@ -19,6 +19,58 @@ The current section below supersedes older H55 statements about missing public
 theorem syntax or unavailable typed counts; the older checkpoint remains history.
 No partial checkpoint or prerequisite pass is full completion.
 
+## H71 MRS shared-contract identification and updated owner routes
+
+MRS requests the exact shared imports, qualified declarations and accepted base
+at reported owner head `5f7bb1441566aaad64a34436904afc61de762fd2`.
+The shared H64 template is published on the assigned H55 branch at
+`a4411be6e9292799c0e80b7d40f1d65315b31146`; publication on master or acceptance
+by MRS is not asserted. Original H55 base remains `4d3790ea`; the reported requester head is
+`5f7bb144`. Its base and accepted-base compatibility remain unverified. Import `Solidity.Roadmap.G49Final.PassCorrect` for
+`Solidity.Roadmap.G49Final.Behaviour` and
+`Solidity.Roadmap.G49Final.PassCorrect`. Import
+`Solidity.Roadmap.G49Final.PassCorrectAdapters` for
+`Solidity.Roadmap.G49Final.Behaviour.ofLang` and
+`Solidity.Roadmap.G49Final.cert_adapter`. These identify the shared declarations;
+no replacement API or equivalence theorem is proposed.
+
+[The exact source manifest](../../tests/h55/g49-final-theorem/h71-contract-identification.json)
+identifies `/workspace/h71-g49-contract-identification/shared-contract-source.tar.gz`,
+SHA256 `8c48e999bca0e23b09b014bf657aad7f782dd793c7b2a706b14e5517394a1164`.
+It contains all seven source modules in the adapters' import closure, per-file
+hashes and two unchanged selected typed rows from the prior successful run.
+No compiled Lean artifacts are included. A receiver must reconcile its own base
+and toolchain and re-elaborate; source publication supplies neither accepted base
+nor 4.35 compatibility. No new Lean run was made under the timing HOLD.
+
+`cert_adapter` constructs PassCorrect from the full existing Roadmap.Cert,
+original domain proof and exact output equation. This is one direction, not a
+claimed equivalence or an upgrade from ReturnClaim/BareRevertClaim. BridgeGoal
+and p1_frame_bridge remain H68 schema names, not new Lean APIs in this packet.
+MRS retains its ordinary P1-CALL and P4/G37.03 family proof obligation. Its
+canonical frame endpoint/program/map/resource bindings, independent approved
+domain and complete session/profile/origin/outcome transports remain required
+producer deliverables. Local successful-return and bare-revert-only claims do
+not discharge them; no V12/V17/V13 P1 scope or H58 unification is transferred.
+
+Statement-graph head `7974163ce7443d49e19e84abedaab95c41d386f7` reports five
+blocked pending-input placeholders, zero production typed declarations and
+unknown open-premise count. The local fourteen conditional selected exports,
+450 edges and 215 unexported dependency targets do not substitute for that
+production selection. Contracts1104 is now routed to migrate-roadmap: the
+question is closed by explicit wait, while the underlying guard failure remains
+reported and unchanged. The Hash overlay retains the same reported SHA256;
+it is unapplied here and full migration/Syntax.Raw gates remain pending.
+
+Current response/evidence: `/workspace/h71-g49-contract-identification`.
+Only metadata and this owned document change. No owner agreement, delivery
+acceptance, canonical bridge, proof/guard/pin edit or full-goal completion is
+inferred. The +14.46% timing HOLD remains operative.
+Independent finder/skeptic reviews confirmed packet integrity and boundaries.
+Skeptic caught requester-head/base wording; it was corrected and reinspected,
+with no further confirmed defect. Neither reviewer used Lean/server/build/tests.
+Metadata and documentation-path checks pass; no new proof gate is claimed.
+
 ## H71 MIC reply: canonical binding dependency remains open
 
 MIC reply at `a48125fe5435c9d2b27036554c2e0007323b59ab` requests the concrete
