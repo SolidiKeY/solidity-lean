@@ -13,8 +13,8 @@ mapped modules. There are zero uncovered mapped statements. Of these, 54 have
 proposition premises, 53 have data/type/instance binders only, and 70 have no input
 binders. The 70 empty packages are explicit census accounting, not additional
 semantic feasibility coverage. The success/runtime phase and matched after timings now also pass. Full normal
-repository validation and the final handoff/review remain pending; the assignment
-must not be marked complete until those gates pass.
+repository validation remains unfinished. H82 retirement explicitly stops this worker;
+the successor receives the preserved queue and evidence. This is not completion.
 
 | Checkpoint | Result |
 |---|---|
@@ -291,3 +291,39 @@ attempt was deliberately cancelled with verified cleanup to fix the provenance
 finding; its completed cache artifacts are retained and it is not a passing gate.
 No residual proof/runtime review finding remains. Do not merge, push, publish,
 pre-gate or mark the persistent goal complete before full final validation passes.
+
+## H82 stop-and-handoff (final worker state)
+
+Human retirement overrides local continuation. Implementation and validation are
+stopped. The active full retry was cancelled through its owned guard after
+89.268 seconds; exit −15, reason cancelled, cleanup_complete=true, no swap,
+maximum one heavy Lean job. This is not a passing gate. The prior full retry
+reached 5281/6117 before its reserve stop. No source/proof failure was observed.
+
+Handoff goes to `solidity-parallel-20261103/abi-entry`, which integrates the final
+head. No scope takeover precedes this final stopped/head acknowledgement. No
+push was made: H71 push permission is unavailable in this worker, while its
+original instruction explicitly prohibits pushing. Original branch/VM/evidence
+remain intact. No Claude-owned source was edited or message sent.
+
+The goal tool catalogue exposes only stop_goal with outcomes complete/blocked.
+There is no pause operation or PAUSED parameter. Consequently the existing goal
+was neither completed nor falsely blocked, created or reset. PAUSED could not be
+set through the exposed tools. This worker must not resume automatically.
+
+Original assignment, complete original work/backfill queues and exact frozen
+scope are committed under tests/h62/item2/audit-abi-world/handoff/. The full
+thread-copy prompt hash is distinguished from the historical coordinator-only
+goal-rendering hash; unavailable bytes are not claimed authenticated by that hash.
+The exported cumulative patch/bundle contain those files, with SHA256SUMS.
+
+Open obligations transferred: complete normal ./run-lean.sh plus final SolKey sort
+output under unchanged bounds; cache-policy matched after timing (current before
+1.244709138 s); final full-gate review/acceptance; coordinator registration and
+integration of the supplied fragment. Inventory177, witnesses177, fidelity177,
+seven success theorems, ten external programs, seven accounting negatives, two
+provenance negatives, five guard controls and four scanner tests already pass.
+Scanner/fixture/reproduction backfill is implemented; no additional candidate
+was assigned. No theorem repair ticket or vacuity escalation is outstanding.
+Full validation/resource wait is retained; retirement prevents further local work.
+No RUNTIME_GATE_PASS or full-assignment completion is claimed.
