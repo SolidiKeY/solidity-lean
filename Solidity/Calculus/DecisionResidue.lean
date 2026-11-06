@@ -183,9 +183,9 @@ theorem decideMem_unknown_iff {φ : Fml C []} :
     decideMem φ = .unknown ↔ φ.memRefuses = true := by
   unfold decideMem Fml.memRefuses
   split
-  · split
-    · exact decideLeafA_unknown_iff
-    · exact decideStruct_unknown_iff
+  · cases ((mxNegativePrepare φ).body.hoist 1024).mxTop with
+    | some ψ => exact decideLeafA_unknown_iff
+    | none => exact decideStruct_unknown_iff
   · exact decideGiven_unknown_iff
 
 theorem decideKInt_unknown_iff {φ : Fml C []} :
@@ -251,10 +251,8 @@ theorem firstKnown_unknown_iff {φ : Fml C []} :
     · rename_i hu
       simp only [hu, true_and]
       exact firstKnown_unknown_iff ts
-    · rename_i v hv
-      constructor
-      · intro h; exact absurd h (by rename_i hne; exact hne)
-      · intro h; exact absurd h.1 (by rename_i hne; rw [hv]; exact hne)
+    · rename_i hv
+      exact ⟨fun h => absurd h hv, fun h => absurd h.1 hv⟩
 
 theorem decideHash_unknown_iff {φ : Fml C []} :
     decideHash φ = .unknown ↔ φ.hashRefuses = true := by

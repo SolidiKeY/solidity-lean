@@ -948,6 +948,25 @@ pin in 2,262 s; this is not a controlled comparison with the historical timing.
 The 300 s budget of the gate covers TestSuite modules only.
 ## M7-next · A checkpoint of the theorem (in progress)
 
+**`DecisionTheorem'` and `Fml.Residue` (lane `m7-decision`, 2026-11-06).**
+The user chose a route-refusal residue (Q1, recorded in
+[the m7-next handoff](feature-work/m7-next.md)).
+`Calculus/DecisionResidue.lean` defines `Fml.Residue`, the leaves every
+route of `decideGoal` refuses, each refusal named (`RouteRefusal`) and
+computed from the route's own front end; it is decidable, kernel-evaluable
+and exact (`residue_iff_unknown`). `DecisionTheorem'` proves that on every
+in-target leaf off the residue `decideGoal` proves it (valid under the goal's
+own hash premise) or refutes it (a certified state). **Totality off the
+residue holds by definition: this is not a completeness result**, and it
+says nothing about which in-target leaves are answered.
+`decisionTheorem_iff_residue_disjoint` restates the unchanged
+`DecisionTheorem` as "the residue meets no in-target leaf"; later milestones
+may only shrink the residue. VA1's source classes that are decidable from
+the leaf are reported as finer reasons (`Fml.residueReasons`); they are not
+residue tests. Fixtures, witness and negative controls:
+`Examples/DecisionResidue.lean`.
+
+
 The ledger-quantifier lane implements feature 33; repository-wide validation
 is recorded in its handoff. This does not
 execute the broader checkpoint proposal below, introduce a `Residue`, or
