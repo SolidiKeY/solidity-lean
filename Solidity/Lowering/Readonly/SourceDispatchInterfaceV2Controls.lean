@@ -66,6 +66,36 @@ theorem migrated_all_callbacks :
 
 theorem migrated_all_at : SourceHistory.At global 3 := all_at global 3
 
+/-! Joint satisfiability: every hypothesis of each V1 branch lemma that V2
+routes through holds together, at one global, frame, input and bound. -/
+
+theorem function_jointly_satisfiable : ∃ (G : Glob EB) (F : Fr) (input : Bytes) (n : Nat) (d : Decl),
+    SourceHistory.At G n ∧ G.pickFn F input = some d ∧ input.isEmpty = false :=
+  ⟨global, FC, SourceDispatchControls.cb, 3, cbDecl, all_at global 3, function_selected, rfl⟩
+
+theorem getter_jointly_satisfiable : ∃ (G : Glob getterEnv) (F : Fr) (input : Bytes) (n : Nat)
+    (d : Decl) (ps : List STy) (r : STy),
+    SourceHistory.At G n ∧ G.pickFn F input = none ∧ G.pickGetter F input = some (d, ps, r) :=
+  ⟨getterGlobal, getterFrame, getterInput, 3, getterDecl, [], uint, all_at getterGlobal 3,
+    getter_no_function, getter_selected⟩
+
+theorem special_jointly_satisfiable : ∃ (G : Glob EB) (F : Fr) (input : Bytes) (n : Nat),
+    SourceHistory.At G n ∧ G.pickFn F input = none ∧ G.pickGetter F input = none :=
+  ⟨global, FC, [], 3, all_at global 3, pickFn_empty _ _, pickGetter_empty _ _⟩
+
+/-! Negative controls: the two frozen V1 empty-selected lemmas have
+unsatisfiable premises for every environment, global, frame and input. -/
+
+theorem v1_getter_empty_vacuous {E : Env} (G : Glob E) (F : Fr) (input : Bytes) (fd : Decl)
+    (present : G.pickFn F input = some fd) (empty : input.isEmpty = true) : False := by
+  have nonempty := selected_nonempty G F input fd present
+  rw [empty] at nonempty
+  cases nonempty
+
+theorem v1_special_empty_vacuous {E : Env} (G : Glob E) (F : Fr) (input : Bytes) (fd : Decl)
+    (present : G.pickFn F input = some fd) (empty : input.isEmpty = true) : False :=
+  v1_getter_empty_vacuous G F input fd present empty
+
 end Solidity.Lowering.Readonly.SourceDispatchV2.Controls
 
 #print axioms Solidity.Lowering.Readonly.SourceDispatchV2.selector_length

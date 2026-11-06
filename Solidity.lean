@@ -1394,6 +1394,8 @@ import Solidity.Backend.Passes.SourceAdditionValuePins
 import Solidity.Backend.Passes.SourceCallBoundary
 import Solidity.Backend.Passes.SourceCallControls
 import Solidity.Backend.Passes.SourceCallFrame
+import Solidity.Backend.Passes.SourceCallProducer
+import Solidity.Backend.Passes.SourceCallProducerControls
 import Solidity.Backend.Passes.SourceNarrowingValue
 import Solidity.Backend.Passes.SourceNarrowingValueControls
 import Solidity.Backend.Passes.SourceNarrowingValuePins
