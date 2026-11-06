@@ -1,6 +1,8 @@
 # H62 item 6: EVM toolchain migration
 
-Status: **blocked; full assignment unfinished**. The old census/build is complete.
+Status: **H82 retired/stopped by explicit user PAUSE; full assignment unfinished**.
+The platform goal API has no PAUSED operation; this capability failure is
+reported rather than substituting complete/blocked or scheduling continuation. The old census/build is complete.
 The new compiler fails in an owner dependency and the observed prerequisite
 slowdowns exceed the frozen STOP threshold. No production EVM file was changed.
 
@@ -199,3 +201,44 @@ byte-identical to the pinned base; the new lane document introduced no missing
 citation. **B-DOC-CITE** is a pre-existing out-of-scope owner request, not a waived
 check. No cache file was invented and no Mathlib dependency was added. The root
 handoff records this failed gate alongside the syntax/performance blockers.
+
+## Final H82 retirement checkpoint
+
+Successor/handoff_to: solidity-h62-6-20261106/migrate-root-gate. The successor
+queue relay was accepted before the user ordered retirement. This worker makes
+no new proof implementation and stops after final head acknowledgement. All
+production EVM files, statements, definitions, budgets, axiom sets and exclusions
+remain unchanged. No new timing or Lean run is performed, and the explicit
+performance STOP is retained.
+
+The complete original assignment, original goal context, unabridged work/backfill
+queue, exact280-entry scope, complete current H82 authority, checksum-matching
+H78 root request and every pending item/wait are committed under
+`tests/h62/item6/migrate-evm/handoff/`. Their SHA256SUMS is committed as well.
+Identical copies and actual delivered coordinator inputs are in the evidence
+archive, using portable archive-relative paths. The original rendered-prompt
+byte file is unavailable; full first-user assignment is transcribed from the
+original thread, with scope/120 owner keys checked against the verified registry.
+Its actual file hash is reported separately; no false rendered-digest match is
+asserted. The copied H78 ticket exactly matches the supplied749df2f...41f5 digest.
+
+H82 removes pending exact-file permission waits for pure statement-preserving
+proof/import/doc work; B-DOC-CITE is now successor work, not a permission wait.
+Definition-body/API/budget/axiom/exclusion changes still require owner/frozen-pair
+rules. H78 visibility and old/new generated public API/shim evidence remain
+incomplete. Implemented shims: none; no public generated exclusion is authorized.
+Full H68/H69/H71/H80/H81 policy texts and the H78 requirements/staged owner files
+were not delivered here, so host paths are recorded only as provenance.
+
+No H71 push authorization was verifiable from supplied inputs. Original no-push
+permission therefore remains; no push (including coordination refs), master
+change or external/Claude-owner message is sent. Final cumulative patch/bundle,
+head-specific handoff, evidence archive and checksums are exported locally for
+the survivor. Prior VM, branches, artifacts and proof caches are preserved.
+
+PAUSE TOOL LIMIT: only stop_goal(complete|blocked) is exposed; there is no PAUSED
+operation. The requested platform transition cannot be performed. The worker
+obeys the explicit user pause and will not auto-continue, mark complete, create
+or reset a goal, or substitute a different goal outcome. The final stopped/head
+acknowledgement is the boundary for successor integration; no live producer
+ownership is silently transferred.

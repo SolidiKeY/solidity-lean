@@ -38,8 +38,9 @@ with archive.open('wb') as raw:
                 with p.open('rb') as source:tar.addfile(info,source)
 handoff=dest/'HANDOFF.md'
 document=(ROOT/'docs/feature-work/h62-6-migrate-evm.md').read_text().replace('](../../', ']('+str(ROOT)+'/')
-handoff.write_text(f'Committed head: {head}\nBase: {BASE}\nRepository: {ROOT}\nBranch: {BRANCH}\n\nGoal status: BLOCKED, unfinished. No new-toolchain rerun until STOP/owner conditions resolve.\nPrivate original proof caches remain at {E}; cache object hashes are in the evidence archive.\n\n'+document)
+goal_label='USER PAUSED / worker retired; platform PAUSED operation unavailable; assignment unfinished' if (ROOT/'tests/h62/item6/migrate-evm/handoff/h82-retirement-authority.txt').exists() else 'BLOCKED, unfinished'
+handoff.write_text(f'Committed head: {head}\nBase: {BASE}\nRepository: {ROOT}\nBranch: {BRANCH}\n\nGoal disposition: {goal_label}. No implementation continuation by retired worker; successor preserves STOP/owner conditions.\nPrivate original proof caches remain at {E}; cache object hashes are in the evidence archive.\n\n'+document)
 checks=dest/'SHA256SUMS';paths=[patch,bundle,handoff,archive]
 checks.write_text(''.join(sha(p)+'  '+str(p)+'\n' for p in paths))
-record={'head':head,'base':BASE,'repository':str(ROOT),'branch':BRANCH,'status':'blocked','paths':{'original_patch':str(patch),'bundle':str(bundle),'handoff':str(handoff),'evidence':str(archive),'checksums':str(checks)},'sha256':{p.name:sha(p) for p in paths},'archived_review_files':len(review_files),'private_cached_objects':len(cache)}
+record={'head':head,'base':BASE,'repository':str(ROOT),'branch':BRANCH,'status':'partial' if 'USER PAUSED' in goal_label else 'blocked','disposition':goal_label,'handoff_to':'solidity-h62-6-20261106/migrate-root-gate','paths':{'original_patch':str(patch),'bundle':str(bundle),'handoff':str(handoff),'evidence':str(archive),'checksums':str(checks)},'sha256':{p.name:sha(p) for p in paths},'archived_review_files':len(review_files),'private_cached_objects':len(cache)}
 (ART/'EXPORT.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))
