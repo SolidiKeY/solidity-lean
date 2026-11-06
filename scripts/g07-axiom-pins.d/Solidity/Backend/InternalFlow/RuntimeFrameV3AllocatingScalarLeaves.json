@@ -1,0 +1,8 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.binary_eq": [
+  "propext"
+ ],
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3AllocatingScalarLeaves.lean:Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingScalarLeaves.closeAssignment": [
+  "propext"
+ ]
+}

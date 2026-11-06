@@ -7,7 +7,7 @@ namespace Solidity.Lowering.V07.UnsignedCasts
 open UnsignedNarrowing (ty modulus_range)
 
 theorem allowed (E : Source.Env) (bits : Nat) (valid : bits % 8 = 0 ∧ 8 ≤ bits ∧ bits ≤ 256) :
-    (Source.STy.int .u256).explicit E.isBase (.int (ty bits valid)) = true := by
+    (Source.STy.int .u256).explicit E.isBase E.mapFree (.int (ty bits valid)) = true := by
   simp only [Source.STy.explicit,ty,Source.IntTy.u256,BEq.beq,decide_true,Bool.true_or,Bool.or_true]
 
 def castValue {C : Contract} {Γ : Ctx} (bits : Nat) (v : Val C Γ .uint) : Val C Γ .uint :=

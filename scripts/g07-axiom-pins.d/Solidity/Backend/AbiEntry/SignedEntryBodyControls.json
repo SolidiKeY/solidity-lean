@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.body_failure_not_decoder_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.dirty_still_rejected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.fuel_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.nonpayable_before_any_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.payable_signed_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.raw_signed_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.short_before_word_and_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/SignedEntryBodyControls.lean:Solidity.Backend.AbiEntry.SignedEntryBodyControls.zero_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
