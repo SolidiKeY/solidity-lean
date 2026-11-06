@@ -504,3 +504,25 @@ batches, records and module inputs are hashed off Git in
 `tests/h55/shared-fixtures/g19-exec-evidence.sha256`. This is not an exact G19
 scope determination, semantic case review, migrated-code acceptance or
 independent review. All original G19 scope and final gates remain open.
+
+## Source custom-error semantic review (partial)
+
+The named public statements in `SourceCustomErrorControls` and
+`SourceCustomErrorFailureControls` preserve these actual Source observations;
+all stated pipeline, static and horizon parameters remain part of the facts.
+
+| Declarations | Original observations to preserve |
+|---|---|
+| Custom-error `populated_snapshot`, `error_member`, `assign_false`, `read_false` | Complete initial account/transient/journal/heap/event/log snapshot, declaration membership, and actual local assignment/read for arbitrary state and static mode. |
+| `arguments_execute`, `encoding_execute`, `signature_utf8`, `signature_bytes` | Reached local/hash effects, exact converted values and encoding, and exact UTF-8 signature bytes. |
+| `actual_execution`, `intrinsic_selector_payload`, `encoded_length`, `exact_payload_length`, `complete_machine` | Actual custom-error revert and reached state for either static mode, intrinsic selector transport, 96-byte body and 100-byte payload, and retained machine/heap observations. |
+| `zero_horizon`, reversed argument/encoding/execution facts, `wrong_argument_order`, `static_is_not_plain_revert`, `argument_timeout`, `panic_before_payload` | Preserve distinct timeout, reordered-value inequality, nonempty static custom-error payload and division-by-zero panic before error-payload construction. |
+| Failure `converted_hash_head`, `changed_local_tail_failure`, `argument_prefix_then_failure`, `argument_failure_boundary`, `observed_argument_failure`, `wrong_argument_reset` | Preserve the hash allocation and changed local before panic, actual statement boundary and `EM.attempt` observation, and inequality from the original unallocated state. |
+| Failure `nested_panic_execution`, `nested_timeout`, `nested_intrinsic_panic_bytes`, `rethrow_binary`, `observed_rethrow`, `wrong_truncated_selector`, `rethrow_not_panic` | Preserve nested panic versus timeout, intrinsic panic code 0x12 bytes, actual binary rethrow and attempt observation, truncated-selector inequality and the rethrow/panic distinction. No catch-dispatch claim is added. |
+| Failure `record_populated_snapshot`, `record_members`, `record_arguments`, `record_encoding_failure`, `record_execution_failure`, `record_complete_state` | Preserve the record environment and membership, reached local/heap effects, exact stuck `not ABI-encodable` result, and all recorded state and heap objects. |
+| Failure `wrong_encoding_rollback`, `encoding_failure_not_plain_revert`, `record_zero_horizon` | Preserve the negative automatic-reset and plain-revert controls, and zero-horizon timeout at the initial state. |
+
+This records named public statements in these two controls only, not the
+complete cross-family census, all private/generated cases or any migrated
+statement acceptance. The existing kernel Source candidate inventories remain
+baseline evidence, not independent review.
