@@ -15,6 +15,11 @@ def valid_digest(value, pattern):
     return isinstance(value, str) and pattern.fullmatch(value) is not None
 
 
+
+def valid_path(path):
+    return (isinstance(path, str) and path.endswith(".lean") and not path.startswith("/")
+            and "\\" not in path and all(part not in ("", ".", "..") for part in path.split("/")))
+
 def validate(inventory, binding, records):
     if not isinstance(inventory, list) or not inventory or not isinstance(binding, dict) or not isinstance(records, list):
         return ["invalid inventory, binding or records"]
@@ -24,11 +29,11 @@ def validate(inventory, binding, records):
         return ["invalid provenance binding"]
     expected = {}
     for row in inventory:
-        if (not isinstance(row, dict) or not isinstance(row.get("path"), str) or
-                not row["path"] or not valid_digest(row.get("sha256"), SHA) or row["path"] in expected):
+        if (not isinstance(row, dict) or not valid_path(row.get("path")) or
+                not valid_digest(row.get("sha256"), SHA) or row["path"] in expected):
             return ["invalid or duplicate inventory"]
         expected[row["path"]] = row["sha256"]
-    errors, seen = [], set()
+    errors, seen, mono_intervals, boot_intervals = [], set(), [], []
     for record in records:
         if not isinstance(record, dict) or not isinstance(record.get("path"), str):
             errors.append("invalid record path")
@@ -60,13 +65,25 @@ def validate(inventory, binding, records):
         if any(type(v) is not int or v < 0 for v in starts):
             errors.append(f"invalid clock values: {path}")
             continue
-        mono = (starts[1] - starts[0]) / 1e9
-        boot = (starts[3] - starts[2]) / 1e9
+        mono_ns = starts[1] - starts[0]
+        boot_ns = starts[3] - starts[2]
+        if not 0 < mono_ns <= 300_000_000_000 or not 0 < boot_ns <= 300_000_000_000:
+            errors.append(f"invalid or inconsistent timing: {path}")
+            continue
+        mono_intervals.append((starts[0], starts[1], path))
+        boot_intervals.append((starts[2], starts[3], path))
+        mono = mono_ns / 1e9
+        boot = boot_ns / 1e9
         wall = record.get("wall_seconds")
         if (type(wall) not in (int, float) or not math.isfinite(wall) or not 0 < wall <= 300 or
                 not 0 < mono <= 300 or not 0 < boot <= 300 or
                 abs(mono - boot) > max(.05, boot * .01) or abs(wall - mono) > .05):
             errors.append(f"invalid or inconsistent timing: {path}")
+    for label, intervals in (("monotonic", mono_intervals), ("boottime", boot_intervals)):
+        intervals.sort()
+        for previous, current in zip(intervals, intervals[1:]):
+            if current[0] < previous[1]:
+                errors.append(f"overlapping {label} intervals: {previous[2]} and {current[2]}")
     errors.extend(f"missing: {path}" for path in sorted(expected.keys() - seen))
     return errors
 

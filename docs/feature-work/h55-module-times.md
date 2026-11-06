@@ -369,3 +369,15 @@ only: a forged set of matching inputs can pass; it does not authenticate H56,
 clock readings, inventory, source/tool/cache or process execution, and it is not
 a production gate. The 34-method synthetic suite passes. Independent reviews,
 H56 actual measurements and all full-scope acceptance remain pending.
+
+## Receipt seriality correction
+
+A local review found that the consistency checker previously accepted two
+rows that each claimed one Lean job even if their recorded intervals overlap.
+It now rejects overlapping monotonic or boot-time intervals, unsafe inventory
+paths and oversized clock deltas; touching endpoints remain allowed. The
+36-method synthetic suite passes, including overlap and extreme-clock controls.
+This only checks supplied claims and cannot authenticate actual concurrency,
+clocks or execution. It is not an independent review, an H56 measurement or
+production acceptance. The H28 goal pause is confirmed by the coordinator, but
+its exact original prompt and final bundle are still unavailable on this VM.
