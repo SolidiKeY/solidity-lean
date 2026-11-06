@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "integrated_at": "1f1d428a64231f3a2eeb160daaac7000aa54d05c",
+  "member_final_heads": [
+    "a6cb9553091e615aeea59bce3ecfdb333f9a17ea",
+    "9ced4aa2d8b7460e0a73ef897764d0ea8e619cb9",
+    "a06d064670dc755496c520136d067b0aad429381",
+    "42e78a67e07fd786cb744036e7a4e53b0324ad65",
+    "33b5001cc5cfa56445c7291a6492a2d7f16c5978"
+  ],
+  "metadata_checksums": "H82b archive, manifest, SHA256SUMS and all payload checksums verified",
+  "gates": [
+    {
+      "name": "infer-helpers Python",
+      "status": "pass",
+      "tests": 6
+    },
+    {
+      "name": "generic Python",
+      "status": "pass",
+      "tests": 22
+    },
+    {
+      "name": "axiom-pin checker",
+      "exit": 0,
+      "pins": 15584,
+      "errors": 0,
+      "unrecorded_changes": 1304,
+      "boundary": "Not full acceptance; shared registry reconciliation remains outstanding"
+    },
+    {
+      "name": "Numeric MCP diagnostics",
+      "status": "incomplete",
+      "reason": "No result record; orphaned MCP server stopped; no passing claim"
+    }
+  ],
+  "reviews": {
+    "finder": "PASS after fixing full Frontend path/status/mode and untracked-file guard",
+    "skeptic": "Same initial scope gap confirmed; serial launcher flags checked"
+  },
+  "limitations": "Source intake and Python checks only. All original unfinished proofs, failed gates, exact meaning/axiom checks, comparative timings and backfill remain open. No toolchain change, producer-source edit or push."
+}
