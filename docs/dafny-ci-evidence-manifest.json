@@ -9,5 +9,14 @@
   },
   "reviewMember": "REVIEWS.md",
   "sourceMember": "SOURCE-DRAFT.json",
-  "boundary": "CI digest-only is not full inventory/parity evidence. Failures retained; final committed clean checkout and hosted runner not yet observed. Mandatory parity gate unchanged and missing-input exit1 retained."
+  "boundary": "CI digest-only is not full inventory/parity evidence. Failures retained; final committed clean checkout and hosted runner not yet observed. Mandatory parity gate unchanged and missing-input exit1 retained.",
+  "followup": {
+    "sourceHead": "520a60802",
+    "archive": {
+      "path": "/workspace/dafny-parity-ci-20261106/ci-followup-evidence.tar.gz",
+      "bytes": 16839,
+      "sha256": "c408ec4aea1c83dd764ff3f5a324a5fcb6ff8fd39349cedb41f2cff60bb81f44"
+    },
+    "boundary": "391pass1fail9skip cleancheckout failure retained; portable sibling expectation repaired and focusedextensionpasses. New committed cleanfullrun/hostedCI pending."
+  }
 }

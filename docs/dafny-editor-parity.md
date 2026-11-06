@@ -1331,3 +1331,25 @@ this checkpoint; no blocking-CI or parity success is claimed.
 All486 obligations/frozen270 remain. Full build/TestSuite/timed strict, native
 macOS, paired rendered/proof and performance/scaling/adversarial matrices, real
 metadata producer integration and paired independent row judgments remain open.
+
+
+### Portable sibling expectation and H70 startup boundary
+
+Clean checkout at `520a60802` gave391Node passes/1failure/9explicit skips;
+offline digest checks passed and strict missing-input inventory/parity both
+exited1. The remaining `/workspace/other` expectation is now derived from the
+checkout's sibling directory, preserving relative backend semantics. Focused
+fresh extension tests pass; independent finder/skeptic found no defect. The
+[CI followup receipt](dafny-ci-evidence-manifest.json) preserves that failure;
+a new clean committed full run and hosted GitHub observation remain required.
+
+H70's exact `3efa0a3832de30e514ca9d2fd286f129c0ca9984` object was fetched read-only,
+without integration. The [startup inspection manifest](dafny-startup-owner-evidence-manifest.json)
+binds source inspection: the measured offline browser startup includes HTML,
+Monaco, compiler worker and compiled-WASM readiness. Shared editor JS modules
+are imported, but desktop extension startup is not this offline boot path.
+No causal attribution follows without original receipts/asset binding. The
+hash-bound841027byte native-browser evidence archive/index is absent here.
+No stopped benchmark rerun, threshold/metadata/profile change or web/producer
+scope takeover occurred. This is an evidence wait; independent editor work
+continues. Kernel metadata and Source.Horizon resource waits remain separate.
