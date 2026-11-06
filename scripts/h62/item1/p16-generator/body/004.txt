@@ -1,0 +1,7 @@
+/-! RawDeclarationFrame bridges existing typed declaration snapshots into the
+existing raw frame at the actual named Source context, with exact word view,
+clean-backup/world and conditional coherence laws. Its concrete Boolean literal
+runner grows ctx.push and retains the original frame on timeout. The Source law
+observes the explicit stored-clean projection; it does not imply dirty-read
+cleanup, lexical admission, or general context-growing loop composition.
+Dirty-word/growth/refusal controls are in Solidity.Yul.Checks.RawDeclarationFrame. -/
