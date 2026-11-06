@@ -1,4 +1,4 @@
-import Solidity.Frontend.StatementGrammarH28.AtomConditional
+import Solidity.Frontend.StatementGrammarH28.AtomSimple
 
 /-! Arbitrarily nested statements and item lists over expression atoms.
 
@@ -134,6 +134,17 @@ inductive AtomStmt : {k : SCtx} → Syn (.stmt k) → List Tok → Nat → Prop 
       AtomStmt (Syn.forStmt (l := l) .none c v x)
         ([.kw .for_, .punct .lparen, .punct .semi] ++ cs ++ [.punct .semi] ++ vs ++
           [.punct .rparen] ++ ts) (d + ca + va + 1)
+  | simpleS {k : SCtx} {x : Syn .simple} {ss : List Tok} {a : Nat} :
+      SimpleAtom x ss a → simpleHeadList ss = true →
+      AtomStmt (k := k) (.simpleStmt x) (ss ++ [.punct .semi]) (a + 1)
+  | forInit {l u : Bool} {x : Syn .simple} {ss : List Tok} {a : Nat}
+      {c v : Syn (.opt .expr)} {cs vs : List Tok} {ca va : Nat}
+      {b : Syn (.stmt ⟨true, u⟩)} {ts : List Tok} {d : Nat} :
+      SimpleAtom x ss a → simpleHeadList ss = true →
+      OptAtom .semi c cs ca → OptAtom .rparen v vs va → AtomStmt b ts d →
+      AtomStmt (Syn.forStmt (l := l) (.some x) c v b)
+        ([.kw .for_, .punct .lparen] ++ ss ++ [.punct .semi] ++ cs ++ [.punct .semi] ++ vs ++
+          [.punct .rparen] ++ ts) (d + a + ca + va + 1)
 
 inductive AtomItems : {k : SCtx} → Syn (.list (.item k)) → List (List Tok) → Nat → Prop where
   | nil {k : SCtx} : AtomItems (Syn.nil (c := .item k)) [] 0
@@ -151,7 +162,9 @@ end
 /-- No atom statement starts with `else`. -/
 theorem atom_stmt_no_else_input {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
     (h : AtomStmt x ts d) (s : St) : NoFollowingElse (locatedInput ts s) := by
-  cases h <;> intro bad <;> cases bad
+  cases h
+  case simpleS _ hh => exact simple_no_else hh _ s
+  all_goals (intro bad; cases bad)
 
 theorem atom_stmt_tokens_nonempty {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
     (h : AtomStmt x ts d) : ts ≠ [] := by
@@ -195,9 +208,11 @@ theorem atom_item_step {k : SCtx} {x : Syn (.stmt k)} {ts : List Tok} {d : Nat}
       (fun p => .ok (some p.1, p.2)) = .ok (some (.stmtItem x), s) := by
     rw [parse]
     rfl
-  cases h <;>
+  cases h
+  case simpleS _ hh => exact simple_item_step m hh parse
+  all_goals
     simp only [blockLeafStep, item, braces, pu, List.cons_append, List.nil_append,
-      List.append_assoc] at lifted ⊢ <;>
+      List.append_assoc] at lifted ⊢
     exact lifted
 
 theorem atom_empty_return (n : Nat) (k : SCtx) (s : St) :
@@ -300,6 +315,49 @@ theorem for_atom_step {u : Bool} {c v : Syn (.opt .expr)} {cs vs : List Tok} {ca
   rw [hb]
   rfl
 
+/-- One `for` statement with a simple-statement initialiser and optional atom
+condition and update, given its body. -/
+theorem for_init_step {u : Bool} {x : Syn .simple} {ss : List Tok} {a : Nat}
+    {c v : Syn (.opt .expr)} {cs vs : List Tok} {ca va : Nat}
+    (hx : SimpleAtom x ss a) (hh : simpleHeadList ss = true)
+    (hc : OptAtom .semi c cs ca) (hv : OptAtom .rparen v vs va) (m : Nat) (l : Bool)
+    {b : Syn (.stmt ⟨true, u⟩)} {ts : List Tok} (s : St)
+    (hb : stmt (m + a + ca + va + 5) ⟨true, u⟩ (locatedInput ts s) = .ok (b, s)) :
+    stmt (m + a + ca + va + 5 + 1) ⟨l, u⟩
+      (locatedInput ([.kw .for_, .punct .lparen] ++ ss ++ [.punct .semi] ++ cs ++
+        [.punct .semi] ++ vs ++ [.punct .rparen] ++ ts) s) =
+      .ok (Syn.forStmt (l := l) (.some x) c v b, s) := by
+  have hsx := hx (m + ca + va + 5) (locatedInput (cs ++ [.punct .semi])
+    (locatedInput (vs ++ [.punct .rparen]) (locatedInput ts s)))
+  rw [show m + ca + va + 5 + a = m + a + ca + va + 5 by omega] at hsx
+  have hcv := opt_atom_coverage hc (m + a + va + 4)
+    (locatedInput (vs ++ [.punct .rparen]) (locatedInput ts s))
+  rw [show m + a + va + 4 + ca + 1 = m + a + ca + va + 5 by omega] at hcv
+  have hvv := opt_atom_coverage hv (m + a + ca + 4) (locatedInput ts s)
+  rw [show m + a + ca + 4 + va + 1 = m + a + ca + va + 5 by omega] at hvv
+  have hi : locatedInput ([.kw .for_, .punct .lparen] ++ ss ++ [.punct .semi] ++ cs ++
+      [.punct .semi] ++ vs ++ [.punct .rparen] ++ ts) s =
+      locatedInput [.kw .for_, .punct .lparen] (locatedInput (ss ++ [.punct .semi])
+        (locatedInput (cs ++ [.punct .semi]) (locatedInput (vs ++ [.punct .rparen])
+          (locatedInput ts s)))) := by
+    simp only [← locatedInput_append, List.append_assoc]
+  rw [hi, for_header_prefix]
+  generalize m + a + ca + va + 5 = M at hsx hcv hvv hb ⊢
+  simp only [bind, StateT.bind]
+  rw [simple_eat_semi hh]
+  change (simple M _).bind _ = _
+  dsimp only
+  rw [hsx]
+  change (optExprBefore M .semi (locatedInput (cs ++ [.punct .semi])
+    (locatedInput (vs ++ [.punct .rparen]) (locatedInput ts s)))).bind _ = _
+  rw [hcv]
+  change (optExprBefore M .rparen (locatedInput (vs ++ [.punct .rparen])
+    (locatedInput ts s))).bind _ = _
+  rw [hvv]
+  change (stmt M ⟨true, u⟩ (locatedInput ts s)).bind _ = _
+  rw [hb]
+  rfl
+
 mutual
 /-- Coverage at every excess fuel and every framed suffix. -/
 theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List Tok} → {d : Nat} →
@@ -379,6 +437,13 @@ theorem atom_stmt_coverage : {k : SCtx} → {x : Syn (.stmt k)} → {ts : List T
     rw [show n + ca + va + d + 6 = (n + d + 1) + ca + va + 5 by omega] at hb
     rw [fuel]
     exact for_atom_step hc hv (n + d + 1) l s hb
+  | _, _, _, _, .simpleS hx hh, n, s, _ => simple_stmt_coverage hx hh n s
+  | _, _, _, _, .forInit (l := l) (u := u) (ts := ts) (d := d) (a := a) (ca := ca) (va := va)
+      hx hh hc hv h, n, s, hf => by
+    have hb := atom_stmt_coverage h (n + a + ca + va) s hf
+    rw [show n + a + ca + va + d + 6 = (n + d + 1) + a + ca + va + 5 by omega] at hb
+    rw [show n + (d + a + ca + va + 1) + 6 = (n + d + 1) + a + ca + va + 5 + 1 by omega]
+    exact for_init_step hx hh hc hv (n + d + 1) l s hb
   | _, _, _, _, .doLoop (l := l) (u := u) (c := c) (cs := cs) (x := x) (ts := ts) (d := d)
       (a := a) hc h, n, s, _ => by
     let tail := locatedInput ([.kw .while_, .punct .lparen] ++ cs ++
@@ -541,6 +606,7 @@ theorem atom_items_of_leaf_items {k : SCtx} {xs : Syn (.list (.item k))} {ts : L
 #print axioms opt_atom_coverage
 #print axioms for_empty_init_prefix
 #print axioms for_atom_step
+#print axioms for_init_step
 #print axioms atom_stmt_coverage
 #print axioms atom_items_at
 #print axioms atom_items_block_coverage

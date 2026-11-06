@@ -93,3 +93,4 @@ Solidity.Frontend.StatementGrammarH28.G0Nodes	Gate G0 node-constructor twin of S
 Solidity.Frontend.StatementGrammarH28.AtomConditional	Conditional/loop coverage with expression-atom conditions under an exposed premise
 Solidity.Frontend.StatementGrammarH28.AtomNested	Mutual nested atom statement/item fragment: coverage, budgets, nearest else, token/prefix uniqueness
 Solidity.Frontend.StatementGrammarH28.G0Rejections	Gate G0 twins of Syn.rejections for the fixture profile observation, with link theorems
+Solidity.Frontend.StatementGrammarH28.AtomSimple	Simple statements and for initialisers under the stated SimpleAtom premise

@@ -196,6 +196,67 @@ theorem break_outside_loop_refused (n : Nat) (s : St) :
     ∃ err, stmt (n + 1) .body (locatedInput [.kw .break_, .punct .semi] s) = .error err :=
   ⟨_, break_outside_loop n false 0 0 0 0 s⟩
 
+/-- `{ x; for (y; z; ) { w; } }`: simple statements as items, a body and a
+`for` initialiser, through the stated `simple` premise. -/
+def simpleBody : Syn (.stmt ⟨true, false⟩) :=
+  .blockStmt (.block (.cons (.stmtItem (.simpleStmt (.exprStmt (.ident "w")))) .nil))
+
+def simpleItems : Syn (.list (.item .body)) :=
+  .cons (.stmtItem (.simpleStmt (.exprStmt (.ident "x"))))
+    (.cons (.stmtItem (.forStmt (.some (.exprStmt (.ident "y"))) (.some (.ident "z")) .none simpleBody))
+      .nil)
+
+def simpleParts : List (List Tok) :=
+  [[.ident "x"] ++ [.punct .semi],
+   [.kw .for_, .punct .lparen] ++ [.ident "y"] ++ [.punct .semi] ++ [.ident "z"] ++
+     [.punct .semi] ++ [] ++ [.punct .rparen] ++ braces [[.ident "w"] ++ [.punct .semi]].flatten]
+
+theorem simple_items_relation : AtomItems simpleItems simpleParts 33 :=
+  .stmtCons (.simpleS (ident_simple_atom "x") rfl)
+    (.stmtCons (.forInit (ident_simple_atom "y") rfl
+      (.some (ident_atom_semi "z") (by intro h; cases h) (by intro h; cases h)) .none
+      (.block (.stmtCons (.simpleS (ident_simple_atom "w") rfl) .nil))) .nil)
+
+theorem simple_block_coverage (n : Nat) (s : St) :
+    stmt (n + 33 + 6) .body (locatedInput (braces simpleParts.flatten) s) =
+      .ok (.blockStmt (.block simpleItems), s) :=
+  atom_stmt_coverage (.block simple_items_relation) n s (Or.inl rfl)
+
+/-- The kernel evaluates the actual parser on `x;` at the derived fuel. -/
+theorem simple_stmt_kernel :
+    stmt 13 .body (locatedInput ([.ident "x"] ++ [.punct .semi]) ⟨[], [], 0⟩) =
+      .ok (.simpleStmt (.exprStmt (.ident "x")), ⟨[], [], 0⟩) := by
+  rfl
+
+theorem simple_block_unique {x : Syn (.stmt .body)} {d : Nat}
+    (h : AtomStmt x (braces simpleParts.flatten) d) : x = .blockStmt (.block simpleItems) :=
+  atom_stmt_token_unique h (.block simple_items_relation) rfl
+
+/-- Negative: statement keywords, `else`, braces, `;` and `revert` are not
+simple-statement heads (their dispatchers read them). -/
+theorem simple_head_refusals :
+    simpleHeadList [.kw .if_] = false ∧ simpleHeadList [.kw .else_] = false ∧
+    simpleHeadList [.kw .unchecked] = false ∧ simpleHeadList [.punct .lbrace] = false ∧
+    simpleHeadList [.punct .rbrace] = false ∧ simpleHeadList [.punct .semi] = false ∧
+    simpleHeadList [.ident "revert"] = false ∧ simpleHeadList [] = false := by
+  decide
+
+/-- Negative: the `simple` premise names the parsed tree. -/
+theorem simple_premise_names_parsed :
+    ¬ SimpleAtom (.exprStmt (.ident "y")) [.ident "x"] 6 := by
+  intro h
+  have bad := (ident_simple_atom "x" 0 ⟨[], [], 0⟩).symm.trans (h 0 ⟨[], [], 0⟩)
+  injection bad with bad
+  injection bad with bad
+  injection bad with bad
+  injection bad with bad
+  exact absurd bad (by decide)
+
+#print axioms simple_block_coverage
+#print axioms simple_stmt_kernel
+#print axioms simple_block_unique
+#print axioms simple_head_refusals
+#print axioms simple_premise_names_parsed
 #print axioms for_do_arbitrary_suffix
 #print axioms for_header_none_none
 #print axioms for_header_cond

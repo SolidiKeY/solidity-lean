@@ -2279,3 +2279,51 @@ The branch changes nothing that step reads: its diff from
 `tests/h28-sol/statement-grammar/**`, this document, the module map and the
 generated root. The failure predates this lane and belongs to the solkey
 annotation owners.
+
+## Checkpoint AA: simple statements and `for` initialisers
+
+This checkpoint follows the coordinator's follow-up order (2026-11-06), item 1.
+`AtomSimple.lean` exposes the premise on the existing `simple` parser:
+
+    SimpleAtom x ss a :=
+      ∀ n s, simple (n + a) (locatedInput (ss ++ [;]) s) = .ok (x, punctBefore ; s)
+
+It is proved for identifier expression statements (`ident_simple_atom`,
+budget 6, by `rfl`; the parser's `declHead` attempt fails and backtracks).
+Otherwise it is a premise, as with the expression atoms. The first token
+must satisfy `simpleHead`: it is not a statement keyword, `else`,
+`unchecked`, `{`, `}`, `;` or the identifier `revert`. These are exactly
+the tokens that the statement, item and block-loop dispatchers read as
+their own. The side condition is conservative, because `revert` followed by
+a non-identifier also reaches `simpleStmt`.
+
+The following are proved:
+
+- `stmt_simple_dispatch`: a `simpleHead` token reaches `simpleStmt`. It is
+  proved by cases on the token. The string test on `revert` is discharged
+  by unfolding the matcher `stmt.match_7` and splitting its `dite`.
+- `simple_stmt_coverage`.
+- `simple_item_step`: the block-loop step.
+- `simple_no_else` and `simple_eat_semi`: the frame and header facts.
+- `for_header_prefix`, and in `AtomNested`, `for_init_step`.
+
+`AtomStmt` gains two constructors. `simpleS` has budget `a + 1`. `forInit`
+is `for (init; c; u) body` with optional atom condition and update, and has
+budget `d + a + ca + va + 1`. Coverage, the item step, the no-else lemma,
+nearest else, and token and prefix uniqueness extend to both.
+
+Controls (`AtomNestedControls`) cover:
+
+- a block `{ x; for (y; z; ) { w; } }` at derived budget 33, with coverage
+  and token uniqueness;
+- a kernel `rfl` parse of `x;` at fuel 13;
+- refusals of `simpleHead` on `if`, `else`, `unchecked`, `{`, `}`, `;`,
+  `revert` and the empty list;
+- the premise naming the parsed tree.
+
+A kernel `rfl` on the whole block exceeded the elaboration heartbeat budget.
+It was dropped, not given more heartbeats.
+
+Not claimed: any `simple` parse beyond the premise (declarations, tuple
+declarations and compound expressions are covered only through it), and
+the contextual `revert`-headed simple statements.
