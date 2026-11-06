@@ -1,213 +1,228 @@
-# H62 item 6: isolated Calculus toolchain migration
+# H62 migrate-calculus: blocked migration, reviewed H70 producer available
 
-Assigned branch: `codex/solidity-h62-6-20261106/migrate-calculus`.
-Pinned base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`.
-VM checkout: `/workspace/migrate-calculus` (separate worktree).
-Original `/workspace/solidity-lean` checkout remains on `work` unchanged.
-The base was fetched from origin and its ancestry to fetched origin/master verified.
+The clean old-toolchain directory build passes. The H70 proof-only producer is
+committed and available for coordinator retrieval. Full new-toolchain migration
+remains blocked by the syntax owner dependency and the recorded RSS STOP.
+No full migration or RUNTIME_GATE_PASS is claimed.
 
-## Preparation checkpoint (not migration completion)
+## Identity and scope
 
-The deterministic source census covers all 385 pinned Calculus Lean modules,
-490 local modules in their import closure, 83 direct boundary imports and 1,213
-reverse boundary imports across tracked Lean files, including roots and Bridge.
-No reverse header was unparsed. All 385 Calculus files and all 490 closure
-sources remain byte-identical to base. Whole-file hashes cover every original
-statement, declaration, case, proof and resource option. These are source hashes,
-not elaborated semantic API hashes: that migration obligation remains pending.
-No existing Lean file, generated root, central map, pin or lean-toolchain changed.
-No new theorem/helper, sorry, axiom, native_decide or proof-budget increase.
+- Batch/slug: solidity-h62-6-20261106 / migrate-calculus.
+- Repository: `/workspace/migrate-calculus`, a separate worktree.
+- Branch: `codex/solidity-h62-6-20261106/migrate-calculus`.
+- Base: `c6f550e281a7e5affa9a99bc2cdaed556dec00e4`, fetched and verified as an
+  ancestor of fetched origin/master before branch creation.
+- Original `/workspace/solidity-lean` checkout remains on `work` unchanged.
+- Clean baseline code head: `dd8163e4a7a1601c0ae02d70fa421572bedb4815`;
+  all 490 measured Lean source files were byte-identical to the pinned base.
+- H70 source-only producer head: `25fc247b3279902e1520de400a375754d0314d5f`.
+- Final committed handoff head is recorded automatically in the export manifest.
 
-Generators: `scripts/h62/item6/migrate-calculus/census.py` and `bounded.py`.
-Controls: `tests/h62/item6/migrate-calculus/test_tooling.py` (eight passing tests).
-Bulk evidence is off git at `/workspace/migrate-calculus-evidence`.
-Current census: `base-census-v3/census.json`, `source-sha256.txt` and
-`ordered-modules.txt`. Reproduce with:
+The only production change is one proof line in
+`Solidity/Calculus/LinearCountermodel.lean`. No statement, premise, exclusion,
+computational definition, import, proof budget or trust pin changes. Root files,
+central maps and lean-toolchain are unchanged. There were no pushes, merges,
+PRs, pre-gate/deployment runs or freeze announcements. Live producer ownership
+continues unchanged; H55 work was not taken.
 
-```sh
-python3 scripts/h62/item6/migrate-calculus/census.py /workspace/migrate-calculus /workspace/migrate-calculus-evidence/new-census
-PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-calculus/test_tooling.py
+## H70 partial producer
+
+The coordinator requested publication of the exact reviewed partial producer for
+migrate-corpus and audit-exact-verification. Commit 25fc247b changes only the
+falseNode_spec proof at line 134:
+
+```diff
+-  simpa only [Bool.not_eq_true'] using hp
++  simpa only [falseNode, Bool.not_eq_true'] using hp
 ```
 
-## Toolchain and measurement policy
+The actual canonical file is `Solidity/Calculus/LinearCountermodel.lean`.
+The H70 summary's shorter Linear/Countermodel path is not a second file.
+The committed file equals the previously reviewed full-module fixture with its
+two diagnostic #print commands removed. The full-module fixture passed on both
+actual toolchains before the RSS STOP; its falseNode_spec/searchCountermodel
+axiom sets contain only propext, Classical.choice and Quot.sound.
 
-Coordinator input manifest verifies all five supplied files. The required official
-`leanprover/lean4:v4.35.0` archive has SHA256
-`7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-Actual Lean: 4.35.0, commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`;
-Lake: `5.0.0-src+eb6cafb (Lean version 4.35.0)`.
-Actual old Lean: 4.24.0, commit `797c613eb9b6d4ec95db23e3e00af9ac6657f24b`;
-Lake: `5.0.0-src+797c613 (Lean version 4.24.0)`.
-Full extracted-install verification checked 11,574 old files and 17,938 new files
-against their respective archives. Deliberately pairing the new archive with the
-old installation was rejected (`share/lean/lean.mk` mismatch).
-See `installation-verification.json` off git.
+The committed-path new build was not rerun after publication: the STOP remains
+in force. This is a partial producer boundary, not a full directory gate.
+The H70 exact-file publication does not transfer live ownership or authorize
+additional new-toolchain work. The source statement header is unchanged.
 
-Measurements use a fresh output directory with artifact caches disabled,
-Docker memory.max=12884901888 and swap.max=0, one CPU, 4 GiB outer available
-reserve, LEAN_NUM_THREADS=1 and explicit Lean -j1 behind a serial lock. No systemd-run.
-The runtime image is pinned by local image SHA256
-`d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377`;
-read-only host executable/library mounts are recorded in each result.
-The harness validates the full source inventory before and after, records
-config/source/harness hashes, and times the 490-module directory closure.
-It is a directory measurement, not the repository final `run-lean.sh` gate.
-Any measured regression must be escalated; over 10 percent requires STOP.
-
-The preliminary `old-clean-01` run was deliberately stopped after review found
-monitoring/provenance gaps. Its 81.691 s partial timing is invalid as a baseline.
-The initial new KeySort probe passed (2.527 s; sampled aggregate RSS 617336832
-bytes), but predates final archive/install admission checks. Retain as diagnostic
-only; repeat under the final harness before accepting prerequisites.
-RUNTIME_GATE_PASS is pending. Full old clean build, new directory build,
-matched timing comparison, final validation, semantic interface validation and
-migration patch acceptance are all unfinished.
-
-## Independent reviews
-
-Finder and skeptic were separate read-only agents; neither ran Lean or a server.
-Initial reviews requested: complete reverse imports, validate census/source
-provenance, reserve before workload, bounded monitoring, support module headers,
-and bind archive to the selected installation. Confirmed findings were fixed.
-Finder accepted the focused census/harness fixes; skeptic accepted the original
-census/monitoring fixes and requested the final archive/install binding, now
-implemented and checked by positive and deliberately mismatched-install controls.
-Both independent reviewers accepted the final archive/install binding and process-guard fixes. This is no full migration review.
-
-## Ownership and remaining work
-
-No `relay.sh` is present in the actual checkout or supplied coordinator inputs.
-Exact-file requests must be saved for coordinator pickup when a required source
-adaptation is identified. No absent reply is treated as permission. Live producer
-ownership continues unchanged; no H55 work is claimed. External dependency
-sources in the census are read-only to this lane. No cut-over, push, merge,
-pre-gate, deployment or freeze announcement has occurred.
-
-Next: final-harness new-toolchain dependency probe, clean old closure measurement,
-owner relay for concrete external failures, scoped acceptance/fixture backfill,
-owner-coordinated Calculus adaptations, full new build and matched timings,
-independent milestone reviews, final patch/bundle/hash handoff to root/gate.
-
-## Backfill checkpoint and explicit STOP
-
-The full new probe (`new-clean-02/result.json`) passed KeySort, AST and SpecSyntax,
-then failed in the out-of-scope `Solidity/Syntax/Raw.lean` at 597, 650, 665, 682
-and 684 (String versus String.Slice, absent Slice.toList, changed dropRight,
-and polymorphic partially applied endsWith). It blocks 374/385 assigned modules.
-All 105/105 external local dependencies have unique migration owners in
-`backfill/cross-directory-owners.json`. The full source and import census remains
-385 assigned modules, 490 closure modules and 1,213 reverse boundary edges.
-
-The independent-subset probe (`new-independent-03/result.json`) checked all 11
-assigned modules not depending on Syntax.Raw: nine pass unchanged,
-LinearCountermodel fails at falseNode_spec line 134, and PresburgerDecision is
-blocked by that failed import. No excluded module is counted as migrated.
-
-`backfill.py` deterministically generates the isolated full-file countermodel
-candidate, preserving every byte except one proof simp-list addition:
-`[Bool.not_eq_true']` becomes `[falseNode, Bool.not_eq_true']`.
-Two appended axiom reports are fixture instrumentation. It does not modify
-`Solidity/Calculus/LinearCountermodel.lean`. The generated test copy is removed
-from the checkout after checking; the preserved source and proposed one-line
-patch are in the off-git `backfill/` directory. The original file and all other
-385 Calculus sources remain unchanged. Owner coordination is still required.
-
-`StringApiCases.lean` contains three test adapters, one bounded test-only tactic,
-and eight fixed theorem statements: ASCII/Unicode slicing, negative identity,
-zero/overrun slicing, character preservation, suffix success and suffix refusal.
-The old suffix implementation needs its private well-founded loop equations;
-the tactic locates that existing definition and unfolds its checked equations
-at most four times. The final proof is checked by Lean, with no native_decide,
-new axiom or budget override. New versions use public standard-library lemmas.
-
-Final byte-identical fixture checks:
-
-| Evidence | Outcome |
+| Artifact under `/workspace/migrate-calculus-evidence/h70-producer` | SHA256 |
 |---|---|
-| `old-candidate-09/result.json` | PASS: four dependency modules plus both fixtures; actual Lean 4.24.0 |
-| `new-candidate-08/result.json` | PASS: same sources and settings; actual official Lean 4.35.0 |
-| Both `StringApiCases.lean.log` files | All eight theorems check. Old slicing axioms empty; old suffix axioms `[propext]`; new sets only the standard three |
-| Both `GeneratedCountermodelCandidate.lean.log` files | falseNode_spec and searchCountermodel use only `[propext, Classical.choice, Quot.sound]` |
-| Python tooling controls | Eight PASS, including stale inventory and live-worker/zombie negative controls |
+| producer.patch | 1e9f4cbb4d16309faf398cb9b949aa7a9635772467122e91ad4cb36a2cbc555d |
+| producer.diff | e6cb692412eb22013991d2b64037705c484e0dede6ef1c73628f555c699b3518 |
+| LinearCountermodel.lean | 073590d8c660b2d776bf96e5d4da8e6b6dad76d7ab6f4b8d0471d11b0a1f023a |
 
-The matched subset wall time is 21.1943729 s old versus 16.4929547 s new
-(-22.1824 percent), but sampled aggregate peak RSS is 867917824 bytes old versus
-1756893184 bytes new (+102.4262 percent). This is a diagnostic subset, not the
-required full-directory before/after comparison. **ESCALATE: the RSS regression
-triggers STOP on further new-toolchain migration work pending root/gate
-classification.** See `backfill/matched-diagnostic-comparison.json`.
-No attempted production migration change follows this STOP. Completing the
-already-authorized old baseline and preparing read-only handoff evidence remain.
+Base file SHA256: b2a6ba4f212715ae9e4e329ae774914303d07687735d9973eb9cb6c6d2edfa79.
+producer.json records full head/base/parent, consumer keys, the baseline type
+hash and statement-header hash, patch paths and exact gate boundary.
+SHA256SUMS covers that partial publication. No remote transport acknowledgement
+is claimed; the coordinator retrieves the committed objects/artifacts from this VM.
 
-Typed requests are committed at `tests/h62/item6/migrate-calculus/owner-requests.json`
-and preserved off git: `DEP-SYNTAX-RAW-V435` (syntax owner migration dependency)
-and `OWNER-LINEAR-FALSENODE` (live VA1 owner coordination before an exact-file
-proof-only overlay). The delivery field explicitly says saved for coordinator
-pickup; no request was sent and no absent response is treated as approval.
-The RSS STOP is an additional root/gate blocker. No scope or statement exclusion
-is proposed. There are no human scope questions.
+## Census and frozen baseline interfaces
 
-Independent finder and skeptic re-reviewed the candidate, eight fixtures,
-source and scope hashes, 105 owners, and recomputed the timing/RSS deltas.
-Both confirmed matching final fixture sources and standard-only axioms; both
-accepted the escalation/STOP and retained the unfinished full-directory gates.
-Neither used Lean or a Lean server.
+The pinned census accounts for all 385 assigned Lean modules, their 490-module
+local closure, 105 external local dependencies, 83 direct boundary imports and
+1213 reverse boundary imports across tracked Lean files, including roots and
+Bridge. No reverse header was unparsed. All 105 external modules have unique
+migration owners in backfill/cross-directory-owners.json. No import cycle was found.
+The census was taken before the H70 proof-only source edit.
 
-The first corrected old baseline attempt (`old-clean-02`) passed 176 modules
-then was stopped by the process observer at SoundSummary: 1331.084 s partial,
-1695682560 bytes sampled RSS. It is **not** an accepted baseline. Its rejected
-snapshot was not retained, so the historical process condition is unclassified.
-The observer now records STAT, ignores zombies, retains rejected raw snapshots,
-and still rejects two live Lean processes or missing -j1. Both reviewers accepted
-the fix and the fresh complete old baseline must be repeated (`old-clean-03`).
+The old-only interface audit reuses only the owned, fully validated old build.
+It emits exact Name trees, levels, binder names/info, declaration kinds, safety
+flags and types; only nonsemantic Expr.mdata is removed. It never exports proof
+bodies and is not a semantic-equivalence proof. Private/generated declarations
+and zero-declaration umbrella modules are retained, not excluded.
 
-## Persistent goal and continuation
+| Baseline inventory | Count |
+|---|---:|
+| Assigned modules | 385 (376 with declarations, 9 with zero) |
+| Declarations | 47965 |
+| Private declarations | 7703 |
+| Theorems | 24491 |
+| Definitions | 19995 |
+| Constructors / recursors / inductives / opaques | 2337 / 427 / 423 / 292 |
+| Existing unsafe declarations | 34 |
+| Owned axiom declarations | 0 |
 
-This remains the original launcher goal for rendered prompt SHA256
-`0992f14182a95808d7e2bf1d1e1610b8677b2b85e79f2c8697c7fb782cd1eb59`.
-No replacement goal or competing continuation was created. get_goal is not
-exposed; coordinator explicitly confirmed that optional absence is not a blocker.
-Original VM environment:
-`ccarenv_b64_Y2NhcmVudl9kODQ1MTc2ZjEzOTg4MTkxOGM0YzMyZmJjYzQ5Y2U4YQ`.
-Coordinator owns the fresh-thread handoff after the completed preparation/backfill
-items; this worker never self-launches a replacement. Whole-goal completion is
-blocked by owner dependencies and the RSS STOP. Full old baseline, full new
-build, semantic interface validation, full comparison and final gates must never
-be inferred from the passing subset or this handoff.
+The 34 unsafe flags belong to the pinned baseline, including existing elaborator
+implementations; none was introduced by the producer patch. New custom axioms,
+sorry, native_decide and raised maxHeartbeats in production: zero.
 
-## Resource recovery before the fresh old baseline
+`old-interface-check-01/frozen-types.ndjson` is 267094042 bytes; SHA256
+95e5af8a318e6ee07e228c7e358e48065b56dc9e977b8c36bacabd64de02f2fe.
+The canonical declaration hashes are declaration-type-sha256.ndjson; module hashes
+and counts are frozen-interface-manifest.json. Hashing requires a successful
+matching audit record, exact Lean-reported completion count and unique names.
+It binds result/log/raw-stream SHA256 values and rejects truncated streams.
+The old-only audit passed in 100.691179657 s with 1547210752 bytes sampled RSS.
+No new-toolchain interface-equivalence gate has passed.
 
-`old-clean-03` was correctly stopped at RuleShapes after 262 successful modules:
-2005.496787837 s partial wall and 3460091904 bytes sampled aggregate RSS.
-The failure was the 4 GiB parent reserve guard, not a reported proof error.
-It is not an accepted clean baseline and is not combined with another run.
+## Toolchains and resource protocol
 
-At idle, the VM cgroup charged 9468493824 bytes, including 8757678080 bytes of
-file cache, with no Lean process active. The allowed-memory calculation remains
-conservative: min(host MemAvailable, parent memory.max - memory.current).
-No cap, swap setting, reserve, thread setting or theorem budget was relaxed.
+All five supplied coordinator input hashes were verified. Required new release:
+leanprover/lean4:v4.35.0, official lean-4.35.0-linux.tar.zst, SHA256
+7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d.
 
-`cache.py` applies POSIX_FADV_DONTNEED only to specified regular files opened
-read-only, skipping symlinks. It neither deletes nor modifies file contents.
-It is advisory cache conditioning, not a guarantee that every page is evicted.
-The three roots are this task's evidence directory, the verified old toolchain,
-and its archive. The evidence directory includes the verified new toolchain
-and all retained prior attempts. Thus the same old/new inputs can receive the
-same policy before any later authorized full comparison. No global drop_caches
-or sysfs resource write is used. All historical logs and build products remain.
+| Toolchain | Actual observed versions |
+|---|---|
+| Old | Lean 4.24.0, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613 |
+| New | Lean 4.35.0, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc; Lake 5.0.0-src+eb6cafb |
 
-`cache-recovery.json` records usage falling 9468493824 to 3458945024 bytes,
-a recovery of 6009548800 bytes, with file cache falling 5853618176 bytes.
-The bounded runner conditions after archive/install verification but before
-workload admission, records all roots/pre/post readings and helper SHA256,
-and saves executed-cache.py alongside executed-bounded.py. It also now retains
-the exact offending memory reading before any reserve stop.
+Full archive/install comparison checked 11574 old and 17938 new entries.
+Deliberately pairing the new archive with the old install was rejected.
+installation-verification.json preserves those results. No custom Lean build
+or v4.24 per-master cache was used; testing uses private sysroot/config overlays.
+The final lean-toolchain edit belongs to migrate-root-gate.
 
-The cache byte-preservation/symlink control passes in the authorized worker,
-bringing Python controls to nine. The finder independently passed eight
-nonwriting controls; its read-only sandbox could not create the temporary
-control file. Both finder and skeptic accepted the advisory method with
-unchanged limits and required the same policy for later comparisons. The
-finder's cache-helper provenance request was implemented before rerunning.
-The fresh complete old baseline is now `old-clean-04`; all prior attempts remain
-partial/invalid for acceptance. The RSS STOP on new-toolchain work remains.
+Heavy checks are serial: actual memory.max=12884901888, memory.swap.max=0,
+cpu.max=100000 100000, LEAN_NUM_THREADS=1 and explicit -j1. A lock serializes
+actual Lean execution; process observations reject multiple live Lean processes
+and missing -j1, while ignoring zombies. No systemd-run was invoked.
+The parent reserve is 4 GiB, measured conservatively as min(host MemAvailable,
+parent memory.max minus current). Limits and reserve were never relaxed.
+
+Fresh measurement outputs must not exist beforehand. Artifact caches are disabled.
+The runtime image is sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377;
+read-only host executable/library mounts are recorded in every result.
+
+Before the accepted baseline, POSIX_FADV_DONTNEED advised only regular read-only
+files under the owned evidence directory and verified old install/archive,
+skipping symlinks. It preserved every file. This is advisory cache conditioning,
+not guaranteed eviction. Initial idle usage fell 9468493824 to 3458945024 bytes.
+The same policy/roots are required for a later authorized comparison. The runner
+records roots, pre/post accounting, helper hash and executed helper source.
+No global drop_caches or resource-limit write was used.
+
+## Gates, outcomes and decisive evidence
+
+All paths below are under `/workspace/migrate-calculus-evidence`. Successful
+bounded result files contain the exact invocation, Docker command, leaf commands,
+versions, source/config/harness hashes, actual limits, outputs and exit codes.
+Fresh reproduction needs a new output directory and the exact frozen source tree;
+the current branch includes the H70 proof edit and must not be reset for a baseline.
+
+| Gate / command | Outcome and evidence |
+|---|---|
+| census.py ROOT OUTPUT | PASS: base-census-v3/census.json, source-sha256.txt, ordered-modules.txt |
+| bounded.py old clean, complete closure | PASS 490/490: old-clean-04/result.json; 3150.846505021 s wall, 3488944128 bytes sampled peak RSS, 8872005632 bytes minimum available; no guard stop |
+| bounded.py official new full probe | BLOCKED: new-clean-02/result.json; KeySort/AST/SpecSyntax pass, Syntax.Raw fails at 597/650/665/682/684 |
+| bounded.py independent new subset | Nine unchanged assigned modules PASS; LinearCountermodel failed (subsequently H70 producer), PresburgerDecision not rebuilt; new-independent-03/result.json |
+| bounded.py identical fixtures and proof candidate | PASS on old-candidate-09 and new-candidate-08; four dependency modules plus both fixtures; standard-only axiom reports |
+| bounded.py old interface audit | PASS: old-interface-check-01/result.json and GeneratedFrozenTypes.lean.log; all 385 / 47965 |
+| interfaces.py hash ROOT CENSUS AUDIT | PASS: complete audit binding and frozen-interface-manifest.json |
+| PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-calculus/test_tooling.py | PASS 10 tests; tooling-final.log |
+| node scripts/check-layers.mjs | PASS: 857 core modules, zero reach elaborator or checked adapters; static-layers.log |
+| bash scripts/coord-tools/register.sh --check | PASS exit 0; static-roots.log |
+| bash scripts/coord-tools/fragments.sh --check | PASS exit 0; static-fragments.log |
+| git diff --check | PASS |
+| Full new directory build/comparison and final run-lean.sh | PENDING/BLOCKED; not executed past STOP; no RUNTIME_GATE_PASS |
+
+StringApiCases.lean has three test adapters, one bounded equation-unfolding tactic
+and eight fixed kernel-checked theorem statements (ASCII/Unicode, zero/overrun,
+negative identity, character lists, suffix success/refusal). All eight axiom reports
+are present in the final matching old/new runs. Old slicing sets are empty, old
+suffix sets use propext, and new sets use only the standard three. These are
+isolated standard-library controls, not full Solidity preservation proofs.
+Python scanners, hashes, structural checks and timing observations are external
+tests/metadata; they do not prove interface equivalence or source/backend adequacy.
+
+Earlier attempts remain off git: old-clean-01 was deliberately stopped during
+review; old-clean-02 stopped after 176 passes on an unclassified process observation
+whose snapshot was not retained; old-clean-03 stopped after 262 passes on reserve.
+No partial timings were combined into the accepted baseline. The corrected observer
+retains process and actual offending memory snapshots; the accepted old-clean-04
+starts empty and passes every job. All historical files remain preserved.
+
+## Typed blockers and remaining obligations
+
+1. DEP-SYNTAX-RAW-V435: migrate-syntax owns Solidity/Syntax/Raw.lean. Its five
+   String/Slice API failures block 374/385 assigned modules. backfill/syntax-raw-impacts.json
+   records a concrete dependency route for each. relay.sh is unavailable; requests
+   were saved for coordinator pickup, not treated as acknowledged.
+2. RSS-STOP: matched diagnostic wall is 21.1943729 s old versus 16.4929547 s new
+   (-22.1824 percent), but sampled aggregate RSS is 867917824 versus 1756893184
+   bytes (+102.4262 percent). backfill/matched-diagnostic-comparison.json records
+   identical sources/settings and the escalation. New-toolchain work remains stopped
+   pending root/gate classification. This subset is not the full-directory comparison.
+3. Remaining new migration/build, full clean before/after comparison, new frozen-type
+   comparison, full affected acceptance and final repository gates remain unfinished.
+   The H70 partial producer resolves only its exact reviewed proof change.
+
+The exact-file producer/request metadata is committed at
+`tests/h62/item6/migrate-calculus/owner-requests.json` and preserved off git.
+No scope, statement, premise or case exclusion is proposed. questions=[];
+no new human approval or relaxed gate is inferred.
+
+## Independent reviews and handoff
+
+Separate read-only finder and skeptic reviewed every preparation/backfill milestone,
+resource fixes, H70 source/patch bytes, complete old baseline and all type hashes.
+Neither ran Lean or a Lean server. Confirmed findings were fixed: reverse roots/Bridge
+coverage, module headers, census/source provenance, observation timeouts, reserve
+preflight, archive/install binding, zombie handling, cache-helper provenance and
+truncated type-stream rejection. Both accepted the final focused fixes. The finder
+recomputed all 47965 declaration/module hashes; both verified provenance hashes,
+matching fixture sources, standard axioms, 105 owner mappings and the RSS STOP.
+The root worker ran the writable temporary-file control; reviewers stayed read-only.
+
+Bulk artifacts stay off git. Deterministic generators are census.py, bounded.py,
+cache.py, backfill.py, interfaces.py and export.py under the assigned scripts path.
+Generated full-module candidate/import audit copies are retained off git and removed
+from the checkout. No new production module registration is needed for the one-line
+existing-module producer; standalone test helpers do not alter generated roots.
+
+Export targets: `/workspace/migrate-calculus-evidence/handoff/original.patch`,
+HANDOFF.md, migrate-calculus.bundle, manifest.json and SHA256SUMS. The exporter
+records the final full head/base/repository and verifies the bundle; final checksum
+validation is recorded separately. H70's source-only patch remains in h70-producer/.
+
+This is the original launcher goal for rendered prompt SHA256
+0992f14182a95808d7e2bf1d1e1610b8677b2b85e79f2c8697c7fb782cd1eb59.
+get_goal is not exposed; coordinator confirmed that optional absence is not a blocker.
+No goal was recreated/reset and no competing continuation was scheduled.
+Original VM: ccarenv_b64_Y2NhcmVudl9kODQ1MTc2ZjEzOTg4MTkxOGM0YzMyZmJjYzQ5Y2U4YQ.
+The coordinator owns the fresh-thread handoff on this same VM/branch/goal. Resume only
+within the original scope and authorizations, preserving the STOP and complete queue.
+The goal is blocked, not complete.

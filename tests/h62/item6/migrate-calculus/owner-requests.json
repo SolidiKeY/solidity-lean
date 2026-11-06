@@ -21,17 +21,17 @@
     },
     {
       "id": "OWNER-LINEAR-FALSENODE",
-      "kind": "OWNER_COORDINATION_REQUIRED",
+      "kind": "H70_PARTIAL_PRODUCER_PUBLICATION",
       "live_owner": "solidity-automation-20261031/va1-decision",
       "migration_owner": "solidity-h62-6-20261106/migrate-calculus",
       "file": "Solidity/Calculus/LinearCountermodel.lean",
       "theorem": "Solidity.Linear.AFml.falseNode_spec",
       "line": 134,
       "statement_sha256": "151d71cd2ab21b96bf9d54514f2fb0dd9dc6b3387eb436528fafadf723a00a18",
-      "action": "Review exact one-line proof-only overlay proposal before any existing-file edit; no absent reply is permission",
+      "action": "Retrieve H70 producer commit/patch; preserve existing RSS STOP and live ownership",
       "proposal": "/workspace/migrate-calculus-evidence/backfill/proposed-owner-proof.patch",
       "candidate_fixture": "/workspace/migrate-calculus-evidence/backfill/GeneratedCountermodelCandidate.lean",
-      "candidate_status": "isolated fixture pass; original-file edit awaits owner coordination",
+      "candidate_status": "Exact reviewed full-module fixture passed both toolchains; H70 source-only producer committed",
       "evidence": "/workspace/migrate-calculus-evidence/new-independent-03/Solidity.Calculus.LinearCountermodel.log",
       "validations": [
         {
@@ -47,7 +47,10 @@
           "fixture_sha256": "924c07a1a1d624e6ccec84365bc9f8e2dc256d4f8310a481ed927ae89b325013"
         }
       ],
-      "transient_test_path": "/workspace/migrate-calculus/tests/h62/item6/migrate-calculus/GeneratedCountermodelCandidate.lean"
+      "transient_test_path": "/workspace/migrate-calculus/tests/h62/item6/migrate-calculus/GeneratedCountermodelCandidate.lean",
+      "producer_head": "25fc247b3279902e1520de400a375754d0314d5f",
+      "status": "H70 exact-file partial producer published locally; full migration gates still blocked",
+      "producer_manifest": "/workspace/migrate-calculus-evidence/h70-producer/producer.json"
     }
   ]
 }

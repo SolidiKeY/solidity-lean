@@ -3,7 +3,7 @@
 This is a directory measurement, not the repository run-lean.sh final gate.
 Never restores old per-master caches; each invocation requires a new output.
 """
-import argparse, fcntl, hashlib, importlib.util, json, os, shlex, subprocess, sys, tarfile, time
+import argparse, fcntl, hashlib, importlib.util, json, os, shlex, subprocess, sys, tarfile, time, tomllib
 sys.dont_write_bytecode=True
 from pathlib import Path
 CAP=12*1024**3
@@ -60,7 +60,7 @@ def validate_inventory(census,fresh,baseline):
     if baseline and any(row["sha256"]!=row["base_sha256"] for row in census["closure_sources"]):
         raise RuntimeError("Baseline source closure differs from pinned base")
 def main():
-    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--cache-root",action="append",default=[]); a.add_argument("--target",action="append",default=[]); a.add_argument("--exclude-dependency"); a.add_argument("--keep-going",action="store_true"); a.add_argument("--fixture",action="append",default=[]); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
+    a=argparse.ArgumentParser(); a.add_argument("--root",required=True); a.add_argument("--toolchain",required=True); a.add_argument("--census",required=True); a.add_argument("--out",required=True); a.add_argument("--image",required=True); a.add_argument("--archive",required=True); a.add_argument("--pin"); a.add_argument("--audit-from"); a.add_argument("--cache-root",action="append",default=[]); a.add_argument("--target",action="append",default=[]); a.add_argument("--exclude-dependency"); a.add_argument("--keep-going",action="store_true"); a.add_argument("--fixture",action="append",default=[]); a.add_argument("--baseline",action="store_true"); a.add_argument("--keysort-only",action="store_true"); args=a.parse_args()
     root=Path(args.root).resolve(); toolchain=Path(args.toolchain).resolve(); out=Path(args.out).resolve()
     lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a"); fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     if out.exists(): raise RuntimeError("Output exists; preserve it and use a fresh measurement directory")
@@ -99,6 +99,17 @@ def main():
             ordered.append(module)
         for m in ["Solidity.KeySort"]+selected: visit(m)
         modules=ordered
+    audit=None
+    if args.audit_from:
+        if not args.baseline or args.target or args.exclude_dependency or args.keysort_only or not args.fixture:
+            raise RuntimeError("Audit mode requires old baseline inputs and standalone fixtures only")
+        audit_path=Path(args.audit_from);previous=json.loads(audit_path.read_text())
+        if previous["status"]!="pass" or previous["scope"]["planned_modules"]!=census["ordered_local_closure"]:
+            raise RuntimeError("Audit requires an accepted full directory baseline")
+        if previous["source_provenance"]!=census["closure_sources"] or previous["archive_sha256"]!=archive_hash:
+            raise RuntimeError("Audit source/toolchain differs from validated baseline")
+        audit=dict(result=str(audit_path),sha256=hashlib.sha256(audit_path.read_bytes()).hexdigest(),build_dir=tomllib.loads(previous["config_text"])["buildDir"])
+        modules=[]
     fixture_sources=[]
     for fixture in args.fixture:
         path=(root/fixture).resolve()
@@ -125,15 +136,18 @@ def main():
     config=root/"scripts/h62/item6/migrate-calculus"/(".runtime-"+out.name+".toml")
     if config.exists(): raise RuntimeError("Alternate config already exists")
     text=(root/"lakefile.toml").read_text().replace('enableArtifactCache = true','enableArtifactCache = false')
-    text=text.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = '+json.dumps(str(out/"build")),1)
+    text=text.replace('version = "0.1.0"','version = "0.1.0"\nbuildDir = '+json.dumps(audit["build_dir"] if audit else str(out/"build")),1)
     config.write_text(text)
     name="h62-calculus-"+str(os.getpid())
     docker=DOCKER+["run","-d","--name",name,"--network=none","--memory="+str(CAP),"--memory-swap="+str(CAP),"--cpus=1","-e","LEAN_NUM_THREADS=1","-e","LAKE_ARTIFACT_CACHE=false","-e","LAKE_NO_CACHE=true","-e","LAKE_OVERRIDE_LEAN=true","-e","LEAN_SYSROOT="+str(overlay),"-e","PATH="+str(overlay/"bin")+":/usr/local/bin:/usr/bin:/bin","-w",str(root)]
     for path in ("/workspace","/usr","/lib","/lib64","/bin"):
         docker += ["--mount","type=bind,src="+path+",dst="+path+(",readonly" if path!="/workspace" else "")]
+    if args.audit_from:
+        docker += ["-e","H62_INTERFACE_OUTPUT="+str(out/"frozen-types.ndjson")]
     docker += [args.image,"/bin/sleep","infinity"]
     record=dict(root=str(root),head=command(["git","-C",str(root),"rev-parse","HEAD"]).strip(),toolchain=str(toolchain),image=args.image,command=docker,settings=dict(memory=CAP,swap=0,cpus=1,reserve=RESERVE,threads=1),results=[],status="running")
     def save(): (out/"result.json").write_text(json.dumps(record,indent=2)+"\n")
+    record["audit_reuses_owned_baseline"]=audit
     record["cache_condition"]=cache_condition
     record["invocation"]=[sys.executable]+sys.argv
     record["scope"]=dict(requested_targets=args.target,assigned_count=len(assigned),excluded_dependency=args.exclude_dependency,excluded_modules=excluded,planned_modules=modules,keysort_only=args.keysort_only)

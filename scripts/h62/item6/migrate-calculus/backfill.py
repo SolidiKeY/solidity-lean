@@ -5,7 +5,7 @@ from pathlib import Path
 sys.dont_write_bytecode=True
 BASE="c6f550e281a7e5affa9a99bc2cdaed556dec00e4"
 def main():
-    a=argparse.ArgumentParser();a.add_argument("root");a.add_argument("census");a.add_argument("output");a.add_argument("--new-validation");a.add_argument("--old-validation");args=a.parse_args()
+    a=argparse.ArgumentParser();a.add_argument("root");a.add_argument("census");a.add_argument("output");a.add_argument("--producer-head");a.add_argument("--new-validation");a.add_argument("--old-validation");args=a.parse_args()
     root=Path(args.root).resolve(); out=Path(args.output).resolve();out.mkdir(parents=True,exist_ok=True)
     lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","a");fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
     spec=importlib.util.spec_from_file_location("census",Path(__file__).with_name("census.py"));m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
@@ -22,11 +22,11 @@ def main():
     (out/"syntax-raw-impacts.json").write_text(json.dumps(impacts,indent=2)+"\n")
     target="Solidity/Calculus/LinearCountermodel.lean"
     frozen=subprocess.check_output(["git","show",BASE+":"+target],cwd=root,text=True)
-    if (root/target).read_text()!=frozen: raise RuntimeError("Existing owned file has changed; preserve and inspect")
     before="  simpa only [Bool.not_eq_true'] using hp"
     after="  simpa only [falseNode, Bool.not_eq_true'] using hp"
     if frozen.count(before)!=1:raise RuntimeError("Candidate replacement is not unique")
     candidate=frozen.replace(before,after)
+    if (root/target).read_text() not in [frozen,candidate]:raise RuntimeError("Preserve unexpected owned-file changes")
     proposal="".join(difflib.unified_diff(frozen.splitlines(keepends=True),candidate.splitlines(keepends=True),fromfile="a/"+target,tofile="b/"+target))
     (out/"proposed-owner-proof.patch").write_text(proposal)
     candidate+="\n#print axioms Solidity.Linear.AFml.falseNode_spec\n#print axioms Solidity.Linear.AFml.searchCountermodel\n"
@@ -55,6 +55,18 @@ def main():
     assigned={r["module"] for r in census["modules"]}
     dependencies=[dict(row,owners=[owner for owner,scope in migration_scopes if row["path"] in scope]) for row in census["closure_sources"] if row["module"] not in assigned]
     (out/"cross-directory-owners.json").write_text(json.dumps(dependencies,indent=2)+"\n")
+    if args.producer_head:
+        producer=subprocess.check_output(["git","rev-parse",args.producer_head],cwd=root,text=True).strip()
+        source=subprocess.check_output(["git","show",producer+":"+target],cwd=root,text=True)
+        original=subprocess.check_output(["git","show",producer+"^:"+target],cwd=root,text=True)
+        files=subprocess.check_output(["git","diff","--name-only",producer+"^",producer],cwd=root,text=True).splitlines()
+        if source!=frozen.replace(before,after) or original!=frozen or files!=[target]:raise RuntimeError("H70 producer does not match reviewed source-only change")
+        requests[1]["kind"]="H70_PARTIAL_PRODUCER_PUBLICATION"
+        requests[1]["candidate_status"]="Exact reviewed full-module fixture passed both toolchains; H70 source-only producer committed"
+        requests[1]["producer_head"]=producer
+        requests[1]["status"]="H70 exact-file partial producer published locally; full migration gates still blocked"
+        requests[1]["action"]="Retrieve H70 producer commit/patch; preserve existing RSS STOP and live ownership"
+        requests[1]["producer_manifest"]="/workspace/migrate-calculus-evidence/h70-producer/producer.json"
     record=dict(base=BASE,delivery="Saved for coordinator pickup; relay.sh unavailable; not sent",requests=requests)
     (out/"owner-requests.json").write_text(json.dumps(record,indent=2)+"\n")
     (root/"tests/h62/item6/migrate-calculus/owner-requests.json").write_text(json.dumps(record,indent=2)+"\n")
