@@ -1,5 +1,9 @@
 {
- "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.actual_shadow_execution": [],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.actual_shadow_execution": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.all_shadows_same_copy": [
   "propext"
  ],
@@ -7,7 +11,10 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.certificate_inhabited": [],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.certificate_inhabited": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.exact_live_rows": [
   "propext"
  ],
@@ -15,7 +22,10 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.many_empty_with_shadow": [],
+ "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.many_empty_with_shadow": [
+  "Quot.sound",
+  "propext"
+ ],
  "Solidity/Backend/MemoryCopies/FixedReferenceLiveControls.lean:Solidity.Backend.MemoryCopies.FixedReferenceLiveControls.stored_value_not_rewritten": [
   "propext"
  ],
