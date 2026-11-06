@@ -205,7 +205,8 @@ theorem mixed_residual_padding : mixedPhysical 163 = 0xa5 ∧ mixedPhysical 420 
 def mixedState : Source.EMState mixedEnv [.bytes .memory, .string .memory, mixedArrayTy, .struct .memory mixedName] :=
   ⟨.cons (.memRef rfl 0) (.cons (.memRef rfl 0) (.cons (.memRef rfl 4) (.cons (.memRef rfl 3) .nil))),
     ⟨⟨⟨fun _ => Source.Account.empty _⟩, .empty, []⟩, mixedHeap, [], [], ⟨[], .nil⟩⟩⟩
-def mixedReadFrame : Source.Fr := ⟨0, 0, 0, false, "MixedHeap", true, 0⟩
+def mixedReadFrame : Source.Fr :=
+  {this:=0,sender:=0,value:=0,static:=false,contract:="MixedHeap",checked:=true,depth:=0,cd:=[]}
 
 theorem mixed_actual_MemOK : Source.MemOK mixedEnv mixedHeap.ty mixedState := by
   obtain ⟨heap, top, inner⟩ := mixedHeap_owner_invariants mixedPlacement mixedEntries mixed_coverage

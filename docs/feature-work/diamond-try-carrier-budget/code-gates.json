@@ -1,0 +1,170 @@
+[
+  {
+    "label": "full-final",
+    "command": [
+      "bash",
+      "./run-lean.sh"
+    ],
+    "exit": 0,
+    "seconds": 5.544,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 382865408,
+    "peakAggregateRSSKiB": 618960
+  },
+  {
+    "label": "corpus-final",
+    "command": [
+      "bash",
+      "scripts/check-corpus.sh",
+      "--solkey",
+      "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+    ],
+    "exit": 0,
+    "seconds": 12.85,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 1129066496,
+    "peakAggregateRSSKiB": 4960268
+  },
+  {
+    "label": "frozen",
+    "command": [
+      "bash",
+      "scripts/check-testsuite.sh",
+      "--complete",
+      "--solkey",
+      "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+    ],
+    "exit": 0,
+    "seconds": 1.511,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 41246720,
+    "peakAggregateRSSKiB": 17532
+  },
+  {
+    "label": "orphans",
+    "command": [
+      "node",
+      "scripts/check-orphans.mjs"
+    ],
+    "exit": 0,
+    "seconds": 1.498,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 63762432,
+    "peakAggregateRSSKiB": 19384
+  },
+  {
+    "label": "layers",
+    "command": [
+      "node",
+      "scripts/check-layers.mjs"
+    ],
+    "exit": 0,
+    "seconds": 1.516,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 63164416,
+    "peakAggregateRSSKiB": 19632
+  },
+  {
+    "label": "automatic",
+    "command": [
+      "node",
+      "scripts/check-automatic.mjs",
+      "--strict"
+    ],
+    "exit": 0,
+    "seconds": 1.512,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 18526208,
+    "peakAggregateRSSKiB": 19260
+  },
+  {
+    "label": "trust",
+    "command": [
+      "bash",
+      "scripts/check-trust.sh"
+    ],
+    "exit": 0,
+    "seconds": 5.545,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 173256704,
+    "peakAggregateRSSKiB": 198712
+  },
+  {
+    "label": "inventory",
+    "command": [
+      "python3",
+      "scripts/solidity-feature-audit.py",
+      "--check"
+    ],
+    "exit": 0,
+    "seconds": 1.538,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 10842112,
+    "peakAggregateRSSKiB": 17912
+  },
+  {
+    "label": "axioms",
+    "command": [
+      "lake",
+      "env",
+      "lean",
+      "--tstack=131072",
+      "-j1",
+      "/workspace/next10-diamond-try-evidence/carrier-budget/Axioms.lean"
+    ],
+    "exit": 0,
+    "seconds": 20.61,
+    "expectedExit": 0,
+    "gatePassed": true,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 212783104,
+    "peakAggregateRSSKiB": 1638212
+  },
+  {
+    "label": "native-family",
+    "command": [
+      "node",
+      "scripts/solidity-upstream.mjs",
+      "run",
+      "--compiler",
+      "/workspace/next10-diamond-try-evidence/compiler/soljson.js",
+      "--filter",
+      "semanticTests/tryCatch/",
+      "--out",
+      "/workspace/next10-diamond-try-evidence/carrier-budget/native-family"
+    ],
+    "exit": 1,
+    "seconds": 73.033,
+    "expectedExit": 1,
+    "gatePassed": false,
+    "memoryMax": 12884901888,
+    "swapMax": 0,
+    "peakBytes": 487305216,
+    "peakAggregateRSSKiB": 1170680
+  }
+]

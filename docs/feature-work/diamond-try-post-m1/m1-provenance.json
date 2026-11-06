@@ -1,0 +1,37 @@
+[
+  {
+    "commit": "3ee3855c21f62b7454d629b824be281d66384bae",
+    "file": "scripts/self-try-adapter.mjs",
+    "blob": "3d80ae1aa23c3f4a2beccd1393ae1f78a2539eb0",
+    "sha256": "721d58179a44083d57a3ea5a4afa0b53483cc62ea9f327923870b564de69863c",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/m1-scripts__self-try-adapter.mjs"
+  },
+  {
+    "commit": "3ee3855c21f62b7454d629b824be281d66384bae",
+    "file": "Solidity/Evm/TryPanicProducer.lean",
+    "blob": "e8233a1d6b3a444d280d2c5f9ca5f72e592c30fa",
+    "sha256": "666ae4f78fc43a3d224fd687c3b61a56282641d8fdfdfef28ee6e9e3ffc81df4",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/m1-Solidity__Evm__TryPanicProducer.lean"
+  },
+  {
+    "commit": "3ee3855c21f62b7454d629b824be281d66384bae",
+    "file": "Solidity/Evm/TryByteCapture.lean",
+    "blob": "36d4266d79911cdc691d12b3a8151bc5765c11f0",
+    "sha256": "16b9f64acce59632274d774810ef825101da334f6b107ed03ec6cf0201836fcb",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/m1-Solidity__Evm__TryByteCapture.lean"
+  },
+  {
+    "commit": "3ee3855c21f62b7454d629b824be281d66384bae",
+    "file": "Solidity/Semantics/RevertMemory.lean",
+    "blob": "de59a637ea1d6f70dc8515ec5338f57fa86d6b4f",
+    "sha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/m1-Solidity__Semantics__RevertMemory.lean"
+  },
+  {
+    "commit": "3ee3855c21f62b7454d629b824be281d66384bae",
+    "file": "Solidity/Examples/Tactics/TryPanicProducer.lean",
+    "blob": "9fd9039ca0d623f57bf61393c2e9ce358abc2f77",
+    "sha256": "ece306fba2eb8fa8e58763a7be34b9c8dbe3e4bd3e7ee2f38eec50eeeccb2e2e",
+    "evidence": "/workspace/next10-diamond-try-evidence/post-m1-design/m1-Solidity__Examples__Tactics__TryPanicProducer.lean"
+  }
+]

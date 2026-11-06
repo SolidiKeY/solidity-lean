@@ -37,7 +37,7 @@ binds something of it, is one `kind.datas` lists. -/
 theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Binders ρ)
     (sargs : Args C Γ ps) (sbody : Prog C (ρ ++ ps) Γf) (kind : CatchKind) (σ : State C Γ)
     {ds : DSet} (hd : kind.datas sbody = some ds) {d bs : List UInt8}
-    (hb : (match TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    (hb : (match TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
       | .ok _ => .error .revert
       | .error .revert => .ok []
       | .error (.revertWith d) => .ok d
@@ -49,14 +49,14 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
     have hS : sbody.revertDatas false = some ds := hd
     have hk' : Semantics.decodeError d = some bs := CatchKind.decode_reason hk
     revert hb
-    cases hc : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    cases hc : TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
     | ok => intro hb; cases hb
     | error e =>
       cases e with
       | revert => intro hb; cases hb; exact absurd hk' (by simp [Semantics.decodeError])
       | revertWith d' =>
         intro hb; cases hb
-        exact TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS false sbody hS) σ d hc
+        exact TRun.call_dataS sargs (.rets rets.toRet) _ _ (Prog.run_dataS false sbody hS) σ d hc
           (.inr (by rw [hk']; rfl))
       | panic =>
         intro hb; cases hb
@@ -69,14 +69,14 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
     simp only [Option.map_eq_some_iff] at hd'
     obtain ⟨S, hS, rfl⟩ := hd'
     revert hb
-    cases hc : TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    cases hc : TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
     | ok => intro hb; cases hb
     | error e =>
       cases e with
       | revert => intro hb; cases hb; exact .inl List.mem_cons_self
       | revertWith d' =>
         intro hb; cases hb
-        rcases TRun.call_dataS sargs (.rets rets) _ _ (Prog.run_dataS true sbody hS) σ d hc
+        rcases TRun.call_dataS sargs (.rets rets.toRet) _ _ (Prog.run_dataS true sbody hS) σ d hc
           (.inl rfl) with h | ⟨p, hp, hm⟩
         · exact .inl (List.mem_cons_of_mem _ h)
         · exact .inr ⟨p, List.mem_append_right _ hp, hm⟩
@@ -84,7 +84,7 @@ theorem catchBytes_self_mem {ρ ps Γf : Ctx} (call : ExtCall C Γ) (rets : Bind
         intro hb; cases hb
         cases ha : sbody.asserts with
         | false =>
-          exact absurd hc (TRun.call_noPanic sargs (.rets rets) _ _ (Prog.run_noPanic sbody ha) σ)
+          exact absurd hc (TRun.call_noPanic sargs (.rets rets.toRet) _ _ (Prog.run_noPanic sbody ha) σ)
         | true =>
           exact .inr ⟨Pat.panic, by simp only [ha, if_true, List.cons_append, List.nil_append,
             List.mem_cons, true_or], Pat.matches_panic _⟩

@@ -1,0 +1,166 @@
+{
+  "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "files": [
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/assert.sol",
+      "bytes": 314,
+      "sha256": "e64329f778b1c355f50331936f22045bdfe7f12c21a67df22096e6a8984a49b7",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/assert_pre_byzantium.sol",
+      "bytes": 386,
+      "sha256": "279810a16b5bc32ab1e39c5566ea9f2dd25ea1974d694b0d3615e1f01f61bc31",
+      "settingsText": "\n// EVMVersion: <byzantium\n",
+      "historicalExcludedBeforeCompile": true,
+      "executionAllowed": false
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/create.sol",
+      "bytes": 847,
+      "sha256": "574de0c72abb81159c2d91801ba248006e403eea581e78f119a7966cd20a2058",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/invalid_error_encoding.sol",
+      "bytes": 5760,
+      "sha256": "7b8873a21c1422f343a9e1c44ddee308710d80ea74a6d1f5d89a6f9e14abebdf",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/lowLevel.sol",
+      "bytes": 661,
+      "sha256": "4f236ce9511d27ec38871eb350ba0aa3065a33d58721572a9bbe82b85594dc4b",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/malformed_error.sol",
+      "bytes": 2213,
+      "sha256": "44052942a220ca2aebd413dcdb3ddadada6cbed2bad3a7bbb8f0c0a50281b2e9",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/malformed_panic.sol",
+      "bytes": 1230,
+      "sha256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/malformed_panic_2.sol",
+      "bytes": 1336,
+      "sha256": "bfa3d3be525e4362c696db7705687ad371c318d0bd606cf167c12ac05335bcd1",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/malformed_panic_3.sol",
+      "bytes": 1554,
+      "sha256": "6105e17700ce785d33949e585af5993a8b8aeb22ddd8ddea04537f806c689fcb",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/malformed_panic_4.sol",
+      "bytes": 1479,
+      "sha256": "7a9a7bdb97a81a07980e34d99c489612d2871987f9d6dd5e2ed2ff89f874c545",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/nested.sol",
+      "bytes": 1052,
+      "sha256": "ffa30ce33274980427a6b5e92369190fca36a7fc1b7945688289a49ff3f4ac2e",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/panic.sol",
+      "bytes": 1357,
+      "sha256": "5d72ecf61c90c21b885e8a9b6749e7d352d4265faa2841beb0f63ad67a0c5ad4",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/require.sol",
+      "bytes": 315,
+      "sha256": "22aaf569a190f6526f725e0241adf3b233bd33ecb7e0f3e837bf74b0dcd5dcb5",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/require_pre_byzantium.sol",
+      "bytes": 387,
+      "sha256": "bcbb6c935da66240da0f48685d2185c51edf3555a9d3eeff84cb7336b762cd49",
+      "settingsText": "\n// EVMVersion: <byzantium\n",
+      "historicalExcludedBeforeCompile": true,
+      "executionAllowed": false
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/return_function.sol",
+      "bytes": 516,
+      "sha256": "296d9f0a183f9503377a550864ef4792c94abf1c7085ce6a42ff0a1b3691e3df",
+      "settingsText": "",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/simple.sol",
+      "bytes": 431,
+      "sha256": "9cbfae9d83fa46632843869162ce67afce5a9524fd2ca5d7f7f690d81a2f236c",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/simple_notuple.sol",
+      "bytes": 376,
+      "sha256": "37b33319106d0a62495cd1fba0ee5fb6e85201d2538d1d562392c8444d88fe1d",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/structured.sol",
+      "bytes": 528,
+      "sha256": "b142766592ec69aad511f1bf24c6e4a956006bf8721f0452bb78282678a5fc73",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/structuredAndLowLevel.sol",
+      "bytes": 792,
+      "sha256": "0ff23cc9e6420fef5076ba773fdbc17fa488573377c216796beee09d0776a07e",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    },
+    {
+      "path": "test/libsolidity/semanticTests/tryCatch/try_catch_library_call.sol",
+      "bytes": 1136,
+      "sha256": "4376fed4d27beaf3ba4c3b10925d27046d5bb6ac82f2f0616cc3abe951b09384",
+      "settingsText": "\n// EVMVersion: >=byzantium\n",
+      "historicalExcludedBeforeCompile": false,
+      "executionAllowed": true
+    }
+  ]
+}

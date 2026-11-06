@@ -1,0 +1,16 @@
+{
+  "combinedDriver": "gates.py",
+  "launched": false,
+  "status": "automatic approval review rejected",
+  "reason": "The gate driver includes native/reference fixture execution, including evm-reference/replay.mjs, despite the retained explicit prohibition on historical runner/backend build, load, or execution; M1 approval does not override that boundary. Do not bypass this rejection through a workaround or indirect execution.",
+  "deferredNoRun": [
+    "source-admission",
+    "script-tests",
+    "vectors88",
+    "native-family",
+    "reference-malformed_panic"
+  ],
+  "changedBudgets": false,
+  "historicalExecution": false,
+  "native12working8blockedStrictExit1": "retained, not a new replay"
+}

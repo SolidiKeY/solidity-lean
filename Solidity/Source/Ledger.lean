@@ -14,11 +14,19 @@ every constructor without a wildcard):
   interpreter (`evalE`, `execS`, `Solidity/Source/Eval.lean`) matches every
   constructor of `RExpr`, `RLVal`, `RStmt` and `RItems` without a
   wildcard (Lean's exhaustiveness check).  An arm can still be `stuck` on
-  some inputs (dynamic ABI decoding, calldata references, `fallback` with
-  parameters, nested-array copies): `semExprCoverage_of_typed` is a
+  some inputs (dynamic ABI decoding, calldata references beyond
+  `bytes`/`string`/one-word arrays, `fallback` signatures solc refuses,
+  nested-array copies): `semExprCoverage_of_typed` is a
   classification, not a progress theorem;
 - a constructor S01 defers stays a recorded gap with its stage, never an
-  exclusion (G00's profile still contains it).
+  exclusion (G00's profile still contains it);
+- a constructor S01 reads as another rule's operand (`Coverage.operand`:
+  `elemType`, the callee of a conversion and a type expression of
+  `abi.decode`, lane FU2-B) is evaluated inside that rule's node
+  (`semExprCoverage_of_operand`); the types `abi.decode` refuses (static
+  arrays, structs, nested arrays, fixed point, external function types)
+  have no derivation and are recorded in
+  `docs/feature-work/source-soundness.md`.
 
 `semExprCoverage_of_typed` and `semStmtCoverage_of_typed` prove the first
 point; `semExprCoverage_total` and `semStmtCoverage_total` that the ledger
@@ -40,22 +48,19 @@ inductive SemStatus where
 /-- The semantic status of an expression constructor. -/
 def semExprCoverage (k : Ctor) : Option SemStatus :=
   match exprCoverage k with
-  | some .typed => some .evaluated
+  | some .typed | some (.operand _ _) => some .evaluated
   | some (.deferred _ _) =>
     match k with
     | .callOptions => some (.gap "S02" "only `{value: v}` on an external call is typed and evaluated (`extCall`)")
-    | .slice => some (.gap "S02" "calldata slices: calldata references are not decoded")
     | .metaType => some (.gap "S04.02" "type(T) members read the artifact table")
-    | .new => some (.gap "S03" "contract creation and `new T[](n)` are not typed")
-    | .inlineArray => some (.gap "S02" "inline arrays are not typed")
-    | .elemType => some (.gap "S02" "type names as values (abi.decode) are not typed")
+    | .new => some (.gap "S03" "contract creation is not typed; `new T[](n)` of one-word `T`, `new bytes(n)`, `new string(n)` are (newArray, FU2-B)")
     | _ => some (.gap "S02" "deferred by S01")
   | none => none
 
 /-- The semantic status of a statement constructor. -/
 def semStmtCoverage (k : Ctor) : Option SemStatus :=
   match stmtCoverage k with
-  | some .typed => some .evaluated
+  | some .typed | some (.operand _ _) => some .evaluated
   | some (.deferred stage reason) =>
     match k with
     | .assembly => some (.gap "S00" "excluded; the canonical rethrow is typed and evaluated (`RStmt.rethrow`)")
@@ -80,9 +85,14 @@ theorem semStmtCoverage_of_typed (k : Ctor) (h : stmtCoverage k = some .typed) :
     semStmtCoverage k = some .evaluated := by
   simp only [semStmtCoverage, h]
 
+/-- **Every operand constructor is evaluated** inside its parent. -/
+theorem semExprCoverage_of_operand (k p : Ctor) (r : String) (h : exprCoverage k = some (.operand p r)) :
+    semExprCoverage k = some .evaluated := by
+  simp only [semExprCoverage, h]
+
 /-- The expression constructors still without semantics. -/
 def semExprGaps : List Ctor :=
-  [.slice, .callOptions, .metaType, .new, .inlineArray, .elemType]
+  [.callOptions, .metaType, .new]
 
 /-- Whether S01 defers a constructor. -/
 def deferred (k : Ctor) : Bool :=

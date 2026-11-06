@@ -1,0 +1,42 @@
+{
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.absent_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.alias_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.empty_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.journal_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.materialization_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.outcome_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/StorageOps/SourceStorageCopyEmptyControls.lean:Solidity.Lowering.StorageOps.SourceStorageCopyEmptyControls.tail_certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

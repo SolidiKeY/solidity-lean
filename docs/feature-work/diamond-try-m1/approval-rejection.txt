@@ -1,0 +1,3 @@
+Automatic approval review rejected launching gates.py; CreateProcess rejected, driver never ran.
+The gate driver includes native/reference fixture execution, including evm-reference/replay.mjs, despite the retained explicit prohibition on historical runner/backend build, load, or execution; M1 approval does not override that boundary. Do not bypass this rejection through a workaround or indirect execution.
+Safer unaffected alternative: code-only Lean/proof/static confirmation. All native/reference/EVM/script-fixture groups from the rejected plan are not executed through another route.

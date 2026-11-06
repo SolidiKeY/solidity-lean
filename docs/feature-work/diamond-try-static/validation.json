@@ -1,0 +1,152 @@
+{
+  "kind": "evidence-only, no new kernel/source/runtime fixture validation",
+  "rows": [
+    {
+      "label": "controls",
+      "command": [
+        "python3",
+        "/workspace/next10-diamond-try-evidence/static-frontier/check-static.py"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17292,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 13991936,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17416,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 10801152,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "expected": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 25856,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 9441280,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 14988,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4947968,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "node-syntax",
+      "command": [
+        "node",
+        "--check",
+        "/workspace/next10-diamond-try-evidence/static-frontier/compile-static.mjs"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 16864,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 12980224,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "invocation-control",
+      "command": [
+        "bash",
+        "-c",
+        "test \"$LEAN_NUM_THREADS\" = 1 && ! flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock true && printf \"LEAN_NUM_THREADS=1 writer_lock_held=true historical_execution=false\n\" && df -h /workspace && free -m"
+      ],
+      "exit": 0,
+      "expected": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17984,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4665344,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "compile-static",
+      "exit": 0,
+      "seconds": 7,
+      "peakAggregateRssKiB": 260852,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 250204160,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "map-static",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17856,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 21958656,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "collect",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17524,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 25649152,
+      "oom": 0,
+      "oomKill": 0
+    }
+  ],
+  "historicalDocBaseline": {
+    "baselineCommit": "aca22c9396011005a528bb39b29a57ecc5520770",
+    "baselineExit": 1,
+    "currentExit": 1,
+    "baselineMissing": 20,
+    "currentMissing": 20,
+    "newFindings": 0
+  },
+  "retainedKernelCheckpoint": "aca22c9396011005a528bb39b29a57ecc5520770",
+  "retainedAxiomDeclarations": 217,
+  "newAxiomAudits": 0,
+  "fixtureReplayThisTurn": false,
+  "historicalExecution": false,
+  "historicalRunnerEnabled": false
+}

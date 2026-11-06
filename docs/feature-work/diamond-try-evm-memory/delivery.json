@@ -1,0 +1,8 @@
+{
+  "base": "905df9958839e80843659475ed3054114ab174b1",
+  "sameExecutorAuthenticated": true,
+  "executor": "ccarenv_b64_Y2NhcmVudl9mMDA5NzMwMmYyNWM4MTkxYTViNmJmYmEzYTcyZTAxOA",
+  "directUserWakeNoRedispatch": true,
+  "priorAcceptedComponentsNotReplayed": true,
+  "heldSourceModelNotAuthorized": true
+}

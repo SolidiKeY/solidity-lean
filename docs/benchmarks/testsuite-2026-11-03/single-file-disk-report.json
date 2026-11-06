@@ -1,0 +1,11 @@
+{
+  "singleFile": true,
+  "proofs": true,
+  "startedAt": "2026-11-03T20:52:59.346Z",
+  "assetBuild": "3491afe47f49e1cb454a60ee6879fbc8ab2929d2866cfb234a1005b63b3f87a1",
+  "protocolHistoryLimit": 100,
+  "checks": [],
+  "webSockets": [],
+  "requests": [],
+  "errors": []
+}

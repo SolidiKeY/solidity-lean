@@ -1,0 +1,1 @@
+First control suite11pass/1fail: normal DELEGATECALL account reread failed because raw runCode root account was not installed. Host-abort leg already passed. Repair explicitly installs zero STOP code/root account in both nested control VMs before executing raw code; engine/limits/asserted counts/results unchanged. Firstfailure retained.

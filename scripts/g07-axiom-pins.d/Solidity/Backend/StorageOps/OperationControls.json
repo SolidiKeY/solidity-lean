@@ -1,0 +1,46 @@
+{
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.field_writes_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.generated_families_commute": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.generated_family_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyAt_field": [],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyAt_field_suffix": [],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyAt_key_suffix": [],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyAt_mapping_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyField_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyMany_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifyMany_outside": [
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.modifySlot_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.recursive_fields_commute": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/OperationControls.lean:Solidity.Backend.StorageOps.recursive_keys_commute": [
+  "Quot.sound",
+  "propext"
+ ]
+}

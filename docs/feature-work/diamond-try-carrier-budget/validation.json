@@ -1,0 +1,178 @@
+{
+  "checks": [
+    {
+      "label": "derive",
+      "exit": 0,
+      "seconds": 2,
+      "peakAggregateRSSKiB": 34808,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 72744960,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "budget-controls",
+      "exit": 0,
+      "seconds": 2,
+      "peakAggregateRSSKiB": 247672,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 250888192,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "source-admission",
+      "exit": 0,
+      "seconds": 2,
+      "peakAggregateRSSKiB": 285804,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 254795776,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "vectors88",
+      "exit": 0,
+      "seconds": 4,
+      "peakAggregateRSSKiB": 380144,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 364138496,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "build-carrier",
+      "exit": 0,
+      "seconds": 2,
+      "peakAggregateRSSKiB": 742828,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 174309376,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "full-final",
+      "exit": 0,
+      "seconds": 4,
+      "peakAggregateRSSKiB": 618960,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 382865408,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "corpus-final",
+      "exit": 0,
+      "seconds": 12,
+      "peakAggregateRSSKiB": 4960268,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1129066496,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "frozen",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 17532,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 41246720,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "orphans",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 19384,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 63762432,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "layers",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 19632,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 63164416,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "automatic",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 19260,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 18526208,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "trust",
+      "exit": 0,
+      "seconds": 5,
+      "peakAggregateRSSKiB": 198712,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 173256704,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "inventory",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 17912,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 10842112,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "axioms",
+      "exit": 0,
+      "seconds": 20,
+      "peakAggregateRSSKiB": 1638212,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 212783104,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "native-family",
+      "exit": 1,
+      "seconds": 72,
+      "peakAggregateRSSKiB": 1170680,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 487305216,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "account",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRSSKiB": 17120,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 31158272,
+      "maxOOMEvents": 0
+    },
+    {
+      "label": "doc-paths",
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRSSKiB": 23948,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 9138176,
+      "maxOOMEvents": 0
+    }
+  ],
+  "maxPeakBytes": 1129066496,
+  "maxAggregateRSSKiB": 4960268,
+  "nativeStrictPassed": false,
+  "fullOriginalAssignmentComplete": false
+}

@@ -46,12 +46,30 @@ theorem transaction_last (environment : Environment) (first last : Source.TxConf
 Contract identity, checked mode and depth are explicit execution inputs. -/
 def sourceFrameOfCall (frame : Source.CallFrame) (contract : String) (checked : Bool) (depth : Nat) : Source.Fr :=
   { this := frame.this, sender := frame.caller, value := frame.value,
-    static := frame.static, contract := contract, checked := checked, depth := depth }
+    static := frame.static, contract := contract, checked := checked, depth := depth, cd := frame.input }
 
 theorem sourceFrameOfCall_fields (frame : Source.CallFrame) (contract : String) (checked : Bool) (depth : Nat) :
     let source := sourceFrameOfCall frame contract checked depth
     source.this=frame.this ∧ source.sender=frame.caller ∧ source.value=frame.value ∧
     source.static=frame.static ∧ source.contract=contract ∧ source.checked=checked ∧ source.depth=depth :=
   ⟨rfl,rfl,rfl,rfl,rfl,rfl,rfl⟩
+
+/-- The actual per-call input is preserved, independently of all other
+frame fields. The older seven-field projection theorem remains unchanged. -/
+theorem sourceFrameOfCall_cd (frame : Source.CallFrame) (contract : String)
+    (checked : Bool) (depth : Nat) :
+    (sourceFrameOfCall frame contract checked depth).cd=frame.input := by
+  rfl
+
+/-- Actual owner byte-reference reads consume the same per-call input and
+preserve the complete source state. This is not a reference-formation,
+callee-admission or whole-call adequacy theorem. -/
+theorem sourceFrameOfCall_bytes {E : Source.Env} {Γ : Source.RCtx}
+    (frame : Source.CallFrame) (contract : String) (checked : Bool)
+    (depth horizon off len : Nat) (s : Source.Locals E.layout Γ × Source.St E) :
+    (Source.bytesOfRV (sourceFrameOfCall frame contract checked depth) horizon
+      (τ:=.bytes .calldata) (.val (.cdRef rfl off len))).run s=
+      (.ok ((frame.input.drop off).take len),s) := by
+  rfl
 
 end Solidity.Yul.Views

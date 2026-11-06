@@ -1,0 +1,117 @@
+{
+  "arithmetic": {
+    "partial": false,
+    "still_elaborating_lines": null,
+    "success": true,
+    "timed_out": false,
+    "items": [],
+    "failed_dependencies": []
+  },
+  "runtime": {
+    "partial": false,
+    "still_elaborating_lines": null,
+    "success": true,
+    "timed_out": false,
+    "items": [],
+    "failed_dependencies": []
+  },
+  "regression": {
+    "partial": false,
+    "still_elaborating_lines": null,
+    "success": true,
+    "timed_out": false,
+    "items": [
+      {
+        "severity": "info",
+        "message": "maximum: proved",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "falseMaximum: refuted",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "storeMaximum: proved",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "twoChoices: proved",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "constantOne: proved",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "falseConstant: refuted",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "store: proved",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      },
+      {
+        "severity": "info",
+        "message": "falseStore: refuted",
+        "line": 4,
+        "column": 1,
+        "lean_tags": null
+      }
+    ],
+    "failed_dependencies": []
+  },
+  "unitTests": {
+    "passed": 130,
+    "skipped": 2,
+    "failed": 0
+  },
+  "closureTests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "layers": {
+    "coreModules": 547,
+    "reachElaborator": 0,
+    "reachParserAdapters": 0
+  },
+  "moduleRegistration": "passed",
+  "nativeForbiddenKernelMetaElabSymbols": [],
+  "reviews": {
+    "runtimeFinder": "No actionable soundness or correctness findings.",
+    "integrationSkeptic": "All confirmed ownership, location, constructor, provenance and licensing findings fixed; final read-only review had no blocking findings."
+  },
+  "browserHTTPAndOffline": "passed 15 checks",
+  "browserPerformanceControls": "passed",
+  "diskFileLaunch": {
+    "status": "blocked by managed Chromium policy",
+    "error": "net::ERR_BLOCKED_BY_ADMINISTRATOR at file:// navigation"
+  },
+  "finalFocusedTests": {
+    "passed": 26,
+    "failed": 0
+  },
+  "package": {
+    "verified": "runtime bytes, manifest bytes, license notices and worker sources match tested files; no serialized .olean files",
+    "sha256": "9696f4f36c0536b0300d25d895fa89212f1fb9fee6195cacefa119a3a1f42a91"
+  }
+}

@@ -1,0 +1,135 @@
+{
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.assignableCheck_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.committed_frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.callFrame_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.enter_nonpayable": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ContractWorld.World.enter_static": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.deployT_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.ExecP.committed_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.holds_modal_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.committed_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.committed_view": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.frames_of_storeAt": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.frames_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_halt_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_local_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.pure_outside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Prog.run_withOutside": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Spec.box_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.System.run_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.transact_nonpayable": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.holds_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.holds_readOnly": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.ordinary_static": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.pure_independent": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.readOnly_preserves": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.run_withOutsideCells": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Mutability.lean:Solidity.Theory.Mutability.Transient.Program.static_preserves_all": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

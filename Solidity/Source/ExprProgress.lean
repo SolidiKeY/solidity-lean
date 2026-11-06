@@ -209,7 +209,7 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
     | (rename_i h; rw [hl] at h; cases h)
     | skip
   · -- a plain value
-    rename_i x hr hh _ _ _ _ _ _
+    rename_i x hr hh _ _ _ _ _ _ _
     dsimp only
     split
     · exact NS.pure' _
@@ -222,7 +222,7 @@ theorem convRV_ns {Γ : RCtx} (F : Fr) (n : Nat) {σ τ : STy} (hc : Conv E.isBa
       exact NS.bind (NS.pure' _) fun _ =>
         NS.bind (NS.lift' (convVal_ok E.isBase hv (.inl (hc.resolve_right he)) x)) fun _ => NS.pure' _
   · -- not a plain value: impossible for the fragment's types
-    rename_i hr hh _ _ hval _ _ _ _
+    rename_i hr hh _ _ _ hval _ _ _ _
     exfalso
     rcases hσ with hσ | ⟨q, rfl⟩ | ⟨q, k, rfl⟩
     · cases v with
@@ -487,7 +487,7 @@ theorem Val.word_isSome {D : Layout} {τ : STy} (h : τ.keyable = true) (x : Val
     | contract _ => rfl
     | memRef h _ => cases h
     | storRef h _ => cases h
-    | cdRef h _ => cases h
+    | cdRef h _ _ => cases h
 
 /-- **A mapping key of a keyable type is a key step**, never `stuck`. -/
 theorem keyStep_nsp {Γ : RCtx} (F : Fr) (n : Nat) {τ : STy} (hτ : τ.keyable = true) (k : RVal E.layout τ) :
@@ -656,7 +656,7 @@ theorem val_step (ih : ExprNSAt C G F n) (hcall : CallNS C G F n) {Γ : RCtx} {�
           exact NSP.bind (NSP.of_ns (readLoc_stor_ns F _ (STy.byRef_of_value hf.2.2.2.1)
             (cellTy_key hp bs hf.2.2.2.1) hf.2.2.2.2)) fun _ _ => NSP.pure' trivial
         | memRef hm _ => cases hm
-        | cdRef hm _ => cases hm
+        | cdRef hm _ _ => cases hm
     | call d h args =>
       simp only [evalE]
       exact NS.bind (ih.convArgs args hf.2 ho) fun vs =>
@@ -712,7 +712,7 @@ theorem ref_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τ : STy} (e : RExpr E Γ 
         rw [if_pos (show (STy.mapping τk' τv').byRef = true from rfl)]
         exact storRef_map_nsp _ (pathTy_key hp bs)
       | memRef hm _ => cases hm
-      | cdRef hm _ => cases hm
+      | cdRef hm _ _ => cases hm
   | _ => exact hm.elim
 
 theorem loc_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ τ) (hs : RLVal.IsSimpleC C l)
@@ -735,7 +735,7 @@ theorem loc_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τ : STy} (l : RLVal E Γ 
         obtain ⟨bs, rfl⟩ := hst
         exact NSP.pure' ⟨STy.byRef_of_value hv, cellTy_key hp bs hv, hd⟩
       | memRef hm _ => cases hm
-      | cdRef hm _ => cases hm
+      | cdRef hm _ _ => cases hm
   | _ => exact hs.elim
 
 theorem convArgs_step (ih : ExprNSAt C G F n) {Γ : RCtx} {τs : List STy} (es : RConvArgs E Γ τs)

@@ -1,0 +1,167 @@
+{
+  "schema": 2,
+  "state": "frozen",
+  "scope": "pilot",
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "coverage_claim": "Direct return-versus-parameter frame projection mutation. Pure callee returns42/true; wrong projection exports3/false. Universal projections, equal-payload positive control, inhabited actual/mutant landings, unconditional soundness counterexample and a same-premise callback counterexample in the pending caller continuation. No claim that the callee itself calls back, all declarations mutated, or assignment complete.",
+  "inventory": "tests/h28-sol/mutation-testing/inventory.frame-selected.json",
+  "inventory_sha256": "9ebbba8a50d6ef8fabdfb9fa77419b9da7f31814fb953b3a8729f67c4ab78ba3",
+  "production_inputs": {
+    "Solidity/Calculus/Rules.lean": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+    "Solidity/Calculus/RuleShapes.lean": "f7a09bdeabe0ca9a2dbef9ddb33a4ae5a1ecea5b5c3c494ee2e05d0f44535949",
+    "Solidity/TestSuite/Refuted.lean": "61d90c3ecfd08ede2614b521afc1256891e6ff4ff3a4d83fbf9e35800cac3f2e",
+    "tests/upstream/README.md": "92bd8a345b09247b3c4c2be61b7a78ff4204c687b00acff5f181b239e5d33dc6",
+    "Solidity/Calculus/CallbackRules.lean": "4a9608669a6cc5e80cc1064e29dab97297f9362a389f1fe956d2f20961513a5e"
+  },
+  "cache_manifest": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+  "cache_manifest_sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+  "cache_root": "/workspace/h28-runtime/prepared-callback-base-6f3eedf0-v2",
+  "runtime_lean_sha256": "8fadc3ed92cc9decb94c96ee9c0876e91e03a3a5e69138f32114f02789e2766c",
+  "measurement_binary_sha256": "34fec4c31dc6b7ae09b39d616f103657041366cbd5bcb12ab0f67e4329938c4c",
+  "cases": [
+    {
+      "id": "frames.return-parameter-projection",
+      "kind": "mutant",
+      "family": "callback-frames",
+      "source_symbol": "Premise.expandCall",
+      "consumer_symbol": "Taclet.functionBodyExpand",
+      "constructor_id": "Premise.expandCall",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "    (fun {rs} bs body => .inline (args.declsThen (bs.declsThen\n      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps \u0393))).2.2) .nil)))\n      (Thin.keepAll rs (Thin.ofExt (Ext.append \u0393 ps))))",
+      "new": "    (fun {rs} bs body => .inline (args.declsThen (bs.declsThen\n      (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps \u0393))).2.2) .nil)))\n      (if h : rs = ps then by\n        subst ps\n        exact Thin.ofExt (Ext.append (rs ++ \u0393) rs)\n       else Thin.keepAll rs (Thin.ofExt (Ext.append \u0393 ps))))",
+      "mutant_sha256": "6aa21ebc7287ffe97ff2edd01f90c6edc3ebff259801448dd5bcfc2e014ce77e",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/FrameReturnBaseline.lean",
+      "oracle_sha256": "34977c19b55b5b5552c6314790e7ae25d6ae393729d762ae653bd3436eba66a4",
+      "oracle_declarations": [
+        "H28.FrameReturnBaseline.source_link",
+        "H28.FrameReturnBaseline.input_inhabited",
+        "H28.FrameReturnBaseline.callee_returns",
+        "H28.FrameReturnBaseline.expanded_landing",
+        "H28.FrameReturnBaseline.correct_projection",
+        "H28.FrameReturnBaseline.wrong_projection",
+        "H28.FrameReturnBaseline.distinguishing_values",
+        "H28.FrameReturnBaseline.same_payload_control",
+        "H28.FrameReturnBaseline.good_frame_projects",
+        "H28.FrameReturnBaseline.bad_frame_projects"
+      ],
+      "oracle_signature_sha256": {
+        "H28.FrameReturnBaseline.source_link": "f9bf197fdbf5a835bbe84f5fa9d0f81eac629960cc26bda8fceed73f57b06a7d",
+        "H28.FrameReturnBaseline.input_inhabited": "efcb45626ec5903cae2e4ec4efd6dd8afa6c1dec2bd4ffb7a996d7533caf6ded",
+        "H28.FrameReturnBaseline.callee_returns": "6d8a95ede550fed22ab48d420edfbc12f94cd30e7f235849c60d69ca46f04eb5",
+        "H28.FrameReturnBaseline.expanded_landing": "361e9fba7ad7942166cd942176ac827fe35ee10a072a21a7ca8b246d9a6ef5c8",
+        "H28.FrameReturnBaseline.correct_projection": "0174c93a12eff7d4d1d8c66e72ca8abc9b24c7352b71a7a2e246d98e5b6b6a13",
+        "H28.FrameReturnBaseline.wrong_projection": "88c27d87744d82ee4377b48e91ab3c6e1c8bba287d6156f0708cfe9c12e9f9c6",
+        "H28.FrameReturnBaseline.distinguishing_values": "bbaa86ec58942a0cd0251c6b2e09ee75ffd909d0427442a7b2981b59dff2b2ca",
+        "H28.FrameReturnBaseline.same_payload_control": "ae1afbde4398b385f5448f6d2410116edc02dbc973345754ef1e4afd01c62b3c",
+        "H28.FrameReturnBaseline.good_frame_projects": "251fe1447f55f3c71ac31642360dd8e83ee754ff77927189cb03aa15c6dcbfd7",
+        "H28.FrameReturnBaseline.bad_frame_projects": "004203ab512c9f758eefd7b32a90095e75a4b7df57cf66e255794c56539412e9"
+      },
+      "witness": "tests/h28-sol/mutation-testing/oracles/FrameReturnKill.lean",
+      "witness_sha256": "73a1283e63547b66513dbea8fe2fe83cb25c43f51389dfcf2dad30f17c4053a0",
+      "witness_declarations": [
+        "H28.FrameReturnKill.source_link",
+        "H28.FrameReturnKill.input_inhabited",
+        "H28.FrameReturnKill.callee_returns",
+        "H28.FrameReturnKill.expanded_landing",
+        "H28.FrameReturnKill.correct_projection",
+        "H28.FrameReturnKill.wrong_projection",
+        "H28.FrameReturnKill.distinguishing_values",
+        "H28.FrameReturnKill.premise_frames",
+        "H28.FrameReturnKill.actual_frames",
+        "H28.FrameReturnKill.premise_accepts_post",
+        "H28.FrameReturnKill.execution_rejects_post",
+        "H28.FrameReturnKill.checked_kill",
+        "H28.FrameReturnKill.callback_preserves_number",
+        "H28.FrameReturnKill.callback_program_preserves",
+        "H28.FrameReturnKill.pending_preserves_number",
+        "H28.FrameReturnKill.after_cat",
+        "H28.FrameReturnKill.callback_premise_accepts",
+        "H28.FrameReturnKill.callback_resumes",
+        "H28.FrameReturnKill.callback_effect_controls",
+        "H28.FrameReturnKill.real_callback_frame",
+        "H28.FrameReturnKill.callback_execution_rejects",
+        "H28.FrameReturnKill.checked_callback_frames",
+        "H28.FrameReturnKill.same_payload_control",
+        "H28.FrameReturnKill.good_frame_projects",
+        "H28.FrameReturnKill.bad_frame_projects"
+      ],
+      "witness_signature_sha256": {
+        "H28.FrameReturnKill.source_link": "1087b96dd231807a09d13efb5e47d7cbbac808567300d07d2d571de2f4174e9b",
+        "H28.FrameReturnKill.input_inhabited": "eb49a3c51edef217a2fc3012647143f8de1401901d31db39fa6cf8a6f3c985e2",
+        "H28.FrameReturnKill.callee_returns": "268e99e018fe0dbb670d2d15126529dd1d80cc263a79d3564b99f342dbff8708",
+        "H28.FrameReturnKill.expanded_landing": "1ccc5f15b4d4f5ccfd2e0ae51ee7327df32619126826da5a7ce559bfcdf82cb6",
+        "H28.FrameReturnKill.correct_projection": "4df39603941cc813eb4601905042568df72663d45153a73f06254eb923313ef3",
+        "H28.FrameReturnKill.wrong_projection": "02d7a264ae8b339e668fe7b5eb1f63331abeca8865dd750be2fca46322434c82",
+        "H28.FrameReturnKill.distinguishing_values": "08700a457ccca2f731f17429f6866cafcb8d9819e86421a6e96bdd7b6e499fcc",
+        "H28.FrameReturnKill.premise_frames": "9a199cd77416ae1b7db6ca214127e0d6f25a5713b02070b69bb72594931044f8",
+        "H28.FrameReturnKill.actual_frames": "a014a503a9c08ac5f8cf55800a924c84c9553c2bea4daa738ae11704a38ea5fa",
+        "H28.FrameReturnKill.premise_accepts_post": "735370f5661833d70e551bca7366f82c1a057ff6c4feefada8f31b7f12815453",
+        "H28.FrameReturnKill.execution_rejects_post": "b48d7bb1cb7a51d18b1574f1d04466037f5ab8d4fed17106f977e163c779fa75",
+        "H28.FrameReturnKill.checked_kill": "b7c224cdbada747eda98559527e97b9daf26cd0f4bd363d36e75b40ae54fbe57",
+        "H28.FrameReturnKill.callback_preserves_number": "7c8573e5d24c8079e956816c1654ba54366734b0dae5b04b5e53f26da3800029",
+        "H28.FrameReturnKill.callback_program_preserves": "814063f18051a4b8e23cb3908f084d05ab867c06b1822fb87400f2e334d58817",
+        "H28.FrameReturnKill.pending_preserves_number": "1532ad3966855f74350099cd1dc8a0d518695077380f9a413acfdfcdde1ff518",
+        "H28.FrameReturnKill.after_cat": "b455495042748976a8ab2aa9a31fe9ece7193a654495f798b3834767cca0b409",
+        "H28.FrameReturnKill.callback_premise_accepts": "f8acba3f7ebe818311cdb135368ec384578b40d158fca2b4a522fb43eaa57b18",
+        "H28.FrameReturnKill.callback_resumes": "9c5ddcf5114f48c654c6987a7747633daa613e97a472ac730dbad3e2fb970e73",
+        "H28.FrameReturnKill.callback_effect_controls": "41668ed0daedb9b0aba7ecdc659bb228d128d60f6f3ffaa32b3e05462fc15556",
+        "H28.FrameReturnKill.real_callback_frame": "731fdd6f70eeaf9156074b15ddd15f504a21290b3e763e8c660be4df38e1c526",
+        "H28.FrameReturnKill.callback_execution_rejects": "b63d4a6657ab98fb99c4ab13db88be36f62690ce72bebee9c0b6070f5bba28e7",
+        "H28.FrameReturnKill.checked_callback_frames": "91b709aa075346487a8129bc37f9cf88a894f55e98f48f303275e7017b3a7038",
+        "H28.FrameReturnKill.same_payload_control": "fccf64221d2b382de7fdccf9f36939d25bd6c9203acee1c9dedf33f32ab5f221",
+        "H28.FrameReturnKill.good_frame_projects": "a4da07710e4ce97ebc52d154af93d02a5051ebb89747e44252816c355e2f6b15",
+        "H28.FrameReturnKill.bad_frame_projects": "89029d2601bdb97472de423bcde2f704ad71547eeb0f6223b0ddb0e743cd5856"
+      }
+    },
+    {
+      "id": "control.revert-diamond-true",
+      "kind": "known-kill",
+      "target": "Solidity/Calculus/Rules.lean",
+      "target_sha256": "e4f886ee79ba026ad18e6a3f167507a67e2bae8aea70337e82e0c248e68f1207",
+      "old": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd false }",
+      "new": "  | revertDiamond :\n      dl{ \u27e8 revert(); \u27e9 \u21dd true }",
+      "oracle": "tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean",
+      "witness": "tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean",
+      "oracle_sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c",
+      "witness_sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea",
+      "oracle_declarations": [
+        "H28.RevertBaseline.source_link",
+        "H28.RevertBaseline.input_inhabited",
+        "H28.RevertBaseline.reverting_run"
+      ],
+      "witness_declarations": [
+        "H28.RevertDiamondKill.source_link",
+        "H28.RevertDiamondKill.input_inhabited",
+        "H28.RevertDiamondKill.checked_kill"
+      ],
+      "constructor_id": "Taclet.revertDiamond",
+      "family": "rollback-payment",
+      "oracle_signature_sha256": {
+        "H28.RevertBaseline.source_link": "144d37e5fd0ef3092d8d44e6e8989c316c5cb2eb13f0217ca37ce549353c3fab",
+        "H28.RevertBaseline.input_inhabited": "6e8fa3611c79027d65c31bedf2770835a56d730ce4214e8bc2e047a1e8fd55b4",
+        "H28.RevertBaseline.reverting_run": "5e157f888621d21c0f81f9f2124d1494be2b294b5a8e78fd9c4aa755a2a82244"
+      },
+      "witness_signature_sha256": {
+        "H28.RevertDiamondKill.source_link": "b24379fb17fd051830ee94e23a49d53f445ae82bb31ab7a3d73f356adfc04e3a",
+        "H28.RevertDiamondKill.input_inhabited": "96de47eef937d3308a6359c8a9fafad4d18d4099ae022bb8a0a47268d1f5ef2a",
+        "H28.RevertDiamondKill.checked_kill": "a5647be95056656b75d5b7f0b3e4b90b4066c450e66afcc5ca5c3a80dad31509"
+      },
+      "mutant_sha256": "ab16b8f064591a82628b07fc99e5fa42b506a2cb1a7a59e14274005cde0d7e93"
+    }
+  ],
+  "input_storage": {
+    "authorization": "H44",
+    "inventory": "git-tracked selected attribution index",
+    "off_git_inputs": [
+      {
+        "role": "cache_manifest",
+        "path": "tests/h28-sol/mutation-testing/evidence/callback-cache-bootstrap-v2/manifest.json",
+        "sha256": "788c9e387fc7c03e803895521dee1389fc6f4843eb3290dc82f70754d892f63c",
+        "bytes": 36528,
+        "availability": "VM-only"
+      }
+    ],
+    "bulk_manifest": "tests/h28-sol/mutation-testing/bulk-data.json"
+  }
+}

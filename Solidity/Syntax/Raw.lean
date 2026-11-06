@@ -675,7 +675,16 @@ partial def canonFnTy (enums : List String) (s : String) : String :=
       if fnTy? c then canonFnTy enums c else
       match PrimTy.ofName? c with
       | some p => p.toStr
-      | none => if enums.contains c then "uint" else c
+      | none =>
+        if enums.contains c then "uint" else
+        -- a memory or storage array of a value type (`FunDecl.sigTy?`): its
+        -- element as a value component reads, the location kept
+        match ["[]memory", "[]storage"].find? c.endsWith with
+        | some loc =>
+          match PrimTy.ofName? (c.dropRight loc.length) with
+          | some p => p.toStr ++ loc
+          | none => c
+        | none => c
     fnTyStr (ps.map comp) (rs.map comp) ext
   | none => s
 

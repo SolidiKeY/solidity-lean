@@ -1,0 +1,36 @@
+{
+  "api": "solidity-lean-attempt-v1",
+  "baseTreeManifestSHA256": "ab506efc442c7ac563fa6717196efe0fcef87608b54ce99ba6da778c4df6aa6f",
+  "baseTreeFiles": 4040,
+  "packageVersions": {
+    "@ethereumjs/vm": "10.1.3",
+    "@ethereumjs/evm": "10.1.3",
+    "@ethereumjs/common": "10.1.3",
+    "@ethereumjs/util": "10.1.3",
+    "ethers": "6.17.0"
+  },
+  "patchSHA256": "0dd9f3180a986770f7a4230187eebf1d44acada866b073fa63b57bd983704353",
+  "files": [
+    {
+      "path": "@ethereumjs/evm/dist/cjs/evm.js",
+      "originalSHA256": "14b0644a17f6a3e321451da2adc84c43c4cecee34c1f930060b40cd00e60291f",
+      "patchedSHA256": "7341a8eab000000d39b0c02a741e4baa0b6ebf5509a91b35111c92ee19351d68"
+    },
+    {
+      "path": "@ethereumjs/evm/dist/cjs/interpreter.js",
+      "originalSHA256": "7a28938cf72c934e5f17cfe4a0a48c731c324625db0deea859f47b3c6ec71535",
+      "patchedSHA256": "c6af0114f73208cea1aec29e226d2e3b40b36bc642a3fa5bf7efd72e456ed7db"
+    },
+    {
+      "path": "@ethereumjs/evm/dist/cjs/types.d.ts",
+      "originalSHA256": "80c9469eb0e0ce83e3523729e995247a8b4a6ef8a8b0d3deea22045ceae09ece",
+      "patchedSHA256": "fd826698f00dcb5e79a5b7a9d1ea81da2e9a66c4eeef4f29a218842a2833fe9e"
+    },
+    {
+      "path": "@ethereumjs/evm/dist/cjs/evm.d.ts",
+      "originalSHA256": "9c939246516091b9bbb07e3aac70c5e139d579765f263f4d6801e532136ada64",
+      "patchedSHA256": "6c370b44ac3fe432e29ef3fc97b2d46dfca4d2c97ad559029ace3d2f39c71b6e"
+    }
+  ],
+  "scope": "Derived CommonJS artifact only. ESM unchanged and not supported by this budget API. No original installation mutation."
+}

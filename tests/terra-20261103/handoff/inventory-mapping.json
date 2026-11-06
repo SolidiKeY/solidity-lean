@@ -1,0 +1,161 @@
+{
+  "historical_cases_and_helpers": [
+    {
+      "historical_method": "setUp",
+      "replacement_method": "setUp",
+      "status": "identical AST",
+      "historical_source": "def setUp(self):\n        self.tmp = tempfile.TemporaryDirectory(prefix=\"terra handoff \")\n        self.addCleanup(self.tmp.cleanup)\n        self.root = Path(self.tmp.name)\n        self.repo = self.root / \"repo\"\n        self.repo.mkdir()\n        self.git(\"init\", \"-q\")\n        self.git(\"config\", \"user.name\", \"Fixture\")\n        self.git(\"config\", \"user.email\", \"fixture@example.invalid\")\n        (self.repo / \"Old.lean\").write_text(\"old\\n\")\n        (self.repo / \"tracked\").write_text(\"base\\n\")\n        self.git(\"add\", \".\")\n        self.git(\"commit\", \"-qm\", \"base\")\n        self.base = self.git(\"rev-parse\", \"HEAD\")\n        (self.repo / \"Old.lean\").unlink()\n        (self.repo / \"New.lean\").write_text(\"new\\n\")\n        self.git(\"add\", \"-A\")\n        self.git(\"commit\", \"-qm\", \"change modules\")\n        self.head = self.git(\"rev-parse\", \"HEAD\")\n        self.branch = self.git(\"branch\", \"--show-current\")\n        self.out = self.root / \"out\"\n        self.env = {k:v for k,v in os.environ.items() if not k.startswith(\"HANDOFF_\")}\n        self.env.update(HANDOFF_BASE=self.base, HANDOFF_BATCH=\"batch\", HANDOFF_SLUG=\"slug\", TMPDIR=str(self.root))",
+      "replacement_source": "def setUp(self):\n        self.tmp = tempfile.TemporaryDirectory(prefix=\"terra handoff \")\n        self.addCleanup(self.tmp.cleanup)\n        self.root = Path(self.tmp.name)\n        self.repo = self.root / \"repo\"\n        self.repo.mkdir()\n        self.git(\"init\", \"-q\")\n        self.git(\"config\", \"user.name\", \"Fixture\")\n        self.git(\"config\", \"user.email\", \"fixture@example.invalid\")\n        (self.repo / \"Old.lean\").write_text(\"old\\n\")\n        (self.repo / \"tracked\").write_text(\"base\\n\")\n        self.git(\"add\", \".\")\n        self.git(\"commit\", \"-qm\", \"base\")\n        self.base = self.git(\"rev-parse\", \"HEAD\")\n        (self.repo / \"Old.lean\").unlink()\n        (self.repo / \"New.lean\").write_text(\"new\\n\")\n        self.git(\"add\", \"-A\")\n        self.git(\"commit\", \"-qm\", \"change modules\")\n        self.head = self.git(\"rev-parse\", \"HEAD\")\n        self.branch = self.git(\"branch\", \"--show-current\")\n        self.out = self.root / \"out\"\n        self.env = {k:v for k,v in os.environ.items() if not k.startswith(\"HANDOFF_\")}\n        self.env.update(HANDOFF_BASE=self.base, HANDOFF_BATCH=\"batch\", HANDOFF_SLUG=\"slug\", TMPDIR=str(self.root))"
+    },
+    {
+      "historical_method": "git",
+      "replacement_method": "git",
+      "status": "identical AST",
+      "historical_source": "def git(self, *args):\n        return subprocess.check_output([\"git\", *map(str, args)], cwd=self.repo, text=True).strip()",
+      "replacement_source": "def git(self, *args):\n        return subprocess.check_output([\"git\", *map(str, args)], cwd=self.repo, text=True).strip()"
+    },
+    {
+      "historical_method": "invoke",
+      "replacement_method": "invoke",
+      "status": "identical AST",
+      "historical_source": "def invoke(self, *args, **updates):\n        env = dict(self.env, **updates)\n        return subprocess.run([\"bash\", str(TOOL), *map(str, args)], cwd=self.repo, env=env, text=True, capture_output=True)",
+      "replacement_source": "def invoke(self, *args, **updates):\n        env = dict(self.env, **updates)\n        return subprocess.run([\"bash\", str(TOOL), *map(str, args)], cwd=self.repo, env=env, text=True, capture_output=True)"
+    },
+    {
+      "historical_method": "gate",
+      "replacement_method": "gate",
+      "status": "identical AST",
+      "historical_source": "def gate(self, status=\"PASS\", head=True):\n        d = self.root / \"gate\"\n        d.mkdir(exist_ok=True)\n        (d / \"gates.tsv\").write_text(status + \"\\tcheck\\t1\\tfixture.log\\tcheck --flag\\n\")\n        if head is True:\n            (d / \"HEAD\").write_text(self.head + \"\\n\")\n        elif head:\n            (d / \"HEAD\").write_text(head + \"\\n\")\n        return d",
+      "replacement_source": "def gate(self, status=\"PASS\", head=True):\n        d = self.root / \"gate\"\n        d.mkdir(exist_ok=True)\n        (d / \"gates.tsv\").write_text(status + \"\\tcheck\\t1\\tfixture.log\\tcheck --flag\\n\")\n        if head is True:\n            (d / \"HEAD\").write_text(self.head + \"\\n\")\n        elif head:\n            (d / \"HEAD\").write_text(head + \"\\n\")\n        return d"
+    },
+    {
+      "historical_method": "expected",
+      "replacement_method": "expected",
+      "status": "identical AST",
+      "historical_source": "def expected(self, out, status=\"partial\", gates=None, checkpoints=None, notes=\"\"):\n        return dict(batch=\"batch\", slug=\"slug\", status=status, branch=self.branch,\n                    base=self.base, head=self.head, repository=str(self.repo),\n                    commits=[dict(sha=self.head, subject=\"change modules\")],\n                    modules_changed=[\"New\"], modules_deleted=[\"Old\"],\n                    checkpoints=checkpoints or [], gates=gates or [], notes=notes,\n                    questions=[], artifacts=dict(handoff=str(out / \"HANDOFF.md\")))",
+      "replacement_source": "def expected(self, out, status=\"partial\", gates=None, checkpoints=None, notes=\"\"):\n        return dict(batch=\"batch\", slug=\"slug\", status=status, branch=self.branch,\n                    base=self.base, head=self.head, repository=str(self.repo),\n                    commits=[dict(sha=self.head, subject=\"change modules\")],\n                    modules_changed=[\"New\"], modules_deleted=[\"Old\"],\n                    checkpoints=checkpoints or [], gates=gates or [], notes=notes,\n                    questions=[], artifacts=dict(handoff=str(out / \"HANDOFF.md\")))"
+    },
+    {
+      "historical_method": "passing_gate",
+      "replacement_method": "passing_gate",
+      "status": "identical AST",
+      "historical_source": "def passing_gate(self):\n        return [dict(gate=\"check\", command=\"check --flag\", status=\"pass\", seconds=1.0, evidence=\"fixture.log\")]",
+      "replacement_source": "def passing_gate(self):\n        return [dict(gate=\"check\", command=\"check --flag\", status=\"pass\", seconds=1.0, evidence=\"fixture.log\")]"
+    },
+    {
+      "historical_method": "assert_artifacts",
+      "replacement_method": "assert_artifacts",
+      "status": "identical AST",
+      "historical_source": "def assert_artifacts(self, result, expected, out):\n        self.assertEqual(result.returncode, 0, result.stderr)\n        self.assertEqual({p.name for p in out.iterdir()}, {\"HANDOFF.md\", \"CLOUDVM-RESULT.json\"})\n        body = json.dumps(expected, indent=2, ensure_ascii=False) + \"\\n\"\n        self.assertEqual(json.loads((out / \"CLOUDVM-RESULT.json\").read_text()), expected)\n        self.assertEqual((out / \"CLOUDVM-RESULT.json\").read_text(), body)\n        self.assertEqual((out / \"HANDOFF.md\").read_bytes().decode(), \"# Handoff\\n\\n\" + self.head + \" change modules\\n\\n```json\\n\" + body + \"```\\n\\n\" + expected[\"notes\"])\n        self.assertEqual(result.stdout, \"CLOUDVM-RESULT\\n\" + body + \"END-CLOUDVM-RESULT\\n\")",
+      "replacement_source": "def assert_artifacts(self, result, expected, out):\n        self.assertEqual(result.returncode, 0, result.stderr)\n        self.assertEqual({p.name for p in out.iterdir()}, {\"HANDOFF.md\", \"CLOUDVM-RESULT.json\"})\n        body = json.dumps(expected, indent=2, ensure_ascii=False) + \"\\n\"\n        self.assertEqual(json.loads((out / \"CLOUDVM-RESULT.json\").read_text()), expected)\n        self.assertEqual((out / \"CLOUDVM-RESULT.json\").read_text(), body)\n        self.assertEqual((out / \"HANDOFF.md\").read_bytes().decode(), \"# Handoff\\n\\n\" + self.head + \" change modules\\n\\n```json\\n\" + body + \"```\\n\\n\" + expected[\"notes\"])\n        self.assertEqual(result.stdout, \"CLOUDVM-RESULT\\n\" + body + \"END-CLOUDVM-RESULT\\n\")"
+    },
+    {
+      "historical_method": "assert_refused",
+      "replacement_method": "assert_refused",
+      "status": "identical AST",
+      "historical_source": "def assert_refused(self, result):\n        self.assertNotEqual(result.returncode, 0, result.stdout)\n        self.assertIn(\"handoff:\", result.stderr)\n        self.assertFalse(self.out.exists())",
+      "replacement_source": "def assert_refused(self, result):\n        self.assertNotEqual(result.returncode, 0, result.stdout)\n        self.assertIn(\"handoff:\", result.stderr)\n        self.assertFalse(self.out.exists())"
+    },
+    {
+      "historical_method": "test_partial_default",
+      "replacement_method": "test_partial_default",
+      "status": "identical AST",
+      "historical_source": "def test_partial_default(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out), self.out)",
+      "replacement_source": "def test_partial_default(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out), self.out)"
+    },
+    {
+      "historical_method": "test_done_passing",
+      "replacement_method": "test_done_passing",
+      "status": "identical AST",
+      "historical_source": "def test_done_passing(self):\n        gate = self.gate()\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_artifacts(result, self.expected(self.out, status=\"done\", gates=self.passing_gate()), self.out)",
+      "replacement_source": "def test_done_passing(self):\n        gate = self.gate()\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_artifacts(result, self.expected(self.out, status=\"done\", gates=self.passing_gate()), self.out)"
+    },
+    {
+      "historical_method": "test_done_failed_gate",
+      "replacement_method": "test_done_failed_gate",
+      "status": "strictly strengthened",
+      "historical_source": "def test_done_failed_gate(self):\n        gate = self.gate(status=\"FAIL\")\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)",
+      "replacement_source": "def test_done_failed_gate(self):\n        gate = self.gate(status=\"FAIL\")\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)\n        self.assertIn(\"done requires passing gates and a clean tracked tree\", result.stderr)"
+    },
+    {
+      "historical_method": "test_done_stale_head",
+      "replacement_method": "test_done_stale_head",
+      "status": "identical AST",
+      "historical_source": "def test_done_stale_head(self):\n        gate = self.gate(head=self.base)\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)\n        self.assertIn(\"another commit\", result.stderr)",
+      "replacement_source": "def test_done_stale_head(self):\n        gate = self.gate(head=self.base)\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)\n        self.assertIn(\"another commit\", result.stderr)"
+    },
+    {
+      "historical_method": "test_done_dirty_tracked",
+      "replacement_method": "test_done_dirty_tracked",
+      "status": "strictly strengthened",
+      "historical_source": "def test_done_dirty_tracked(self):\n        gate = self.gate()\n        (self.repo / \"tracked\").write_text(\"dirty\\n\")\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)",
+      "replacement_source": "def test_done_dirty_tracked(self):\n        gate = self.gate()\n        (self.repo / \"tracked\").write_text(\"dirty\\n\")\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)\n        self.assertIn(\"done requires passing gates and a clean tracked tree\", result.stderr)"
+    },
+    {
+      "historical_method": "test_missing_gate_head",
+      "replacement_method": "test_missing_gate_head",
+      "status": "identical AST",
+      "historical_source": "def test_missing_gate_head(self):\n        gate = self.gate(head=False)\n        self.assertFalse((gate / \"HEAD\").exists())\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)",
+      "replacement_source": "def test_missing_gate_head(self):\n        gate = self.gate(head=False)\n        self.assertFalse((gate / \"HEAD\").exists())\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"done\", HANDOFF_GATES=str(gate))\n        self.assert_refused(result)"
+    },
+    {
+      "historical_method": "test_notes_crlf",
+      "replacement_method": "test_notes_crlf",
+      "status": "identical AST",
+      "historical_source": "def test_notes_crlf(self):\n        notes = self.root / \"notes\"\n        notes.write_bytes(b\"first\\r\\nsecond\\r\\n\")\n        result = self.invoke(notes, HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out, notes=\"first\\r\\nsecond\\r\\n\"), self.out)",
+      "replacement_source": "def test_notes_crlf(self):\n        notes = self.root / \"notes\"\n        notes.write_bytes(b\"first\\r\\nsecond\\r\\n\")\n        result = self.invoke(notes, HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out, notes=\"first\\r\\nsecond\\r\\n\"), self.out)"
+    },
+    {
+      "historical_method": "test_notes_unicode",
+      "replacement_method": "test_notes_unicode",
+      "status": "identical AST",
+      "historical_source": "def test_notes_unicode(self):\n        notes = self.root / \"notes\"\n        notes.write_text(\"proof \u03bb \u6f22\u5b57\\n\")\n        result = self.invoke(notes, HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out, notes=\"proof \u03bb \u6f22\u5b57\\n\"), self.out)",
+      "replacement_source": "def test_notes_unicode(self):\n        notes = self.root / \"notes\"\n        notes.write_text(\"proof \u03bb \u6f22\u5b57\\n\")\n        result = self.invoke(notes, HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out, notes=\"proof \u03bb \u6f22\u5b57\\n\"), self.out)"
+    },
+    {
+      "historical_method": "test_outside_checkout_default",
+      "replacement_method": "test_outside_checkout_default",
+      "status": "strictly strengthened",
+      "historical_source": "def test_outside_checkout_default(self):\n        out = self.root / (\"coord-handoff-\" + self.head[:12])\n        result = self.invoke()\n        self.assertFalse(out.is_relative_to(self.repo))\n        self.assert_artifacts(result, self.expected(out), out)",
+      "replacement_source": "def test_outside_checkout_default(self):\n        out = self.root / (\"coord-handoff-\" + self.head[:12])\n        result = self.invoke()\n        self.assertEqual(result.returncode, 0, result.stderr)\n        observed = json.loads(result.stdout.removeprefix(\"CLOUDVM-RESULT\\n\")\n                              .removesuffix(\"END-CLOUDVM-RESULT\\n\"))\n        observed_handoff = Path(observed[\"artifacts\"][\"handoff\"])\n        self.assertTrue(observed_handoff.is_absolute())\n        self.assertFalse(observed_handoff.is_relative_to(self.repo))\n        self.assertEqual(observed_handoff, out / \"HANDOFF.md\")\n        self.assert_artifacts(result, self.expected(out), out)"
+    },
+    {
+      "historical_method": "test_checkpoint_statuses",
+      "replacement_method": "test_checkpoint_statuses",
+      "status": "identical AST",
+      "historical_source": "def test_checkpoint_statuses(self):\n        checkpoints = [dict(name=\"one\", status=\"done\"), dict(name=\"two\", status=\"partial\"), dict(name=\"three\", status=\"blocked\")]\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_CHECKPOINTS=\"one=done,two=partial,three=blocked\")\n        self.assert_artifacts(result, self.expected(self.out, checkpoints=checkpoints), self.out)",
+      "replacement_source": "def test_checkpoint_statuses(self):\n        checkpoints = [dict(name=\"one\", status=\"done\"), dict(name=\"two\", status=\"partial\"), dict(name=\"three\", status=\"blocked\")]\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_CHECKPOINTS=\"one=done,two=partial,three=blocked\")\n        self.assert_artifacts(result, self.expected(self.out, checkpoints=checkpoints), self.out)"
+    },
+    {
+      "historical_method": "test_base_and_head",
+      "replacement_method": "test_base_and_head",
+      "status": "identical AST",
+      "historical_source": "def test_base_and_head(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out), self.out)\n        self.assertNotEqual(self.base, self.head)\n        self.assertEqual(self.git(\"merge-base\", self.base, self.head), self.base)",
+      "replacement_source": "def test_base_and_head(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out))\n        self.assert_artifacts(result, self.expected(self.out), self.out)\n        self.assertNotEqual(self.base, self.head)\n        self.assertEqual(self.git(\"merge-base\", self.base, self.head), self.base)"
+    },
+    {
+      "historical_method": "test_malformed_status",
+      "replacement_method": "test_malformed_status",
+      "status": "identical AST",
+      "historical_source": "def test_malformed_status(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"finished\")\n        self.assert_refused(result)\n        self.assertIn(\"invalid status\", result.stderr)",
+      "replacement_source": "def test_malformed_status(self):\n        result = self.invoke(HANDOFF_OUT=str(self.out), HANDOFF_STATUS=\"finished\")\n        self.assert_refused(result)\n        self.assertIn(\"invalid status\", result.stderr)"
+    }
+  ],
+  "artifacts": {
+    "accept.py": "byte-identical historical contract, retained; superseded only for new repair acceptance",
+    "README.md": "byte-identical historical instructions",
+    "test_cases.py": "all twelve cases and helpers retained; three stricter predicates",
+    "historical.tar.gz": "exact coordinator archive including original RED and both reviews"
+  },
+  "contract_assertions": {
+    "old production SHA": "old exact SHA checked inside archive; new exact production SHA checked on repaired source and production commit",
+    "exact three artifact paths": "superseded by complete new directory inventory; all original paths retained",
+    "artifact sizes >40": "preserved for all files",
+    "optional artifact-only commit diff": "superseded by exact current HEAD supplied as mandatory argument, clean tracked tree, exact frozen committed bytes and explicit cumulative changed-path inventory",
+    "accept bytes at commit": "preserved for every current artifact including both acceptors",
+    "exact twelve case names": "preserved separately, plus exact thirteen added controls",
+    "testsRun and no skips/expected failures/unexpected successes": "preserved for each suite",
+    "wasSuccessful": "preserved for each suite"
+  },
+  "backend": "Both suites invoke actual production bash handoff in temporary Git repositories; synthetic gates.tsv is not real gate execution. Full original invoke/git/assert_artifacts methods retained unchanged. No Lean/kernel/EVM validation."
+}

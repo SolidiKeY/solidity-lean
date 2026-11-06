@@ -1,0 +1,303 @@
+["docker", "--host=unix:///var/run/docker.sock", "run", "--name", "h28-type-8d4b9101390d", "--network", "none", "--memory", "12g", "--memory-swap", "12g", "--cpus", "1", "--user", "1000:1000", "--mount", "type=bind,src=/workspace/solidity-lean,dst=/workspace/solidity-lean", "--mount", "type=bind,src=/workspace/.setup/tools/lean-4.24.0-linux,dst=/opt/lean,readonly", "--mount", "type=bind,src=/workspace/.setup/cache/lake,dst=/workspace/.setup/cache/lake", "-w", "/workspace/solidity-lean", "-e", "LEAN_NUM_THREADS=1", "-e", "LAKE_CACHE_DIR=/workspace/.setup/cache/lake", "ubuntu@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852", "sh", "-c", "export PATH=/opt/lean/bin:$PATH; set -eu; trap 'printf CGROUP_PEAK=; cat /sys/fs/cgroup/memory.peak' EXIT; test \"$(cat /sys/fs/cgroup/memory.max)\" = 12884901888; test \"$(cat /sys/fs/cgroup/memory.swap.max)\" = 0; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.Layouts; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.Counterexamples; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.Composition; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.Boundaries; lake -f tests/h28-sol/type-grammar/runtime.toml build Solidity.Frontend.TypeGrammarH28.TypeRegions; lake -f tests/h28-sol/type-grammar/runtime.toml env lean -j1 --tstack=131072 tests/h28-sol/type-grammar/AxiomAudit.lean"]
+ℹ [5/5] Replayed Solidity.Frontend.TypeGrammarH28.Layouts
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+Build completed successfully (5 jobs).
+ℹ [6/7] Replayed Solidity.Frontend.TypeGrammarH28.Layouts
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+ℹ [7/7] Replayed Solidity.Frontend.TypeGrammarH28.Counterexamples
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:35:0: 'Solidity.Frontend.TypeGrammarH28.raw_yield_not_unique' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Counterexamples.lean:36:0: 'Solidity.Frontend.TypeGrammarH28.raw_counterexample_precedence' does not depend on any axioms
+Build completed successfully (7 jobs).
+ℹ [5/6] Replayed Solidity.Frontend.TypeGrammarH28.Layouts
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+ℹ [6/6] Replayed Solidity.Frontend.TypeGrammarH28.Composition
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:220:0: 'Solidity.Frontend.TypeGrammarH28.exact_elem' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:221:0: 'Solidity.Frontend.TypeGrammarH28.exact_userType' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:222:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:223:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:224:0: 'Solidity.Frontend.TypeGrammarH28.exact_no_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:225:0: 'Solidity.Frontend.TypeGrammarH28.exact_some_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:226:0: 'Solidity.Frontend.TypeGrammarH28.exact_array' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:227:0: 'Solidity.Frontend.TypeGrammarH28.exact_param' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:228:0: 'Solidity.Frontend.TypeGrammarH28.exact_mapping' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:229:0: 'Solidity.Frontend.TypeGrammarH28.exact_fnType' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:230:0: 'Solidity.Frontend.TypeGrammarH28.params_cons_decompose' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:231:0: 'Solidity.Frontend.TypeGrammarH28.exact_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:232:0: 'Solidity.Frontend.TypeGrammarH28.exact_layout_equivalent' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:233:0: 'Solidity.Frontend.TypeGrammarH28.exact_dynamic_depth' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:234:0: 'Solidity.Frontend.TypeGrammarH28.exact_empty_function' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:235:0: 'Solidity.Frontend.TypeGrammarH28.exact_nested_layout' does not depend on any axioms
+Build completed successfully (6 jobs).
+ℹ [4/4] Replayed Solidity.Frontend.TypeGrammarH28.Boundaries
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:352:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mark_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:353:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mark_close' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:354:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:355:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:356:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:357:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:358:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:359:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_plain' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:360:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:361:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_close' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:362:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_plain' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:363:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:364:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_cut' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:365:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:366:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_boundary' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:367:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:368:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.boundary_unique' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:369:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:370:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.nest_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:371:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.nest_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:372:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.arbitrary_nested_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:373:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mismatched_close_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:374:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.unterminated_group_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:375:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.inner_comma_preserved' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:376:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:377:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:378:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_head_inv' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:379:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_suffix' does not depend on any axioms
+Build completed successfully (4 jobs).
+ℹ [5/8] Replayed Solidity.Frontend.TypeGrammarH28.Layouts
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:54:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:55:0: 'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:56:0: 'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:57:0: 'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:58:0: 'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:59:0: 'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:60:0: 'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Layouts.lean:61:0: 'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+ℹ [6/8] Replayed Solidity.Frontend.TypeGrammarH28.Composition
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:220:0: 'Solidity.Frontend.TypeGrammarH28.exact_elem' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:221:0: 'Solidity.Frontend.TypeGrammarH28.exact_userType' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:222:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:223:0: 'Solidity.Frontend.TypeGrammarH28.exact_params_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:224:0: 'Solidity.Frontend.TypeGrammarH28.exact_no_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:225:0: 'Solidity.Frontend.TypeGrammarH28.exact_some_length' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:226:0: 'Solidity.Frontend.TypeGrammarH28.exact_array' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:227:0: 'Solidity.Frontend.TypeGrammarH28.exact_param' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:228:0: 'Solidity.Frontend.TypeGrammarH28.exact_mapping' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:229:0: 'Solidity.Frontend.TypeGrammarH28.exact_fnType' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:230:0: 'Solidity.Frontend.TypeGrammarH28.params_cons_decompose' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:231:0: 'Solidity.Frontend.TypeGrammarH28.exact_toks' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:232:0: 'Solidity.Frontend.TypeGrammarH28.exact_layout_equivalent' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:233:0: 'Solidity.Frontend.TypeGrammarH28.exact_dynamic_depth' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:234:0: 'Solidity.Frontend.TypeGrammarH28.exact_empty_function' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Composition.lean:235:0: 'Solidity.Frontend.TypeGrammarH28.exact_nested_layout' does not depend on any axioms
+ℹ [7/8] Replayed Solidity.Frontend.TypeGrammarH28.Boundaries
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:352:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mark_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:353:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mark_close' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:354:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:355:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:356:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:357:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:358:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:359:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_plain' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:360:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:361:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_close' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:362:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_plain' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:363:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_open' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:364:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_cut' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:365:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:366:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_boundary' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:367:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:368:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.boundary_unique' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:369:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:370:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.nest_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:371:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.nest_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:372:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.arbitrary_nested_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:373:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.mismatched_close_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:374:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.unterminated_group_refused' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:375:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.inner_comma_preserved' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:376:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:377:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.region_append' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:378:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_head_inv' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/Boundaries.lean:379:0: 'Solidity.Frontend.TypeGrammarH28.Boundary.cut_suffix' does not depend on any axioms
+ℹ [8/8] Replayed Solidity.Frontend.TypeGrammarH28.TypeRegions
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:652:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.elem_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:653:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.path_tail_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:654:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.path_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:655:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.name_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:656:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.loc_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:657:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.vis_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:658:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.mut_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:659:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.key_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:660:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.parens_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:661:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.brackets_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:662:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_balanced' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:663:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.param_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:664:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.array_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:665:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.mapping_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:666:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_cons_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:667:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:668:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.single_region' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:669:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.fn_attrs_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:670:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.function_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:671:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_elem_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:672:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_userType_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:673:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_array_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:674:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_mapping_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:675:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_fnType_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:676:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_param_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:677:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_nil_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:678:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_cons_iff' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:679:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.no_length_balance' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:680:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.some_length_balance' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:681:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.numeric_length_balance' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:682:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_elem_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:683:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_userType_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:684:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_mapping_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:685:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_array_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:686:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_fnType_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:687:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_param_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:688:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_nil' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:689:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_cons' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:690:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_yield_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:691:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.param_yield_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:692:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.params_yield_regions' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:693:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.region_all_closes' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:694:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_region' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:695:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:696:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_token_boundary_unique' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:697:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_atoms_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:698:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_type_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:699:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_atoms_balanced' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:700:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.every_close_boundary' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:701:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_split' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:702:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.afterFirst_boundary' does not depend on any axioms
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:703:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.params_first_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:704:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_type_boundary' depends on axioms: [propext]
+info: Solidity/Frontend/TypeGrammarH28/TypeRegions.lean:705:0: 'Solidity.Frontend.TypeGrammarH28.TypeRegion.malformed_layouts_refused' does not depend on any axioms
+Build completed successfully (8 jobs).
+'Solidity.Frontend.TypeGrammarH28.Boundary.mark_open' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.mark_close' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_nil' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_append' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_cons' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_plain' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_nonempty_open' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_close' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_plain' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_empty_open' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_cut' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_boundary' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.region_cut_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.boundary_unique' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.region_balanced' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.nest_balanced' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.nest_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.arbitrary_nested_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.mismatched_close_refused' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.unterminated_group_refused' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.inner_comma_preserved' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.balanced_append' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.region_append' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.Boundary.prefix_head_inv' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.Boundary.cut_suffix' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_elem' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_userType' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_params_nil' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_params_cons' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_no_length' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_some_length' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_array' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_param' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_mapping' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_fnType' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.params_cons_decompose' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.exact_toks' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_layout_equivalent' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_dynamic_depth' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_empty_function' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.exact_nested_layout' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.raw_yield_not_unique' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.raw_counterexample_precedence' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_symm' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.layoutEquivalent_trans' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.elem_yield' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.userType_yield' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.elem_toks' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.userType_toks' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.elem_no_unused_layout' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.userType_no_unused_layout' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.elem_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.path_tail_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.path_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.name_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.loc_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.vis_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.mut_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.key_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.parens_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.brackets_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_balanced' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.param_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.array_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.mapping_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_cons_nil' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.arrange_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.single_region' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.fn_attrs_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.function_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_elem_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_userType_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_array_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_mapping_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_fnType_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_param_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_nil_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.atoms_params_cons_iff' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.no_length_balance' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.some_length_balance' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.numeric_length_balance' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_elem_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_userType_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_mapping_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_array_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_fnType_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_param_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_nil' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.yield_params_cons' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_yield_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.param_yield_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.params_yield_regions' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.region_all_closes' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_region' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_toks_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.type_token_boundary_unique' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_atoms_balanced' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.dynamic_type_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_atoms_balanced' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.every_close_boundary' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.commaSep_split' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.afterFirst_boundary' does not depend on any axioms
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.params_first_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.nested_type_boundary' depends on axioms: [propext]
+'Solidity.Frontend.TypeGrammarH28.TypeRegion.malformed_layouts_refused' does not depend on any axioms
+CGROUP_PEAK=79380480
+
+CONTAINER 12884901888 12884901888 false 0

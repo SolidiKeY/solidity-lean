@@ -108,26 +108,32 @@ export function runSolidityTests(paths, options = {}) {
       const fixture = join(scratch, "source.ast.json");
       const args = ["scripts/solc-ast.mjs", "--source", source, "--out", fixture, "--no-wrapper"];
       for (const key of ["solkey", "soljson"]) if (options[key]) args.push(`--${key}`, resolve(options[key]));
+      if(options.projectRoot)args.push('--project-root',resolve(options.projectRoot));
+      for(const path of options.includePaths??[])args.push('--include-path',path);for(const rule of options.remappings??[])args.push('--remapping',rule);
       runTool(process.execPath, args, timeoutMs);
       stage = "discovery";
       const data = readFileSync(fixture);
       const parsed = JSON.parse(data);
       const sourceBytes = readFileSync(source);
-      const compiledHash = parsed.header?.sourceSha256;
+      const primaryUnit=parsed.sourceUnits?.find(u=>u.name===parsed.header.mainSource);
+      const primaryAst=parsed.ast??primaryUnit?.ast;
+      const compiledHash = parsed.header?.sourceSha256??primaryUnit?.sourceSha256;
       if (compiledHash !== sourceHash(sourceBytes))
         throw new Error('source changed during compilation; retry verification');
-      const location = sourceLocations(parsed.ast, sourceBytes);
+      const location = sourceLocations(primaryAst, sourceBytes);
       let hash = 0xcbf29ce484222325n;
       for (const byte of data) hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
-      const contracts = JSON.parse(data).ast.nodes.filter(n => n.nodeType === "ContractDefinition")
+      const contracts = primaryAst.nodes.filter(n => n.nodeType === "ContractDefinition")
         .map(n => n.name).filter(n => !options.contract || n === options.contract).sort();
       if (!contracts.length) throw new Error("no contracts selected");
       for (const contract of contracts) {
         const firstResult = results.length;
+        function assertSources(){for(const unit of parsed.sourceUnits??[]){const base=options.projectRoot??dirname(resolve(source));const candidates=[resolve(base,unit.name),...(options.includePaths??[]).map(p=>resolve(base,p,unit.name))];const path=candidates.find(p=>existsSync(p));if(!path)throw new Error('dependency disappeared: '+unit.name);if(sourceHash(readFileSync(path))!==unit.sourceSha256)throw new Error('dependency changed during verification: '+unit.name);}}
         function invoke(first, count, listing) {
           const output = join(scratch, `${contract}.${first ?? 'all'}.${listing ? 'list' : 'proof'}.json`);
           const found = [];
           try {
+          assertSources();
           const name = leanName(contract);
           const wrapper = join(scratch, "Test.lean");
           const command = options.action
@@ -149,18 +155,19 @@ ${command}
           if (diagnostics.includes("warning: solc_import:")) errors.push({ source, contract, reason: diagnostics.trim() });
           } catch (e) { errors.push({ source, contract, stage: "lean", reason: e.message,
             ...(e.tool ? {tool:e.tool} : {}) }); }
+        assertSources();
         if (existsSync(output)) {
           try {
             for (const row of JSON.parse(readFileSync(output, "utf8"))) found.push({
               ...row, source, contract, sourceHash: compiledHash,
               ...(location(contract, row) ? { range: location(contract, row) } : {}),
-              ...(row.counterexample ? {counterexample:sourceWitness(parsed.ast,contract,row)} : {}),
+              ...(row.counterexample ? {counterexample:sourceWitness(primaryAst,contract,row)} : {}),
             });
           } catch (e) { errors.push({ source, contract, reason: `invalid result checkpoint: ${e.message}` }); }
         }
           return found;
         }
-        const node = JSON.parse(data).ast.nodes.find(n => n.nodeType === 'ContractDefinition' && n.name === contract);
+        const node = primaryAst.nodes.find(n => n.nodeType === 'ContractDefinition' && n.name === contract);
         const large = node.nodes.filter(n => n.nodeType === 'FunctionDefinition').length > batchSize;
         if (!options.action && !options.list && !options.function && large) {
           const rows = invoke(undefined, undefined, true);
@@ -211,16 +218,17 @@ function main(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === "--help") {
-      writeFileSync(1, "usage: node scripts/test-solidity.mjs [--json] [--list] [--audit-preconditions] [--counterexamples] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--no-build] FILE_OR_DIR ...\n");
+      writeFileSync(1, "usage: node scripts/test-solidity.mjs [--json] [--list] [--audit-preconditions] [--counterexamples] [--contract NAME] [--function NAME] [--timeout-ms N] [--solkey DIR] [--soljson DIR] [--self-address A] [--project-root DIR] [--include-path DIR] [--remapping PREFIX=TARGET] [--no-build] FILE_OR_DIR ...\n");
       return 0;
     } else if (arg === "--json") options.json = true;
     else if (arg === "--list") options.list = true;
     else if (arg === "--audit-preconditions") options.auditPreconditions = true;
     else if (arg === "--counterexamples") options.counterexamples = true;
     else if (arg === "--no-build") options.build = false;
-    else if (["--contract", "--function", "--timeout-ms", "--solkey", "--soljson", "--self-address"].includes(arg)) {
+    else if(['--include-path','--remapping'].includes(arg)){if(!args[i+1]||args[i+1].startsWith('--'))throw new Error(arg+' needs a value');(options[arg==='--include-path'?'includePaths':'remappings']??=[]).push(args[++i]);}
+    else if (["--contract", "--function", "--timeout-ms", "--solkey", "--soljson", "--self-address", "--project-root"].includes(arg)) {
       if (!args[i + 1] || args[i + 1].startsWith("--")) throw new Error(`${arg} needs a value`);
-      const key = arg === "--timeout-ms" ? "timeoutMs" : arg === "--self-address" ? "selfAddress" : arg.slice(2);
+      const key = arg === "--timeout-ms" ? "timeoutMs" : arg === "--self-address" ? "selfAddress" : arg === "--project-root" ? "projectRoot" : arg.slice(2);
       options[key] = arg === "--timeout-ms" ? Number(args[++i]) : args[++i];
     } else if (arg.startsWith("--")) throw new Error(`unknown option: ${arg}`);
     else paths.push(arg);

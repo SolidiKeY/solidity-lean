@@ -252,7 +252,7 @@ theorem CallRet.runSt_declsThen {Δ : Ctx} (ret : CallRet Γ rs Γ')
     show Prog.runSt σ (.cons (.declLocal p r Option.none) rest) = _
     rw [Prog.runSt_cons, Stmt.runSt_declLocal_none]
     rfl
-  | rets bs => exact Binders.runSt_declsThen σ bs rest
+  | rets bs => exact RetBinders.runSt_declsThen σ bs rest
   | mem R r hd hm =>
     show Prog.runSt σ (.cons (.declMem R r Option.none hd hm) rest) = _
     rw [Prog.runSt_cons, Stmt.runSt_declMem_none]
@@ -278,6 +278,23 @@ theorem State.lift_thinOlds (τ : State C (rs ++ ps)) (A : TEnv C τ.H rs) (n : 
   rw [TEnv.put_keepAll]
   rfl
 
+/-- Several returns entered leave the global part alone. -/
+theorem RetBinders.enterT_keeps {ps : Ctx} : {ρ : Ctx} → (bs : RetBinders ρ) → (τ : State C ps) →
+    (bs.enterT τ).st.storage = τ.storage ∧ (bs.enterT τ).st.net = τ.net ∧
+      (bs.enterT τ).st.selfBalance = τ.selfBalance
+  | _, .nil, _ => ⟨rfl, rfl, rfl⟩
+  | _, .snoc bs _ _, τ => RetBinders.enterT_keeps bs τ
+  | _, .snocMem bs _ _ _ _, τ => RetBinders.enterT_keeps bs τ
+
+/-- Several returns entered past the snapshots: entered on the frame, the
+snapshots declared under them (`RetBinders.enterT_lift`). -/
+theorem RetBinders.enterT_snap (bs : RetBinders rs) (σ : State C ps) :
+    (bs.enterT σ.snap).st = (bs.enterT σ).st.withOlds rs σ.net σ.storage := by
+  have e : σ.snap = σ.lift (Thin.ofExt (Ext.append ps Olds))
+      (TEnv.olds σ.net σ.storage σ.env) := rfl
+  rw [e, RetBinders.enterT_lift]
+  exact State.lift_thinOlds _ _ σ.net σ.storage _
+
 /-- The frame a call enters past the snapshots: the frame it enters, the
 snapshots declared under its return variables. -/
 theorem CallRet.enterT_snap (ret : CallRet Γ rs Γ') (σ : State C ps) :
@@ -285,12 +302,7 @@ theorem CallRet.enterT_snap (ret : CallRet Γ rs Γ') (σ : State C ps) :
   cases ret with
   | none => rfl
   | val => rfl
-  | rets bs =>
-    show σ.snap.withEnv (TEnv.append rs _ σ.snap.env) = State.withEnv _ (TEnv.append rs
-      (TEnv.take rs (TEnv.append rs _ σ.env))
-      (TEnv.olds σ.net σ.storage (TEnv.drop (Ext.append ps rs) (TEnv.append rs _ σ.env))))
-    rw [TEnv.take_append, TEnv.drop_append]
-    rfl
+  | rets bs => exact RetBinders.enterT_snap bs σ
   | mem => rfl
   | storage => rfl
 
@@ -557,9 +569,10 @@ theorem holds_call_of {μ : Mutability} {f : Name} {args : Args C Γ ps}
       refine k a hA o hct.1 hg hag (holds_callPost hpost a hA o.st.storage o.st.net
         o.st.selfBalance (fun hn => ?_) (fun hn => ?_))
       · have hk := hg.keeps hn
-        cases ret <;> exact hk
+        cases ret <;> first | exact hk |
+          exact ⟨hk.1.trans (RetBinders.enterT_keeps _ _).1, hk.2.trans (RetBinders.enterT_keeps _ _).2.1⟩
       · have hb := hg.selfBalance hn
-        cases ret <;> exact hb
+        cases ret <;> first | exact hb | exact hb.trans (RetBinders.enterT_keeps _ _).2.2
 
 /-- A call by its contract, no result. -/
 theorem holds_callNone {μ : Mutability} {f : Name} {args : Args C Γ ps}
@@ -678,8 +691,38 @@ theorem holds_callVal {μ : Mutability} {f : Name} {args : Args C Γ ps} {p : Pr
     simp only [hs, Except.bind, Frames.runSt_pop, Frames.runSt_seq, hT] at hM
     exact hM
 
-/-- A call by its contract, several results left in the caller's context. -/
-theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : Binders rs}
+/-- `∀ xs. ψ` holds nowhere when `ψ` holds nowhere (the quantified types are
+inhabited). -/
+theorem RetBinders.not_holds_all_of : {ρ : Ctx} → (bs : RetBinders ρ) → {Δ : Ctx} →
+    (ψ : Fml C (ρ ++ Δ)) → (∀ σ' : State C (ρ ++ Δ), ¬ holds σ' ψ) →
+      ∀ σ : State C Δ, ¬ holds σ (bs.all ψ)
+  | _, .nil, _, _, hψ, σ, h => hψ σ h
+  | _, .snoc bs p x, _, ψ, hψ, σ, h =>
+    RetBinders.not_holds_all_of bs (.all x p ψ) (fun _ h' => hψ _ (h' (PrimTy.dflt p))) σ h
+  | _, .snocMem bs _ _ _ _, _, _, _, σ, h =>
+    RetBinders.not_holds_all_of bs .ff (fun _ h' => by simp only [Fml.ff, holds, not_true_eq_false] at h') σ h
+
+/-- A memory return among several: a contract's "post" for it holds nowhere
+(`RetBinders.all`). -/
+theorem RetBinders.not_holds_all : {ρ : Ctx} → (bs : RetBinders ρ) → bs.noMem = false →
+    ∀ {Δ : Ctx} (σ : State C Δ) (ψ : Fml C (ρ ++ Δ)), ¬ holds σ (bs.all ψ)
+  | _, .nil, hb, _, _, _, _ => Bool.noConfusion hb
+  | _, .snoc bs _ _, hb, _, σ, _, h => RetBinders.not_holds_all bs hb σ _ h
+  | _, .snocMem bs _ _ _ _, _, _, σ, _, h =>
+    RetBinders.not_holds_all_of bs .ff (fun _ h' => by simp only [Fml.ff, holds, not_true_eq_false] at h') σ h
+
+/-- Several returns, none of them memory, are value binders. -/
+theorem RetBinders.exists_toRet : {ρ : Ctx} → (bs : RetBinders ρ) → bs.noMem = true →
+    ∃ b : Binders ρ, b.toRet = bs
+  | _, .nil, _ => ⟨.nil, rfl⟩
+  | _, .snoc bs p x, h =>
+    let ⟨b, hb⟩ := RetBinders.exists_toRet bs h
+    ⟨.snoc b p x, congrArg (fun z => RetBinders.snoc z p x) hb⟩
+  | _, .snocMem .., h => absurd h Bool.false_ne_true
+
+/-- A call by its contract, several results left in the caller's context;
+with a memory return among them "post" is false (`RetBinders.all`). -/
+theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : RetBinders rs}
     {body : Prog C (rs ++ ps) Γf} {ω : Prog C (rs ++ Γ) Γ₂} {κ : Frames C Γ₂ Γ₀} {φ : Fml C Γ₀}
     {req : Fml C ps} {ens : Fml C (rs ++ (Olds ++ ps))}
     (hc : FunContract (CallRet.rets (Γ := Γ) bs) body req ens m) (hμ : Prog.within μ body = true)
@@ -687,18 +730,31 @@ theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : 
     (hpre : holds σ (Fml.callPre args req m))
     (hpost : holds σ (Fml.callPost μ args (.rets bs) ens ω κ φ m)) :
     holds σ (.modal m (.cons (.call f args (.rets bs) body) ω) κ φ) := by
-  refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+  cases hb : bs.noMem with
+  | false =>
+    refine holds_call_of hc hμ hpre hpost fun a hA o hens hg hag hX => ?_
+    exact absurd hX (RetBinders.not_holds_all bs hb _ _)
+  | true =>
+  obtain ⟨b, rfl⟩ := RetBinders.exists_toRet bs hb
+  refine holds_call_of hc hμ hpre hpost fun a hA => ?_
+  have hE : (CallRet.rets (Γ := Γ) b.toRet).enterT (σ.withEnv a) =
+      ⟨(σ.withEnv a).withEnv (TEnv.append rs b.defaultsT a), List.prefix_refl _⟩ :=
+    Binders.enterT_toRet b _
+  rw [hE]
+  intro o hens hg hag hX
   obtain ⟨⟨st, H', heap, env, net, sb, tx⟩, ext⟩ := o
   obtain ⟨hH, hheap, hsb, htx, -⟩ := hg
-  dsimp only [CallRet.enterT, State.withEnv] at hH hheap hsb htx hag hens
+  dsimp only [State.withEnv] at hH hheap hsb htx hag hens
   dsimp only at hX
   subst hH
   cases hheap
   have hps : TEnv.drop (Ext.append ps rs) (TEnv.drop body.ext env) = a := by
     rw [TLocAgree.drop_eq hag hw, TEnv.drop_append]
-  have hX' := holds_binders_all bs _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
+  have hX0 := hX
+  simp only [Fml.callResult, Binders.toRet_all] at hX0
+  have hX' := holds_binders_all b _ (.imp (ens.wkD (Thin.keepAll rs (Thin.atop (Olds ++ ps) Γ)))
     (.modal m .nil (.drop (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))
-      (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX
+      (.seq ω κ)) φ)) (TEnv.take rs (TEnv.drop body.ext env)) hX0
   have hens' : holds (((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).withEnv
       (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
         ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env))
@@ -729,7 +785,7 @@ theorem holds_callRets {μ : Mutability} {f : Name} {args : Args C Γ ps} {bs : 
         (TEnv.append rs (TEnv.take rs (TEnv.drop body.ext env))
           ((σ.withEnv (TEnv.append ps a σ.env)).snap.havoc st net sb).env)) =
       (⟨st, σ.H, σ.heap, env, net, sb, tx⟩ : State C Γf).withEnv
-        (CallRet.leaveT σ.env (CallRet.rets bs)
+        (CallRet.leaveT σ.env (CallRet.rets b.toRet)
           (TEnv.take rs (TEnv.drop body.ext env))) := by
     refine State.ext' rfl rfl HEq.rfl (heq_of_eq ?_) rfl rfl htx.symm
     show TEnv.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ (Olds ++ ps))))

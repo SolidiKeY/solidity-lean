@@ -1,0 +1,57 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.source_struct_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_member_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.eval_member_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_child": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.read_tag": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.write_reference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.child_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_child_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_tag_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.source_types": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructMemory.lean:Solidity.Backend.MemoryOps.SourceBoolStructLayout.tag_type": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

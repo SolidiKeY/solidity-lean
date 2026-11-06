@@ -1,4 +1,5 @@
 import Solidity.Calculus.Shift
+import Solidity.Calculus.JoinSequence
 import Solidity.Syntax.PushSource
 
 /-!
@@ -114,6 +115,11 @@ def Premise.captureMV {R : RefTy} (x : Var) (b : MPath C Γ (.ref R))
 
 /-! ### The join of an `if` (`ifElseJoin`, Lean only)
 
+The cheap singleton path keeps the existing parallel update. Longer straight
+local-assignment branches use a fresh Boolean snapshot and a guarded sequential
+program, without substituting dependent RHS terms into one another. Exact
+canonical short-circuit normalizations keep their existing SolKey split path.
+
 A branch of an `if` that is empty or one assignment of a value local
 (`v = e;`) runs as the update `{v := e}`: it neither panics nor hands
 control to anyone.  An `if` on a simple condition whose branches are both so
@@ -193,23 +199,23 @@ def Upd.ifJoin (c : Tm C Γ (.val .bool)) : JoinArm C Γ → JoinArm C Γ → Up
 branches joinable (`Prog.joinArm?`), each empty or one assignment of a value
 local: `if (c) { x = x + 1; }`, `if (c) { x = 2; } else { x = 1; }`, a
 lowered `break`'s `if (c) { brk = true; }`. -/
-def Upd.ifJoin? {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) (thn : Prog C Γ Γ₁)
+def Upd.ifJoinSingle? {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) (thn : Prog C Γ Γ₁)
     (els : Prog C Γ Γ₂) : Option (Upd C Γ Γ) :=
   match thn.joinArm?, els.joinArm? with
   | some a, some b => some (Upd.ifJoin c a b)
   | _, _ => none
 
-/-- The shape of a joinable `if` (`Upd.ifJoin?`), whatever its values: both
+/-- The shape of a joinable `if` (`Upd.ifJoinSingle?`), whatever its values: both
 branches empty or one assignment of a value local. -/
-def Prog.joinShape {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) : Bool :=
+def Prog.joinSingleShape {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) : Bool :=
   thn.joinArm?.isSome && els.joinArm?.isSome
 
 /-- A joined `if` has the shape. -/
-theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : Prog C Γ Γ₁}
-    {els : Prog C Γ Γ₂} {u : Upd C Γ Γ} (h : Upd.ifJoin? c thn els = some u) :
-    Prog.joinShape thn els = true := by
-  unfold Upd.ifJoin? at h
-  unfold Prog.joinShape
+theorem Upd.ifJoinSingle?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : Prog C Γ Γ₁}
+    {els : Prog C Γ Γ₂} {u : Upd C Γ Γ} (h : Upd.ifJoinSingle? c thn els = some u) :
+    Prog.joinSingleShape thn els = true := by
+  unfold Upd.ifJoinSingle? at h
+  unfold Prog.joinSingleShape
   split at h
   next a b ha hb =>
     rw [ha, hb]
@@ -217,11 +223,241 @@ theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)} {thn : 
   next => cases h
 
 /-- An `if` without the shape splits. -/
-theorem Upd.ifJoin?_none_of_shape {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) {thn : Prog C Γ Γ₁}
-    {els : Prog C Γ Γ₂} (h : Prog.joinShape thn els = false) : Upd.ifJoin? c thn els = none := by
+theorem Upd.ifJoinSingle?_none_of_shape {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) {thn : Prog C Γ Γ₁}
+    {els : Prog C Γ Γ₂} (h : Prog.joinSingleShape thn els = false) : Upd.ifJoinSingle? c thn els = none := by
+  cases hj : Upd.ifJoinSingle? c thn els with
+  | none => rfl
+  | some u => rw [Upd.ifJoinSingle?_shape hj] at h; cases h
+
+/-! Exact canonical short-circuit normalizations retain their existing SolKey
+split strategy. This is a dispatcher optimization boundary: both programs remain
+supported, including source programs spelling the identical intrinsic shape.
+The general write decoder and guarded builder do not have this restriction. -/
+namespace JoinBoundary
+abbrev Write (C : Contract) (Γ : Ctx) :=
+  (p : PrimTy) × Idx Γ (.val p) × Val C Γ p
+
+def andPair (a b c : Write C Γ) : Bool :=
+  match a, b, c with
+  | ⟨.bool, i, r⟩,
+      ⟨.bool, j, .binop .and _ _ (.simple (.local v)) (.simple (.bool true))⟩,
+      ⟨.bool, w, .simple (.bool false)⟩ =>
+    !r.isSimple && decide (i = j) && decide (j = v) && decide (v = w)
+  | _, _, _ => false
+
+def orPair (a b c : Write C Γ) : Bool :=
+  match a, b, c with
+  | ⟨.bool, i, .simple (.bool true)⟩, ⟨.bool, j, r⟩,
+      ⟨.bool, v, .binop .or _ _ (.simple (.local w)) (.simple (.bool false))⟩ =>
+    !r.isSimple && decide (i = j) && decide (j = v) && decide (v = w)
+  | _, _, _ => false
+
+/-- List arities are inspected before any typed RHS view. -/
+def boundary (a b : LocalWrites C Γ) : Bool :=
+  match a, b with
+  | [a, b], [c] => andPair a b c
+  | [a], [b, c] => orPair a b c
+  | _, _ => false
+
+/-- The AND view reduces with an open context and bound target/RHS. -/
+theorem andPair_shape (i : Idx Γ (.val .bool)) (r : Val C Γ .bool) :
+    andPair ⟨.bool, i, r⟩
+      ⟨.bool, i, .binop (p := .bool) (q := .bool) .and rfl rfl
+        (.simple (.local i)) (.simple (.bool true))⟩
+      ⟨.bool, i, .simple (.bool false)⟩ =
+      (!r.isSimple && decide (i = i) && decide (i = i) && decide (i = i)) := rfl
+
+/-- The canonical AND expansion keeps its existing split strategy. -/
+theorem and_boundary (i : Idx Γ (.val .bool)) (r : Val C Γ .bool)
+    (hr : r.isSimple = false) : boundary
+    [⟨.bool, i, r⟩, ⟨.bool, i, .binop (p := .bool) (q := .bool) .and rfl rfl (.simple (.local i)) (.simple (.bool true))⟩]
+    [⟨.bool, i, .simple (.bool false)⟩] = true := by
+  simp only [boundary, andPair, hr, Bool.not_false, decide_true, Bool.and_self]
+
+/-- Intrinsic weakening cannot identify distinct Boolean locals. -/
+theorem idxWkInjective {Γ Δ : Ctx} (h : Thin Γ Δ) :
+    Function.Injective (fun i : Idx Γ (.val .bool) => i.wk h) := by
+  induction h with
+  | refl => intro i j hij; exact hij
+  | drop h ih => intro i j hij; exact ih (Idx.there.inj hij)
+  | keep h ih =>
+    intro i j hij
+    cases i <;> cases j
+    · rfl
+    · cases hij
+    · cases hij
+    · exact congrArg Idx.there (ih (Idx.there.inj hij))
+
+/-- Boolean target equality is unchanged by intrinsic weakening. -/
+theorem idxDecideWk {Γ Δ : Ctx} (h : Thin Γ Δ) (i j : Idx Γ (.val .bool)) :
+    decide (i.wk h = j.wk h) = decide (i = j) := by
+  by_cases e : i = j
+  · cases e; simp only [decide_true]
+  · have en : i.wk h ≠ j.wk h := fun hw => e (idxWkInjective h hw)
+    simp only [e, en, decide_false]
+
+/-- A Solidity RHS stays simple or nonsimple after adding intrinsic locals. -/
+theorem simpleWk {Γ Δ : Ctx} (h : Thin Γ Δ) (r : Val C Γ .bool) :
+    (r.wk h).isSimple = r.isSimple := by
+  cases r <;> rfl
+
+def wkWrite {Γ Δ : Ctx} (h : Thin Γ Δ) (w : Write C Γ) : Write C Δ :=
+  ⟨w.1, w.2.1.wk h, w.2.2.wk h⟩
+
+/-- Exact AND normalization recognition is independent of inserted locals. -/
+theorem andPair_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (a b c : Write C Γ) :
+    andPair (wkWrite h a) (wkWrite h b) (wkWrite h c) = andPair a b c := by
+  rcases a with ⟨p, i, r⟩
+  cases p <;> try rfl
+  rcases b with ⟨q, j, s⟩
+  cases q <;> try rfl
+  cases s <;> try rfl
+  rename_i p op ha left right hret
+  cases p <;> cases op <;> try rfl
+  cases left <;> try rfl
+  rename_i leftS
+  cases leftS <;> try rfl
+  rename_i ref
+  cases right <;> try rfl
+  rename_i rightS
+  cases rightS <;> try rfl
+  rename_i flag
+  cases flag <;> try rfl
+  rcases c with ⟨u, k, t⟩
+  cases u <;> try rfl
+  cases t <;> try rfl
+  rename_i thirdS
+  cases thirdS <;> try rfl
+  rename_i lastFlag
+  cases lastFlag <;> try rfl
+  change (!((r.wk h).isSimple) && decide (i.wk h = j.wk h) &&
+    decide (j.wk h = ref.wk h) && decide (ref.wk h = k.wk h)) =
+    (!r.isSimple && decide (i = j) && decide (j = ref) && decide (ref = k))
+  rw [simpleWk h r, idxDecideWk h i j, idxDecideWk h j ref, idxDecideWk h ref k]
+
+/-- Exact OR normalization recognition is independent of inserted locals. -/
+theorem orPair_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (a b c : Write C Γ) :
+    orPair (wkWrite h a) (wkWrite h b) (wkWrite h c) = orPair a b c := by
+  rcases a with ⟨p, i, r⟩
+  cases p <;> try rfl
+  cases r <;> try rfl
+  rename_i firstS
+  cases firstS <;> try rfl
+  rename_i firstFlag
+  cases firstFlag <;> try rfl
+  rcases b with ⟨q, j, s⟩
+  cases q <;> try rfl
+  rcases c with ⟨u, k, t⟩
+  cases u <;> try rfl
+  cases t <;> try rfl
+  rename_i p op ha left right hret
+  cases p <;> cases op <;> try rfl
+  cases left <;> try rfl
+  rename_i leftS
+  cases leftS <;> try rfl
+  rename_i ref
+  cases right <;> try rfl
+  rename_i rightS
+  cases rightS <;> try rfl
+  rename_i flag
+  cases flag <;> try rfl
+  change (!((s.wk h).isSimple) && decide (i.wk h = j.wk h) &&
+    decide (j.wk h = k.wk h) && decide (k.wk h = ref.wk h)) =
+    (!s.isSimple && decide (i = j) && decide (j = k) && decide (k = ref))
+  rw [simpleWk h s, idxDecideWk h i j, idxDecideWk h j k, idxDecideWk h k ref]
+
+/-- The OR normalization row keeps its existing split strategy. -/
+theorem or_boundary (i : Idx Γ (.val .bool)) (r : Val C Γ .bool)
+    (hr : r.isSimple = false) : boundary
+    [⟨.bool, i, .simple (.bool true)⟩]
+    [⟨.bool, i, r⟩, ⟨.bool, i, .binop (p := .bool) (q := .bool) .or rfl rfl (.simple (.local i)) (.simple (.bool false))⟩] = true := by
+  simp only [boundary, orPair, hr, Bool.not_false, decide_true, Bool.and_self]
+
+/-- Recognition of the exact canonical pair commutes with weakening. -/
+theorem boundary_wk {Γ Δ : Ctx} (h : Thin Γ Δ) (a b : LocalWrites C Γ) :
+    boundary (LocalWrites.wk h a) (LocalWrites.wk h b) = boundary a b := by
+  rcases a with _ | ⟨a, _ | ⟨a', _ | ⟨a'', as⟩⟩⟩ <;>
+    rcases b with _ | ⟨b, _ | ⟨b', _ | ⟨b'', bs⟩⟩⟩ <;>
+    first | rfl | exact andPair_wk h _ _ _ | exact orPair_wk h _ _ _
+
+end JoinBoundary
+
+/-- A join is either the existing parallel singleton update or a sequential
+program read below a fresh Boolean snapshot. Only the latter needs capture. -/
+abbrev JoinPlan (C : Contract) (Γ : Ctx) :=
+  Sum (Upd C Γ Γ) (Prog C (.val .bool :: Γ) (.val .bool :: Γ))
+
+/-- Keep existing written singleton rule rows; their query result is the
+update arm of the plan. Expanded signatures explicitly expose JoinPlan. -/
+instance : Coe (Upd C Γ Γ) (JoinPlan C Γ) := ⟨Sum.inl⟩
+
+/-- Join Solidity assignment branches without substituting RHS terms.
+The existing singleton update query remains the first, unchanged fast path. -/
+def Upd.ifJoin? {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool)) (thn : Prog C Γ Γ₁)
+    (els : Prog C Γ Γ₂) : Option (JoinPlan C Γ) :=
+  match Upd.ifJoinSingle? c thn els with
+  | some u => some (.inl u)
+  | none =>
+    match thn.localWrites?, els.localWrites? with
+    | some a, some b =>
+      if JoinBoundary.boundary a b then none else some (.inr (a.guarded true (b.guarded false)))
+    | _, _ => none
+
+/-- Syntax-dependent join eligibility: preserve the cheap singleton test
+before decoding complete straight-write branches. -/
+def Prog.joinShape {Γ₁ Γ₂ : Ctx} (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) : Bool :=
+  Prog.joinSingleShape thn els ||
+    (match thn.localWrites?, els.localWrites? with
+    | some a, some b => !JoinBoundary.boundary a b
+    | _, _ => false)
+
+/-- The generalized join query recognizes exactly this Solidity branch shape. -/
+theorem Upd.ifJoin?_isSome {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool))
+    (thn : Prog C Γ Γ₁) (els : Prog C Γ Γ₂) :
+    (Upd.ifJoin? c thn els).isSome = Prog.joinShape thn els := by
+  cases hta : thn.joinArm? <;> cases hea : els.joinArm? <;>
+    simp only [Upd.ifJoin?, Upd.ifJoinSingle?, Prog.joinShape, Prog.joinSingleShape,
+      hta, hea, Option.isSome_none, Option.isSome_some, Bool.false_and,
+      Bool.and_false, Bool.true_and, Bool.false_or, Bool.true_or]
+  all_goals cases thn.localWrites? <;> cases els.localWrites? <;> try rfl
+  all_goals dsimp only
+  all_goals rename_i a b; cases JoinBoundary.boundary a b <;> rfl
+
+/-- A selected joined Solidity branch has the syntax-dependent shape. -/
+theorem Upd.ifJoin?_shape {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)}
+    {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} {plan : JoinPlan C Γ}
+    (h : Upd.ifJoin? c thn els = some plan) : Prog.joinShape thn els = true := by
+  have hs : (Upd.ifJoin? c thn els).isSome = true := congrArg Option.isSome h
+  rw [Upd.ifJoin?_isSome] at hs
+  exact hs
+
+/-- The update arm of a joined Solidity branch is exactly the old fast path. -/
+theorem Upd.ifJoin?_inl {Γ₁ Γ₂ : Ctx} {c : Tm C Γ (.val .bool)}
+    {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} {u : Upd C Γ Γ}
+    (h : Upd.ifJoin? c thn els = some (.inl u)) :
+    Upd.ifJoinSingle? c thn els = some u := by
+  cases hs : Upd.ifJoinSingle? c thn els with
+  | some v =>
+    simp only [Upd.ifJoin?, hs, Option.some.injEq, Sum.inl.injEq] at h
+    cases h
+    rfl
+  | none =>
+    cases ht : thn.localWrites? with
+    | none => simp only [Upd.ifJoin?, hs, ht] at h; cases h
+    | some a =>
+      cases he : els.localWrites? with
+      | none => simp only [Upd.ifJoin?, hs, ht, he] at h; cases h
+      | some b =>
+        simp only [Upd.ifJoin?, hs, ht, he] at h
+        split at h <;> cases h
+
+/-- A Solidity branch pair without the joinable shape keeps the split rule. -/
+theorem Upd.ifJoin?_none_of_shape {Γ₁ Γ₂ : Ctx} (c : Tm C Γ (.val .bool))
+    {thn : Prog C Γ Γ₁} {els : Prog C Γ Γ₂} (h : Prog.joinShape thn els = false) :
+    Upd.ifJoin? c thn els = none := by
   cases hj : Upd.ifJoin? c thn els with
   | none => rfl
-  | some u => rw [Upd.ifJoin?_shape hj] at h; cases h
+  | some plan => rw [Upd.ifJoin?_shape hj] at h; cases h
 
 end Builders
 
@@ -860,7 +1096,8 @@ def iteStep {Γ₁ Γ₂ : Ctx} (c : Val C Γ .bool) (thn : Prog C Γ Γ₁) (el
     Premise C Γ Γ :=
   match c with
   | .simple s => match Upd.ifJoin? s.lower thn els with
-    | some U => .update U
+    | some (.inl U) => .update U
+    | some (.inr body) => .capture .bool (fse k) (.simple s) (.block body)
     | none => .split .block (Fml.isBool s.lower true) (Fml.isBool s.lower false) thn els
   | c => .capture .bool (fse k) c
       (.ite (.simple (.local .here)) (thn.wk up).2.2 (els.wk up).2.2)

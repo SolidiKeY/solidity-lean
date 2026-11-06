@@ -1,0 +1,85 @@
+{
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.args_eq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.bridge_step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.certificates": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.Controls.lowering_witness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.div": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.divFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.mod": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.model_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.modFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.scalar_outcome": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.stack_cons": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.sub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/QuotientSelectionControls.lean:SolidityBridge.Yul.QuotientSelection.subFacts": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

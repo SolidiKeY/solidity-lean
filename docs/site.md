@@ -8,17 +8,22 @@ switches between the core's Solidity examples and Velvet's (`bridge.md`,
 (`#project=Solidity&file=Solidity/Examples/Tactics/Tour.lean&line=43`), so a
 link opens on that line.
 
-GitHub Pages runs no Lean, so the page is read-only: every goal and message on
+The examples viewer is read-only: every goal and message on
 it was recorded from Lean's language server when the site was built, and none
 is computed in the browser. To change an example and see it re-checked, open
 it in an editor (the page's About box has the commands).
+
+The separate [offline IDE](https://solidikey.github.io/solidity-lean/ide/) runs
+Solidity compilation and Lean proof checking in browser WebAssembly workers.
+Its complete runtime is embedded in one downloadable HTML file. See
+[web-ide.md](web-ide.md) for use, tests and limits.
 
 ## How it is built
 
 `.github/workflows/pages.yml` runs on every push to the default branch, and
 by hand (`workflow_dispatch`) on any branch:
 
-1. **Build** the project's libraries: `lake build Solidity`, then
+1. **Build** the project's libraries: `lake build Solidity SolidityExamples`, then
    `lake build SolkeyTestSuite` (solkey's test suite, allowed to fail: its
    pages then show Lean's errors and the rest still records) in the root, or
    `lake build Velvet VelvetExamples SolidityVelvet` in `Bridge/` (Mathlib
@@ -32,14 +37,28 @@ by hand (`workflow_dispatch`) on any branch:
    `_site/data/<project>/`, one JSON file per example and an `index.json`
    with titles (the module docstring's `# ` heading and first paragraph), the
    commit and the toolchain.
-3. **Assemble** the viewer (`site/index.html`, `site/app.js`,
+3. **Build and test the IDE** in a separate job. The pinned Lean/GMP WebAssembly
+   build and serialized proof libraries are cached by source/toolchain hashes.
+   The builder embeds Monaco, solc and Brotli-compressed proof libraries in one
+   HTML file. Real Chromium tests open it offline as a local file, check proofs,
+   reopen it and check again. Failure prevents publication.
+4. **Assemble** the viewer (`site/index.html`, `site/app.js`,
    `site/style.css`, `site/examples.json`) with whatever was recorded. A
    project whose job failed shows as not recorded; the other still deploys.
-4. **Deploy** to Pages, from the default branch only, and never from a
+   The IDE is added under `ide/`; the complete site must fit the 1 GB budget.
+5. **Deploy** to Pages, from the default branch only, and never from a
    cancelled run. On the default branch a push queues behind the build in
    progress instead of cancelling it (the core's build is longer than the
    gap between pushes); on another branch the newer run cancels the older,
    and the site is uploaded as the run's `github-pages` artifact instead.
+   `pages-recovery.yml` lets a newer push replace an older run whose IDE job
+   already failed. A healthy default-branch build keeps its place unless a
+   maintainer explicitly marks the new commit `[replace-pages]` (for example,
+   when the older run still uses a loader already known to fail). An ancestry
+   check prevents a delayed helper from cancelling a newer build.
+6. **Check the published IDE** in Chromium against the generated build ID,
+   then disconnect networking and restart its compiler/kernel before more proofs.
+   Reports and screenshots are retained as workflow artifacts.
 
 The repository's Pages source must be **GitHub Actions** (Settings → Pages →
 Build and deployment → Source), once.
@@ -51,8 +70,8 @@ stand-in language server, without Lean; `lean.yml` runs it.
 
 Add a row to `site/examples.json` under its project: the `file` relative to
 the project's `root`, and a `group` for the picker. The file must be built by
-the project's step 1 (for the core, imported from `Solidity.lean` or
-`SolkeyTestSuite.lean`). The title and summary come from the file's module
+the project's step 1 (for the core, imported from `Solidity.lean`,
+`SolidityExamples.lean` or `SolkeyTestSuite.lean`). The title and summary come from the file's module
 docstring; give `title` in the row for a file without one. A long file costs
 its elaboration time again in the site's build, plus one or two goal requests
 per line.
@@ -60,7 +79,7 @@ per line.
 To look at the viewer locally, record one example and serve the result:
 
 ```sh
-lake build Solidity
+lake build Solidity SolidityExamples
 node scripts/site/export.mjs --project Solidity --out _site --only Solidity/Examples/Tactics/Tour.lean
 cp site/index.html site/app.js site/style.css site/examples.json _site/
 python3 -m http.server -d _site 8000

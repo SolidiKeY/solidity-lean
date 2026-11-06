@@ -58,6 +58,20 @@ partial def bindersS? (bs : Expr) : MetaM (Option (Array (Expr × Expr) × List 
   let x := bs.getArg! 3
   return some (xs.push (bs.getArg! 2, x), x :: names)
 
+/-- A call's several return binders (`RetBinders`), in the order they are
+bound: each one's type (a `PrimTy`, or a memory return's `RefTy`), its name,
+and whether it is a memory return. -/
+partial def retBindersS? (bs : Expr) : MetaM (Option (Array (Expr × Expr × Bool))) := do
+  let bs ← whnf bs
+  if bs.isAppOf ``RetBinders.nil then return some #[]
+  if bs.isAppOfArity ``RetBinders.snoc 4 then
+    let some xs ← retBindersS? (bs.getArg! 1) | return none
+    return some (xs.push (bs.getArg! 2, bs.getArg! 3, false))
+  if bs.isAppOfArity ``RetBinders.snocMem 6 then
+    let some xs ← retBindersS? (bs.getArg! 1) | return none
+    return some (xs.push (bs.getArg! 2, bs.getArg! 3, true))
+  return none
+
 /-- What a formula's `where` clause is read from (`Delab.ppFmlE`): the
 memory locals hidden binders put in scope, with their types, and the locals
 a copy out of storage binds (`carol = alice;`, `MRhs.copy`), each by its
@@ -357,6 +371,30 @@ def ppDeferredExprS (ns : List Expr) (code value : Expr) :
 def labelHead (s : Expr) : Lean.Name :=
   s.getAppFn.constName?.getD .anonymous
 
+/-- A `UInt8` or `Nat` numeral's value. -/
+def byteLit? (e : Expr) : Option Nat :=
+  let n? := if e.isAppOfArity ``OfNat.ofNat 3 then (e.getArg! 1).rawNatLit? else e.rawNatLit?
+  n?.bind fun n => if n < 256 then some n else none
+
+/-- Two lowercase hex digits of a byte. -/
+def hexByte (b : UInt8) : String :=
+  let d := fun (n : Nat) => "0123456789abcdef".get ⟨n⟩
+  String.mk [d (b.toNat / 16), d (b.toNat % 16)]
+
+/-- `revert(d)` whose data is one literal `Error(string)` encoding, as the
+elaborator writes `revert(hex"…")`: the reason's `hex"…"`, so the statement
+reads back. -/
+def revertHexReason? (d : Expr) : MetaM (Option (TSyntax `sol_expr)) := do
+  let d ← instantiateMVars d
+  let some (_, [p]) := d.listLit? | return none
+  unless p.isAppOfArity ``RevPart.bytes 3 do return none
+  let some (_, bs) := (p.getArg! 2).listLit? | return none
+  let some ns := bs.mapM byteLit? | return none
+  let bytes := ns.map Nat.toUInt8
+  let some r := Semantics.decodeError bytes | return none
+  unless Semantics.encodeError r == bytes do return none
+  return some (← `(sol_expr| hex $(Syntax.mkStrLit (String.join (r.map hexByte))):str))
+
 /-- Whether the syntax `stx` has the identifier `x`. -/
 partial def hasIdent (x : Lean.Name) (stx : Syntax) : Bool :=
   (stx.isIdent && stx.getId == x) || stx.getArgs.any (hasIdent x)
@@ -484,6 +522,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
   -- a revert with data (`revertDataBox`): the data, a schema variable or
   -- escaped
   | Stmt.revertData _ _ d =>
+    if let some r ← revertHexReason? d then return ← `(sol_stmt| revert($r:sol_expr))
     let some dn ← fvarName? d | escape
     `(sol_stmt| $(mkIdent `revert):ident ( $(nameIdent dn):ident ))
   -- a `catch` clause binding the data (`catchDataBox`): the binding, then the
@@ -530,7 +569,7 @@ partial def ppStmtS (ns : List Expr) (e : Expr) : PrM (TSyntax `sol_stmt) := do
     if ret.isAppOfArity ``CallRet.val 4 then
       if let some y ← optSome? (ret.getArg! 3) then res ← var? y
     else if ret.isAppOfArity ``CallRet.rets 3 then
-      if (← bindersS? (ret.getArg! 2)).isNone then return ← escape
+      if (← retBindersS? (ret.getArg! 2)).isNone then return ← escape
     else unless ret.isAppOfArity ``CallRet.none 1 || ret.isAppOfArity ``CallRet.mem 5 ||
         ret.isAppOfArity ``CallRet.storage 3 do
       return ← escape
@@ -673,11 +712,18 @@ partial def ppLoopQ (ns : List Expr) (q : Expr) : PrM (Option (TSyntax `sol_loop
     return some (← `(sol_loop_inv| \forall $(mkIdent (Name.mkSimple T)):ident $xi:ident; $body))
   | _ => return none
 
-/-- `address(a).f(e₁, …)`: an external call. -/
+/-- `address(a).f(e₁, …)`: an external call.  Only an ordinary call with no
+recorded invocation is printed: `sol{}` cannot yet say that a call is
+`static` (in Solidity that follows from the callee's `view`/`pure`
+declaration) or name its site, so such a call escapes rather than print as
+an ordinary one.  `Stmt.toStr` (`Syntax/Scoped.lean`), a debugging string,
+does not show the two fields. -/
 partial def ppExtCallS (ns : List Expr) (c : Expr) : PrM (Option (TSyntax `sol_expr)) := do
   let c ← whnf c
-  unless c.isAppOfArity ``ExtCall.mk 5 do return none
+  unless c.isAppOfArity ``ExtCall.mk 7 do return none
   let a := c.getAppArgs
+  unless (← whnf a[5]!).isConstOf ``CallMode.call do return none
+  unless (← whnf a[6]!).isConstOf ``InvocationId.unknown do return none
   let some f ← nameOf? a[3]! | return none
   let some args ← listElems? a[4]! | return none
   let mut es : Array (TSyntax `sol_expr) := #[]
@@ -718,6 +764,12 @@ partial def ppRetTargetS (t : SPiece) : PrM (Option (TSyntax `sol_expr × Expr))
     let_expr MSrc.val _ _ _ v := (← whnf src) | return none
     let some r ← local? v | return none
     return some (← ppExprS ns l, r)
+  -- a memory local target of a memory return (`b = mv1;`): the pointer
+  | Stmt.rebindMem _ _ _ i rhs =>
+    let_expr MRhs.alias _ _ _ p := (← whnf rhs) | return none
+    let_expr MPath.var _ _ _ r _ := (← whnf p) | return none
+    let some x ← ppVar? (← idxName ns i) | return none
+    return some (← `(sol_expr| $x:ident), ← idxName ns r)
   | _ => return none
 
 /-- A call that returns to targets (`CallRet.rets`) and the statements after
@@ -730,9 +782,10 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
   if s.isFVar then return none
   let_expr Stmt.call _ _ _ _ _ _ f args ret _ := (← whnf s) | return none
   let_expr CallRet.rets _ _ bs := (← whnf ret) | return none
-  let some (rs, _) ← bindersS? bs | return none
-  let rvs := rs.map (·.2)
+  let some rs ← retBindersS? bs | return none
+  let rvs := rs.map (·.2.1)
   let rps := rs.map (·.1)
+  let anyMem := rs.any (·.2.2)
   let some (fe, xs) ← ppCallPartsS ns f args | return none
   let mut slots : Array (Option (TSyntax `sol_expr)) := Array.replicate rvs.size none
   let mut start := 0
@@ -763,6 +816,8 @@ partial def ppTupleCallS (s : SPiece) (rest : List SPiece) :
       let stx ← ppPieceS t
       if names.any (hasIdent · stx) then reads := true
     if reads then
+      -- a memory return among them: printed apart (the call, then each read)
+      if anyMem then return none
       let mut decls : Array Syntax := #[]
       for i in [0:rvs.size] do
         let some x ← ppVar? rvs[i]! | return none
@@ -910,6 +965,14 @@ def ppProgS (ns : List Expr) (P : Expr) : PrM (Option (Array (TSyntax `sol_stmt)
 /-- The statements of pieces with schema variables in them, a program
 variable as a statement (`body;`), the rest `ω` too. -/
 def progItemsS (ps : Array SPiece) : PrM (Option (Array (TSyntax `sol_stmt))) := do
+  -- Match RuleSyntax's program stems; other locals keep the typed fallback.
+  for piece in ps do
+    if let .var P := piece then
+      let some s ← fvarName? P | return none
+      let stripped := s.dropRightWhile fun c =>
+        c.isDigit || ('₀' ≤ c && c ≤ '₉') || c == '\''
+      let stem := if stripped.isEmpty then s else stripped
+      unless ["P", "Q", "ω", "body"].contains stem do return none
   let some (ss, t) ← ppPartsS ps | return none
   match t with
   | some x => return some (ss.push (← `(sol_stmt| $x:ident)))
@@ -1188,7 +1251,7 @@ partial def ppPremiseS (ns : List Expr) (e : Expr) (labels : List String := [])
         $(nameIdent bn):ident; } ])
       return some (← `(dl_premise| $g1:dl_branch ; $g2:dl_branch))
   let unfold (ns : List Expr) (P : Expr) : PrM (Option (TSyntax `dl_premise)) := do
-    let some ss ← ppProgS ns P | return none
+    let some ss ← progItemsS (← progExprPieces ns P) | return none
     return some (← `(dl_premise| ⟨[ $[$ss;]* ]⟩))
   match_expr (← whnf e) with
   | Premise.update _ _ _ U =>

@@ -49,3 +49,19 @@ source-output extension, not newly supported KeY input sorts. The native
 `Problem.parts` and `Problem.text` APIs remain unchanged. The source command
 fails explicitly on a shape it cannot describe; it does not print a weaker
 obligation or silently drop input conditions.
+
+## ABI entry decoding
+
+Source obligations quantify over typed parameter values; they do not decode
+calldata. The upstream replay's entry decoder (`Semantics/AbiEntry.lean`,
+[abi-hashes.md](feature-work/abi-hashes.md), "Entry decoding: lazy and
+noncanonical layouts") is what connects actual calldata bytes to those values
+for ABI coder v2 external entries: an input either fails solc's entry checks
+(an empty revert before the body) or yields typed values, which for calldata
+parameters are exactly what lazy reads return (`AbiEntry.eager_cref`).
+Layouts only lazy reads accept, and elements that fail only when read, are
+refused there; they need calldata references in the source semantics
+(lane FU2-B added them there for `bytes`, `string` and dynamic arrays of
+one-word values, with access-time validation:
+[source-soundness.md](feature-work/source-soundness.md)).
+

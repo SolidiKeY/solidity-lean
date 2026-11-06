@@ -1,0 +1,28 @@
+{
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.envA_allowed": [],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_legacy": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_not_both": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.order_viaIR": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.sourceSplit_nonVacuous": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Semantics/Nondeterminism/SourceWitness.lean:Solidity.Semantics.Nondeterminism.SourceWitness.sourceSplit_refutes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

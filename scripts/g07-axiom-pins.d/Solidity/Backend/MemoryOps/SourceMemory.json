@@ -1,0 +1,42 @@
+{
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_alloc": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_alloc_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_bool_read": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.source_heapObj_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.copy_schedule": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceMemory.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.schedule_read_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

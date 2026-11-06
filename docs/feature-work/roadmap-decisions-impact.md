@@ -61,7 +61,7 @@ changes which theorems count as evidence for the public claim.
 | `file:line` | Item | Verdict | Owner |
 |---|---|---|---|
 | `Solidity/Language/Features.lean:1771` | `Unmodelled` (22 constructors; `blockField` covers 9 fields, so 30 rows) | U | G00 |
-| `Features.lean:1880`, `:1910`, `:1936` | `outsideScope`, `Unmodelled.excluded`, `Feature.exclusion_complete`: classification, not approval | U | G00 |
+| `Features.lean:1252`, `FeatureInfo.lean:1094`, `:1120` | `outsideScope`, `Unmodelled.excluded`, `Feature.exclusion_complete`: classification, not approval | U | G00 |
 | `scripts/roadmap-g00-scope.py:36`, `:335` | `EXCLUSION_EVIDENCE`, `g00_status`: `exclude` still maps to `unresolved` | R (an evidence entry naming the decision) | G00 (g00-manifest-rev) |
 | `docs/feature-work/roadmap-g00-scope.md:18–24`, `:563–587` | "30 unresolved" wording, superseded by its own note at `:25` | R | G00 |
 | `docs/coverage-plan.md:172` | G00 row: "Unconfirmed exclusions remain unresolved work" | R (none remain unconfirmed) | G00 |

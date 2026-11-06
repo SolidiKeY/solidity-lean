@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import {libraryTryContext,libraryTryVectorsFixture} from './library-try-adapter.mjs';
+import {creationTryContext} from './creation-try-adapter.mjs';
+import {directSelfTryContext} from './self-try-adapter.mjs';
 import {preparePaymentSource,certifyPaymentEvidence} from './payment-source.mjs';
 /** Pinned upstream corpus, exact compiler diagnostics and typed runtime replay.
  * See docs/solidity-upstream-tests.md. No npm or Lake dependency is added.
@@ -148,6 +151,9 @@ function scalarArg(token, type) {
   if (type.startsWith('int') && n >= 2n**255n && n < 2n**256n) n -= 2n**256n;
   const signed = type.startsWith('int');
   const bits = type.startsWith('address') ? 160 : Number(type.match(/\d+/)?.[0] ?? 256);
+  // TestFileParser writes a negative literal as its two's-complement word:
+  // for a 256-bit unsigned type that word is canonical (`-2` is 2^256 - 2).
+  if (!signed && !type.startsWith('address') && bits === 256 && n < 0n && n >= -(2n**255n)) n += 2n**256n;
   if (n < (signed ? -(2n**BigInt(bits-1)) : 0n) || n >= 2n**BigInt(signed ? bits-1 : bits))
     throw new Error('noncanonical ABI input requires ABI decoder replay');
   return n.toString();
@@ -273,17 +279,25 @@ function scalarSemanticVectors(fixture, abi) {
 export function abiType(p) {
   return p.type.startsWith('tuple') ? '('+(p.components ?? []).map(abiType).join(',')+')'+p.type.slice(5) : p.type;
 }
-function checkAbiMetadata(p) {
-  if (/^enum\s/.test(p.internalType ?? '')) throw new Error('nominal enum ABI range not adapted');
+function checkAbiMetadata(p, top = false) {
+  // A top-level enum parameter/return (ABI `uint8`) of an ABI coder v2 entry is
+  // replayed at its declared cardinality from the source declaration (Lean
+  // `paramRanges`, `Semantics/AbiEntry.lean` `Kind.enumBelow`); nested enums
+  // stay refused. Lean's raw path replays enum parameters and returns by
+  // position (`Tools/Upstream.lean`), refusing an unmatched position.
+  if (/^enum\s/.test(p.internalType ?? '') && !(top && p.type === 'uint8'))
+    throw new Error('nominal enum ABI range not adapted');
   for (const c of p.components ?? []) checkAbiMetadata(c);
 }
 export function semanticVectors(fixture, abi) {
-  // Validate nominal metadata before either path can erase it.
-  for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p);
+  const sources=[...(fixture.sources?.values() ?? [])].join('\n');
+  const canonicalOnly = fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
+    /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' '));
+  // Validate nominal metadata before either path can erase it. ABI coder v1
+  // masks an enum word to uint8 at entry instead of checking its cardinality,
+  // so v1 keeps every enum refused.
+  for (const p of abi.flatMap(d=>[...(d.inputs ?? []),...(d.outputs ?? [])])) checkAbiMetadata(p, !canonicalOnly);
   try { return scalarSemanticVectors(fixture,abi); } catch (scalarError) {
-    const sources=[...(fixture.sources?.values() ?? [])].join('\n');
-    const canonicalOnly = fixture.settings?.ABIEncoderV1Only === 'true' || fixture.abiCoderV1 === true ||
-      /pragma\s+abicoder\s+v1\s*;/.test(sources.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g,' '));
     const vectors=[];
     for (let line of fixture.expectations) {
       line=stripFixtureComments(line).trim(); if (!line) continue;
@@ -399,8 +413,9 @@ function prepare(entry, directory, compile, work) {
   const candidates = ast?.nodes.filter(n=>n.nodeType === 'ContractDefinition' && n.contractKind === 'contract' && !n.abstract) ?? [];
   const contract = candidates.at(-1);
   if (!contract) return {path,stage,status:'blocked',reason:'no concrete deployment contract'};
+  const libraryContext=libraryTryContext(ast,contract);
   let blocked, vectors;
-  try {vectors=semanticVectors({...fixture,abiCoderV1:ast.nodes.some(n=>n.nodeType==='PragmaDirective' &&
+  try {vectors=semanticVectors({...(libraryContext?libraryTryVectorsFixture(fixture,libraryContext):fixture),abiCoderV1:ast.nodes.some(n=>n.nodeType==='PragmaDirective' &&
     n.literals?.[0]==='abicoder' && n.literals?.[1]==='v1')},out.contracts[fixture.mainSource][contract.name].abi);}
   catch(e) {blocked=e.message;}
   // Context and cross-contract behavior require the upstream EVM host. Refuse
@@ -422,7 +437,9 @@ function prepare(entry, directory, compile, work) {
   if (vectors?.some(v=>v.calldata) && Object.values(out.sources).some(unit=>hasAssembly(unit.ast)))
     blocked='raw ABI replay with physical calldata/memory assembly not adapted';
   const context = Object.values(out.sources).some(unit=>hostBehavior(unit.ast));
-  if (context) blocked='transaction/block/self-address or cross-contract host behavior not adapted';
+  const otherUnitHost = Object.values(out.sources).some(unit=>unit.ast !== ast && hostBehavior(unit.ast));
+  const hostContext = otherUnitHost ? null : (libraryContext ?? (context ? (directSelfTryContext(ast, contract) ?? creationTryContext(ast, contract)) : null));
+  if (context && !hostContext) blocked='transaction/block/self-address or cross-contract host behavior not adapted';
   // Import success alone cannot discharge a vector we cannot execute.
   if (blocked) return {path,stage,status:'blocked',reason:blocked};
   const pipelines=runtimePipelines(fixture.settings);
@@ -469,7 +486,7 @@ function prepare(entry, directory, compile, work) {
     } catch(e) {return {path,stage,status:'blocked',reason:'static compiler-code materialization failed: '+e.message};}
     const fixturePath=join(work,sha(path+'#'+pipeline).slice(0,24)+'.ast.json');
     save(fixturePath,variant);
-    jobs.push({path,pipeline,requiredPipelines:pipelines,contract:contract.name,fixture:fixturePath,vectors});
+    jobs.push({path,pipeline,requiredPipelines:pipelines,contract:contract.name,fixture:fixturePath,vectors,...(hostContext ? {hostContext,...(hostContext.kind === 'linked-library-try-source' ? {requiresLibraryContext:true} : hostContext.kind === 'creation-try-source' ? {requiresCreationContext:true} : {requiresSelfContext:true})} : {})});
   }
   return {jobs};
 }
@@ -555,6 +572,9 @@ async function main(args) {
   const metadata={version:1,commit:PIN,compiler:VERSION,compilerSha256:COMPILER_SHA,
     archiveSha256:manifest.archiveSha256,runnerSha256:sha(readFileSync(fileURLToPath(import.meta.url))),
     compilerCodeAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-code.mjs'))),
+    selfTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/self-try-adapter.mjs'))),
+    creationTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/creation-try-adapter.mjs'))),
+    libraryTryAdapterSha256:sha(readFileSync(join(ROOT,'scripts/library-try-adapter.mjs'))),
     compilationUnitAdapterSha256:sha(readFileSync(join(ROOT,'scripts/solc-unit.mjs'))),
     paymentSourceAdapterSha256:sha(readFileSync(join(ROOT,'scripts/payment-source.mjs'))),
     paymentReferenceSha256:sha(readFileSync(join(ROOT,'scripts/evm-reference/payment-replay.mjs'))),

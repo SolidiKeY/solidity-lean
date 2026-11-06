@@ -1,0 +1,91 @@
+{
+  "upstreamCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+  "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+  "engineVersion": "10.1.3",
+  "referenceDependencyLockSha256": "fd223698b68dd5cf9dc1b59589c61da6c0131c3f68af65f7c26a3d5ac0498829",
+  "files": [
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/interpreter.js",
+      "sha256": "27106c4194446a01eb6207a2c5158e13eb242fc6cbb7e180d4b937cd87ba6499",
+      "copy": "engine-dist__esm__interpreter.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/evm.js",
+      "sha256": "e978f659e72aeb8ee22ebc4559bafb37e4760b0557512224f734b5b46da22f46",
+      "copy": "engine-dist__esm__evm.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/functions.js",
+      "sha256": "9a73c68a74d15dd4e6255062cef6b9e575fe0eafd2256948683e3d0556a88440",
+      "copy": "engine-dist__esm__opcodes__functions.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/gas.js",
+      "sha256": "72087f58b0b78e2f5dc7fed7cfa48aeee6000c5dbff4f3d851622f40c5a900c4",
+      "copy": "engine-dist__esm__opcodes__gas.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/util.js",
+      "sha256": "a9ae8a7bd71c0580762e4185aa7a8ed784474f2b043693f45831df225fdf9cff",
+      "copy": "engine-dist__esm__opcodes__util.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/EIP7928.js",
+      "sha256": "1294c92cc0f875dda60bfc81c610aef82e8800fbea8f6da4f73a7f36b48f289a",
+      "copy": "engine-dist__esm__opcodes__EIP7928.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/dist/esm/opcodes/codes.js",
+      "sha256": "46e6b74f7cff1256a065f3df6756d0b5290bde8740ec7d5ec5152f9263aac231",
+      "copy": "engine-dist__esm__opcodes__codes.js"
+    },
+    {
+      "kind": "pinned installed engine code, not execution",
+      "path": "/workspace/next10-diamond-try-evidence/conditional/reference/node_modules/@ethereumjs/evm/package.json",
+      "sha256": "8a3c432434a6250963e416156e0387f016db477d95660114c9d595e3602b3b66",
+      "copy": "engine-package.json"
+    },
+    {
+      "kind": "upstream harness exact snapshot",
+      "path": "test/EVMHost.cpp",
+      "pinnedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "sha256": "a5f9c40b2a268f21be3e6c82aee68f2df79c4a161a041c4b62afa4f123375982",
+      "copy": "harness-test__EVMHost.cpp"
+    },
+    {
+      "kind": "upstream harness exact snapshot",
+      "path": "test/ExecutionFramework.cpp",
+      "pinnedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "sha256": "20aaee0ca741afd6812a90b27631138f2bfb8daae67cb5b4cabf106463fec06a",
+      "copy": "harness-test__ExecutionFramework.cpp"
+    },
+    {
+      "kind": "upstream harness exact snapshot",
+      "path": "test/ExecutionFramework.h",
+      "pinnedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "sha256": "cbd2acb8607ecfdfc9ff728f61b221f5cec8976956cc4e1518996e94f12c7a8e",
+      "copy": "harness-test__ExecutionFramework.h"
+    },
+    {
+      "kind": "upstream harness exact snapshot",
+      "path": "test/libsolidity/SemanticTest.cpp",
+      "pinnedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "sha256": "053285d39e24bcf8e38b4462fc281142d66194daed9b7c8ab88b03299b1c129b",
+      "copy": "harness-test__libsolidity__SemanticTest.cpp"
+    },
+    {
+      "kind": "upstream harness exact snapshot",
+      "path": "test/libsolidity/SolidityExecutionFramework.cpp",
+      "pinnedCommit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+      "sha256": "e060a474b6c9d366768568082facf571c0b01403cf0d47066f8cafaff0e1c907",
+      "copy": "harness-test__libsolidity__SolidityExecutionFramework.cpp"
+    }
+  ]
+}

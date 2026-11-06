@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/InternalFlow/RuntimeFrameV3NativeParents.lean:Solidity.Backend.InternalFlow.RuntimeFrame.NativeParents.Checks.coupled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

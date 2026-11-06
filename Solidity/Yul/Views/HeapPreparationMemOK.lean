@@ -23,7 +23,10 @@ theorem supportedElement_exists {E : Source.Env} {h : Source.Heap E.layout} (p :
     rcases extendedMember_location supported with no | memory
     · rw [loc] at no; cases no
     · rw [loc] at memory; cases memory
-  | cdRef loc off => exact False.elim ok
+  | cdRef loc off len =>
+    rcases extendedMember_location supported with no | memory
+    · rw [loc] at no; cases no
+    · rw [loc] at memory; cases memory
   | udvt v =>
     simp only [ExtendedMemberType,OrdinaryMemberType,CanonicalScalarType,Source.STy.loc?,reduceCtorEq,or_self] at supported
   | internalFn name =>

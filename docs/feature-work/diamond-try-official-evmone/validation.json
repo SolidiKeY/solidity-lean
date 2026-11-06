@@ -1,0 +1,121 @@
+{
+  "kind": "official-source inspection and artifact-integrity only",
+  "parent": "7ec3983ce4606cb39a48cbd2fb8ebd8e690685f1",
+  "rows": [
+    {
+      "label": "check",
+      "command": [
+        "python3",
+        "/workspace/next10-diamond-try-evidence/official-evmone/check.py"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 18032,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 23285760,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17780,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 10600448,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "doc-paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 23696,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 9043968,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "whitespace",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 15152,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4673536,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "invocation",
+      "command": [
+        "bash",
+        "-c",
+        "test \"$LEAN_NUM_THREADS\" = 1 && ! flock -n /tmp/solidity-lean-feature-groups-20261025/writer.lock true && printf \"threads1 writer_lock_held=true historical_execution=false\n\" && df -h /workspace && free -m"
+      ],
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17448,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 4579328,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    },
+    {
+      "label": "final registered-document paths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1,
+      "seconds": 3,
+      "peakAggregateRssKiB": 23756,
+      "memoryMax": 12884901888,
+      "memorySwapMax": 0,
+      "peakBytes": 9011200,
+      "maxEvents": 0,
+      "oom": 0,
+      "oomKill": 0
+    }
+  ],
+  "priorChecksumsVerified": 2138,
+  "sourceResponseAndExtractHashesVerified": 64,
+  "docPathsBaselineCount": 20,
+  "docPathsNewFindings": 0,
+  "docPathsActualExit": 1,
+  "retainedNativeWorking": 12,
+  "retainedNativeBlocked": 8,
+  "retainedNativeStrictExit": 1,
+  "retainedStandardOnlyAxiomAudits": 217,
+  "newAxiomAudits": 0,
+  "newLeanBuildOrMCP": false,
+  "newCompilerOrFixtureExecution": false,
+  "backendBuildLoadOrExecution": false,
+  "physicalProducerImplementation": false,
+  "scope": "exact pinned source/header/build-edge facts and bounded absence of supported abort interface; no runtime guarantees",
+  "sourceCollection": "small lock-held outer urllib/git metadata retrieval; bounded Docker validation separately measured"
+}

@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.source_items_context_pair_error": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.source_items_context_pair_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.recontext": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.declare_assign_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceStructDeclaration.lean:Solidity.Backend.MemoryOps.SourceBoolStructAt.recontext": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

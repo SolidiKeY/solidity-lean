@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Owned MCP shim: keep language-server workers serial and memory-bounded.
+set -euo pipefail
+if [[ "${1-}" == serve ]]; then
+  exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "$@" -j1 -M11264 --tstack=131072
+fi
+exec /workspace/.setup/tools/lean-4.24.0-linux/bin/lake "$@"

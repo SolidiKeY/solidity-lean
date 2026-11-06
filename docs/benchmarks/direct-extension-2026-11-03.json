@@ -1,0 +1,3854 @@
+{
+  "scope": "Direct verifier versus certified control; actual extension worker with precompiled identical AST snapshots. Packaging overlapped part of clean runs. No SolKey comparison.",
+  "runs": {
+    "certified": {
+      "benchmark": false,
+      "direct": false,
+      "startedAt": "2026-11-03T02:24:53.659Z",
+      "closedSpecs": true,
+      "trials": [
+        {
+          "name": "constant",
+          "repeat": 0,
+          "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+          "elapsedMs": 2889.824314,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 1167,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 1,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 0,
+          "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+          "elapsedMs": 449.38303499999984,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 391,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 2,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 0,
+          "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+          "elapsedMs": 913.3339890000002,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 845,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 3,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 0,
+          "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+          "elapsedMs": 660.5742369999998,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 587,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 4,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 0,
+          "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+          "elapsedMs": 1078.0657869999995,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 981,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 5,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 0,
+          "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+          "elapsedMs": 243.55612800000017,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "pending",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "open proof goals",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 177,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 6,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "constant",
+          "repeat": 1,
+          "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+          "elapsedMs": 323.1621619999996,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 261,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 7,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 1,
+          "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+          "elapsedMs": 407.02730299999985,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 328,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 8,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 1,
+          "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+          "elapsedMs": 372.73053900000014,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 303,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 9,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 1,
+          "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+          "elapsedMs": 593.7861299999995,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 520,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 10,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 1,
+          "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+          "elapsedMs": 918.4376089999996,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 830,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 11,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 1,
+          "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+          "elapsedMs": 246.00369200000023,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "pending",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "open proof goals",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 179,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 12,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "constant",
+          "repeat": 2,
+          "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+          "elapsedMs": 303.60575900000003,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 235,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 13,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 2,
+          "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+          "elapsedMs": 397.41404599999987,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 336,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 14,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 2,
+          "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+          "elapsedMs": 358.0234410000012,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 292,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 15,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 2,
+          "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+          "elapsedMs": 666.822755000001,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 598,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 16,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 2,
+          "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+          "elapsedMs": 1077.2238679999991,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 986,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 17,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 2,
+          "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+          "elapsedMs": 258.6620469999998,
+          "results": [
+            {
+              "tag": "specified",
+              "status": "pending",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "open proof goals",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 183,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-7wCi7V/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 641325,
+            "leanServerPid": 641336,
+            "leanDocumentVersion": 18,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        }
+      ],
+      "passed": true
+    },
+    "direct": {
+      "benchmark": false,
+      "direct": true,
+      "startedAt": "2026-11-03T02:25:06.206Z",
+      "closedSpecs": true,
+      "trials": [
+        {
+          "name": "constant",
+          "repeat": 0,
+          "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+          "elapsedMs": 1559.013396,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 21,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 1,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 0,
+          "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+          "elapsedMs": 74.52152699999988,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 18,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 2,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 0,
+          "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+          "elapsedMs": 75.39110400000004,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 19,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 3,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 0,
+          "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+          "elapsedMs": 75.4047230000001,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 20,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 4,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 0,
+          "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+          "elapsedMs": 816.7145580000001,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 728,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 5,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 0,
+          "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+          "elapsedMs": 86.51830199999995,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "refuted",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "counterexample found",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 24,
+              "counterexample": {
+                "transaction": {
+                  "timestamp": "0",
+                  "selfAddress": "0",
+                  "msgValue": "0",
+                  "msgSender": "1",
+                  "ext": []
+                },
+                "outcome": {
+                  "storage": "",
+                  "kind": "postStorage"
+                },
+                "lines": [
+                  "msg.sender = 1, msg.value = 0",
+                  "before: ",
+                  "after: "
+                ],
+                "kind": "model-state",
+                "initialStorage": "",
+                "initialLedger": [],
+                "initialBalance": "0",
+                "goalKind": "fmlValid",
+                "certified": false,
+                "arguments": []
+              },
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 6,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "constant",
+          "repeat": 1,
+          "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+          "elapsedMs": 88.78699400000005,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 22,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 7,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 1,
+          "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+          "elapsedMs": 92.8942750000001,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 24,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 8,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 1,
+          "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+          "elapsedMs": 93.29923099999996,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 26,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 9,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 1,
+          "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+          "elapsedMs": 102.80668500000002,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 33,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 10,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 1,
+          "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+          "elapsedMs": 885.7956260000001,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 797,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 11,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 1,
+          "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+          "elapsedMs": 89.5002669999999,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "refuted",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "counterexample found",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 21,
+              "counterexample": {
+                "transaction": {
+                  "timestamp": "0",
+                  "selfAddress": "0",
+                  "msgValue": "0",
+                  "msgSender": "1",
+                  "ext": []
+                },
+                "outcome": {
+                  "storage": "",
+                  "kind": "postStorage"
+                },
+                "lines": [
+                  "msg.sender = 1, msg.value = 0",
+                  "before: ",
+                  "after: "
+                ],
+                "kind": "model-state",
+                "initialStorage": "",
+                "initialLedger": [],
+                "initialBalance": "0",
+                "goalKind": "fmlValid",
+                "certified": false,
+                "arguments": []
+              },
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 12,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "constant",
+          "repeat": 2,
+          "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+          "elapsedMs": 113.55477900000051,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 24,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 13,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "identity",
+          "repeat": 2,
+          "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+          "elapsedMs": 88.75284699999975,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 12,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 26,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 70
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 14,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "assignment",
+          "repeat": 2,
+          "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+          "elapsedMs": 94.2497830000002,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run(uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 21,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 44
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 15,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "increment",
+          "repeat": 2,
+          "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+          "elapsedMs": 108.94175599999926,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "run()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 28,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+              "range": {
+                "start": {
+                  "line": 5,
+                  "character": 2
+                },
+                "end": {
+                  "line": 5,
+                  "character": 46
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 16,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "branch",
+          "repeat": 2,
+          "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+          "elapsedMs": 754.7783359999994,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 20,
+              "signature": "run(uint,uint)",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 672,
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 7,
+                  "character": 3
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 17,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        },
+        {
+          "name": "false-constant",
+          "repeat": 2,
+          "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+          "elapsedMs": 107.0720250000004,
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "refuted",
+              "sourceId": 10,
+              "signature": "run()",
+              "reason": "counterexample found",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "run",
+              "elapsedMs": 32,
+              "counterexample": {
+                "transaction": {
+                  "timestamp": "0",
+                  "selfAddress": "0",
+                  "msgValue": "0",
+                  "msgSender": "1",
+                  "ext": []
+                },
+                "outcome": {
+                  "storage": "",
+                  "kind": "postStorage"
+                },
+                "lines": [
+                  "msg.sender = 1, msg.value = 0",
+                  "before: ",
+                  "after: "
+                ],
+                "kind": "model-state",
+                "initialStorage": "",
+                "initialLedger": [],
+                "initialBalance": "0",
+                "goalKind": "fmlValid",
+                "certified": false,
+                "arguments": []
+              },
+              "source": "/workspace/solidity-lean/.lake/extension-speed-xJdjez/Simple.sol",
+              "contract": "Simple",
+              "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+              "range": {
+                "start": {
+                  "line": 4,
+                  "character": 2
+                },
+                "end": {
+                  "line": 4,
+                  "character": 64
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "backend": {
+            "workerPid": 642915,
+            "leanServerPid": 642926,
+            "leanDocumentVersion": 18,
+            "native": {
+              "active": true,
+              "sha256": "0f82fa77eeea3f74b6dcc07d929ad9d96534e21637997caa20dd1850f4e68529",
+              "optimization": "-O0",
+              "probe": false
+            }
+          }
+        }
+      ],
+      "passed": true
+    }
+  },
+  "profile": {
+    "benchmark": true,
+    "direct": true,
+    "startedAt": "2026-11-03T02:23:40.970Z",
+    "closedSpecs": true,
+    "trials": [
+      {
+        "name": "constant",
+        "repeat": 0,
+        "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+        "elapsedMs": 1597.661133,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 24,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "2c9740bf2f41d5a55dde302bb41d4ac8a85e8ee1f52e84368a6d1d0842d71604",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 1,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 243552\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4296,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":10729432,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":10998982,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":13339448,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":24361435,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4296,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 10729432,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 10998982,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 13339448,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 24361435,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            243552
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 0,
+        "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+        "elapsedMs": 74.985862,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 22,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ab174ccb6a8ebcb9a9e58032dfe59af6cea90f4c6ca88da8bfc2fdc502c9228",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 2,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 378583\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2323,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6018271,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6164008,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":15204890,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":21385983,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2323,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 6018271,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 6164008,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 15204890,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 21385983,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            378583
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 0,
+        "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+        "elapsedMs": 78.56133299999988,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 20,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "89e2ad5c57f40ba18d81f28812f74ff047c8f5c477767d3f2a1efd10f848227e",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 3,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 700140\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4557,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5159398,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5344723,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":13991673,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":19353742,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4557,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5159398,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5344723,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 13991673,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 19353742,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            700140
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 0,
+        "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+        "elapsedMs": 98.77335500000004,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 27,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "6a84d46cce3192b511f18a4618e12d5eebbd1eb760eb1f7839bd9dcf1c2de9ab",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 4,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 1761538\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":3145,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6197610,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6454011,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":21096111,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":27574728,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 3145,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 6197610,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 6454011,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 21096111,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 27574728,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            1761538
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 0,
+        "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+        "elapsedMs": 699.685894,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 618,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "37f19a9280fdeaa885f9256f34b9ec0e3b8b337da29e269382f2a6b02f722837",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 5,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 24890059\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":3966,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":7460997,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":7686172,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":48641906,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":617950066,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 3966,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 7460997,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 7686172,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 48641906,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 617950066,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            24890059
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 0,
+        "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+        "elapsedMs": 92.04883199999995,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "refuted",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "counterexample found",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 18,
+            "counterexample": {
+              "transaction": {
+                "timestamp": "0",
+                "selfAddress": "0",
+                "msgValue": "0",
+                "msgSender": "1",
+                "ext": []
+              },
+              "outcome": {
+                "storage": "",
+                "kind": "postStorage"
+              },
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: "
+              ],
+              "kind": "model-state",
+              "initialStorage": "",
+              "initialLedger": [],
+              "initialBalance": "0",
+              "goalKind": "fmlValid",
+              "certified": false,
+              "arguments": []
+            },
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "967ac9d406ec8c492dbba0824f73c16fb3ec9497ff1dd51ddf55844610692569",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 6,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 1872152\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2724,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":4915265,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5069935,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":12835815,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":17935804,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2724,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 4915265,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5069935,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 12835815,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 17935804,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            1872152
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 1,
+        "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+        "elapsedMs": 85.48833300000024,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 17,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "78e706f79408926b19886adc4b6c7c3308744650df809d60c8ce42e614c7b345",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 7,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 211925\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":3495,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5457089,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5633151,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":11066396,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":16716201,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 3495,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5457089,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5633151,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 11066396,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 16716201,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            211925
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 1,
+        "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+        "elapsedMs": 93.35246999999981,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 19,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "0e0f4eb210acc0f6a061e03e83f590c7e6a9b775b4a9309a592d0af8eb516e5f",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 8,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 356820\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4086,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5178636,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5333607,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":14033726,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":19412579,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4086,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5178636,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5333607,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 14033726,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 19412579,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            356820
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 1,
+        "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+        "elapsedMs": 83.92681200000015,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 21,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "69e9c9090b314f19e3f84f0832ccba315d23bd7c4b01c59b19ec21c5f69afc00",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 9,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 711298\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4737,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5626882,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5853279,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":14367381,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":20241501,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4737,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5626882,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5853279,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 14367381,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 20241501,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            711298
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 1,
+        "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+        "elapsedMs": 93.63401799999974,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 24,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "7bcc5d2616c16499611b356766c40bd968c101c55d764aa92006653e0a66b153",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 10,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 1428072\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2503,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5789123,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6002941,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":17512526,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":23535186,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2503,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5789123,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 6002941,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 17512526,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 23535186,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            1428072
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 1,
+        "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+        "elapsedMs": 699.0010550000002,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 619,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "f5b4c3c1775a66152e9a47c689f7ee3c2de013dea827e35f89e0c51c522e7734",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 11,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 25068685\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4447,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":7796266,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":7986248,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":45530913,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":619486084,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4447,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 7796266,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 7986248,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 45530913,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 619486084,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            25068685
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 1,
+        "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+        "elapsedMs": 72.84553499999993,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "refuted",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "counterexample found",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 22,
+            "counterexample": {
+              "transaction": {
+                "timestamp": "0",
+                "selfAddress": "0",
+                "msgValue": "0",
+                "msgSender": "1",
+                "ext": []
+              },
+              "outcome": {
+                "storage": "",
+                "kind": "postStorage"
+              },
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: "
+              ],
+              "kind": "model-state",
+              "initialStorage": "",
+              "initialLedger": [],
+              "initialBalance": "0",
+              "goalKind": "fmlValid",
+              "certified": false,
+              "arguments": []
+            },
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "1ba0b160b1c5d2813f6a87baa166376737a93c4b0584aaf0be652b445910ee7b",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 12,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 1911310\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2474,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5694112,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5901471,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":15833140,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":21808149,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2474,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5694112,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5901471,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 15833140,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 21808149,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            1911310
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "constant",
+        "repeat": 2,
+        "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+        "elapsedMs": 78.36609899999985,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 20,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "71612ca825d38bbe7dc7d4bcf0a6d4c41cd7a42809ee14dc4b9a7bd5cd8e0685",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 13,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 250473\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4326,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5614804,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5887249,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":13924012,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":19829679,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4326,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5614804,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5887249,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 13924012,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 19829679,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            250473
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "identity",
+        "repeat": 2,
+        "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+        "elapsedMs": 78.03632800000014,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 12,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 20,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "761ba19f63ad995a0d328a4813b8b40813900c5aeb12d71da825cafbb3a9d2d2",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 70
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 14,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 361608\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2664,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5424652,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5753260,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":14420810,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":20197505,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2664,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5424652,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5753260,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 14420810,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 20197505,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            361608
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "assignment",
+        "repeat": 2,
+        "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+        "elapsedMs": 80.13150199999973,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 21,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "a3541d9e6f5041e356f3c101b37eaa6ffcc9d698f9103108586c8b2ac6ed7e3a",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 44
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 15,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 938655\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":4617,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5534164,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5730956,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":14639826,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":20388398,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 4617,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5534164,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5730956,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 14639826,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 20388398,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            938655
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "increment",
+        "repeat": 2,
+        "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+        "elapsedMs": 88.23375299999952,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "run()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 22,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "bba7d23ea1a2fdc671dc6896c0f5053bb121a5044543c557877e2116f9c3d18d",
+            "range": {
+              "start": {
+                "line": 5,
+                "character": 2
+              },
+              "end": {
+                "line": 5,
+                "character": 46
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 16,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 1451377\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2564,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5635304,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5841691,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":16905594,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":22767525,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2564,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5635304,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 5841691,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 16905594,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 22767525,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            1451377
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "branch",
+        "repeat": 2,
+        "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+        "elapsedMs": 715.2501029999994,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 20,
+            "signature": "run(uint,uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 634,
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "8efbfaaef94d524ae3a8d750c2307cdec6cb14bcde603e39d0c5a0fa765bce69",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 7,
+                "character": 3
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 17,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 21862079\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":2604,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6440671,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6655921,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":42275034,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":633545352,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 2604,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 6440671,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 6655921,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 42275034,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 633545352,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            21862079
+          ],
+          "nativeWalkNanos": []
+        }
+      },
+      {
+        "name": "false-constant",
+        "repeat": 2,
+        "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+        "elapsedMs": 85.55382999999983,
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "refuted",
+            "sourceId": 10,
+            "signature": "run()",
+            "reason": "counterexample found",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "run",
+            "elapsedMs": 23,
+            "counterexample": {
+              "transaction": {
+                "timestamp": "0",
+                "selfAddress": "0",
+                "msgValue": "0",
+                "msgSender": "1",
+                "ext": []
+              },
+              "outcome": {
+                "storage": "",
+                "kind": "postStorage"
+              },
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: ",
+                "after: "
+              ],
+              "kind": "model-state",
+              "initialStorage": "",
+              "initialLedger": [],
+              "initialBalance": "0",
+              "goalKind": "fmlValid",
+              "certified": false,
+              "arguments": []
+            },
+            "source": "/workspace/solidity-lean/.lake/extension-speed-RjafCY/Simple.sol",
+            "contract": "Simple",
+            "sourceHash": "26311446f3fc1cca391c7fcab8a33bff6060bcbbae79e9988f686b73506f0716",
+            "range": {
+              "start": {
+                "line": 4,
+                "character": 2
+              },
+              "end": {
+                "line": 4,
+                "character": 64
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "backend": {
+          "workerPid": 638422,
+          "leanServerPid": 638433,
+          "leanDocumentVersion": 18,
+          "native": {
+            "active": true,
+            "sha256": "6d1610b6bd5c8f387e41b19036b65347b395c121ce8d36da97a031c6ad4eecfe",
+            "optimization": "-O0",
+            "probe": true
+          },
+          "benchmarkMessages": [
+            "NATIVE_FRONTEND_PROBE\nNATIVE_DIRECT_CHECK 2003487\n",
+            "0 obligations declared scoped",
+            "SOLKEY_BENCH {\"function\":\"\",\"nanos\":3685,\"phase\":\"tails\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":5798216,\"phase\":\"direct-formula\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":6018424,\"phase\":\"direct-classify\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":16636043,\"phase\":\"direct-executable\"}\nSOLKEY_BENCH {\"function\":\"run\",\"nanos\":22678953,\"phase\":\"direct\"}\n"
+          ],
+          "phases": [
+            {
+              "function": "",
+              "nanos": 3685,
+              "phase": "tails"
+            },
+            {
+              "function": "run",
+              "nanos": 5798216,
+              "phase": "direct-formula"
+            },
+            {
+              "function": "run",
+              "nanos": 6018424,
+              "phase": "direct-classify"
+            },
+            {
+              "function": "run",
+              "nanos": 16636043,
+              "phase": "direct-executable"
+            },
+            {
+              "function": "run",
+              "nanos": 22678953,
+              "phase": "direct"
+            }
+          ],
+          "nativeDirectNanos": [
+            2003487
+          ],
+          "nativeWalkNanos": []
+        }
+      }
+    ],
+    "passed": true
+  },
+  "browser": {
+    "singleFile": true,
+    "proofs": true,
+    "startedAt": "2026-11-03T02:32:35.610Z",
+    "assetBuild": "cfca570cfd7dd1d25fc094b455b90213e582a4bf4b4163b898b38d6a05221488",
+    "protocolHistoryLimit": 100,
+    "checks": [
+      {
+        "name": "a plain static website boots a real Solidity WASM compiler without any backend",
+        "elapsedMs": 23782.9
+      },
+      {
+        "name": "the unchanged compiler helpers produce exact source provenance and AST language services",
+        "elapsedMs": 486.2
+      },
+      {
+        "name": "Monaco rename and compiler-validated formatting run in the worker",
+        "elapsedMs": 899.2
+      },
+      {
+        "name": "compiler errors come from solc running inside the browser",
+        "elapsedMs": 354
+      },
+      {
+        "name": "unopened imports and cross-file definitions use the browser filesystem",
+        "elapsedMs": 645.4
+      },
+      {
+        "name": "rename includes and validates a closed sibling importer",
+        "elapsedMs": 1582.2
+      },
+      {
+        "name": "an unresolved import produces a positioned Problems error",
+        "elapsedMs": 201.4
+      },
+      {
+        "name": "failed browser storage never marks an unsaved edit clean",
+        "elapsedMs": 23.8
+      },
+      {
+        "name": "the exact Lean kernel boots entirely in a browser worker",
+        "elapsedMs": 21.8
+      },
+      {
+        "name": "direct browser verification reports correct programs and a wrong specification",
+        "elapsedMs": 16091.1
+      },
+      {
+        "name": "editing terminates an active obsolete browser proof",
+        "elapsedMs": 3941.2
+      },
+      {
+        "name": "an edited false result cannot retain a green proof",
+        "elapsedMs": 14458.4
+      },
+      {
+        "name": "direct counterexamples do not claim kernel certificates",
+        "elapsedMs": 649.1
+      },
+      {
+        "name": "a fully disconnected fresh browser runtime still compiles and proves new edits",
+        "elapsedMs": 20861.4
+      }
+    ],
+    "webSockets": [],
+    "requests": [],
+    "errors": [],
+    "documentRequests": [
+      "http://127.0.0.1:33023/index.html?backend=native",
+      "http://127.0.0.1:33023/index.html?backend=native"
+    ],
+    "startupMs": 16712.8,
+    "embedded": {
+      "build": "cfca570cfd7dd1d25fc094b455b90213e582a4bf4b4163b898b38d6a05221488",
+      "assets": 2926,
+      "preparationMs": 15185.9,
+      "reused": false,
+      "remainingDataNodes": 0
+    },
+    "reopenMs": 6928.4,
+    "runtime": {
+      "mode": "browser",
+      "proofReady": true,
+      "compilerReady": true,
+      "error": null,
+      "message": "The pinned Lean kernel and Solidity compiler run entirely in this browser.",
+      "lean": "4.24.0",
+      "build": "7436fd7235361420a34990be5ddebc16b34492bddbe1cab1cc60a736f7422259"
+    },
+    "proofTrials": [
+      {
+        "elapsedMs": 15781.4,
+        "report": {
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "increment()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "increment",
+              "elapsedMs": 165,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 7,
+                  "character": 4
+                },
+                "end": {
+                  "line": 9,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 23,
+              "signature": "reset()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "reset",
+              "elapsedMs": 62,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 12,
+                  "character": 4
+                },
+                "end": {
+                  "line": 14,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 32,
+              "signature": "one()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "one",
+              "elapsedMs": 44,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 17,
+                  "character": 4
+                },
+                "end": {
+                  "line": 19,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "refuted",
+              "sourceId": 41,
+              "signature": "openGoal()",
+              "reason": "counterexample found",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "openGoal",
+              "elapsedMs": 71,
+              "counterexample": {
+                "transaction": {
+                  "timestamp": "0",
+                  "selfAddress": "0",
+                  "msgValue": "0",
+                  "msgSender": "1",
+                  "ext": []
+                },
+                "outcome": {
+                  "storage": "count = 0",
+                  "kind": "postStorage"
+                },
+                "lines": [
+                  "msg.sender = 1, msg.value = 0",
+                  "before: count = 0",
+                  "after: count = 0"
+                ],
+                "kind": "model-state",
+                "initialStorage": "count = 0",
+                "initialLedger": [],
+                "initialBalance": "0",
+                "goalKind": "fmlValid",
+                "certified": false,
+                "arguments": []
+              },
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 22,
+                  "character": 4
+                },
+                "end": {
+                  "line": 24,
+                  "character": 5
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "timings": {
+            "kernelChecks": [
+              {
+                "contract": "Counter",
+                "checkMs": 15767.209999993443,
+                "libraries": {
+                  "reads": 9328,
+                  "cacheHits": 6440,
+                  "compressedBytes": 623009847,
+                  "inflatedBytes": 2376207168,
+                  "fetchMs": 2062.6650004684925,
+                  "hashMs": 2587.1649998277426,
+                  "inflateMs": 4908.444999888539,
+                  "prefetchMs": 0,
+                  "prefetchedBytes": 0,
+                  "directReads": 2888,
+                  "fallbacks": 0
+                },
+                "phases": []
+              }
+            ]
+          }
+        }
+      },
+      {
+        "elapsedMs": 6,
+        "report": {
+          "results": [
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 14,
+              "signature": "increment()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "increment",
+              "elapsedMs": 165,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 7,
+                  "character": 4
+                },
+                "end": {
+                  "line": 9,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 23,
+              "signature": "reset()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "reset",
+              "elapsedMs": 62,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 12,
+                  "character": 4
+                },
+                "end": {
+                  "line": 14,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "proved",
+              "sourceId": 32,
+              "signature": "one()",
+              "reason": "",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "one",
+              "elapsedMs": 44,
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 17,
+                  "character": 4
+                },
+                "end": {
+                  "line": 19,
+                  "character": 5
+                }
+              }
+            },
+            {
+              "verification": "direct",
+              "tag": "specified",
+              "status": "refuted",
+              "sourceId": 41,
+              "signature": "openGoal()",
+              "reason": "counterexample found",
+              "reading": "solc",
+              "invalidSpecification": false,
+              "function": "openGoal",
+              "elapsedMs": 71,
+              "counterexample": {
+                "transaction": {
+                  "timestamp": "0",
+                  "selfAddress": "0",
+                  "msgValue": "0",
+                  "msgSender": "1",
+                  "ext": []
+                },
+                "outcome": {
+                  "storage": "count = 0",
+                  "kind": "postStorage"
+                },
+                "lines": [
+                  "msg.sender = 1, msg.value = 0",
+                  "before: count = 0",
+                  "after: count = 0"
+                ],
+                "kind": "model-state",
+                "initialStorage": "count = 0",
+                "initialLedger": [],
+                "initialBalance": "0",
+                "goalKind": "fmlValid",
+                "certified": false,
+                "arguments": []
+              },
+              "source": "/workspace/Counter.sol",
+              "contract": "Counter",
+              "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+              "range": {
+                "start": {
+                  "line": 22,
+                  "character": 4
+                },
+                "end": {
+                  "line": 24,
+                  "character": 5
+                }
+              }
+            }
+          ],
+          "errors": [],
+          "timings": {
+            "kernelChecks": [
+              {
+                "contract": "Counter",
+                "checkMs": 15767.209999993443,
+                "libraries": {
+                  "reads": 9328,
+                  "cacheHits": 6440,
+                  "compressedBytes": 623009847,
+                  "inflatedBytes": 2376207168,
+                  "fetchMs": 2062.6650004684925,
+                  "hashMs": 2587.1649998277426,
+                  "inflateMs": 4908.444999888539,
+                  "prefetchMs": 0,
+                  "prefetchedBytes": 0,
+                  "directReads": 2888,
+                  "fallbacks": 0
+                },
+                "phases": []
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "nativeComparison": "historical reference uses a different mode or source",
+    "counterexample": {
+      "verification": "direct",
+      "tag": "specified",
+      "status": "refuted",
+      "sourceId": 41,
+      "signature": "openGoal()",
+      "reason": "counterexample found",
+      "reading": "solc",
+      "invalidSpecification": false,
+      "function": "openGoal",
+      "elapsedMs": 48,
+      "counterexample": {
+        "transaction": {
+          "timestamp": "0",
+          "selfAddress": "0",
+          "msgValue": "0",
+          "msgSender": "1",
+          "ext": []
+        },
+        "outcome": {
+          "storage": "count = 0",
+          "kind": "postStorage"
+        },
+        "lines": [
+          "msg.sender = 1, msg.value = 0",
+          "before: count = 0",
+          "after: count = 0"
+        ],
+        "kind": "model-state",
+        "initialStorage": "count = 0",
+        "initialLedger": [],
+        "initialBalance": "0",
+        "goalKind": "fmlValid",
+        "certified": false,
+        "arguments": []
+      },
+      "source": "/workspace/Counter.sol",
+      "contract": "Counter",
+      "sourceHash": "d875f57147f0335346ceaf634767d9c5c90a3d9f7e655223478270e3f86cb65e",
+      "range": {
+        "start": {
+          "line": 22,
+          "character": 4
+        },
+        "end": {
+          "line": 24,
+          "character": 5
+        }
+      }
+    },
+    "staticServerStopped": true,
+    "offlineProof": {
+      "elapsedMs": 14438.5,
+      "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+      "report": {
+        "results": [
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 14,
+            "signature": "increment()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "increment",
+            "elapsedMs": 153,
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+            "range": {
+              "start": {
+                "line": 7,
+                "character": 4
+              },
+              "end": {
+                "line": 9,
+                "character": 5
+              }
+            }
+          },
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 23,
+            "signature": "reset()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "reset",
+            "elapsedMs": 53,
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 4
+              },
+              "end": {
+                "line": 14,
+                "character": 5
+              }
+            }
+          },
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 32,
+            "signature": "one()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "one",
+            "elapsedMs": 37,
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+            "range": {
+              "start": {
+                "line": 17,
+                "character": 4
+              },
+              "end": {
+                "line": 19,
+                "character": 5
+              }
+            }
+          },
+          {
+            "verification": "direct",
+            "tag": "specified",
+            "status": "refuted",
+            "sourceId": 41,
+            "signature": "openGoal()",
+            "reason": "counterexample found",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "openGoal",
+            "elapsedMs": 49,
+            "counterexample": {
+              "transaction": {
+                "timestamp": "0",
+                "selfAddress": "0",
+                "msgValue": "0",
+                "msgSender": "1",
+                "ext": []
+              },
+              "outcome": {
+                "storage": "count = 0",
+                "kind": "postStorage"
+              },
+              "lines": [
+                "msg.sender = 1, msg.value = 0",
+                "before: count = 0",
+                "after: count = 0"
+              ],
+              "kind": "model-state",
+              "initialStorage": "count = 0",
+              "initialLedger": [],
+              "initialBalance": "0",
+              "goalKind": "fmlValid",
+              "certified": false,
+              "arguments": []
+            },
+            "source": "/workspace/Counter.sol",
+            "contract": "Counter",
+            "sourceHash": "d50e45de7ebba8c0b5b7a27346542a949ab117da5dfeb7138458430763d084d5",
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 4
+              },
+              "end": {
+                "line": 24,
+                "character": 5
+              }
+            }
+          }
+        ],
+        "errors": [],
+        "timings": {
+          "kernelChecks": [
+            {
+              "contract": "Counter",
+              "checkMs": 14240.010000005364,
+              "libraries": {
+                "reads": 9328,
+                "cacheHits": 6440,
+                "compressedBytes": 623009847,
+                "inflatedBytes": 2376207168,
+                "fetchMs": 1725.5949998348951,
+                "hashMs": 2416.3949997872114,
+                "inflateMs": 4596.64499977231,
+                "prefetchMs": 0,
+                "prefetchedBytes": 0,
+                "directReads": 2888,
+                "fallbacks": 0
+              },
+              "phases": []
+            }
+          ]
+        }
+      }
+    },
+    "passed": true
+  },
+  "browserResourceResult": "Passed; peak aggregate RSS 4.16 GiB"
+}

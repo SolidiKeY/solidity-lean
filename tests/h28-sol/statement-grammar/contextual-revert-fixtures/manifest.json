@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+  "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+  "boundary": "External solc grammar refusals/positive controls; not kernel proofs or a solc-accepted-source incompleteness claim. Original45 fixture suite unchanged.",
+  "cases": [
+    {
+      "id": "n00-contextual-contract-decl",
+      "file": "n00-contextual-contract-decl.sol",
+      "sha256": "96869f80a75cccfc9a281f12949c9acd901f7d8c2ed96a4fa2ee727b21e40204",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected '(' but got ';'"
+        }
+      ]
+    },
+    {
+      "id": "n01-contextual-value-decl",
+      "file": "n01-contextual-value-decl.sol",
+      "sha256": "b3119f5e2d1c41c8d72e70a4f6056aaccade6f217c97575a9bde31b07ffd29f0",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected '(' but got ';'"
+        }
+      ]
+    },
+    {
+      "id": "p02-qualified-decl",
+      "file": "p02-qualified-decl.sol",
+      "sha256": "a4ee1b6fbbaeca34cbbfc4930842ab7cb82181558d0b44228b7f1ddc5918cde9",
+      "accept": true,
+      "errors": [],
+      "astStatement": "VariableDeclarationStatement",
+      "declPath": "R.revert"
+    },
+    {
+      "id": "p03-ordinary-decl",
+      "file": "p03-ordinary-decl.sol",
+      "sha256": "73470525e3017a2f6b727af853ddef6ba63a682e860e24876e27be4211b8838a",
+      "accept": true,
+      "errors": [],
+      "astStatement": "VariableDeclarationStatement",
+      "declPath": "T"
+    },
+    {
+      "id": "p04-error-revert",
+      "file": "p04-error-revert.sol",
+      "sha256": "a8b632d1ab2e6e175f22b085cc9c5259dcf1c4f51d09fed9beef08fa857a3306",
+      "accept": true,
+      "errors": [],
+      "astStatement": "RevertStatement"
+    },
+    {
+      "id": "n05-contextual-init",
+      "file": "n05-contextual-init.sol",
+      "sha256": "446da7d3ef90df2f88a5a61b7f49789697475ca2160c95df332a69295f2ba464",
+      "accept": false,
+      "errors": [
+        {
+          "type": "ParserError",
+          "code": "2314",
+          "message": "Expected '(' but got '='"
+        }
+      ]
+    }
+  ]
+}

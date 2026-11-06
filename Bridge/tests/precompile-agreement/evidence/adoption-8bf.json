@@ -1,0 +1,37 @@
+{
+  "head": "f24960a1fafc195e7d5320ad7bb6060fd5d6f429",
+  "publication": "8bf8321873befa3f35ca31e97e5339a1baee93e6",
+  "preserved_parent": "7fe17cd8fde351fcc02f8833c4138314666a4574",
+  "gates": [
+    {
+      "command": [
+        "python3",
+        "scripts/check-precompile-agreement.py"
+      ],
+      "exit": 0,
+      "seconds": 0.2,
+      "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/adoption-8bf-scope.log"
+    },
+    {
+      "command": [
+        "bash",
+        "scripts/coord-tools/register.sh",
+        "--check"
+      ],
+      "exit": 0,
+      "seconds": 0.077,
+      "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/adoption-8bf-roots.log"
+    },
+    {
+      "command": [
+        "node",
+        "scripts/check-axiom-pins.mjs"
+      ],
+      "exit": 1,
+      "seconds": 12.103,
+      "evidence": "/workspace/solidity-lean/Bridge/tests/precompile-agreement/evidence/adoption-8bf-axioms.log"
+    }
+  ],
+  "original_queue": "unchanged; no full-gate completion",
+  "Exp_packet_head": "6ed2ced6b87b5dd7e282f71fcfba1dc1d80c5fd0"
+}

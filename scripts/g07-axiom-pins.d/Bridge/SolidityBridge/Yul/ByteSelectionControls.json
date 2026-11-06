@@ -1,0 +1,66 @@
+{
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.compact_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.compact_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.compileBlock": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.compiled": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.compileLeaf": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.prefixed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.prefixed_lowering": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.prefixed_source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.push": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.select": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ByteSelectionControls.lean:SolidityBridge.Yul.ByteSelection.source_model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

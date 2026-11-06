@@ -77,7 +77,7 @@ theorem packed_erased_padding_wrong : complementWord (fun _ => true) packedRawA 
 
 def packedStepEnv : Source.Env := ⟨[]⟩
 def packedStepRegistry (a : Roadmap.Address) : List (ScalarPath packedStepEnv.layout (packedStepEnv.lay a)) := []
-def packedStepFrame : Source.Fr := ⟨account,account,0,false,"PackedStep",true,0⟩
+def packedStepFrame : Source.Fr := {this:=account,sender:=account,value:=0,static:=false,contract:="PackedStep",checked:=true,depth:=0,cd:=[]}
 def packedStepRequest : PackedSlotRequest := ⟨false,account,7,packedRawA⟩
 theorem packed_step_plan_exists : (preparePackedSlot packedStepRegistry packedStepRegistry packedStepRequest).isSome := by decide
 def packedStepPlan := (preparePackedSlot packedStepRegistry packedStepRegistry packedStepRequest).get packed_step_plan_exists

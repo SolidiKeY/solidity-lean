@@ -96,7 +96,7 @@ theorem collision_not_assumed_away : ¬ Hash.RegionsDisjoint (2^256) 1 (fixedLay
 mapping declarations are not introduced by the empty transient registry. -/
 def ps (a : Roadmap.Address) := mapping.registry fixed keys a
 def ts (_ : Roadmap.Address) : List (ScalarPath env.layout (env.lay account)) := []
-def frame : Source.Fr := ⟨account,account,0,false,"Nested",true,0⟩
+def frame : Source.Fr := {this:=account,sender:=account,value:=0,static:=false,contract:="Nested",checked:=true,depth:=0,cd:=[]}
 def state : Source.EMState env [] :=
   ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=env.layout) (env.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
 def complement := initialPackedComplement ps ts (fun _=>0xa5)

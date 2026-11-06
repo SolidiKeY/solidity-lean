@@ -1,7 +1,7 @@
 import Solidity.Roadmap.Contracts
 
 /-!
-# Physical byte operations (VY2 preparation)
+# Physical byte operations
 
 This is a view, not a second source state. Addresses are natural byte offsets;
 `ValidRange` is required by future successful EVM steps (overflow/allocation

@@ -1,0 +1,102 @@
+{
+  "implementationHead": "713a061286b467f1016d7d7a58e3dee9bd52c2e0",
+  "base": "b419c3cf4f642ae519b66bebc26cdf2f7cf93574",
+  "baseSourceSha256": "8dc38e58b9179a7894d490fba3e05b05883d41517ff66207eda6c1275370e92d",
+  "explicitSharedDeclarations": 32,
+  "currentInventory": {
+    "Solidity.Frontend.ExecutableAst.Shared.Reader": [],
+    "Solidity.Frontend.ExecutableAst.Shared.BodyLoopLowerer": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.PlainEntryPre": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.assertionObligation": [
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.obligation": [
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.field": [],
+    "Solidity.Frontend.ExecutableAst.Shared.str": [],
+    "Solidity.Frontend.ExecutableAst.Shared.arr": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.arrDefault": [],
+    "Solidity.Frontend.ExecutableAst.Shared.node": [],
+    "Solidity.Frontend.ExecutableAst.Shared.optional": [],
+    "Solidity.Frontend.ExecutableAst.Shared.prim": [],
+    "Solidity.Frontend.ExecutableAst.Shared.typeNameStep": [],
+    "Solidity.Frontend.ExecutableAst.Shared.typeName": [],
+    "Solidity.Frontend.ExecutableAst.Shared.expressionStep": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.expression": [],
+    "Solidity.Frontend.ExecutableAst.Shared.tokens": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.precedence": [],
+    "Solidity.Frontend.ExecutableAst.Shared.specExpr": [],
+    "Solidity.Frontend.ExecutableAst.Shared.specification": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.rawSpec": [],
+    "Solidity.Frontend.ExecutableAst.Shared.rawInvariant": [],
+    "Solidity.Frontend.ExecutableAst.Shared.loopSpec": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.statementsStep": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.statements": [],
+    "Solidity.Frontend.ExecutableAst.Shared.params": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.reader": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.validateMetadata": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.checkedExpression": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.checkedStatements": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.function": [
+      "propext"
+    ],
+    "Solidity.Frontend.ExecutableAst.Shared.contract": [
+      "propext"
+    ],
+    "Solidity.Tools.DirectRuntime.check": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.Tools.DirectRuntime.checkString": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "baseRuntimeInventory": {
+    "Solidity.Tools.DirectRuntime.check": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "Solidity.Tools.DirectRuntime.checkString": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ]
+  },
+  "runtimeSetsEqual": true,
+  "additionalObservedAxiomNames": [],
+  "newOrChangedNamedTheorems": [],
+  "boundary": "These are #print axioms declaration sets. Partial definitions are opaque to logical dependency traversal; no executable dependency closure, source equivalence or semantic preservation follows."
+}

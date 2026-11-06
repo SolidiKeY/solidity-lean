@@ -1,0 +1,3 @@
+PASS build-touched 4289s /workspace/solidity-lean/tests/directruntime-20261104/shared-translator/artifacts/evidence/dc271809-touched/1.log
+{"childMaxRssKiB": 3211968, "command": ["env", "GATE_BASE=b419c3cf4f642ae519b66bebc26cdf2f7cf93574", "GATE_LOGS=tests/directruntime-20261104/shared-translator/artifacts/evidence/dc271809-touched", "bash", "scripts/coord-tools/gate.sh", "touched"], "exit": 0, "scopeMemoryPeakBytes": "4651905024", "wallSeconds": 4289.227302957999}
+{"outerExit": 0, "resourceStop": false, "minimumOuterAvailableBytes": 7339847680, "outerWallSeconds": 4291.37799669}

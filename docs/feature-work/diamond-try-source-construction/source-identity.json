@@ -1,0 +1,86 @@
+[
+  {
+    "pipeline": "legacy",
+    "sourceSha256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "inputSha256": "f6b4902eeb6b24de09bbff2a551920bf9af16fce22c769d58e88c0c41a205dd8",
+    "outputSha256": "d8dd80611bbc54581b3d9e6a1471c75045b01701439f39e6080a1098ff35e03a",
+    "selectedWholeNodesSha256": "855577888f4fbb26addb2f33d84b34a1c49c4287326db27944ef5239f1ee253a",
+    "settings": {
+      "viaIR": false,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "metadata": {
+        "appendCBOR": false
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "irOptimized",
+            "evm.assembly",
+            "evm.legacyAssembly",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers"
+          ]
+        }
+      }
+    },
+    "externalMetadataControls": [
+      "wrong-owner-ref",
+      "wrong-arg",
+      "wrong-parameter",
+      "wrong-body-order",
+      "extra-body",
+      "wrong-return-slot"
+    ],
+    "typedSourceConstructionProved": false
+  },
+  {
+    "pipeline": "viaIR",
+    "sourceSha256": "522bfa3512517476f4f06cef823b176afe52978eb52393b25783e30d10ccc311",
+    "inputSha256": "03fab305ff1a9b86b8b779aba695dd21bb53af7af66b78fd0f9e43ba23a21ac2",
+    "outputSha256": "94f13db8438b5026fb5b6902565ef3759f807b769a84d9bbadb5a332f12f904f",
+    "selectedWholeNodesSha256": "855577888f4fbb26addb2f33d84b34a1c49c4287326db27944ef5239f1ee253a",
+    "settings": {
+      "viaIR": true,
+      "evmVersion": "osaka",
+      "optimizer": {
+        "enabled": false,
+        "runs": 200
+      },
+      "metadata": {
+        "appendCBOR": false
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "irOptimized",
+            "evm.assembly",
+            "evm.legacyAssembly",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers"
+          ]
+        }
+      }
+    },
+    "externalMetadataControls": [
+      "wrong-owner-ref",
+      "wrong-arg",
+      "wrong-parameter",
+      "wrong-body-order",
+      "extra-body",
+      "wrong-return-slot"
+    ],
+    "typedSourceConstructionProved": false
+  }
+]

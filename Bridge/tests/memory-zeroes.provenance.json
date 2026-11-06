@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/NethermindEth/EVMYulLean",
+  "commit": "047f63070309f436b66c61e276ab3b6d1169265a",
+  "path": "EvmYul/FFI/ffi.c",
+  "sourceSha256": "0ca099540b8f46888e9ae18afffb2a825ef8ef0edc0d9a239c819c32cf82a020",
+  "verbatimFunctionBodySha256": "93579d056e3250af09ce3395766a7834b153bc10854c36d4156a6b5b57057ad2",
+  "fixture": "Bridge/tests/memory-zeroes.c",
+  "fixtureSha256": "7f3151ac352060f82a4cd6174a5da45b3ca950d718b24faafe9f5cd58375b043",
+  "note": "Only includes and provenance comment added; function body verbatim. Runtime evidence does not prove PaddingCorrect."
+}

@@ -56,4 +56,18 @@ theorem em_no_number_source_expression : Source.Builtin.memberTy .block "number"
 
 theorem em_no_origin_source_expression : Source.Builtin.memberTy .tx "origin"=none := rfl
 
+/-- Actual source location reads use the nonempty input carried by the
+converted frame. No calldata is synthesized from an empty fixture. -/
+def emReadCalldata (off : Nat) : Option Nat :=
+  match (Source.readLoc (E:=mixedEnv) (Γ:=[]) (τ:=.int .u256) emSourceFrame (.cd off)).run
+      (Source.Locals.nil,mixedState.2) with
+  | (.ok value,_) => value.word.map Fin.val
+  | _ => none
+/-- info: true -/
+#guard_msgs in #eval decide (emReadCalldata 0=some (170*256^31))
+/-- info: true -/
+#guard_msgs in #eval decide (emReadCalldata 1=some 0)
+/-- info: false -/
+#guard_msgs in #eval decide (emReadCalldata 0=some 0)
+
 end Solidity.Yul.Views.Controls

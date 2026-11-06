@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/NestedLivePipelineInterface.lean` | Contract only for original shadow-retaining nested values through the existing two-copy pipeline, with full reached states and two refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipeline.lean` | Proved original-value nested storage/memory pipeline by exact whole-copy and strip transport, retaining both reached refusal phases. |
+| `Backend/MemoryCopies/NestedLivePipelineControls.lean` | Original outer/child shadows, mixed live lengths, two fresh copies, actual final cursor, shallow-copy negative and first/later represented capacity-refusal controls. |

@@ -7,7 +7,7 @@ open Controls
 def ps := rootRegistry
 def ts := rootTempRegistry
 
-def frame : Source.Fr := ⟨account,account,0,false,"Slots",true,0⟩
+def frame : Source.Fr := {this:=account,sender:=account,value:=0,static:=false,contract:="Slots",checked:=true,depth:=0,cd:=[]}
 def state : Source.EMState rootEnv [] :=
   ⟨.nil,⟨⟨⟨fun _=>Source.Account.empty (D:=rootEnv.layout) (rootEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
 def residual := initialPackedComplement ps ts (fun _=>0xbeef0000)

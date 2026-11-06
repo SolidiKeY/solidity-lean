@@ -1,0 +1,80 @@
+{
+ "Solidity/Theorems.lean:Solidity.Main.callback_soundness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.compiler_checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.compiler_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.compiler_net": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_exists": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_is_step": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_of_step": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.rule_unique": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_eq_calculus": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_lt_calculus": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_rule_exists": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_rule_lt_calculus": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_soundness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.solkey_step_taclet": [
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.soundness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.soundness'": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Theorems.lean:Solidity.Main.symex_sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

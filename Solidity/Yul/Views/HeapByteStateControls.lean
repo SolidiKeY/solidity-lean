@@ -45,7 +45,7 @@ theorem actual_written_MemOK : Source.MemOK heapByteEnv byteHeap.ty byteStringSt
   exact heapByteStateWriteback_MemOK heapByteEnv byteHeap.ty byteStateAfter byteStringStateAfter afterBytePlacement
     1 true stringOld rfl bothChangedPhysical actual_string_state_writeback first
 
-def byteReadFrame : Source.Fr := ⟨0, 0, 0, false, "HeapBytes", true, 0⟩
+def byteReadFrame : Source.Fr := {this:=0,sender:=0,value:=0,static:=false,contract:="HeapBytes",checked:=true,depth:=0,cd:=[]}
 
 theorem actual_alias_source_reads :
     byteStringStateAfter.1.get (.here) = bytesAlias ∧

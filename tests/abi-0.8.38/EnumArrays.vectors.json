@@ -1,0 +1,201 @@
+{
+ "contract": "EnumArrays",
+ "sequences": [
+  {
+   "label": "abi.decode of E[]",
+   "calls": [
+    {
+     "label": "decodeArr(2, 1)",
+     "signature": "decodeArr(uint256,uint256)",
+     "args": [
+      2,
+      1
+     ],
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000015"
+     }
+    },
+    {
+     "label": "decodeArr(0, 3)",
+     "signature": "decodeArr(uint256,uint256)",
+     "args": [
+      0,
+      3
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    },
+    {
+     "label": "decodeArr(256, 0)",
+     "signature": "decodeArr(uint256,uint256)",
+     "args": [
+      256,
+      0
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    }
+   ]
+  },
+  {
+   "label": "abi.decode of E[2]",
+   "calls": [
+    {
+     "label": "decodeFixed(1, 2)",
+     "signature": "decodeFixed(uint256,uint256)",
+     "args": [
+      1,
+      2
+     ],
+     "expect": {
+      "failed": false,
+      "data": "0x000000000000000000000000000000000000000000000000000000000000000c"
+     }
+    },
+    {
+     "label": "decodeFixed(3, 0)",
+     "signature": "decodeFixed(uint256,uint256)",
+     "args": [
+      3,
+      0
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    }
+   ]
+  },
+  {
+   "label": "E[] at the external entry",
+   "calls": [
+    {
+     "label": "entryArr([2, 0])",
+     "signature": "entryArr(uint8[])",
+     "args": [
+      [
+       2,
+       0
+      ]
+     ],
+     "expect": {
+      "failed": false,
+      "data": "0x00000000000000000000000000000000000000000000000000000000000000ca"
+     }
+    },
+    {
+     "label": "entryArr([2, 3])",
+     "signature": "entryArr(uint8[])",
+     "args": [
+      [
+       2,
+       3
+      ]
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    },
+    {
+     "label": "entryArr([2, 256]) raw word",
+     "signature": "entryArr(uint8[])",
+     "raw": "0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000100",
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    }
+   ]
+  },
+  {
+   "label": "struct with an enum member at the external entry",
+   "calls": [
+    {
+     "label": "entryStruct((2, 5))",
+     "signature": "entryStruct((uint8,uint256))",
+     "args": [
+      [
+       2,
+       5
+      ]
+     ],
+     "expect": {
+      "failed": false,
+      "data": "0x00000000000000000000000000000000000000000000000000000000000007d5"
+     }
+    },
+    {
+     "label": "entryStruct((3, 5))",
+     "signature": "entryStruct((uint8,uint256))",
+     "args": [
+      [
+       3,
+       5
+      ]
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x"
+     }
+    }
+   ]
+  },
+  {
+   "label": "public enum getter",
+   "calls": [
+    {
+     "label": "stored() initially",
+     "signature": "stored()",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000000"
+     }
+    },
+    {
+     "label": "setStored(2)",
+     "signature": "setStored(uint256)",
+     "args": [
+      2
+     ],
+     "expect": {
+      "failed": false,
+      "data": "0x"
+     }
+    },
+    {
+     "label": "stored() after setStored(2)",
+     "signature": "stored()",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000002"
+     }
+    },
+    {
+     "label": "setStored(3)",
+     "signature": "setStored(uint256)",
+     "args": [
+      3
+     ],
+     "expect": {
+      "failed": true,
+      "data": "0x4e487b710000000000000000000000000000000000000000000000000000000000000021"
+     }
+    },
+    {
+     "label": "stored() after the failed setStored(3)",
+     "signature": "stored()",
+     "expect": {
+      "failed": false,
+      "data": "0x0000000000000000000000000000000000000000000000000000000000000002"
+     }
+    }
+   ]
+  }
+ ]
+}

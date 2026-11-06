@@ -1,0 +1,1641 @@
+{
+  "boundary": "Fresh exact-pinned compiler executions, unmodified raw ASTs. Reader outcome is not intrinsic elaboration, proof closure or backend execution.",
+  "cases": [
+    {
+      "nodeType": "ArrayTypeName",
+      "route": "typeName",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/4/members/2/typeName",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 23,
+      "src": "262:6:0",
+      "line": 8
+    },
+    {
+      "nodeType": "Assignment",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1/body/statements/0/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 11,
+      "src": "137:9:0",
+      "line": 6
+    },
+    {
+      "nodeType": "BinaryOperation",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/2/body/statements/0/expression/arguments/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 54,
+        "name": "checkTen",
+        "src": "344:58:0",
+        "line": 15
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 50,
+      "src": "387:11:0",
+      "line": 15
+    },
+    {
+      "nodeType": "Block",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1/body",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 13,
+      "src": "135:14:0",
+      "line": 6
+    },
+    {
+      "nodeType": "Break",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/9/body/statements/1/body/statements/0/trueBody",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 301,
+        "name": "invariantBreak",
+        "src": "2582:227:0",
+        "line": 96
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 284,
+      "src": "2739:5:0",
+      "line": 100
+    },
+    {
+      "nodeType": "Conditional",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+      "fixtureSha256": "31be58f4442d8ca027df3ec9b719bfc0427729092768c47ed41c272e44a4d1c0",
+      "pointer": "/compilerAsts/Group07.sol/nodes/1/nodes/4/body/statements/0/expression",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "Group07.sol",
+          "source": "tests/solc/Group07.sol",
+          "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+        }
+      ],
+      "unit": "Group07.sol",
+      "function": {
+        "id": 47,
+        "name": "lazyDiscard",
+        "src": "166:120:0",
+        "line": 7
+      },
+      "contract": {
+        "id": 344,
+        "name": "Group07"
+      },
+      "nodeId": 37,
+      "src": "206:39:0",
+      "line": 8
+    },
+    {
+      "nodeType": "Continue",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/3/body/statements/1/body/statements/0/trueBody/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 69,
+        "name": "forContinueStillUpdates",
+        "src": "749:269:0",
+        "line": 24
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 51,
+      "src": "932:8:0",
+      "line": 29
+    },
+    {
+      "nodeType": "ContractDefinition",
+      "route": "contract",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 15,
+      "src": "61:90:0",
+      "line": 4
+    },
+    {
+      "nodeType": "DoWhileStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/4/body/statements/1",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 94,
+        "name": "doWhileRunsBodyFirst",
+        "src": "1024:189:0",
+        "line": 36
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 86,
+      "src": "1131:52:0",
+      "line": 39
+    },
+    {
+      "nodeType": "ElementaryTypeName",
+      "route": "typeName",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/0/typeName",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 2,
+      "src": "86:4:0",
+      "line": 5
+    },
+    {
+      "nodeType": "ElementaryTypeNameExpression",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/1/body/statements/1/expression/expression/expression/arguments/0/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 44,
+        "name": "",
+        "src": "224:115:0",
+        "line": 11
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 35,
+      "src": "308:7:0",
+      "line": 13
+    },
+    {
+      "nodeType": "EmitStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+      "fixtureSha256": "e2f972c4b22e1e9c65caccfaaa5e09bbf9c38d97f75910daf5fa9c37954d0d0c",
+      "pointer": "/compilerAsts/SourceAdmission.sol/nodes/2/nodes/11/body/statements/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "SourceAdmission.sol",
+          "source": "tests/solc/SourceAdmission.sol",
+          "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+        }
+      ],
+      "unit": "SourceAdmission.sol",
+      "function": {
+        "id": 134,
+        "name": "emitted",
+        "src": "976:51:0",
+        "line": 24
+      },
+      "contract": {
+        "id": 236,
+        "name": "SourceAdmission"
+      },
+      "nodeId": 132,
+      "src": "1004:20:0",
+      "line": 24
+    },
+    {
+      "nodeType": "EnumDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 5,
+      "src": "86:29:0",
+      "line": 4
+    },
+    {
+      "nodeType": "EnumValue",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/0/members/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 2,
+      "src": "99:4:0",
+      "line": 4
+    },
+    {
+      "nodeType": "ErrorDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+      "fixtureSha256": "d4dc2336f0b85c422ffc7f2ba98481dced7827a15476c1f0d42949392b945191",
+      "pointer": "/compilerAsts/lib~1Errors.sol/nodes/2",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "lib/Math.sol",
+          "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "lib/Errors.sol",
+          "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "app/Main.sol",
+          "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        }
+      ],
+      "unit": "lib/Errors.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 192,
+      "src": "45:18:1",
+      "line": 3
+    },
+    {
+      "nodeType": "EventDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+      "fixtureSha256": "e2f972c4b22e1e9c65caccfaaa5e09bbf9c38d97f75910daf5fa9c37954d0d0c",
+      "pointer": "/compilerAsts/SourceAdmission.sol/nodes/2/nodes/1",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "SourceAdmission.sol",
+          "source": "tests/solc/SourceAdmission.sol",
+          "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+        }
+      ],
+      "unit": "SourceAdmission.sol",
+      "function": null,
+      "contract": {
+        "id": 236,
+        "name": "SourceAdmission"
+      },
+      "nodeId": 10,
+      "src": "135:20:0",
+      "line": 7
+    },
+    {
+      "nodeType": "ExpressionStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1/body/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 12,
+      "src": "137:9:0",
+      "line": 6
+    },
+    {
+      "nodeType": "ForStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/3/body/statements/1",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 69,
+        "name": "forContinueStillUpdates",
+        "src": "749:269:0",
+        "line": 24
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 61,
+      "src": "859:129:0",
+      "line": 27
+    },
+    {
+      "nodeType": "FunctionCall",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/1/body/statements/1/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 44,
+        "name": "",
+        "src": "224:115:0",
+        "line": 11
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 41,
+      "src": "300:32:0",
+      "line": 13
+    },
+    {
+      "nodeType": "FunctionCallOptions",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/0/body/statements/0/expression/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 162,
+        "name": "make",
+        "src": "1092:109:0",
+        "line": 46
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 157,
+      "src": "1165:26:0",
+      "line": 47
+    },
+    {
+      "nodeType": "FunctionDefinition",
+      "route": "function",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 14,
+      "src": "115:34:0",
+      "line": 6
+    },
+    {
+      "nodeType": "FunctionTypeName",
+      "route": "typeName",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/7/nodes/0/body/statements/0/declarations/0/typeName",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": {
+        "id": 403,
+        "name": "positive",
+        "src": "2341:166:0",
+        "line": 52
+      },
+      "contract": {
+        "id": 428,
+        "name": "RenamedExternal"
+      },
+      "nodeId": 380,
+      "src": "2375:44:0",
+      "line": 52
+    },
+    {
+      "nodeType": "Identifier",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1/body/statements/0/expression/leftHandSide",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 9,
+      "src": "137:5:0",
+      "line": 6
+    },
+    {
+      "nodeType": "IdentifierPath",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/baseContracts/0/baseName",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 16,
+      "src": "178:9:0",
+      "line": 9
+    },
+    {
+      "nodeType": "IfStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/3/body/statements/1/body/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 69,
+        "name": "forContinueStillUpdates",
+        "src": "749:269:0",
+        "line": 24
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 53,
+      "src": "902:53:0",
+      "line": 28
+    },
+    {
+      "nodeType": "ImportDirective",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+      "fixtureSha256": "d4dc2336f0b85c422ffc7f2ba98481dced7827a15476c1f0d42949392b945191",
+      "pointer": "/compilerAsts/app~1Main.sol/nodes/1",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "lib/Math.sol",
+          "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "lib/Errors.sol",
+          "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "app/Main.sol",
+          "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        }
+      ],
+      "unit": "app/Main.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 2,
+      "src": "24:35:0",
+      "line": 2
+    },
+    {
+      "nodeType": "IndexAccess",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/7/body/statements/0/expression/leftHandSide",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": {
+        "id": 73,
+        "name": "enumMapping",
+        "src": "477:93:0",
+        "line": 13
+      },
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 57,
+      "src": "509:9:0",
+      "line": 13
+    },
+    {
+      "nodeType": "IndexRangeAccess",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+      "fixtureSha256": "c3be5a595c2a55df51a0674206df8a8a5854f7890611ab06beb45cc7865c1733",
+      "pointer": "/compilerAsts/SliceReferenceCopies.sol/nodes/2/nodes/4/body/statements/0/initialValue",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "SliceReferenceCopies.sol",
+          "source": "tests/solc/SliceReferenceCopies.sol",
+          "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+        }
+      ],
+      "unit": "SliceReferenceCopies.sol",
+      "function": {
+        "id": 123,
+        "name": "copies",
+        "src": "217:327:0",
+        "line": 9
+      },
+      "contract": {
+        "id": 1067,
+        "name": "SliceReferenceCopies"
+      },
+      "nodeId": 34,
+      "src": "303:7:0",
+      "line": 10
+    },
+    {
+      "nodeType": "InheritanceSpecifier",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/baseContracts/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 17,
+      "src": "178:9:0",
+      "line": 9
+    },
+    {
+      "nodeType": "InlineAssembly",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceAdmission.raw.json",
+      "fixtureSha256": "e2f972c4b22e1e9c65caccfaaa5e09bbf9c38d97f75910daf5fa9c37954d0d0c",
+      "pointer": "/compilerAsts/SourceAdmission.sol/nodes/2/nodes/16/body/statements/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "SourceAdmission.sol",
+          "source": "tests/solc/SourceAdmission.sol",
+          "sourceSha256": "859b1b06abb36ccda73279cb3a83fa8d5bc4d9f2b7b2e38586479220e45d6d1b"
+        }
+      ],
+      "unit": "SourceAdmission.sol",
+      "function": {
+        "id": 180,
+        "name": "rethrow",
+        "src": "1487:111:0",
+        "line": 34
+      },
+      "contract": {
+        "id": 236,
+        "name": "SourceAdmission"
+      },
+      "nodeId": 178,
+      "src": "1545:47:0",
+      "line": 35
+    },
+    {
+      "nodeType": "Literal",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/0/value",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 3,
+      "src": "108:1:0",
+      "line": 5
+    },
+    {
+      "nodeType": "Mapping",
+      "route": "typeName",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/2/typeName",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 12,
+      "src": "144:22:0",
+      "line": 6
+    },
+    {
+      "nodeType": "MemberAccess",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/1/body/statements/1/expression/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 44,
+        "name": "",
+        "src": "224:115:0",
+        "line": 11
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 39,
+      "src": "300:29:0",
+      "line": 13
+    },
+    {
+      "nodeType": "ModifierDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/14/nodes/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 644,
+        "name": "ModifiedReceiverBase"
+      },
+      "nodeId": 637,
+      "src": "4101:25:0",
+      "line": 90
+    },
+    {
+      "nodeType": "ModifierInvocation",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/1/modifiers/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 44,
+        "name": "",
+        "src": "224:115:0",
+        "line": 11
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 26,
+      "src": "252:12:0",
+      "line": 11
+    },
+    {
+      "nodeType": "NewExpression",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/0/body/statements/0/expression/expression/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 162,
+        "name": "make",
+        "src": "1092:109:0",
+        "line": 46
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 155,
+      "src": "1165:16:0",
+      "line": 47
+    },
+    {
+      "nodeType": "OverrideSpecifier",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/11/nodes/0/overrides",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": {
+        "id": 566,
+        "name": "",
+        "src": "3599:52:0",
+        "line": 78
+      },
+      "contract": {
+        "id": 601,
+        "name": "ReceiveOverride"
+      },
+      "nodeId": 559,
+      "src": "3626:8:0",
+      "line": 78
+    },
+    {
+      "nodeType": "ParameterList",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/1/parameters",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 14,
+        "name": "",
+        "src": "115:34:0",
+        "line": 6
+      },
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 7,
+      "src": "126:8:0",
+      "line": 6
+    },
+    {
+      "nodeType": "PlaceholderStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/14/nodes/0/body/statements/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": null,
+      "contract": {
+        "id": 644,
+        "name": "ModifiedReceiverBase"
+      },
+      "nodeId": 635,
+      "src": "4122:1:0",
+      "line": 90
+    },
+    {
+      "nodeType": "PragmaDirective",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 1,
+      "src": "36:23:0",
+      "line": 2
+    },
+    {
+      "nodeType": "Return",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/0/body/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 162,
+        "name": "make",
+        "src": "1092:109:0",
+        "line": 46
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 160,
+      "src": "1158:36:0",
+      "line": 47
+    },
+    {
+      "nodeType": "RevertStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+      "fixtureSha256": "d4dc2336f0b85c422ffc7f2ba98481dced7827a15476c1f0d42949392b945191",
+      "pointer": "/compilerAsts/app~1Main.sol/nodes/6/nodes/4/body/statements/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "lib/Math.sol",
+          "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "lib/Errors.sol",
+          "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "app/Main.sol",
+          "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        }
+      ],
+      "unit": "app/Main.sol",
+      "function": {
+        "id": 90,
+        "name": "qualified",
+        "src": "525:53:0",
+        "line": 12
+      },
+      "contract": {
+        "id": 183,
+        "name": "SourceUnits"
+      },
+      "nodeId": 88,
+      "src": "560:15:0",
+      "line": 12
+    },
+    {
+      "nodeType": "SourceUnit",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 364,
+      "src": "36:2807:0",
+      "line": 2
+    },
+    {
+      "nodeType": "StorageLayoutSpecifier",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/TransientSource.raw.json",
+      "fixtureSha256": "e458cbf9d08bd3342e8efcf4b646469b1f1a374b947872e8a8fd3d3298375843",
+      "pointer": "/compilerAsts/TransientSource.sol/nodes/1/storageLayout",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "TransientSource.sol",
+          "source": "tests/solc/TransientSource.sol",
+          "sourceSha256": "c08a560914bff75f77891ff2074b9c4edd778e63df93a2db9b703182f84beb3e"
+        }
+      ],
+      "unit": "TransientSource.sol",
+      "function": null,
+      "contract": {
+        "id": 154,
+        "name": "TransientSource"
+      },
+      "nodeId": 3,
+      "src": "83:12:0",
+      "line": 4
+    },
+    {
+      "nodeType": "StructDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/9",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 299,
+      "src": "2372:27:0",
+      "line": 84
+    },
+    {
+      "nodeType": "StructuredDocumentation",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/EntryPointsLeft.raw.json",
+      "fixtureSha256": "3296891a92706c7a2d920d1bb467f38e1db29b223e09341101da12a1d17fb72e",
+      "pointer": "/compilerAsts/EntryPointsLeft.sol/nodes/1/nodes/6/documentation",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "EntryPointsLeft.sol",
+          "source": "tests/solc/EntryPointsLeft.sol",
+          "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+        }
+      ],
+      "unit": "EntryPointsLeft.sol",
+      "function": {
+        "id": 51,
+        "name": "enumScalar",
+        "src": "362:86:0",
+        "line": 11
+      },
+      "contract": {
+        "id": 171,
+        "name": "NominalGetters"
+      },
+      "nodeId": 33,
+      "src": "338:19:0",
+      "line": 10
+    },
+    {
+      "nodeType": "TryCatchClause",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/1/body/statements/0/clauses/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 188,
+        "name": "trySuccess",
+        "src": "1206:213:0",
+        "line": 49
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 181,
+      "src": "1304:65:0",
+      "line": 50
+    },
+    {
+      "nodeType": "TryStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/1/body/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 188,
+        "name": "trySuccess",
+        "src": "1206:213:0",
+        "line": 49
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 186,
+      "src": "1270:143:0",
+      "line": 50
+    },
+    {
+      "nodeType": "TupleExpression",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+      "fixtureSha256": "31be58f4442d8ca027df3ec9b719bfc0427729092768c47ed41c272e44a4d1c0",
+      "pointer": "/compilerAsts/Group07.sol/nodes/1/nodes/4/body/statements/0/expression/falseExpression",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "Group07.sol",
+          "source": "tests/solc/Group07.sol",
+          "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+        }
+      ],
+      "unit": "Group07.sol",
+      "function": {
+        "id": 47,
+        "name": "lazyDiscard",
+        "src": "166:120:0",
+        "line": 7
+      },
+      "contract": {
+        "id": 344,
+        "name": "Group07"
+      },
+      "nodeId": 36,
+      "src": "239:6:0",
+      "line": 8
+    },
+    {
+      "nodeType": "UnaryOperation",
+      "route": "expression",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/2/nodes/3/body/statements/0/expression",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 61,
+        "name": "bump",
+        "src": "407:37:0",
+        "line": 16
+      },
+      "contract": {
+        "id": 82,
+        "name": "WorldProduct"
+      },
+      "nodeId": 58,
+      "src": "434:7:0",
+      "line": 16
+    },
+    {
+      "nodeType": "UncheckedBlock",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Group07.raw.json",
+      "fixtureSha256": "31be58f4442d8ca027df3ec9b719bfc0427729092768c47ed41c272e44a4d1c0",
+      "pointer": "/compilerAsts/Group07.sol/nodes/1/nodes/7/body/statements/0",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "Group07.sol",
+          "source": "tests/solc/Group07.sol",
+          "sourceSha256": "f302d03b7bf944bd629cd4ce9444941a7d0179132509bcc08e4dd68da6d703ce"
+        }
+      ],
+      "unit": "Group07.sol",
+      "function": {
+        "id": 87,
+        "name": "uncheckedNegation",
+        "src": "427:79:0",
+        "line": 13
+      },
+      "contract": {
+        "id": 344,
+        "name": "Group07"
+      },
+      "nodeId": 85,
+      "src": "470:34:0",
+      "line": 13
+    },
+    {
+      "nodeType": "UserDefinedTypeName",
+      "route": "typeName",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/0/body/statements/0/expression/expression/expression/typeName",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 162,
+        "name": "make",
+        "src": "1092:109:0",
+        "line": 46
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 154,
+      "src": "1169:12:0",
+      "line": 47
+    },
+    {
+      "nodeType": "UserDefinedValueTypeDefinition",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SliceReferenceCopies.raw.json",
+      "fixtureSha256": "c3be5a595c2a55df51a0674206df8a8a5854f7890611ab06beb45cc7865c1733",
+      "pointer": "/compilerAsts/SliceReferenceCopies.sol/nodes/1",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "SliceReferenceCopies.sol",
+          "source": "tests/solc/SliceReferenceCopies.sol",
+          "sourceSha256": "207b54eb5cc40eed1677c547d64a8603b815725506d2fbc299eeaa68d0c406d8"
+        }
+      ],
+      "unit": "SliceReferenceCopies.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 3,
+      "src": "61:20:0",
+      "line": 3
+    },
+    {
+      "nodeType": "UsingForDirective",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/SourceUnits.raw.json",
+      "fixtureSha256": "d4dc2336f0b85c422ffc7f2ba98481dced7827a15476c1f0d42949392b945191",
+      "pointer": "/compilerAsts/app~1Main.sol/nodes/5",
+      "compilerVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "anchors": [
+        {
+          "name": "lib/Math.sol",
+          "sourceSha256": "065795e8c25c1e9fcb2d8fc50a8fc0c65efe9f2732a979d04b2561554ca50666",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "lib/Errors.sol",
+          "sourceSha256": "73d69a2feaff3f6eebc75a5d36a0f6fc5fa36b561bbabf2d7af9183ab9f0e360",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        },
+        {
+          "name": "app/Main.sol",
+          "sourceSha256": "b4bacd90fcda85a1a2de4b54d0e1ad7d428fa3826d2d63587f66d56dff01f8e3",
+          "inputFixture": "tests/solc/source-units/SourceUnits.input.json",
+          "inputSha256": "61c55215c8216ea7ced63babd4d123b586a4ac490c577965dd3504402cef0c94"
+        }
+      ],
+      "unit": "app/Main.sol",
+      "function": null,
+      "contract": null,
+      "nodeId": 10,
+      "src": "187:21:0",
+      "line": 6
+    },
+    {
+      "nodeType": "VariableDeclaration",
+      "route": "none",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/1/nodes/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": null,
+      "contract": {
+        "id": 15,
+        "name": "WorldBase"
+      },
+      "nodeId": 4,
+      "src": "86:23:0",
+      "line": 5
+    },
+    {
+      "nodeType": "VariableDeclarationStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/ContractWorld.raw.json",
+      "fixtureSha256": "c4fee19937b552ce60145f6ce9b9d787b66718fdd175c6cfb6d5539bcd0a2797",
+      "pointer": "/compilerAsts/ContractWorld.sol/nodes/8/nodes/7/body/statements/0",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "ContractWorld.sol",
+          "source": "tests/solc/ContractWorld.sol",
+          "sourceSha256": "21cc6a71517cfc4a7a33beac241a81d1d1973b1e2b2ef34176cc06027833a4c3"
+        }
+      ],
+      "unit": "ContractWorld.sol",
+      "function": {
+        "id": 280,
+        "name": "extra",
+        "src": "2137:118:0",
+        "line": 75
+      },
+      "contract": {
+        "id": 296,
+        "name": "WorldFactory"
+      },
+      "nodeId": 272,
+      "src": "2196:16:0",
+      "line": 76
+    },
+    {
+      "nodeType": "WhileStatement",
+      "route": "statements",
+      "fixture": "tests/directruntime-20261104/shared-translator/fresh/Loops.raw.json",
+      "fixtureSha256": "ed4031b652bd83ed228bdac24fa8b7b2722f281d9925b95096c8030fc83fb7d5",
+      "pointer": "/compilerAsts/Loops.sol/nodes/1/nodes/2/body/statements/1",
+      "compilerVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "anchors": [
+        {
+          "name": "Loops.sol",
+          "source": "tests/solc/Loops.sol",
+          "sourceSha256": "2e88c882d44b8bdc4747aea72854193823f3614a9efa6c6de5e78019634460b1"
+        }
+      ],
+      "unit": "Loops.sol",
+      "function": {
+        "id": 31,
+        "name": "whileCountsUp",
+        "src": "565:178:0",
+        "line": 15
+      },
+      "contract": {
+        "id": 334,
+        "name": "Loops"
+      },
+      "nodeId": 23,
+      "src": "665:48:0",
+      "line": 18
+    }
+  ]
+}

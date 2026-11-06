@@ -1,0 +1,115 @@
+[
+  {
+    "file": "lib__evmone__vm.cpp",
+    "sha256": "f647220f99a70a70e2ec34d94a37e18e6f7c2b6266c494eb0d0744bf8d71cee6",
+    "anchors": {
+      "set_option": [
+        30,
+        82
+      ],
+      "opcode.count": [
+        64
+      ],
+      "VM::VM": [
+        74
+      ],
+      "evmc_create_evmone": [
+        102
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__tracing.hpp",
+    "sha256": "7a40628232993def039ee728841a027e6ad5537165c2c7abb157d14fb63bac1c",
+    "anchors": {
+      "notify_instruction_start": [
+        42,
+        48
+      ],
+      "on_instruction_start": [
+        46,
+        54
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__baseline_execution.cpp",
+    "sha256": "ef8d9abf7f69f3bca503ccd0ac435db476ac4f54468b5576b5fb87d729ebec69",
+    "anchors": {
+      "check_requirements": [
+        44,
+        49,
+        152
+      ],
+      "int64_t dispatch(": [
+        165
+      ],
+      "notify_instruction_start": [
+        181
+      ],
+      "evmc_result execute": [
+        265,
+        308
+      ],
+      "const auto code_analysis": [
+        314
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__advanced_execution.cpp",
+    "sha256": "8755dc592f0552fe2ea0d96a0ab5a7635de240fda5e9a5ffad0de9353a919f25",
+    "anchors": {
+      "evmc_result execute": [
+        11,
+        28
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__instructions_calls.cpp",
+    "sha256": "0eef43e52119cd98c3d31b699f7c3d974551e130dca9a8a116f824a3d2db2a51",
+    "anchors": {
+      "state.host.call(msg)": [
+        174,
+        249
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__tracing.cpp",
+    "sha256": "c1018283e3bfa5bff0bceb63ed6075be189469f5875a8fae4aecae92ebd192fd",
+    "anchors": {
+      "class InstructionCounter": [
+        69
+      ],
+      "m_counters[code[pc]]++": [
+        85
+      ],
+      "~InstructionCounter": [
+        95
+      ]
+    }
+  },
+  {
+    "file": "evmc__include__evmc__evmc.hpp",
+    "sha256": "08d3703480f4cae128e8b90d578072548e19126c892a0fdb9fb44521c752dc65",
+    "anchors": {
+      "inline evmc_result call": [
+        828
+      ]
+    }
+  },
+  {
+    "file": "lib__evmone__instructions_traits.hpp",
+    "sha256": "b6a994f856c72e4ccd49f18f9e083a4791b1c2e051a1405dd3ff2382617e3a52",
+    "anchors": {
+      "table[EVMC_BYZANTIUM][OP_REVERT]": [
+        130
+      ],
+      "table[OP_REVERT]": [
+        403
+      ]
+    }
+  }
+]

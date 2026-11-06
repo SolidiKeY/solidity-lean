@@ -1,0 +1,101 @@
+{
+  "status": "reader tests passed; actual native model execution and intrinsic proofs recorded separately",
+  "controls": [
+    {
+      "function": "executeFirst",
+      "family": "do-while",
+      "admission": "candidate",
+      "obligation": "body runs once; return 1",
+      "reader_result": "pass"
+    },
+    {
+      "function": "whileZero",
+      "family": "while-control",
+      "admission": "existing-route-unverified",
+      "obligation": "body runs zero times; return 0",
+      "reader_result": "pass"
+    },
+    {
+      "function": "continueTest",
+      "family": "do-while",
+      "admission": "candidate",
+      "obligation": "continue reaches condition; return 2",
+      "reader_result": "pass"
+    },
+    {
+      "function": "breakTest",
+      "family": "do-while",
+      "admission": "candidate",
+      "obligation": "break suppresses further condition/body; return 1",
+      "reader_result": "pass"
+    },
+    {
+      "function": "earlyReturn",
+      "family": "do-while",
+      "admission": "candidate",
+      "obligation": "return escapes loop; return 7",
+      "reader_result": "pass"
+    },
+    {
+      "function": "swap",
+      "family": "tuple-assignment-return",
+      "admission": "candidate",
+      "obligation": "capture RHS before writes; return input b,input a",
+      "reader_result": "pass"
+    },
+    {
+      "function": "declaration",
+      "family": "tuple-declaration-return",
+      "admission": "candidate",
+      "obligation": "preserve declaration hole; return 3,true",
+      "reader_result": "pass"
+    },
+    {
+      "function": "skipped",
+      "family": "tuple-hole",
+      "admission": "candidate",
+      "obligation": "preserve discarded position; return 5",
+      "reader_result": "pass"
+    },
+    {
+      "function": "repeated",
+      "family": "tuple-repeat",
+      "admission": "admitted",
+      "obligation": "native and intrinsic control both return 1 using existing right-to-left overlapping primitive writes",
+      "reader_result": "pass"
+    },
+    {
+      "function": "aliased",
+      "family": "tuple-alias",
+      "admission": "pending-model",
+      "obligation": "whole function unknown at reference declaration; separate storage dynamic alias fixture isolates intrinsic rejection after reader admission",
+      "reader_result": "unknown"
+    },
+    {
+      "function": "sideEffect",
+      "family": "tuple-effects",
+      "admission": "unknown",
+      "obligation": "postincrement unsupported by current expression decoder; no extension authorized",
+      "reader_result": "unknown"
+    },
+    {
+      "function": "inlineArray",
+      "family": "inline-array",
+      "admission": "unknown",
+      "obligation": "inline array/type expansion outside scope",
+      "reader_result": "unknown"
+    },
+    {
+      "function": "callTuple",
+      "family": "internal-call",
+      "admission": "unknown",
+      "obligation": "internal-call semantics expansion outside scope",
+      "reader_result": "unknown"
+    }
+  ],
+  "additional_pending": [
+    "central registration and A producer composition",
+    "full final gate; orphan/root failures expected until central registration",
+    "general source/EVM/backend adequacy not established by this packet"
+  ]
+}

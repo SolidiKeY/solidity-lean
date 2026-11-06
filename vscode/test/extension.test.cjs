@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const { createHash } = require('node:crypto');
 const { createExtension } = require('../src/extension.cjs');
 const model = require('../src/model.cjs');
-const { mock } = require('./mock.cjs');
+const { mock, leaves } = require('./mock.cjs');
 const token = { isCancellationRequested: false, onCancellationRequested: () => ({ dispose() {} }) };
 function row(env, overrides = {}) {
   return { source: env.doc.uri.fsPath, sourceHash: createHash('sha256').update(env.doc.text).digest('hex'), contract: 'C', function: 'f', signature: 'f(uint256)', status: 'proved', range: { start: { line: 1, character: 2 }, end: { line: 2, character: 3 } }, ...overrides };
@@ -15,6 +15,22 @@ function setup(backend) {
   return env;
 }
 const settle = () => new Promise(resolve => setImmediate(resolve));
+
+test('a queued dependency notification clears old UI without cancelling a fresh verification',async()=>{
+  const env=mock(),disposable=()=>({dispose(){}}),service=new (require('node:events').EventEmitter)();
+  Object.assign(service,{open:async()=>{},cancel(){},dispose:async()=>{}});
+  for(const name of ['registerCompletionItemProvider','registerDefinitionProvider','registerReferenceProvider','registerDocumentSymbolProvider','registerSignatureHelpProvider','registerDocumentHighlightProvider','registerRenameProvider','registerDocumentFormattingEditProvider','registerCodeActionsProvider','registerWorkspaceSymbolProvider'])env.vscode.languages[name]=disposable;
+  Object.assign(env.vscode,{StatusBarAlignment:{Left:1},CodeActionKind:{QuickFix:{}},Uri:{file:path=>({fsPath:path})}});
+  Object.assign(env.vscode.window,{visibleTextEditors:[],createTextEditorDecorationType:disposable,createStatusBarItem:()=>({show(){},hide(){},dispose(){}}),onDidChangeVisibleTextEditors:disposable,onDidChangeActiveTextEditor:disposable});
+  Object.assign(env.vscode.workspace,{textDocuments:[env.doc],onDidOpenTextDocument:disposable,onDidChangeConfiguration:disposable,createFileSystemWatcher:()=>({dispose(){},onDidChange:disposable,onDidCreate:disposable,onDidDelete:disposable})});
+  let complete,signal;const api=createExtension(env.vscode,env.context,args=>{signal=args.signal;return new Promise(resolve=>{complete=resolve;});},service);
+  try{
+    const pending=api.verify(env.doc);await settle();api.reports.set(env.doc.uri.toString(),{results:[row(env)],errors:[]});
+    service.emit('invalidated',{uri:env.doc.uri.toString(),version:env.doc.version});
+    assert.equal(api.reports.has(env.doc.uri.toString()),false);assert.equal(signal.aborted,false);
+    complete({results:[row(env)],errors:[]});assert.equal((await pending).results[0].status,'proved');
+  }finally{await api.dispose();}
+});
 
 test('model distinguishes incomplete proof, import gap, runtime error and success', () => {
   assert.equal(model.resultKind({ status: 'pending' }), 'failed');
@@ -40,9 +56,10 @@ test('impossible preconditions remain visible even when the postcondition is pro
   assert.equal(diagnostics[0].code, 'preconditions-impossible');
   assert.match(diagnostics[0].message, /vacuous/);
   const file = [...env.controller.items.values()][0];
-  assert.match([...file.children.values()][0].description, /vacuous/);
+  assert.match(leaves(file)[0].description, /vacuous/);
   await env.controller.run({include:[file]}, token);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','errored','end']);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['errored','end']);
+  assert.deepEqual(env.runs.at(-1).calls.map(call => call[0]), ['enqueued','started','errored','end']);
 });
 
 test('unknown audits require attention while possible entry states preserve a pass', () => {
@@ -60,7 +77,7 @@ test('verify command registers proof status, Test Explorer function and hover', 
   await env.commands.get('solidityLean.verify')();
   const file = env.controller.items.get(env.doc.uri.toString());
   assert.equal(file.children.size, 1);
-  const item = [...file.children.values()][0];
+  const item = leaves(file)[0];
   assert.equal(item.label, 'C.f(uint256)'); assert.equal(item.description, 'proved');
   assert.deepEqual(env.diagnosticMap.get(env.doc.uri.toString()), []);
   const hover = env.events.hover.provideHover(env.doc, { line: 1, character: 5 });
@@ -110,6 +127,39 @@ test('suppresses results from modified documents', async () => {
   assert.equal(signal.aborted, true); finish(); assert.equal(await promise, null);
   assert.equal(env.diagnosticMap.size, 0); assert.equal(env.controller.items.size, 0);
 });
+for (const saved of [true,false]) test(`an edit during ${saved?'completed':'interrupted'} save prevents a superseded request from launching a backend`, async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc); await settle();
+  env.doc.version++; env.doc.text += '// newer';
+  env.events.change({document:env.doc,contentChanges:[{}]});
+  release(saved);
+  assert.equal(await old,null); assert.equal(calls,0); assert.equal(env.api.reports.size,0);
+  env.doc.isDirty = false;
+  await env.api.verify(env.doc);assert.equal(calls,1);
+});
+test('an unsuccessful save still reports an error for a current request',async()=>{
+  const env=setup();env.doc.isDirty=true;env.doc.save=async()=>false;
+  await assert.rejects(env.api.verify(env.doc),/Save the Solidity file/);
+});
+test('a joined save must leave the current buffer clean before a backend starts',async()=>{
+  let saves=0,calls=0;
+  const env=setup(async(_,env)=>{calls++;assert.equal(env.doc.isDirty,false);return {results:[row(env)],errors:[]};});
+  env.doc.isDirty=true;
+  env.doc.save=async()=>{saves++;if(saves===2)env.doc.isDirty=false;return true;};
+  await env.api.verify(env.doc);assert.equal(saves,2);assert.equal(calls,1);
+});
+test('new verification requests supersede older requests still saving the same file', async () => {
+  let release, calls = 0;
+  const env = setup(async (_, env) => { calls++; return {results:[row(env)],errors:[]}; });
+  env.doc.isDirty = true;
+  env.doc.save = () => new Promise(resolve => { release = resolve; });
+  const old = env.api.verify(env.doc);await settle();
+  env.doc.isDirty = false;await env.api.verify(env.doc);
+  release(true);assert.equal(await old,null);assert.equal(calls,1);
+});
 test('rejects stale source hashes and reports for another source', async () => {
   const env = setup(async (_, env) => ({ results: [row(env, { sourceHash: '0'.repeat(64) })], errors: [] }));
   await assert.rejects(env.api.verify(env.doc), /source hash/);
@@ -131,21 +181,21 @@ test('Test Explorer runs one exact overloaded signature and preserves sibling st
     return { results: args.function ? [row(env)] : [row(env), row(env, { function: 'g', signature: 'g()', status: 'ready' })], errors: [] };
   });
   await env.api.verify(env.doc, { listing: true });
-  const file = [...env.controller.items.values()][0], item = [...file.children.values()][0];
+  const file = [...env.controller.items.values()][0], item = leaves(file)[0];
   await env.controller.run({ include: [item] }, token);
   assert.equal(calls[1].function, 'f(uint256)'); assert.equal(calls[1].contract, 'C');
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started', 'passed', 'end']);
-  assert.equal(file.children.size, 2);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['enqueued','started','passed','end']);
+  assert.equal(leaves(file).length, 2);
 });
 test('Test Explorer respects exclusions and maps pending without counterexample claims', async () => {
   const env = setup(async (_, env) => ({ results: [row(env, { status: 'pending', reason: 'open proof goals' })], errors: [] }));
   await env.api.verify(env.doc, { listing: true });
-  const file = [...env.controller.items.values()][0], item = [...file.children.values()][0];
+  const file = [...env.controller.items.values()][0], item = leaves(file)[0];
   await env.controller.run({ include: [file], exclude: [item] }, token);
   assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['end']);
   await env.controller.run({ include: [item] }, token);
-  assert.deepEqual(env.runs[1].calls.map(call => call[0]), ['started', 'failed', 'end']);
-  assert.doesNotMatch(env.runs[1].calls[1][2].message, /counterexample/i);
+  assert.deepEqual(env.runs[1].calls.map(call => call[0]), ['enqueued','started','failed','end']);
+  assert.doesNotMatch(env.runs[1].calls.find(call=>call[0]==='failed')[2].message, /counterexample/i);
 });
 
 test('Test Explorer runs each child once when result publication replaces children', async () => {
@@ -160,7 +210,7 @@ test('Test Explorer runs each child once when result publication replaces childr
   const file = [...env.controller.items.values()][0];
   await env.controller.run({include:[file]}, token);
   assert.deepEqual(calls, ['list','f(uint256)','g()']);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started','passed','started','passed','end']);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['enqueued','enqueued','started','passed','started','passed','end']);
 });
 
 test('source hashes accept the BOM hidden by the editor without accepting other text', async () => {
@@ -243,11 +293,12 @@ test('certified model prestates are opt-in and appear in hover, output and faile
   const hover = env.events.hover.provideHover(env.doc, { line: 1, character: 5 });
   assert.match(hover.contents.value, /certified model prestate/);
   assert.match(hover.contents.value, /\\u001b/);
-  const item = [...[...env.controller.items.values()][0].children.values()][0];
+  const item = leaves([...env.controller.items.values()][0])[0];
   await env.controller.run({ include: [item] }, token);
-  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['started', 'failed', 'end']);
-  assert.match(env.runs[0].calls[1][2].message, /certified model prestate/);
-  assert.doesNotMatch(env.runs[0].calls[1][2].message, /exploit|constructor-reachable/);
+  assert.deepEqual(env.runs[0].calls.map(call => call[0]), ['failed','end']);
+  assert.deepEqual(env.runs.at(-1).calls.map(call => call[0]), ['enqueued','started','failed','end']);
+  assert.match(env.runs.at(-1).calls.find(call=>call[0]==='failed')[2].message, /certified model prestate/);
+  assert.doesNotMatch(env.runs.at(-1).calls.find(call=>call[0]==='failed')[2].message, /exploit|constructor-reachable/);
   env.doc.version++; env.events.change({ document: env.doc, contentChanges: [{}] });
   assert.equal(env.api.reports.size, 0);
   assert.equal(env.events.hover.provideHover(env.doc, { line: 1, character: 5 }), null);

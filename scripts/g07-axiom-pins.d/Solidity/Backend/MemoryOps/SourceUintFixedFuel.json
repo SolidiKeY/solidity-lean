@@ -1,0 +1,12 @@
+{
+ "Solidity/Backend/MemoryOps/SourceUintFixedFuel.lean:Solidity.Backend.MemoryOps.source_uint_fixed_zeroVal_slack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceUintFixedFuel.lean:Solidity.Backend.MemoryOps.source_uint_zeroElems_slack": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,55 @@
+{
+  "scope": "static evidence/design checks only, no Lean/compiler/EVM/fixture or held group run",
+  "commands": [
+    {
+      "command": "decode",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 15320,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 16216064,
+      "maxOrOomEvents": 0
+    },
+    {
+      "command": "check",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 18140,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 31014912,
+      "maxOrOomEvents": 0
+    },
+    {
+      "command": "doc-paths",
+      "exit": 1,
+      "seconds": 4,
+      "peakAggregateRssKiB": 28600,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 8626176,
+      "maxOrOomEvents": 0
+    },
+    {
+      "command": "inventory",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 17648,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 10616832,
+      "maxOrOomEvents": 0
+    },
+    {
+      "command": "whitespace",
+      "exit": 0,
+      "seconds": 1,
+      "peakAggregateRssKiB": 15740,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 4677632,
+      "maxOrOomEvents": 0
+    }
+  ]
+}

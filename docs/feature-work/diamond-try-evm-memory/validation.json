@@ -1,0 +1,553 @@
+{
+  "completedProcessGroups": [
+    {
+      "log": "attempt-driver.log",
+      "processExit": 0,
+      "seconds": 13,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1265496064,
+      "sampledAggregateRSSKiB": 3477868,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "attempt-overlap-gas.log",
+      "processExit": 0,
+      "seconds": 15,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1406517248,
+      "sampledAggregateRSSKiB": 3557428,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "attempt-overlap-memory.log",
+      "processExit": 0,
+      "seconds": 14,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1417183232,
+      "sampledAggregateRSSKiB": 3613444,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "attempt-prologue.log",
+      "processExit": 0,
+      "seconds": 13,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1322401792,
+      "sampledAggregateRSSKiB": 3512592,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "automatic.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 20840448,
+      "sampledAggregateRSSKiB": 18832,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "axioms-clean.log",
+      "processExit": 0,
+      "seconds": 3,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 265945088,
+      "sampledAggregateRSSKiB": 1553644,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "axioms-driver-final.log",
+      "processExit": 0,
+      "seconds": 4,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 264835072,
+      "sampledAggregateRSSKiB": 1557760,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "axioms.log",
+      "processExit": 0,
+      "seconds": 3,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 266092544,
+      "sampledAggregateRSSKiB": 1547712,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "bridge-imports-conform.log",
+      "processExit": 0,
+      "seconds": 51,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 355905536,
+      "sampledAggregateRSSKiB": 1596976,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "bridge-prerequisite.log",
+      "processExit": 1,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 23830528,
+      "sampledAggregateRSSKiB": 18204,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "build-TryMemory-after-imports.log",
+      "processExit": 1,
+      "seconds": 23,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 314888192,
+      "sampledAggregateRSSKiB": 1578840,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "build-TryMemory.log",
+      "processExit": 1,
+      "seconds": 1084,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1078222848,
+      "sampledAggregateRSSKiB": 1667240,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "build-clean.log",
+      "processExit": 0,
+      "seconds": 4,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 357810176,
+      "sampledAggregateRSSKiB": 1579616,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "build-driver-final.log",
+      "processExit": 0,
+      "seconds": 4,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 358109184,
+      "sampledAggregateRSSKiB": 1641660,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "build-final.log",
+      "processExit": 0,
+      "seconds": 49,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1056477184,
+      "sampledAggregateRSSKiB": 2277408,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "cache-curl.log",
+      "processExit": 1,
+      "seconds": 2,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 144900096,
+      "sampledAggregateRSSKiB": 442348,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "cache-post-env-path.log",
+      "processExit": 1,
+      "seconds": 14,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 219705344,
+      "sampledAggregateRSSKiB": 766184,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "cache-runtime-config.log",
+      "processExit": 1,
+      "seconds": 2,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 149852160,
+      "sampledAggregateRSSKiB": 441248,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "cache.log",
+      "processExit": 1,
+      "seconds": 3,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 127418368,
+      "sampledAggregateRSSKiB": 446416,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "doc-paths.log",
+      "processExit": 1,
+      "seconds": 3,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 12849152,
+      "sampledAggregateRSSKiB": 23928,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "goal-driver.log",
+      "processExit": 0,
+      "seconds": 8,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 971059200,
+      "sampledAggregateRSSKiB": 2237664,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "goal-prologue.log",
+      "processExit": 0,
+      "seconds": 5,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 862986240,
+      "sampledAggregateRSSKiB": 2071696,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "integrity-final.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 24358912,
+      "sampledAggregateRSSKiB": 17780,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "integrity.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 256790528,
+      "sampledAggregateRSSKiB": 17976,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "inventory.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 11198464,
+      "sampledAggregateRSSKiB": 17696,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "keysort.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 27676672,
+      "sampledAggregateRSSKiB": 17240,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "lake-version-direct.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 18739200,
+      "sampledAggregateRSSKiB": 17216,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "lake-version.log",
+      "processExit": 1,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 18620416,
+      "sampledAggregateRSSKiB": 14268,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "layers.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 63275008,
+      "sampledAggregateRSSKiB": 17144,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "lean-version.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 18939904,
+      "sampledAggregateRSSKiB": 16192,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-Bridge-root-original.log",
+      "processExit": 0,
+      "seconds": 2,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 205004800,
+      "sampledAggregateRSSKiB": 198840,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-clean.log",
+      "processExit": 0,
+      "seconds": 7,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1033015296,
+      "sampledAggregateRSSKiB": 2281732,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-config-fixed.log",
+      "processExit": 0,
+      "seconds": 6,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 843935744,
+      "sampledAggregateRSSKiB": 1978528,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-controlled.log",
+      "processExit": 0,
+      "seconds": 2,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 270381056,
+      "sampledAggregateRSSKiB": 164952,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-factored.log",
+      "processExit": 0,
+      "seconds": 5,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 861962240,
+      "sampledAggregateRSSKiB": 2075468,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-final.log",
+      "processExit": 0,
+      "seconds": 7,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1038184448,
+      "sampledAggregateRSSKiB": 2280668,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory-first.log",
+      "processExit": 1,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 12165120,
+      "sampledAggregateRSSKiB": 16888,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemory.log",
+      "processExit": 0,
+      "seconds": 2,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 277016576,
+      "sampledAggregateRSSKiB": 167984,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-chunked.log",
+      "processExit": 0,
+      "seconds": 12,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1069998080,
+      "sampledAggregateRSSKiB": 2313752,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-clean.log",
+      "processExit": 0,
+      "seconds": 53,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1843335168,
+      "sampledAggregateRSSKiB": 3022124,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-factored.log",
+      "processExit": 0,
+      "seconds": 51,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1800429568,
+      "sampledAggregateRSSKiB": 2986996,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-final-clean.log",
+      "processExit": 0,
+      "seconds": 53,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1857568768,
+      "sampledAggregateRSSKiB": 3023752,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-final.log",
+      "processExit": 0,
+      "seconds": 8,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1167089664,
+      "sampledAggregateRSSKiB": 2744328,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-linter-clean.log",
+      "processExit": 0,
+      "seconds": 54,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1860042752,
+      "sampledAggregateRSSKiB": 3018504,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryCode-verified.log",
+      "processExit": 0,
+      "seconds": 54,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1849475072,
+      "sampledAggregateRSSKiB": 3020408,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryDriver-clean.log",
+      "processExit": 0,
+      "seconds": 6,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 903348224,
+      "sampledAggregateRSSKiB": 2069528,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryDriver-final.log",
+      "processExit": 0,
+      "seconds": 6,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 881577984,
+      "sampledAggregateRSSKiB": 2104864,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "mcp-TryMemoryDriver-first.log",
+      "processExit": 0,
+      "seconds": 12,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 1100251136,
+      "sampledAggregateRSSKiB": 2667232,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "orphans.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 65515520,
+      "sampledAggregateRSSKiB": 16164,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "trust.log",
+      "processExit": 0,
+      "seconds": 4,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 171905024,
+      "sampledAggregateRSSKiB": 171764,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "vendor.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 7774208,
+      "sampledAggregateRSSKiB": 17368,
+      "maxOOMEvents": 0
+    },
+    {
+      "log": "whitespace.log",
+      "processExit": 0,
+      "seconds": 1,
+      "memoryMax": 12884901888,
+      "swapMax": 0,
+      "peakBytes": 4657152,
+      "sampledAggregateRSSKiB": 15460,
+      "maxOOMEvents": 0
+    }
+  ],
+  "largestCompletedGroupPeakBytes": 1860042752,
+  "largestSampledAggregateRSSKiB": 3613444,
+  "missingFinalResourceFooters": [
+    "bridge-minimal-prerequisite.log"
+  ],
+  "stoppedColdBuildExit": 137,
+  "stoppedColdBuildMeasuredPeakUnknown": true,
+  "owningProofMCPFilesClean": 3,
+  "publicAxiomAudits": 29,
+  "standardOnly": true,
+  "ordinaryRegistrationRootKnownClean": false,
+  "ordinaryBridgePrerequisiteExit": 1,
+  "fullBridgeConfirmationPassed": false,
+  "newOriginalFixtureRowsPassed": 0,
+  "freshFullFamilyReplay": false,
+  "retainedNativeStrictExit": 1,
+  "fullEVMCorrectness": false,
+  "assignmentComplete": false,
+  "additionalFinalStaticLogs": [
+    {
+      "log": "doc-final.log",
+      "exit": 1,
+      "sameHistoricalFindings": true
+    },
+    {
+      "log": "whitespace-final.log",
+      "exit": 0
+    }
+  ]
+}

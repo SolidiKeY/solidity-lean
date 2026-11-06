@@ -127,3 +127,18 @@ test('retry provenance cannot mix different compilation-unit producers',async()=
   /compilationUnitAdapterSha256/);
  assert.throws(()=>compatible({}, {compilationUnitAdapterSha256:'b'}),/compilationUnitAdapterSha256/);
 });
+
+test('contract-owned scalar specifications retain original source identities while nominal/global scopes remain refused',()=>{
+ const compiler=process.env.SOURCE_UNITS_SOLJSON ?? '.lake/source-units/soljson-v0.8.38+commit.1835d247.js';
+ const solc=createRequire(import.meta.url)(resolve(compiler)),compile=solc.cwrap('solidity_compile','string',['string','number','number']);
+ const sources={'Main.sol':{content:'pragma solidity ^0.8.0; import "Lib.sol"; contract Main {\n/// @custom:key ensures \\result == 7\nfunction f() public pure returns(uint) {return Lib.value();} }'},
+  'Lib.sol':{content:'pragma solidity ^0.8.0; library Lib { uint private constant VALUE=7;\n/// @custom:key ensures \\result == VALUE\nfunction value() internal pure returns(uint) {return VALUE;} }'}};
+ const settings={...input.settings,remappings:[]};
+ const analyse=sources=>JSON.parse(compile(JSON.stringify({language:'Solidity',sources,settings}),0,0));
+ const out=analyse(sources),result=compilationUnitFixture({output:out,sources,mainSource:'Main.sol',settings,pin});assert.equal(result.sourceUnits.length,2);
+ const main=result.sourceUnits.find(s=>s.name==='Main.sol');assert.ok(main.ast.nodes.find(n=>n.nodeType==='ContractDefinition').nodes[0].documentation.text.includes('ensures'));
+ for(const extra of ['uint constant HIDDEN=8;','enum Foreign { A,B }','struct Foreign { uint x; }','type Foreign is uint;']){
+  const changed={...sources,'Lib.sol':{content:sources['Lib.sol'].content+'\n'+extra}};
+  assert.throws(()=>compilationUnitFixture({output:analyse(changed),sources:changed,mainSource:'Main.sol',settings,pin}),/compilationUnitSpecifications/);
+ }
+});

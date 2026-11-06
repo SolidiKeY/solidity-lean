@@ -38,6 +38,7 @@ export function loadGraph() {
     }
   })("Solidity");
   add("Solidity.lean");
+  add("SolidityExamples.lean");
   for (const [m, is] of graph) graph.set(m, is.filter((i) => graph.has(i)));
   return { graph, lines };
 }

@@ -1,0 +1,193 @@
+[
+  {
+    "path": "Solidity/Semantics/State.lean",
+    "localSha256": "9023e4196a09e4430a7db8141ab664c746ab812252d35c438d34dac0dd3bb4d4",
+    "localCopy": "local-Solidity__Semantics__State.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "e77fedb3e8f3eb996b9130d863a2b844ef4e0030",
+    "publishedSha256": "9023e4196a09e4430a7db8141ab664c746ab812252d35c438d34dac0dd3bb4d4",
+    "publishedCopy": "published-Solidity__Semantics__State.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Semantics/Heap.lean",
+    "localSha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+    "localCopy": "local-Solidity__Semantics__Heap.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "817d5e5b641471d60df538817c2d494d1d74af25",
+    "publishedSha256": "82bbdc0c5bb712e3cbfaedb258d0fb3cb439d784fb4d79c23c7f9ec1399be24a",
+    "publishedCopy": "published-Solidity__Semantics__Heap.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Semantics/RevertMemory.lean",
+    "localSha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "localCopy": "local-Solidity__Semantics__RevertMemory.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "de59a637ea1d6f70dc8515ec5338f57fa86d6b4f",
+    "publishedSha256": "f9f8570ed679b830d5eaab6ab16d8dd3a9383307ea4a7579aeae4aa448a16e93",
+    "publishedCopy": "published-Solidity__Semantics__RevertMemory.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Semantics/RevertData.lean",
+    "localSha256": "73f37ee7b44cb603d6768e652965fb7066275c8b078d3fa8519fee135e0a00f7",
+    "localCopy": "local-Solidity__Semantics__RevertData.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "6db13b6659960993d4092585144ef37a9a4f51eb",
+    "publishedSha256": "76737627eefbbff4c90d529286ed61b1c5ea08f51549fc7885262281f268bff1",
+    "publishedCopy": "published-Solidity__Semantics__RevertData.lean",
+    "sameAsLocal": false
+  },
+  {
+    "path": "Solidity/Semantics/AllocBytes.lean",
+    "localSha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+    "localCopy": "local-Solidity__Semantics__AllocBytes.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "66ea08593722ceed120d420967e7a997da5f9338",
+    "publishedSha256": "29033ca8c2fbb8449ee616ae36fc719fa77c606438b8340f3abe40a25b240257",
+    "publishedCopy": "published-Solidity__Semantics__AllocBytes.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/RevertBytes.lean",
+    "localSha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+    "localCopy": "local-Solidity__RevertBytes.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "2474a1f05a619b8cb4a0a051e0f87e83be1e627b",
+    "publishedSha256": "724b287bc4c3f3e159f06ac2a5cd38100ccff9691b5331c17ef2edeab44d76ee",
+    "publishedCopy": "published-Solidity__RevertBytes.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/Machine.lean",
+    "localSha256": "a8a13b4c5b2c32bf5f83c9903ee5f7436e797fe4b70496aeb5fdf5aaa550ebd6",
+    "localCopy": "local-Solidity__Evm__Machine.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "b116e3cb2cb989530d7e8a253bddfeb1141cd815",
+    "publishedSha256": "a8a13b4c5b2c32bf5f83c9903ee5f7436e797fe4b70496aeb5fdf5aaa550ebd6",
+    "publishedCopy": "published-Solidity__Evm__Machine.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/Memory.lean",
+    "localSha256": "1b40c67f29168850d969f8c37f0aad3e89e15e44c20c0078020e4588f34b5b34",
+    "localCopy": "local-Solidity__Evm__Memory.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "db9812b4d430be037c77e8b584e7a654fb1f04e9",
+    "publishedSha256": "1b40c67f29168850d969f8c37f0aad3e89e15e44c20c0078020e4588f34b5b34",
+    "publishedCopy": "published-Solidity__Evm__Memory.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemoryHeap.lean",
+    "localSha256": "3a84a3a517c15e37f74d693602d93e26aa4833eb5a26c29187a77b29122c8835",
+    "localCopy": "local-Solidity__Evm__MemoryHeap.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "22cc4bbee29c41b788fec6b5685564f5b4362c82",
+    "publishedSha256": "3a84a3a517c15e37f74d693602d93e26aa4833eb5a26c29187a77b29122c8835",
+    "publishedCopy": "published-Solidity__Evm__MemoryHeap.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemoryAlloc.lean",
+    "localSha256": "cfc0280445cf5aea444b4196be2b28ab767946dae7d4ded9d3e7626f4f3f634e",
+    "localCopy": "local-Solidity__Evm__MemoryAlloc.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "1a7708d1111d45c7e39902ffec83ad24f600fe4c",
+    "publishedSha256": "cfc0280445cf5aea444b4196be2b28ab767946dae7d4ded9d3e7626f4f3f634e",
+    "publishedCopy": "published-Solidity__Evm__MemoryAlloc.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemoryGrowResult.lean",
+    "localSha256": "05c861e391eadc867117ec21881012d933b35e04d567df288025d9fd9ee56da0",
+    "localCopy": "local-Solidity__Evm__MemoryGrowResult.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "8fbe65f44980ebb5d112e07e7b2b9626ce1db754",
+    "publishedSha256": "05c861e391eadc867117ec21881012d933b35e04d567df288025d9fd9ee56da0",
+    "publishedCopy": "published-Solidity__Evm__MemoryGrowResult.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemoryCompile.lean",
+    "localSha256": "c97f0ea6fc1e2c39046756724fb888b9e0f10a5e7460b6d50e1e297a467af333",
+    "localCopy": "local-Solidity__Evm__MemoryCompile.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "95887b45a43a93f2bcd33e26a2e90d0bd6be08df",
+    "publishedSha256": "c97f0ea6fc1e2c39046756724fb888b9e0f10a5e7460b6d50e1e297a467af333",
+    "publishedCopy": "published-Solidity__Evm__MemoryCompile.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemorySource.lean",
+    "localSha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd",
+    "localCopy": "local-Solidity__Evm__MemorySource.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "31247e4429b52060ef2194d23fa1ae13df400051",
+    "publishedSha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd",
+    "publishedCopy": "published-Solidity__Evm__MemorySource.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Evm/MemoryCapture.lean",
+    "localSha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002",
+    "localCopy": "local-Solidity__Evm__MemoryCapture.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "304aaa468cf4ccefec8088a8f42897d86f057d66",
+    "publishedSha256": "d455818799b70c0b0f41dc30f4ce12dec1e20f319d8610d5e7b143e896937002",
+    "publishedCopy": "published-Solidity__Evm__MemoryCapture.lean",
+    "sameAsLocal": true
+  },
+  {
+    "path": "Solidity/Frontend/SolcJson/Body.lean",
+    "localSha256": "21a74641830168789cae16d776f0b83234d8b74f16cda1706b6559b53ed8f1e1",
+    "localCopy": "local-Solidity__Frontend__SolcJson__Body.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "dcfd0f1ca0ceffac54db47bb16bc37733b734b07",
+    "publishedSha256": "e35ded0dc707043c7e4db126fac448925fe5aa81a3de0632cf959791cdbeab69",
+    "publishedCopy": "published-Solidity__Frontend__SolcJson__Body.lean",
+    "sameAsLocal": false
+  },
+  {
+    "path": "docs/intrinsic.md",
+    "localSha256": "8ee4a3818b87981afd07f9124a36319fe3d873649bf02e26e8b8427ff30f89d3",
+    "localCopy": "local-docs__intrinsic.md",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "1f729903641e29e3b200a1824466705be056d253",
+    "publishedSha256": "8ee4a3818b87981afd07f9124a36319fe3d873649bf02e26e8b8427ff30f89d3",
+    "publishedCopy": "published-docs__intrinsic.md",
+    "sameAsLocal": true
+  },
+  {
+    "path": "docs/coverage-plan.md",
+    "localSha256": "86dd5feeecbe6cd41d3e494d6048fe597167bef8c282290948b9a9923630a386",
+    "localCopy": "local-docs__coverage-plan.md",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "3acb019665cf3e25282b26465a88e1e6c2ea87cd",
+    "publishedSha256": "1db98033d3207f52254b800acc9831f1270f6c8e38f93805fa54b4dfb291fe47",
+    "publishedCopy": "published-docs__coverage-plan.md",
+    "sameAsLocal": false
+  },
+  {
+    "path": "docs/feature-work/roadmap-g03-ledger.json",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "d126f2ce892aba996a9c04e9155b6108818ade86",
+    "publishedSha256": "a98f813f3ef05c5960b08a9ecb35c0077cedb437d61552d13171d0bf7f461de6",
+    "publishedCopy": "published-docs__feature-work__roadmap-g03-ledger.json"
+  },
+  {
+    "path": "Bridge/SolidityBridge/ExternalEvm.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "c53c006ce9f7a653468ee2821edc5d8cb5e45319",
+    "publishedSha256": "cb1c5d532a6e0a449926dc1e691c0ad5a075da9c9b8fcbb1593bcc615de0774a",
+    "publishedCopy": "published-Bridge__SolidityBridge__ExternalEvm.lean"
+  },
+  {
+    "path": "Bridge/SolidityBridge/ExternalEvm/WordOps.lean",
+    "publishedCommit": "fb379ae20f10e2c92113453ddd9d40d8f2efbe09",
+    "publishedBlob": "7c00b44fe00bef2881e2168cf1e924b9ee98f1da",
+    "publishedSha256": "0a48810f49326e605c91d409f6b22b16495fe40a3de4d8f9b7e0a64fb88de01a",
+    "publishedCopy": "published-Bridge__SolidityBridge__ExternalEvm__WordOps.lean"
+  }
+]
