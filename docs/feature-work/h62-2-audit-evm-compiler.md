@@ -1,6 +1,11 @@
 # H62 item 2: frozen EVM compiler hypothesis audit
 
-Status: **partial; full four-checkpoint assignment unfinished**. Human H69
+Status: **stopped by human retirement instruction; full assignment partial**.
+Handoff to `solidity-v12-v17-20261031/v17-validation-release`.
+No implementation continuation is authorized. The exposed goal tool cannot
+set PAUSED (it accepts only complete or blocked); neither substitute state
+was requested. This capability failure does not authorize resuming work.
+ Human H69
 accepts checked joint-impossibility proofs for intentional negative controls,
 separation lemmas and refutations. SCOPE1 and TC1 are resolved. Ordinary interface
 statements still require simultaneous witnesses. No original statement changes.
@@ -21,7 +26,8 @@ merge, PR, generated root, central registration, axiom pin or interface edit.
    mapped modules are counted once, including private and no-premise declarations.
    Core: exact kernel Expr types, universe parameters and axiom sets extracted
    for all 1,721 declarations in 156 modules. Four optional Bridge modules contain
-   109 declarations pending extraction while exact-pinned dependencies build.
+   109 declarations pending extraction; the exact-pinned dependency build was
+   interrupted for retirement.
    Source scanner schema 2 corrects 48 truncated source signatures involving
    root lets, root matches and tuple constructors; counts/identities and kernel
    expressions are unchanged. The correction ledger retains old and new text.
@@ -94,8 +100,12 @@ and successful replacement receipts are retained.
 
 Optional Bridge uses the frozen manifest's exact Git revisions and root v4.24.0,
 private external serial package configs and ignored runtime package links. Public
-Mathlib cache requests returned CONNECT 403; serial source compilation proceeds
-with bounded 300-second batches retaining completed artifacts. Dependency source
+Mathlib cache requests returned CONNECT 403; serial source compilation had proceeded
+with bounded 300-second batches retaining completed artifacts. The fifth
+batch was terminated under the human retirement instruction (exit -15 after
+182.917 s), preserving completed dependencies through logged target 934/939.
+No further builds are running. Queued new witness-file creation was canceled
+before execution; the 63 checked theorems and 46 coverage links are unchanged. Dependency source
 and tracked Bridge/core configs remain unchanged. Runtime provisioning is not a
 proof result. Full optional Bridge extraction is still pending.
 
@@ -127,6 +137,30 @@ suggestions are additive fragments under tests for the coordinator; no root or
 module-map registration is performed here.
 
 The external handoff records full committed head, original goal/VM identity,
-commands, patch/bundle paths and pending obligations. Continue this same original
-goal and branch. A fresh-thread handoff after these milestone groups does not
-complete the assignment or authorize a replacement goal.
+commands, patch/bundle paths and pending obligations. The original VM/goal/branch are preserved. The successor integrates the final
+head; this worker stops. No new/reset/replacement goal or automatic continuation.
+No H71 push permission was supplied, so the original no-push rule remains.
+The retirement supersedes earlier instructions to continue.
+
+## Retirement preservation checkpoint
+
+The authenticated patch/bundle includes the original user-rendered assignment
+from this thread, its complete original work/backfill queues, exact scope
+manifest (all 160 mapped paths) and effective decisions under the assigned
+tests handoff directory. The local prompt copy's SHA256 is separately recorded;
+it is not asserted equal to the coordinator's older rendered-goal digest.
+Bulk census/kernel/build logs remain off Git with checksums.
+
+All four checkpoints remain partial. Pending: 109 Bridge captures/reconciliation,
+1,784 joint-witness/classification records, 1,812 producer-owner assignments,
+general supported-source success/totality, all-contract negative controls and
+observable gas/historical-fork boundaries, full affected-library/run-lean.sh
+gates and final fidelity/reviews. Backfill remains scanner/census, within-scope
+negative controls, isolated fixture proofs and deterministic acceptance/timing
+tooling; no new unclaimed candidate was taken. The interrupted Bridge build and
+cache CONNECT403 are the concrete dependency state, not a new scope question.
+The queued Jumpdest plan was not saved or checked and earns no coverage.
+
+The external retirement handoff enumerates waits, commands, exports, full final
+committed head and SHA256SUMS. No new proof implementation, owner message,
+Claude-owned edit, root/module-map/axiom pin change, push or merge was performed.
