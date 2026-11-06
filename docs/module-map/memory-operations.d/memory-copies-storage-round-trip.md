@@ -1,0 +1,1 @@
+| `Backend/MemoryCopies/StorageRoundTripInterface.lean` | Contract only for actual primitive-array storage/memory/deep-memory/storage composition with represented destination, cleanup, framing and ordered allocation refusals. |
