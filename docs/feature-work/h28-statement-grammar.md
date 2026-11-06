@@ -2082,7 +2082,7 @@ ControlFreePr, ControlFreeAtoms and SyntaxControlFree prove that successful
 expression/type/argument/parameter/declaration/simple yields contain no actual
 else, catch or unchecked keyword tokens anywhere, strengthening the earlier
 head-only fact. The existing boundaryToken predicate and SemiFreeCat footprint
-are reused unchanged. The universal induction covers all42atom constructors
+are reused unchanged. The universal induction covers all 42 atom constructors
 and recursive nil/cons/none/some wrappers over existing Syn. Only successful
 actual yields and the existing category footprint are premises; no successful
 parse, expression uniqueness or new source/precedence restriction is assumed.
@@ -2099,8 +2099,8 @@ producers, interfaces and budgets were not refactored or changed. New indexed
 syntax induction constructs proofs only; new computational controls match only
 on parameter-only yield options, never on Syn.
 
-ControlFreeControls enumerates actual successful nonempty yields for all42
-constructors with exact Ctor inventories, all5literal classes, four generic
+ControlFreeControls enumerates actual successful nonempty yields for all 42
+constructors with exact Ctor inventories, all 5 literal classes, four generic
 list/option wrappers, both mapping-key forms, optional array/location/name/init
 fields, empty arguments/tuples and both function-attribute orders. Real else,
 catch and unchecked tokens are negative controls. Identifiers with those
@@ -2110,10 +2110,47 @@ fragment/layout choices remain refused. This proves token absence, not lexical
 validity, general statement segmentation, parser completeness or whole-language
 uniqueness. No new external solc fixture or compiler correctness claim is made.
 
-Public signature/axiom audit covers all43source theorems,3relation constructors,
-ControlFreeParts and23control theorems (70constants). Inventory and exact
-constructor/clause accounting are in
-`/workspace/h28-statement-grammar-evidence/inventory-y.json`.
+The committed audit inventory is self-contained:
+
+| Committed source | Explicit audit entries |
+|---|---:|
+| [ControlFreePr.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreePr.lean) | 21 source theorems |
+| [ControlFreeAtoms.lean](../../Solidity/Frontend/StatementGrammarH28/ControlFreeAtoms.lean) | 18 source theorems |
+| [SyntaxControlFree.lean](../../Solidity/Frontend/StatementGrammarH28/SyntaxControlFree.lean) | 4 source theorems |
+| `ControlFree.empty`, `.token`, `.append` | 3 relation constructors |
+| `ControlFreeParts` | 1 predicate definition |
+| [ControlFreeControls.lean](../../tests/h28-sol/statement-grammar/ControlFreeControls.lean) | 23 control theorems |
+| Total | 70 constants: 43 source theorems, 3 constructors, 1 definition, 23 control theorems |
+
+[ControlFreePublicAxioms.lean](../../tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean)
+lists every source signature and axiom query. The control file lists its own
+axiom queries and kernel-checked constructor inventories: 29 expression,
+5 type-name, 2 call-argument, 1 named-argument, 1 parameter, 1 variable-declaration
+and 3 simple-statement constructors, totaling 42. Nil, cons, none and some are
+four additional generic closure cases. These committed declarations and tests
+are the inventory; reviewing it does not require a VM-only JSON file.
+
+At checkpoint head `1b1391e3fa6ff56edd3ef8e5fad7ef64eca1c3c5`, all 96 VM checks
+passed (93 owned builds, controls, public audit and KeySort). The complete audit
+reported 56 constants without axioms, 5 using `propext`, and 9 using `propext`
+and `Quot.sound`. Lean was 4.24.0 and Lake 5.0.0-src+797c613. A line-oriented
+evidence collector initially rejected one wrapped axiom printout; the complete
+multiline output was then parsed against all 70 expected names without changing
+source, rerunning passed checks or relabeling a failed Lean gate.
+
+On the prepared task VM, reproduce the focused checks with:
+
+```sh
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreePr
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.ControlFreeAtoms
+python3 tests/h28-sol/statement-grammar/runtime.py build Solidity.Frontend.StatementGrammarH28.SyntaxControlFree
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreeControls.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate tests/h28-sol/statement-grammar/ControlFreePublicAxioms.lean
+python3 tests/h28-sol/statement-grammar/runtime.py gate Solidity/KeySort.lean
+```
+
+The following run IDs and `/workspace` paths locate historical execution
+receipts on that VM. They supplement the committed inventory above.
 Per-file source diagnostics pass: run-1793932818689100266,
 run-1793932857929873010 and run-1793932917015203868. Final controls diagnostics:
 run-1793933442590916776. Builds have no new warnings and maxHeartbeats is unchanged.
