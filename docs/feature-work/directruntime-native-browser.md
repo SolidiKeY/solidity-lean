@@ -494,3 +494,27 @@ checker and syntax gates pass. Four pending storage diamond cases,13 unsupported
 C constructs, the existing browser stack failure and both timing STOPs remain.
 External A data and reviewed producer repairs remain required; no final runtime
 gate or whole-assignment completion is claimed.
+
+## OT-PAGES-IDE: explicit pinned SDK config
+
+The Pages IDE job in run42295102972 (job128158368938) builds GMP and leanrt,
+then fails the strict explicit `EM_CONFIG` guard. The existing compact builder
+already invokes `build-direct.sh` inside the digest-pinned Emscripten4.0.15
+image. That entrypoint now exports `/emsdk/.emscripten` after SDK activation
+and refuses a missing file before invoking Python. The Python builder retains
+its explicit-config requirement and all compiler/config provenance checks.
+
+The regression control executes the real entrypoint in bounded Docker with a
+fixture SDK and capture-only builder: unset and inherited unrelated configs
+select the pinned path; a missing SDK config fails before Python. All three
+controls and the eight existing builder/provenance tests pass. These tests
+check plumbing, not actual SDK compilation or Pages success. Read-only finder
+and skeptic reviews find no blocking defect. No Lean source, proof budget or
+trust boundary changed; no runtime build or stopped benchmark was repeated.
+
+A `pages.yml` workflow_dispatch on the published lane branch and a green IDE
+job remain required. The VM CLI token is invalid and the available connector
+has no dispatch action; host-owned branch publication/dispatch is pending.
+The non-default-branch workflow does not deploy Pages. H100 remains open until
+the actual IDE result is retrieved. Exact evidence is retained outside Git at
+`/workspace/solidity-lean/.lake/native-browser-pages-sdk-config/receipt.json`.
