@@ -335,3 +335,19 @@ backfill theorems reported no axioms. This is a kernel check of this helper's
 reuse and proof equivalence, not an external behavioral test, independent
 review or full-scope acceptance of item 1. Evidence remains off Git at
 `/workspace/h55-shared-fixtures-evidence/extract-equivalence.log`.
+
+### Extract-failure declaration comparison
+
+`ExtractFailureDeclarationAudit.lean` inventories every kernel constant
+belonging to the four affected modules, including private and generated
+constants. Each record includes its elaborated type expression, universe
+parameters, axiom dependencies and safety flags. The exact baseline modules
+were compiled in a separate artifact overlay using the original sources and
+unchanged dependency OLeans. `compare_extract_declarations.py` compared these
+against the changed modules: 608 original constants, 604 changed constants,
+exactly four removed private `extract_failure` constants, no additions and no
+other changed records. The shared replacement separately reports no axioms and
+its original statement/proof-equivalence controls passed. This checks all
+kernel constants in these four modules, not every module or family in item 1;
+independent finder/skeptic reviews and the broader item acceptance still remain.
+Large inventories are off Git and hashed in the evidence manifest.
