@@ -43,6 +43,15 @@ class ScannerControls(unittest.TestCase):
         self.assertEqual(len(list(scanner.DECL.finditer("local theorem x : True := by trivial"))), 1)
         self.assertEqual(len(list(scanner.DECL.finditer("inductive X where"))), 1)
 
+    def test_structure_defaults_are_rejected(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "A.lean"
+            source.write_text("structure S where\n  x : Nat := 0\n")
+            rows = scanner.scan(source, root)
+            self.assertEqual(rows[0]["reject_reason"], "unsupported-declaration-form")
+            self.assertIsNone(rows[0]["statement"])
+
     def test_string_does_not_end_body(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -50,6 +59,15 @@ class ScannerControls(unittest.TestCase):
             source.write_text('def a : String := "first\nend\nlast"\n')
             rows = scanner.scan(source, root)
             self.assertEqual(rows[0]["body"], ['"first\nend\nlast"'])
+
+    def test_fixture_body_copy_with_different_signatures(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "A.lean").write_text("def natFixture : Nat := 0\ndef intFixture : Int := 0\n")
+            data = json.loads(subprocess.check_output([sys.executable, "-B", str(SCRIPT), str(root), "*.lean"]))
+            self.assertEqual(data["candidates"], [])
+            self.assertEqual(len(data["body_candidates"]), 1)
+            self.assertIn("different-or-unsupported-statements", data["body_candidates"][0]["reject_reasons"])
 
     def test_namespace_context_is_not_conflated(self):
         with tempfile.TemporaryDirectory() as directory:

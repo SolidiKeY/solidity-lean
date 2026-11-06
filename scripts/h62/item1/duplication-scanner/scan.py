@@ -129,12 +129,14 @@ def scan(path, root):
         end = matches[i+1].start() if i+1 < len(matches) else len(text)
         content = text[match.end():end]
         context = digest([m.group().strip() for m in context_commands if m.start() < match.start()])
-        parts = split_definition(content)
+        unsupported = match.group(1) in {"structure", "inductive", "class", "axiom", "constant"}
+        parts = None if unsupported else split_definition(content)
         if parts is None:
             rows.append(dict(path=path.relative_to(root).as_posix(),
                              line=text.count("\n", 0, match.start())+1,
                              kind=match.group(1), name=match.group(2) or "<anonymous>",
-                             statement=None, body=[], owner="unknown", context_hash=context, reject_reason="missing-top-level-definition"))
+                             statement=None, body=[], owner="unknown", context_hash=context,
+                             reject_reason="unsupported-declaration-form" if unsupported else "missing-top-level-definition"))
             continue
         header, body = parts
         boundary = re.search(r"(?m)^[ \t]*(?:end|namespace|section|open|variable|attribute|#\w+)\b", hide_strings(body))

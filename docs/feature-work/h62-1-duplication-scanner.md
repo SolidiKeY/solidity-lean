@@ -55,3 +55,45 @@ incremental whole-scope reports and backfill; required affected and full gates,
 timings and final handoff. No frozen Lean statements, proofs, axioms or sorry
 counts were changed by this prototype. The supplied ownership snapshot is
 historical and does not itself establish live ownership.
+
+## Audit index and whole-tree lexical reports
+
+The [pinned source](../../tests/h62/item1/duplication-scanner/audit-source.md)
+has SHA-256 `31ab16906906a9b22fd28700aacc72d2ee0ffe81cea723ae209eb28e5299286a`.
+The [generator](../../scripts/h62/item1/duplication-scanner/index_audit.py)
+reproduces the [19-item index](../../tests/h62/item1/duplication-scanner/audit-index.json)
+and rejects modified input. Every item retains its exact source text and an
+unresolved live-ownership status. Finder and skeptic independently checked the
+source, item order, and absence of unowned claims. They found a portable
+reproduction-test gap; the pinned in-scope source fixture and unconditional
+byte comparison resolve it. Neither reviewer used Lean. The skeptic's
+read-only sandbox could not run scanner tests requiring temporary files; the
+owner's permitted test run supplies that result.
+
+A bounded serial scan of `Solidity/**/*.lean` and `tests/**/*.lean` at
+the first scanner commit read 6,657 files, reported 114,034 recognized
+declarations and 69,517 explicit rejections in 101 seconds. After the
+structure-default fix, the incremental scan reported 114,034 recognized
+declarations and 69,589 rejections. Its two runs took 97 and 100 seconds,
+with byte-identical SHA-256
+`5cfb658f214a45d90402dceafd0ccf285c7f03e77bc1ff9897f099c44db3d1a7`.
+There were no changed, added or removed Lean inputs, and the report correctly
+recorded changed scanner bytes. These large reports are off Git in the
+evidence directory; they are lexical snapshots, not proof of complete Lean
+declaration coverage or current ownership.
+
+The skeptic found that body leads lacked unresolved-signature and ownership
+reasons even where statements appeared to match. Both reasons are now
+unconditional and have an acceptance control. Structures, classes,
+inductives, axioms and constants are explicitly rejected rather than treating
+a field default as their definition delimiter. Unrecognized syntax and
+unresolved names remain open limitations.
+
+The initial prototype creation command reported a bad lock descriptor but
+continued to write the new file; this did not hold the intended writer lock.
+The checkout was otherwise clean and no concurrent writer was observed. All
+subsequent edits, checks involving writes, and commits used the specified lock.
+
+Pending work remains as listed above; the index and reproducible lexical
+reports do not complete the scanner, ownership, backfill, full validation or
+final handoff.
