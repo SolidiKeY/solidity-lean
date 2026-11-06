@@ -355,3 +355,30 @@ register the module and run checkpoint/full gates. Every existing statement and
 consumer condition must remain unchanged; any necessary statement change stops
 that migration for a scope question. Admission-transport/v16-correctness-transfer
 is the source-relations successor and must be notified in the result.
+
+## Canonical adoption: generated equation interface barrier
+
+Q-NL-SHARED-ADOPT1 (#47) authorized the canonical proposal subject to retaining
+every existing statement and consumer condition. The proposal SHA-256 matched
+`2906a075d7332560a770e986592861c049bd18806451b00c352b437eede58459`.
+The draft added the production helper, both sets of aliases, the test import
+shim and module registration. Both inferencers compiled; an initial consumer
+check encountered a stale test object containing the old duplicate definitions.
+
+An isolated Lean 4.24 probe using the saved original definitions generated 16
+public branch equations. The exact alias bodies instead generated six
+unconditional equations: six old `eq_1` statement types changed and ten other
+old names disappeared. Six dependent matcher signatures can be retained by
+forwarding shims, but explicit old equation theorems are rejected as reserved
+names. Thus the observation/consumer agreement proofs alone do not satisfy H78.
+
+Q-NL-SHARED-EQ1 was sent through `coord-ask`: retain original match-shaped
+helpers with canonical agreement lemmas, use a separate versioned alias
+interface, or supply an exact equation-registration solution. No production
+migration was committed. Its complete draft and before/after probes are
+preserved under `/workspace/sol-numeric-literals-helper-migration/`; production
+and registration files were restored. Full checkpoint and `run-lean.sh` gates
+await the conditional owner decision. No statement change, axiom addition,
+budget change or source push is claimed. Both read-only reviewers identified
+the generated API issue; the finder also identified the audit script's test-shim
+assumption, whose draft fix is preserved with the migration.
