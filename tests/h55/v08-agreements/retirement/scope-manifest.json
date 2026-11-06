@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "batch": "solidity-h55-sol-20261106",
+  "slug": "v08-agreements",
+  "repository": "/workspace/solidity-lean",
+  "branch": "codex/solidity-h55-sol-20261106/v08-agreements",
+  "original_base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "pre_retirement_committed_head": "8e725b730a6fca409792f39d3455ff2a533536bf",
+  "handoff_to": "solidity-v07-v11-20261030/v08-world-lowering",
+  "original_assigned_existing_paths": [
+    "/workspace/solidity-lean/Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+    "/workspace/solidity-lean/Solidity/Lowering/V08/CreationPremises.lean",
+    "/workspace/solidity-lean/Solidity/Lowering/V08/LibraryFrameTransport.lean",
+    "/workspace/solidity-lean/Solidity/Lowering/V08/LibraryPremises.lean"
+  ],
+  "original_new_helper_locations": [
+    "/workspace/solidity-lean/tests/h55/v08-agreements",
+    "/workspace/solidity-lean/scripts/h55/v08-agreements",
+    "/workspace/solidity-lean/docs/feature-work/h55-v08-agreements.md"
+  ],
+  "protected_files": [
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+      "relative_path": "Solidity/Lowering/V08/ConstructorScalarTransport.lean",
+      "sha256": "21bba3b19ef5699eefd3263c621c167ef05a85b65f4ba94eb55e873534c10492",
+      "unchanged_from_original_base": true
+    },
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/V08/CreationPremises.lean",
+      "relative_path": "Solidity/Lowering/V08/CreationPremises.lean",
+      "sha256": "9ce078e744ff61d51b114c2987a6f989cf94988d2e33041f689498574a710dbe",
+      "unchanged_from_original_base": true
+    },
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/V08/LibraryFrameTransport.lean",
+      "relative_path": "Solidity/Lowering/V08/LibraryFrameTransport.lean",
+      "sha256": "1b2074bd0fdfa3fbe1d0993bf2e0107941183a626667768594469d36f421f3dc",
+      "unchanged_from_original_base": true
+    },
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/V08/LibraryPremises.lean",
+      "relative_path": "Solidity/Lowering/V08/LibraryPremises.lean",
+      "sha256": "e3b7e4233c33e7b24f9758f780ffd59fa021995bad7d900c01e6cfa494e70f3b",
+      "unchanged_from_original_base": true
+    },
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/V07/P8Bindings.lean",
+      "relative_path": "Solidity/Lowering/V07/P8Bindings.lean",
+      "sha256": "6e7bb55b97964519f7dd9bfc1a29b78a525372eca91ade5d0a5ea615a2124ec5",
+      "unchanged_from_original_base": true
+    },
+    {
+      "path": "/workspace/solidity-lean/Solidity/Lowering/P8/FrozenInterface.lean",
+      "relative_path": "Solidity/Lowering/P8/FrozenInterface.lean",
+      "sha256": "25d6c7e77168309e23710540cfd7d3ba5479d0a3b1727c1caa2b1aa4357ab662",
+      "unchanged_from_original_base": true
+    }
+  ],
+  "standing_authorization": "H82 authorizes statement-preserving proof-only/additive/module-split/import/doc edits without exact-file owner permission. Historical blanket exact-file requests for these edits are withdrawn. Existing statement/depended-definition/interface/budget/axiom/exclusion changes still require owner; frozen changes require H57 versioned pair.",
+  "latest_override": "Human-approved H82 retirement: preserve smallest safe checkpoint, no new proof implementation, no Claude-owned edits/messages, stop and request existing goal PAUSED, no automatic continuation; no takeover before final stopped/head acknowledgement.",
+  "withdrawn_requests": [
+    {
+      "id": "R-V08-EXACT-FILES",
+      "scope": "Exact-file permission for statement-preserving additive/proof-only work",
+      "status": "withdrawn under H82"
+    }
+  ],
+  "frozen_or_readonly": [
+    "P8a.SourceOrigins unchanged",
+    "V07/P8Bindings read-only: supply adapter/owner request, never edit",
+    "No H16 Source/Core ExtCall edits",
+    "No shared roots/maps/pins edits: provide central registration fragments",
+    "H58 HOLD: git-ref relays, single-state-file rewrite, generated axiom audit, Roadmap.Word/Outcome unification"
+  ],
+  "proof_constraints": [
+    "Intrinsic dependency-free core",
+    "No theorem/premise/exclusion/refusal/observation weakening",
+    "No new axiom/sorry/trust shortcut",
+    "No maxHeartbeats raise",
+    "No budget increase; preserve assigned proof/resource/observation budgets",
+    "Attached executor, serial Lean -j1, LEAN_NUM_THREADS=1, at least4GiB reserve, no swap/cap increase/systemd-run",
+    "Stop/report checking slowdown >10%; do not rerun unchanged known STOP"
+  ],
+  "retirement_preservation_references": [
+    "H44 off-Git bulk evidence and committed hashes",
+    "H68 full PassCorrect bridges",
+    "H69 witness/intentional contradiction distinction",
+    "H78 generated public API shims",
+    "H80 editor requirements",
+    "H81 current resource policy"
+  ],
+  "reference_boundary": "H68/H69/H78/H80/H81 are retained verbatim references from retirement notice; additional policy text was not attached to this thread. No heavy/proof job or source edit was run after retirement.",
+  "push": {
+    "performed": false,
+    "reason": "H71 branch-push permission was not supplied in the original thread or task-local files; original no-push rule remains. No master push."
+  },
+  "goal_pause": {
+    "requested": "PAUSED",
+    "applied": false,
+    "precise_failure": "No pause-capable tool exposed. Available stop_goal supports outcome complete|blocked only, so cannot represent PAUSED. No substitute transition attempted.",
+    "goal_created": false,
+    "goal_reset": false,
+    "goal_completed": false,
+    "automatic_implementation_continuation_authorized": false
+  },
+  "waits": [
+    {
+      "lane": "coordinator/H67 G07 inventory",
+      "item": "H67 tip35b9d826d14b26bacdb203b235fcc506a5466f7b is not an ancestor of last fetched master7ae5607c9ecfff4078162115eaaaa48a1ff46eb0. Reviewed central merge and required pin-gate rerun remain pending; no master adoption was performed."
+    },
+    {
+      "lane": "solidity-v07-v11-20261030/v08-world-lowering",
+      "item": "Actual owner-reviewed typed-interface checkpoint before g49 composition remains outstanding. H82 withdraws blanket exact-file requests for statement-preserving edits; only existing statement/depended-definition/interface/budget/axiom/exclusion changes need owner agreement, with H57 versioned pairs for frozen interfaces."
+    },
+    {
+      "lane": "coordinator/goal service",
+      "item": "User requests PAUSED, but no pause operation is exposed. Available stop_goal supports only complete or blocked, not PAUSED. No substitute transition, completion, creation or reset attempted. Worker stops and must not automatically continue."
+    }
+  ],
+  "questions": []
+}

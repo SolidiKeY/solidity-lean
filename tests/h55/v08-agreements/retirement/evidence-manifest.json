@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "purpose": "Authenticated retirement scope and off-Git evidence",
+  "handoff_to": "solidity-v07-v11-20261030/v08-world-lowering",
+  "original_base": "4d3790eadb8a5212233bc7d5e345817476b2f590",
+  "source_checkpoint": "769bf7d5b1304642ac1995ee4a9c3a770cd948ce",
+  "prior_head": "8e725b730a6fca409792f39d3455ff2a533536bf",
+  "scope_files": [
+    {
+      "path": "tests/h55/v08-agreements/retirement/H82-design-notes.md",
+      "sha256": "07157950fd189cd43f2116eae23200400fc1e22bab4b11f3220e4b31c712adac"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/coordination-history.txt",
+      "sha256": "b8aeb4ae0f13a1a0a07e12b81ff5db21b3ba1c2aa73f43bc9db6935c8c43dc48"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/original-assignment.txt",
+      "sha256": "15a770419c82a1e39dd9b25863f2eca0d876597a70aa82cd65abf74e7ed88a69"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/original-environment-context.txt",
+      "sha256": "780cfaa9a34408f47ad319b9d9084695245ea0f0ad810f028b805396d69a578b"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/original-goal-objective.txt",
+      "sha256": "7de87656819f5bb97835d4f6ffcc5e37e8da40792269d5b06c644c909822db3b"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/prompt-provenance.json",
+      "sha256": "8e6d40896025fc20d75aa27a8a117e1c4acfe3acde37084648c62c91850969df"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/queue.json",
+      "sha256": "4b0321c0b415a9288ca4fb422f8516131eb8249864581a5ee5fa96741b1349be"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/retirement-notice.txt",
+      "sha256": "7f22a7aa2f5beace5980fff7448829e7bf176891fa46eca86b74f5c4b49963eb"
+    },
+    {
+      "path": "tests/h55/v08-agreements/retirement/scope-manifest.json",
+      "sha256": "c7d318366ca09df88515c2f11dcfc0342e5fd9a89c8c695c9f527c96a397473e"
+    }
+  ],
+  "external_evidence": [
+    {
+      "path": "/workspace/v08-agreements-evidence/retirement/coordination-history-original-transport.txt",
+      "sha256": "5ba0e9038cb59f74c6c544ca48ee75a5c8c06ea3c9cf79af2d102b88c01b1ef3"
+    },
+    {
+      "path": "/workspace/v08-agreements-evidence/retirement/goal-pause-capability.json",
+      "sha256": "a469acda14afa1ecdf74a204bb295e5f11d8909f43c28ee83ec313d20c91a6a1"
+    },
+    {
+      "path": "/workspace/v08-agreements-evidence/retirement/retirement-state.json",
+      "sha256": "ffe352af89e4ac1629048dc3d0982d866c869747e027e632a97a986990b16187"
+    },
+    {
+      "path": "/workspace/v08-agreements-evidence/retirement/reviews.json",
+      "sha256": "f15a773a7b6921649f79db7a59f78c2ccf8b74f93cee492026b4a2fa75a81a70"
+    },
+    {
+      "path": "/workspace/v08-agreements-evidence/retirement/scope-validation.log",
+      "sha256": "453ce8ce105854703f2ffed5a3eaf57b82c6578a9a2bea1f5d232a24d6810aa4"
+    }
+  ],
+  "prior_evidence_manifests": [
+    "tests/h55/v08-agreements/evidence-manifest.json",
+    "tests/h55/v08-agreements/h67-resolution-manifest.json"
+  ],
+  "prior_evidence_directories": [
+    "/workspace/v08-agreements-evidence",
+    "/workspace/v08-agreements-evidence/h67-waiting",
+    "/workspace/v08-agreements-evidence/h70-router"
+  ],
+  "cache_pack": {
+    "path": "/workspace/v08-agreements-evidence/lake-cache.tar.zst",
+    "sha256": "1e953afba985881c949b8219bd59cf92950f139adb8dc99257bd50d9e0c1f4f5",
+    "preserved": true
+  },
+  "goal_pause": {
+    "requested_goal_state": "PAUSED",
+    "available_goal_tool": "mcp__codex_apps__codex_goals_stop_goal",
+    "available_input_schema": {
+      "outcome": [
+        "complete",
+        "blocked"
+      ]
+    },
+    "pause_capable_tool_exposed": false,
+    "transition_attempted": false,
+    "failure": "No supported PAUSED operation exists in the exposed tool inventory. Calling complete or blocked would not satisfy the explicit retirement pause instruction, so no substitute transition is attempted.",
+    "goal_completed": false,
+    "goal_created": false,
+    "goal_reset": false,
+    "automatic_implementation_continuation_authorized": false
+  },
+  "prompt_boundary": "Full visible original user assignment and supplied goal/context saved. Actual file hash differs from declared renderer-specific hash; unavailable rendered bytes are not claimed authenticated.",
+  "final_head_boundary": "Final stopped head, clean status, cumulative patch/bundle and complete final checksums are exported after this commit.",
+  "transport_normalization": "One H70 quoted line had trailing transport whitespace. It is normalized in the committed coordination-history copy for git diff --check; original transport bytes are preserved and hashed off Git. Original frozen assignment file is unchanged."
+}
