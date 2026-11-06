@@ -1,0 +1,4 @@
+/evidence/
+/*.json
+!/bulk-data.json
+!/registration.json

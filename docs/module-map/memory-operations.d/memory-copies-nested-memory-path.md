@@ -1,0 +1,3 @@
+| `Backend/MemoryCopies/NestedMemoryPathInterface.lean` | Contract only for selected nested memory paths, checked deep snapshot copying/binding, preserved old contents and distinct path/capacity refusals. |
+| `Backend/MemoryCopies/NestedMemoryPath.lean` | Proved selected nested deep copy/binding with full typed adoption, preserved old/new snapshots and separate path/capacity refusal. |
+| `Backend/MemoryCopies/NestedMemoryPathControls.lean` | Populated shared-child and overlapping-local controls distinguish alias from deep copy, observe distinct fresh children and actual target words, and test represented capacity refusal. |
