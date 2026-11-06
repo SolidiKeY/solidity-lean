@@ -1,5 +1,63 @@
 # H55 yul-artifact: source census, design and conversion backfill
 
+## H82 retirement: stopped, incomplete, successor handoff
+
+Human stop-and-handoff overrides implementation continuation. Successor:
+`solidity-inline-assembly5-20261031/vy2-physical`. No further implementation is
+authorized on this retired lane. Exact-file requests for additive/proof-only work
+were withdrawn under H82; the old ownership-blocked sections below are historical.
+Existing statement/definition/interface/budget/axiom/exclusion changes still need
+the owner, with H57 versioned pairs for frozen interfaces.
+
+The final checkpoint preserves two **unvalidated** additive drafts:
+`Solidity/Yul/Compilation/Artifact.lean` and
+`Solidity/Yul/Compilation/CompletionControls.lean`. They cover closed normal
+statements with full newer/caller frames. Artifact alone does not retain original
+producer data; its Image does. No concrete adapters or family migrations exist.
+Expressions, case lists and policy-indexed open statements remain outstanding.
+No existing producer/consumer source was edited.
+
+The bounded serial dependency check was stopped on retirement (exit 143) before
+it reached the new modules. Its old dotted receipt names caused sibling logs to
+overwrite one another. No full gate or recovered per-file evidence is claimed.
+Read-only finder/skeptic reviews found the receipt collision, zero-target false
+pass and unsafe cache-stamp skip; the handoff tooling fixes these by separate
+receipt directories, target validation and disabling historical cache skips.
+These fixes received Python syntax/CLI checks; no further Lean run was started.
+The new helpers are unregistered; proposed central registration fragments are
+saved but no shared roots/maps/pins were changed.
+
+Actual H82 prerequisite: Lean 4.24.0 / Lake 5.0.0-src+797c613; bounded KeySort
+exit 0 in 2.210 seconds. This is not a production RUNTIME_GATE_PASS. The original
+checkpoint's generic backfill proof and 14 external tests remain historical
+passes. No production benchmark, all-module gate or Terra acceptance completed.
+
+Mandatory scope files, committed into the cumulative patch/bundle:
+- `scripts/h55/yul-artifact/handoff/original-assignment.txt`: complete original
+  assignment copied from this thread. Its own checksum is reported; the supplied
+  rendered-wrapper hash is provenance, not a verified byte-identity claim.
+- `scripts/h55/yul-artifact/handoff/original-goal-objective.txt`: frozen objective.
+- `scripts/h55/yul-artifact/handoff/original-queue.json`: full work/backfill queue,
+  constraints, outstanding validation and waits.
+- `scripts/h55/yul-artifact/handoff/scope-manifest.json`: exact 57 paths, 38
+  audited declarations/23 files, hashes and 13 additional audited files.
+- `scripts/h55/yul-artifact/handoff/coordination-history.txt`: subsequent
+  ownership, router, H82 standing and final retirement instructions.
+
+Final delivery lives under `/workspace/h55-yul-artifact-evidence/h82/retirement/`:
+`cumulative.patch`, `cumulative.bundle`, `handoff.json`, `cache-pack.tar.gz`,
+`SHA256SUMS`, and copies of the mandatory scope files. Original checkpoint
+artifacts/seals and original VM/branch are retained unchanged. Cache pack is
+incomplete dependency output, not successful new-module proof evidence.
+
+No push: no H71 authorization was supplied, so the original no-push rule remains.
+Goal pause cannot be performed with the exposed API: only stop_goal outcomes
+complete/blocked are available; PAUSED is unsupported. No incompatible outcome,
+new goal, reset or completion was submitted. Implementation is stopped by the
+human retirement instruction; automatic continuation is unauthorized.
+
+## Historical checkpoint 36aa9daae (superseded status, retained evidence)
+
 ## Status and authorization
 
 The full H55–H58 queue is **unfinished**. No existing producer or consumer source
