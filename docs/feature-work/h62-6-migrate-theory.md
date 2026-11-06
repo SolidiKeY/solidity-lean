@@ -191,3 +191,37 @@ Continue the same original persistent goal on this VM
 `ccarenv_b64_Y2NhcmVudl85ZGQyODU3NzBlYjg4MTkxYmJjYjgyNGQxNGYyODcxMw`.
 This is a fresh-thread handoff to the coordinator, not a new/replacement goal.
 The entire assignment must remain unfinished until all four checkpoints pass.
+
+
+## H82 retirement preservation checkpoint
+
+Human-approved stop-and-handoff and its ordering correction retire this worker.
+No new proof implementation or Lean run is performed. The successor is
+`solidity-h62-6-20261106/migrate-root-gate`, responsible for integration after the
+final stopped/head acknowledgement. Existing goal is explicitly requested PAUSED,
+but the exposed goal API has no pause operation; `stop_goal` accepts only complete
+or blocked. No substitute completion/reset/transition is attempted. Exact capability
+failure is recorded in the committed handoff. No automatic implementation
+continuation is authorized by retirement. The coordinator explicitly resolved
+Q-H82-RETIRE: KEEP RETIREMENT/HANDOFF; generic broadcasts and tickets do not
+revoke it. Coordinator will set the existing goal paused after final head report
+and idle turn. No human decision is needed.
+
+The complete original assignment and goal text, exact scope, all work/backfill
+items and waits, current policy/ordering messages, latest root request and source
+hashes are committed under `tests/h62/item6/migrate-theory/h82-handoff/`. Read its
+README and HANDOFF-SOURCES.sha256 before successor work. Launcher rendering digest
+is retained as provenance; actual transcription file hashes are separate.
+
+Current H82 standing agreements supersede the earlier exact-file protocol in
+this historical document for statement-preserving proof/additive/split/import/doc
+edits. Existing statement/depended-on definition/signature/budget/axiom/exclusion
+changes still need owner, with H57 versioned frozen pairs. No proof-only permission
+wait is retained. Retirement and performance holds still prohibit implementation
+here. H78 complete original public generated API/shim requirements remain open;
+the old inventory alone does not establish visibility or old/new compatibility.
+
+No H71 original-branch push permission was supplied, so no push is performed.
+The cumulative patch, bundle, portable archive and final hashes are saved under
+`/workspace/scratch/migrate-theory/h82-retirement/`. Historical H44 evidence and
+all VM/branch artifacts are preserved. No Claude-owned edits or messages occur.
