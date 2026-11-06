@@ -12,7 +12,8 @@ def digest(data):return hashlib.sha256(data).hexdigest()
 
 def verify(repo, profile='combined'):
  profiles={'combined':('combined_proof_pack','combined-pilot.json',17,13),
-           'rollback':('rollback_proof_pack','rollback-pilot.json',2,1)}
+           'rollback':('rollback_proof_pack','rollback-pilot.json',2,1),
+           'frame':('frame_proof_pack','frame-pilot.json',2,1)}
  require(profile in profiles,'unsupported proof profile')
  pin_key,manifest_name,case_count,scored_count=profiles[profile]
  pin=read_json(repo/'tests/h28-sol/mutation-testing/bulk-data.json',repo)[pin_key]
@@ -40,7 +41,7 @@ def verify(repo, profile='combined'):
   require(r['runner_cases_complete'] and not r['scope_complete'] and not r['unrun'],'run incomplete or scope overclaim')
   summary=summarize(r['records'],m['cases'])
   require(all(r[k]==v for k,v in summary.items()),'summary replay mismatch')
-  require(len(r['records'])==case_count and r['denominator']==r['killed']==scored_count and r['score']==1,'combined outcomes changed')
+  require(len(r['records'])==case_count and r['denominator']==r['killed']==scored_count and r['score']==1,profile+' outcomes changed')
   cases={c['id']:c for c in m['cases']};checks=exports=artifacts=0
   for rec in r['records']:
    c=cases[rec['id']];prefix='run/'+rec['id']+'/'
@@ -107,5 +108,5 @@ def verify(repo, profile='combined'):
 
 if __name__=='__main__':
  repo=Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
- parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=('combined','rollback'),default='combined');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--profile',choices=('combined','rollback','frame'),default='combined');args=parser.parse_args()
  print(json.dumps(verify(repo,args.profile),indent=2))

@@ -897,3 +897,33 @@ itself is tracked, so this mixed-input profile is separate from the legacy
 two-off-Git-input declarations. Current census counts are 34 fixtures, 12
 profiles and 19 distinct variants. Development passes are unscored; the frozen
 whole pilot run, reviews and evidence seal remain pending.
+
+
+Coordinator publication `af972480b7eb44498a7d754f0761dd3adf5e39eb` is merged
+after the frozen frame run finished. The delivery anchor advances to this
+verified published master in engine and bulk metadata together; semantic/cache
+base and historical snapshot provenance remain immutable. Review nits are
+fixed: outcome errors name the selected profile, and any member-manifest pin
+without an archive key is rejected, with a real-Git receipt control. The frame
+profile's mixed-input annotation is descriptive; runner hash authentication
+enforces its actual tracked inventory and off-Git cache identities.
+
+
+Frozen frame run `e198e3fbe0d29687129e571cdc5a192b7755b753` passed all 12 checks; scored mutant
+and independent known-kill were killed, denominator one. Eight compiled outputs
+and 43 owned axiom exports include all 35 new theorem signatures. Summed check
+time 72.508s; peak RSS 1,467,400 KiB; minimum
+estimated reserve 4,566,003,712 bytes. Normal/optimized
+86 controls, actual Lean4.24.0/Lake5.0.0-src+797c613 and fresh bounded KeySort
+passed. Finder/skeptic development and actual-evidence reviews are separate from
+seal replay. `verify_combined.py --profile frame` uses fixed 2/1 accounting and
+the unchanged strict certificate/source/artifact/resource checks.
+
+H41 frame pack `/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
+`16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6`, with 41 H44-pinned regular members. It stays
+on this VM for coordinator pull; no transfer is claimed. Normal dependencies
+are separately pinned; mutant objects remain isolated. Frame semantics are
+restricted to the typed selected call and its pending caller callback, and
+provide no whole-compiler correctness claim. Full queue acceptance remains false:
+final selection ledger, expanded combined execution, and final repository gates
+are still pending.
