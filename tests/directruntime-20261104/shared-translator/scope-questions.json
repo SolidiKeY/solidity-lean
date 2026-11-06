@@ -33,6 +33,6 @@
       "Retain required compiler metadata with existing normalization: CR/D migrate their producer paths and compatibility fixtures to this explicit input contract.",
       "Provide an owner-reviewed checked compatibility adapter: CR/D validate equivalent required metadata for normalized fixtures under an explicit adapter contract."
     ],
-    "status": "pending; test-only retention is not producer authorization"
+    "status": "resolved by human H68: option 1; retain required typeIdentifier/tryCall metadata, preserve normalization and loop annotations, migrate compatibility fixtures"
   }
 ]
