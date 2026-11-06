@@ -189,12 +189,19 @@ def wrongTarget : Stmt C G G :=
 
 theorem wrong_target_differs : aAfter (Stmt.runC wrongTarget (withA 5)) = .ok 5 := rfl
 
-/-- A value-returning call with a storage argument is left as written. -/
+/-- A value-returning call with a storage argument: since the X06 follow-up it is
+inlined, the parameter bound as a storage alias (`bindArgs`). -/
 def callStorageArg : Stmt C G G :=
   .call "s" (.snocStorage .nil (.array (.prim .uint)) (.user "v") (.loc (.root "values" rfl)))
     (.val .uint (.user "r") (some .here)) (.cons (.assignLocal .here (lit 1)) .nil)
 
-theorem storage_arg_kept : Stmt.inl callStorageArg = callStorageArg := rfl
+theorem storage_arg_inlined : Stmt.inl callStorageArg =
+    inlineBlockVal (.snocStorage .nil (.array (.prim .uint)) (.user "v") (.loc (.root "values" rfl)))
+      .uint (.user "r") (some .here) (.cons (.assignLocal .here (lit 1)) .nil) := rfl
+
+theorem storage_arg_same : aAfter (Stmt.runC (Stmt.inl callStorageArg) (withA 5)) =
+    aAfter (Stmt.runC callStorageArg (withA 5)) := by
+  rw [Stmt.inl_runC]
 
 /-- A call with a memory return is left as written. -/
 def callMem : Stmt C G (.mem (.array (.prim .uint)) :: G) :=

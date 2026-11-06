@@ -35,6 +35,7 @@ def stages (Γ Γ' : Ctx) : List (Lowering.Pass C Γ Γ') :=
 /-- One optimizer round. -/
 def round (Γ Γ' : Ctx) : Lowering.Pass C Γ Γ' := Pass.pipeline (stages Γ Γ')
 
+/-- One round preserves `SameRun`: each stage does (`Preserves.pipeline`). -/
 theorem round_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (round Γ Γ') :=
   Preserves.pipeline (Related := SameRun) (fun _ => rfl)
@@ -57,6 +58,7 @@ theorem round_preserves (Γ Γ' : Ctx) :
 def _root_.Solidity.Prog.optimize (n : Nat) {Γ Γ' : Ctx} (P : Prog C Γ Γ') : Prog C Γ Γ' :=
   Pass.pipeline (List.replicate n (round Γ Γ')) P
 
+/-- `n` rounds preserve `SameRun`. -/
 theorem optimize_preserves (n : Nat) (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.optimize n) :=
   Preserves.pipeline (Related := SameRun) (fun _ => rfl)

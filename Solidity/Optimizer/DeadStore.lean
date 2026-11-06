@@ -5,8 +5,8 @@ import Solidity.Semantics.Storage.Anon
 # O03/X06 dead store elimination for storage and memory
 
 `v = e₁; v = e₂;` becomes `v = e₂;` for a primitive state variable `v` when
-`e₁` is simple (it cannot fail) and `e₂` is pure (it reads no storage, so it
-evaluates as it did before the first store); `m.f = s₁; m.f = s₂;` and
+`e₁` is simple (it cannot fail) and `e₂` is pure (`Val.isPure`: it reads no storage
+and no memory, so it evaluates as it did before the first store); `m.f = s₁; m.f = s₂;` and
 `m[k] = s₁; m[k] = s₂;` become the second store for a static memory location
 (`Load.ofMLoc?`) when both values are simple. The rewrite is applied in every
 sequence (blocks, `if` branches, loop bodies; `Prog.dstore`).
@@ -38,9 +38,11 @@ variable {C : Contract} {Γ : Ctx}
 
 /-! ## Storage: the last store at a state variable wins -/
 
+/-- A store at a state variable (`total = 1;`) always lands: the root is replaced. -/
 theorem write_root {st : Storage C} {p : PrimTy} (n : Name) (h : C.rootType n = some (.prim p))
     (x : p.Denote) : st.write (SRef.ofRoot n h) (.prim x) = some (st.set h (.prim x)) := rfl
 
+/-- **`v = s; v = e; Q` runs as `v = e; Q`** for a state variable `v`, `s` simple and `e` pure (`total = 1; total = a + 2;`). -/
 theorem sstore_dead_runC {Δ : Ctx} {p : PrimTy} (n : Name) (h : C.rootType n = some (.prim p))
     (s : Simple C Γ p) (e : Val C Γ p) (he : Val.isPure e = true) (Q : Prog C Γ Δ) :
     Prog.runC (.cons (.assign (.root n h) (.val (.simple s)))
@@ -58,6 +60,7 @@ theorem sstore_dead_runC {Δ : Ctx} {p : PrimTy} (n : Name) (h : C.rootType n = 
 
 /-! ## Memory: the last write at an address wins -/
 
+/-- The last of two object replacements at one identity wins. -/
 theorem Objs.set_set {H : HTy} {R : RefTy} : (Rs : List RefTy) → (os : Objs H Rs) → (i : Nat) →
     (h : Rs[i]? = some R) → (o o' : MObj H R) →
       Objs.set Rs (Objs.set Rs os i h o) i h o' = Objs.set Rs os i h o'
@@ -67,10 +70,12 @@ theorem Objs.set_set {H : HTy} {R : RefTy} : (Rs : List RefTy) → (os : Objs H 
     rfl
   | _ :: Rs, os, i + 1, h, o, o' => congrArg (Prod.mk os.1) (Objs.set_set Rs os.2 i _ o o')
 
+/-- The last of two object replacements at one reference wins. -/
 theorem Heap.set_set {H : HTy} {R : RefTy} (hp : Heap H) (r : HRef H R) (o o' : MObj H R) :
     (hp.set r o).set r o' = hp.set r o' :=
   Objs.set_set H hp r.id r.get? o o'
 
+/-- The last of two member writes wins (`m.f = 1; m.f = 2;`). -/
 theorem MFields.set_set {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T : Ty} →
     (x : MFields H fs) → (h : Semantics.lookupBy f fs = some T) → (v w : MVal H T) →
       MFields.set fs (MFields.set fs x h v) h w = MFields.set fs x h w
@@ -82,11 +87,13 @@ theorem MFields.set_set {H : HTy} {f : Name} : (fs : List (Name × Ty)) → {T :
       simp only [MFields.set, e, dite_true]
     · simp only [MFields.set, e, dite_false, MFields.set_set fs x.2 _ v w]
 
+/-- The last of two element writes wins (`xs[0] = 1; xs[0] = 2;`). -/
 theorem MObj.setElem_setElem {H : HTy} {R : RefTy} {E : Ty} (a : ArrTy R E) (o : MObj H R)
     (i : Nat) (v w : MVal H E) :
     MObj.setElem a (MObj.setElem a o i v) i w = MObj.setElem a o i w := by
   cases a <;> simp only [MObj.setElem_dyn, MObj.setElem_fixed, List.set_set]
 
+/-- **The last of two writes at one address wins**, given the first lands. -/
 theorem Heap.writeAddr_writeAddr {H : HTy} {T : Ty} {hp hp₁ : Heap H} {ad : MAddr H T}
     {v : MVal H T} (h : hp.writeAddr ad v = some hp₁) (w : MVal H T) :
     hp₁.writeAddr ad w = hp.writeAddr ad w := by
@@ -105,6 +112,7 @@ theorem Heap.writeAddr_writeAddr {H : HTy} {T : Ty} {hp hp₁ : Heap H} {ad : MA
         List.length_set, hb, if_true, Heap.set_set, MObj.setElem_setElem]
     · simp only [reduceCtorEq] at h
 
+/-- A write that does not land (`xs[5] = v;` past the end) fails for every value. -/
 theorem Heap.writeAddr_none {H : HTy} {T : Ty} {hp : Heap H} {ad : MAddr H T} {v : MVal H T}
     (h : hp.writeAddr ad v = none) (w : MVal H T) : hp.writeAddr ad w = none := by
   cases ad with
@@ -115,6 +123,7 @@ theorem Heap.writeAddr_none {H : HTy} {T : Ty} {hp : Heap H} {ad : MAddr H T} {v
     · simp only [reduceCtorEq] at h
     · next hb => simp only [hb, if_false]
 
+/-- **`m = s₁; m = s₂; Q` runs as `m = s₂; Q`** at a static memory location (`xs[0] = 1; xs[0] = 2;`). -/
 theorem mstore_dead_runC {Δ : Ctx} {p : PrimTy} (m : MLoc C Γ (.prim p)) {l : Load C Γ p}
     (hl : Load.ofMLoc? m = some l) (s₁ s₂ : Simple C Γ p) (Q : Prog C Γ Δ) :
     Prog.runC (.cons (.assignMem m (.val (.simple s₁)))
@@ -230,7 +239,7 @@ def headMStore? {Δ : Ctx} : Prog C Γ Δ →
 
 theorem simpleMStore?_eq {T : Ty} {m : MLoc C Γ T} {r : MSrc C Γ T} {q : PrimTy}
     {m' : MLoc C Γ (.prim q)} {s : Simple C Γ q} (h : simpleMStore? m r = some ⟨q, m', s⟩) :
-    ∃ e : T = .prim q, HEq m m' ∧ HEq r (MSrc.val (C := C) (Γ := Γ) (.simple s)) := by
+    ∃ _ : T = .prim q, HEq m m' ∧ HEq r (MSrc.val (C := C) (Γ := Γ) (.simple s)) := by
   cases r with
   | val v =>
     simp only [simpleMStore?, Option.map_eq_some_iff] at h
@@ -304,6 +313,7 @@ def dstoreCons : {Γ Γ₁ Δ : Ctx} → Stmt C Γ Γ₁ → Prog C Γ₁ Δ →
   | _, _, _, s@(.revertData ..), P => .cons s P
   | _, _, _, s@(.catchData ..), P => .cons s P
 
+/-- A store dropped before the store that overwrites it runs as before. -/
 theorem dstoreCons_runC : {Γ Γ₁ Δ : Ctx} → (s : Stmt C Γ Γ₁) → (P : Prog C Γ₁ Δ) →
     Prog.runC (dstoreCons s P) = Prog.runC (.cons s P)
   | _, _, _, .assign l r, P => by
@@ -490,6 +500,7 @@ theorem Prog.dstore_runC : {Γ Γ' : Ctx} → (P : Prog C Γ Γ') →
     rw [Stmt.dstore_runC s, Prog.dstore_runC P]
 end
 
+/-- Dead store elimination as an O01 pass preserving `SameRun`. -/
 theorem dstore_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ')) (Prog.dstore : Lowering.Pass C Γ Γ') :=
   fun P => (Prog.dstore_runC P).symm

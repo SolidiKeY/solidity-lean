@@ -6,9 +6,14 @@ import Solidity.Optimizer.Pipeline
 /-!
 # X06 memory-optimization controls
 
-Kernel-checked positive, negative and satisfiability controls for the X06
-passes over the existing typed IR (`StandardExample`): redundant load
-elimination (`Prog.rle`).
+Positive, negative and satisfiability controls for the X06 passes over the
+existing typed IR (`StandardExample`): redundant load elimination (`Prog.rle`),
+dead store elimination (`Prog.dstore`), loop-invariant code motion
+(`Prog.licm`), the certified pipeline (`Prog.optimize`) and inlining with
+reference parameters. Every syntactic result and every storage-only run is a
+kernel `rfl`; runs that allocate memory or iterate a loop more than once are
+pinned with `#guard`, i.e. by the compiled interpreter (`TLoop.run` is
+`implemented_by` a `partial` loop), which is test evidence, not a kernel proof.
 -/
 namespace Solidity.Optimizer.X06Controls
 open Solidity Solidity.Optimizer.ConstFold
@@ -76,7 +81,8 @@ theorem rle_other_root : Prog.rle [] otherRoot =
       (.cons (setAge (lit 5))
         (.cons (.declLocal .uint (.user "b") (some here)) .nil)) := rfl
 
-/-- Kill: `uint a = total; total = 7; uint b = total;` is left as written. -/
+/-- Kill: in `uint a = total; total = 7; uint b = total;` the entry `total ↦ a`
+dies at the store, so `b` does not read `a`; the store forwards `7` instead. -/
 def killed : Prog C [] G2 :=
   .cons (.declLocal .uint (.user "a") (some total))
     (.cons (setTotal (lit 7))
@@ -349,5 +355,149 @@ theorem e2e_licm : Prog.optimize 1 (.cons invLoop .nil) =
 #print axioms Prog.optimize_runC
 #print axioms wrong_kill_differs
 #print axioms licm_witness
+
+/-! ## Review additions -/
+
+/-- `Pair memory p; Pair memory q = p; p.a = 4; q.b = 6; uint x = p.a;`
+becomes `… uint x = 4;`: `q` aliases `p`, but members `a` and `b` never overlap. -/
+abbrev pairR : RefTy := .struct "Pair"
+
+def mem_ {Γ : Ctx} (i : Idx Γ (.mem pairR)) (f : String) (h : C.fieldType "Pair" f = some .uint) :
+    MLoc C Γ (.prim .uint) := .field (.var i (by decide)) f h
+
+def pairProg (g : String) (hg : C.fieldType "Pair" g = some .uint) :
+    Prog C [] [.val .uint, .mem pairR, .mem pairR] :=
+  .cons (.declMem pairR (.user "p") none (by decide) (by decide))
+    (.cons (.declMem pairR (.user "q") (some (.alias (.var .here (by decide)))) rfl (by decide))
+      (.cons (.assignMem (mem_ (.there .here) "a" rfl) (.val (lit 4)))
+        (.cons (.assignMem (mem_ .here g hg) (.val (lit 6)))
+          (.cons (.declLocal .uint (.user "x") (some (.readMem (mem_ (.there .here) "a" rfl)))) .nil))))
+
+theorem rle_member_apart : (Prog.rle [] (pairProg "b" rfl)) =
+    .cons (.declMem pairR (.user "p") none (by decide) (by decide))
+      (.cons (.declMem pairR (.user "q") (some (.alias (.var .here (by decide)))) rfl (by decide))
+        (.cons (.assignMem (mem_ (.there .here) "a" rfl) (.val (lit 4)))
+          (.cons (.assignMem (mem_ .here "b" rfl) (.val (lit 6)))
+            (.cons (.declLocal .uint (.user "x") (some (lit 4))) .nil)))) := rfl
+
+/-- The same member through the alias, `q.a = 6`, kills the entry: kept as written. -/
+theorem rle_member_alias_kept : Prog.rle [] (pairProg "a" rfl) = pairProg "a" rfl := rfl
+
+#guard (topOf (Prog.runC (pairProg "b" rfl) start)).toOption == some 4
+#guard (topOf (Prog.runC (pairProg "a" rfl) start)).toOption == some 6
+
+/-- A member and an element never overlap: `p.a = 4; xs[0] = 6; uint x = p.a;`. -/
+def memberIndex : Prog C [] [.val .uint, .mem uarr, .mem pairR] :=
+  .cons (.declMem pairR (.user "p") none (by decide) (by decide))
+    (.cons (newXs "xs")
+      (.cons (.assignMem (mem_ (.there .here) "a" rfl) (.val (lit 4)))
+        (.cons (.assignMem (at_ .here 0) (.val (lit 6)))
+          (.cons (.declLocal .uint (.user "x") (some (.readMem (mem_ (.there .here) "a" rfl)))) .nil))))
+
+theorem rle_member_index : Prog.rle [] memberIndex =
+  .cons (.declMem pairR (.user "p") none (by decide) (by decide))
+    (.cons (newXs "xs")
+      (.cons (.assignMem (mem_ (.there .here) "a" rfl) (.val (lit 4)))
+        (.cons (.assignMem (at_ .here 0) (.val (lit 6)))
+          (.cons (.declLocal .uint (.user "x") (some (lit 4))) .nil)))) := rfl
+
+/-- `mstore_dead_runC`'s premise holds of `xs[0]`. -/
+theorem mstore_witness : Load.ofMLoc? (at_ (Γ := [.mem uarr]) .here 0) =
+    some (.mindex .dyn .here rfl (.lit 0 (by decide))) := rfl
+
+theorem mstore_witness_run (Q : Prog C [.mem uarr] [.mem uarr]) :
+    Prog.runC (.cons (.assignMem (at_ .here 0) (.val (lit 1)))
+      (.cons (.assignMem (at_ .here 0) (.val (lit 2))) Q)) =
+    Prog.runC (.cons (.assignMem (at_ .here 0) (.val (lit 2))) Q) :=
+  mstore_dead_runC _ mstore_witness _ _ Q
+
+/-- Memory negative: dropping the live store `xs[0] = 1;` before `xs[1] = 2;`
+changes what `xs[0]` reads (`1` against the default `0`). -/
+def liveMRead : Prog C [] [.val .uint, .mem uarr] :=
+  .cons (newXs "xs") (.cons (.assignMem (at_ .here 0) (.val (lit 1)))
+    (.cons (.assignMem (at_ .here 1) (.val (lit 2)))
+      (.cons (.declLocal .uint (.user "a") (some (.readMem (at_ .here 0)))) .nil)))
+
+def liveMDropped : Prog C [] [.val .uint, .mem uarr] :=
+  .cons (newXs "xs") (.cons (.assignMem (at_ .here 1) (.val (lit 2)))
+    (.cons (.declLocal .uint (.user "a") (some (.readMem (at_ .here 0)))) .nil))
+
+theorem dstore_live_mem_kept : Prog.dstore liveMRead = liveMRead := rfl
+#guard (topOf (Prog.runC liveMRead start)).toOption == some 1
+#guard (topOf (Prog.runC liveMDropped start)).toOption == some 0
+
+/-! ### LICM: kernel zero-iteration controls and further rejections -/
+
+/-- The loop that never runs returns (kernel: its first test is false). -/
+theorem fail_loop_returns : (Stmt.runC failLoop startG).toOption.isSome = true := by
+  show (TLoop.run _ _ _).toOption.isSome = true
+  rw [TLoop.run_of_iterN (n := 1) rfl]
+  rfl
+
+/-- The unguarded hoist reverts at `total - 1` (kernel). -/
+theorem unguarded_reverts : (Prog.runC unguarded startG).toOption.isNone = true := rfl
+
+/-- The pass's guarded form returns as the loop does (from `licm_runC`). -/
+theorem guarded_returns : (Stmt.runC (Stmt.licm failLoop) startG).toOption.isSome = true := by
+  rw [Stmt.licm_runC]
+  exact fail_loop_returns
+
+/-- `while (i < 3) { x = total - 1; i = i + 1; }` from `i = 0`, `total = 0`: the
+first iteration reverts, and the hoisted form reverts with it. -/
+def revLoop : Stmt C G G := .loop .auto lt3 (.cons (.assignLocal xv (sub total (lit 1))) (.cons incI .nil))
+
+theorem licm_rev_hoisted : Stmt.licm revLoop =
+    .ite lt3 (.cons (.assignLocal xv (sub total (lit 1)))
+      (.cons (.loop .auto lt3 (.cons incI .nil)) .nil)) .nil := rfl
+
+theorem rev_loop_reverts : (Stmt.runC revLoop startG).toOption.isNone = true := by
+  show (TLoop.run _ _ _).toOption.isNone = true
+  rw [TLoop.run_of_iterN (n := 1) rfl]
+  rfl
+
+theorem rev_hoisted_reverts : (Stmt.runC (Stmt.licm revLoop) startG).toOption.isNone = true := rfl
+
+/-- `while (i < 3) { x = total + 1; x = x + i; i = i + 1; }`: the rest writes `x`;
+not hoisted. -/
+def writesX : Stmt C G G := .loop .auto lt3 (.cons (.assignLocal xv (add total (lit 1)))
+  (.cons (.assignLocal xv (add (.simple (.local xv)) iRead)) (.cons incI .nil)))
+
+theorem licm_x_rejected : Stmt.licm writesX = writesX := rfl
+
+/-- A loop with a written invariant is left as written (`LoopAnn.plainB`). -/
+def annotated : Stmt C G G :=
+  .loop (.inv (.simple (.bool true)) none false []) lt3
+    (.cons (.assignLocal xv (add total (lit 1))) (.cons incI .nil))
+
+theorem licm_annotated_kept : Stmt.licm annotated = annotated := rfl
+
+/-! ## Inlining with reference parameters (backfill) -/
+
+abbrev mapR : RefTy := .mapping .uint (.prim .uint)
+
+/-- `function g(mapping(uint => uint) storage m) internal { m[1] = 7; }` called as
+`g(balances);`: the storage parameter is the alias `m = balances`. -/
+def gBody : Prog C ([] ++ [.alias mapR]) ([] ++ [.alias mapR]) :=
+  .cons (.assign (.index .map (.alias .here) (lit 1)) (.val (lit 7))) .nil
+
+def gArgs : Args C [] [.alias mapR] := .snocStorage .nil mapR (.user "m") (.loc (.root "balances" rfl))
+
+def refCall : Stmt C [] [] := .call "g" gArgs .none gBody
+
+theorem ref_call_inlined : Stmt.inl refCall = inlineBlock gArgs gBody := rfl
+
+theorem ref_call_same : Stmt.runC (Stmt.inl refCall) = Stmt.runC refCall := Stmt.inl_runC refCall
+
+def balances1 (r : TRes (Out C start.H [])) : Option Int :=
+  (r.map fun o => match o.st.storage.find
+    ((SRef.ofRoot (C := C) "balances" (T := .ref mapR) rfl).index .map (uintOfNat 1)) with
+    | some v => (v.view : PrimTy.uint.Denote).1
+    | none => -1).toOption
+
+#guard balances1 (Stmt.runC refCall start) == some 7
+#guard balances1 (Stmt.runC (Stmt.inl refCall) start) == some 7
+
+#print axioms Prog.inl_runC
+#print axioms bindArgs_runC
 
 end Solidity.Optimizer.X06Controls

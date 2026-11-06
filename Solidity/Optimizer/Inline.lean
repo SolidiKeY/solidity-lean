@@ -5,13 +5,17 @@ import Solidity.Semantics.RunWk
 # O03 inlining of internal function calls
 
 `f(e₁, …, eₙ);` for an internal function with no return value (`CallRet.none`)
-and value parameters only runs its body in a frame of its own: the arguments
-evaluated in order, the body run over them, the caller's locals restored.
-Inlining writes it as a block of the caller:
+runs its body in a frame of its own: the arguments evaluated in order, the body
+run over them, the caller's locals restored. Inlining writes it as a block of the
+caller:
 
 `{ T₁ x₁ = e₁; …; Tₙ xₙ = eₙ; body' }`
 
-where each `eᵢ` is read past the parameters declared before it
+with a value parameter declared as a value local, a storage parameter as the
+storage alias `R storage xᵢ = eᵢ;` (`declStorage … (some (.path eᵢ))`, the
+identity the call shares) and a memory parameter as the memory alias
+`R memory xᵢ = eᵢ;` (`declMem … (some (.alias eᵢ))`, the object by identity, no
+copy, as the call binds it), where each `eᵢ` is read past the parameters declared before it
 (`Val.wk (thinUnder _)`) and `body'` is the body weakened into the caller's
 context (`Prog.wk (thinTop Γ ps)`), so it reads only its parameters. The
 block runs as the call (`inlineBlock_runC`; `inlineCall_runC` dispatches):
@@ -22,10 +26,10 @@ the body's locals, which leaves the caller's locals exactly as the call
 restores them (`drop_put_top`, `off_bot_inj`).
 
 Covered: calls with `CallRet.none` or one value return (`CallRet.val`, assigned
-to a caller local or discarded) whose arguments are all values (`Args.allVal`).
+to a caller local or discarded), with value, storage and memory parameters.
 A value-returning call becomes `{ params; T r; { body' } x = r; }`
 (`inlineBlockVal_runC`, through `frame_runC`). Calls with several returns,
-memory or storage returns, storage or memory parameters,
+memory or storage returns,
 recursive calls (`callRec`), receiver calls and external calls are left as
 written. The pass inlines every covered call, including calls inside `if`
 branches, blocks and loop bodies, once (a body's own calls are not inlined),
@@ -104,33 +108,28 @@ end Env
 
 /-! ## Binding the arguments -/
 
-/-- All arguments are values. -/
-def _root_.Solidity.Args.allVal {Γ : Ctx} : {ps : Ctx} → Args C Γ ps → Bool
-  | _, .nil => true
-  | _, .snoc as _ _ _ => Args.allVal as
-  | _, .snocStorage .. => false
-  | _, .snocMemory .. => false
-
 /-- The parameters declared in order, each argument read past the ones before. -/
-def bindArgs {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ ps) → as.allVal = true →
-    Prog C (ps ++ Γ) Δ → Prog C Γ Δ
-  | _, .nil, _, k => k
-  | _, .snoc (ps := ps) as p x e, h, k =>
-    bindArgs as h (.cons (.declLocal p x (some (e.wk (thinUnder ps)))) k)
-  | _, .snocStorage .., h, _ => absurd h Bool.false_ne_true
-  | _, .snocMemory .., h, _ => absurd h Bool.false_ne_true
+def bindArgs {Γ Δ : Ctx} : {ps : Ctx} → (as : Args C Γ ps) → Prog C (ps ++ Γ) Δ → Prog C Γ Δ
+  | _, .nil, k => k
+  | _, .snoc (ps := ps) as p x e, k =>
+    bindArgs as (.cons (.declLocal p x (some (e.wk (thinUnder ps)))) k)
+  | _, .snocStorage (ps := ps) as R x e, k =>
+    bindArgs as (.cons (.declStorage R x (some (.path (e.wk (thinUnder ps))))) k)
+  | _, .snocMemory (ps := ps) as R x e, k =>
+    bindArgs as (.cons (.declMem R x (some (.alias (e.wk (thinUnder ps)))) rfl
+      (e.wk (thinUnder ps)).mapFree) k)
 
 theorem bindArgs_runC {Γ Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : Args C Γ ps) →
-    (h : as.allVal = true) → (k : Prog C (ps ++ Γ) Δ) →
-    Prog.runC (bindArgs as h k) σ =
+    (k : Prog C (ps ++ Γ) Δ) →
+    Prog.runC (bindArgs as k) σ =
       (as.evalT σ).bind fun a => (Prog.runC k (σ.withEnv (TEnv.append ps a σ.env))).map
         fun o => ⟨o.st, o.ext⟩
-  | _, .nil, _, k => by
+  | _, .nil, k => by
     change Prog.runC k σ = (Prog.runC k σ).map fun o => ⟨o.st, o.ext⟩
     cases Prog.runC k σ <;> rfl
-  | _, .snoc (ps := ps) as p x e, h, k => by
+  | _, .snoc (ps := ps) as p x e, k => by
     simp only [bindArgs]
-    rw [bindArgs_runC σ as h]
+    rw [bindArgs_runC σ as]
     cases ha : as.evalT σ with
     | error err =>
       show Except.error err = (Args.evalT σ (.snoc as p x e)).bind _
@@ -152,8 +151,56 @@ theorem bindArgs_runC {Γ Δ : Ctx} (σ : State C Γ) : {ps : Ctx} → (as : Arg
             (Prog.runC k (σ.withEnv (TEnv.append (.val p :: ps) (v, a) σ.env)))) =
           Except.map _ (Prog.runC k (σ.withEnv (TEnv.append (.val p :: ps) (v, a) σ.env)))
         cases Prog.runC k (σ.withEnv (TEnv.append (.val p :: ps) (v, a) σ.env)) <;> rfl
-  | _, .snocStorage .., h, _ => absurd h Bool.false_ne_true
-  | _, .snocMemory .., h, _ => absurd h Bool.false_ne_true
+  | _, .snocStorage (ps := ps) as R x e, k => by
+    simp only [bindArgs]
+    rw [bindArgs_runC σ as]
+    cases ha : as.evalT σ with
+    | error err =>
+      show Except.error err = (Args.evalT σ (.snocStorage as R x e)).bind _
+      simp only [Args.evalT, ha, bind, Except.bind]
+    | ok a =>
+      have hv : (e.wk (thinUnder ps)).resolveT (σ.withEnv (TEnv.append ps a σ.env)) =
+          e.resolveT σ := by
+        have := SPath.resolveT_wk (h := thinUnder ps) (τ := σ) (d := TEnv.append ps a σ.env) e
+        rw [← this]
+        show _ = SPath.resolveT (σ.withEnv (TEnv.put (thinUnder ps) σ.env (TEnv.append ps a σ.env))) _
+        rw [put_under]
+      show (Prog.runC (.cons (.declStorage R x (some (.path (e.wk (thinUnder ps))))) k)
+          (σ.withEnv (TEnv.append ps a σ.env))).map _ = (Args.evalT σ (.snocStorage as R x e)).bind _
+      simp only [Args.evalT, ha, Prog.runC, TRun.seq, Stmt.runC, TRun.declStorage, ARhs.evalT, hv,
+        bind, Except.bind, pure, Except.pure]
+      cases he : e.resolveT σ with
+      | error err => rfl
+      | ok v =>
+        show Except.map _ (Except.map (fun o' => (⟨o'.st, _⟩ : Out C σ.H Δ))
+            (Prog.runC k (σ.withEnv (TEnv.append (.alias R :: ps) (some v, a) σ.env)))) =
+          Except.map _ (Prog.runC k (σ.withEnv (TEnv.append (.alias R :: ps) (some v, a) σ.env)))
+        cases Prog.runC k (σ.withEnv (TEnv.append (.alias R :: ps) (some v, a) σ.env)) <;> rfl
+  | _, .snocMemory (ps := ps) as R x e, k => by
+    simp only [bindArgs]
+    rw [bindArgs_runC σ as]
+    cases ha : as.evalT σ with
+    | error err =>
+      show Except.error err = (Args.evalT σ (.snocMemory as R x e)).bind _
+      simp only [Args.evalT, ha, bind, Except.bind]
+    | ok a =>
+      have hv : (e.wk (thinUnder ps)).mvalT (σ.withEnv (TEnv.append ps a σ.env)) = e.mvalT σ := by
+        have := MPath.mvalT_wk (h := thinUnder ps) (τ := σ) (d := TEnv.append ps a σ.env) e
+        rw [← this]
+        show _ = MPath.mvalT (σ.withEnv (TEnv.put (thinUnder ps) σ.env (TEnv.append ps a σ.env))) _
+        rw [put_under]
+      show (Prog.runC (.cons (.declMem R x (some (.alias (e.wk (thinUnder ps)))) rfl
+          (e.wk (thinUnder ps)).mapFree) k) (σ.withEnv (TEnv.append ps a σ.env))).map _ =
+        (Args.evalT σ (.snocMemory as R x e)).bind _
+      simp only [Args.evalT, ha, Prog.runC, TRun.seq, Stmt.runC, TRun.declMem, MRhs.evalT, hv,
+        bind, Except.bind, pure, Except.pure]
+      cases he : e.mvalT σ with
+      | error err => rfl
+      | ok v =>
+        show Except.map _ (Except.map (fun o' => (⟨o'.st, _⟩ : Out C σ.H Δ))
+            (Prog.runC k (σ.withEnv (TEnv.append (.mem R :: ps) (some v, a) σ.env)))) =
+          Except.map _ (Prog.runC k (σ.withEnv (TEnv.append (.mem R :: ps) (some v, a) σ.env)))
+        cases Prog.runC k (σ.withEnv (TEnv.append (.mem R :: ps) (some v, a) σ.env)) <;> rfl
 
 /-! ## The inlined call -/
 
@@ -163,14 +210,13 @@ private theorem drop_trans' {H : HTy} {Γ Δ : Ctx} (a : Ext Γ Δ) : {Ε : Ctx}
   | _, .push b, e => drop_trans' a b e.2
 
 /-- A void call with value arguments, as a block of the caller. -/
-def inlineBlock {Γ ps Γf : Ctx} (args : Args C Γ ps) (h : args.allVal = true)
-    (body : Prog C ps Γf) : Stmt C Γ Γ :=
-  .block (bindArgs args h (body.wk (thinTop Γ ps)).2.2)
+def inlineBlock {Γ ps Γf : Ctx} (args : Args C Γ ps) (body : Prog C ps Γf) : Stmt C Γ Γ :=
+  .block (bindArgs args (body.wk (thinTop Γ ps)).2.2)
 
 /-- **An inlined void call runs as the call.** -/
 theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (h : args.allVal = true) (body : Prog C ([] ++ ps) Γf) :
-    Stmt.runC (inlineBlock args h body) = Stmt.runC (.call f args .none body) := by
+    (body : Prog C ([] ++ ps) Γf) :
+    Stmt.runC (inlineBlock args body) = Stmt.runC (.call f args .none body) := by
   funext σ
   simp only [inlineBlock, Stmt.runC, TRun.block, TRun.call]
   rw [bindArgs_runC]
@@ -184,7 +230,7 @@ theorem inlineBlock_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
     rw [put_top] at hd
     simp only [Prog.run, Prog.runR_eq] at hd
     generalize (Prog.wk (thinTop Γ ps) body).snd.snd = Pw at hd ⊢
-    rw [Subsingleton.elim (bindArgs args h Pw).ext ((Ext.append Γ ps).trans Pw.ext)]
+    rw [Subsingleton.elim (bindArgs args Pw).ext ((Ext.append Γ ps).trans Pw.ext)]
     simp only [Except.bind, bind, pure, Except.pure]
     simp only [CallRet.enterT, CallRet.leaveT]
     cases hb : body.runC (σ.withEnv a) with
@@ -292,16 +338,16 @@ def retTail {Γ qs : Ctx} {p : PrimTy} :
 
 /-- A call with one value return and value arguments, as a block of the caller:
 `{ params; T r; { body' } (x = r;) }`. -/
-def inlineBlockVal {Γ ps Γf : Ctx} (args : Args C Γ ps) (h : args.allVal = true) (p : PrimTy)
+def inlineBlockVal {Γ ps Γf : Ctx} (args : Args C Γ ps) (p : PrimTy)
     (r : Var) (res : Option (Idx Γ (.val p))) (body : Prog C ([.val p] ++ ps) Γf) :
     Stmt C Γ Γ :=
-  .block (bindArgs args h (.cons (.declLocal p r none)
+  .block (bindArgs args (.cons (.declLocal p r none)
     (.cons (.block (body.wk (thinTop Γ (.val p :: ps))).2.2) (retTail res))))
 
 theorem inlineBlockVal_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (h : args.allVal = true) (p : PrimTy) (r : Var) (res : Option (Idx Γ (.val p)))
+    (p : PrimTy) (r : Var) (res : Option (Idx Γ (.val p)))
     (body : Prog C ([.val p] ++ ps) Γf) :
-    Stmt.runC (inlineBlockVal args h p r res body) =
+    Stmt.runC (inlineBlockVal args p r res body) =
       Stmt.runC (.call f args (.val p r res) body) := by
   funext σ
   simp only [inlineBlockVal, Stmt.runC, TRun.block, TRun.call]
@@ -312,7 +358,7 @@ theorem inlineBlockVal_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
     have hf := frame_runC (qs := .val p :: ps) σ body
       ((PrimTy.dflt p, a) : TEnv C σ.H (.val p :: ps))
     generalize (Prog.wk (thinTop Γ (.val p :: ps)) body).snd.snd = Pw at hf ⊢
-    rw [Subsingleton.elim (bindArgs args h _).ext (Ext.append Γ (.val p :: ps))]
+    rw [Subsingleton.elim (bindArgs args _).ext (Ext.append Γ (.val p :: ps))]
     simp only [Except.bind, bind, pure, Except.pure, CallRet.enterT, CallRet.leaveT, TEnv.take,
       Prog.runC, TRun.seq, Stmt.runC, TRun.declLocal, TRun.block]
     have hf' : Except.map (fun o => (⟨State.drop Pw.ext o.st, o.ext⟩ : Out C σ.H _))
@@ -338,30 +384,19 @@ theorem inlineBlockVal_runC {Γ ps Γf : Ctx} (f : Name) (args : Args C Γ ps)
         rw [drop_append_set, drop_append_append]
         rfl
 
-/-- A call, inlined when it is void or returns one value, with value arguments. -/
+/-- A call, inlined when it is void or returns one value. -/
 def inlineCall {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) :
     (ret : CallRet Γ rs Γ') → (body : Prog C (rs ++ ps) Γf) → Stmt C Γ Γ'
-  | .none, body =>
-    if h : args.allVal = true then inlineBlock args h body else .call f args .none body
-  | .val p r res, body =>
-    if h : args.allVal = true then inlineBlockVal args h p r res body
-    else .call f args (.val p r res) body
+  | .none, body => inlineBlock args body
+  | .val p r res, body => inlineBlockVal args p r res body
   | ret@(.rets ..), body | ret@(.mem ..), body | ret@(.storage ..), body =>
     .call f args ret body
 
 theorem inlineCall_runC {Γ Γ' ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps) :
     (ret : CallRet Γ rs Γ') → (body : Prog C (rs ++ ps) Γf) →
       Stmt.runC (inlineCall f args ret body) = Stmt.runC (.call f args ret body)
-  | .none, body => by
-    simp only [inlineCall]
-    split
-    · next h => exact inlineBlock_runC f args h body
-    · rfl
-  | .val p r res, body => by
-    simp only [inlineCall]
-    split
-    · next h => exact inlineBlockVal_runC f args h p r res body
-    · rfl
+  | .none, body => inlineBlock_runC f args body
+  | .val p r res, body => inlineBlockVal_runC f args p r res body
   | .rets .., _ | .mem .., _ | .storage .., _ => rfl
 
 mutual

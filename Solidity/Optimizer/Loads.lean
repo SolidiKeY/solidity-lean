@@ -19,7 +19,9 @@ loads (`Load`) are
 
 Entries (`LEnt`) are created by `x = ld;` and `T x = ld;` (the holder is the
 local `x`), and by `v = s;` / `m.f = s;` / `m[k] = s;` with `s` simple (the
-holder is `s`). The invariant is `LEnt.Holds E σ`: every recorded load
+holder is `s`). Loads are replaced in the right-hand sides of local assignments
+and declarations, in `require`/`assert`/`if` conditions and in the *value* of a
+storage or memory store, not inside a store's location. The invariant is `LEnt.Holds E σ`: every recorded load
 evaluates in `σ` to its holder's value, so each replaced read evaluated to that
 value (it succeeded), and nothing that can fail is introduced or dropped.
 
@@ -41,8 +43,9 @@ proved against the semantics:
   literal indices of any arrays; storage entries survive
   (`Heap.readAddr_writeAddr_apart`).
 
-`require`, `assert` and declarations keep every entry; every other statement
-(calls, pushes, deletes, allocations, payments, …) and the exit of a branch,
+`require`, `assert` and local value declarations keep every entry; every other
+statement (storage and memory declarations, calls, pushes, deletes, allocations,
+payments, …) and the exit of a branch,
 block or loop clears them, and a loop body starts with none. The pass reads no
 gas and no memory size: the lowering IR has neither, and every rewrite here
 keeps the heap typing, so no observation changes (`Prog.rle_empty_runC`).
@@ -518,6 +521,7 @@ theorem addrT_withHeap {p : PrimTy} (σ : State C Γ) (hp : Heap σ.H) {l : Load
   cases l <;> simp only [mloc?, Option.some.injEq, reduceCtorEq] at h <;> subst h <;>
     simp only [MLoc.addrT, mvalT_var] <;> rfl
 
+/-- A memory load apart from a written location reads as before the write (`xs[0]` after `xs[1] = 6;`). -/
 theorem evalT_write_apart (σ : State C Γ) {T : Ty} {m' : MLoc C Γ T} {a : MAddr σ.H T}
     {mv : MVal σ.H T} {hp : Heap σ.H} (ha : m'.addrT σ = .ok a)
     (hw : σ.heap.writeAddr a mv = some hp) {p : PrimTy} (l : Load C Γ p)
@@ -532,6 +536,7 @@ theorem evalT_write_apart (σ : State C Γ) {T : Ty} {m' : MLoc C Γ T} {a : MAd
     rw [show (σ.withHeap hp).heap = hp from rfl,
       Heap.readAddr_writeAddr_apart hw (MLoc.addrT_apart hap ha hb)]
 
+/-- A static memory location reads back what was written there (`xs[0] = 4;` then `xs[0]` is `4`). -/
 theorem evalT_write_same (σ : State C Γ) {p : PrimTy} {m : MLoc C Γ (.prim p)}
     {a : MAddr σ.H (.prim p)} {x : p.Denote} {hp : Heap σ.H} (ha : m.addrT σ = .ok a)
     (hw : σ.heap.writeAddr a x = some hp) {l : Load C Γ p} (hl : ofMLoc? m = some l) :
@@ -657,6 +662,7 @@ end LEnt
 
 /-! ## Storage and memory writes, step by step -/
 
+/-- `l = r;` that returns: its value, its reference and the written storage (`total = 5;`). -/
 theorem assign_ok {T : Ty} {l : Loc C Γ T} {r : Src C Γ T} {σ : State C Γ}
     {o : Out C σ.H Γ} (ho : TRun.assign l r σ = .ok o) :
     ∃ sv ref st, r.valueT σ = .ok sv ∧ l.resolveT σ = .ok ref ∧
@@ -677,6 +683,7 @@ theorem assign_ok {T : Ty} {l : Loc C Γ T} {r : Src C Γ T} {σ : State C Γ}
         | none => simp only [hw, TRes.ofOpt, reduceCtorEq] at hst
         | some st' => simp only [hw, TRes.ofOpt, Except.ok.injEq] at hst; rw [hst]
 
+/-- `m = r;` in memory that returns: its value, address and heap (`xs[0] = 4;`). -/
 theorem assignMem_ok {T : Ty} {m : MLoc C Γ T} {r : MSrc C Γ T} {σ : State C Γ}
     {o : Out C σ.H Γ} (ho : TRun.assignMem m r σ = .ok o) :
     ∃ mv a hp, r.mvalT σ = .ok mv ∧ m.addrT σ = .ok a ∧
@@ -699,6 +706,7 @@ theorem assignMem_ok {T : Ty} {m : MLoc C Γ T} {r : MSrc C Γ T} {σ : State C 
 
 namespace LEnt
 
+/-- The entries after `l = r;` hold where it returns (`uint a = total; age = 5;` keeps `total ↦ a`). -/
 theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {T : Ty}
     (l : Loc C Γ T) (r : Src C Γ T) {o : Out C σ.H Γ} (ho : TRun.assign l r σ = .ok o) :
     Holds (store E l r) o.st := by
@@ -745,6 +753,7 @@ theorem holds_store {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {
         exact hold
     | mfield | mindex => rw [Load.evalT_withStorage_mem σ st _ rfl]; exact hold
 
+/-- The entries after a memory store hold where it returns (`xs[1] = 6;` keeps `xs[0] ↦ 4`). -/
 theorem holds_mstore {E : List (LEnt C Γ)} {σ : State C Γ} (hE : Holds E σ) {T : Ty}
     (m : MLoc C Γ T) (r : MSrc C Γ T) {o : Out C σ.H Γ} (ho : TRun.assignMem m r σ = .ok o) :
     Holds (mstore E m r) o.st := by
@@ -983,6 +992,7 @@ theorem _root_.Solidity.Prog.rle_empty_runC {Γ Γ' : Ctx} (P : Prog C Γ Γ') :
     Prog.runC (Prog.rle [] P) = Prog.runC P :=
   funext fun σ => Prog.rle_runC [] P σ (LEnt.holds_nil σ)
 
+/-- Redundant load elimination as an O01 pass preserving `SameRun`. -/
 theorem rle_preserves (Γ Γ' : Ctx) :
     Preserves (SameRun (C := C) (Γ := Γ) (Γ' := Γ'))
       (Prog.rle [] : Lowering.Pass C Γ Γ') :=
