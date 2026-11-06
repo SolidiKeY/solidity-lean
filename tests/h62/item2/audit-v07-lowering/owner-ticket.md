@@ -13,3 +13,5 @@ Reproduce with the check-imports.py command in the handoff. See import-check/res
 Q-MIG-001 [sources: checkpoint 2/3/4, DEP-MIGRATION-001]: How should this lane obtain a statement-preserving dependency repair for the official pinned toolchain?
 Options: (A) producer/migration owner supplies a reviewed isolated overlay plus exact commit and validation; this lane validates it without editing the original; (B) retain the dependency blocker until the coordinator provides the repaired integration base/overlay, keeping the original pinned base and all audit obligations recorded.
 No alternative toolchain, weakened statement or new premise is requested.
+
+H82 retirement disposition: withdraw any proof-only exact-file agreement requirement under the standing human authorization. Retain DEP-MIGRATION-001 as the actual migration/acceptance dependency. No Hash edit was made before the explicit stop-and-handoff; successor owns integration.
