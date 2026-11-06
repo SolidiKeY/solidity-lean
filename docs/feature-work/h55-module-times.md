@@ -900,3 +900,35 @@ path was corrected, manifest hashes added, and the mapper now rejects files
 outside the private harness direct discovery directory. Regression controls
 cover these findings. Reviewers used no Lean/server/builds; current H56
 execution, KeySort and production acceptance remain unproved.
+
+## H109 slow examples: implementation checkpoint
+
+Human answer Q-H109-SLOW-CLOSURE selects moving DecisionGaps with its
+eleven transitive example importers. The exact twelve modules are listed in
+`docs/parallelism.md`; `Solidity.Examples.Tactics.OpenLoops` and
+`Solidity.Examples.Tactics.RevertData` complete the 14-entry slow root.
+Statements and imports within those modules are unchanged. Generated roots
+partition them; the checkpoint touched closure removes the slow set, while
+`run-lean.sh`, main Lean CI, Pages CI and the axiom audit include the slow
+root. A CI static check detects direct imports from remaining Solidity files
+into the slow set. It is lexical and not a complete Lean import proof.
+
+Static root, orphan and layer checks pass; the test suite includes synthetic
+checkpoint selection and sparse/descendant generator controls. The first
+synthetic checkpoint test attempt had a Python fixture quoting syntax error,
+which was fixed; its corrected run passes. Repository `check-doc-paths.sh`
+failed on five pre-existing missing references outside this change (raw log
+`/workspace/h55-module-times-evidence/h109-doc-paths.log`). KeySort passed
+serially with Lean 4.24.0 commit `797c613` and Lake 5.0.0-src+797c613:
+`LEAN_NUM_THREADS=1`, Lean `-j1`, 10 GiB address-space limit, 300-second
+timeout; exit 0, shell time 1.74 s. An earlier setup attempt did not start
+Lean because `/usr/bin/time` is absent; both logs are retained. No Lean MCP
+diagnostics tool was exposed.
+
+No affected-module proof or full build, before/after wall/RSS comparison,
+CI run, or runtime gate pass is claimed. The checkout has no `.lake` build
+tree; identical-state benchmark preparation and bounded full validation
+remain outstanding. A checkpoint that skips a changed slow module is not
+evidence that the module was checked. The lexical CI check does not prove
+Lake resolution or cover every external/custom root. The historical H28
+object, H56 runner provenance and measurements remain unresolved.
