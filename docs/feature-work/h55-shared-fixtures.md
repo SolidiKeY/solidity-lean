@@ -47,3 +47,19 @@ timed, reviewed, registered or accepted, and is not a completed queue item.
 The declaration inventory is a candidate finder, not the requested
 scope-complete acceptance tool; such a tool and owner packets for the other
 families remain to be built.
+
+## Conservative baseline audit
+
+`python3 scripts/h55/shared-fixtures/baseline_audit.py PATH...` hashes and
+compares every byte of each explicitly named Lean input with the pinned Git
+base. It exits nonzero on any difference or invalid input. Identical bytes
+cover the whole named file; a changed file requires a separate declaration and
+case comparison, kernel checks and independent reviews. This tool does not
+infer the assigned scope or establish that a changed statement is equivalent.
+It is deliberately incapable of approving a migration by itself.
+
+The Bool/Int deletion examples include distinct encoded values, including
+negative signed values; the Bool/Signed copy examples also have differently
+sized case sets. A parameterisation needs explicit acceptance for each original
+observation and refusal, including empty, short-fuel and static executions.
+These examples are leads, not a claim that the family census is complete.
