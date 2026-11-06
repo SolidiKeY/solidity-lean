@@ -1,0 +1,553 @@
+⚠ [3/25] Replayed Solidity.Source.Ctor
+warning: Solidity/Source/Ctor.lean:701:52: This simp argument is unused:
+  List.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  simp only [Syn.ctor, Excl.ctors, List.mem_cons, L̵i̵s̵t̵.̵m̵e̵m̵_̵s̵i̵n̵g̵l̵e̵t̵o̵n̵,̵ ̵true_or, or_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+warning: Solidity/Source/Ctor.lean:720:52: This simp argument is unused:
+  List.mem_singleton
+
+Hint: Omit it from the simp argument list.
+  simp only [Syn.ctor, Excl.ctors, List.mem_cons, L̵i̵s̵t̵.̵m̵e̵m̵_̵s̵i̵n̵g̵l̵e̵t̵o̵n̵,̵ ̵true_or, or_true]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+ℹ [25/25] Replayed Solidity.Frontend.C3Exactness.Audit
+info: Solidity/Frontend/C3Exactness/Audit.lean:8:0: Solidity.Frontend.C3Exactness.selects (c : String) (d : Decl) : Bool
+info: Solidity/Frontend/C3Exactness/Audit.lean:12:0: Solidity.Frontend.C3Exactness.rank (E : Env) (c : String) : Nat
+info: Solidity/Frontend/C3Exactness/Audit.lean:16:0: Solidity.Frontend.C3Exactness.find_getIdx {α : Type} (p : α → Bool) (xs : List α) :
+  List.find? p xs = xs[List.findIdx p xs]?
+info: Solidity/Frontend/C3Exactness/Audit.lean:20:0: Solidity.Frontend.C3Exactness.rank_le (E : Env) (c : String) : rank E c ≤ E.decls.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:24:0: Solidity.Frontend.C3Exactness.rank_selected (E : Env) (c : String) (hi : rank E c < E.decls.length) :
+  selects c E.decls[rank E c] = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:28:0: Solidity.Frontend.C3Exactness.selects_iff (c : String) (d : Decl) :
+  selects c d = true ↔ d.scope = none ∧ d.name = c ∧ (d.kind = DeclKind.contract ∨ d.kind = DeclKind.interface)
+info: Solidity/Frontend/C3Exactness/Audit.lean:32:0: Solidity.Frontend.C3Exactness.rank_injective {E : Env} {a b : String} (ha : rank E a < E.decls.length)
+  (hb : rank E b < E.decls.length) (he : rank E a = rank E b) : a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:36:0: Solidity.Frontend.C3Exactness.bases_empty_of_rank_eq {E : Env} {c : String} (he : rank E c = E.decls.length) :
+  E.bases c = []
+info: Solidity/Frontend/C3Exactness/Audit.lean:40:0: Solidity.Frontend.C3Exactness.rank_lt_of_base {E : Env} {c b : String} (hb : b ∈ E.bases c) : rank E c < E.decls.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:44:0: Solidity.Frontend.C3Exactness.rank_le_index {E : Env} {c : String} {i : Nat} {d : Decl} (hi : E.decls[i]? = some d)
+  (hd : selects c d = true) : rank E c ≤ i
+info: Solidity/Frontend/C3Exactness/Audit.lean:48:0: Solidity.Frontend.C3Exactness.base_rank_lt {E : Env} (ha : E.basesOK = true) {c b : String} (hb : b ∈ E.bases c) :
+  rank E b < rank E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:52:0: Solidity.Frontend.C3Exactness.rank_name_mem {E : Env} {c : String} (hc : rank E c < E.decls.length) :
+  c ∈ List.map Decl.name E.decls
+info: Solidity/Frontend/C3Exactness/Audit.lean:56:0: Solidity.Frontend.C3Exactness.rank_graph (u : Syn Cat.unit) (c : String) (hc : rank u.env c < u.decls.length) :
+  ∃ d, (rank u.env c, d) ∈ u.graph ∧ selects c d = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:60:0: Solidity.Frontend.C3Exactness.nodup_subset_length {α : Type} [DecidableEq α] {xs ys : List α} (hn : xs.Nodup)
+  (hs : xs ⊆ ys) : xs.length ≤ ys.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:64:0: Solidity.Frontend.C3Exactness.public_merge_fuel (E : Env) : E.decls.length < E.decls.length * E.decls.length + 2
+info: Solidity/Frontend/C3Exactness/Audit.lean:68:0: Solidity.Frontend.C3Exactness.Controls.choiceFamily {α : Type} (n : Nat) (a b : α) : List (List α)
+info: Solidity/Frontend/C3Exactness/Audit.lean:72:0: Solidity.Frontend.C3Exactness.Controls.blocked_prefix {α : Type} [DecidableEq α] (n : Nat) (a b : α) :
+  admissible (Controls.choiceFamily n a b) a = false
+info: Solidity/Frontend/C3Exactness/Audit.lean:76:0: Solidity.Frontend.C3Exactness.Controls.legal_last {α : Type} [DecidableEq α] (n : Nat) (a b : α) (hne : a ≠ b) :
+  admissible (Controls.choiceFamily n a b) b = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:80:0: Solidity.Frontend.C3Exactness.Controls.every_head_position {α : Type} [DecidableEq α] (n : Nat) (a b : α)
+  (hne : a ≠ b) : first (Controls.choiceFamily n a b) = some b
+info: Solidity/Frontend/C3Exactness/Audit.lean:84:0: Solidity.Frontend.C3Exactness.Controls.cycle_obstruction {α : Type} [DecidableEq α] (a b : α) :
+  Obstruction [[a, b], [b, a]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:88:0: Solidity.Frontend.C3Exactness.Controls.duplicate_obstruction {α : Type} [DecidableEq α] (a : α) : Obstruction [[a, a]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:92:0: Solidity.Frontend.C3Exactness.Controls.identity_trace : Trace [[1], [2, 1]] [2, 1]
+info: Solidity/Frontend/C3Exactness/Audit.lean:96:0: Solidity.Frontend.C3Exactness.Controls.last_head_control : first (Controls.choiceFamily 8 1 2) = some 2
+info: Solidity/Frontend/C3Exactness/Audit.lean:100:0: Solidity.Frontend.C3Exactness.Controls.empty_zero_fuel : Env.merge 0 [] = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:104:0: Solidity.Frontend.C3Exactness.Controls.empty_one_fuel : Env.merge 1 [] = some []
+info: Solidity/Frontend/C3Exactness/Audit.lean:108:0: Solidity.Frontend.C3Exactness.Controls.singleton_insufficient : Env.merge 1 [["a"]] = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:112:0: Solidity.Frontend.C3Exactness.Controls.singleton_sufficient : Env.merge 2 [["a"]] = some ["a"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:116:0: Solidity.Frontend.C3Exactness.Controls.independent_heads : Trace [["a"], ["b"]] ["a", "b"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:120:0: Solidity.Frontend.C3Exactness.Controls.later_head_refused : ¬Trace [["a"], ["b"]] ["b", "a"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:124:0: Solidity.Frontend.C3Exactness.Controls.diamond_merge : Trace [["B", "A"], ["C", "A"], ["B", "C"]] ["B", "C", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:128:0: Solidity.Frontend.C3Exactness.Controls.repeated_shared_merge :
+  Trace [["C", "A"], ["B", "A"], ["C", "B"], ["A"], []] ["C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:132:0: Solidity.Frontend.C3Exactness.Controls.cycle_refused (n : Nat) : Env.merge n [["a", "b"], ["b", "a"]] = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:136:0: Solidity.Frontend.C3Exactness.Controls.delayed_obstruction {α : Type} [DecidableEq α] (p a b : α) (hpa : p ≠ a)
+  (hpb : p ≠ b) : Stuck [[p], [a, b], [b, a]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:140:0: Solidity.Frontend.C3Exactness.Controls.delayed_refused (n : Nat) : Env.merge n [["p"], ["a", "b"], ["b", "a"]] = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:144:0: Solidity.Frontend.C3Exactness.Controls.empty_trace : Trace [] []
+info: Solidity/Frontend/C3Exactness/Audit.lean:148:0: Solidity.Frontend.C3Exactness.Controls.cycle_stuck : Stuck [["a", "b"], ["b", "a"]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:152:0: Solidity.Frontend.C3Exactness.graphSpecs (bs : List String) : Syn Cat.inherit.list
+info: Solidity/Frontend/C3Exactness/Audit.lean:156:0: Solidity.Frontend.C3Exactness.graphUnit (specs : List (String × List String)) : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:160:0: Solidity.Frontend.C3Exactness.graphDiamond : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:164:0: Solidity.Frontend.C3Exactness.graphDiamond_admitted : graphDiamond.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:168:0: Solidity.Frontend.C3Exactness.graphDiamond_public : graphDiamond.env.linearize "D" = some ["D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:172:0: Solidity.Frontend.C3Exactness.graphDiamond_exact : ExactLin graphDiamond.env "D" ["D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:176:0: Solidity.Frontend.C3Exactness.graphDiamond_constructors : graphDiamond.env.ctorOrder "D" = ["A", "B", "C", "D"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:180:0: Solidity.Frontend.C3Exactness.graphDiamond_identities : IdentityLin graphDiamond.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:184:0: Solidity.Frontend.C3Exactness.graphDiamond_graph_nodes (j : Nat) : j ∈ [3, 2, 1, 0] → ∃ d, (j, d) ∈ graphDiamond.graph
+info: Solidity/Frontend/C3Exactness/Audit.lean:188:0: Solidity.Frontend.C3Exactness.graphDiamond_identity_order_refused : ¬IdentityLin graphDiamond.env 3 [3, 1, 2, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:194:0: Solidity.Frontend.C3Exactness.graphShared : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:198:0: Solidity.Frontend.C3Exactness.graphShared_admitted : graphShared.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:202:0: Solidity.Frontend.C3Exactness.graphShared_public : graphShared.env.linearize "F" = some ["F", "E", "D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:206:0: Solidity.Frontend.C3Exactness.graphShared_exact : ExactLin graphShared.env "F" ["F", "E", "D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:210:0: Solidity.Frontend.C3Exactness.graphShared_constructor_nodup : (graphShared.env.ctorOrder "F").Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:214:0: Solidity.Frontend.C3Exactness.graphShared_constructors : graphShared.env.ctorOrder "F" = ["A", "B", "C", "D", "E", "F"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:218:0: Solidity.Frontend.C3Exactness.graphRedundant : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:222:0: Solidity.Frontend.C3Exactness.graphRedundant_admitted : graphRedundant.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:226:0: Solidity.Frontend.C3Exactness.graphRedundant_public : graphRedundant.env.linearize "C" = some ["C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:230:0: Solidity.Frontend.C3Exactness.graphRedundant_constructors : graphRedundant.env.ctorOrder "C" = ["A", "B", "C"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:234:0: Solidity.Frontend.C3Exactness.graphBad : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:238:0: Solidity.Frontend.C3Exactness.graphBad_admitted : graphBad.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:242:0: Solidity.Frontend.C3Exactness.graphBad_merge_stuck : Stuck [["Y", "A", "B"], ["X", "B", "A"], ["Y", "X"]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:246:0: Solidity.Frontend.C3Exactness.graphBad_certificate : GraphBlocked graphBad.env "Z"
+info: Solidity/Frontend/C3Exactness/Audit.lean:250:0: Solidity.Frontend.C3Exactness.graphBad_all_fuel (n : Nat) : graphBad.env.linearizeF n "Z" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:254:0: Solidity.Frontend.C3Exactness.graphBad_public_refused : graphBad.env.linearize "Z" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:258:0: Solidity.Frontend.C3Exactness.graphBad_inherited_certificate : GraphBlocked graphBad.env "W"
+info: Solidity/Frontend/C3Exactness/Audit.lean:262:0: Solidity.Frontend.C3Exactness.graphBad_inherited_all_fuel (n : Nat) : graphBad.env.linearizeF n "W" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:266:0: Solidity.Frontend.C3Exactness.graphBad_identity_stuck : Stuck [[3, 0, 1], [2, 1, 0], [3, 2]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:270:0: Solidity.Frontend.C3Exactness.graphSelfCycle : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:274:0: Solidity.Frontend.C3Exactness.graphSelfCycle_not_admitted : graphSelfCycle.env.basesOK = false
+info: Solidity/Frontend/C3Exactness/Audit.lean:278:0: Solidity.Frontend.C3Exactness.graphSelfCycle_path : CyclePath graphSelfCycle.env "S" "S"
+info: Solidity/Frontend/C3Exactness/Audit.lean:282:0: Solidity.Frontend.C3Exactness.graphSelfCycle_all_fuel (n : Nat) : graphSelfCycle.env.linearizeF n "S" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:286:0: Solidity.Frontend.C3Exactness.graphMutualCycle : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:290:0: Solidity.Frontend.C3Exactness.graphMutualCycle_not_admitted : graphMutualCycle.env.basesOK = false
+info: Solidity/Frontend/C3Exactness/Audit.lean:294:0: Solidity.Frontend.C3Exactness.graphMutualCycle_path : CyclePath graphMutualCycle.env "P" "P"
+info: Solidity/Frontend/C3Exactness/Audit.lean:298:0: Solidity.Frontend.C3Exactness.graphMutualCycle_all_fuel (n : Nat) : graphMutualCycle.env.linearizeF n "P" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:302:0: Solidity.Frontend.C3Exactness.graphMutualCycle_fallback : graphMutualCycle.env.ctorOrder "P" = ["P"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:306:0: Solidity.Frontend.C3Exactness.graphEmpty : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:310:0: Solidity.Frontend.C3Exactness.graphEmpty_admitted : graphEmpty.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:314:0: Solidity.Frontend.C3Exactness.graphUnknown_public : graphEmpty.env.linearize "missing" = some ["missing"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:318:0: Solidity.Frontend.C3Exactness.graphUnknown_identity_refused : ¬IdentityLin graphEmpty.env 0 [0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:322:0: Solidity.Frontend.C3Exactness.graphSentinel_not_global_injective : ¬InjectsOn (fun x => True) (rank graphEmpty.env)
+info: Solidity/Frontend/C3Exactness/Audit.lean:326:0: Solidity.Frontend.C3Exactness.graphDiamond_refl : Reaches graphDiamond.env "D" "D"
+info: Solidity/Frontend/C3Exactness/Audit.lean:330:0: Solidity.Frontend.C3Exactness.graphDiamond_reaches : Reaches graphDiamond.env "D" "A"
+info: Solidity/Frontend/C3Exactness/Audit.lean:334:0: Solidity.Frontend.C3Exactness.graphDiamond_C_public : graphDiamond.env.linearize "C" = some ["C", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:338:0: Solidity.Frontend.C3Exactness.graphDiamond_constructor_subsequence :
+  (graphDiamond.env.ctorOrder "C").Sublist (graphDiamond.env.ctorOrder "D").dropLast
+info: Solidity/Frontend/C3Exactness/Audit.lean:342:0: Solidity.Frontend.C3Exactness.graphInterfaceUnit (specs : List (String × List String)) : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:346:0: Solidity.Frontend.C3Exactness.graphInterfaceDiamond : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:350:0: Solidity.Frontend.C3Exactness.graphInterfaceDiamond_admitted : graphInterfaceDiamond.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:354:0: Solidity.Frontend.C3Exactness.graphInterfaceDiamond_public :
+  graphInterfaceDiamond.env.linearize "ID" = some ["ID", "IC", "IB", "IA"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:358:0: Solidity.Frontend.C3Exactness.graphInterfaceDiamond_identities : IdentityLin graphInterfaceDiamond.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:364:0: Solidity.Frontend.C3Exactness.graphMixed : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:368:0: Solidity.Frontend.C3Exactness.graphMixed_admitted : graphMixed.env.basesOK = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:372:0: Solidity.Frontend.C3Exactness.graphMixed_public : graphMixed.env.linearize "C" = some ["C", "IB", "IA"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:376:0: Solidity.Frontend.C3Exactness.graphBadInterface : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:380:0: Solidity.Frontend.C3Exactness.graphBadInterface_not_admitted : graphBadInterface.env.basesOK = false
+info: Solidity/Frontend/C3Exactness/Audit.lean:384:0: Solidity.Frontend.C3Exactness.graphBadInterface_merge_only : graphBadInterface.env.linearize "I" = some ["I", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:388:0: Solidity.Frontend.C3Exactness.graphDuplicate : Syn Cat.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:392:0: Solidity.Frontend.C3Exactness.graphDuplicate_first_selected : rank graphDuplicate.env "A" = 0
+info: Solidity/Frontend/C3Exactness/Audit.lean:396:0: Solidity.Frontend.C3Exactness.graphDuplicate_public_first : graphDuplicate.env.linearize "A" = some ["A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:400:0: Solidity.Frontend.C3Exactness.graphDuplicate_unselected : ¬GoodId graphDuplicate.env 1
+info: Solidity/Frontend/C3Exactness/Audit.lean:404:0: Solidity.Frontend.C3Exactness.graphDuplicate_clashes :
+  ¬List.Pairwise (fun d d' => Decl.clash graphDuplicate.env d d' = false) graphDuplicate.decls
+info: Solidity/Frontend/C3Exactness/Audit.lean:408:0: Solidity.Frontend.C3Exactness.graphSettings : Settings
+info: Solidity/Frontend/C3Exactness/Audit.lean:412:0: Solidity.Frontend.C3Exactness.graphResolution : Resolution
+info: Solidity/Frontend/C3Exactness/Audit.lean:416:0: Solidity.Frontend.C3Exactness.graphResolution_resolves : Resolves' graphSettings graphDiamond graphResolution
+info: Solidity/Frontend/C3Exactness/Audit.lean:420:0: Solidity.Frontend.C3Exactness.graphResolution_identities : IdentityLin graphResolution.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:424:0: Solidity.Frontend.C3Exactness.nameAt (E : Env) (i : Nat) : String
+info: Solidity/Frontend/C3Exactness/Audit.lean:428:0: Solidity.Frontend.C3Exactness.GoodId (E : Env) (i : Nat) : Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:432:0: Solidity.Frontend.C3Exactness.nameAt_rank {E : Env} {c : String} (hc : rank E c < E.decls.length) :
+  nameAt E (rank E c) = c
+info: Solidity/Frontend/C3Exactness/Audit.lean:436:0: Solidity.Frontend.C3Exactness.rank_good {E : Env} {c : String} (hc : rank E c < E.decls.length) : GoodId E (rank E c)
+info: Solidity/Frontend/C3Exactness/Audit.lean:440:0: Solidity.Frontend.C3Exactness.rank_injects (E : Env) : InjectsOn (fun c => rank E c < E.decls.length) (rank E)
+info: Solidity/Frontend/C3Exactness/Audit.lean:444:0: Solidity.Frontend.C3Exactness.nameAt_injects (E : Env) : InjectsOn (GoodId E) (nameAt E)
+info: Solidity/Frontend/C3Exactness/Audit.lean:448:0: Solidity.Frontend.C3Exactness.merge_input_known {E : Env} {c : String} {Ls : List (List String)} (ha : E.basesOK = true)
+  (hlen : Ls.length = (E.bases c).reverse.length)
+  (hchildren :
+    ∀ (i : Nat) (b : String) (Lb : List String), (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → ExactLin E b Lb)
+  (x : String) : x ∈ (Ls ++ [(E.bases c).reverse]).flatten → rank E x < E.decls.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:452:0: Solidity.Frontend.C3Exactness.IdentityLin (E : Env) : Nat → List Nat → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:456:0: Solidity.Frontend.C3Exactness.ExactLin.identities {E : Env} {c : String} {L : List String} (ht : ExactLin E c L)
+  (ha : E.basesOK = true) : rank E c < E.decls.length → IdentityLin E (rank E c) (List.map (rank E) L)
+info: Solidity/Frontend/C3Exactness/Audit.lean:460:0: Solidity.Frontend.C3Exactness.identity_input_good {E : Env} {c : String} {Ls : List (List Nat)} (ha : E.basesOK = true)
+  (hlen : Ls.length = (E.bases c).reverse.length)
+  (hchildren :
+    ∀ (i : Nat) (b : String) (Lb : List Nat),
+      (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → ∀ (j : Nat), j ∈ Lb → GoodId E j)
+  (j : Nat) : j ∈ (Ls ++ [List.map (rank E) (E.bases c).reverse]).flatten → GoodId E j
+info: Solidity/Frontend/C3Exactness/Audit.lean:464:0: Solidity.Frontend.C3Exactness.IdentityLin.known {E : Env} {i : Nat} {L : List Nat} (ht : IdentityLin E i L)
+  (ha : E.basesOK = true) (j : Nat) : j ∈ L → GoodId E j
+info: Solidity/Frontend/C3Exactness/Audit.lean:468:0: Solidity.Frontend.C3Exactness.decode_bases {E : Env} {c : String} (ha : E.basesOK = true) :
+  List.map (nameAt E) (List.map (rank E) (E.bases c).reverse) = (E.bases c).reverse
+info: Solidity/Frontend/C3Exactness/Audit.lean:472:0: Solidity.Frontend.C3Exactness.IdentityLin.decode {E : Env} {i : Nat} {L : List Nat} (ht : IdentityLin E i L)
+  (ha : E.basesOK = true) : ExactLin E (nameAt E i) (List.map (nameAt E) L)
+info: Solidity/Frontend/C3Exactness/Audit.lean:476:0: Solidity.Frontend.C3Exactness.IdentityLin.roundtrip {E : Env} {i : Nat} {L : List Nat} (ht : IdentityLin E i L)
+  (ha : E.basesOK = true) : List.map (rank E) (List.map (nameAt E) L) = L
+info: Solidity/Frontend/C3Exactness/Audit.lean:480:0: Solidity.Frontend.C3Exactness.IdentityLin.unique {E : Env} {i : Nat} {a b : List Nat} (ha : IdentityLin E i a)
+  (hb : IdentityLin E i b) (hadm : E.basesOK = true) : a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:484:0: Solidity.Frontend.C3Exactness.IdentityLin.nodup {E : Env} {i : Nat} {L : List Nat} (ht : IdentityLin E i L)
+  (ha : E.basesOK = true) : L.Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:488:0: Solidity.Frontend.C3Exactness.IdentityLin.graph_nodes {u : Syn Cat.unit} {i : Nat} {L : List Nat}
+  (ht : IdentityLin u.env i L) (ha : u.env.basesOK = true) (j : Nat) : j ∈ L → ∃ d, (j, d) ∈ u.graph
+info: Solidity/Frontend/C3Exactness/Audit.lean:492:0: Solidity.Frontend.C3Exactness.linearize_identity_iff {E : Env} (ha : E.basesOK = true) (c : String)
+  (hc : rank E c < E.decls.length) (I : List Nat) :
+  Option.map (List.map (rank E)) (E.linearize c) = some I ↔ IdentityLin E (rank E c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:496:0: Solidity.Frontend.C3Exactness.linearize_selected_identity_iff {E : Env} (ha : E.basesOK = true) (c : String)
+  (hc : ∃ d, d ∈ E.decls ∧ selects c d = true) (I : List Nat) :
+  Option.map (List.map (rank E)) (E.linearize c) = some I ↔ IdentityLin E (rank E c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:502:0: Solidity.Frontend.C3Exactness.collect_root_scope (scope : Option String) {cat : Cat} (s : Syn cat) (d : Decl) :
+  d ∈ Syn.collect scope s → d.kind = DeclKind.contract ∨ d.kind = DeclKind.interface → d.scope = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:506:0: Solidity.Frontend.C3Exactness.unit_decl_selected (u : Syn Cat.unit) (d : Decl) (hd : d ∈ u.decls)
+  (hk : d.kind = DeclKind.contract ∨ d.kind = DeclKind.interface) : selects d.name d = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:510:0: Solidity.Frontend.C3Exactness.unit_contract_selected (u : Syn Cat.unit) (c : String) (hc : c ∈ u.env.contractNames) :
+  ∃ d, d ∈ u.decls ∧ selects c d = true
+info: Solidity/Frontend/C3Exactness/Audit.lean:514:0: Solidity.Frontend.C3Exactness.unit_identity_iff (u : Syn Cat.unit) (ha : u.env.basesOK = true) (c : String)
+  (hc : c ∈ u.env.contractNames) (I : List Nat) :
+  Option.map (List.map (rank u.env)) (u.env.linearize c) = some I ↔ IdentityLin u.env (rank u.env c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:518:0: Solidity.Frontend.C3Exactness.resolved_identity_iff {s : Settings} {u : Syn Cat.unit} {r : Resolution}
+  (hr : Resolves' s u r) (ha : r.env.basesOK = true) (c : String) (hc : c ∈ r.env.contractNames) (I : List Nat) :
+  Option.map (List.map (rank r.env)) (r.env.linearize c) = some I ↔ IdentityLin r.env (rank r.env c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:522:0: Solidity.Frontend.C3Exactness.IdentityLin.mk {E : Env} {c : String} {Ls : List (List Nat)} {M : List Nat} :
+  rank E c < E.decls.length →
+    Ls.length = (E.bases c).reverse.length →
+      (∀ (i : Nat) (b : String) (Lb : List Nat),
+          (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → IdentityLin E (rank E b) Lb) →
+        Trace (Ls ++ [List.map (rank E) (E.bases c).reverse]) M → IdentityLin E (rank E c) (rank E c :: M)
+info: Solidity/Frontend/C3Exactness/Audit.lean:526:0: Solidity.Frontend.C3Exactness.ExactLin (E : Env) : String → List String → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:530:0: Solidity.Frontend.C3Exactness.paired_get {α β : Type} {bs : List α} {Ls : List β} (hlen : Ls.length = bs.length) {l : β}
+  (hl : l ∈ Ls) : ∃ i b, bs[i]? = some b ∧ Ls[i]? = some l
+info: Solidity/Frontend/C3Exactness/Audit.lean:534:0: Solidity.Frontend.C3Exactness.mapM_complete {f : String → Option (List String)} (bs : List String)
+  (Ls : List (List String)) :
+  Ls.length = bs.length →
+    (∀ (i : Nat) (b : String) (Lb : List String), bs[i]? = some b → Ls[i]? = some Lb → f b = some Lb) →
+      List.mapM f bs = some Ls
+info: Solidity/Frontend/C3Exactness/Audit.lean:538:0: Solidity.Frontend.C3Exactness.linearizeF_exact_sound {E : Env} (n : Nat) (c : String) (L : List String) :
+  E.linearizeF n c = some L → ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:542:0: Solidity.Frontend.C3Exactness.ExactLin.unique {E : Env} {c : String} {a b : List String} (ha : ExactLin E c a)
+  (hb : ExactLin E c b) : a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:546:0: Solidity.Frontend.C3Exactness.trace_rank_lt {E : Env} {c : String} {Ls : List (List String)} {M : List String}
+  (ha : E.basesOK = true) (hlen : Ls.length = (E.bases c).reverse.length)
+  (hchildren :
+    ∀ (i : Nat) (b : String) (Lb : List String),
+      (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → ∀ (x : String), x ∈ Lb → rank E x ≤ rank E b)
+  (ht : Trace (Ls ++ [(E.bases c).reverse]) M) (x : String) : x ∈ M → rank E x < rank E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:550:0: Solidity.Frontend.C3Exactness.ExactLin.rank_bound {E : Env} {c : String} {L : List String} (ht : ExactLin E c L)
+  (ha : E.basesOK = true) (x : String) : x ∈ L → rank E x ≤ rank E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:554:0: Solidity.Frontend.C3Exactness.ExactLin.tail_rank {E : Env} {c : String} {M : List String} (ht : ExactLin E c (c :: M))
+  (ha : E.basesOK = true) (x : String) : x ∈ M → rank E x < rank E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:558:0: Solidity.Frontend.C3Exactness.ExactLin.tail_nodup {E : Env} {c : String} {M : List String}
+  (ht : ExactLin E c (c :: M)) : M.Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:562:0: Solidity.Frontend.C3Exactness.ExactLin.tail_length {E : Env} {c : String} {M : List String} (ht : ExactLin E c (c :: M))
+  (ha : E.basesOK = true) : M.length ≤ E.decls.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:566:0: Solidity.Frontend.C3Exactness.ExactLin.nodup {E : Env} {c : String} {L : List String} (ht : ExactLin E c L)
+  (ha : E.basesOK = true) : L.Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:570:0: Solidity.Frontend.C3Exactness.ExactLin.complete {E : Env} {c : String} {L : List String} (ht : ExactLin E c L)
+  (ha : E.basesOK = true) (n : Nat) : rank E c < n → E.linearizeF n c = some L
+info: Solidity/Frontend/C3Exactness/Audit.lean:574:0: Solidity.Frontend.C3Exactness.linearize_exact_iff {E : Env} (ha : E.basesOK = true) (c : String) (L : List String) :
+  E.linearize c = some L ↔ ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:578:0: Solidity.Frontend.C3Exactness.linearize_none_iff {E : Env} (ha : E.basesOK = true) (c : String) :
+  E.linearize c = none ↔ ¬∃ L, ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:582:0: Solidity.Frontend.C3Exactness.linearizeF_unique {E : Env} {c : String} {a b : List String} {m n : Nat}
+  (ha : E.linearizeF m c = some a) (hb : E.linearizeF n c = some b) : a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:586:0: Solidity.Frontend.C3Exactness.Reaches (E : Env) : String → String → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:590:0: Solidity.Frontend.C3Exactness.ExactLin.mem_iff {E : Env} {c : String} {L : List String} (ht : ExactLin E c L)
+  (x : String) : x ∈ L ↔ Reaches E c x
+info: Solidity/Frontend/C3Exactness/Audit.lean:594:0: Solidity.Frontend.C3Exactness.ExactLin.direct_order {E : Env} {c : String} {L : List String} (ht : ExactLin E c L) :
+  (E.bases c).reverse.Sublist (List.drop 1 L)
+info: Solidity/Frontend/C3Exactness/Audit.lean:598:0: Solidity.Frontend.C3Exactness.ExactLin.monotone {E : Env} {c b : String} {L Lb : List String} (ht : ExactLin E c L)
+  (hb : b ∈ E.bases c) (htb : ExactLin E b Lb) : Lb.Sublist (List.drop 1 L)
+info: Solidity/Frontend/C3Exactness/Audit.lean:602:0: Solidity.Frontend.C3Exactness.exact_ctorOrder {E : Env} {c : String} {L : List String} (hs : E.linearize c = some L) :
+  E.ctorOrder c = L.reverse
+info: Solidity/Frontend/C3Exactness/Audit.lean:606:0: Solidity.Frontend.C3Exactness.ctor_direct_order {E : Env} {c : String} {L : List String} (hs : E.linearize c = some L) :
+  (E.bases c).Sublist (E.ctorOrder c).dropLast
+info: Solidity/Frontend/C3Exactness/Audit.lean:610:0: Solidity.Frontend.C3Exactness.ctor_monotone {E : Env} {c b : String} {L Lb : List String} (hs : E.linearize c = some L)
+  (hb : b ∈ E.bases c) (hsb : E.linearize b = some Lb) : (E.ctorOrder b).Sublist (E.ctorOrder c).dropLast
+info: Solidity/Frontend/C3Exactness/Audit.lean:614:0: Solidity.Frontend.C3Exactness.ctor_nodup {E : Env} {c : String} {L : List String} (ha : E.basesOK = true)
+  (hs : E.linearize c = some L) : (E.ctorOrder c).Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:618:0: Solidity.Frontend.C3Exactness.linearizeF_self_cycle {E : Env} {c : String} (hc : E.bases c = [c]) (n : Nat) :
+  E.linearizeF n c = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:622:0: Solidity.Frontend.C3Exactness.GraphBlocked (E : Env) : String → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:626:0: Solidity.Frontend.C3Exactness.mapM_none {f : String → Option (List String)} (bs : List String) :
+  List.mapM f bs = none → ∃ b, b ∈ bs ∧ f b = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:630:0: Solidity.Frontend.C3Exactness.GraphBlocked.not_exact {E : Env} {c : String} (hb : GraphBlocked E c) {L : List String} :
+  ¬ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:634:0: Solidity.Frontend.C3Exactness.graph_trace_or_blocked {E : Env} (ha : E.basesOK = true) (c : String) :
+  (∃ L, ExactLin E c L) ∨ GraphBlocked E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:638:0: Solidity.Frontend.C3Exactness.linearize_none_iff_blocked {E : Env} (ha : E.basesOK = true) (c : String) :
+  E.linearize c = none ↔ GraphBlocked E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:642:0: Solidity.Frontend.C3Exactness.GraphBlocked.linearizeF_none {E : Env} {c : String} (hb : GraphBlocked E c) (n : Nat) :
+  E.linearizeF n c = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:646:0: Solidity.Frontend.C3Exactness.CyclePath (E : Env) : String → String → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:650:0: Solidity.Frontend.C3Exactness.CyclePath.rank_lt {E : Env} {c b : String} (hp : CyclePath E c b)
+  (ha : E.basesOK = true) : rank E b < rank E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:654:0: Solidity.Frontend.C3Exactness.ExactLin.base_length {E : Env} {c b : String} {L : List String} (ht : ExactLin E c L)
+  (hb : b ∈ E.bases c) : ∃ Lb, ExactLin E b Lb ∧ Lb.length < L.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:658:0: Solidity.Frontend.C3Exactness.CyclePath.descendant {E : Env} {c b : String} (hp : CyclePath E c b) {L : List String} :
+  ExactLin E c L → ∃ Lb, ExactLin E b Lb ∧ Lb.length < L.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:662:0: Solidity.Frontend.C3Exactness.CyclePath.not_exact {E : Env} {c : String} (hp : CyclePath E c c) {L : List String} :
+  ¬ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:666:0: Solidity.Frontend.C3Exactness.CyclePath.linearizeF_none {E : Env} {c : String} (hp : CyclePath E c c) (n : Nat) :
+  E.linearizeF n c = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:670:0: Solidity.Frontend.C3Exactness.ExactLin.mk {E : Env} {c : String} {Ls : List (List String)} {M : List String} :
+  Ls.length = (E.bases c).reverse.length →
+    (∀ (i : Nat) (b : String) (Lb : List String),
+        (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → ExactLin E b Lb) →
+      Trace (Ls ++ [(E.bases c).reverse]) M → ExactLin E c (c :: M)
+info: Solidity/Frontend/C3Exactness/Audit.lean:674:0: Solidity.Frontend.C3Exactness.Reaches.refl {E : Env} {c : String} : Reaches E c c
+info: Solidity/Frontend/C3Exactness/Audit.lean:678:0: Solidity.Frontend.C3Exactness.Reaches.step {E : Env} {c b x : String} : b ∈ E.bases c → Reaches E b x → Reaches E c x
+info: Solidity/Frontend/C3Exactness/Audit.lean:682:0: Solidity.Frontend.C3Exactness.GraphBlocked.merge {E : Env} {c : String} {Ls : List (List String)} :
+  Ls.length = (E.bases c).reverse.length →
+    (∀ (i : Nat) (b : String) (Lb : List String),
+        (E.bases c).reverse[i]? = some b → Ls[i]? = some Lb → ExactLin E b Lb) →
+      Stuck (Ls ++ [(E.bases c).reverse]) → GraphBlocked E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:686:0: Solidity.Frontend.C3Exactness.GraphBlocked.base {E : Env} {c b : String} :
+  b ∈ E.bases c → GraphBlocked E b → GraphBlocked E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:690:0: Solidity.Frontend.C3Exactness.CyclePath.direct {E : Env} {c b : String} : b ∈ E.bases c → CyclePath E c b
+info: Solidity/Frontend/C3Exactness/Audit.lean:694:0: Solidity.Frontend.C3Exactness.CyclePath.step {E : Env} {c b x : String} :
+  b ∈ E.bases c → CyclePath E b x → CyclePath E c x
+info: Solidity/Frontend/C3Exactness/Audit.lean:698:0: Solidity.Frontend.C3Exactness.InjectsOn {α β : Type} (S : α → Prop) (f : α → β) : Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:702:0: Solidity.Frontend.C3Exactness.mem_map_reflect {α β : Type} {S : α → Prop} {f : α → β} {l : List α} {x : α}
+  (hf : InjectsOn S f) (hx : S x) (hl : ∀ (a : α), a ∈ l → S a) : f x ∈ List.map f l ↔ x ∈ l
+info: Solidity/Frontend/C3Exactness/Audit.lean:706:0: Solidity.Frontend.C3Exactness.admissible_map {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} {h : α} (hf : InjectsOn S f) (hs : ∀ (x : α), x ∈ ls.flatten → S x) (hh : S h) :
+  admissible (List.map (List.map f) ls) (f h) = admissible ls h
+info: Solidity/Frontend/C3Exactness/Audit.lean:710:0: Solidity.Frontend.C3Exactness.active_map {α β : Type} [DecidableEq α] [DecidableEq β] (f : α → β) (ls : List (List α)) :
+  active (List.map (List.map f) ls) = List.map (List.map f) (active ls)
+info: Solidity/Frontend/C3Exactness/Audit.lean:714:0: Solidity.Frontend.C3Exactness.filter_map_ne {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {l : List α} {h : α} (hf : InjectsOn S f) (hs : ∀ (x : α), x ∈ l → S x) (hh : S h) :
+  List.filter (fun x => decide (x ≠ f h)) (List.map f l) = List.map f (List.filter (fun x => decide (x ≠ h)) l)
+info: Solidity/Frontend/C3Exactness/Audit.lean:718:0: Solidity.Frontend.C3Exactness.residual_map {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} {h : α} (hf : InjectsOn S f) (hs : ∀ (x : α), x ∈ ls.flatten → S x) (hh : S h) :
+  residual (List.map (List.map f) ls) (f h) = List.map (List.map f) (residual ls h)
+info: Solidity/Frontend/C3Exactness/Audit.lean:722:0: Solidity.Frontend.C3Exactness.findSome_congr {γ δ : Type} (xs : List γ) (f g : γ → Option δ)
+  (he : ∀ (x : γ), x ∈ xs → f x = g x) : List.findSome? f xs = List.findSome? g xs
+info: Solidity/Frontend/C3Exactness/Audit.lean:726:0: Solidity.Frontend.C3Exactness.findSome_result_map {γ δ ε : Type} (f : δ → ε) (g : γ → Option δ) (xs : List γ) :
+  List.findSome? (fun x => Option.map f (g x)) xs = Option.map f (List.findSome? g xs)
+info: Solidity/Frontend/C3Exactness/Audit.lean:730:0: Solidity.Frontend.C3Exactness.first_map {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} (hf : InjectsOn S f) (hs : ∀ (x : α), x ∈ ls.flatten → S x) :
+  first (List.map (List.map f) ls) = Option.map f (first ls)
+info: Solidity/Frontend/C3Exactness/Audit.lean:734:0: Solidity.Frontend.C3Exactness.Trace.rename {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} {out : List α} (ht : Trace ls out) (hf : InjectsOn S f) :
+  (∀ (x : α), x ∈ ls.flatten → S x) → Trace (List.map (List.map f) ls) (List.map f out)
+info: Solidity/Frontend/C3Exactness/Audit.lean:738:0: Solidity.Frontend.C3Exactness.Stuck.rename {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} (ht : Stuck ls) (hf : InjectsOn S f) :
+  (∀ (x : α), x ∈ ls.flatten → S x) → Stuck (List.map (List.map f) ls)
+info: Solidity/Frontend/C3Exactness/Audit.lean:742:0: Solidity.Frontend.C3Exactness.rename_exists_iff {α β : Type} [DecidableEq α] [DecidableEq β] {S : α → Prop} {f : α → β}
+  {ls : List (List α)} (hf : InjectsOn S f) (hs : ∀ (x : α), x ∈ ls.flatten → S x) :
+  (∃ out, Trace (List.map (List.map f) ls) out) ↔ ∃ out, Trace ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:746:0: Solidity.Frontend.C3Exactness.active {α : Type} [DecidableEq α] (ls : List (List α)) : List (List α)
+info: Solidity/Frontend/C3Exactness/Audit.lean:750:0: Solidity.Frontend.C3Exactness.admissible {α : Type} [DecidableEq α] (ls : List (List α)) (h : α) : Bool
+info: Solidity/Frontend/C3Exactness/Audit.lean:754:0: Solidity.Frontend.C3Exactness.first {α : Type} [DecidableEq α] (ls : List (List α)) : Option α
+info: Solidity/Frontend/C3Exactness/Audit.lean:758:0: Solidity.Frontend.C3Exactness.residual {α : Type} [DecidableEq α] (ls : List (List α)) (h : α) : List (List α)
+info: Solidity/Frontend/C3Exactness/Audit.lean:762:0: Solidity.Frontend.C3Exactness.Trace {α : Type} [DecidableEq α] : List (List α) → List α → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:766:0: Solidity.Frontend.C3Exactness.Obstruction {α : Type} [DecidableEq α] (ls : List (List α)) : Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:770:0: Solidity.Frontend.C3Exactness.Stuck {α : Type} [DecidableEq α] : List (List α) → Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:774:0: Solidity.Frontend.C3Exactness.first_empty {α : Type} [DecidableEq α] : first [] = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:778:0: Solidity.Frontend.C3Exactness.merge_succ (n : Nat) (ls : List (List String)) :
+  Env.merge (n + 1) ls =
+    if (active ls).isEmpty = true then some []
+    else
+      match first (active ls) with
+      | none => none
+      | some h => Option.map (fun x => h :: x) (Env.merge n (residual ls h))
+info: Solidity/Frontend/C3Exactness/Audit.lean:782:0: Solidity.Frontend.C3Exactness.merge_sound (n : Nat) (ls : List (List String)) (out : List String) :
+  Env.merge n ls = some out → Trace ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:786:0: Solidity.Frontend.C3Exactness.Trace.complete {ls : List (List String)} {out : List String} (t : Trace ls out)
+  (n : Nat) : out.length < n → Env.merge n ls = some out
+info: Solidity/Frontend/C3Exactness/Audit.lean:790:0: Solidity.Frontend.C3Exactness.Trace.unique {α : Type} [DecidableEq α] {ls : List (List α)} {a b : List α}
+  (ha : Trace ls a) (hb : Trace ls b) : a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:794:0: Solidity.Frontend.C3Exactness.merge_fuel (n : Nat) (ls : List (List String)) (out : List String) :
+  Env.merge n ls = some out → out.length < n
+info: Solidity/Frontend/C3Exactness/Audit.lean:798:0: Solidity.Frontend.C3Exactness.merge_iff {n : Nat} {ls : List (List String)} {out : List String} :
+  Env.merge n ls = some out ↔ Trace ls out ∧ out.length < n
+info: Solidity/Frontend/C3Exactness/Audit.lean:802:0: Solidity.Frontend.C3Exactness.admissible_iff {α : Type} [DecidableEq α] (ls : List (List α)) (h : α) :
+  admissible ls h = true ↔ ∀ (l : List α), l ∈ ls → ¬h ∈ List.drop 1 l
+info: Solidity/Frontend/C3Exactness/Audit.lean:806:0: Solidity.Frontend.C3Exactness.first_iff {α : Type} [DecidableEq α] (ls : List (List α)) (h : α) :
+  first ls = some h ↔
+    ∃ pre l post,
+      ls = pre ++ l :: post ∧
+        Option.filter (admissible ls) l.head? = some h ∧
+          ∀ (earlier : List α), earlier ∈ pre → Option.filter (admissible ls) earlier.head? = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:810:0: Solidity.Frontend.C3Exactness.first_mem {α : Type} [DecidableEq α] {ls : List (List α)} {h : α}
+  (hf : first (active ls) = some h) : h ∈ ls.flatten
+info: Solidity/Frontend/C3Exactness/Audit.lean:814:0: Solidity.Frontend.C3Exactness.flatten_active {α : Type} [DecidableEq α] (ls : List (List α)) :
+  (active ls).flatten = ls.flatten
+info: Solidity/Frontend/C3Exactness/Audit.lean:818:0: Solidity.Frontend.C3Exactness.flatten_residual {α : Type} [DecidableEq α] (ls : List (List α)) (h : α) :
+  (residual ls h).flatten = List.filter (fun x => decide (x ≠ h)) ls.flatten
+info: Solidity/Frontend/C3Exactness/Audit.lean:822:0: Solidity.Frontend.C3Exactness.residual_decreases {α : Type} [DecidableEq α] {ls : List (List α)} {h : α}
+  (hf : first (active ls) = some h) : (residual ls h).flatten.length < ls.flatten.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:826:0: Solidity.Frontend.C3Exactness.Trace.length_le {α : Type} [DecidableEq α] {ls : List (List α)} {out : List α}
+  (t : Trace ls out) : out.length ≤ ls.flatten.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:830:0: Solidity.Frontend.C3Exactness.trace_or_stuck {α : Type} [DecidableEq α] (ls : List (List α)) :
+  (∃ out, Trace ls out) ∨ Stuck ls
+info: Solidity/Frontend/C3Exactness/Audit.lean:834:0: Solidity.Frontend.C3Exactness.Stuck.not_trace {α : Type} [DecidableEq α] {ls : List (List α)} (hs : Stuck ls)
+  {out : List α} : ¬Trace ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:838:0: Solidity.Frontend.C3Exactness.Stuck.merge_none {ls : List (List String)} (hs : Stuck ls) (n : Nat) :
+  Env.merge n ls = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:842:0: Solidity.Frontend.C3Exactness.merge_none_iff {ls : List (List String)} {n : Nat} :
+  Env.merge n ls = none ↔ Stuck ls ∨ ∃ out, Trace ls out ∧ n ≤ out.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:846:0: Solidity.Frontend.C3Exactness.fuelBound {α : Type} (ls : List (List α)) : Nat
+info: Solidity/Frontend/C3Exactness/Audit.lean:850:0: Solidity.Frontend.C3Exactness.merge_bound_none_iff (ls : List (List String)) :
+  Env.merge (fuelBound ls) ls = none ↔ Stuck ls
+info: Solidity/Frontend/C3Exactness/Audit.lean:854:0: Solidity.Frontend.C3Exactness.merge_bound_iff (ls : List (List String)) (out : List String) :
+  Env.merge (fuelBound ls) ls = some out ↔ Trace ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:858:0: Solidity.Frontend.C3Exactness.Trace.mem_iff {α : Type} [DecidableEq α] {ls : List (List α)} {out : List α}
+  (t : Trace ls out) (x : α) : x ∈ out ↔ x ∈ ls.flatten
+info: Solidity/Frontend/C3Exactness/Audit.lean:862:0: Solidity.Frontend.C3Exactness.Trace.nodup {α : Type} [DecidableEq α] {ls : List (List α)} {out : List α}
+  (t : Trace ls out) : out.Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:866:0: Solidity.Frontend.C3Exactness.first_head {α : Type} [DecidableEq α] {ls : List (List α)} {h : α}
+  (hf : first ls = some h) : (∃ l, l ∈ ls ∧ l.head? = some h) ∧ ∀ (l : List α), l ∈ ls → ¬h ∈ List.drop 1 l
+info: Solidity/Frontend/C3Exactness/Audit.lean:870:0: Solidity.Frontend.C3Exactness.filter_head {α : Type} [DecidableEq α] {l : List α} {h : α} (ht : ¬h ∈ List.drop 1 l) :
+  (l.head? = some h → l = h :: List.filter (fun x => decide (x ≠ h)) l) ∧
+    (¬h ∈ l → List.filter (fun x => decide (x ≠ h)) l = l)
+info: Solidity/Frontend/C3Exactness/Audit.lean:874:0: Solidity.Frontend.C3Exactness.Trace.local_order {α : Type} [DecidableEq α] {ls : List (List α)} {out : List α}
+  (t : Trace ls out) (l : List α) : l ∈ ls → l.Sublist out
+info: Solidity/Frontend/C3Exactness/Audit.lean:878:0: Solidity.Frontend.C3Exactness.first_none_iff {α : Type} [DecidableEq α] (ls : List (List α)) :
+  first ls = none ↔
+    ∀ (l : List α), l ∈ ls → ∀ (h : α), l.head? = some h → ∃ blocking, blocking ∈ ls ∧ h ∈ List.drop 1 blocking
+info: Solidity/Frontend/C3Exactness/Audit.lean:882:0: Solidity.Frontend.C3Exactness.obstruction_iff {α : Type} [DecidableEq α] (ls : List (List α)) :
+  Obstruction ls ↔
+    active ls ≠ [] ∧
+      ∀ (l : List α),
+        l ∈ active ls → ∀ (h : α), l.head? = some h → ∃ blocking, blocking ∈ active ls ∧ h ∈ List.drop 1 blocking
+info: Solidity/Frontend/C3Exactness/Audit.lean:886:0: Solidity.Frontend.C3Exactness.Trace.done {α : Type} [DecidableEq α] {ls : List (List α)} : active ls = [] → Trace ls []
+info: Solidity/Frontend/C3Exactness/Audit.lean:890:0: Solidity.Frontend.C3Exactness.Trace.step {α : Type} [DecidableEq α] {ls : List (List α)} {h : α} {out : List α} :
+  first (active ls) = some h → Trace (residual ls h) out → Trace ls (h :: out)
+info: Solidity/Frontend/C3Exactness/Audit.lean:894:0: Solidity.Frontend.C3Exactness.Stuck.here {α : Type} [DecidableEq α] {ls : List (List α)} : Obstruction ls → Stuck ls
+info: Solidity/Frontend/C3Exactness/Audit.lean:898:0: Solidity.Frontend.C3Exactness.Stuck.step {α : Type} [DecidableEq α] {ls : List (List α)} {h : α} :
+  first (active ls) = some h → Stuck (residual ls h) → Stuck ls
+info: Solidity/Frontend/C3Exactness/Audit.lean:903:0: Controls.empty_trace : Trace [] []
+info: Solidity/Frontend/C3Exactness/Audit.lean:904:0: Controls.identity_trace : Trace [[1], [2, 1]] [2, 1]
+info: Solidity/Frontend/C3Exactness/Audit.lean:905:0: Controls.independent_heads : Trace [["a"], ["b"]] ["a", "b"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:906:0: Controls.diamond_merge : Trace [["B", "A"], ["C", "A"], ["B", "C"]] ["B", "C", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:907:0: Controls.cycle_stuck : Stuck [["a", "b"], ["b", "a"]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:908:0: graphBad_merge_stuck : Stuck [["Y", "A", "B"], ["X", "B", "A"], ["Y", "X"]]
+info: Solidity/Frontend/C3Exactness/Audit.lean:909:0: graphDiamond_exact : ExactLin graphDiamond.env "D" ["D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:910:0: graphShared_exact : ExactLin graphShared.env "F" ["F", "E", "D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:911:0: graphDiamond_refl : Reaches graphDiamond.env "D" "D"
+info: Solidity/Frontend/C3Exactness/Audit.lean:912:0: graphDiamond_reaches : Reaches graphDiamond.env "D" "A"
+info: Solidity/Frontend/C3Exactness/Audit.lean:913:0: graphBad_certificate : GraphBlocked graphBad.env "Z"
+info: Solidity/Frontend/C3Exactness/Audit.lean:914:0: graphBad_inherited_certificate : GraphBlocked graphBad.env "W"
+info: Solidity/Frontend/C3Exactness/Audit.lean:915:0: graphSelfCycle_path : CyclePath graphSelfCycle.env "S" "S"
+info: Solidity/Frontend/C3Exactness/Audit.lean:916:0: graphMutualCycle_path : CyclePath graphMutualCycle.env "P" "P"
+info: Solidity/Frontend/C3Exactness/Audit.lean:917:0: graphDiamond_identities : IdentityLin graphDiamond.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:918:0: graphInterfaceDiamond_identities : IdentityLin graphInterfaceDiamond.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:919:0: graphResolution_identities : IdentityLin graphResolution.env 3 [3, 2, 1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:920:0: fun {n} {ls} {out} =>
+  merge_iff : ∀ {n : Nat} {ls : List (List String)} {out : List String},
+  Env.merge n ls = some out ↔ Trace ls out ∧ out.length < n
+info: Solidity/Frontend/C3Exactness/Audit.lean:921:0: fun {α} [DecidableEq α] {ls} {a b} =>
+  Trace.unique : ∀ {α : Type} [inst : DecidableEq α] {ls : List (List α)} {a b : List α},
+  Trace ls a → Trace ls b → a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:922:0: fun {E} =>
+  linearize_exact_iff : ∀ {E : Env},
+  E.basesOK = true → ∀ (c : String) (L : List String), E.linearize c = some L ↔ ExactLin E c L
+info: Solidity/Frontend/C3Exactness/Audit.lean:923:0: fun {E} =>
+  linearize_none_iff_blocked : ∀ {E : Env}, E.basesOK = true → ∀ (c : String), E.linearize c = none ↔ GraphBlocked E c
+info: Solidity/Frontend/C3Exactness/Audit.lean:924:0: fun {E} {c} =>
+  CyclePath.linearizeF_none : ∀ {E : Env} {c : String}, CyclePath E c c → ∀ (n : Nat), E.linearizeF n c = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:925:0: fun {E} {i} {a b} =>
+  IdentityLin.unique : ∀ {E : Env} {i : Nat} {a b : List Nat},
+  IdentityLin E i a → IdentityLin E i b → E.basesOK = true → a = b
+info: Solidity/Frontend/C3Exactness/Audit.lean:926:0: unit_identity_iff : ∀ (u : Syn Cat.unit),
+  u.env.basesOK = true →
+    ∀ (c : String),
+      c ∈ u.env.contractNames →
+        ∀ (I : List Nat),
+          Option.map (List.map (rank u.env)) (u.env.linearize c) = some I ↔ IdentityLin u.env (rank u.env c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:927:0: fun {s} {u} {r} =>
+  resolved_identity_iff : ∀ {s : Settings} {u : Syn Cat.unit} {r : Resolution},
+  Resolves' s u r →
+    r.env.basesOK = true →
+      ∀ (c : String),
+        c ∈ r.env.contractNames →
+          ∀ (I : List Nat),
+            Option.map (List.map (rank r.env)) (r.env.linearize c) = some I ↔ IdentityLin r.env (rank r.env c) I
+info: Solidity/Frontend/C3Exactness/Audit.lean:928:0: fun {E} {c b} {L Lb} =>
+  ctor_monotone : ∀ {E : Env} {c b : String} {L Lb : List String},
+  E.linearize c = some L → b ∈ E.bases c → E.linearize b = some Lb → (E.ctorOrder b).Sublist (E.ctorOrder c).dropLast
+info: Solidity/Frontend/C3Exactness/Audit.lean:929:0: fun {E} {c} {L} =>
+  ctor_nodup : ∀ {E : Env} {c : String} {L : List String},
+  E.basesOK = true → E.linearize c = some L → (E.ctorOrder c).Nodup
+info: Solidity/Frontend/C3Exactness/Audit.lean:931:0: have this := rfl;
+this : graphUnit [] = Syn.nil.unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:932:0: have this := rfl;
+this : graphSpecs ["A"] = (Syn.inherit { head := "A" } Syn.none).cons Syn.nil
+info: Solidity/Frontend/C3Exactness/Audit.lean:933:0: have this := rfl;
+this : graphUnit [("A", [])] = ((Syn.contract false "A" Syn.none Syn.nil Syn.nil).cons Syn.nil).unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:934:0: have this := rfl;
+this : graphInterfaceUnit [("I", [])] = ((Syn.interface "I" Syn.nil Syn.nil).cons Syn.nil).unit
+info: Solidity/Frontend/C3Exactness/Audit.lean:937:0: graphDiamond_public : graphDiamond.env.linearize "D" = some ["D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:938:0: graphDiamond_constructors : graphDiamond.env.ctorOrder "D" = ["A", "B", "C", "D"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:939:0: graphShared_public : graphShared.env.linearize "F" = some ["F", "E", "D", "C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:940:0: graphShared_constructors : graphShared.env.ctorOrder "F" = ["A", "B", "C", "D", "E", "F"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:941:0: graphRedundant_public : graphRedundant.env.linearize "C" = some ["C", "B", "A"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:942:0: graphRedundant_constructors : graphRedundant.env.ctorOrder "C" = ["A", "B", "C"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:943:0: graphInterfaceDiamond_public : graphInterfaceDiamond.env.linearize "ID" = some ["ID", "IC", "IB", "IA"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:944:0: graphMixed_public : graphMixed.env.linearize "C" = some ["C", "IB", "IA"]
+info: Solidity/Frontend/C3Exactness/Audit.lean:945:0: graphBad_public_refused : graphBad.env.linearize "Z" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:946:0: graphBad_inherited_all_fuel : ∀ (n : Nat), graphBad.env.linearizeF n "W" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:947:0: graphSelfCycle_all_fuel : ∀ (n : Nat), graphSelfCycle.env.linearizeF n "S" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:948:0: graphMutualCycle_all_fuel : ∀ (n : Nat), graphMutualCycle.env.linearizeF n "P" = none
+info: Solidity/Frontend/C3Exactness/Audit.lean:949:0: graphBadInterface_not_admitted : graphBadInterface.env.basesOK = false
+info: Solidity/Frontend/C3Exactness/Audit.lean:952:0: Solidity.Frontend.C3Exactness.CommonOrder {α : Type} (ls : List (List α)) (out : List α) : Prop
+info: Solidity/Frontend/C3Exactness/Audit.lean:955:0: Solidity.Frontend.C3Exactness.Controls.alternative_common_order : CommonOrder [[0], [1]] [1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:960:0: Solidity.Frontend.C3Exactness.Controls.alternative_not_trace : ¬Trace [[0], [1]] [1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:963:0: Solidity.Frontend.C3Exactness.Controls.cycle_not_common_order {α : Type} [DecidableEq α] (a b : α) (out : List α) :
+  ¬CommonOrder [[a, b], [b, a]] out
+info: Solidity/Frontend/C3Exactness/Audit.lean:968:0: Solidity.Frontend.C3Exactness.Obstruction.not_common_order {α : Type} [DecidableEq α] {ls : List (List α)}
+  (ho : Obstruction ls) (out : List α) : ¬CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:971:0: Solidity.Frontend.C3Exactness.Stuck.not_common_order {α : Type} [DecidableEq α] {ls : List (List α)} (ht : Stuck ls)
+  (out : List α) : ¬CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:974:0: Solidity.Frontend.C3Exactness.Trace.common_order {α : Type} [DecidableEq α] {ls : List (List α)} {out : List α}
+  (ht : Trace ls out) : CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:977:0: Solidity.Frontend.C3Exactness.graphBad_identity_no_order (out : List Nat) :
+  ¬CommonOrder [[3, 0, 1], [2, 1, 0], [3, 2]] out
+info: Solidity/Frontend/C3Exactness/Audit.lean:980:0: Solidity.Frontend.C3Exactness.graphBad_merge_no_order (out : List String) :
+  ¬CommonOrder [["Y", "A", "B"], ["X", "B", "A"], ["Y", "X"]] out
+info: Solidity/Frontend/C3Exactness/Audit.lean:983:0: Solidity.Frontend.C3Exactness.merge_bound_exists_iff_common_order (ls : List (List String)) :
+  (∃ out, Env.merge (fuelBound ls) ls = some out) ↔ ∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:988:0: Solidity.Frontend.C3Exactness.merge_bound_none_iff_no_common_order (ls : List (List String)) :
+  Env.merge (fuelBound ls) ls = none ↔ ¬∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:993:0: Solidity.Frontend.C3Exactness.merge_none_iff_order_or_fuel (n : Nat) (ls : List (List String)) :
+  Env.merge n ls = none ↔ (¬∃ out, CommonOrder ls out) ∨ ∃ out, Trace ls out ∧ n ≤ out.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:996:0: Solidity.Frontend.C3Exactness.stuck_iff_no_common_order {α : Type} [DecidableEq α] (ls : List (List α)) :
+  Stuck ls ↔ ¬∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:999:0: Solidity.Frontend.C3Exactness.trace_exists_iff_common_order {α : Type} [DecidableEq α] (ls : List (List α)) :
+  (∃ out, Trace ls out) ↔ ∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1003:0: have this := rfl;
+this : (fun {α} ls out => CommonOrder ls out) = fun {α} ls out => out.Nodup ∧ ∀ (l : List α), l ∈ ls → l.Sublist out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1004:0: Controls.alternative_common_order : CommonOrder [[0], [1]] [1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:1005:0: Controls.alternative_not_trace : ¬Trace [[0], [1]] [1, 0]
+info: Solidity/Frontend/C3Exactness/Audit.lean:1006:0: graphBad_merge_no_order : ∀ (out : List String), ¬CommonOrder [["Y", "A", "B"], ["X", "B", "A"], ["Y", "X"]] out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1007:0: graphBad_identity_no_order : ∀ (out : List Nat), ¬CommonOrder [[3, 0, 1], [2, 1, 0], [3, 2]] out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1008:0: fun {α} [DecidableEq α] {ls} {out} =>
+  Trace.common_order : ∀ {α : Type} [inst : DecidableEq α] {ls : List (List α)} {out : List α},
+  Trace ls out → CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1009:0: fun {α} [DecidableEq α] {ls} =>
+  Obstruction.not_common_order : ∀ {α : Type} [inst : DecidableEq α] {ls : List (List α)},
+  Obstruction ls → ∀ (out : List α), ¬CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1010:0: fun {α} [DecidableEq α] {ls} =>
+  Stuck.not_common_order : ∀ {α : Type} [inst : DecidableEq α] {ls : List (List α)},
+  Stuck ls → ∀ (out : List α), ¬CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1011:0: fun {α} [DecidableEq α] =>
+  stuck_iff_no_common_order : ∀ {α : Type} [inst : DecidableEq α] (ls : List (List α)),
+  Stuck ls ↔ ¬∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1012:0: fun {α} [DecidableEq α] =>
+  trace_exists_iff_common_order : ∀ {α : Type} [inst : DecidableEq α] (ls : List (List α)),
+  (∃ out, Trace ls out) ↔ ∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1013:0: merge_bound_none_iff_no_common_order : ∀ (ls : List (List String)),
+  Env.merge (fuelBound ls) ls = none ↔ ¬∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1014:0: merge_bound_exists_iff_common_order : ∀ (ls : List (List String)),
+  (∃ out, Env.merge (fuelBound ls) ls = some out) ↔ ∃ out, CommonOrder ls out
+info: Solidity/Frontend/C3Exactness/Audit.lean:1015:0: merge_none_iff_order_or_fuel : ∀ (n : Nat) (ls : List (List String)),
+  Env.merge n ls = none ↔ (¬∃ out, CommonOrder ls out) ∨ ∃ out, Trace ls out ∧ n ≤ out.length
+info: Solidity/Frontend/C3Exactness/Audit.lean:1016:0: fun {α} [DecidableEq α] =>
+  Controls.cycle_not_common_order : ∀ {α : Type} [DecidableEq α] (a b : α) (out : List α),
+  ¬CommonOrder [[a, b], [b, a]] out
+Build completed successfully (25 jobs).
+	Command being timed: "lake build +Solidity.Frontend.C3Exactness.Audit"
+	User time (seconds): 0.09
+	System time (seconds): 0.01
+	Percent of CPU this job got: 55%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.20
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 62852
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 7052
+	Voluntary context switches: 167
+	Involuntary context switches: 4
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1304
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

@@ -1,0 +1,20 @@
+{
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.loop_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.source_complete": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/ForCompletion.lean:SolidityBridge.Yul.ForCompletion.transport_output": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

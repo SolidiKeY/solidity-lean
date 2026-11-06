@@ -1,0 +1,3 @@
+FAIL congr 3; exact congrArg UInt256.mk (Fin.sub_self _)
+FAIL congr 2; exact congrArg UInt256.mk (Fin.sub_self _)
+FAIL have z : UInt256.ofNat (identityGas I.calldata.toList) - UInt256.ofNat (identityGas I.calldata.toList) = UInt256.ofNat 0 := by apply congrArg UInt256.mk; exact Fin.sub_self _; rw [z]

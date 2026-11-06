@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutationControls.complete_numeric_observations": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutationControls.heterogeneous_commutation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutationControls.ordered_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutationControls.shared_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/RecursiveNumericCommutationControls.lean:Solidity.Backend.StorageOps.RecursiveNumericCommutationControls.wrong_source_interference": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

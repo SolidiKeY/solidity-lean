@@ -14,7 +14,7 @@ open scoped Scoped
 
 /-- The address and signature are fixed source syntax; the oracle premise is
 explicit and local to the theorem, not an added global source profile. -/
-def guardedCall : ExtCall Probe [] := ⟨.lit 7 rfl, "fetch", []⟩
+def guardedCall : ExtCall Probe [] := ⟨.lit 7 rfl, "fetch", [], .call, .unknown⟩
 
 /-- Ordinary source-shaped conditional success for *any* typed starting state.
 The actual oracle witness discharges the specialized condition/formula interface. -/
@@ -181,7 +181,7 @@ theorem deterministic_long_panic : (panicStatement longPanic).run panicState =
     panic_callee_halts longPanic panicState
   have hs : (guardedCall.addr.evalT panicState).1 = panicState.tx.selfAddress.1 := rfl
   have he : Semantics.decodeError longPanic = none := by decide +kernel
-  simp only [TRun.tryCall, hs, decide_true, Bool.true_and, if_true, hc, he, long_panic_data]
+  simp only [TRun.tryCall, Binders.toRet, hs, decide_true, Bool.true_and, if_true, hc, he, long_panic_data]
   rfl
 
 /-- Undecodable short returndata remains the exact rethrown actual halt. -/

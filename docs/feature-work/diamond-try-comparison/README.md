@@ -221,4 +221,4 @@ implementation-cost phrase with direct host-semantics wording. Clarified address
 role renaming versus fixed non-address ABI words. Neither relation, backend,
 compatibility, fresh source/kernel result nor assignment completion is certified.
 Review scope and actual commands remain under
-`/workspace/next10-diamond-try-evidence/comparison-design`.
+VM location `next10-diamond-try-evidence/comparison-design`.

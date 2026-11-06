@@ -217,8 +217,15 @@ def closeScoped (g : MVarId) (C φ : Expr) : MetaM Bool := do
     let ob := mkApp (mkConst ``Option [0]) (mkConst ``Bool)
     let lhs := mkApp2 (mkConst ``Seq.checkCore) C φ
     let rhs := mkApp2 (mkConst ``Option.some [0]) (mkConst ``Bool) (mkConst ``Bool.true)
-    let h ← Derive.kernelLemma (mkApp3 (mkConst ``Eq [1]) ob lhs rhs)
-      (mkApp2 (mkConst ``Eq.refl [1]) ob rhs)
+    let type := mkApp3 (mkConst ``Eq [1]) ob lhs rhs
+    let value := mkApp2 (mkConst ``Eq.refl [1]) ob rhs
+    -- The Testing driver owns the final synchronous theorem check. Retain
+    -- this exact checked premise there so neighboring leaves share a kernel
+    -- context; public tactic callers still check the auxiliary theorem now.
+    let h ← if (← getOptions).getBool `sol.prove.sharedResidues false &&
+        !type.hasFVar && !type.hasMVar then
+        pure (mkApp2 (mkConst ``id [0]) type value)
+      else Derive.kernelLemma type value
     g.assign (mkApp3 (mkConst ``Seq.checkCore_valid) C φ h)
     return true
 

@@ -1,0 +1,842 @@
+ERROR 11:38 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 12:39 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 30:54 Application type mismatch: The argument
+  one
+has type
+  PrimTy.uint.Denote
+but is expected to have type
+  MvT ?m.7
+in the application
+  m.writeT (MAddrT.index 9 ArrTy.dyn z) one
+ERROR 31:53 Application type mismatch: The argument
+  one
+has type
+  PrimTy.uint.Denote
+but is expected to have type
+  MvT ?m.7
+in the application
+  m.writeT (MAddrT.index 0 ArrTy.dyn one) one
+ERROR 34:45 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 35:45 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 41:41 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 49:43 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 50:59 typeclass instance problem is stuck, it is often due to metavariables
+  OfNat (MvT ?m.7) 0
+numerals are polymorphic in Lean, but the numeral `0` cannot be used in a context where the expected type is
+  MvT ?m.7
+due to the absence of the instance above
+ERROR 53:45 Function expected at
+  List.nil_prefix
+but this term has type
+  [] <+: ?m.7
+
+Note: Expected a function because this term is being applied to the argument
+  _
+ERROR 54:59 Application type mismatch: The argument
+  z
+has type
+  PrimTy.uint.Denote
+but is expected to have type
+  MvT ?m.7
+in the application
+  fixedMem.writeT (MAddrT.index 0 ArrTy.fixed z) z
+ERROR 15:60 Tactic `rfl` failed: The left-hand side
+  m.writeT at0 one
+is not definitionally equal to the right-hand side
+  some m1
+
+⊢ m.writeT at0 one = some m1
+ERROR 17:15 Application type mismatch: The argument
+  rfl
+has type
+  ?m.16 = ?m.16
+but is expected to have type
+  m.readId at0 = some z
+in the application
+  ⟨?m.14, rfl⟩
+ERROR 22:57 Tactic `rfl` failed: The left-hand side
+  m1.writeT at0 z
+is not definitionally equal to the right-hand side
+  some m
+
+⊢ m1.writeT at0 z = some m
+ERROR 27:38 failed to synthesize
+  Decidable (Fresh m.H' 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 28:52 failed to synthesize
+  Decidable ¬Fresh m.H' 0
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 29:49 failed to synthesize
+  Decidable (Fresh m.H' 1)
+
+Hint: Additional diagnostic information may be available using the `set_option diagnostics true` command.
+ERROR 37:25 Tactic `rfl` failed: The left-hand side
+  tokenMem.writeT (MAddrT.field 0 ⋯) one
+is not definitionally equal to the right-hand side
+  some tokenOne
+
+⊢ tokenMem.writeT (MAddrT.field 0 ⋯) one = some tokenOne
+ERROR 107:3 Tactic `rfl` failed: The left-hand side
+  {
+            H' :=
+              {
+                    H' :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                    ext := ⋯,
+                    heap :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                    val :=
+                      ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                          MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                        ⋯⟩ }.alloc.H',
+            ext := ⋯,
+            heap :=
+              {
+                    H' :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                    ext := ⋯,
+                    heap :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                    val :=
+                      ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                          MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                        ⋯⟩ }.alloc.heap,
+            val :=
+              (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                  {
+                        H' :=
+                          {
+                                H' :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                ext := ⋯,
+                                heap :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                        ext := ⋯,
+                        heap :=
+                          {
+                                H' :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                ext := ⋯,
+                                heap :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                        val :=
+                          ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                              MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                {
+                                      H' :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                      ext := ⋯,
+                                      heap :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                            ⋯⟩ }.alloc.val,
+                ()) }.alloc.heap.writeAddr
+    (MAddr.index (HRef.wk ⋯ { id := 0, get? := old._proof_1 }) ArrTy.dyn z) one
+is not definitionally equal to the right-hand side
+  some
+    (({
+                  H' :=
+                    {
+                          H' :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                          ext := ⋯,
+                          heap :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                          val :=
+                            ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                              ⋯⟩ }.alloc.H',
+                  ext := ⋯,
+                  heap :=
+                    {
+                          H' :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                          ext := ⋯,
+                          heap :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                          val :=
+                            ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                              ⋯⟩ }.alloc.heap,
+                  val :=
+                    (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                        {
+                              H' :=
+                                {
+                                      H' :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                      ext := ⋯,
+                                      heap :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                {
+                                      H' :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                      ext := ⋯,
+                                      heap :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val :=
+                                ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                    MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                      {
+                                            H' :=
+                                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                            ext := ⋯,
+                                            heap :=
+                                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                                  ⋯⟩ }.alloc.val,
+                      ()) }.alloc.heap.writeAddr
+          (MAddr.index (HRef.wk suffixHeap._proof_1 { id := 0, get? := old._proof_1 }) ArrTy.dyn z) one).getD
+      {
+            H' :=
+              {
+                    H' :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                    ext := ⋯,
+                    heap :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                    val :=
+                      ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                          MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                        ⋯⟩ }.alloc.H',
+            ext := ⋯,
+            heap :=
+              {
+                    H' :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                    ext := ⋯,
+                    heap :=
+                      {
+                            H' :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                    val :=
+                      ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                          MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                        ⋯⟩ }.alloc.heap,
+            val :=
+              (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                  {
+                        H' :=
+                          {
+                                H' :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                ext := ⋯,
+                                heap :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                        ext := ⋯,
+                        heap :=
+                          {
+                                H' :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                ext := ⋯,
+                                heap :=
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                        val :=
+                          ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                              MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                {
+                                      H' :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                      ext := ⋯,
+                                      heap :=
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                            ⋯⟩ }.alloc.val,
+                ()) }.alloc.heap)
+
+⊢ {
+              H' :=
+                {
+                      H' :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                      ext := ⋯,
+                      heap :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                      val :=
+                        ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                            MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                          ⋯⟩ }.alloc.H',
+              ext := ⋯,
+              heap :=
+                {
+                      H' :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                      ext := ⋯,
+                      heap :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                      val :=
+                        ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                            MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                          ⋯⟩ }.alloc.heap,
+              val :=
+                (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                    {
+                          H' :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                          ext := ⋯,
+                          heap :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                          val :=
+                            ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                              ⋯⟩ }.alloc.val,
+                  ()) }.alloc.heap.writeAddr
+      (MAddr.index (HRef.wk ⋯ { id := 0, get? := old._proof_1 }) ArrTy.dyn z) one =
+    some
+      (({
+                    H' :=
+                      {
+                            H' :=
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val :=
+                              ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                  MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                    {
+                                          H' :=
+                                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                          ext := ⋯,
+                                          heap :=
+                                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                                ⋯⟩ }.alloc.H',
+                    ext := ⋯,
+                    heap :=
+                      {
+                            H' :=
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                            ext := ⋯,
+                            heap :=
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                            val :=
+                              ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                  MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                    {
+                                          H' :=
+                                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                          ext := ⋯,
+                                          heap :=
+                                            { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                                ⋯⟩ }.alloc.heap,
+                    val :=
+                      (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                          {
+                                H' :=
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                ext := ⋯,
+                                heap :=
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                val :=
+                                  ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                        { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                      MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                        {
+                                              H' :=
+                                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                              ext := ⋯,
+                                              heap :=
+                                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                                    ⋯⟩ }.alloc.val,
+                        ()) }.alloc.heap.writeAddr
+            (MAddr.index (HRef.wk suffixHeap._proof_1 { id := 0, get? := old._proof_1 }) ArrTy.dyn z) one).getD
+        {
+              H' :=
+                {
+                      H' :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                      ext := ⋯,
+                      heap :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                      val :=
+                        ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                            MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                          ⋯⟩ }.alloc.H',
+              ext := ⋯,
+              heap :=
+                {
+                      H' :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                      ext := ⋯,
+                      heap :=
+                        {
+                              H' :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                              ext := ⋯,
+                              heap :=
+                                { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                      val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                              val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                      val :=
+                        ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                            MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                              {
+                                    H' :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                    ext := ⋯,
+                                    heap :=
+                                      { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                            val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                    val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                          ⋯⟩ }.alloc.heap,
+              val :=
+                (MVal.wk ⋯ (Ty.ref (RefTy.array (Ty.ref (RefTy.struct "Token"))))
+                    {
+                          H' :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                          ext := ⋯,
+                          heap :=
+                            {
+                                  H' :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                  ext := ⋯,
+                                  heap :=
+                                    { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                          val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                  val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                          val :=
+                            ⟨[MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val,
+                                MVal.wk ⋯ (Ty.ref (RefTy.struct "Token"))
+                                  {
+                                        H' :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.H',
+                                        ext := ⋯,
+                                        heap :=
+                                          { H' := [RefTy.array Ty.uint], ext := ⋯, heap := (⟨[z], hp._proof_1⟩, ()),
+                                                val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.heap,
+                                        val := (MVal.wk ⋯ Ty.uint z, ()) }.alloc.val],
+                              ⋯⟩ }.alloc.val,
+                  ()) }.alloc.heap)
+ERROR 128:58 Application type mismatch: The argument
+  rfl
+has type
+  ?m.4 = ?m.4
+but is expected to have type
+  (Ty.ref (RefTy.struct "UnknownH28")).mapFree = true
+in the application
+  SVal.copyStToM hp (SVal.struct SFields.nil) ⋯
+diag: 20 errors

@@ -1,0 +1,143 @@
+{
+  "status": "concrete API and observation packet; producer migration pending",
+  "sourceHead": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "adoptedMaster": "4095d848297d87e374b4f069692511cfe4a36cf7",
+  "entrypoint": "Solidity.Frontend.ExecutableAst.Shared.executableReader",
+  "publicRoots": [
+    "Shared.function executableReader",
+    "Shared.contract executableReader"
+  ],
+  "intrinsicBoundary": [
+    "Shared.assertionObligation",
+    "Shared.obligation"
+  ],
+  "sourceFiles": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Boundary.lean",
+      "sha256": "a8bc38ff1cffea32a6af360812335aa7f6d9262875cfd19daca8c9ecbd53cf64"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "sha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Scope.lean",
+      "sha256": "3a84fd3a33229ee1877e44c4ab0ca59ea957a5cc83e2543451d93c97d54d1a1e"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Compose.lean",
+      "sha256": "0c55d2dda8f700efd314b98ee9a284fd3ad73a17ae68ae4decf7d6eab15ccee5"
+    },
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Intrinsic.lean",
+      "sha256": "272ce9d6ffa2e19739de6252e84ba4bbb804677c54ce6750aa9226eabe310ef2"
+    },
+    {
+      "path": "Solidity/Tools/DirectRuntime.lean",
+      "sha256": "2cc70038fea989248d13ed444a2760c72dbfbbd2dab33128b0bec45e622303a6"
+    },
+    {
+      "path": "Solidity/Frontend/Import.lean",
+      "sha256": "9de6e71a9e2d38556c8a482ff4931a3df391a8bdcc2ceee863679acf2eda1e4e"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/Body.lean",
+      "sha256": "c4a0d8b40edb961c048db203ae4ffc16ce8b8187cdf167988a9289783ac8a884"
+    },
+    {
+      "path": "Solidity/Frontend/SolcJson/Contract.lean",
+      "sha256": "86dde91a3b909008a21b09eee6631afba64c4318110a7c01bf358d10b5b37617"
+    }
+  ],
+  "signatures": "tests/directruntime-20261104/shared-translator/artifacts/composed-gates/3.log",
+  "comparison": "tests/directruntime-20261104/shared-translator/reader-comparison.json",
+  "coverage": "tests/directruntime-20261104/shared-translator/coverage-inventory.json",
+  "callbackContract": "Plain BodyLoopLowerer receives existing renameStmts output; same-scope original declarations checked by Scope.validateScopes. Reference parameter/return guards remain.",
+  "producerAcceptance": [
+    "CR migrates the actual existing SolcJson printer/parser/macro import route, preserving admission/settings/provenance; an optional wrapper is insufficient.",
+    "Preserve declaration identity, scope/shadowing, evaluation order, overloads, modality/reference premises and unsupported diagnostics; no frozen Source/Core changes.",
+    "H68 requires producer retention of typeDescriptions.typeIdentifier and tryCall, preserving builtin-ID normalization and loop annotations; migrate compatibility fixtures. No compatibility adapter alternative is selected.",
+    "Deliver exact reviewed CR commit for A consumption; D supplies fresh compiled native/WASM closure and source/binary provenance."
+  ],
+  "boundary": "Every modern AST kind has selected source-anchored observations or explicit no-standalone-entry status in each reader/suite; this is not exhaustive per-form parity, intrinsic/source proof closure or backend support. Legacy Throw and Yul remain separately inventoried/refused.",
+  "directCheckerObservations": {
+    "path": "tests/directruntime-20261104/shared-translator/direct-result-observations.json",
+    "counts": {
+      "proved": 4,
+      "pending": 4,
+      "unsupported": 4
+    },
+    "boundary": "Trusted executable model-checker observations; not Lean proof terms,source preservation,native/WASM closure or refutation of pending cases."
+  },
+  "modalityControls": {
+    "ledger": "tests/directruntime-20261104/shared-translator/modality-ledger.json",
+    "cases": 6,
+    "pairs": 3,
+    "trustedCheckerCounts": {
+      "proved": 3,
+      "refuted": 3
+    },
+    "boundary": "Source-backed paired body observations through canonical reader/public checker; finite model runs and trusted refutations are not compiler preservation or native correctness. Counterexample objects are not independently replayed by preflight."
+  },
+  "newProducerApiReview": {
+    "path": "Solidity/Frontend/SolcJson/IrImport.lean",
+    "role": "Exact JSON IR-channel selector; does not migrate existing AST import."
+  },
+  "nativeControls": {
+    "receipt": "tests/directruntime-20261104/shared-translator/evidence/adoption-3ad/native-controls.json",
+    "binarySha256": "1d327a56e1501d4bf02fe66bd04c4a4c1d85d328d7a550846a20ab76f05caa5d",
+    "comparisons": 18,
+    "failClosed": 2,
+    "boundary": "18exact saved native-vs-Lean-harness outcomes+2failclosed,rerun after mandatede684 rebase. No serialized env/frontend library/external frontend exec observed in those runs. 14origin candidates reviewed6emptyinitializers/8generichelpers;not exhaustive binary closure,WASM,source preservation or full migration."
+  },
+  "metadataDecision": {
+    "authority": "H68, human, 2026-11-06",
+    "decision": "Keep required typeIdentifier/tryCall metadata in producer output and migrate compatibility fixtures (option 1). Preserve existing normalization and loop annotations.",
+    "consumers": [
+      "CR actual existing AST import producer",
+      "DR-D native/browser fixture producers"
+    ],
+    "delivery": "Coordinator relay through this packet; producer changes remain owner-only, exact reviewed commit pending."
+  },
+  "metadataCompatibility": {
+    "authority": "H68 option 1",
+    "generator": "tests/directruntime-20261104/shared-translator/compatibility-fixtures.mjs",
+    "receipt": "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/evidence/h68/metadata-compilation.json",
+    "preflight": "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/evidence/h68/metadata-preflight.json",
+    "fixtures": [
+      "ReaderFixtures",
+      "UnsupportedContract",
+      "YulKinds",
+      "ComposedReaders",
+      "ModalityControls"
+    ],
+    "compiler": "0.8.34+commit.80d5c536.Emscripten.clang",
+    "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+    "typeIdentifiers": 424,
+    "tryCallFlags": 27,
+    "boundary": "Required raw compiler metadata retained. All other JSON values match recorded4095 publication; same normalized builtin IDs and loop annotations. Five fresh external compiler runs; not a second AST translator. CR/D producer migration remains owner-only."
+  },
+  "dataDelivery": {
+    "authority": "H44",
+    "manifest": "tests/directruntime-20261104/shared-translator/bulk-manifest.json",
+    "restore": "Copy the recorded archive into its archiveRelative path, extract at tests/directruntime-20261104/shared-translator/artifacts/h68-bulk, then run verify-bulk.py. Required data is external, with no fallback.",
+    "historical": "Tracked fixture/census/matrix/coverage files retain their4095 baseline bytes; they do not describe current migrated packet hashes. Original57-kind controls intentionally retain their frozen baseline inputs."
+  },
+  "observedVariants": {
+    "cases": 806,
+    "fixtures": 49,
+    "default": {
+      "decoded": 165,
+      "refused": 388,
+      "noStandalone": 253
+    },
+    "composed": {
+      "decoded": 172,
+      "refused": 381,
+      "noStandalone": 253
+    },
+    "unknownRootNegativesEachReader": 553,
+    "changedOutcomes": 25,
+    "boundary": "Observed selected-field variants, including intentional mutations. Not exhaustive grammar, authenticated compilation, intrinsic closure or source/backend preservation."
+  }
+}

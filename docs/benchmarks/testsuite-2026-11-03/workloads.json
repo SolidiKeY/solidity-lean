@@ -1,0 +1,505 @@
+{
+  "inventory": "Bridge/SolidityVelvet/TestSuite.lean",
+  "inventorySha256": "a4c66b77ffbdc4337be20a8822f176a4b22d50a91247b159acd8024969c11f43",
+  "reading": "box (Velvet partial correctness)",
+  "trials": [
+    {
+      "name": "additionStorageWrite",
+      "sourceHash": "032c88e68418a4b9db72f8a6acc17585ea32821bb7ea9346091ad1081c17bc45",
+      "fixtureSha256": "cd647165b7e6983366b2a40d51a1ce9e661d1245ffbac3dfa90bc009f2746e5e",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function additionStorageWrite(uint x, uint y) public {\n    require(x == 5 && y == 7);\n    age = x + y;\n    uint r = age;\n    assert(r == 12);\n  }\n}\n"
+    },
+    {
+      "name": "additionSimple",
+      "sourceHash": "72ce1de00ce24dfae5d0c63b84818b56f93512d3f65bb68c8986ddf9d1c5dd83",
+      "fixtureSha256": "9a9199c2788301b7672162a3eca0cfd2cc5fbe62293e944c0c8e6af6b690d82d",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function additionSimple() public pure {\n    uint r = 1 + 2;\n    assert(r == 3);\n  }\n}\n"
+    },
+    {
+      "name": "additionStorageRead",
+      "sourceHash": "5bef99312705e58855ba08879762b96f8d44b0f4801fc60fe6b68012827808f6",
+      "fixtureSha256": "28eb9232eec96e15e91100a04aa07dc66bed0952352ae55e912a1baf470ef75e",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function additionStorageRead() public {\n    age = 10;\n    uint r = age + 1;\n    assert(r == 11);\n  }\n}\n"
+    },
+    {
+      "name": "subtractionSimple",
+      "sourceHash": "8c7634df6df97c25ea5e7e28921c42b4488cc0fd0c3de9cb9ff3f9d6f2d86125",
+      "fixtureSha256": "9fe51f06a51262e139a4a7ce05bb47fafc2cc0171b2235e346ed88045f59807c",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function subtractionSimple() public pure {\n    uint r = 7 - 2;\n    assert(r == 5);\n  }\n}\n"
+    },
+    {
+      "name": "subtractionStorageRead",
+      "sourceHash": "1d4f1bbbfef8eba1cf6f0cdf936caaf5d17833a94378bd77b23a3d27ffe48a78",
+      "fixtureSha256": "0e7d61fce53d4f20b7fc572d44751e66c0ce8d940f3819dca4d3591edee34365",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function subtractionStorageRead() public {\n    age = 10;\n    uint r = age - 3;\n    assert(r == 7);\n  }\n}\n"
+    },
+    {
+      "name": "multiplicationSimple",
+      "sourceHash": "94e85a874e0868a5e0b062e89ddb8358cb6aee70ff7a89e9c3d78f3174c6a9ec",
+      "fixtureSha256": "f0aefd1c07d65dea48a947d029aa93e368d83fdc2cb1f7521c96df5a99775ee7",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function multiplicationSimple() public pure {\n    uint r = 3 * 4;\n    assert(r == 12);\n  }\n}\n"
+    },
+    {
+      "name": "divisionSimple",
+      "sourceHash": "97477c487380fc87e1379fbbd63dbcf4937f63cb407fbae253b9eeabe88ed293",
+      "fixtureSha256": "1b344a8e38f78b6b091bc543823fc5a1c598f6d0b0ed9a3fe739c03a3c70b1c6",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function divisionSimple() public pure {\n    uint r = 8 / 2;\n    assert(r == 4);\n  }\n}\n"
+    },
+    {
+      "name": "moduloSimple",
+      "sourceHash": "2b6055596f7f13f1dd988178cfefaf173504511633925502b9e1711123339559",
+      "fixtureSha256": "7888323146924b32655d03045db37ceb87cbf3c6c5fdc039e41b419ebee0436f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function moduloSimple() public pure {\n    uint r = 7 % 3;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "powerSimple",
+      "sourceHash": "35cf44d54efc9e2f6d1e55f89b3b2aa746dc883a9376681179d4c15bd248f370",
+      "fixtureSha256": "8f42f6e4094f66ee154f3fafe40c3ce2e8a5d3bf3956c82284086c3772d0145a",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function powerSimple() public pure {\n    uint r = 2 ** 3;\n    assert(r == 8);\n  }\n}\n"
+    },
+    {
+      "name": "localArithmeticInRange",
+      "sourceHash": "9294d4ef67caa4dea094c46a67c7e679c009a234eddf398b4f8b7a622fa34864",
+      "fixtureSha256": "1d4bf383b6c7fede86ea6d773e5f36434c6e9d83ab773e0594842df767720522",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function localArithmeticInRange(uint x) public pure {\n    require(x >= 1 && x <= 100);\n    uint r;\n    r = x + 1;\n    r -= 1;\n    ++r;\n    assert(r == x + 1);\n  }\n}\n"
+    },
+    {
+      "name": "greaterEqualSimple",
+      "sourceHash": "0bffdd84955103983e1871e740eb106147d5880f7acadbb22728c5b2768ed021",
+      "fixtureSha256": "9539878d1c53cfcaaaa3864c0672c7dd49383ae04f7f17231e7465725fca9665",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function greaterEqualSimple() public pure {\n    bool r = 5 >= 6;\n    assert(!r);\n  }\n}\n"
+    },
+    {
+      "name": "greaterThanSimple",
+      "sourceHash": "fd5ed45a2b252dd4933d7c10b5306e693e0745ae9e76c8430883c1d59d1a11e0",
+      "fixtureSha256": "6ec4de04f8eeae6ec8f9725f9b6b31c9666d0b234725c12663bbc39a2fc776bc",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function greaterThanSimple() public pure {\n    bool r = 5 > 3;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "lessEqualSimple",
+      "sourceHash": "81bddc53fa1a2043d2e7292708614a1a05ca76c55f52f368ff1a90b13546516f",
+      "fixtureSha256": "d91f974c5fbd458644c52e1aea151902a84a310645de1da1a1bdc90289963e8d",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function lessEqualSimple() public pure {\n    bool r = 5 <= 5;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "lessThanSimple",
+      "sourceHash": "25861d1edd7194fe488d1ed989f6b65e1e10737f1e5f6ce0ff758d7a3bfee1ac",
+      "fixtureSha256": "82cefb798ecc90d4424a6c5a34c7a740e033d88819fd463c9ba4df6976a3ebd2",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function lessThanSimple() public pure {\n    bool r = 3 < 5;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "notEqualSimple",
+      "sourceHash": "51f18f627f55624f6d346e8d6f81a9fe48ec8c1191185ae4de9bf39e489ec228",
+      "fixtureSha256": "d873765c630fb2fb22cc9aefebbd1bd53149dd51f66acb85a92469aa9a91a13d",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function notEqualSimple() public pure {\n    bool r = 3 != 4;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "logicalAndSimple",
+      "sourceHash": "c37956e6afccaa11455bb8dd91dda1de538c02061aa42ed689afe208ec7aac2d",
+      "fixtureSha256": "455182a5820a0a74c4a2491d98fbb8ea70a567d0d8cca9c1d4c03c9bdc73b5b2",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function logicalAndSimple() public pure {\n    bool r = true && false;\n    assert(!r);\n  }\n}\n"
+    },
+    {
+      "name": "logicalAndShortCircuitRhs",
+      "sourceHash": "8d949d6b285aa583b170c73f96d83afa53cf7d441092f8b3338f835f46ca60d7",
+      "fixtureSha256": "534b302410b5637a06ffabdc093d81e636873ad97ff6955755473e49803023b0",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function logicalAndShortCircuitRhs() public pure {\n    uint x = 5;\n    bool r = x == 5 && x + 1 == 6;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "logicalNotSimple",
+      "sourceHash": "39c5f66d04bb6623077675b06393641b3774c76dfff3b7cef1d3052880481838",
+      "fixtureSha256": "9214320aca9aee1ae6119ce79002d858e2f7d7462d152655531bece35b5153b1",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function logicalNotSimple() public pure {\n    bool r = !false;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "logicalOrSimple",
+      "sourceHash": "f9ad6c2adddb5e92464f351ef3a8787a495c5f1b8fbd3b65d3504f93805ac18b",
+      "fixtureSha256": "d529dfe4e7e5a1f4b2883a51f3fb93d375775323f49e24111c21ec707b8a2562",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function logicalOrSimple() public pure {\n    bool r = true || false;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "logicalOrShortCircuitRhs",
+      "sourceHash": "a4fa2df8c0ef099dc15de20f9523542dba48355bfc986d2f9cbcab80e785fc52",
+      "fixtureSha256": "5c0a3caf39b656275ccd7b941cb7edede359442a16bf8ef07a797ee02d2369b3",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function logicalOrShortCircuitRhs() public pure {\n    uint x = 5;\n    bool r = x == 4 || x + 1 == 6;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "ternaryCaptureCond",
+      "sourceHash": "2748b074ec9de2666d513723b920f6d8c415e639ad58e70de5e3c02fd6841a4f",
+      "fixtureSha256": "41aba1935be771dbaef4514a2a8a0fa3fbe16176161a9806a7ef121a2283f349",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ternaryCaptureCond() public pure {\n    uint x = 5;\n    uint r = x == 5 ? x + 1 : 0;\n    assert(r == 6);\n  }\n}\n"
+    },
+    {
+      "name": "ternaryToIf",
+      "sourceHash": "ba600bce419cf20577771cf7b23fbcb3450b6dc4cf500dad7235c0fc9e0c310c",
+      "fixtureSha256": "6a94b425c066f30386f69150cdb835242caaf42e5762a98aa1c9d7e7b76d4156",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ternaryToIf() public pure {\n    bool b = true;\n    uint r = b ? 1 : 2;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "ifUnfold",
+      "sourceHash": "692d4b237c19d466c4beefd3b9e15cf580705ee577d380052bfd04472aa705ff",
+      "fixtureSha256": "2fb25b82108f698baecb9671b598d2038f1c7c6cb9cd3b3d5fc81fe183c18ed5",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifUnfold() public pure {\n    uint x = 5;\n    uint r = 0;\n    if (x == 4) r = 1;\n    assert(r == 0);\n  }\n}\n"
+    },
+    {
+      "name": "ifElseUnfold",
+      "sourceHash": "41b8bfdb715c4059d511b7a2a4dde4a8c211c277f42698fba93b725c4d38f207",
+      "fixtureSha256": "e3fd32396f8f452dce08f364f43df9cca9f42b42cf3fb3d44fb270eccd8fb51f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifElseUnfold() public pure {\n    uint x = 5;\n    uint r = 0;\n    if (x == 5) r = 1; else r = 2;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "ifSplit",
+      "sourceHash": "17c130b43adfc769660b66538ecea9d3437420dee5658de1d4757887230bd9bb",
+      "fixtureSha256": "8a19c559c88618be634560e2c5a4443b9075cc0de9a139e47abb73ae97f39719",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifSplit() public pure {\n    bool b = true;\n    uint r = 0;\n    if (b) r = 1;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "ifElseSplit",
+      "sourceHash": "22560ecb478f4e0d7d0bf8733b60c09d469f12ef28235a4beead039e8087e11f",
+      "fixtureSha256": "09ce77d73b10f6ceee7ca0d3f7283f9b84631862e79f9b9af8b1b058be0992b8",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifElseSplit() public pure {\n    bool b = false;\n    uint r = 0;\n    if (b) {\n      r = 1;\n    } else {\n      r = 2;\n    }\n    assert(r == 2);\n  }\n}\n"
+    },
+    {
+      "name": "ifTrue",
+      "sourceHash": "5f0de93ea4ffd7cd35e4481cd7b525ba8a01c5c2097c9eef080c9f4322d6df88",
+      "fixtureSha256": "e2e378ecaad01219ed19035e467d7b17f1b51a1630cd363342ef25961178ed58",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifTrue() public pure {\n    uint r = 0;\n    if (true) r = 1;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "ifFalse",
+      "sourceHash": "86a7a7818eec4eff0e8b36bf6feccf4a4869a4b96e5ca717bc341805e9dbf947",
+      "fixtureSha256": "45201da0dc6b763681bd783520ef7d2d6174c6aeae52a62a769c9b11f589b922",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifFalse() public pure {\n    uint r = 0;\n    if (false) r = 1;\n    assert(r == 0);\n  }\n}\n"
+    },
+    {
+      "name": "ifElseTrue",
+      "sourceHash": "5de8d246bca623a1f855bed071570bf6798c60237cd449249a95ea65ce37acfd",
+      "fixtureSha256": "635e724ce51a108764014801ec8d7ac3c16f588479c3b52c18c3c5094b0c7111",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifElseTrue() public pure {\n    uint r = 0;\n    if (true) r = 1; else r = 2;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "ifElseFalse",
+      "sourceHash": "9b66d2dafb97a7a5273168c7ac02757309a9287da19142c4e88ae2c2abda1906",
+      "fixtureSha256": "ce7151a25172e0150cd8df384880a2bbccb587fdc9de291616b8e24b6452da3c",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifElseFalse() public pure {\n    uint r = 0;\n    if (false) r = 1; else r = 2;\n    assert(r == 2);\n  }\n}\n"
+    },
+    {
+      "name": "ifElseNegated",
+      "sourceHash": "df835a62078a6f8cde96f7b3ff35b468d042d93c431f32dc43ec03c7cdc04629",
+      "fixtureSha256": "62b627ea6e4501bd25fa7223d64f2459d8b6d152ad3e349289e1b98bd3946aae",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function ifElseNegated() public pure {\n    bool b = false;\n    uint r = 0;\n    if (!b) r = 1; else r = 2;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "requireTrueLiteral",
+      "sourceHash": "89118596054f6b0ee248a97f9b7b78c7d3784cdc48e1fc78809d7bdda5f6a2ec",
+      "fixtureSha256": "2e8d039ae624b83551595aef545b83576769cfc5660fbf6cf87697c3f18f9a20",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function requireTrueLiteral() public pure {\n    require(true);\n    assert(true);\n  }\n}\n"
+    },
+    {
+      "name": "requireFalseLiteral",
+      "sourceHash": "82300ae386c7d20325d3a26af9c47c902b2265dd29b622bc08ed3b1e750cbe4d",
+      "fixtureSha256": "1f03580d1c0bb1238f924ebbcf80a6eab39e6b6c532e2569e1e15ed0f81b5ce3",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function requireFalseLiteral() public pure {\n    require(false);\n    assert(false);\n  }\n}\n"
+    },
+    {
+      "name": "requireGuardBox",
+      "sourceHash": "7df023afd2abc2da7a58ef39e7b12ddea12d764b803de1a7817df0ef598e8f85",
+      "fixtureSha256": "de7feadbc4b04f075fddcd09e8eb3a5ca4722406e1b259065706679c7a269ed4",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function requireGuardBox(uint x) public {\n    require(x > 0);\n    age = 1;\n    uint r = age;\n    assert(r == 1);\n  }\n}\n"
+    },
+    {
+      "name": "requireHoldsDiamond",
+      "sourceHash": "02a07b389e3481fe1d2e057665afcae33910d3ef90be2b591940d0ebd1113d62",
+      "fixtureSha256": "58a6e0d2311b7cd26ef51d126e0a3a76221d68eef92803757d8de5e06a3c2ad7",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function requireHoldsDiamond() public {\n    uint x = 5;\n    require(x > 0);\n    total = x;\n    uint r = total;\n    assert(r == 5);\n  }\n}\n"
+    },
+    {
+      "name": "testSimpleAssert",
+      "sourceHash": "cec2ecaf734780af24f83349eade46de1818d1aa64ce28c8135453cadbe21204",
+      "fixtureSha256": "8dd78490a3c51c86b748ac6643272800a3ce88e1e58e044cf256b3310c04e03c",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function testSimpleAssert() public {\n    age = 42;\n    uint v = age;\n    assert(v == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootReadWrite",
+      "sourceHash": "4f979dfc938fed8b661937638e28a9cc8bd36ace2f2578f48b7a968956aec4e6",
+      "fixtureSha256": "ac491f84c1e3ab0b3df7519ffc11e0bd2df6c72a9c5ab597c322bf91518abc30",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootReadWrite() public {\n    age = 34;\n    uint r = age;\n    assert(r == 34);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootAddAssign",
+      "sourceHash": "4f5e461aae7757ee0305982a2b67fde9761049ea729f817f76e399917ef404e2",
+      "fixtureSha256": "e68e691e8602a334dc6b90b4ac2833e9643a40aac7bb751b088b54736e4d5bf5",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootAddAssign() public {\n    age = 10;\n    age += 5;\n    uint r = age;\n    assert(r == 15);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootSubAssign",
+      "sourceHash": "46f790370dc84f07e3cdbe09d68b475a1eab0a6dae820893b7eff06fd7637aeb",
+      "fixtureSha256": "ea174278ad7203aaaafa544c9218a204dbbfdee188e35c0da6a12ca303c0312b",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootSubAssign() public {\n    age = 10;\n    age -= 4;\n    uint r = age;\n    assert(r == 6);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootMulAssign",
+      "sourceHash": "fef0f242ac873d4074d22f5d45c2c62e85a9c66a6a3aa0d2b9fa647677ff0fb8",
+      "fixtureSha256": "99ee4ca5c19eb804ac797dd002132f9e41439c523dfac362b6d27801b3eae90f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootMulAssign() public {\n    age = 6;\n    age *= 3;\n    uint r = age;\n    assert(r == 18);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootDivAssign",
+      "sourceHash": "4df677390e2e325e8f81a1c5925e1b0ececa90fb1142aca44372404426c4e3e5",
+      "fixtureSha256": "eb7a756990259282b737cc097c08258c537aaa58c5ba1ac1ebd9a0b344940600",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootDivAssign() public {\n    age = 20;\n    age /= 4;\n    uint r = age;\n    assert(r == 5);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootModAssign",
+      "sourceHash": "3b5081c78bddf796ba1270a1feb42b64ed65918ca29d5b64bfb3a964bc51c42a",
+      "fixtureSha256": "b890226dff2a3f923d54b206997bd03699ffd74cf6f6852005adf6404a05ecb3",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootModAssign() public {\n    age = 17;\n    age %= 5;\n    uint r = age;\n    assert(r == 2);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootMultipleWrites",
+      "sourceHash": "1703d68e7aad5852220851d6d795c7f1e19ba56bb1fa7e617f787c3939b581fb",
+      "fixtureSha256": "69dedc4e974a70b1a23d216a2b1850a09cbc1058a0b18dd3fd2c6e5e5ab7b713",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootMultipleWrites() public {\n    age = 1;\n    age = 2;\n    uint r = age;\n    assert(r == 2);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootPostincrement",
+      "sourceHash": "7116e13a655c67223ad57925c9e847c25836caddf8218f8a5232929c3ff3c2fd",
+      "fixtureSha256": "d7ad888caaf91bf8411a14b996aa495d3fc2edc3f2654b048755242ca3dad3d7",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootPostincrement() public {\n    age = 10;\n    age++;\n    uint r = age;\n    assert(r == 11);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootPreincrement",
+      "sourceHash": "c70a65c6d661a793d1da88af1063dc1dab9bc70dd1835a45ae369bc56fb70a8d",
+      "fixtureSha256": "744ccf70e2fe740f103a5f8df8e09ff5d245100c0c7bc0ef4408b37ada837d0f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootPreincrement() public {\n    age = 10;\n    ++age;\n    uint r = age;\n    assert(r == 11);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootPredecrement",
+      "sourceHash": "1899bca310fbbcdd5cd724f6bd6b41212801f54e85bd04bd5b9def3a7cf42f36",
+      "fixtureSha256": "b9fcc213713c6f4dda6a5a182bbdfc999d412800c7a33c4ab8e9b31d46f54575",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootPredecrement() public {\n    age = 10;\n    --age;\n    uint r = age;\n    assert(r == 9);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootDelete",
+      "sourceHash": "f5c79e169bf6f4cffcad51e2b93e87ea268c66b5d41de9349b1acc71293084bc",
+      "fixtureSha256": "53a8cbc7c0d9739778b5ab7e2d0ebce82f67387ce51ff7335f13f9adbaf68052",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootDelete() public {\n    age = 10;\n    delete age;\n    uint r = age;\n    assert(r == 0);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootDisjoint",
+      "sourceHash": "5492112d1ad68f803e0b1113ac6396eecb5c583ad91f859f482ff1704bd55c04",
+      "fixtureSha256": "9ec9a9b745b3cd50894c9d8aae2289ce266c578a0c7cb292dc40ed8e2d1c0673",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootDisjoint() public {\n    age = 7;\n    balance = 9;\n    uint r = age;\n    assert(r == 7);\n  }\n}\n"
+    },
+    {
+      "name": "storageRootWriteRhsCapture",
+      "sourceHash": "da530a463edcd279edf0fce3fd35e5fe44d1f055d6fe70f9df62592f2daaa2fa",
+      "fixtureSha256": "64246c57dea0eb7d7e088719874068158f8340dcf86dc0961bd8c30a848ec07c",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageRootWriteRhsCapture(uint x, uint y, uint z) public {\n    require(x == 1 && y == 2 && z == 3);\n    total = x + y * z;\n    uint r = total;\n    assert(r == 7);\n  }\n}\n"
+    },
+    {
+      "name": "storageBoolRootReadWrite",
+      "sourceHash": "7b97f120aa97ab879346535fdef5591a36eaa40c09f14cd103bf9809283f1151",
+      "fixtureSha256": "45ddac109861ca8d2f186770d7d4e18114b0b3eeba2e294f85958a4d7ec3cd92",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageBoolRootReadWrite() public {\n    flag = true;\n    bool r = flag;\n    assert(r);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexRootMapping",
+      "sourceHash": "4fd9543d36372881ff87f527854f13c0aabd6f6399614c3bdf787a326faa601b",
+      "fixtureSha256": "1a3ce7831dac4259269ed3ce1bcd8930d9c23f6e0d7aca237252cd0db2f4a1d0",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexRootMapping() public {\n    balances[1] = 42;\n    uint r = balances[1];\n    assert(r == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexMappingAddAssign",
+      "sourceHash": "e38c1c2fced36f0e03e4b0f00aa7e8e57ac9248401bd4e45177766cb28d792c8",
+      "fixtureSha256": "d4a3d27a545bc4c0ca312fb2fb0c512ab299e450433810be0e2ecc9412441034",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexMappingAddAssign() public {\n    balances[1] = 40;\n    balances[1] += 2;\n    uint r = balances[1];\n    assert(r == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexReadMappingStoreRoot",
+      "sourceHash": "57ca9b37d56b7824b918c5de7ca18ba9887424f7a9e5b0dbab333e93aa2bbdd1",
+      "fixtureSha256": "cc76b07702b407674352d197cc76ef1baab8e2b2e27ac499a0f3fae0de18238a",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexReadMappingStoreRoot(uint k) public {\n    require(k == 1);\n    balances[1] = 42;\n    total = balances[k];\n    uint r = total;\n    assert(r == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexWriteNseChain",
+      "sourceHash": "f0fc749df15c4ef15739a89128d56c2b38b175b894936721ee3e42d18bffa4f1",
+      "fixtureSha256": "fb84d328a60ba61aa279ce197644010bbb5975a6271f2c004e9b65dc6678ec48",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexWriteNseChain(uint i, uint x, uint y) public {\n    require(i == 2 && x == 3 && y == 4);\n    balances[i + 1] = x * y + 3;\n    uint r = balances[3];\n    assert(r == 15);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexDeleteMappingBool",
+      "sourceHash": "07e13f922a3f8cf90655b61b0c3e5d1e7950df5d9f72418d8b32fb98ed69451f",
+      "fixtureSha256": "7d056d42ee1348844c97e775f43244ef9872ab08a78acf7e98df1f798c949ba9",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexDeleteMappingBool() public {\n    flags[1] = true;\n    delete flags[1];\n    bool r = flags[1];\n    assert(!r);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexDeleteNseIndex",
+      "sourceHash": "e0e6b61dbec99a3df24a68040186db701a510d09751bdafbe1d586a954264aae",
+      "fixtureSha256": "cfa407941497c850c5c6bf25a0e6d20076f2abc485883856e9e4bdfb60eb5b41",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexDeleteNseIndex(uint k) public {\n    require(k == 2);\n    balances[3] = 7;\n    delete balances[k + 1];\n    uint r = balances[3];\n    assert(r == 0);\n  }\n}\n"
+    },
+    {
+      "name": "testStorageMapReadWriteAndDelete",
+      "sourceHash": "f14b02051fb00d8607bc260fcd519c2b1f479af14e9b70553c4cf7d7dfb5b00d",
+      "fixtureSha256": "1e6c49e048a1b6855ee09dcd089742cc67f3c5dd851dd2fc203425eac530f51d",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function testStorageMapReadWriteAndDelete() public {\n    valuesMap[1] = 10;\n    valuesMap[2] = 20;\n    uint v = valuesMap[1];\n    uint kept = valuesMap[2];\n    delete valuesMap[1];\n    assert(v == 10);\n    assert(kept == 20);\n    assert(valuesMap[1] == 0);\n    assert(valuesMap[2] == 20);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexCopyValue",
+      "sourceHash": "84fdce928be747e365a89391651681624747b96c3da212c08dfd312543525515",
+      "fixtureSha256": "0eccc67039d4e5f795936d934f0c6f17868d03a05c31c11b55e71b6d4a5e8f6a",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexCopyValue(uint i, uint j) public {\n    require(1 < values.length);\n    require(i == 5 && j == 1);\n    values[1] = 8;\n    balances[i] = values[j];\n    uint r = balances[5];\n    assert(r == 8);\n  }\n}\n"
+    },
+    {
+      "name": "storageGridWriteRead",
+      "sourceHash": "dd1678661cf15779241d871747b8d84b49e302a64b99319fffd2e4b7d7e24ceb",
+      "fixtureSha256": "5009db77379a3dc2bf20ce9cf1248bf8d62c3626e468a4a977750bc121c1ae12",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageGridWriteRead() public {\n    grid[2][3] = 99;\n    grid[3][2] = 1;\n    uint r = grid[2][3];\n    assert(r == 99);\n  }\n}\n"
+    },
+    {
+      "name": "storageBoolKeyedMapping",
+      "sourceHash": "d31da12cce654d714ce794905907a7dca70e9628e7918a62600433efc586593d",
+      "fixtureSha256": "42b42685ea9e7f2a7d0a4c34f3ef0f6f97122a709aa8fe0cc1c91a5defb8366b",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageBoolKeyedMapping() public {\n    boolKeyed[true] = 1;\n    boolKeyed[false] = 2;\n    assert(boolKeyed[true] == 1);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexAddAssign",
+      "sourceHash": "904bb96b3b81a974617669e553459fbaf0bc5295b92def1d18431ad1d2e59540",
+      "fixtureSha256": "244ab566d08fbb3fda571fe998876b0c598383ac7c0554421ad869c95be21182",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexAddAssign() public {\n    require(1 < values.length);\n    values[1] = 40;\n    values[1] += 2;\n    uint r = values[1];\n    assert(r == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexSubAssign",
+      "sourceHash": "c7d9659c27b79894e24b10da9748697ac06a9b0ba3674a2b377359b5180bf0ff",
+      "fixtureSha256": "a6614cad783806e830be46307e5817c3a83f2cca4dd09459f7e944f3bf0ebc80",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexSubAssign() public {\n    require(1 < values.length);\n    values[1] = 40;\n    values[1] -= 8;\n    uint r = values[1];\n    assert(r == 32);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexMultipleWrites",
+      "sourceHash": "1df9c26ab4faf84553113e7565cb43b19d1b53371d5de2a2bc0caf640da491de",
+      "fixtureSha256": "1693d8884cf1c4530170c10dd974637e85c39f540f275b87248a10867662d16d",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexMultipleWrites() public {\n    require(3 < values.length);\n    values[3] = 5;\n    values[3] = 8;\n    uint r = values[3];\n    assert(r == 8);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexPostincrement",
+      "sourceHash": "211f5011fcd5da34376109cacea764ba9a2b117dce71c8bfc195b3705225336f",
+      "fixtureSha256": "4c1fe6667cbd83f216bf79e9b73071eee9cba827e403f63a8ba2215a2bbe71c2",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexPostincrement() public {\n    require(1 < values.length);\n    values[1] = 40;\n    values[1]++;\n    uint r = values[1];\n    assert(r == 41);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexPostdecrement",
+      "sourceHash": "9e7f06ca7ff398c3aaa4cf3749f5684b980b87b6f240a0a8fc87cc2e8287bc2d",
+      "fixtureSha256": "4bb559e547e43d477a95bc6166b636d72df4d2e8e4b00c59e5953d7e1276d817",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexPostdecrement() public {\n    require(1 < values.length);\n    values[1] = 40;\n    values[1]--;\n    uint r = values[1];\n    assert(r == 39);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexDelete",
+      "sourceHash": "ff2c8428161896f58880580f4f5df85461ba16567fc5c75aa9a192ff1edc7f67",
+      "fixtureSha256": "0d3b764cf35e033f363780558d93b45d2ac24d7a4448ea01fa99c17417bc0013",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexDelete() public {\n    require(1 < values.length);\n    values[1] = 7;\n    delete values[1];\n    uint r = values[1];\n    assert(r == 0);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexReadNseIndex",
+      "sourceHash": "27b821ea2c3ab7c27adbaa8001361ea9cbafeba344d9b5deb8448ab231e4a84b",
+      "fixtureSha256": "3a440b7d5810895b10b4f866ad1ab9cd1e08c104c615473464bda889078497a0",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexReadNseIndex(uint i) public {\n    require(2 < values.length);\n    require(i == 1);\n    values[2] = 9;\n    uint r = values[i + 1];\n    assert(r == 9);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexArrayAddAssignOutOfBoundsReverts",
+      "sourceHash": "d89f2c5c635bae63307293458be082c3093ff3c8ecee286180630dd61d6c2b06",
+      "fixtureSha256": "5108bea24931ba40eac11d7908fe02c27f05cfef240c6649b194715ea72a032a",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexArrayAddAssignOutOfBoundsReverts() public {\n    require(values.length == 0);\n    values[1] += 2;\n    assert(false);\n  }\n}\n"
+    },
+    {
+      "name": "storageIndexArrayReadOutOfBoundsReverts",
+      "sourceHash": "d31b7458104a14d2ae8a04600049052f65963bd16d57f737a3487d1bbf199f14",
+      "fixtureSha256": "df0ec54c2fc25e5d342b82df127d0855593dcccd9068893a1f2e5c0afaf67127",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageIndexArrayReadOutOfBoundsReverts() public view {\n    require(values.length == 0);\n    uint r = values[1];\n    assert(r != r);\n  }\n}\n"
+    },
+    {
+      "name": "storageMatrixWriteRead",
+      "sourceHash": "9662f33b62d6b9fdc554b2ca6215d5bf0b9c9387243a89c2694c2969d46f19a5",
+      "fixtureSha256": "2ea25908f03929950ed1745709a316d97e91fc0cd49942a57f02a39285072338",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageMatrixWriteRead() public {\n    require(2 < matrix.length);\n    require(3 < matrix[2].length);\n    matrix[2][3] = 99;\n    uint r = matrix[2][3];\n    assert(r == 99);\n  }\n}\n"
+    },
+    {
+      "name": "storageMatrixNseIndex",
+      "sourceHash": "d4b7c0f3bf32ecb190a55a8a912aaa271a476587d6072bf8579b5cb27d2a31e9",
+      "fixtureSha256": "301e16bda981503c44527e37175d618250370ddcd2a0417f2811b18b16b7ef08",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storageMatrixNseIndex(uint i, uint j, uint x, uint y) public {\n    require(2 < matrix.length);\n    require(3 < matrix[2].length);\n    require(i == 1 && j == 2 && x == 5 && y == 6);\n    matrix[i + 1][j + 1] = x + y;\n    assert(matrix[2][3] == 11);\n  }\n}\n"
+    },
+    {
+      "name": "storagePushEmpty",
+      "sourceHash": "00faecd582e249e2e1b4a23367c6b032cc8542b9910e880a49f9632448f6c8ee",
+      "fixtureSha256": "3957f2f22466e4cd5adca5993a49b9b2bd087791724713603dc7d3abb9757eb8",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePushEmpty() public {\n    require(values.length == 2);\n    values.push();\n    assert(values.length == 3);\n  }\n}\n"
+    },
+    {
+      "name": "storagePushLengthPositive",
+      "sourceHash": "c89f7a897bb0083c81de465d34a1409a00610f704304f4fbf3afd005cf5e4070",
+      "fixtureSha256": "78e673032528bcbd2cfb64fa0a701f5b85f9c0e92c0f57e7b24f24d2c0eb0c9b",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePushLengthPositive() public {\n    values.push();\n    assert(values.length > 0);\n  }\n}\n"
+    },
+    {
+      "name": "storagePushNonsimpleArg",
+      "sourceHash": "00a12c20d4792074fdd70846166413a6b2121727c57873a046b37cf5636cd0e4",
+      "fixtureSha256": "709621b0cba9468b257bb29f3047a7155cccaffc0ca9baedb3a494c5f300707c",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePushNonsimpleArg(uint x, uint y) public {\n    require(values.length == 2);\n    require(x == 40 && y == 2);\n    values.push(x + y);\n    assert(values[2] == 42);\n    assert(values.length == 3);\n  }\n}\n"
+    },
+    {
+      "name": "storagePushReadBack",
+      "sourceHash": "5c54eaa0a602e0731aa89c100d74e4b99ad8e09056dc97b5f2ffc6f1bc702031",
+      "fixtureSha256": "bcde7f6197f437f596fe6ed034c7d1a457e095428f9471463570752cbe6975cf",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePushReadBack() public {\n    values.push(42);\n    uint r = values[values.length - 1];\n    assert(r == 42);\n  }\n}\n"
+    },
+    {
+      "name": "storagePopAfterPush",
+      "sourceHash": "a86c4c3d2f6f4961089743e826c6acec23c3bee43fbbe29ce12a553b4c4de47c",
+      "fixtureSha256": "40973f5cdc858be46cae9486074601a616a2a3abb356bb67c6c6713dab219ed2",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePopAfterPush() public {\n    require(values.length == 0);\n    values.push();\n    values.pop();\n    assert(values.length == 0);\n  }\n}\n"
+    },
+    {
+      "name": "storagePopNonempty",
+      "sourceHash": "dd646cf5997ca96f5ce00e157aa3165b0c434a8ff172f5da0015962df6c69054",
+      "fixtureSha256": "6089789e5689f7911589c5b886aba6843889e10c3d376d447c23148292b02679",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePopNonempty() public {\n    require(values.length == 2);\n    values.pop();\n    assert(values.length == 1);\n    values.push();\n    assert(values[1] == 0);\n  }\n}\n"
+    },
+    {
+      "name": "storagePopUnknownLength",
+      "sourceHash": "f3a9f0271b91ece5efcd727c2028295fb0ad78bf6de23ed874e0415e0fdcc974",
+      "fixtureSha256": "6bb119ef60a9614c1a5fc2362f18eb438209c41fc8b434ccbf93149d3f40b28f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function storagePopUnknownLength() public {\n    values.push();\n    values.pop();\n  }\n}\n"
+    },
+    {
+      "name": "whileCountsUp",
+      "sourceHash": "c25d8d30f493308cefa1fdb5c5da50ac375e4c29cde0a0d7183b65e093bca40f",
+      "fixtureSha256": "c1eea15b69f16be46fc2f216511645b0d1e38fde8c11bb91c64ccb6bb6994bba",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function whileCountsUp() public pure {\n    uint i = 0;\n    /// @custom:key invariant i <= 3\n    while (i < 3)\n    {\n      i = i + 1;\n    }\n    assert(i == 3);\n  }\n}\n"
+    },
+    {
+      "name": "whileBodyDeclaresLocal",
+      "sourceHash": "d154707080da94e7ecd309ad2e57510cc3a7221329df0e4ef080b6924b4373a8",
+      "fixtureSha256": "d18a35e2023038872fee394f44748d710e8b909c131be03ea4e68285317d9c60",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function whileBodyDeclaresLocal() public pure {\n    uint i = 0;\n    uint s = 0;\n    /// @custom:key invariant (i == 0 && s == 0) || (i == 1 && s == 0) || (i == 2 && s == 2) || (i == 3 && s == 6)\n    while (i < 3)\n    {\n      uint t = i * 2;\n      s = s + t;\n      i = i + 1;\n    }\n    assert(s == 6);\n  }\n}\n"
+    },
+    {
+      "name": "forWritesStorageArray",
+      "sourceHash": "74a435dfaec31dfe592d338f8e51613707112560c5ebf7ba34dc3ef3a9ea14ec",
+      "fixtureSha256": "0d469b4b057d902e1b7a6688cad0ee4be8c605083a3b88ee3efa0cc5d5f2695f",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function forWritesStorageArray() public {\n    require(values.length == 3);\n    /// @custom:key invariant i <= values.length && values.length == 3\n    /// @custom:key invariant \\forall uint j; j < i -> values[j] == j * j\n    for (uint i = 0; i < values.length; i++)\n    {\n      values[i] = i * i;\n    }\n    assert(values[2] == 4);\n  }\n}\n"
+    },
+    {
+      "name": "invariantCountsToBound",
+      "sourceHash": "9b3313fda2e1be1c3ebc8cd165493e76814366b51a79a504b1ed0e81f850d2d6",
+      "fixtureSha256": "48706cbb037ba8471b87e8fd248fa7deadfbc6fcabd52a5173303f4c30ab70e2",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function invariantCountsToBound(uint n) public pure {\n    require(n >= 0);\n    uint i = 0;\n    /// @custom:key invariant i <= n\n    while (i < n)\n    {\n      i = i + 1;\n    }\n    assert(i == n);\n  }\n}\n"
+    },
+    {
+      "name": "invariantForCountsArrayLength",
+      "sourceHash": "a3188c442f90368a75177692a3017105adce1d7992beaf492164a0246b3bed33",
+      "fixtureSha256": "b59250a8d76a0cba2bd440222c92bc86a28566ed478bdc002df9678588c1fc11",
+      "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.34;\ncontract TestSuite {\n\n  uint age;\n  uint balance;\n  uint total;\n  bool flag;\n  uint[] values;\n  uint[][] matrix;\n  mapping(uint => uint) balances;\n  mapping(uint => bool) flags;\n  mapping(uint => uint) valuesMap;\n  mapping(uint => mapping(uint => uint)) grid;\n  mapping(bool => uint) boolKeyed;\n\n\n\n  /// @custom:key box\n  function invariantForCountsArrayLength() public view {\n    uint c = 0;\n    /// @custom:key invariant 0 <= i && i <= values.length && c == i\n    for (uint i = 0; i < values.length; i++)\n    {\n      c = c + 1;\n    }\n    assert(c == values.length);\n  }\n}\n"
+    }
+  ]
+}

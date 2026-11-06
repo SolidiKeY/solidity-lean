@@ -1,0 +1,19 @@
+{
+  "command": [
+    "scripts/coord-tools/lean-mcp",
+    "diag",
+    "Solidity/Frontend/NumericLiteralProofs/WordTable/Part25.lean"
+  ],
+  "exit": 0,
+  "seconds": 10.096,
+  "container_memory_peak_bytes": 2810642432,
+  "minimum_parent_headroom_bytes": 15106899968,
+  "resource_stop": false,
+  "log": "/workspace/solidity-lean/tests/sol-numeric-literals/evidence/wordtable-part25.log",
+  "container": "sol-nl-proof-worker",
+  "limits": {
+    "memory_max": 12884901888,
+    "memory_swap_max": 0,
+    "lean_num_threads": 1
+  }
+}

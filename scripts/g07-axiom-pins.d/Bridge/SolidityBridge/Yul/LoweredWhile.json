@@ -1,0 +1,20 @@
+{
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.model": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.parts": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.repeat_shift": [],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.slices": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Bridge/SolidityBridge/Yul/LoweredWhile.lean:SolidityBridge.Yul.LoweredWhile.structured": [
+  "Quot.sound",
+  "propext"
+ ]
+}

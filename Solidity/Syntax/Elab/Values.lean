@@ -137,18 +137,123 @@ def fnTyOf? (Γ : ECtx) (h : String) : Option String :=
     | some _ => none
     | none => fnRow? C.widths h).map (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1))
 
+/-- A function type's array parameter component at a location
+(`uint[]memory`, `uint8[]memory`, `bytes2[]storage`; `FunDecl.sigTy?`): its
+element's spelling, a value type (a word of any width, a `bytesN`, `bool`,
+`address`), and whether it is a storage reference. A narrow or `bytesN`
+element is a `uint` whose width rows the capture declares from this
+spelling (`dispatchCaptures`, then `shapeCheck` against the operand). A
+`bytes1` element is refused: the model's `bytes` is a `bytes1[]` (the same
+rows), so the key could not tell a `bytes` parameter from a `bytes1[]` one,
+which solc keeps apart (and the source key, `FiniteDispatch.Ty.native`,
+spells differently). -/
+def fnRefElem? (c : String) : Option (String × Bool) := do
+  let (loc, storage) ← if c.endsWith "[]memory" then some ("[]memory", false)
+    else if c.endsWith "[]storage" then some ("[]storage", true) else none
+  let e := c.dropRight loc.length
+  guard (!fnTy? e && (lookupBy e C.enums).isNone)
+  guard ((PrimTy.ofName? e).isSome || (narrowTy? e).isSome || (bytesTy? e).any (· != 1))
+  pure (e, storage)
+
+/-- The structs a type names, through arrays and mappings (`fuel` bounds the
+type's depth; the table's types are finite). -/
+def structsIn : Nat → Ty → List Name
+  | 0, _ => []
+  | _, .prim _ => []
+  | _, .ref (.struct t) => [t]
+  | f + 1, .ref (.array E) | f + 1, .ref (.fixed E _) => structsIn f E
+  | f + 1, .ref (.mapping _ V) => structsIn f V
+
+/-- The struct `s` does not reach itself through its members. A search that
+exhausts its bound counts as recursive (refused, as recursive type graphs are
+outside finite dispatch). -/
+def structNonrec (s : Name) : Bool :=
+  go 64 [] ((structDef s).flatMap fun (_, T) => structsIn 16 T)
+where
+  go : Nat → List Name → List Name → Bool
+    | _, _, [] => true
+    | 0, _, _ => false
+    | f + 1, seen, t :: rest =>
+      if t == s then false
+      else if seen.contains t then go f seen rest
+      else go f (t :: seen) (rest ++ (structDef t).flatMap fun (_, T) => structsIn 16 T)
+
+/-- A function type's struct parameter component at a location
+(`Pmemory`, `Pstorage`; `FunDecl.sigTy?`): the struct by its written name,
+nominal (`Contract.structName?`), nonrecursive and, in memory, free of
+mappings; whether it is a storage reference. -/
+def fnRefStruct? (c : String) : Option (String × Bool) := do
+  let (loc, storage) ← if c.endsWith "storage" then some ("storage", true)
+    else if c.endsWith "memory" then some ("memory", false) else none
+  let s := c.dropRight loc.length
+  guard (!s.isEmpty && !s.endsWith "]" && !fnTy? s)
+  -- the struct the written name names in `C` (`Contract.structName?`), by
+  -- its table name, which spells its written name before its members
+  let e ← C.structName? s
+  guard (!(structDef e).isEmpty && structNonrec e)
+  guard (storage || structMapFree e)
+  pure (s, storage)
+
 /-- The signature of the function `d`, as a function type spelled
-(`canonFnTy`), retaining the supported memory-byte return location. -/
+(`canonFnTy`), retaining the supported memory-byte return location and the
+location of a memory or storage array parameter of a plain value element
+(`uint[] memory`, spelled `uint[]memory`; `uint[]storage`). Other reference
+parameters (calldata, nested, nominal), an element with a marker row (`bytes1`,
+an enum, a string, a function), and a narrow or `bytesN` element of a memory
+array return have no spelling, so no dispatch lists the function. -/
 def FunDecl.sigTy? (d : FunDecl) : Option String := do
   let comp (k : String) : Ty → Option String
     | .prim p => some ((fnRow? d.widths k).getD (declTyName d.widths k p))
     | .ref R => do
-      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k) && R == bytesR)
-      guard (lookupBy (k ++ "[]#bytes") d.widths == some 1)
-      guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
-      pure "bytesmemory"
+      guard (d.retMem && !d.retStorage && d.rets.any (·.1 == k))
+      if lookupBy (k ++ "[]#bytes") d.widths == some 1 then
+        guard (R == bytesR)
+        guard (!(d.widths.any fun (n, _) => n == k ++ "#string"))
+        pure "bytesmemory"
+      else if let .struct st := R then
+        -- a nonrecursive struct in memory (`fnRefStruct?`)
+        let c := Semantics.structDisplay st ++ "memory"
+        guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
+        pure c
+      else
+        -- a memory array of a plain value element (`fnRefElem?`). A return's
+        -- element stays a full word: the call site does not compare the
+        -- element width (`exprShape`), so a narrow or `bytesN` return could
+        -- alias a narrow object at width 256 (integration review, FU1)
+        let .array (.prim p) := R | none
+        let e := k ++ "[]"
+        guard (!(d.widths.any fun (w, _) =>
+          w.startsWith (k ++ "#") || (w.startsWith (e ++ "#") && w != e ++ "#address" &&
+            w != e ++ "#bytes")))
+        let c := declTyName d.widths e p ++ "[]memory"
+        guard ((fnRefElem? C c).any fun (el, _) => (narrowTy? el).isNone && (bytesTy? el).isNone)
+        pure c
   let ps ← d.params.mapM fun (n, T) => do
-    if T matches .ref _ then none else comp n T
+    match T with
+    | .prim _ => comp n T
+    | .ref (.array (.prim p)) =>
+      let loc ← match lookupBy n d.paramLocs with
+        | some .memory => some "[]memory"
+        | some .storage => some "[]storage"
+        | _ => none
+      let k := n ++ "[]"
+      guard (!(d.widths.any fun (w, _) =>
+        w.startsWith (n ++ "#") || (w.startsWith (k ++ "#") && w != k ++ "#address" &&
+          w != k ++ "#bytes")))
+      let c := declTyName d.widths k p ++ loc
+      guard ((fnRefElem? C c).isSome)
+      pure c
+    | .ref (.struct st) =>
+      let loc ← match lookupBy n d.paramLocs with
+        | some .memory => some "memory"
+        | some .storage => some "storage"
+        | _ => none
+      -- the written name, which the struct's table name spells first
+      -- (`structDisplay`); it must name this struct in `C`
+      let c := Semantics.structDisplay st ++ loc
+      guard ((fnRefStruct? C c).isSome && C.structName? (Semantics.structDisplay st) == some st)
+      pure c
+    | .ref _ => none
   let rs ← d.rets.mapM fun (n, T) => comp n T
   pure (canonFnTy (C.enums.map fun (e : Name × List Name) => e.1) (fnTyStr ps rs false))
 
@@ -192,6 +297,15 @@ def isRecursiveC (f : String) : Bool := (reachableC C f).contains f
 /-- The functions mutually recursive with `f`, through values too. -/
 def recPartnersC (f : String) : List String :=
   (reachableC C f).filter fun g => (reachableC C g).contains f
+
+/-- Whether a function type's return component is a memory reference the
+dispatch binds (`fnMemoryDispatch`): `bytes memory`, a memory array of a
+plain value element (`fnRefElem?`) or a nonrecursive struct in memory
+(`fnRefStruct?`). -/
+def fnMemRet (r : String) : Bool :=
+  r == "bytesmemory" ||
+    (fnRefElem? C r).any (fun (el, st) => !st && (narrowTy? el).isNone && (bytesTy? el).isNone) ||
+    (fnRefStruct? C r).any (!·.2)
 
 /-- A function type's component as a value: its primitive type and width. -/
 def fnCompTy? (c : String) : Option (PrimTy × Nat) :=
@@ -787,7 +901,13 @@ call's return's, a conditional's first branch's, `r.g`'s external type. -/
 partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
   let canon := canonFnTy (C.enums.map fun (e : Name × List Name) => e.1)
   match e with
-  | .name x => fnTyOf? C Γ x
+  | .name x =>
+    -- a local or state value of function type, else a function of `C` named
+    -- as a value (`fnTag`): its own signature
+    (fnTyOf? C Γ x).orElse fun _ =>
+      if (lookupBy x Γ).isNone && fnInternal C x then
+        (lookupBy x C.funs).bind (FunDecl.sigTy? C)
+      else none
   | .ternary _ a _ => fnTyOfExpr Γ a
   | .call g args => do
     if g == callValueName then
@@ -810,12 +930,33 @@ partial def fnTyOfExpr (Γ : ECtx) (e : RawExpr) : Option String :=
       let (tb, k, .prim _) ← widthPath? C Γ e | none
       (fnRow? tb k).map canon
 
+/-- `solcEnumBelow(T, "k₁", n₁, …)`, a component of `abi.decode` the solc
+import writes for a type with nested enums (lane FU2-D): `T` at its carriers
+(`uint`, `uint8`), each enum position `kᵢ` (`""` the value, `k[]` an element
+of `k`, `k.f` a member `f` of `k`) checked below its member count `nᵢ`, as
+solc's validator (`abiReadGen`). -/
+def abiEnumBelowName : String := "solcEnumBelow"
+
+/-- The type and the checked positions of a `solcEnumBelow(…)` component. -/
+def abiEnumBelow? : RawExpr → Option (RawExpr × List (String × Nat))
+  | .call f (t :: rest) => do
+    guard (f == abiEnumBelowName)
+    let rec pairs : List RawExpr → Option (List (String × Nat))
+      | [] => some []
+      | k :: .num n :: more => do
+        let bs ← k.bytesLit?
+        pure ((String.mk (bs.map Char.ofNat), n) :: (← pairs more))
+      | _ => none
+    pure (t, ← pairs rest)
+  | _ => none
+
 /-- A type written in `abi.decode`'s types: `T`, `T[]`, `T[][]`, `T[k]`. -/
 partial def abiTyExpr? : RawExpr → Option RawTy
   | .name t =>
     if t.endsWith "[]" then (abiTyExpr? (.name (t.dropRight 2))).map .array else some (.named t)
   | .index t (.num m) => (abiTyExpr? t).map (.fixed · m)
   | .call "#abiArrayType" [t] => (abiTyExpr? t).map .array
+  | e@(.call ..) => (abiEnumBelow? e).bind fun (t, _) => abiTyExpr? t
   | _ => none
 
 /-- The narrow positions of a value of reference type: a place's
@@ -846,8 +987,8 @@ def exprShape (Γ : ECtx) : RawExpr → List (String × Nat)
       | _ => []
     | none =>
       let ty := if f == callValueName then as.head?.bind (fnTyOfExpr C Γ) else fnTyOf? C Γ f
-      if (ty.bind fnParts?).any (fun (ps, rs, ext) =>
-          !ext && ps.isEmpty && rs == ["bytesmemory"]) then dynBytesRows else []
+      if (ty.bind fnParts?).any (fun (_, rs, ext) =>
+          !ext && rs == ["bytesmemory"]) then dynBytesRows else []
   | e => placeShape C Γ e
 
 /-- An assignment expression keeps its mapping target's declared shape.
@@ -1103,7 +1244,19 @@ partial def narrowWholeUse? (Γ : ECtx) : RawExpr → Option RawExpr
             as.all (fun a => dynamicBytesExpr C Γ a))) then
       as.findSome? (narrowBase? Γ)
     else
-    let refs : List Bool := ((lookupBy f C.funs).map fun d => d.params.map fun (_, T) => isRefTy T).getD []
+    -- a call through a function value (a name, or `callValueName` whose first
+    -- argument is the callee): a reference component (`fnRefElem?`,
+    -- `fnRefStruct?`) is captured at its declared shape (`dispatchCaptures`),
+    -- whose initializer `shapeCheck`s the argument
+    let valueRefs (ty : String) : List Bool :=
+      ((fnParts? ty).map fun (ps, _, _) =>
+        ps.map fun c => (fnRefElem? C c).isSome || (fnRefStruct? C c).isSome).getD []
+    let refs : List Bool := match lookupBy f C.funs with
+      | some d => d.params.map fun (_, T) => isRefTy T
+      | none =>
+        if f == callValueName then
+          false :: (((as.head?.bind (fnTyOfExpr C Γ)).map valueRefs).getD [])
+        else ((fnTyOf? C Γ f).map valueRefs).getD []
     as.zipIdx.findSome? fun (a, i) =>
       if refs.getD i false then narrowWholeAt? Γ a else narrowWholeUse? Γ a
   | .assign a b =>
@@ -1475,10 +1628,16 @@ def toBytesAt? (Γ : ECtx) (n : Option Nat) (o e : RawExpr) : Except String RawE
   | some n => toBytesAt C Γ n o e
   | none => pure e
 
+/-- The internal call `#bytesIndex(b, i, N)`: the byte `i` of the
+`bytesN` `b` at a symbolic index, which `hoist` reads (`Elab/Arms.lean`). -/
+def bytesIndexName : String := "#bytesIndex"
+
 /-- The byte `i` of the `bytesN` `b`, a `bytes1`: `b`'s byte counted from the
-left, `b >> 8((N-1) -% i)` cut to 8 bits, divided by `i < N ? 1 : 0` so that
-an index out of range reverts, as an array's does (`Storage.checkIndex`); a
-literal index is checked here. -/
+left, `b >> 8((N-1) -% i)` cut to 8 bits.  A literal index is checked here
+(solc's compile error); a symbolic one is `uint8(#bytesIndex(b, i, N))`,
+whose inner call `hoist` reads as `i` captured, then its bounds check
+(`i < N`, a revert, `Panic(0x32)`'s data where a `catch` reads it, as an
+array index's, `Checked.idxPG`), then the byte. -/
 def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
   match i.litVal? with
   | some k =>
@@ -1486,10 +1645,7 @@ def bytesAt (n : Nat) (b i : RawExpr) : Except String RawExpr :=
     if 0 ≤ k && k < n then
       pure (.call "uint8" [.binop .mod (.binop .shr b (.num (8 * (n - 1 - k.toNat)))) (.num 256)])
     else throw s!"index {k} out of range of a bytes{n}"
-  | none =>
-    let sh : RawExpr := .binop .mulW (.num 8) (.binop .subW (.num (n - 1)) i)
-    pure (.call "uint8" [.binop .div (.binop .mod (.binop .shr b sh) (.num 256))
-      (.ternary (.binop .lt i (.num n)) (.num 1) (.num 0))])
+  | none => pure (.call "uint8" [.call bytesIndexName [b, i, .num n]])
 
 /-- The mark of a `bytesN` argument of `abi.encode`/`encodePacked`/
 `bytes.concat`, put by `bytesPure` (which rewrites the value to a `uint`)

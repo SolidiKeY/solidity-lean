@@ -199,7 +199,9 @@ theorem FunContract.forall_mem {Γf : Ctx} {b : Prog C ([.mem R] ++ ps) Γf} {re
   intro Γ Γ' ret
   cases ret with
   | mem => exact h
-  | rets bs => cases bs
+  | rets bs =>
+    cases bs with
+    | snocMem bs => cases bs; exact h
 
 /-- The bottom frame meets every contract: it is exhausted. -/
 theorem RecContractM.base (μ : Mutability) (req : Fml C ps) (ens : Fml C ([.mem R] ++ (Olds ++ ps)))

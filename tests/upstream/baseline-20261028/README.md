@@ -1,4 +1,8 @@
-# Current-master upstream baseline
+# Upstream baseline of 2026-10-28 (frozen)
+
+This directory is a frozen historical record of master as of 2026-10-28.
+Its quotes (e.g. `probes/matrix.json`) are anchored to that code; do not
+regenerate or edit them. Record newer measurements in a new dated baseline.
 
 The [attribution follow-up](attribution/README.md) assesses each of the original
 84 unresolved feature IDs. It records 59 source/documented boundaries and 25 exact

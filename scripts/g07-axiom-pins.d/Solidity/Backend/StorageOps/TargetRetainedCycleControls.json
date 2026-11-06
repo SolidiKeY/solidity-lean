@@ -1,0 +1,22 @@
+{
+ "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.Controls.changed_payload": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.Controls.executions": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.Controls.failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.Controls.ordered": [],
+ "Solidity/Backend/StorageOps/TargetRetainedCycleControls.lean:Solidity.Backend.StorageOps.TargetRetainedCycle.Controls.uncleared_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

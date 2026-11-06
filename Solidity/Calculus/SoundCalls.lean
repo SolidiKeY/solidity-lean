@@ -329,6 +329,22 @@ theorem Binders.runSt_declsThen {Δ : Ctx} (σ : State C Γ) : {ρ : Ctx} → (b
     rw [Binders.runSt_declsThen σ bs, Prog.runSt_cons]
     rfl
 
+/-- **Several return variables declared** as the call enters them: a value
+one at its default, a memory one a fresh default object (`uint a; uint[]
+memory b;`). -/
+theorem RetBinders.runSt_declsThen {Δ : Ctx} (σ : State C Γ) : {ρ : Ctx} → (bs : RetBinders ρ) →
+    (rest : Prog C (ρ ++ Γ) Δ) →
+      Prog.runSt σ (bs.declsThen rest) = Prog.runSt (bs.enterT σ).st rest
+  | _, .nil, rest => rfl
+  | _, .snoc bs p x, rest => by
+    show Prog.runSt σ (bs.declsThen (.cons (.declLocal p x none) rest)) = _
+    rw [RetBinders.runSt_declsThen σ bs, Prog.runSt_cons]
+    rfl
+  | _, .snocMem bs R x hd hm, rest => by
+    show Prog.runSt σ (bs.declsThen (.cons (.declMem R x none hd hm) rest)) = _
+    rw [RetBinders.runSt_declsThen σ bs, Prog.runSt_cons]
+    rfl
+
 /-- **A weakened body run as a block** runs as the body, lifted, its locals
 popped. -/
 theorem Stmt.run_block_wk {ρ Δ Γf : Ctx} (body : Prog C ρ Γf) (h : Thin ρ Δ) (τ : State C ρ)
@@ -445,7 +461,7 @@ theorem Premise.sound_callVal {ps Γf : Ctx} (f : Name) (args : Args C Γ ps) (p
 /-- `internalCallExpand` of a call that leaves its return variables
 (`CallRet.rets`): the frame dropped from under them. -/
 theorem Stmt.runSt_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
+    (bs : RetBinders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
     (Prog.runSt σ (args.declsThen (bs.declsThen
       (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))).map
       (State.thin (Thin.keepAll rs (Thin.ofExt (Ext.append Γ ps)))) =
@@ -456,28 +472,28 @@ theorem Stmt.runSt_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
   cases args.evalT σ with
   | error => rfl
   | ok a =>
-    show (Prog.runSt _ _).map _ = (TRun.callFrom (.rets bs) body.ext body.runR σ
-      ⟨σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a), List.prefix_refl _⟩).map _
-    have hs : (σ.withEnv (TEnv.append ps a σ.env)).withEnv
-        (TEnv.append rs (bs.defaultsT (C := C)) (σ.withEnv (TEnv.append ps a σ.env)).env) =
-        (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)).lift
-          (Thin.keepAll rs (Thin.atop ps Γ))
-          (TEnv.append rs (bs.defaultsT (C := C)) (TEnv.append ps a σ.env)) := by
-      simp only [State.lift, State.withEnv, TEnv.put_keepAll, TEnv.put_atop, TEnv.drop_append]
-    rw [Binders.runSt_declsThen, hs, Prog.runSt_single, Stmt.runSt, Stmt.run_block_wk]
+    show (Prog.runSt _ _).map _ =
+      (TRun.callFrom (.rets bs) body.ext body.runR σ (bs.enterT (σ.withEnv a))).map _
+    rw [RetBinders.runSt_declsThen, State.withEnv_append_lift, RetBinders.enterT_lift,
+      Prog.runSt_single, Stmt.runSt, Stmt.run_block_wk]
     unfold TRun.callFrom Prog.run
     dsimp only
-    cases Prog.runR body (σ.withEnv (TEnv.append rs (bs.defaultsT (C := C)) a)) with
+    cases Prog.runR body (bs.enterT (σ.withEnv a)).st with
     | error => rfl
     | ok o =>
       exact congrArg Except.ok (by
         simp only [Out.drop, Out.lift, State.lift, State.drop, State.thin, State.withEnv,
           CallRet.leaveT]
-        erw [TEnv.thin_put_keepAllAtop])
+        rw [TEnv.append_wk, TEnv.wk_trans]
+        refine congrArg (fun E => (State.mk o.st.storage o.st.H o.st.heap E o.st.net
+          o.st.selfBalance o.st.tx : State C (rs ++ Γ))) ?_
+        conv => lhs; rw [← TEnv.append_take_drop rs (TEnv.drop body.ext o.st.env)]
+        rw [TEnv.put_keepAll, TEnv.put_atop, TEnv.append_wk, TEnv.drop_append, TEnv.thin_keepAll,
+          TEnv.thin_ofExt, TEnv.drop_append])
 
 /-- Soundness reuses the exact inlined call run. -/
 theorem Premise.sound_callRets {ps rs Γf : Ctx} (f : Name) (args : Args C Γ ps)
-    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
+    (bs : RetBinders rs) (body : Prog C (rs ++ ps) Γf) (σ : State C Γ) :
     Premise.Runs m (.call f args (.rets bs) body)
       (.inline (args.declsThen (bs.declsThen
           (.cons (.block (body.wk (Thin.keepAll rs (Thin.atop ps Γ))).2.2) .nil)))
@@ -631,7 +647,7 @@ theorem Premise.sound_callCaptureVal {ps Γf : Ctx} (k : Nat) (f : Name) (args :
 
 /-- `functionCallArgCapture` (rets return). -/
 theorem Premise.sound_callCaptureRets {ps rs Γf : Ctx} (k : Nat) (f : Name) (args : Args C Γ ps)
-    (bs : Binders rs) (body : Prog C (rs ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
+    (bs : RetBinders rs) (body : Prog C (rs ++ ps) Γf) {p : PrimTy} {v : Val C Γ p}
     {as' : Args C (.val p :: Γ) ps} (hc : args.capture = some ⟨p, v, as'⟩) (σ : State C Γ) :
     Premise.Runs m (.call f args (.rets bs) body)
       (.inline (.cons (.declLocal p (fse k) (some v)) (.cons (.call f as' (.rets bs) body) .nil))
@@ -1276,23 +1292,23 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
     simp only [Bool.true_and, decide_eq_true_eq] at hs
     have hi : call.isSelf.evalT σ = .ok true := by
       rw [ExtCall.isSelf_evalT]; simp only [hs, decide_true]
-    have hnx : ∀ e, TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e →
+    have hnx : ∀ e, TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ = .error e →
         e ≠ .exhausted → holds σ (call.selfFails rets sargs sbody) := by
       intro e he hk
       refine not_holds_diamond σ _ _ _ hk ?_
       rw [Prog.runSt_require_true hi, Prog.runSt_cons]
-      show ((TRun.call sargs (.rets rets) sbody.ext sbody.runR σ).map (·.st)).bind _ = _
+      show ((TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ).map (·.st)).bind _ = _
       rw [he]; rfl
     let P0 : Prog C Γ Γ₁ := .cons (.require call.hasCode) (.cons (.require call.isSelf)
-      (.cons (.call call.fn sargs (.rets rets) sbody) ok))
+      (.cons (.call call.fn sargs (.rets rets.toRet) sbody) ok))
     have h0' := holds_modalK_pop σ P0 ((Ext.append Γ ρ).trans ok.ext) ω κ φ (by
       rw [show (Ext.append Γ ρ).trans ok.ext = (Ext.append Γ []).trans P0.ext from
         Subsingleton.elim _ _]
       exact h0)
     rw [Prog.runSt_require_true hc, Prog.runSt_require_true hi, Prog.runSt_cons] at h0'
-    change Modality.afterRunTR .box _ (((((TRun.call sargs (.rets rets) sbody.ext sbody.runR
+    change Modality.afterRunTR .box _ (((((TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR
       σ).map (·.st)).bind fun τ => Prog.runSt τ ok).map _).bind _) at h0'
-    have hK : ∀ e, TRun.call sargs (.rets rets) sbody.ext sbody.runR σ = .error e →
+    have hK : ∀ e, TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ = .error e →
         ∀ c : Semantics.Word, (e = .panic ∨ ∃ d, e = .revertWith d ∧
           Semantics.decodePanic d = some c) →
         ∀ ks, sbody.panicCodes = some ks →
@@ -1303,7 +1319,7 @@ theorem Premise.sound_trySelfBox {ρ κc Γ₁ Γe Γ₃ Γ₄ ps Γf : Ctx} (ca
       · exact absurd rfl hp
       · exact .inr (hd d c rfl hv)
     revert h0' hnx hK
-    cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    cases TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
     | ok o =>
       intro _ h0' _
       dsimp only

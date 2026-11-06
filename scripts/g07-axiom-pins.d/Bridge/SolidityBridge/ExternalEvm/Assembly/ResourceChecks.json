@@ -1,0 +1,7 @@
+{
+ "Bridge/SolidityBridge/ExternalEvm/Assembly/ResourceChecks.lean:Solidity.Evm.External.Assembly.ResourceChecks.compiledSuccess": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "Solidity/Calculus/StmtSound.lean:Solidity.Stmt.sound": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

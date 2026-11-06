@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.source_bool_delete_memOK": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.source_bool_delete_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.clearT": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.delete_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.delete_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceDelete.lean:Solidity.Backend.MemoryOps.SourceBoolMemoryAt.write_addr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

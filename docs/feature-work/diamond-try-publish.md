@@ -49,7 +49,7 @@ continues to distinguish constructed states and symbolic opcode components from
 whole original execution. This publication is a partial checkpoint.
 
 Exact commands, stdout, resource footers, reviews, old preserved exports and
-validation JSON: `/workspace/next10-diamond-try-evidence/publish-master`.
+validation JSON: VM location `next10-diamond-try-evidence/publish-master`.
 Actual push receipt and verified remote SHA are recorded there after publication.
 
 ### Remote advancement during publication

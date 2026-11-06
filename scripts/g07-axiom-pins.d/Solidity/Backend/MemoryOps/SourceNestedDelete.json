@@ -1,0 +1,27 @@
+{
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.source_nested_delete_low_horizon": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.eval_nested_delete_of_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_delete_child_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.nested_delete_parent_bounds": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/SourceNestedDelete.lean:Solidity.Backend.MemoryOps.SourceBoolRefsAt.resolved_nested_delete_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

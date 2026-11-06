@@ -1,8 +1,9 @@
 import SolidityBridge.ExternalEvm.Assembly.Static
 
 /-! A kernel-visible certificate for the upstream scanner's actual
-parse/next-PC relation. The pinned partial D_J_aux remains untouched and
-opaque. We do not assert an unproved equation for that opaque function.
+parse/next-PC relation. Here the scanner is used through this
+certificate; the bounded vendored `D_J_aux` equation is in
+`BoundedScannerInterface`.
 The certified destination array is suitable as the explicit validJumps input
 to the actual upstream X driver; its instruction boundaries are proved.
 -/
@@ -102,7 +103,7 @@ termination_by code.size - pc
 decreasing_by omega
 
 /-- Scanner-path destinations are unique for the actual deterministic
-upstream parse/next-PC relation. This avoids opaque-function evaluation. -/
+upstream parse/next-PC relation. This needs no evaluation of the vendored scanner. -/
 theorem ScanPath.unique {code : ByteArray} {pc : EvmYul.UInt256}
     {a b : List EvmYul.UInt256} (pa : ScanPath code pc a) (pb : ScanPath code pc b) : a = b := by
   induction pa generalizing b with

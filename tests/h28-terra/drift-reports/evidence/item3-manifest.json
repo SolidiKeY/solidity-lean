@@ -1,0 +1,49 @@
+{
+  "base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "sourceTree": "114f3a4e901fc282cec56d9e210fcffb2776e0cd",
+  "externalEvidenceSha256": "34a3e232a590c516ff39b2b17fd951346c9bd02fe9205974d93fcde675433943",
+  "selectedFilesManifest": "item1-manifest.json",
+  "fixtureIds": [
+    "all-source-rows",
+    "empty-source",
+    "comments-only",
+    "nested-strings",
+    "diagnostic-0",
+    "diagnostic-1",
+    "diagnostic-2",
+    "diagnostic-3",
+    "diagnostic-4",
+    "timing-0",
+    "timing-1",
+    "timing-2",
+    "timing-3",
+    "timing-4",
+    "timing-5",
+    "duplicate-paths",
+    "cross-file-duplicates",
+    "wrong-source-pin",
+    "missing-provenance",
+    "unknown-mode",
+    "invalid-budget-bool",
+    "invalid-budget-nan",
+    "invalid-budget-inf",
+    "boolean-seconds",
+    "malformed-times",
+    "invalid-seconds-null",
+    "invalid-seconds-string",
+    "invalid-seconds-nan",
+    "invalid-seconds-inf",
+    "missing-seconds",
+    "complete-pinned-corpus"
+  ],
+  "retainedOccurrences": 39,
+  "categoryCounts": {
+    "READ DRIFT": 8,
+    "UNANNOTATED READS": 9,
+    "UNKNOWN TOKEN": 20
+  },
+  "summaryLines": [
+    "solkeycheck: 37 mismatch(es); run with --list to inspect the parsed reads",
+    "solkeycheck: parsed 389 taclets, 140 read-bearing, table covers 131"
+  ]
+}

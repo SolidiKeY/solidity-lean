@@ -388,7 +388,7 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
     simpa only [State.lift_thin] using Simple.evalT_wk h (τ.thin h) τ.env call.addr
   cases he with
   | trySelfOk hz hs hc hp =>
-    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases v with
     | halt _ => cases hr
     | violated => cases hr
@@ -404,12 +404,12 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
       exact CWkRel.cat a d' hd (CWkRel.drop ((Thin.Over.append h ρ).trans
         (Prog.wk_over ok (Thin.keepAll ρ h))) hr')
   | trySelfHalt hz hs hc h1 h2 h3 =>
-    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases v <;> cases hr
     exact ⟨_, ExecS.trySelfHalt (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv h1 h2 h3,
       rfl⟩
   | trySelfViolated hz hs hc =>
-    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases v <;> try cases hr
     exact ⟨_, ExecS.trySelfViolated (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv,
       trivial⟩
@@ -444,20 +444,20 @@ theorem tryCall_unwk {Γ ρ κ Γ₁ Γ₂ Γ₃ Γ₄ ps Γf : Ctx} (J : StateI
     obtain ⟨u, hu, hr⟩ := hoth h τ hp
     exact ⟨_, ExecS.tryOther (by rw [← ha]; exact hsf) hu, CWkRel.drop (Prog.wk_over other h) hr⟩
   | trySelfError hz hs hc hp =>
-    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := herr h τ hp
     exact ⟨_, ExecS.trySelfError (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv hu,
       CWkRel.drop (Prog.wk_over err h) hr⟩
   | trySelfOther hz hs hc he hp =>
-    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨v, hv, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases v <;> cases hr
     obtain ⟨u, hu, hr⟩ := hoth h τ hp
     exact ⟨_, ExecS.trySelfOther (by rw [← ha]; exact hz) (by rw [← ha]; exact hs) hv he hu,
       CWkRel.drop (Prog.wk_over other h) hr⟩
   | trySelfPanic hz hs hc he hp =>
     rename_i v u' e₀
-    obtain ⟨w, hw, hr⟩ := call_unwk J call.fn sargs (.rets rets) sbody h τ hc
+    obtain ⟨w, hw, hr⟩ := call_unwk J call.fn sargs (.rets rets.toRet) sbody h τ hc
     cases w <;> cases hr
     obtain ⟨u, hu, hr⟩ := hpnc (Thin.keepAll κ h)
       (τ.withEnv (TEnv.append κ (code.decodeT v) τ.env)) hp

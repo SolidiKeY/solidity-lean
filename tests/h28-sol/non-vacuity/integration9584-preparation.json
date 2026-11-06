@@ -1,0 +1,80 @@
+{
+  "status": "partial; exact-head final gates follow",
+  "upstream": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+  "merge": "74a46841faa1b645e820363a8322ba47b1e25e86",
+  "source_count": 63,
+  "source_mismatches": [],
+  "owned_Lean_files_unchanged": 26,
+  "external_controls": 41,
+  "gates": {
+    "integration9584-accounting": {
+      "git_head": "74a46841faa1b645e820363a8322ba47b1e25e86",
+      "command": [
+        "tests/h28-sol/non-vacuity/runtime/accounting"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 20.45698820099642,
+      "rusage": {
+        "command": [
+          "tests/h28-sol/non-vacuity/runtime/accounting"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 19.865530907991342,
+        "children_user_seconds": 14.709206,
+        "children_system_seconds": 5.466109,
+        "children_max_rss_kib": 24000,
+        "children_major_faults": 0,
+        "children_minor_faults": 4168926
+      },
+      "log_sha256": "93e95e158bd7ff4972eff32b385d9d7110bd9dcd93f6b89bebda058a9997e52c",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 12206510080
+    },
+    "integration9584-proposal": {
+      "git_head": "74a46841faa1b645e820363a8322ba47b1e25e86",
+      "command": [
+        "node",
+        "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+        "tests/h28-sol/non-vacuity/pin-proposal-9584"
+      ],
+      "exit": 0,
+      "elapsed_seconds": 15.091554907994578,
+      "rusage": {
+        "command": [
+          "node",
+          "tests/h28-sol/non-vacuity/prepare-pin-proposal.mjs",
+          "tests/h28-sol/non-vacuity/pin-proposal-9584"
+        ],
+        "exit": 0,
+        "elapsed_seconds": 14.405520307002007,
+        "children_user_seconds": 13.627321,
+        "children_system_seconds": 1.167124,
+        "children_max_rss_kib": 329440,
+        "children_major_faults": 0,
+        "children_minor_faults": 526731
+      },
+      "log_sha256": "241dd60b0eaad4fcdadaf212df1aaa3e25c4296a6aa14c767edf32085256978a",
+      "limits": [
+        "12884901888",
+        "0"
+      ],
+      "stop": null,
+      "minimum_vm_available_bytes": 11953086464
+    }
+  },
+  "generated_proposal": {
+    "old_count": 7925,
+    "added_count": 414,
+    "candidate_count": 8339,
+    "applied": false,
+    "central_patch_sha256": "d301f27878cd46173c45f22afc682596ab26f113da170061b330edcd9bbf8234"
+  },
+  "H41": "No VM ship-cache.sh invocation; prepare verified packs/path/SHA for coordinator pull",
+  "old_shipping_question": "retired by explicit H41",
+  "shared_registry": "generated centrally; no worker write or exception requested",
+  "cache_transfer_observed": false
+}

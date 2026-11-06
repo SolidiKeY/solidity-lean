@@ -363,9 +363,10 @@ open Tactic in
 `sol_prove` (the scoped walk, `Calculus/ProvesDerive.lean`), then
 `Derive.searchLeaf` on each leaf it leaves (`Seq.goalFits`); a walk of more
 than `oneCheck` steps is an error. -/
-def scopedSearch (g : MVarId) (oneCheck : Nat := Seq.fuel) : TacticM Derive.Search := do
+def scopedSearch (g : MVarId) (oneCheck : Nat := Seq.fuel)
+    (shareCheck : Bool := false) : TacticM Derive.Search := do
   let_expr Proves C R _ Γ H φ := ← g.getType | throwError "expected a scoped `⊢ φ`"
-  Derive.proveSearch g (fun g => Seq.prove g C R Γ H φ (oneCheck := oneCheck)) (stopAtOpen := true)
+  Derive.proveSearch g (fun g => Seq.prove g C R Γ H φ (oneCheck := oneCheck) (shareCheck := shareCheck)) (stopAtOpen := true)
     (fits := Seq.goalFits)
 
 syntax (name := solkeyDerive) "#solkey_derive? " ident (&" only " ident)? (&" from " num)?

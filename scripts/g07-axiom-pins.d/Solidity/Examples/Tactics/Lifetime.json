@@ -1,0 +1,27 @@
+{
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.depositThenPay": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.exhaustedNotCommitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.neverBoth": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.paymentPossible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Examples/Tactics/Lifetime.lean:Solidity.Examples.Tactics.Lifetime.settlementRemainsPossible": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

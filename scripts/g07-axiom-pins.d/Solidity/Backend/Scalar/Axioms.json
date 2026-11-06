@@ -1,0 +1,571 @@
+{
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.binary_selection_coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.BinaryCertificate.signedWidth_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.BinaryCertificate.unsignedWidth_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.BinaryInvocation.correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.BinaryInvocation.prefix_safe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.bytesNarrow_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.bytesResize_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.bytesResize_range": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.bytesResize_roundtrip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.bytesWiden_intrinsic": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.cast_roundtrip_int": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.cast_roundtrip_uint": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checked_negation_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedAdditionWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedIntAdd": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedIntMul": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedIntNeg": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedIntSub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.CheckedInvocation.correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.CheckedInvocation.testPrefix_safe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedUintAdd": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedUintMul": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedUintPow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.checkedUintSub": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.ClosedInvocation.prefix_safe": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.encodeValue_toWord": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.guardedNext_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_div_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_div_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_div_exception": [
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_mod_body": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_mod_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.int_word_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.intAnd": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.intOr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.intShr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.intXor": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.mixedWidth_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.mixedWidth_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.mixedWidthCertificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.mixedWidthInvocation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.negationTest_typed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.ofInt_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.parity_word": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerAbsPrefix_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerCell_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerFits_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerNegativePrefix_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerPost_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerPost_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerPostTest_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerPrepare_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerRows_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerSignBody_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerSourceResult_map": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.powerTest_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.prefix_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.run_capacity": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.run_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.scalarEq": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.scalarNe": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.selectBinary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.selectChecked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.selectCheckedUnary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.selectModular": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.selectUnary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_addAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_chain": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_divAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_modAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_mulAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signed_subAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedAddTest_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedAt_word": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedDivOverflowTest_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedExpansion_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedMulTest_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_minimum_one_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_minimum_one_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_negative_three_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_negative_three_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_positive_boundary_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_positive_boundary_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_unsigned_overflow_source": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPower_unsigned_overflow_target": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.SignedPowerInvocation.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedPowerWitness": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedShiftPrefix_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedSubTest_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedWidth_guarded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.signedWidthTest_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.step_height": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.threshold_accept": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.threshold_bounds": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_div_body": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_div_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_div_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_mod_body": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_mod_correct": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uint_mod_zero": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uintNot": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uintShl": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.uintShr": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unary_selection_coverage": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.UnaryCertificate.signedWidth_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.UnaryCertificate.unsignedWidth_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_addAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_after_signed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_divAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_modAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_mulAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_powAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsigned_subAt_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsignedMulTest_raw": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsignedWidth_guarded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.unsignedWidthTest_correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Scalar/Axioms.lean:Solidity.Backend.Scalar.wrappingPow": [
+  "Quot.sound",
+  "propext"
+ ]
+}

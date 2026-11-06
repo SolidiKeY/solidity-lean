@@ -1,0 +1,48 @@
+{
+  "publishedMaster": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+  "preservedOwnedHead": "857e869592a7b7bd070335eb36d87a8bce20ff00",
+  "conflicts": [
+    {
+      "path": "Solidity/Frontend/ExecutableAst/Shared/Translate.lean",
+      "kind": "add/add",
+      "theirsEqualsPublishedStarter": "fcdddfcc446b5004860875f772ff6033e60c745f",
+      "resolution": "Exact premerge owned file retained; later root/metadata validation preserved.",
+      "oursSha256": "f915d2fdc5a7fd1cf36284df63f4952b99f6f8d8dc913432dde6627f583b4594",
+      "theirsSha256": "c39cb830d5002721ee1705452e260134000dbf7547dee4befcd29f5c3c937a92"
+    }
+  ],
+  "ownerPackets": [
+    {
+      "owner": "B",
+      "producerCommitFromPublishedReceipt": "add8c29eb771996dfde3b912e4a47bf3d41226ca",
+      "producerObjectAvailableLocally": false,
+      "path": "Solidity/Frontend/ExecutableAst/Memory/Reader.lean",
+      "sha256": "9d1a8e15551e979a347a267585f373a814cc5f877de94b073d3cc13bf1349350",
+      "source": "Exact published8495f1de tree; coordinator reports source-byte/area review in integration-20261105-checkpoints.md"
+    },
+    {
+      "owner": "C",
+      "producerCommitFromPublishedReceipt": "7e7ca1f3574fb78d15831a3221c16ef88c88951c",
+      "producerObjectAvailableLocally": false,
+      "path": "Solidity/Frontend/ExecutableAst/ControlTuple/Adapter.lean",
+      "sha256": "d2add700343022d94d89fa4b4769d70063084f768f6d6aaf86a671a31dcfbfaa",
+      "source": "Exact published8495f1de tree; coordinator reports source-byte/area review in integration-20261105-checkpoints.md"
+    },
+    {
+      "owner": "C",
+      "producerCommitFromPublishedReceipt": "7e7ca1f3574fb78d15831a3221c16ef88c88951c",
+      "producerObjectAvailableLocally": false,
+      "path": "Solidity/Frontend/ExecutableAst/ControlTuple/AdmissionControls.lean",
+      "sha256": "d51421af3a370262fc695cb5d4ce1761f235d134c0bf45592b27ed8aad034154",
+      "source": "Exact published8495f1de tree; coordinator reports source-byte/area review in integration-20261105-checkpoints.md"
+    }
+  ],
+  "boundary": "Authorized master adoption, not whole-lane completion. Incoming producer files are not edited. Post-adoption gates remain pending.",
+  "upstreamWhitespaceObservation": {
+    "command": "git diff --cached --check",
+    "exit": 2,
+    "output": "Bridge/SolidityBridge/Yul/LoopRealization.lean:141: new blank line at EOF.",
+    "resolution": "Retain exact published unowned Bridge bytes; no Bridge edit authorized or performed.",
+    "publishedFileSha256": "f3ea66ebeb096d3b69cd1f46f89e5e3c9b1cda13b9825fd2fe9b8a9b5a224c0f"
+  }
+}

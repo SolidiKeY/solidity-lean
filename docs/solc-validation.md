@@ -11,10 +11,11 @@ records `compile_correct`. The pinned solc is 0.8.38 (`1835d247`, the
 
 The [full compiler roadmap](coverage-plan.md) separately requires a checked
 source frontend, complete backend and executable-EVM proof for this repository's
-compiler. The external solc comparison square below remains a compatibility
-validation boundary: completing our compiler proof does not certify solc's
-optimizer or its emitted bytecode. The roadmap includes an independent source
-semantics and EVM bridge; the current fragment theorem does not provide them.
+compiler. It also closes the solc square below by translation validation:
+groups T01–T08 of [full-scope.md](feature-work/full-scope.md) prove, contract
+by contract, that solc's bytecode (legacy and via-IR, optimizer off and on)
+refines the source semantics. Until they land, the tests below are the only
+link; the current fragment theorem does not provide it.
 
 ## The chain of trust
 
@@ -28,7 +29,7 @@ Proved: the rules are sound for (2) (`Stmt.sound`, `Proves.sound`,
 `ProvesC.sound_of`); the repository's compiler agrees with (2) on the
 programs it compiles (`compile_correct` over `inFragP`, and the memory path;
 `docs/compiler-verification.md`); no `try`, `send` or data reverts. (2) is never stuck: the typed run halts only by `THalt`
-(`docs/intrinsic.md`). Not proved, and not provable without a model of solc:
+(`docs/intrinsic.md`). Not yet proved (T01–T08 prove it per contract, without a model of solc's code):
 that (1) reads a program as solc does, and that (2) plus the layout equals (3)
 plus (4). **Every proof reaches solc-compiled contracts only through that
 square.** A rule is wrong about Solidity only through one of four links:
@@ -83,6 +84,14 @@ theorem.
   programs with the SHA-pinned solc and run them on an externally supplied
   EthereumJS VM, legacy and via-IR, against expected results. Optional; no Lake
   dependency. Per-feature evidence, not a generated differential harness.
+- **ABI entry decoding, typed and proved.** `Semantics/AbiEntry.lean` models
+  solc's v2 entry decoder (eager memory parameters, entry-checked calldata
+  parameters with lazy element access); `Semantics/AbiEntryProofs.lean` proves
+  that the eager decoder's values are what lazy reads observe (`mdec_cval`,
+  `eager_cref`). `scripts/abi-entry-probe.mjs` pins the decoder's checks on
+  `tests/abi-0.8.38/LazyEntry.sol` in legacy/via-IR with the optimizer off and
+  on; [abi-hashes.md](feature-work/abi-hashes.md) ("Entry decoding: lazy and
+  noncanonical layouts") has the evidence and the remaining refusals.
 - **Operand order is decided**: legacy by default, `Contract.evalOrder :=
   .viaIR` for source order (`docs/options.md` O9).
 
@@ -152,8 +161,10 @@ require the suite to kill each. A survivor is a decision no test observes.
 **I. Translation validation through solc's Yul** (a sibling repository: a Yul
 semantics such as EVMYulLean pulls Mathlib). One lemma per `--ir` helper
 instantiation (done twice: `Evm/Signed.lean`, `Evm/Exp.lean`); a validator
-matching `fun_f_<id>` to the `Stmt` and emitting a simulation proof. Trusted:
-the Yul optimizer and assembly. Legacy has no IR; D covers it alone.
+matching `fun_f_<id>` to the `Stmt` and emitting a simulation proof. Planned in
+full detail as T01–T07: the IR matcher, a validator per Yul optimizer step, the
+Yul-to-bytecode transform and a bytecode validator for legacy (which has no
+IR), so neither the optimizer nor assembly stays trusted.
 
 **J. A rule-to-solc map**, `docs/rule-solc-map.md` beside
 `docs/lean-key-rule-map.md`: per constructor the legacy and IR code site, the
@@ -216,6 +227,8 @@ external programs, or from a sibling repository.
 3. **D** with **E**'s universe contract, then **G**.
 4. Coverage reports, **H**, **L**.
 5. **M**, **N**, **O** as automation grows.
-6. **C** against a real EVM; **I** in a sibling repository.
+6. **C** against a real EVM; **I** as lanes VT1–VT4 of
+   [full-scope.md](feature-work/full-scope.md), in the core (the Yul semantics
+   is dependency-free); EVMYulLean agreement stays in `Bridge/`.
 
 The diamond-try [bounded modern attempt facility](feature-work/diamond-try-carrier-budget.md) supplies an explicitly derived/pinned CommonJS engine API and wiring for only check-source-admission/check-call-exception-vectors at their retained Cancun settings. Derive a separate artifact with scripts/evm-reference/derive-attempt-budget.py before invoking those scripts; the unpatched tree is refused. It is not a global fork/profile or historical runner change.

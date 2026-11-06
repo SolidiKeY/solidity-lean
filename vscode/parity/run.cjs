@@ -6,9 +6,10 @@ const {resolve,join,dirname} = require('node:path');
 const {tmpdir,cpus,totalmem,release} = require('node:os');
 const {performance} = require('node:perf_hooks');
 const {randomUUID,createHash} = require('node:crypto');
-const {ProcessSampler,summarize,differences,normalize,scaling,protocol} = require('./core.cjs');
+const {ProcessSampler,summarize,differences,normalize,scaling,protocol,hostEvidenceErrors} = require('./core.cjs');
 const {terminateTree} = require('../src/backend.cjs');
 const renderer=require('./renderer.cjs');
+const {servePhases}=require('./phase-capture.cjs');
 const repo=resolve(__dirname,'../..');
 
 function parse(args) {
@@ -27,11 +28,13 @@ function parse(args) {
   for(const key of ['trials','warmups','obligations','timeoutMs','operationTimeoutMs']) if(!Number.isSafeInteger(options[key])||options[key]<(key==='warmups'?0:1)) throw new Error('Invalid '+key);
   if(options.workers.some(v=>!Number.isSafeInteger(v)||v<1||v>32)) throw new Error('Invalid workers');
   if(options.targets.some(t=>!['dafny','local'].includes(t))) throw new Error('Invalid target');
+  if(options.targets.includes('local')&&options.workers.some(w=>w>4))throw new Error('Local workers must be between 1 and 4');
   if(options.cache.some(t=>!['none','basic','advanced'].includes(t))) throw new Error('Invalid cache');
   for(const key of ['workers','targets','cache'])if(new Set(options[key]).size!==options[key].length)throw new Error('Duplicate '+key);
   if(options.obligations>1000||options.trials>100||options.warmups>10)throw new Error('Excessive benchmark dimensions');
   if(!['on','off'].includes(options.trace))throw new Error('Invalid trace');
-  if(!['full','benchmark'].includes(options.suite))throw new Error('Invalid suite');
+  if(!['full','benchmark','visual','commands','custom-commands','custom-default-commands'].includes(options.suite))throw new Error('Invalid suite');
+  if(options.suite==='commands'&&(options.targets.length!==1||options.targets[0]!=='local'))throw new Error('Concrete command suite requires --targets local; no Dafny command equivalence is claimed');
   for(const key of ['memoryReserveMiB','memoryMaxMiB'])if(options[key]!==undefined&&(!Number.isSafeInteger(options[key])||options[key]<1))throw new Error('Invalid '+key);
   return options;
 }
@@ -55,20 +58,21 @@ function shortSummary(report) {
   return lines.join('\n');
 }
 async function launch(config,options) {
-  config={...config,runId:randomUUID()};
+  config={...config,suite:options.suite||'full',runId:randomUUID()};
   mkdirSync(config.dir,{recursive:true});mkdirSync(config.workspace,{recursive:true});
   const cache={'none':'No caching',basic:'Basic caching',advanced:'Advanced caching'}[config.cache];
   const settings= config.target==='dafny' ? {'dafny.version':'custom','dafny.cliPath':resolve(options.dafny),'dafny.dotnetExecutablePath':resolve(options.dotnet),
     'dafny.verificationVirtualCores':config.workers,'dafny.verificationCachingPolicy':cache,'dafny.verificationTimeLimit':20,
     'dafny.automaticVerification':'onchange','dafny.displayGutterStatus':true,'dafny.markGhostStatements':true} : {
     'solidityLean.backendPath':repo,'solidityLean.nodePath':process.execPath,'solidityLean.timeoutMs':options.operationTimeoutMs};
+  if(config.target==='dafny'&&process.platform==='linux'){const sdk=dirname(resolve(options.dotnet));settings['terminal.integrated.env.linux']={PATH:sdk+':${env:PATH}',DOTNET_ROOT:sdk};}
   settings['files.autoSave']='off';settings['telemetry.telemetryLevel']='off';settings['update.mode']='none';
   settings['git.enabled']=false;settings['workbench.secondarySideBar.defaultVisibility']='hidden';
-  if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']='never';}
+  if(config.target==='local'){settings['solidityLean.workers']=config.workers;settings['solidityLean.automaticVerification']=options.suite==='visual'?'onchange':'never';}
   mkdirSync(join(config.workspace,'.vscode'),{recursive:true});
   writeFileSync(join(config.workspace,'.vscode/settings.json'),JSON.stringify(settings));
   const runtimeEnvironment=Object.fromEntries(['PATH','SOLKEY_ROOT','LEAN_NUM_THREADS','XDG_CACHE_HOME'].filter(k=>process.env[k]!==undefined).map(k=>[k,process.env[k]]));
-  const hostConfig={...config,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
+  const hostConfig={...config,dafnyExecutable:config.target==='dafny'?resolve(options.dafny):undefined,dotnetExecutable:config.target==='dafny'?resolve(options.dotnet):undefined,dotnetVersion:config.target==='dafny'?spawnSync(resolve(options.dotnet),['--version'],{encoding:'utf8',timeout:5000}).stdout?.trim():undefined,suite:options.suite||'full',runtimeEnvironment,recordProtocol:options.trace!=='off',obligations:options.obligations,operationTimeoutMs:options.operationTimeoutMs};
   const configPath=join(config.dir,'config.json');writeFileSync(configPath,JSON.stringify(hostConfig));
   const extension=config.target==='local'?resolve(repo,'vscode'):resolve(options.dafnyExtension);
   const logfile=openSync(join(config.dir,'editor.log'),'w');
@@ -94,7 +98,18 @@ async function launch(config,options) {
   },500);
   // Capture before VS Code's test runner closes the window. The host writes a
   // completion marker then waits briefly for this observer's acknowledgement.
+  const seenPhases=new Set();let phaseTask,phaseBusy=false;
+  let keybindingTask,keybindingStarted=false;
   const renderTimer=setInterval(()=>{
+    if(['commands','custom-commands','custom-default-commands'].includes(options.suite)&&!keybindingStarted&&existsSync(join(config.dir,'keybinding-request.json'))){
+      keybindingStarted=true;keybindingTask=(async()=>{let client;try{const request=JSON.parse(readFileSync(join(config.dir,'keybinding-request.json'),'utf8'));if(request.runId!==config.runId)throw Error('Foreign keybinding request');client=await renderer.connect(debugPort);const menuDirectory=join(config.dir,'context-menu');mkdirSync(menuDirectory,{recursive:true});const contextMenu=await renderer.contextSubmenu(client,menuDirectory,config.target==='dafny'?{label:'Dafny',expected:'Build with Custom Arguments'}:undefined);const promptDirectory=join(config.dir,'custom-prompt');mkdirSync(promptDirectory,{recursive:true});const observation={...await renderer.buildKeybinding(client,{custom:['custom-commands','custom-default-commands'].includes(options.suite),input:request.customInput,directory:promptDirectory}),contextMenu};writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,requestId:request.requestId,observation}));}catch(error){writeFileSync(join(config.dir,'keybinding-reply.json'),JSON.stringify({runId:config.runId,error:error.message}));}finally{client?.close();}})();
+    }
+    if((options.suite==='visual'||options.suite==='custom-default-commands'&&config.target==='dafny')&&!phaseBusy){
+      phaseBusy=true;
+      phaseTask=servePhases(config.dir,config.runId,async directory=>{
+        const client=await renderer.connect(debugPort);try{const rendered=await renderer.capture(client,directory,true);if(options.suite==='custom-default-commands'){const menu=join(directory,'menu');mkdirSync(menu,{recursive:true});rendered.contextMenu=await renderer.contextSubmenu(client,menu,{label:'Dafny',expected:'Build with Custom Arguments'});}return rendered;}finally{client.close();}
+      },seenPhases).catch(error=>{rendererCapture={captured:false,error:error.message};}).finally(()=>{phaseBusy=false;});
+    }
     if(!probing&&existsSync(join(config.dir,'renderer-probe.json'))) {
       probing=true;
       probeTask=(async()=>{
@@ -128,6 +143,8 @@ async function launch(config,options) {
   let exitCode,error;
   await new Promise(resolvePromise=>{child.on('error',e=>{error=e.message;resolvePromise();});child.on('close',code=>{exitCode=code;resolvePromise();});});
   clearTimeout(timer);clearInterval(renderTimer);clearInterval(resourceTimer);
+  if(phaseTask)await phaseTask;
+  if(keybindingTask)await keybindingTask;
   if(probeTask)await probeTask;
   if(deadlineTask)await deadlineTask;
   if(captureTask)await captureTask;
@@ -147,8 +164,8 @@ async function launch(config,options) {
     probe.observedDuringVerification=probe.started>=begin&&probe.finished<=end;
     if(result?.metrics&&probe.observedDuringVerification&&probe.focusedEditor)result.metrics.rendererKeyRoundTripMs=probe.roundTripMs;
   }
-  if(result&&(result.runId!==config.runId||result.target!==config.target||result.schemaVersion!==1||!Array.isArray(result.scenarios)||!result.checks?.includes('initial-verification'))) {
-    error='Host evidence is stale, incomplete or belongs to another launch';result=undefined;
+  if(result&&hostEvidenceErrors(result,config).length) {
+    error='Host evidence is stale, incomplete or inconsistent: '+hostEvidenceErrors(result,config).join('; ');result=undefined;
   }
   if(resources.cleanup.remaining.length)error='Owned verifier processes survived cleanup; subsequent trials must not run';
   const run={target:config.target,workers:config.workers,cache:config.cache,suite:options.suite||'full',trial:config.trial,warmup:config.warmup,
@@ -194,7 +211,7 @@ async function main(args=process.argv.slice(2)) {
       'Frontend, VC generation and solver phases remain unmeasured unless supplied by native notifications.',
       'Dafny protocol recording adds synchronous disk writes in the extension host; use --trace off for an observer-overhead control.',
       'Missing editor capabilities and incomplete scenarios prevent a claim of full parity.']};
-  const inventory=JSON.parse(readFileSync(join(repo,'docs/dafny-editor-features.json'),'utf8'));
+  const inventory=require('./inventory.cjs').loadInventory();
   const save=()=>{
     report.summary=summarize(runs);report.parallelScaling=scaling(report.summary);
     report.featureParity=inventory.features.map(feature=>{

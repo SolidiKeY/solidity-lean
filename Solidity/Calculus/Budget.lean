@@ -1,4 +1,4 @@
-import Lean
+import Lean.Elab.Tactic.Basic
 
 /-!
 # A step's heartbeats, within the declaration's

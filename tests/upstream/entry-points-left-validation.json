@@ -1,0 +1,5031 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-28",
+  "branch": "feature/entry-points-left-20261027",
+  "startingCommit": "f4dee4a29c2e208b36db4a4161a4723c735cd775",
+  "repository": "https://github.com/SolidiKeY/solidity-lean.git",
+  "runtime": {
+    "cwd": "/workspace/solidity-lean",
+    "environmentId": "ccarenv_b64_Y2NhcmVudl82ZTExMGIzMWU3Mjg4MTkxYjcxMzcwOTAzZGUzZDk3Nw",
+    "lean": "Lean (version 4.24.0, x86_64-unknown-linux-gnu, commit 797c613eb9b6d4ec95db23e3e00af9ac6657f24b, Release)",
+    "lake": "Lake version 5.0.0-src+797c613 (Lean version 4.24.0)",
+    "keySortSmoke": {
+      "exit": 0,
+      "elapsedSeconds": 0.151,
+      "configuration": "untracked alternate TOML with --tstack=131072 and -j1"
+    }
+  },
+  "bounds": {
+    "inheritedHardAddressSpaceBytes": 12884901888,
+    "descendantRssGuardBytes": 12884901888,
+    "availableMemoryReserveBytes": 2147483648,
+    "sampleSeconds": 0.05,
+    "executorCgroupMemoryMaxBytes": 17179869184,
+    "leanNumThreads": 1,
+    "leanFlags": [
+      "--tstack=131072",
+      "-j1",
+      "-DElab.async=false"
+    ],
+    "limitation": "No systemd bus or writable delegated cgroup was available. The 12GiB address-space limit is inherited per process; aggregate descendant RSS is guarded by the supervisor, not a hard delegated 12GiB cgroup. No OOM or aggregate RSS stop occurred."
+  },
+  "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+  "implementationInputs": {
+    "Solidity/Frontend/SolcJson/Contract.lean": "86c74db29881bae5a6f3ed0bce4073ed7afb305a0524dce539ed5228ddc7efa2",
+    "Solidity/Frontend/SolcJson/Getters.lean": "93c128df976718c018a817945e31ca06a3eca219a07bf1bc15f164137c3f0137",
+    "Solidity/Language/Features.lean": "6c591f959f67bd205b8588cb89caace86a546d11cef77e578748d2b2102bec56",
+    "scripts/finite-dispatch.test.mjs": "d906c887fd2f21247df9a9f33cd961a10e02be2ea87b386cc9307ea2e8530675",
+    "scripts/entry-points-left.test.mjs": "bd0e6266e41308482481fa6996869ef9baefb8da050c71b815721269985eb00a",
+    "tests/solc/EntryPointsLeft.sol": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+    "tests/solc/EntryPointsLeft.ast.json": "02ee1a9eb555930bab7025768b72f0aeb6d47aa136f24a93fdc351b601d140a6",
+    "tests/solc/EntryPointsLeft.viaIR.ast.json": "e603298dce3204a3490b6f0a76544425206bf415fd902f077069e408cfbcf440",
+    "tests/upstream/EntryPointsLeft.lean": "a4bac56fbb5318588deedeaf5d3ce935a816210d1faedeb9f5be3db9197a778a",
+    "tests/upstream/EntryPointsAdmission.lean": "465c2c4d105e5db753dd08481efbaeaa132d8f63c7cdb713bc7232d53bcaabb6"
+  },
+  "fixtureHeaders": {
+    "tests/solc/EntryPointsLeft.ast.json": {
+      "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "tests/solc/EntryPointsLeft.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      ]
+    },
+    "tests/solc/EntryPointsLeft.viaIR.ast.json": {
+      "solcVersion": "0.8.38+commit.1835d247.Emscripten.clang",
+      "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "tests/solc/EntryPointsLeft.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.38+commit.1835d247.js",
+      "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": true,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      ]
+    }
+  },
+  "proofs": {
+    "scope": "Kernel-checked typed-model executions; not compiler/EVM equivalence",
+    "normalExecutions": 32,
+    "falseObservationPanics": 8,
+    "exactEnumPanicControls": 2,
+    "refusalGuards": 22,
+    "abiKindGuards": 4,
+    "axioms": [
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumScalar",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumMapping",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_enumStruct",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_contractScalar",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFallback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_RenamedExternal_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_ReceivePriority_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_ReceiveOverride_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_ExternalOverride_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_ExternalOverloads_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_OwnHelperReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFrameReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFrameFallback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedRollback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_NominalGetters_falseEnum",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedReceiver_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_InheritedFallback_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_RenamedExternal_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumScalar",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumMapping",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_enumStruct",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_contractScalar",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFallback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_RenamedExternal_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_ReceivePriority_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_ReceiveOverride_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_ExternalOverride_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_ExternalOverloads_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_OwnHelperReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFrameReceiver_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFrameFallback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedRollback_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_NominalGetters_falseEnum",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedReceiver_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_InheritedFallback_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_RenamedExternal_falseObservation",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_enumPanic",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_enumPanic",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.Legacy_ContractKeyGetter_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      {
+        "theorem": "Solidity.Tests.EntryPointsLeft.ViaIR_ContractKeyGetter_positive",
+        "axioms": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      }
+    ],
+    "mcp": [
+      {
+        "file": "Solidity/Frontend/SolcJson/Getters.lean",
+        "result": {
+          "meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"partial\": false,\n  \"still_elaborating_lines\": null,\n  \"success\": true,\n  \"timed_out\": false,\n  \"items\": [],\n  \"failed_dependencies\": []\n}",
+              "annotations": null,
+              "meta": null
+            }
+          ],
+          "structuredContent": {
+            "result": {
+              "partial": false,
+              "still_elaborating_lines": null,
+              "success": true,
+              "timed_out": false,
+              "items": [],
+              "failed_dependencies": []
+            }
+          },
+          "isError": false
+        }
+      },
+      {
+        "file": "Solidity/Frontend/SolcJson/Contract.lean",
+        "result": {
+          "meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"partial\": false,\n  \"still_elaborating_lines\": null,\n  \"success\": true,\n  \"timed_out\": false,\n  \"items\": [],\n  \"failed_dependencies\": []\n}",
+              "annotations": null,
+              "meta": null
+            }
+          ],
+          "structuredContent": {
+            "result": {
+              "partial": false,
+              "still_elaborating_lines": null,
+              "success": true,
+              "timed_out": false,
+              "items": [],
+              "failed_dependencies": []
+            }
+          },
+          "isError": false
+        }
+      },
+      {
+        "file": "tests/upstream/EntryPointsAdmission.lean",
+        "result": {
+          "meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"partial\": false,\n  \"still_elaborating_lines\": null,\n  \"success\": true,\n  \"timed_out\": false,\n  \"items\": [],\n  \"failed_dependencies\": []\n}",
+              "annotations": null,
+              "meta": null
+            }
+          ],
+          "structuredContent": {
+            "result": {
+              "partial": false,
+              "still_elaborating_lines": null,
+              "success": true,
+              "timed_out": false,
+              "items": [],
+              "failed_dependencies": []
+            }
+          },
+          "isError": false
+        }
+      },
+      {
+        "file": "tests/upstream/EntryPointsLeft.lean",
+        "result": {
+          "meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"partial\": false,\n  \"still_elaborating_lines\": null,\n  \"success\": true,\n  \"timed_out\": false,\n  \"items\": [],\n  \"failed_dependencies\": []\n}",
+              "annotations": null,
+              "meta": null
+            }
+          ],
+          "structuredContent": {
+            "result": {
+              "partial": false,
+              "still_elaborating_lines": null,
+              "success": true,
+              "timed_out": false,
+              "items": [],
+              "failed_dependencies": []
+            }
+          },
+          "isError": false
+        }
+      },
+      {
+        "verify": {
+          "meta": null,
+          "content": [
+            {
+              "type": "text",
+              "text": "{\n  \"axioms\": [\n    \"propext\",\n    \"Classical.choice\",\n    \"Quot.sound\"\n  ],\n  \"warnings\": []\n}",
+              "annotations": null,
+              "meta": null
+            }
+          ],
+          "structuredContent": {
+            "axioms": [
+              "propext",
+              "Classical.choice",
+              "Quot.sound"
+            ],
+            "warnings": []
+          },
+          "isError": false
+        }
+      }
+    ]
+  },
+  "sourceApi": {
+    "command": [
+      "node",
+      "--test",
+      "--test-concurrency=1",
+      "scripts/entry-points-left.test.mjs"
+    ],
+    "tests": 22,
+    "contractReports": {
+      "ByteFallbackRefusal": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 753,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:111: solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 1,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ByteFallbackRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 110,
+                "character": 4
+              },
+              "end": {
+                "line": 110,
+                "character": 98
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ContractKeyGetter": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 1247,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 4036,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ContractKeyGetter",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 184,
+                "character": 4
+              },
+              "end": {
+                "line": 187,
+                "character": 5
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ExternalOverloadCollisionRefusal": {
+        "results": [
+          {
+            "tag": "diamond",
+            "status": "proved",
+            "sourceId": 843,
+            "signature": "target(uint)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 1425,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloadCollisionRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 124,
+                "character": 4
+              },
+              "end": {
+                "line": 124,
+                "character": 69
+              }
+            }
+          },
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 853,
+            "signature": "target(address)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloadCollisionRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 125,
+                "character": 4
+              },
+              "end": {
+                "line": 125,
+                "character": 75
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 877,
+            "signature": "positive()",
+            "reason": "EntryPointsLeft.sol:128: solidity.functionDispatch: this call needs a finite set of typed dispatch targets",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 1,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloadCollisionRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 127,
+                "character": 4
+              },
+              "end": {
+                "line": 127,
+                "character": 118
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ExternalOverloads": {
+        "results": [
+          {
+            "tag": "diamond",
+            "status": "proved",
+            "sourceId": 888,
+            "signature": "target(uint)",
+            "reason": "",
+            "reading": "clean",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 1775,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloads",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 131,
+                "character": 4
+              },
+              "end": {
+                "line": 131,
+                "character": 69
+              }
+            }
+          },
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 898,
+            "signature": "target(bool)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloads",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 132,
+                "character": 4
+              },
+              "end": {
+                "line": 132,
+                "character": 69
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 934,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 28570,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverloads",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 134,
+                "character": 4
+              },
+              "end": {
+                "line": 137,
+                "character": 5
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ExternalOverride": {
+        "results": [
+          {
+            "tag": "diamond",
+            "status": "pending",
+            "sourceId": 808,
+            "signature": "target(uint)",
+            "reason": "open proof goals",
+            "reading": "clean",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 1849,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverride",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 119,
+                "character": 4
+              },
+              "end": {
+                "line": 119,
+                "character": 82
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 832,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 19818,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ExternalOverride",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 121,
+                "character": 4
+              },
+              "end": {
+                "line": 121,
+                "character": 118
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "HelperReceiverRefusal": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 715,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:104: solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "HelperReceiverRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 103,
+                "character": 4
+              },
+              "end": {
+                "line": 103,
+                "character": 98
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "InheritedFallback": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 322,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 5650,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedFallback",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 42,
+                "character": 4
+              },
+              "end": {
+                "line": 42,
+                "character": 135
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "pending",
+            "sourceId": 356,
+            "signature": "falseObservation()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "falseObservation",
+            "elapsedMs": 9269,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedFallback",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 44,
+                "character": 4
+              },
+              "end": {
+                "line": 44,
+                "character": 143
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "InheritedFrameFallback": {
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 1159,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 10672,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedFrameFallback",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 170,
+                "character": 4
+              },
+              "end": {
+                "line": 170,
+                "character": 167
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "InheritedFrameReceiver": {
+        "results": [
+          {
+            "tag": "specified",
+            "status": "proved",
+            "sourceId": 1094,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 10624,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedFrameReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 160,
+                "character": 4
+              },
+              "end": {
+                "line": 160,
+                "character": 167
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "InheritedReceiver": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 218,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 6170,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 30,
+                "character": 4
+              },
+              "end": {
+                "line": 30,
+                "character": 135
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "pending",
+            "sourceId": 252,
+            "signature": "falseObservation()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "falseObservation",
+            "elapsedMs": 10147,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 32,
+                "character": 4
+              },
+              "end": {
+                "line": 32,
+                "character": 143
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 274,
+            "signature": "stipendRefusal()",
+            "reason": "EntryPointsLeft.sol:35: solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "stipendRefusal",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 34,
+                "character": 4
+              },
+              "end": {
+                "line": 34,
+                "character": 98
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "InheritedRollback": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 1211,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 17860,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "InheritedRollback",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 178,
+                "character": 4
+              },
+              "end": {
+                "line": 178,
+                "character": 135
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ModifiedReceiverRefusal": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 670,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:95: solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 1,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ModifiedReceiverRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 94,
+                "character": 4
+              },
+              "end": {
+                "line": 94,
+                "character": 98
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "NominalDispatchRefusal": {
+        "results": [
+          {
+            "tag": "diamond",
+            "status": "proved",
+            "sourceId": 768,
+            "signature": "clean()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "clean",
+            "elapsedMs": 1409,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalDispatchRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 114,
+                "character": 4
+              },
+              "end": {
+                "line": 114,
+                "character": 74
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 792,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:117: solidity.functionDispatch: this call needs a finite set of typed dispatch targets",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalDispatchRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 116,
+                "character": 4
+              },
+              "end": {
+                "line": 116,
+                "character": 121
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "NominalGetters": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 51,
+            "signature": "enumScalar()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "enumScalar",
+            "elapsedMs": 3961,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 10,
+                "character": 4
+              },
+              "end": {
+                "line": 10,
+                "character": 90
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 73,
+            "signature": "enumMapping()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "enumMapping",
+            "elapsedMs": 4257,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 12,
+                "character": 4
+              },
+              "end": {
+                "line": 12,
+                "character": 97
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 128,
+            "signature": "enumStruct()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "enumStruct",
+            "elapsedMs": 8267,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 14,
+                "character": 4
+              },
+              "end": {
+                "line": 18,
+                "character": 5
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 151,
+            "signature": "contractScalar()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "contractScalar",
+            "elapsedMs": 4195,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 20,
+                "character": 4
+              },
+              "end": {
+                "line": 20,
+                "character": 102
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "pending",
+            "sourceId": 170,
+            "signature": "falseEnum()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "falseEnum",
+            "elapsedMs": 7011,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 22,
+                "character": 4
+              },
+              "end": {
+                "line": 22,
+                "character": 89
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "NominalKeyDispatchRefusal": {
+        "results": [
+          {
+            "tag": "diamond",
+            "status": "proved",
+            "sourceId": 1002,
+            "signature": "clean(address)",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "clean",
+            "elapsedMs": 1548,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalKeyDispatchRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 148,
+                "character": 4
+              },
+              "end": {
+                "line": 148,
+                "character": 69
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 1029,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:151: solidity.functionDispatch: this call needs a finite set of typed dispatch targets",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NominalKeyDispatchRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 150,
+                "character": 4
+              },
+              "end": {
+                "line": 150,
+                "character": 129
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "NonpayableFallbackRefusal": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 632,
+            "signature": "entry()",
+            "reason": "EntryPointsLeft.sol:87: solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "entry",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "NonpayableFallbackRefusal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 86,
+                "character": 4
+              },
+              "end": {
+                "line": 86,
+                "character": 98
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "OwnHelperReceiver": {
+        "results": [
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 945,
+            "signature": "helper()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "helper",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "OwnHelperReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 141,
+                "character": 4
+              },
+              "end": {
+                "line": 141,
+                "character": 47
+              }
+            }
+          },
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 952,
+            "signature": "receive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "receive",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "OwnHelperReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 142,
+                "character": 4
+              },
+              "end": {
+                "line": 142,
+                "character": 44
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 986,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 5248,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "OwnHelperReceiver",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 144,
+                "character": 4
+              },
+              "end": {
+                "line": 144,
+                "character": 135
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ReceiveOverride": {
+        "results": [
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 566,
+            "signature": "receive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "receive",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ReceiveOverride",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 77,
+                "character": 4
+              },
+              "end": {
+                "line": 77,
+                "character": 56
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 600,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 5950,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ReceiveOverride",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 79,
+                "character": 4
+              },
+              "end": {
+                "line": 79,
+                "character": 135
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "ReceivePriority": {
+        "results": [
+          {
+            "tag": "internal",
+            "status": "internal",
+            "sourceId": 520,
+            "signature": "fallback()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "fallback",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ReceivePriority",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 72,
+                "character": 4
+              },
+              "end": {
+                "line": 72,
+                "character": 48
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 554,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 5156,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "ReceivePriority",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 74,
+                "character": 4
+              },
+              "end": {
+                "line": 74,
+                "character": 135
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "RefusedGetters": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 454,
+            "signature": "referenceBytes()",
+            "reason": "EntryPointsLeft.sol:61: public getter needs reference-valued ABI returns/inputs",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "referenceBytes",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RefusedGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 60,
+                "character": 4
+              },
+              "end": {
+                "line": 60,
+                "character": 98
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 475,
+            "signature": "referenceString()",
+            "reason": "EntryPointsLeft.sol:63: public getter needs reference-valued ABI returns/inputs",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "referenceString",
+            "elapsedMs": 0,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RefusedGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 62,
+                "character": 4
+              },
+              "end": {
+                "line": 62,
+                "character": 107
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "unsupported",
+            "sourceId": 498,
+            "signature": "functionResult()",
+            "reason": "EntryPointsLeft.sol:65: solidity.functionDispatch: this call needs a finite set of typed dispatch targets",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "functionResult",
+            "elapsedMs": 1,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RefusedGetters",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 64,
+                "character": 4
+              },
+              "end": {
+                "line": 64,
+                "character": 120
+              }
+            }
+          }
+        ],
+        "errors": []
+      },
+      "RenamedExternal": {
+        "results": [
+          {
+            "tag": "box",
+            "status": "proved",
+            "sourceId": 403,
+            "signature": "positive()",
+            "reason": "",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "positive",
+            "elapsedMs": 18952,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RenamedExternal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 51,
+                "character": 4
+              },
+              "end": {
+                "line": 51,
+                "character": 170
+              }
+            }
+          },
+          {
+            "tag": "box",
+            "status": "pending",
+            "sourceId": 427,
+            "signature": "falseObservation()",
+            "reason": "open proof goals",
+            "reading": "solc",
+            "invalidSpecification": false,
+            "function": "falseObservation",
+            "elapsedMs": 46975,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RenamedExternal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011",
+            "range": {
+              "start": {
+                "line": 53,
+                "character": 4
+              },
+              "end": {
+                "line": 53,
+                "character": 126
+              }
+            }
+          },
+          {
+            "tag": "diamond",
+            "status": "proved",
+            "sourceId": 367,
+            "signature": "target(uint)",
+            "reason": "",
+            "reading": "clean",
+            "invalidSpecification": false,
+            "function": "target",
+            "elapsedMs": 1704,
+            "source": "/workspace/solidity-lean/tests/solc/EntryPointsLeft.sol",
+            "contract": "RenamedExternal",
+            "sourceHash": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+          }
+        ],
+        "errors": []
+      }
+    },
+    "allRowStatuses": {
+      "unsupported": 11,
+      "proved": 21,
+      "internal": 6,
+      "pending": 5
+    },
+    "pendingExplanation": "Four deliberately false observations stay pending; the separate untagged ExternalOverride.target row also remains pending and is not counted as a proved property.",
+    "compilerPin": {
+      "file": "soljson-v0.8.34+commit.80d5c536.js",
+      "version": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "pipeline": "legacy (default source/API runner)"
+    },
+    "sourceSha256": "e822221ab853c906c5244413a2283310e8d2a1389574926f9b109a1aef53d011"
+  },
+  "upstream": [
+    {
+      "fixture": "types/mapping_contract_key_getter.sol",
+      "source": {
+        "path": "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+        "bytes": 1019,
+        "sha256": "2656e7ad7fa5301f3e582f02ac07dd33d3f2b84088b4aa03dd17e27dfd57e341"
+      },
+      "originalFixtureText": "interface A {}\ncontract test {\n    mapping(A => uint8) public table;\n    function set(A k, uint8 v) public {\n        table[k] = v;\n    }\n    function get(A k) public returns (uint8) {\n        return this.table(k);\n    }\n}\n// ----\n// table(address): 0 -> 0\n// table(address): 0x01 -> 0\n// table(address): 0xa7 -> 0\n// get(address): 0 -> 0\n// get(address): 0x01 -> 0\n// get(address): 0xa7 -> 0\n// set(address,uint8): 0x01, 0xa1 ->\n// table(address): 0 -> 0\n// table(address): 0x01 -> 0xa1\n// table(address): 0xa7 -> 0\n// get(address): 0 -> 0\n// get(address): 0x01 -> 0xa1\n// get(address): 0xa7 -> 0\n// set(address,uint8): 0x00, 0xef ->\n// table(address): 0 -> 0xef\n// table(address): 0x01 -> 0xa1\n// table(address): 0xa7 -> 0\n// get(address): 0 -> 0xef\n// get(address): 0x01 -> 0xa1\n// get(address): 0xa7 -> 0\n// set(address,uint8): 0x01, 0x05 ->\n// table(address): 0 -> 0xef\n// table(address): 0x01 -> 0x05\n// table(address): 0xa7 -> 0\n// get(address): 0 -> 0xef\n// get(address): 0x01 -> 0x05\n// get(address): 0xa7 -> 0\n",
+      "before": {
+        "stage": "before",
+        "fixture": "types/mapping_contract_key_getter.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/before/types__mapping_contract_key_getter",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 1.2697537470012321,
+        "directory": ".lake/upstream/entry-points-left/before/types__mapping_contract_key_getter",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+            }
+          ]
+        }
+      },
+      "after": {
+        "stage": "after-final",
+        "fixture": "types/mapping_contract_key_getter.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/after-final/types__mapping_contract_key_getter",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 0.9180492590021458,
+        "directory": ".lake/upstream/entry-points-left/after-final/types__mapping_contract_key_getter",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/types/mapping_contract_key_getter.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "transaction/block/self-address or cross-contract host behavior not adapted"
+            }
+          ]
+        }
+      },
+      "completeResultObjectsUnchanged": true
+    },
+    {
+      "fixture": "getters/value_types.sol",
+      "source": {
+        "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+        "bytes": 911,
+        "sha256": "3070e462fa8b1a2c8d32e705c2e269f3d7045455ef5cced20fbf115c2fcd33d5"
+      },
+      "originalFixtureText": "contract C {\n    uint8 public a;\n    uint16 public b;\n    uint128 public c;\n    uint public d;\n    bytes1 public e;\n    bytes20 public f;\n    bytes32 public g;\n    bool public h;\n    address public i;\n    constructor() {\n        a = 3;\n        b = 4;\n        c = 5;\n        d = 6;\n        e = bytes1(uint8(0x7f));\n        f = bytes20(uint160(0x6465616462656566313564656164000000000010));\n        g = bytes32(uint256(0x6465616462656566313564656164000000000000000000000000000000000010));\n        h = true;\n        i = address(type(uint160).max / 3);\n    }\n}\n// ----\n// a() -> 3\n// b() -> 4\n// c() -> 5\n// d() -> 6\n// e() -> 0x7f00000000000000000000000000000000000000000000000000000000000000\n// f() -> 0x6465616462656566313564656164000000000010000000000000000000000000\n// g() -> 0x6465616462656566313564656164000000000000000000000000000000000010\n// h() -> true\n// i() -> 0x5555555555555555555555555555555555555555\n",
+      "before": {
+        "stage": "before",
+        "fixture": "getters/value_types.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/getters/value_types.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/before/getters__value_types",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 0,
+        "elapsed": 4.707004707999658,
+        "directory": ".lake/upstream/entry-points-left/before/getters__value_types",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/getters/value_types.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all supported runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+                  "observed": [
+                    {
+                      "values": [],
+                      "signature": "a()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "b()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        4
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "c()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        5
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "d()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        6
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "e()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        127,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "f()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "g()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "h()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "i()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all supported runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+                  "observed": [
+                    {
+                      "values": [],
+                      "signature": "a()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "b()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        4
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "c()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        5
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "d()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        6
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "e()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        127,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "f()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "g()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "h()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "i()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "after": {
+        "stage": "after-final",
+        "fixture": "getters/value_types.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/getters/value_types.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/after-final/getters__value_types",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 0,
+        "elapsed": 4.57604579100007,
+        "directory": ".lake/upstream/entry-points-left/after-final/getters__value_types",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/getters/value_types.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+              "stage": "lean-runtime",
+              "status": "working",
+              "reason": "functional runtime vectors match in every required source evaluation mode",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "working",
+                  "reason": "all supported runtime vectors match",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+                  "observed": [
+                    {
+                      "values": [],
+                      "signature": "a()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "b()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        4
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "c()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        5
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "d()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        6
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "e()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        127,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "f()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "g()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "h()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "i()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    }
+                  ]
+                },
+                {
+                  "status": "working",
+                  "reason": "all supported runtime vectors match",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/getters/value_types.sol",
+                  "observed": [
+                    {
+                      "values": [],
+                      "signature": "a()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        3
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "b()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        4
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "c()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        5
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "d()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        6
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "e()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        127,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "f()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "g()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        100,
+                        101,
+                        97,
+                        100,
+                        98,
+                        101,
+                        101,
+                        102,
+                        49,
+                        53,
+                        100,
+                        101,
+                        97,
+                        100,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        16
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "h()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        1
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    },
+                    {
+                      "values": [],
+                      "signature": "i()",
+                      "revertBytes": [],
+                      "returnBytes": [
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85,
+                        85
+                      ],
+                      "failed": false,
+                      "calldataBytes": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "completeResultObjectsUnchanged": true
+    },
+    {
+      "fixture": "getters/struct_with_bytes_simple.sol",
+      "source": {
+        "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+        "bytes": 341,
+        "sha256": "004ecded9a450c958ca8d3d1c001ff8a89e3113743df3aa8c17ec7bbba6e5cbd"
+      },
+      "originalFixtureText": "contract C {\n    struct S {\n        uint a;\n        bytes b;\n        mapping(uint => uint) c;\n        uint[] d;\n    }\n    uint shifter;\n    S public s;\n    constructor() {\n        s.a = 7;\n        s.b = \"abc\";\n        s.c[0] = 9;\n    }\n}\n// ----\n// s() -> 0x07, 0x40, 0x03, 0x6162630000000000000000000000000000000000000000000000000000000000\n",
+      "before": {
+        "stage": "before",
+        "fixture": "getters/struct_with_bytes_simple.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/before/getters__struct_with_bytes_simple",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 3.356905274999008,
+        "directory": ".lake/upstream/entry-points-left/before/getters__struct_with_bytes_simple",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+              "stage": "lean-runtime",
+              "status": "broken",
+              "reason": "frontend import gaps",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "broken",
+                  "reason": "frontend import gaps",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+                  "gaps": [
+                    {
+                      "status": "unsupported",
+                      "reason": "struct_with_bytes_simple.sol:11: public getter needs reference-valued ABI returns/inputs",
+                      "function": ""
+                    }
+                  ]
+                },
+                {
+                  "status": "broken",
+                  "reason": "frontend import gaps",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+                  "gaps": [
+                    {
+                      "status": "unsupported",
+                      "reason": "struct_with_bytes_simple.sol:11: public getter needs reference-valued ABI returns/inputs",
+                      "function": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "after": {
+        "stage": "after-final",
+        "fixture": "getters/struct_with_bytes_simple.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/after-final/getters__struct_with_bytes_simple",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 3.499202973998763,
+        "directory": ".lake/upstream/entry-points-left/after-final/getters__struct_with_bytes_simple",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+              "stage": "lean-runtime",
+              "status": "broken",
+              "reason": "frontend import gaps",
+              "requiredPipelines": [
+                "legacy",
+                "viaIR"
+              ],
+              "variants": [
+                {
+                  "status": "broken",
+                  "reason": "frontend import gaps",
+                  "pipeline": "legacy",
+                  "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+                  "gaps": [
+                    {
+                      "status": "unsupported",
+                      "reason": "struct_with_bytes_simple.sol:11: public getter needs reference-valued ABI returns/inputs",
+                      "function": ""
+                    }
+                  ]
+                },
+                {
+                  "status": "broken",
+                  "reason": "frontend import gaps",
+                  "pipeline": "viaIR",
+                  "path": "test/libsolidity/semanticTests/getters/struct_with_bytes_simple.sol",
+                  "gaps": [
+                    {
+                      "status": "unsupported",
+                      "reason": "struct_with_bytes_simple.sol:11: public getter needs reference-valued ABI returns/inputs",
+                      "function": ""
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "completeResultObjectsUnchanged": true
+    },
+    {
+      "fixture": "receive/inherited.sol",
+      "source": {
+        "path": "test/libsolidity/semanticTests/receive/inherited.sol",
+        "bytes": 245,
+        "sha256": "e763739e3e8b56eb745435fdb352601c8e7e8a21200f09331017838e26495a54"
+      },
+      "originalFixtureText": "contract A {\n    uint data;\n    receive() external payable { ++data; }\n    function getData() public returns (uint r) { return data; }\n}\ncontract B is A {}\n// ----\n// getData() -> 0\n// () ->\n// getData() -> 1\n// (), 1 ether ->\n// getData() -> 2\n",
+      "before": {
+        "stage": "before",
+        "fixture": "receive/inherited.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/receive/inherited.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/before/receive__inherited",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 0.7777023710004869,
+        "directory": ".lake/upstream/entry-points-left/before/receive__inherited",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/receive/inherited.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/receive/inherited.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "unsupported runtime expectation: () ->"
+            }
+          ]
+        }
+      },
+      "after": {
+        "stage": "after-final",
+        "fixture": "receive/inherited.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/receive/inherited.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/after-final/receive__inherited",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 0.7643086390016833,
+        "directory": ".lake/upstream/entry-points-left/after-final/receive__inherited",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/receive/inherited.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/receive/inherited.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "unsupported runtime expectation: () ->"
+            }
+          ]
+        }
+      },
+      "completeResultObjectsUnchanged": true
+    },
+    {
+      "fixture": "fallback/inherited.sol",
+      "source": {
+        "path": "test/libsolidity/semanticTests/fallback/inherited.sol",
+        "bytes": 208,
+        "sha256": "66bb8bdba98b5ea1b33a6e69c47892fc1ed77d8e53c90df3eda79af230541223"
+      },
+      "originalFixtureText": "contract A {\n    uint data;\n    fallback() external { data = 1; }\n    function getData() public returns (uint r) { return data; }\n}\ncontract B is A {}\n// ----\n// getData() -> 0\n// (): 42 ->\n// getData() -> 1\n",
+      "before": {
+        "stage": "before",
+        "fixture": "fallback/inherited.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/fallback/inherited.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/before/fallback__inherited",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 0.7933484340010182,
+        "directory": ".lake/upstream/entry-points-left/before/fallback__inherited",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "0f89a4c1d6e3c72717fc00d74df270a8cb8bc627af12ef76da9bd855c5f25902",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/fallback/inherited.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/fallback/inherited.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "unsupported runtime expectation: (): 42 ->"
+            }
+          ]
+        }
+      },
+      "after": {
+        "stage": "after-final",
+        "fixture": "fallback/inherited.sol",
+        "command": [
+          "node",
+          "scripts/solidity-upstream.mjs",
+          "run",
+          "--compiler",
+          "/workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js",
+          "--filter",
+          "test/libsolidity/semanticTests/fallback/inherited.sol",
+          "--out",
+          "/workspace/solidity-lean/.lake/upstream/entry-points-left/after-final/fallback__inherited",
+          "--batch-size",
+          "1"
+        ],
+        "exit": 1,
+        "elapsed": 0.7785166110006685,
+        "directory": ".lake/upstream/entry-points-left/after-final/fallback__inherited",
+        "results": {
+          "metadata": {
+            "version": 1,
+            "commit": "1835d247de183f23e7b0e2bc4a50732af525b77c",
+            "compiler": "0.8.38+commit.1835d247.Emscripten.clang",
+            "compilerSha256": "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390",
+            "archiveSha256": "9200f2a26b08be5b77faf877c44f5cfbf5ea95f1bccc45dae559d2fbc7cefb2d",
+            "runnerSha256": "de90dacc69e0054dadeccc958b4a948611f44cd3213942bde72c1a3bdd3e8082",
+            "compilerCodeAdapterSha256": "478f1728f696dffc06a8d53c202b02cab1173dbc42aaf10ce9d11e80a394d740",
+            "modelSha256": "c4c7e803dac7093af323dbf81f2eee0df14a2eaa25c39c60372f28cd933643ad",
+            "evmVersion": "osaka",
+            "loopFuel": 1000,
+            "scope": "Pinned-solc reference diagnostics; typed Lean observations for supported scalar/canonical-prefix ABI vectors, v2 primitive entry checks and retained failure bytes in required legacy/viaIR source modes. Generated EVM/SSA, gas, logs and the native C++ harness are not tested.",
+            "snapshotFiles": 11622,
+            "filter": "test/libsolidity/semanticTests/fallback/inherited.sol",
+            "timeoutMs": 120000,
+            "batchSize": 1
+          },
+          "results": [
+            {
+              "path": "test/libsolidity/semanticTests/fallback/inherited.sol",
+              "stage": "lean-runtime",
+              "status": "blocked",
+              "reason": "unsupported runtime expectation: (): 42 ->"
+            }
+          ]
+        }
+      },
+      "completeResultObjectsUnchanged": true
+    }
+  ],
+  "upstreamScope": "All selected original fixture bytes and complete result objects retained. Primitive getter vectors pass both required modes; reference getter remains broken, raw receive/fallback and contract-key host cases remain adapter-blocked. No corpus count increase claimed.",
+  "focusedOriginalPublicGetters": {
+    "expected": [
+      [
+        "arrays",
+        "proved"
+      ],
+      [
+        "boolKeys",
+        "proved"
+      ],
+      [
+        "falseBoundsPanic",
+        "pending"
+      ],
+      [
+        "falseScalar",
+        "pending"
+      ],
+      [
+        "fixedBounds",
+        "proved"
+      ],
+      [
+        "identity",
+        "proved"
+      ],
+      [
+        "inherited",
+        "proved"
+      ],
+      [
+        "inheritedGetters",
+        "proved"
+      ],
+      [
+        "nestedMapping",
+        "proved"
+      ],
+      [
+        "primitives",
+        "proved"
+      ],
+      [
+        "scalar",
+        "proved"
+      ],
+      [
+        "selectorBounds",
+        "proved"
+      ],
+      [
+        "selectorRead",
+        "proved"
+      ],
+      [
+        "solcGetter27",
+        "internal"
+      ],
+      [
+        "structFields",
+        "proved"
+      ],
+      [
+        "viaInterface",
+        "proved"
+      ]
+    ],
+    "report": {
+      "results": [
+        {
+          "tag": "internal",
+          "status": "internal",
+          "sourceId": 89,
+          "signature": "solcGetter27()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "solcGetter27",
+          "elapsedMs": 0,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 33,
+              "character": 4
+            },
+            "end": {
+              "line": 33,
+              "character": 73
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 118,
+          "signature": "scalar()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "scalar",
+          "elapsedMs": 5258,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 37,
+              "character": 4
+            },
+            "end": {
+              "line": 42,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 144,
+          "signature": "viaInterface()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "viaInterface",
+          "elapsedMs": 4928,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 44,
+              "character": 4
+            },
+            "end": {
+              "line": 48,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 222,
+          "signature": "primitives()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "primitives",
+          "elapsedMs": 115918,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 50,
+              "character": 4
+            },
+            "end": {
+              "line": 58,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 264,
+          "signature": "nestedMapping()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "nestedMapping",
+          "elapsedMs": 5698,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 60,
+              "character": 4
+            },
+            "end": {
+              "line": 64,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 299,
+          "signature": "boolKeys()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "boolKeys",
+          "elapsedMs": 11741,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 66,
+              "character": 4
+            },
+            "end": {
+              "line": 70,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 363,
+          "signature": "arrays()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "arrays",
+          "elapsedMs": 78093,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 72,
+              "character": 4
+            },
+            "end": {
+              "line": 81,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 407,
+          "signature": "structFields()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "structFields",
+          "elapsedMs": 6314,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 83,
+              "character": 4
+            },
+            "end": {
+              "line": 88,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 457,
+          "signature": "inheritedGetters()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "inheritedGetters",
+          "elapsedMs": 90984,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 90,
+              "character": 4
+            },
+            "end": {
+              "line": 96,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 490,
+          "signature": "fixedBounds()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "fixedBounds",
+          "elapsedMs": 12190,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 98,
+              "character": 4
+            },
+            "end": {
+              "line": 102,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 544,
+          "signature": "identity()",
+          "reason": "",
+          "reading": "clean",
+          "invalidSpecification": false,
+          "function": "identity",
+          "elapsedMs": 18828,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 104,
+              "character": 4
+            },
+            "end": {
+              "line": 109,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 561,
+          "signature": "selectorRead(uint)",
+          "reason": "",
+          "reading": "clean",
+          "invalidSpecification": false,
+          "function": "selectorRead",
+          "elapsedMs": 1694,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 111,
+              "character": 4
+            },
+            "end": {
+              "line": 113,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "proved",
+          "sourceId": 596,
+          "signature": "selectorBounds()",
+          "reason": "",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "selectorBounds",
+          "elapsedMs": 12454,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 115,
+              "character": 4
+            },
+            "end": {
+              "line": 119,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "pending",
+          "sourceId": 629,
+          "signature": "falseBoundsPanic()",
+          "reason": "open proof goals",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "falseBoundsPanic",
+          "elapsedMs": 5930,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 121,
+              "character": 4
+            },
+            "end": {
+              "line": 124,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "box",
+          "status": "pending",
+          "sourceId": 646,
+          "signature": "falseScalar()",
+          "reason": "open proof goals",
+          "reading": "solc",
+          "invalidSpecification": false,
+          "function": "falseScalar",
+          "elapsedMs": 5926,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25",
+          "range": {
+            "start": {
+              "line": 126,
+              "character": 4
+            },
+            "end": {
+              "line": 129,
+              "character": 5
+            }
+          }
+        },
+        {
+          "tag": "diamond",
+          "status": "proved",
+          "sourceId": 19,
+          "signature": "inherited(uint8)",
+          "reason": "",
+          "reading": "clean",
+          "invalidSpecification": false,
+          "function": "inherited",
+          "elapsedMs": 1935,
+          "source": "/workspace/solidity-lean/tests/solc/PublicGetters.sol",
+          "contract": "PublicGetters",
+          "sourceHash": "3253b28f3818488c24666ab0a548c2d47bd653057d8dc5bd3663e58eb0648e25"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "originalAggregateGate": "61 of62 existing tests passed; unchanged300s PublicGetters aggregate timed out and remains blocked. All16 original row expectations match separately with batchSize1 and the same300s per-job limit.",
+  "validationPhases": [
+    {
+      "gate": "combined-resumed",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.Testing",
+        "Solidity.Tools.Upstream"
+      ],
+      "exit": 0,
+      "elapsed": 47.19774247899841
+    },
+    {
+      "gate": "kernel42",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsLeft.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exit": 0,
+      "elapsed": 26.5782902380015
+    },
+    {
+      "gate": "admission",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exit": 0,
+      "elapsed": 1.8237477930015302
+    },
+    {
+      "gate": "source-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/entry-points-left.test.mjs"
+      ],
+      "exit": 0,
+      "elapsed": 342.9117554479999
+    },
+    {
+      "gate": "affected-tests",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/finite-dispatch.test.mjs",
+        "scripts/public-getters.test.mjs",
+        "scripts/getter-dispatch.test.mjs",
+        "scripts/getter-plans.test.mjs",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exit": 1,
+      "elapsed": 664.1424299889986,
+      "classification": "blocked by original aggregate PublicGetters timeout",
+      "tests": 62,
+      "passed": 61,
+      "blocked": 1
+    },
+    {
+      "gate": "upstream-final",
+      "command": [
+        "python3",
+        "/workspace/.setup/entry-final-upstream.py"
+      ],
+      "exit": 0,
+      "elapsed": 10.75543565299813
+    },
+    {
+      "gate": "mcp-final",
+      "command": [
+        ".venv/bin/python",
+        "/workspace/.setup/entry-mcp-final.py"
+      ],
+      "exit": 0,
+      "elapsed": 91.203593506998
+    }
+  ],
+  "staticGates": [
+    {
+      "gate": "trust",
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "layers",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "automatic",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "testsuite",
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh"
+      ],
+      "exit": 0,
+      "successfulCommand": [
+        "bash",
+        "scripts/check-testsuite.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "log": "entry-final-testsuite-frozen.log",
+      "earlierConfigurationFailures": [
+        "entry-final-testsuite.log",
+        "entry-final-testsuite-activated.log"
+      ]
+    },
+    {
+      "gate": "docpaths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1
+    },
+    {
+      "gate": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    }
+  ],
+  "resourceMeasurements": [
+    {
+      "log": "entry-serial-narrow-build.log",
+      "command": [
+        "bash",
+        "-e",
+        "-c",
+        "lake -f .lake/entry-points.toml build Solidity.Calculus.TermSize; lake -f .lake/entry-points.toml build Solidity.Frontend.SolcJson"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 62.76649968899983,
+      "peakGroupRssBytes": 1115447296
+    },
+    {
+      "log": "entry-combined-resumed.log",
+      "command": [
+        "lake",
+        "build",
+        "Solidity.Frontend.Testing",
+        "Solidity.Tools.Upstream"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 47.16800018900176,
+      "peakGroupRssBytes": 1367707648
+    },
+    {
+      "log": "entry-kernel42.log",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsLeft.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 26.55078041500019,
+      "peakGroupRssBytes": 1505636352
+    },
+    {
+      "log": "entry-admission.log",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "--",
+        "--tstack=131072"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 1.793321402001311,
+      "peakGroupRssBytes": 747102208
+    },
+    {
+      "log": "entry-source-tests.log",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/entry-points-left.test.mjs"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 342.87647115800064,
+      "peakGroupRssBytes": 3097391104
+    },
+    {
+      "log": "entry-affected-tests.log",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/finite-dispatch.test.mjs",
+        "scripts/public-getters.test.mjs",
+        "scripts/getter-dispatch.test.mjs",
+        "scripts/getter-plans.test.mjs",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 664.1147123709998,
+      "peakGroupRssBytes": 3368984576
+    },
+    {
+      "log": "entry-upstream-final.log",
+      "command": [
+        "python3",
+        "/workspace/.setup/entry-final-upstream.py"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 10.730170066999563,
+      "peakGroupRssBytes": 1101754368
+    },
+    {
+      "log": "entry-mcp-final.log",
+      "command": [
+        ".venv/bin/python",
+        "/workspace/.setup/entry-mcp-final.py"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 91.17929977300082,
+      "peakGroupRssBytes": 2205659136
+    },
+    {
+      "log": "entry-publicgetters-focused.log",
+      "command": [
+        "node",
+        "/workspace/.setup/entry-publicgetters-focused.mjs"
+      ],
+      "exit": 0,
+      "blocked": null,
+      "elapsed": 451.04036009099946,
+      "peakGroupRssBytes": 3069468672
+    }
+  ],
+  "finalSequenceElapsedSeconds": 1184.612995106996,
+  "finalSequencePeakDescendantRssBytes": 3368984576,
+  "failedOrInterruptedDevelopmentAttempts": [
+    {
+      "log": "entry-admission-cause.log",
+      "sha256": "7313834cdbe0aa31f5475b09549880195a330d75b2747c90b875eaaaad488a4e",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1.5169646710000961,
+      "peakGroupRssBytes": 748769280
+    },
+    {
+      "log": "entry-admission-final.log",
+      "sha256": "1f0b608ff9b781ae5808582cb58294052cacf302de73d32e79c8eaabe9595b95",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1.7225324800001545,
+      "peakGroupRssBytes": 746070016
+    },
+    {
+      "log": "entry-admission-fixed.log",
+      "sha256": "598f8293aab7f790960f9d417f7ae32ace9e12c31397c6fbfe236bc906b7c09f",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsAdmission.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1.2130352380008844,
+      "peakGroupRssBytes": 693063680
+    },
+    {
+      "log": "entry-affected-tests.log",
+      "sha256": "8786747bd0ff3c80151bcc96b30f7f6ff499d7b7e5157eb933eeb6f472129d58",
+      "command": [
+        "node",
+        "--test",
+        "--test-concurrency=1",
+        "scripts/finite-dispatch.test.mjs",
+        "scripts/public-getters.test.mjs",
+        "scripts/getter-dispatch.test.mjs",
+        "scripts/getter-plans.test.mjs",
+        "scripts/solidity-upstream.test.mjs"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 664.1147123709998,
+      "peakGroupRssBytes": 3368984576
+    },
+    {
+      "log": "entry-baseline-build.log",
+      "sha256": "68aedb6863d86a0aaa845b76664309a64dc1bfaf0790c98f80d59c13af31de56",
+      "command": [
+        "lake",
+        "-f",
+        ".lake/entry-points.toml",
+        "build",
+        "Solidity.Frontend.Testing"
+      ],
+      "exit": -15,
+      "blocked": null,
+      "elapsed": 300.06961794199924,
+      "peakGroupRssBytes": 1075474432
+    },
+    {
+      "log": "entry-baseline-reader.log",
+      "sha256": "3a935d0549364aef21ccaf5d155b74e3e698b5aad660a29b625917d486021348",
+      "command": [
+        "bash",
+        "-c",
+        "node scripts/solc-ast.mjs --source /workspace/.setup/EntryPointsLeft.sol --out /workspace/.setup/EntryPointsLeft.ast.json --no-wrapper; python3 - <<'PY'\nfrom pathlib import Path\nPath(\"/workspace/.setup/entry-baseline.lean\").write_text(\"\"\"import Solidity.Frontend.SolcJson\nopen Lean Solidity.Frontend\n#eval do\n let fixture ← IO.ofExcept (Json.parse (← IO.FS.readFile \"/workspace/.setup/EntryPointsLeft.ast.json\"))\n let ast ← IO.ofExcept (fixture.getObjVal? \"ast\")\n let provenance ← IO.ofExcept (Source.read fixture ast)\n for name in [\"NominalGetters\", \"InheritedReceiver\", \"InheritedFallback\", \"RenamedExternal\", \"RefusedGetters\"] do\n  let c ← IO.ofExcept (readContract ast name [] true (scanSource := Admission.scan ast provenance))\n  for f in c.funs do\n   IO.println s!\"{name}.{f.sourceName}: {repr (f.body.map fun _ => ())}; diagnostic={(f.sourceScope.diagnostic?.map (·.name))}\"\n\"\"\")\nPY\nlake --quiet --no-build lean /workspace/.setup/entry-baseline.lean -- --tstack=131072 -j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1.5189222429999063,
+      "peakGroupRssBytes": 692932608
+    },
+    {
+      "log": "entry-combined-build.log",
+      "sha256": "4b5a04dd1d6b7ac4fcd39949db6930fe34503716b76730d206df90f2c6ba17b9",
+      "command": [
+        "bash",
+        "-e",
+        "-c",
+        "python3 scripts/solidity-feature-audit.py; lake -f .lake/entry-points.toml build Solidity.Frontend.Testing Solidity.Tools.Upstream"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1267.6845180290002,
+      "peakGroupRssBytes": 3620343808
+    },
+    {
+      "log": "entry-final-frontend-build.log",
+      "sha256": "d9806658a1ca4c8e59d1fae972542abc9b7419f26c9c67ff3874a1aa4b022ae5",
+      "command": [
+        "bash",
+        "-c",
+        "node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.ast.json --no-wrapper; node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --via-ir --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.viaIR.ast.json --no-wrapper; lake -f .lake/entry-points.toml build Solidity.Frontend.Testing Solidity.Tools.Upstream"
+      ],
+      "exit": -15,
+      "blocked": null,
+      "elapsed": 203.12841782400028,
+      "peakGroupRssBytes": 1113989120
+    },
+    {
+      "log": "entry-final-narrow-build.log",
+      "sha256": "761cdcf6714a0b5a243225c07b88844fd2ae0fc7270f9f304b7cbd9ac2b3f645",
+      "command": [
+        "bash",
+        "-e",
+        "-c",
+        "node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.ast.json --no-wrapper; node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --via-ir --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.viaIR.ast.json --no-wrapper; python3 - <<'PY'\nfrom pathlib import Path\nimport json,re\np=Path(\"tests/upstream/EntryPointsLeft.lean\");s=p.read_text()\nfor path in [\"EntryPointsLeft.ast.json\",\"EntryPointsLeft.viaIR.ast.json\"]:\n bs=Path(\"tests/solc/\"+path).read_bytes();h=0xcbf29ce484222325\n for b in bs:h=((h^b)*0x100000001b3)&((1<<64)-1)\n s=re.sub(r\"(solc_import \\\"../solc/\"+re.escape(path)+r\"\\\" hash )0x[0-9a-f]+\",lambda m:m[1]+f\"0x{h:x}\",s)\np.write_text(s)\nPY\nnode --check scripts/entry-points-left.test.mjs\nlake -f .lake/entry-points.toml build Solidity.Calculus.TermSize Solidity.Frontend.SolcJson"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 42.124092032998306,
+      "peakGroupRssBytes": 1045753856
+    },
+    {
+      "log": "entry-kernel-corrected.log",
+      "sha256": "93373f60fa7d13f417340cbde5a69414f2ea9b0ae318c36897a510413a6f0ce8",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsLeft.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 30.098236553998504,
+      "peakGroupRssBytes": 1529589760
+    },
+    {
+      "log": "entry-kernel-focused.log",
+      "sha256": "6a409e2ba281cf714502b3d7efc89cf6b829567d401e242dbe489fd8f0c33cd6",
+      "command": [
+        "bash",
+        "-e",
+        "-c",
+        "lake -f .lake/entry-points.toml build Solidity.Frontend.Import Solidity.Semantics.RunFuel; lake --quiet --no-build lean tests/upstream/EntryPointsLeft.lean -- --tstack=131072 -j1"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 28.651739315999293,
+      "peakGroupRssBytes": 1246306304
+    },
+    {
+      "log": "entry-kernel-initial.log",
+      "sha256": "e628b2ea211262d755951a9c5247579f4d99685b528634411212701852bf2b58",
+      "command": [
+        "lake",
+        "--quiet",
+        "--no-build",
+        "lean",
+        "tests/upstream/EntryPointsLeft.lean",
+        "--",
+        "--tstack=131072",
+        "-j1"
+      ],
+      "exit": 3,
+      "blocked": null,
+      "elapsed": 0.15144386799875065,
+      "peakGroupRssBytes": 55226368
+    },
+    {
+      "log": "entry-reader-build-final.log",
+      "sha256": "714361529041f5290ad41c630392a3358d756719876d1d07dcf225c84cc8ce5c",
+      "command": [
+        "lake",
+        "-f",
+        ".lake/entry-points.toml",
+        "build",
+        "Solidity.Frontend.SolcJson"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 32.91446806100066,
+      "peakGroupRssBytes": 990052352
+    },
+    {
+      "log": "entry-reader-build-fixed.log",
+      "sha256": "878d3908dd4fedbf946b0f70ae4820a5bc44a1d1b82b6747761a0271233ccefb",
+      "command": [
+        "lake",
+        "-f",
+        ".lake/entry-points.toml",
+        "build",
+        "Solidity.Frontend.SolcJson"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 38.867060984999625,
+      "peakGroupRssBytes": 1003429888
+    },
+    {
+      "log": "entry-reader-build.log",
+      "sha256": "d47b0c9f0356abeabcf7ef8815676217752cb7b11b77300b6796f60534ee4a23",
+      "command": [
+        "lake",
+        "-f",
+        ".lake/entry-points.toml",
+        "build",
+        "Solidity.Frontend.SolcJson"
+      ],
+      "exit": 1,
+      "blocked": null,
+      "elapsed": 1.765742092000437,
+      "peakGroupRssBytes": 731455488
+    },
+    {
+      "log": "entry-reviewed-frontend-build.log",
+      "sha256": "45e19445d701c1a3d0cf2f75c5b3698aad439cf4098f9f78515324990f6b88ce",
+      "command": [
+        "bash",
+        "-c",
+        "node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.ast.json --no-wrapper; node scripts/solc-ast.mjs --compiler-file /workspace/.setup/soljson/soljson-v0.8.38+commit.1835d247.js --compiler-sha256 6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390 --via-ir --source tests/solc/EntryPointsLeft.sol --out tests/solc/EntryPointsLeft.viaIR.ast.json --no-wrapper; lake -f .lake/entry-points.toml build Solidity.Frontend.Testing Solidity.Tools.Upstream"
+      ],
+      "exit": -15,
+      "blocked": null,
+      "elapsed": 73.25867487699907,
+      "peakGroupRssBytes": 1233108992
+    }
+  ],
+  "baselineReaderReproduction": {
+    "sourceText": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\ncontract NominalGetters {\n    enum Shade { Zero, One, Two }\n    Shade public shade;\n    mapping(uint => Shade) public shades;\n    NominalGetters public owner;\n    struct Entry { Shade shade; address owner; uint[] omitted; mapping(uint => uint) hidden; }\n    Entry public entry;\n    /// @custom:key box\n    function enumScalar() public { shade = Shade.Two; assert(this.shade() == Shade.Two); }\n    /// @custom:key box\n    function enumMapping() public { shades[7] = Shade.Two; assert(this.shades(7) == Shade.Two); }\n    /// @custom:key box\n    function enumStruct() public {\n        entry.shade = Shade.Two; entry.owner = address(this);\n        try this.entry() returns (Shade s, address a) { assert(s == Shade.Two); assert(a == address(this)); }\n        catch { assert(false); }\n    }\n    /// @custom:key box\n    function contractScalar() public { owner = this; assert(address(this.owner()) == address(this)); }\n    /// @custom:key box\n    function falseEnum() public { shade = Shade.Two; assert(this.shade() == Shade.One); }\n}\ncontract ReceiverBase {\n    uint internal marker;\n    receive() external payable virtual { marker = 17; }\n}\ncontract InheritedReceiver is ReceiverBase {\n    /// @custom:key box\n    function positive() public { marker = 0; (bool ok,) = payable(address(this)).call{value:0}(\"\"); assert(ok); assert(marker == 17); }\n    /// @custom:key box\n    function falseObservation() public { marker = 0; (bool ok,) = payable(address(this)).call{value:0}(\"\"); assert(ok); assert(marker == 18); }\n    /// @custom:key box\n    function stipendRefusal() public { payable(address(this)).transfer(0); assert(marker == 17); }\n}\ncontract FallbackBase {\n    uint internal marker;\n    fallback() external payable { marker = 23; }\n}\ncontract InheritedFallback is FallbackBase {\n    /// @custom:key box\n    function positive() public { marker = 0; (bool ok,) = payable(address(this)).call{value:0}(\"\"); assert(ok); assert(marker == 23); }\n    /// @custom:key box\n    function falseObservation() public { marker = 0; (bool ok,) = payable(address(this)).call{value:0}(\"\"); assert(ok); assert(marker == 24); }\n}\ncontract ExternalBase {\n    function target(uint x) external pure virtual returns(uint) { return x; }\n}\ncontract RenamedExternal is ExternalBase {\n    /// @custom:key box\n    function positive() public view { function(uint) external pure returns(uint) h = this.target; assert(h(3) == 3); assert(h.selector == ExternalBase.target.selector); }\n    /// @custom:key box\n    function falseObservation() public view { function(uint) external pure returns(uint) h = this.target; assert(h(3) == 4); }\n}\ncontract RefusedGetters {\n    bytes public data;\n    string public text;\n    function() external public action;\n    /// @custom:key box\n    function referenceBytes() public view { bytes memory b = this.data(); assert(b.length == 0); }\n    /// @custom:key box\n    function referenceString() public view { string memory s = this.text(); assert(bytes(s).length == 0); }\n    /// @custom:key box\n    function functionResult() public view { function() external f = this.action(); assert(f.address == address(this)); }\n}\n",
+    "sourceSha256": "56b0effe803b019980cc34e9511dce0785488e7a83f2a3c6a0e762f48ea85e9a",
+    "astSha256": "f655f4fc7c03d42dcf91f6d47f392baa5ac72f8cc62929f0d7c432ae7b8a90ce",
+    "header": {
+      "solcVersion": "0.8.34+commit.80d5c536.Emscripten.clang",
+      "sourceSha256": "56b0effe803b019980cc34e9511dce0785488e7a83f2a3c6a0e762f48ea85e9a",
+      "solkeyCommit": "473da8944ca7329e6b76819863591407db26e7ec",
+      "source": "/workspace/.setup/EntryPointsLeft.sol",
+      "provenanceVersion": 1,
+      "compilerFile": "soljson-v0.8.34+commit.80d5c536.js",
+      "compilerSha256": "c8649f8d57f81b3244c7d2dd662efc0620d1ae296f623b347a2c616a6cfd11d8",
+      "validationStage": "analysis",
+      "settings": {
+        "viaIR": false,
+        "evmVersion": "osaka",
+        "optimizer": {
+          "enabled": false,
+          "runs": 200
+        },
+        "libraries": {},
+        "remappings": [],
+        "outputSelection": {
+          "*": {
+            "": [
+              "ast"
+            ]
+          }
+        }
+      },
+      "acceptedPragmas": [
+        [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ]
+      ]
+    },
+    "beforeLog": "⚠ [3/17] Replayed Solidity.AST\nwarning: Solidity/AST.lean:354:4: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nNominalGetters.enumScalar: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs a nominal or reference-valued ABI return/input\" 11); diagnostic=none\nNominalGetters.enumMapping: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs a nominal or reference-valued ABI return/input\" 13); diagnostic=none\nNominalGetters.enumStruct: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs a nominal or reference-valued ABI return/input\" 17); diagnostic=none\nNominalGetters.contractScalar: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs a nominal or reference-valued ABI return/input\" 21); diagnostic=none\nNominalGetters.falseEnum: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs a nominal or reference-valued ABI return/input\" 23); diagnostic=none\nInheritedReceiver.positive: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs inherited receive, fallback or modifier dispatch\"\n  31); diagnostic=(some solidity.selfPayment)\nInheritedReceiver.falseObservation: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs inherited receive, fallback or modifier dispatch\"\n  33); diagnostic=(some solidity.selfPayment)\nInheritedReceiver.stipendRefusal: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs inherited receive, fallback or modifier dispatch\"\n  35); diagnostic=(some solidity.selfPayment)\nInheritedFallback.positive: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs inherited receive, fallback or modifier dispatch\"\n  43); diagnostic=(some solidity.selfPayment)\nInheritedFallback.falseObservation: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs inherited receive, fallback or modifier dispatch\"\n  45); diagnostic=(some solidity.selfPayment)\nRenamedExternal.positive: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.functionDispatch: this call needs a finite set of typed dispatch targets\"\n  52); diagnostic=(some solidity.functionDispatch)\nRenamedExternal.falseObservation: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.functionDispatch: this call needs a finite set of typed dispatch targets\"\n  54); diagnostic=(some solidity.functionDispatch)\nRenamedExternal.target: Except.ok (); diagnostic=none\nRefusedGetters.referenceBytes: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs reference-valued ABI returns/inputs\" 61); diagnostic=none\nRefusedGetters.referenceString: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs reference-valued ABI returns/inputs\" 63); diagnostic=none\nRefusedGetters.functionResult: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.functionDispatch: this call needs a finite set of typed dispatch targets\"\n  65); diagnostic=(some solidity.functionDispatch)\n{\"command\": [\"bash\", \"-c\", \"sed -i \\\"s/map (\\u00b7.name)/map (fun (d : Source.Diagnostic) => d.name)/\\\" /workspace/.setup/entry-baseline.lean; lake --quiet --no-build lean /workspace/.setup/entry-baseline.lean -- --tstack=131072 -j1\"], \"exit\": 0, \"blocked\": null, \"elapsed\": 1.6142004110006383, \"peakGroupRssBytes\": 738906112}\n",
+    "afterSameInputLog": "⚠ [3/17] Replayed Solidity.AST\nwarning: Solidity/AST.lean:354:4: unused variable `k`\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nNominalGetters.enumScalar: Except.ok (); diagnostic=none\nNominalGetters.enumMapping: Except.ok (); diagnostic=none\nNominalGetters.enumStruct: Except.ok (); diagnostic=none\nNominalGetters.contractScalar: Except.ok (); diagnostic=none\nNominalGetters.falseEnum: Except.ok (); diagnostic=none\nInheritedReceiver.positive: Except.ok (); diagnostic=none\nInheritedReceiver.falseObservation: Except.ok (); diagnostic=none\nInheritedReceiver.stipendRefusal: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.selfPayment: self-payment needs unsupported stipend, nonpayable, byte-oriented, helper-call or modifier dispatch\"\n  35); diagnostic=(some solidity.selfPayment)\nInheritedFallback.positive: Except.ok (); diagnostic=none\nInheritedFallback.falseObservation: Except.ok (); diagnostic=none\nRenamedExternal.positive: Except.ok (); diagnostic=none\nRenamedExternal.falseObservation: Except.ok (); diagnostic=none\nRenamedExternal.target: Except.ok (); diagnostic=none\nRefusedGetters.referenceBytes: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs reference-valued ABI returns/inputs\" 61); diagnostic=none\nRefusedGetters.referenceString: Except.error (Solidity.Frontend.Gap.unsupported \"public getter needs reference-valued ABI returns/inputs\" 63); diagnostic=none\nRefusedGetters.functionResult: Except.error (Solidity.Frontend.Gap.unsupported\n  \"solidity.functionDispatch: this call needs a finite set of typed dispatch targets\"\n  65); diagnostic=(some solidity.functionDispatch)\n{\"command\": [\"lake\", \"--quiet\", \"--no-build\", \"lean\", \"/workspace/.setup/entry-baseline.lean\", \"--\", \"--tstack=131072\", \"-j1\"], \"exit\": 0, \"blocked\": null, \"elapsed\": 2.0215088950008067, \"peakGroupRssBytes\": 737280000}\n"
+  },
+  "sharedFilesChanged": [
+    "Solidity/Frontend/SolcJson/Contract.lean",
+    "Solidity/Frontend/SolcJson/Getters.lean",
+    "Solidity/Language/Features.lean",
+    "scripts/finite-dispatch.test.mjs",
+    "docs/solidity-features.json",
+    "docs/solidity-feature-inventory.md",
+    "docs/module-map.md",
+    "docs/feature-work/declarations-metadata.md",
+    "docs/feature-work/source-admission.md",
+    "docs/feature-work/finite-dispatch.md"
+  ],
+  "remainingRefusals": [
+    "Reference/function getter results, bytes/string keys/results and general reference-valued external tuple frames",
+    "Nominal getter function-value input/result signatures and native/source erasure collisions",
+    "Newly registered stipend, modifier/helper-frame, nonpayable and byte-oriented fallback dispatch",
+    "Arbitrary top-level raw-calldata/receive/fallback transaction replay and broader contract-world host behavior"
+  ],
+  "review": {
+    "finder": "Independent read-only reviews; no Lean worker. Confirmed omissions fixed: static contract-key success, exact named refusals, overload control, nonzero sender/value framing, rollback and enum ABI/panic control. Final import/source hashes and all42certificates checked.",
+    "skeptic": "Independent read-only reviews; no Lean worker. Fixed own-receive dependency regression, nominal key erasure, and selected fallback missing-id oracle fallthrough independently of optional admission. No confirmed implementation issue remains."
+  },
+  "notRun": "No core syntax, semantics, calculus or rule was edited. Full default-library/run-lean.sh and Corpus builds were not run; final coverage is the listed frontend roots and gates.",
+  "logInputs": {
+    "entry-admission-cause.log": "7313834cdbe0aa31f5475b09549880195a330d75b2747c90b875eaaaad488a4e",
+    "entry-admission-final.log": "1f0b608ff9b781ae5808582cb58294052cacf302de73d32e79c8eaabe9595b95",
+    "entry-admission-fixed.log": "598f8293aab7f790960f9d417f7ae32ace9e12c31397c6fbfe236bc906b7c09f",
+    "entry-admission.log": "46ef249dc0391881ab96668b22beaede2506785c749d5a6efff66d5328841d43",
+    "entry-affected-tests.log": "8786747bd0ff3c80151bcc96b30f7f6ff499d7b7e5157eb933eeb6f472129d58",
+    "entry-after-reader.log": "e1620d7e9e2d37ce977b0442767402009ebd523f4d959af8dbc3010885b8343d",
+    "entry-baseline-build.log": "68aedb6863d86a0aaa845b76664309a64dc1bfaf0790c98f80d59c13af31de56",
+    "entry-baseline-docpaths.log": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "entry-baseline-reader-fixed.log": "09dc48d70f9f468f4cb078dbfd9cb6e6d4e2d1ab129210029781f74da361566a",
+    "entry-baseline-reader.log": "3a935d0549364aef21ccaf5d155b74e3e698b5aad660a29b625917d486021348",
+    "entry-baseline-trust.log": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+    "entry-combined-build.log": "4b5a04dd1d6b7ac4fcd39949db6930fe34503716b76730d206df90f2c6ba17b9",
+    "entry-combined-resumed.log": "81e502bef6bb1dbe8778aec6821b62c3d37d804db181e39d408fe988ccebf37a",
+    "entry-final-automatic.log": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+    "entry-final-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "entry-final-docpaths.log": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "entry-final-frontend-build.log": "d9806658a1ca4c8e59d1fae972542abc9b7419f26c9c67ff3874a1aa4b022ae5",
+    "entry-final-inventory.log": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+    "entry-final-layers.log": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+    "entry-final-narrow-build.log": "761cdcf6714a0b5a243225c07b88844fd2ae0fc7270f9f304b7cbd9ac2b3f645",
+    "entry-final-orphans.log": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0",
+    "entry-final-sequence-driver.log": "f48e8f3273c50159f6a0c4800e467b5bb1b12e283318877ae0fb2a51d0e5c875",
+    "entry-final-testsuite-activated.log": "da460c61fe206b86f08c78d59c984ab5e83f46c380fb72985571a40561a9996f",
+    "entry-final-testsuite-frozen.log": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+    "entry-final-testsuite.log": "13cfa775bb8058ad9695a11d4c7510df26ec4cb5206076e1dfc06190c2cbd7ba",
+    "entry-final-trust.log": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+    "entry-fixture-generation.log": "554d896d6cb2d9c4a655ab519dfd4bddeb8bc82803c10167eaeb71e697f31233",
+    "entry-frame-check.log": "e8ebc90f419f4454aea129280d0b492ca6ce032fe6f0781e4450bad8015a4ecb",
+    "entry-kernel-corrected.log": "93373f60fa7d13f417340cbde5a69414f2ea9b0ae318c36897a510413a6f0ce8",
+    "entry-kernel-final.log": "646a37a958274f600af29615b73dbca9b02588333df618a22faf76744ab08a49",
+    "entry-kernel-focused.log": "6a409e2ba281cf714502b3d7efc89cf6b829567d401e242dbe489fd8f0c33cd6",
+    "entry-kernel-initial.log": "e628b2ea211262d755951a9c5247579f4d99685b528634411212701852bf2b58",
+    "entry-kernel42.log": "4f20a46ae5a8f346079142eea1e34021196455476feeb77e31da353292c0a159",
+    "entry-mcp-diagnostics.log": "b10c2955bc01d737caa4b380ffbedac56c292085cb3133f36180fc7345dea757",
+    "entry-mcp-final.log": "71170100d98888400051adee8724c8287ff3be6c3569f270d2391b03fb87cd86",
+    "entry-mcp-verify-final.log": "58d508b92a3db0e5d71b81739fea33c51bdcd153463aa99ab697572dc63bd458",
+    "entry-publicgetters-focused.log": "5a71c7ea0e6e5a60a0dba35dd5889ecaeb49a82c0a5314e4b90f1a847242d6da",
+    "entry-reader-build-factored.log": "a255500703f59bb4e4409421fc7455360baba7c0f1e4ad7f005ceaed87e5ae91",
+    "entry-reader-build-final.log": "714361529041f5290ad41c630392a3358d756719876d1d07dcf225c84cc8ce5c",
+    "entry-reader-build-fixed.log": "878d3908dd4fedbf946b0f70ae4820a5bc44a1d1b82b6747761a0271233ccefb",
+    "entry-reader-build.log": "d47b0c9f0356abeabcf7ef8815676217752cb7b11b77300b6796f60534ee4a23",
+    "entry-reviewed-frontend-build.log": "45e19445d701c1a3d0cf2f75c5b3698aad439cf4098f9f78515324990f6b88ce",
+    "entry-serial-narrow-build.log": "94d3478686e65c7da220e2b2db3bcb5deaa7c557232bdd425a41b853e545f130",
+    "entry-source-tests.log": "b8e39e3fa6643bfebf609d53f375cbfad6d08c5f0b13b79d5b9e582d42ac2273",
+    "entry-upstream-before-after.log": "2271d12522ee515bab6c085586f2002991ff2d21e4322302fc594880a307922f",
+    "entry-upstream-final.log": "c6874a05727b9ab347d5a4655c7bfefe15e18aaa029610f78f94db7cc8e2b837",
+    "entry-sealed-inventory.log": "641537a8f69c2326aba00ec0da863be95421b2118df770ab73bf4ccbac3d573c",
+    "entry-sealed-trust.log": "47abb486c1a15d28ca421bb0d0deb45e4aa5455ec4fc3138dc2c754c81915668",
+    "entry-sealed-docpaths.log": "0c812bbde7cc70668b2c994792cb3e8ce155369eac34994482b7eb88cead982e",
+    "entry-sealed-orphans.log": "478388d467f5ebc5908df58684d27f05788cb1de9b17b02fcde7f2230feebff0",
+    "entry-sealed-testsuite.log": "3554a6b06464541ae8cfbb0af0d2c73c837ca1585ff98f525b9820ed2b54a45b",
+    "entry-sealed-automatic.log": "af5228ef5205e66a36b7008d5476cc4c11a1c77bd6b2c29e896d85d083c47b81",
+    "entry-sealed-layers.log": "f57d72888dd2936bc309fa0fe0b97b413cfcf0aafbf5d1beb53960951ccdc858",
+    "entry-sealed-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sealedStaticGates": [
+    {
+      "gate": "trust",
+      "command": [
+        "bash",
+        "scripts/check-trust.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "orphans",
+      "command": [
+        "node",
+        "scripts/check-orphans.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "layers",
+      "command": [
+        "node",
+        "scripts/check-layers.mjs"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "automatic",
+      "command": [
+        "node",
+        "scripts/check-automatic.mjs",
+        "--strict"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "inventory",
+      "command": [
+        "python3",
+        "scripts/solidity-feature-audit.py",
+        "--check"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "testsuite",
+      "command": [
+        "bash",
+        "scripts/check-testsuite.sh",
+        "--solkey",
+        "/workspace/solidity-lean/tests/migration/solkey/keyext.solidity.examples"
+      ],
+      "exit": 0
+    },
+    {
+      "gate": "docpaths",
+      "command": [
+        "bash",
+        "scripts/check-doc-paths.sh"
+      ],
+      "exit": 1
+    },
+    {
+      "gate": "diff",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    }
+  ]
+}

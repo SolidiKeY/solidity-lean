@@ -1,0 +1,11 @@
+{
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutation.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.machines": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/TargetSnapshotCommutation.lean:Solidity.Backend.StorageOps.TargetSnapshotCommutation.programs": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

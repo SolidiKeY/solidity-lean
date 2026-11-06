@@ -22,7 +22,7 @@ its exact halt, including a failure in the success/catch body itself. -/
 def tryCondition (result : TRes (Out C σ.H Γ)) : Prop :=
   if (call.addr.evalT σ).1 = 0 then result = .error .revert else
   if self && decide ((call.addr.evalT σ).1 = σ.tx.selfAddress.1) then
-    match TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+    match TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
     | .ok o => result = (ok.runR o.st).map fun o' =>
         ⟨o'.st.drop ((Ext.append Γ ρ).trans ok.ext), o.ext.trans o'.ext⟩
     | .error .revert => result = (other.runR σ).map fun o => ⟨o.st.drop other.ext, o.ext⟩

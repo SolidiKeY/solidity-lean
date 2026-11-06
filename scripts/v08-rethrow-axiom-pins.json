@@ -1,0 +1,143 @@
+{
+ "Solidity.Lowering.V08.SourceRethrow.allocated_object": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.allocation_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.execution_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.expression_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.expression_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.intrinsic_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.literal_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.reached_rethrow": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrow.statement_timeout": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.allocation_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.complete_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.intrinsic_binary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.intrinsic_empty": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.intrinsic_long33": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.mixed_complete": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.mixed_timeout_after_effects": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.mixed_transport": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.mixed_vector": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.old_pointer": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.old_pointer_not_fresh": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.payload_cases": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.reached_write": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.statement_low": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.timeout_is_not_empty_revert": [],
+ "Solidity.Lowering.V08.SourceRethrowControls.wrong_mixed_encoding": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.wrong_payload": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.wrong_reverted_local": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity.Lowering.V08.SourceRethrowControls.wrong_unallocated_state": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

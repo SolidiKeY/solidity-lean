@@ -1,0 +1,348 @@
+{
+  "original_base": "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5",
+  "upstream": "b86ae4568cef6d6226f4d170360bbb089debe3fb",
+  "prior_owned_head": "d952505990a00083f379d6221b729b37ffec6838",
+  "merge": "e98f9b2b7834ee37019e4eac2d81ba187c61a86b",
+  "authorization": "2026-11-05 scheduled1200Z publication; fetch fresh master/reuse published APIs/continue existing owned queue preserving work. H41 verified packs for coordinator pull; no VMshipping.",
+  "source_files": [
+    {
+      "path": "Solidity/Calculus/Callback.lean",
+      "sha256": "4be4448a6a830ee42396bc81ea0f5c79a34ac4fbebdb8856660991f697ca46c8",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/CallbackHolds.lean",
+      "sha256": "b330820257e664c3222d03e910171e96b147a2743035cf9372dcdcc8cb67b717",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound.lean",
+      "sha256": "676b28823c633de539e0a81546512b974b6df83680fcf49d1fe2b5b40fa2f741",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/CallbackSound/Calls.lean",
+      "sha256": "fb0abff761fa859f496f134e196a0ef29c474c2ea0f3a056b50417b8c54eb0dd",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Correct.lean",
+      "sha256": "801d1b570c0319cd9f659481630230f5c2cc13c9137ef5b95affb279e2baf051",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/CorrectCallback.lean",
+      "sha256": "923dfd401f1d61591c26eda2901cf01de4d6a24c65c73eb80152c2377dbd649a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/FirstOrder.lean",
+      "sha256": "5c8cd291e08f69f3078bd7fab3e18dea5841c03b17d5b25140cdd6745409c234",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Fml.lean",
+      "sha256": "1327bb1fe336e9eca4b761b1ebdf8c59c1b00dabbfc4cb5b9b0dfe78f94385f1",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Lands.lean",
+      "sha256": "b623cc6b3d79911c47302977a822ebe64017c06127a209a4e4b3ee1ca75f1c62",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Logic.lean",
+      "sha256": "2ea371b5a0825522f4387a36ed10ae2d651b8de0b12bab6c34e2318ce5dd4b8b",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/PremiseSound.lean",
+      "sha256": "4aed9036c674074ecbdd6e3d7f9b646909448181b845ba6f315be1425a6e58b7",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Proves.lean",
+      "sha256": "23118f07095903f55b1f1f2961a361d6968fa1d57f18f9ebcb1d9c8b8c514808",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/ProvesSound.lean",
+      "sha256": "0553ab3c69d9c30b7acc36ca17000b3172210f36f769ad6d3ec753ded52e9625",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/RuleExists.lean",
+      "sha256": "995aaf3f47070b2595d33924148b115e503335712ccccb2c044bc6647c749a77",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyFragment.lean",
+      "sha256": "ce621cd11d5ac9d9e0e3641db46540c5bca37c0a119cf2ad8519ff6957765faa",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/SolkeyProves.lean",
+      "sha256": "6286b4579c2c4ac522edd664c635c9b39beafbe2f88a5f64416b6af8bd4b369a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Sound.lean",
+      "sha256": "519cc7e419d16c630473f89c11614f9c10401d07592f25ba20bef8ae5a9e2911",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/StmtSound.lean",
+      "sha256": "ff66c6a0f12b79df3d97c2129872af5400ace11f24e897944b50a485839d390a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Symex.lean",
+      "sha256": "1f4e6a8852bdadbb4752e6fc03d7d5367720c58cbe674a5878215a9da3192fdc",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/Taclet.lean",
+      "sha256": "12fcaacc1a031e4453c71f775f00ec00bbe42435daf14a65931476f5bb285130",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Calculus/TailMode.lean",
+      "sha256": "edc9e596791bba2153a77b0c60259670b94f821ca529f0c4701a54efe1de9461",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Compile.lean",
+      "sha256": "e452bff7f9c882940ccbabea2a51566e333c30d3617486b8338d04d32f99e4a9",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Compiler.lean",
+      "sha256": "38565297a2909c6213dbec3aad878f4f04823efdeee7a91c19d2cfee64ef1810",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Correct.lean",
+      "sha256": "21f6b4b402515040d9adea80d61e0acf042aaf1fa93344e081f42cfc95ff4be1",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Memory.lean",
+      "sha256": "1b40c67f29168850d969f8c37f0aad3e89e15e44c20c0078020e4588f34b5b34",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryAlloc.lean",
+      "sha256": "cfc0280445cf5aea444b4196be2b28ab767946dae7d4ded9d3e7626f4f3f634e",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCalls.lean",
+      "sha256": "e929e9fad2bd02bfeb3c2d3a77bdefd4f4ffcaa2e9b7baa65ab4b7656ebfefb3",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCompile.lean",
+      "sha256": "08f32f3755e4573f48408b48590adfaf0022e5e4d91c1c1913727311b87ba99b",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryCopyBound.lean",
+      "sha256": "031402dd5986b889bca3335c65264fc7b651e65f87c529454ea67832e55770fa",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedCompile.lean",
+      "sha256": "00a551c07477479aec3c7ec967c967344e82aee2f0b10d7ed3ea08351abc512a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryFixedStorageCopy.lean",
+      "sha256": "377df4f8b65df3addaa768ef95714076d9db8756c54c2bd733dac3b7dab92ab3",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryGrowResult.lean",
+      "sha256": "05c861e391eadc867117ec21881012d933b35e04d567df288025d9fd9ee56da0",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryHeap.lean",
+      "sha256": "3a84a3a517c15e37f74d693602d93e26aa4833eb5a26c29187a77b29122c8835",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoop.lean",
+      "sha256": "5aac7a3861c618c7fbc8b8d8b0b40d74778e8d580917e7c5a1d18d1f212097b8",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopCompile.lean",
+      "sha256": "ade063ee486a481f81f5558d86b9cdc8bd4b5929a8eca02103241c0600fb040c",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopScope.lean",
+      "sha256": "b7c6b7bd2cebbcce6173ca1606a4f2e90a01afc50498c13636849be6cbb26ab1",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryLoopScopeCompile.lean",
+      "sha256": "9ed933f9f7fc488b22c4cb7da364f7bccdb996c54c9004cda6f47c757cff8e37",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAllocationCost.lean",
+      "sha256": "902b12bb0ba76ff8f7a92fedb5cd315ac082876a5d27db944597ce69b40fb1f7",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectAllocator.lean",
+      "sha256": "0f71968ed6a657c72a7efa05d33262d2f0f3afd34c9ea9ff445ba8b567fe970a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectCompile.lean",
+      "sha256": "93f684686866f348178f2b008f807b9c0caae97841591b6bfc418f0abf40d81c",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjectConstructionCompile.lean",
+      "sha256": "10f0bc746629892b5d80b41e2a152c3c5d0b97bb33c5bbfa0c979a18ca381779",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryObjects.lean",
+      "sha256": "31fb3cda3b69ad128a90d4dd783519e66573a4e391dd95a5aaeb206244e02269",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArray.lean",
+      "sha256": "9a4c60a90d13ca9f7ba6b1b054698e37d5eacac1aa945a12fcb6626dd6e1f877",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayCompile.lean",
+      "sha256": "99979fb8889846ffc296e2ec4ab6416bb83e9ad312f480d2e3e03cd8e2c6d159",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefArrayState.lean",
+      "sha256": "a9af24f242d988570263634d4e6915a27b732feb66f19d7dc74ac39c604ad39a",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryRefs.lean",
+      "sha256": "da3283bf96f2d1c3bfe498934a71443666986717ce1264bcd771021e75eba5b5",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemorySource.lean",
+      "sha256": "0c843eaf5933df26cfc09d9d969c8975936b2e0ae51a37659874a5fc70a5dcfd",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageConstructionCompile.lean",
+      "sha256": "2097cf49bd5eb70b78c02c7584aac41db37e3bf0981bbbc0631a54b2e8d87fb2",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStorageCopyCompile.lean",
+      "sha256": "6a1c1fc05b3b33cf5705c36138fcd2393e60c7878de9ef80ad3279d90dee6bf9",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStruct.lean",
+      "sha256": "9e759f5656be7937e20bb0cc8799ec4b1652615ce5be45f8055aef6fa41fb08e",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructAlloc.lean",
+      "sha256": "3d04b062ffa05ab66098c27b7356e4e5dd585bf82c4e6cc9be214707bbc5960f",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/MemoryStructHeap.lean",
+      "sha256": "b200cbd15d504dab96b3e0bb2c80f75f3dcb626e19c1f039e6fbfcd136872802",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Repr.lean",
+      "sha256": "eac29c092292aca1f82d90409ab7d43a68450c2c44e8607b0fae06d18bafd240",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/Sim.lean",
+      "sha256": "e72117d9247ae80ade30c089378a56a51d3fd76ac3d36dd845a563db02bb2821",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Evm/SimLemmas.lean",
+      "sha256": "7118ac974e84b3e7ea092eb84d7bff723ffaa662af927e3356414bdf4bfd07a7",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Semantics/Callback.lean",
+      "sha256": "8277e068b13e2cd9a17e252a7721a9ee8d6824ae7ee78bcadd761ffc0520f02c",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Semantics/NoPanic.lean",
+      "sha256": "a08845384cb4ee03338d7cee214bc2514acec30e16d08bb9225bcaa8e670e5cf",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Semantics/RunFrame.lean",
+      "sha256": "cd150706360346b72eb985ebaa6170532bfcea378d0630a68d35412b103c51bd",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Syntax/Scoped.lean",
+      "sha256": "85d626e454f350c6043046352101ce2bd53c7cebdebb93698f4a34e9deed7532",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Theorems.lean",
+      "sha256": "cb68eb68cc471970fa149faabce9dc8fe16142cdff1b884611663ab40670bcc9",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Typing/CleanTail.lean",
+      "sha256": "31fddba4c6e1b500a1e2aafc1ac205050ca184f9f80c52dc27dfbf049655650f",
+      "byte_identical": true
+    },
+    {
+      "path": "Solidity/Update.lean",
+      "sha256": "b6770b0a55a024edbf17e0abe396984bac6ca3797e0a3d238a9b62af5adfb830",
+      "byte_identical": true
+    },
+    {
+      "path": "docs/feature-work/roadmap-g04-restrictions.md",
+      "sha256": "05f80f0984ddd3bbc384f56a9968359be441bbd08a1fa43fd4059a44228a1063",
+      "byte_identical": true
+    }
+  ],
+  "source_count": 63,
+  "boundary": "Original theorem/predicate source pins remain unchanged. Only ownership-diff baseline adopts published upstream. No shared pin registration exception or cache receipt inferred.",
+  "integration_history": [
+    {
+      "upstream": "8495f1deb0a95dd6b9301822d8649ab76b217681",
+      "prior_owned_head": "ffd09ef2d49fd7bd71d585e66fc78e3bc81ecf83",
+      "merge": "9121caa3685b18df08ff7b40a7ce73beb87cbc1a"
+    },
+    {
+      "upstream": "f77cf60d3cea8f7f1db8db29cc027532b0cd3fce",
+      "prior_owned_head": "66b9d11f3a614fb626df318334ae8ecdc099e1a8",
+      "merge": "da9d39bad42f9e0fd996866bf0cde5caa32fe2ef"
+    },
+    {
+      "upstream": "9584f9e7df09f638d9e0cb8930501d1660aa4b2f",
+      "prior_owned_head": "502cf5411d2c75c885be07cb76beea8dfffafe0b",
+      "merge": "74a46841faa1b645e820363a8322ba47b1e25e86"
+    }
+  ],
+  "cache_handoff": {
+    "id": "H41",
+    "mode": "coordinator-pull",
+    "vm_ship_cache": false
+  }
+}

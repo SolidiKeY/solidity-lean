@@ -673,7 +673,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf}
       {o₁ : Out C σ.H (ρ ++ Γ)} {o : COut C o₁.st.H Γ₁} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.ok o₁) → ExecP J o₁.st ok o →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) (.ok o₁) → ExecP J o₁.st ok o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map fun o' => ⟨o'.st.drop ((Ext.append Γ ρ).trans ok.ext), o₁.ext.trans o'.ext⟩)
   /-- A self-call whose callee exhausts or diverges: the caller does too. -/
@@ -682,7 +682,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) → e ≠ .revert → e ≠ .panic →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) (.halt e) → e ≠ .revert → e ≠ .panic →
         (∀ d, e ≠ .revertWith d) →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true) (.halt e)
   /-- A self-call whose callee reverts with data: the `Error` clause, from the
@@ -694,7 +694,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₂}
       {d : List UInt8} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt (.revertWith d)) → ExecP J σ err o →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) (.halt (.revertWith d)) → ExecP J σ err o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop err.ext))
   /-- A self-call whose callee reverts: the catch-all, from the caller's
@@ -705,7 +705,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {o : COut C σ.H Γ₄}
       {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) (.halt e) →
       (e = .revert ∨ ∃ d, e = .revertWith d) → ExecP J σ other o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
           (o.map (Out.drop other.ext))
@@ -718,7 +718,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} {v : Word}
       {o : COut C σ.H Γ₃} {e : THalt} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) (.halt e) →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) (.halt e) →
       (e = .panic ∨ ∃ d, e = .revertWith d ∧ Semantics.decodePanic d = some v) →
       ExecP J (σ.withEnv (TEnv.append κ (code.decodeT v) σ.env)) pnc o →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true)
@@ -729,7 +729,7 @@ inductive ExecS (J : StateInv C) : {Γ Γ' : Ctx} → (σ : State C Γ) → Stmt
       {pnc : Prog C (κ ++ Γ) Γ₃} {other : Prog C Γ Γ₄}
       {ps Γf : Ctx} {sargs : Args C Γ ps} {sbody : Prog C (ρ ++ ps) Γf} :
       (call.addr.evalT σ).1 ≠ 0 → (call.addr.evalT σ).1 = σ.tx.selfAddress.1 →
-      ExecS J σ (.call call.fn sargs (.rets rets) sbody) .violated →
+      ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) .violated →
         ExecS J σ (.tryCall call rets ok err code pnc other sargs sbody true) .violated
   /-- A loop that pays, whose condition halts. -/
   | loopHalt {Γ Γ₁ : Ctx} {σ : State C Γ} {a : LoopAnn C Γ} {c : Val C Γ .bool}
@@ -1060,22 +1060,22 @@ theorem Stmt.exec_run (J : StateInv C) : {Γ Γ' : Ctx} → (s : Stmt C Γ Γ') 
     · rename_i hs
       simp only [Bool.and_eq_true, decide_eq_true_eq] at hs
       obtain ⟨rfl, hs⟩ := hs
-      have hc : ExecS J σ (.call call.fn sargs (.rets rets) sbody)
-          (.ofRes (TRun.call sargs (.rets rets) sbody.ext sbody.runR σ)) ∨
-          ExecS J σ (.call call.fn sargs (.rets rets) sbody) .violated := by
+      have hc : ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody)
+          (.ofRes (TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ)) ∨
+          ExecS J σ (.call call.fn sargs (.rets rets.toRet) sbody) .violated := by
         rw [TRun.call_eq]
         cases ha : sargs.evalT σ with
         | error e => exact .inl (.callArgs ha)
         | ok a =>
-          show ExecS J σ _ (.ofRes (TRun.callFrom (.rets rets) sbody.ext sbody.runR σ
-            ((CallRet.rets rets).enterT (σ.withEnv a)))) ∨ _
+          show ExecS J σ _ (.ofRes (TRun.callFrom (.rets rets.toRet) sbody.ext sbody.runR σ
+            ((CallRet.rets rets.toRet).enterT (σ.withEnv a)))) ∨ _
           rw [TRun.callFrom_eq, ← COut.map_ofRes]
-          rcases Prog.exec_run J sbody ((CallRet.rets rets).enterT (σ.withEnv a)).st with h | h
+          rcases Prog.exec_run J sbody ((CallRet.rets rets.toRet).enterT (σ.withEnv a)).st with h | h
           · exact .inl (ExecS.callBody (f := call.fn) ha h)
           · exact .inr (ExecS.callBody (f := call.fn) (o := .violated) ha h)
       rcases hc with hc | hc
       · revert hc
-        cases TRun.call sargs (.rets rets) sbody.ext sbody.runR σ with
+        cases TRun.call sargs (.rets rets.toRet) sbody.ext sbody.runR σ with
         | ok o₁ =>
           intro hc
           dsimp only

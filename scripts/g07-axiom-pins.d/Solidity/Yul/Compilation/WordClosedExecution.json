@@ -1,0 +1,27 @@
+{
+ "Solidity/Yul/Compilation/WordClosedExecution.lean:Solidity.Yul.Compilation.WordClosedExecution.failure_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecution.lean:Solidity.Yul.Compilation.WordClosedExecution.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecution.lean:Solidity.Yul.Compilation.WordClosedExecution.step": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecution.lean:Solidity.Yul.Compilation.WordClosedExecution.step_failure": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/WordClosedExecution.lean:Solidity.Yul.Compilation.WordClosedExecution.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

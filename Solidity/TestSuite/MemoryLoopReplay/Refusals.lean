@@ -65,7 +65,7 @@ run_elab do
   let hints := base.hints.map fun h => {h with fresh := h.fresh+1}
   let mut selected := false
   -- Recorded by the actual default-budget discovery: the first literalized node.
-  for id in [889] do
+  for id in [973] do
     unless selected do
       let env ← getEnv
       pendingLayers.set #[]

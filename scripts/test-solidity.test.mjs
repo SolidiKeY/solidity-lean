@@ -5,8 +5,15 @@ import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { execFileSync } from "node:child_process";
-import { runSolidityTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
+import { runSolidityTests as runSourceTests, runTool, solidityFiles, testsPassed } from "./test-solidity.mjs";
 import { sourceHash } from './source-locations.mjs';
+import { solkeyTestOptions } from './test-compiler.mjs';
+
+const compilerOptions = solkeyTestOptions();
+// Keep every API case on the verified snapshot and compiler, including temp sources.
+function runSolidityTests(paths, options) {
+  return runSourceTests(paths, {...compilerOptions, ...options});
+}
 
 test('editor reports retain exact overload identities, source hashes and UTF-16 ranges', () => {
   const dir = mkdtempSync(join(tmpdir(), 'solidity-editor-'));
@@ -370,7 +377,8 @@ test("imported library helper annotations retain their defining enum scope", () 
   try {
     const ast = join(dir, "source.ast.json");
     execFileSync(process.execPath, ['scripts/solc-ast.mjs', '--source',
-      'tests/solc/EnumSpecs.sol', '--out', ast, '--no-wrapper']);
+      'tests/solc/EnumSpecs.sol', '--out', ast, '--no-wrapper',
+      '--solkey', compilerOptions.solkey, '--soljson', compilerOptions.soljson]);
     const check = join(dir, "Check.lean");
     writeFileSync(check, `import Solidity.Frontend.SolcJson
 open Lean Solidity.Frontend
@@ -457,6 +465,19 @@ test("bytesN, bytes and string: literals, indexing, conversions, storage, memory
     // a storage array copied to memory: the copy's length (`LTm.sfindLen?`)
     'copyLength', 'copyLengthSymbolic'])
     assert.equal(status[name], 'proved', name);
+});
+
+test("nested enums in abi.decode are admitted at their carriers (tests/solc/EnumArrayDecode.sol)", () => {
+  // docs/feature-work/abi-hashes.md, lane FU2-D: `solcEnumBelow` positions;
+  // the decode loops have no invariant, so the claims stay open
+  // (docs/semantic-gaps.md, "Loops without invariants")
+  const report = runSolidityTests(["tests/solc/EnumArrayDecode.sol"], {build:false, batchSize:1});
+  assert.deepEqual(report.errors, []);
+  const rows = Object.fromEntries(report.results.map(r => [r.function, r]));
+  for (const fn of ["dynamicArray", "fixedArray", "structMember"]) {
+    assert.notEqual(rows[fn].status, "unsupported", fn);
+    assert.doesNotMatch(rows[fn].reason ?? "", /cardinality/, fn);
+  }
 });
 
 test("calldata: read-only memory parameters, a written copy refused, slices as views", () => {
@@ -682,7 +703,11 @@ test("quantified consequents parse and omitted specification bodies stay local",
   assert.equal(rows.renamedSpec.status, "proved");
   assert.equal(rows.omittedCaller.status, "pending");
   assert.equal(rows.omittedBody.status, "unsupported");
-  assert.equal(rows.omittedModifier.status, "unsupported");
+  // its modifier's general Yul is the S00 exclusion `solidity.inlineAssembly`
+  // (`Frontend/Source.lean`), reported as `excluded`: a gap like `unsupported`
+  // (docs/solidity-testing.md), still local to this row
+  assert.equal(rows.omittedModifier.status, "excluded");
+  assert.match(rows.omittedModifier.reason, /solidity\.inlineAssembly/);
   assert.equal(rows.stillChecked.status, "pending");
   const ctor = Object.fromEntries(report.results.filter(r => r.contract === "SpecCtorGap")
     .map(r => [r.function, r]));
@@ -750,9 +775,10 @@ test("constant specifications preserve units, lexical visibility and unsigned ty
   const rows = Object.fromEntries(base.results.map(r => [r.function, r]));
   assert.equal(rows.exactUnits.status, "proved");
   assert.equal(rows.falseConstant.status, "pending");
-  for (const fn of ["boundedLoop", "quantifiedShadow"]) {
-    assert.equal(rows[fn].status, "unsupported", fn);
-  }
+  assert.equal(rows.boundedLoop.status, "unsupported");
+  // the quantifier binds COUNT (scoped specifications): `\forall uint COUNT;
+  // COUNT == 2` is false, so open, never proved through the constant COUNT == 2
+  assert.equal(rows.quantifiedShadow.status, "pending");
   assert.match(rows.boundedLoop.reason, /loop's invariant needs a statement/);
   assert.equal(rows.parameterShadow.status, "pending");
   const other = run("OtherConstants");
@@ -1069,7 +1095,8 @@ test("finite nominal declarations avoid explicit renaming collisions", () => {
   try {
     const fixture = join(dir, 'source.ast.json');
     runTool(process.execPath, ['scripts/solc-ast.mjs', '--source',
-      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper'], 300000);
+      'tests/solc/FiniteTypeLowering.sol', '--out', fixture, '--no-wrapper',
+      '--solkey', compilerOptions.solkey, '--soljson', compilerOptions.soljson], 300000);
     let hash = 0xcbf29ce484222325n;
     for (const byte of readFileSync(fixture))
       hash = BigInt.asUintN(64, (hash ^ BigInt(byte)) * 0x100000001b3n);
@@ -1134,5 +1161,14 @@ test("canonical nominal ABI matching preserves enum input ranges", () => {
   assert.deepEqual(report.errors, []);
   assert.equal(report.results.find(r => r.function === 'check')?.status, 'proved');
   runTool('lake', ['--no-build', 'lean', 'tests/upstream/EnumAbiRanges.lean',
+    '--', '--tstack=131072'], 300000);
+});
+
+test("typed ABI entry decoding replays lazy and noncanonical layouts", () => {
+  // Lane CF1 controls (Semantics/AbiEntry.lean): certified entry reverts with
+  // rollback, eager/lazy values, and the named lazy-only refusals.
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/AbiEntryReplay.lean',
+    '--', '--tstack=131072'], 300000);
+  runTool('lake', ['--no-build', 'lean', 'tests/upstream/Replay.lean',
     '--', '--tstack=131072'], 300000);
 });

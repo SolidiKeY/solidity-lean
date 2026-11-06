@@ -1,0 +1,21 @@
+{
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteIntervals_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteIntervals_path": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.overwriteSlice_all_len": [
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/MemoryOps/IntervalOverwrite.lean:Solidity.Backend.MemoryOps.replaceSlice_comm": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

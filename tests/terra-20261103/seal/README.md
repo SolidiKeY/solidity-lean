@@ -1,0 +1,9 @@
+# TF-seal fixture handoff
+
+The pinned `scripts/coord-tools/seal.sh` is exercised with real Git in separate disposable repositories. The fixture checks the full generated inventory, manifest, checksums, bundle head and prerequisites, and rejection after tampering. No Lean, network, containers, host cleanup, or production downloads are involved.
+
+Cases: `usage` checks invalid invocations; `clean_roundtrip` checks creation and verification; `base_merge_base` checks a diverged base; `manifest_tip` and `manifest_base` reject altered metadata with recomputed checksums; `bundle_prerequisites` checks the prerequisite and rejects an invalid base; `missing_file` removes each generated file; `extra_file` checks both unlisted and checksum-listed extra files; `corrupt_bundle` checks corruption before and after updating metadata and sums; `corrupt_checksum` checks a modified digest; `empty_range` checks refusal; `paths_with_spaces` checks repository and output paths with spaces.
+
+Acceptance command: `PYTHONDONTWRITEBYTECODE=1 python3 tests/terra-20261103/seal/accept.py`. Actual result: 12 tests ran and passed (1.349 seconds); acceptance printed `TF-seal` with `count: 12` and `status: PASS`. The saved log is outside the checkout at `/workspace/terra-artifact-fixtures-evidence/seal-accept.log`.
+
+Read-only finder review by the implementer: checked the case list, pinned hash, temporary repository isolation, generated file inventory, metadata, and tamper checks. Read-only skeptic review by the implementer: checked that the tool is real, Git is real, test mutations are verified rather than mocked, and no Lean or external service runs. These are self-reviews; the separate coordinator Sol finder and skeptic reviews remain pending. The prerequisite fixture covers a single base prerequisite; it does not exercise a bundle with multiple prerequisites.

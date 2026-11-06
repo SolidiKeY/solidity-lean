@@ -1,0 +1,32 @@
+{
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.certificate": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.failures": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.frames": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.ordered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.overlap_negative": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/StorageOps/NestedPopCommutationControls.lean:Solidity.Backend.StorageOps.NestedPopCommutation.Controls.transported": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
