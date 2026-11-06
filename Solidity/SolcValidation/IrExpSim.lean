@@ -238,6 +238,155 @@ theorem loop_body (i : Nat) (p0 b0 e mx p b : Word) (hmx : mx.val = maxWord) (s 
           odd, ↓reduceIte]
       · rfl
 
+/-! ## The loop, by induction on the exponent -/
+
+/-- The number of loop turns for an exponent. -/
+def steps (e : Nat) : Nat := if e ≤ 1 then 0 else steps (e / 2) + 1
+termination_by e
+decreasing_by omega
+
+theorem steps_le : ∀ (n e : Nat), e < 2 ^ (n + 1) → steps e ≤ n := by
+  intro n
+  induction n with
+  | zero =>
+    intro e h
+    rw [steps, if_pos (by omega)]
+    exact Nat.le_refl 0
+  | succ n ih =>
+    intro e h
+    rw [steps]
+    by_cases le : e ≤ 1
+    · rw [if_pos le]; omega
+    · rw [if_neg le]
+      have : e / 2 < 2 ^ (n + 1) := by
+        rw [Nat.pow_succ] at h
+        omega
+      have := ih (e / 2) this
+      omega
+
+theorem word_val_lt (n : Nat) (h : n < 2 ^ 256) : (Solidity.Yul.word n).val = n := Nat.mod_eq_of_lt h
+
+theorem word_mod (n : Nat) : Solidity.Yul.word (n % 2 ^ 256) = Solidity.Yul.word n := by
+  apply Fin.ext
+  rw [word_val, word_val, Nat.mod_mod]
+
+theorem gt_one_val (e : Word) : Solidity.Yul.Pure.eval .«gt» (word2 e 1) = Solidity.Yul.truth (1 < e.val) := by
+  rw [pure_gt, word2_zero, word2_one]
+  rfl
+
+theorem truth_eq_zero_iff (b : Bool) : Solidity.Yul.truth b = 0 ↔ b = false := truth_eq_zero b
+
+section Iterate
+variable {F : List FnSig} {c : Ctl} {L : List String} (E : FunEnv F) (cond : Expr F L 1)
+  (body : Block F ⟨c.function, true⟩ L)
+
+theorem empty_block (k : Nat) {c' : Ctl} (vs : Vals L) (s : σ) :
+    evalBlock (c := c') M ctx (k + 2) E (.mk [] .nil .nil) vs s = .ok (s, vs, .normal) := rfl
+
+theorem iter_exit (k : Nat) (vs : Vals L) (s : σ) (v : Word)
+    (h : evalExpr M ctx k E cond vs s = .ok (s, fun _ => v)) (z : v = 0) :
+    iterate (c := c) M ctx (k + 1) E cond (.mk [] .nil .nil) body vs s = .ok (s, vs, .normal) := by
+  simp only [iterate, h, run_ok_bind, z, ↓reduceIte, run_pure]
+
+theorem iter_step (k : Nat) (vs vs' : Vals L) (s s' : σ) (v : Word)
+    (h : evalExpr M ctx (k + 2) E cond vs s = .ok (s, fun _ => v)) (nz : v ≠ 0)
+    (hb : evalBlock M ctx (k + 2) E body vs s = .ok (s', vs', .normal)) :
+    iterate (c := c) M ctx (k + 3) E cond (.mk [] .nil .nil) body vs s =
+      iterate M ctx (k + 2) E cond (.mk [] .nil .nil) body vs' s' := by
+  rw [iterate]
+  simp only [h, run_ok_bind, nz, ↓reduceIte, hb, empty_block, reduceCtorEq]
+
+theorem iter_panic (k : Nat) (vs : Vals L) (s : σ) (v : Word) (R : Run σ σ)
+    (h : evalExpr M ctx k E cond vs s = .ok (s, fun _ => v)) (nz : v ≠ 0)
+    (hb : ∃ cont, evalBlock M ctx k E body vs s = R >>= cont) :
+    ∃ cont, iterate (c := c) M ctx (k + 1) E cond (.mk [] .nil .nil) body vs s = R >>= cont := by
+  obtain ⟨cont, hb⟩ := hb
+  simp only [iterate, h, run_ok_bind, nz, ↓reduceIte, hb]
+  exact ⟨_, bind_assoc _ _ _⟩
+end Iterate
+
+/-- The loop of `checked_exp_helper` runs as `expLoop`. -/
+theorem loop_run : ∀ (e j : Nat) (p0 b0 mx : Word) (p b : Nat), e < 2 ^ 256 → p < 2 ^ 256 →
+    b < 2 ^ 256 → mx.val = maxWord → ∀ (s : σ),
+    match expLoop p b e with
+    | some (p', b', e') => iterate (c := ⟨true, false⟩) M ctx (j + steps e + 45) expE1 loopCond (.mk [] .nil .nil) loopBody
+        (hv p0 b0 (Solidity.Yul.word e) mx (Solidity.Yul.word p) (Solidity.Yul.word b)) s =
+        .ok (s, hv p0 b0 (Solidity.Yul.word e') mx (Solidity.Yul.word p') (Solidity.Yul.word b'), .normal)
+    | none => ∃ cont, iterate (c := ⟨true, false⟩) M ctx (j + steps e + 45) expE1 loopCond (.mk [] .nil .nil) loopBody
+        (hv p0 b0 (Solidity.Yul.word e) mx (Solidity.Yul.word p) (Solidity.Yul.word b)) s =
+        panicRun M 0x11 s >>= cont := by
+  intro e
+  induction e using Nat.strongRecOn with
+  | ind e ih =>
+    intro j p0 b0 mx p b eW pW bW hmx s
+    have hc : ∀ i, evalExpr M ctx (i + 5) expE1 loopCond
+        (hv p0 b0 (Solidity.Yul.word e) mx (Solidity.Yul.word p) (Solidity.Yul.word b)) s =
+        .ok (s, fun _ => Solidity.Yul.truth (1 < e)) := by
+      intro i
+      rw [loopCond, hv, op2_gen M ctx _ _ _ _ _ _ _ _ 1 (var_gen M ctx _ _ _ _) (lit_gen M ctx _ _ _ _) i]
+      simp only [Vals.get_here, Vals.get_there]
+      rw [gt_one_val, word_val_lt e eW]
+    by_cases le : e ≤ 1
+    · rw [expLoop_exit p b e le]
+      have fuel : j + steps e + 45 = (j + steps e + 44) + 1 := rfl
+      rw [fuel, iter_exit M ctx _ _ _ _ _ _ _ (hc (j + steps e + 39))
+        ((truth_eq_zero_iff _).mpr (decide_eq_false (by omega)))]
+    · have st : steps e = steps (e / 2) + 1 := by rw [steps, if_neg le]
+      have fuel : j + steps e + 45 = (j + steps (e / 2) + 43) + 3 := by omega
+      have nz : Solidity.Yul.truth (1 < e) ≠ 0 :=
+        fun h => absurd ((truth_eq_zero_iff _).mp h) (by simp only [decide_eq_false_iff_not, Nat.not_lt]; omega)
+      have body := loop_body M ctx (j + steps (e / 2) + 5) p0 b0 (Solidity.Yul.word e) mx
+        (Solidity.Yul.word p) (Solidity.Yul.word b) hmx s
+      rw [word_val_lt b bW, word_val_lt e eW, word_val_lt p pW] at body
+      by_cases big : maxWord / b < b
+      · rw [expLoop_panic p b e le big]
+        rw [fuel]
+        exact iter_panic M ctx _ _ _ (j + steps (e / 2) + 45) _ s _ _ (hc (j + steps (e / 2) + 40)) nz
+          (body.1 big)
+      · rw [expLoop_step p b e le big, fuel,
+          iter_step M ctx _ _ _ (j + steps (e / 2) + 43) _ _ s s _ (hc (j + steps (e / 2) + 40)) nz (body.2 big)]
+        have pW' : (if e % 2 = 1 then p * b % 2 ^ 256 else p) < 2 ^ 256 := by
+          split
+          · exact Nat.mod_lt _ (by decide)
+          · exact pW
+        have h := ih (e / 2) (by omega) j p0 b0 mx _ (b * b % 2 ^ 256) (by omega) pW' (Nat.mod_lt _ (by decide)) hmx s
+        have pv : (if e % 2 = 1 then Solidity.Yul.word (p * b) else Solidity.Yul.word p) =
+            Solidity.Yul.word (if e % 2 = 1 then p * b % 2 ^ 256 else p) := by
+          split
+          · exact (word_mod _).symm
+          · rfl
+        rw [pv, ← word_mod (b * b)]
+        exact h
+
+theorem for_stmt (k : Nat) {F : List FnSig} {c : Ctl} {L : List String} (E : FunEnv F) (lp : Loop F c L)
+    (vs : Vals L) (s : σ) : evalStmt M ctx (k + 1) E (.for_ lp) vs s = evalLoop M ctx k E lp vs s := rfl
+
+theorem loop_run_eq (k : Nat) {F : List FnSig} {c : Ctl} {L : List String} (E : FunEnv F) (cond : Expr F L 1)
+    (post : Block F ⟨c.function, false⟩ L) (body : Block F ⟨c.function, true⟩ L) (vs : Vals L) (s : σ) :
+    evalLoop M ctx (k + 1) E (.run cond post body) vs s = iterate M ctx k E cond post body vs s := rfl
+
+theorem one_word : (1 : Word) = Solidity.Yul.word 1 := rfl
+
+/-- `checked_exp_helper(1, b, e, max)`'s body runs the loop from `power = 1`. -/
+theorem helper_run (j : Nat) (b e : Nat) (mx : Word) (eW : e < 2 ^ 256) (bW : b < 2 ^ 256)
+    (hmx : mx.val = maxWord) (s : σ) :
+    match expLoop 1 b e with
+    | some (p', b', e') => evalBlock M ctx (j + steps e + 51) expEnv expExpHelper
+        (hv 1 (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0 0) s =
+        .ok (s, hv 1 (Solidity.Yul.word b) (Solidity.Yul.word e') mx (Solidity.Yul.word p') (Solidity.Yul.word b'), .normal)
+    | none => ∃ cont, evalBlock M ctx (j + steps e + 51) expEnv expExpHelper
+        (hv 1 (Solidity.Yul.word b) (Solidity.Yul.word e) mx 0 0) s = panicRun M 0x11 s >>= cont := by
+  rw [helper_eq, block_empty, hv,
+    items_stmt_normal M ctx (j + steps e + 49) _ _ _ _ _ _ _ (assign_of M ctx _ _ _ _ _ _ _ (var_gen M ctx _ _ _ _ _)),
+    items_stmt_normal M ctx (j + steps e + 48) _ _ _ _ _ _ _ (assign_of M ctx _ _ _ _ _ _ _ (var_gen M ctx _ _ _ _ _))]
+  have fuel2 : j + steps e + 48 = (j + steps e + 46) + 2 := rfl
+  rw [fuel2, items_last, for_stmt, loop_run_eq]
+  simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there]
+  rw [one_word]
+  have h := loop_run M ctx e j 1 (Solidity.Yul.word b) mx 1 b eW (by decide) bW hmx s
+  rw [← one_word] at h
+  exact h
+
 end
 
 end Solidity.SolcValidation.IrSyntax
