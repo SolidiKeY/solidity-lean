@@ -1,0 +1,22 @@
+{
+ "Solidity/Yul/Compilation/ZeroScopeCompilation.lean:Solidity.Yul.Compilation.ZeroScopeCompilation.Artifact.completion_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompilation.lean:Solidity.Yul.Compilation.ZeroScopeCompilation.Artifact.reflected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompilation.lean:Solidity.Yul.Compilation.ZeroScopeCompilation.compile": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/ZeroScopeCompilation.lean:Solidity.Yul.Compilation.ZeroScopeCompilation.lower": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

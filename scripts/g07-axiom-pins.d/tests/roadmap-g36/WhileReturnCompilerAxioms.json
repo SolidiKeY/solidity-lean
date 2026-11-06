@@ -1,0 +1,57 @@
+{
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.false_not_return": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.joined": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.nonzero_frame": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.observed": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.true_not_fallthrough": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.wrong_base_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.Controls.wrong_flag_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Backend.StructuredFlow.WhileReturnCompiler.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.WhileReturn.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.WhileReturn.source_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/WhileReturnCompilerAxioms.lean:Solidity.Lowering.G19.WhileReturn.source_zero": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

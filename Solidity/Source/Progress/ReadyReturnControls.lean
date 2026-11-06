@@ -8,7 +8,7 @@ namespace Solidity.Source.Progress.ReadyReturnControls
 open EM Preservation.MemoryProgramControls
 
 def resultExpr : RExpr E (returnContext [Aty] Aty) Aty := .local (.there .here)
-def same : Aty.implicit E.isBase Aty = true := by decide +kernel
+def same : Aty.implicit E.isBase E.mapFree Aty = true := by decide +kernel
 def callee : {called : Decl // called ∈ Solidity.Lowering.P9.WholeProgram.functions resolution ∧
     called.fnSig E = some ([Aty],[Aty])} := ⟨d,by decide +kernel,signature⟩
 
@@ -85,7 +85,7 @@ def sourceFrame := (d.frame? E).get (by rfl)
 def inferred := (ItemsD.infer (sourceFrame.ctx E d.scope) sourceFrame.locals sourceFrame.body).get (by rfl)
 def inferredBody := RBody.ofDerivation sourceFrame inferred.2 []
 def resultExpr : RExpr E (returnContext [U] Aty) Aty := .newArray rfl (.local (.there .here)) rfl
-def same : Aty.implicit E.isBase Aty = true := by decide +kernel
+def same : Aty.implicit E.isBase E.mapFree Aty = true := by decide +kernel
 def body := singleReturningBody [U] Aty resultExpr same
 
 theorem signature : d.fnSig E = some ([U],[Aty]) := rfl
@@ -211,7 +211,7 @@ theorem expression_run (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
   rw [evalE,Hoare.run_bind,argument_run]
   dsimp only
   rw [Hoare.run_bind]
-  have inner : callInternal (glob p fixed) frame 20 d arguments [Aty] (.nil,initial) =
+  have inner : callInternal (plan := none) (glob p fixed) frame 20 d arguments [Aty] (.nil,initial) =
       (.ok (.val (.memRef rfl 2)),(.nil,after)) := success_run p fixed
   simp only [EM.sub,ExceptT.run,ExceptT.mk,inner]
   rfl

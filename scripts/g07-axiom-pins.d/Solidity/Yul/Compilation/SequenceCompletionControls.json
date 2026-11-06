@@ -1,0 +1,37 @@
+{
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.final_height": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.mixed_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.mixed_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.oversized_success": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.source_recovered": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.success_iff": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/SequenceCompletionControls.lean:Solidity.Yul.Compilation.SequenceCompletion.Controls.truncated_output_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
