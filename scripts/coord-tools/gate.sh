@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -uo pipefail
-usage() { echo "usage: gate.sh per-file FILE... | touched | checkpoint | full" >&2; exit 2; }
+usage() { echo "usage: gate.sh per-file FILE... | touched | meaning | checkpoint | full" >&2; exit 2; }
 [ $# -gt 0 ] || usage
 mode=$1; shift
-case "$mode" in per-file) [ $# -gt 0 ] || usage;; touched|checkpoint|full) [ $# -eq 0 ] || usage;; *) usage;; esac
+case "$mode" in per-file) [ $# -gt 0 ] || usage;; touched|meaning|checkpoint|full) [ $# -eq 0 ] || usage;; *) usage;; esac
 root=$(git rev-parse --show-toplevel) || exit 2
 logs=${GATE_LOGS:-$(mktemp -d "${TMPDIR:-/tmp}/coord-gates.XXXXXXXX")}; mkdir -p "$logs" || exit 2
 logs=$(cd "$logs" && pwd); : > "$logs/gates.tsv"
@@ -25,6 +25,33 @@ run_gate() {
   end=$(date +%s); seconds=$((end-start))
   printf "%s %s %ss %s\n" "$status" "$name" "$seconds" "$log"
   printf "%s\t%s\t%s\t%s\t%s\n" "$status" "$name" "$seconds" "$log" "$cmd" >> "$logs/gates.tsv"
+}
+# Lake 4.24 has no -j build option; give every Lean child explicit -j1
+# through weak arguments (which do not invalidate the shared build cache).
+serial_lake() {
+  local config status
+  config=$(mktemp "$root/.coord-h64.XXXXXXXX.toml") || return 1
+  python3 - "$root/lakefile.toml" "$config" <<'SERIAL'
+import pathlib,re,sys
+text=pathlib.Path(sys.argv[1]).read_text()
+parts=re.split(r'(?=^\[\[lean_(?:lib|exe)\]\])',text,flags=re.M)
+for i,part in enumerate(parts):
+    if not part.startswith('[[lean_'): continue
+    if re.search(r'^weakLeanArgs\s*=',part,re.M):
+        part=re.sub(r'(weakLeanArgs\s*=\s*\[)([^\]]*)(\])',lambda m:m[1]+m[2]+(', ' if m[2].strip() else '')+'"-j1"'+m[3],part,count=1)
+    else:
+        pos=part.index('\n')+1
+        part=part[:pos]+'weakLeanArgs = ["-j1"]\n'+part[pos:]
+    parts[i]=part
+pathlib.Path(sys.argv[2]).write_text(''.join(parts))
+SERIAL
+  if [ "${1:-}" = --run-lean ]; then
+    LEAN_GATE_CONFIG="$config" LEAN_NUM_THREADS=1 bash run-lean.sh; status=$?
+  else
+    LEAN_NUM_THREADS=1 lake -f "$config" "$@"; status=$?
+  fi
+  rm -f "$config"
+  return "$status"
 }
 build_touched() {
   local base=${GATE_BASE:-origin/master}; local targets
@@ -66,21 +93,25 @@ open(os.environ["GATE_CORE_FILE"],"w").write("core" if core else "")
 PY
 ) || return 1
   echo "targets: ${targets:-none}"
-  [ -z "$targets" ] || LEAN_NUM_THREADS=1 lake build $targets
+  [ -z "$targets" ] || serial_lake build $targets
 }
+if [ "$mode" = meaning ]; then
+  run_gate meaning node scripts/check-meaning.mjs
+  exit "$failed"
+fi
 if [ "$mode" = per-file ]; then
-  for file in "${files[@]}"; do run_gate "lean:$file" lake env lean --tstack=131072 "$file"; done
+  for file in "${files[@]}"; do run_gate "lean:$file" lake env lean --tstack=131072 -j1 "$file"; done
 else
   run_gate build-touched build_touched
   if [ "$mode" != touched ]; then
     if [ "$mode" = full ]; then
-      run_gate run-lean bash run-lean.sh
+      run_gate run-lean serial_lake --run-lean
     else
       # A checkpoint builds the library alone; a lane touching the core also
       # builds the examples and the TestSuite (`docs/contributing.md`).
-      run_gate library lake build Solidity
+      run_gate library serial_lake build Solidity
       if [ -s "$logs/core" ] || [ "${GATE_EXAMPLES:-0}" = 1 ]; then
-        run_gate examples lake build SolidityExamples SolkeyTestSuite
+        run_gate examples serial_lake build SolidityExamples SolkeyTestSuite
       fi
     fi
     run_gate trust bash scripts/check-trust.sh
@@ -91,6 +122,7 @@ else
     run_gate doc-paths bash scripts/check-doc-paths.sh
     run_gate axiom-pins node scripts/check-axiom-pins.mjs
   fi
+  run_gate meaning node scripts/check-meaning.mjs
   if [ "$mode" = full ]; then
     run_gate testsuite bash scripts/check-testsuite.sh
     run_gate corpus bash scripts/check-corpus.sh

@@ -34,7 +34,9 @@ bash scripts/coord-tools/fragments.sh --check
 # instead of starting after it (`docs/parallelism.md`, P5).
 mapfile -t default_targets < <(sed -n 's/^defaultTargets[[:space:]]*=[[:space:]]*\[\(.*\)\][[:space:]]*\(#.*\)\{0,1\}$/\1/p' lakefile.toml | tr ',' '\n' | tr -d " \t\"'" | grep -v '^$' || true)
 [[ ${#default_targets[@]} -gt 0 ]] || { echo "run-lean: no defaultTargets in lakefile.toml" >&2; exit 2; }
-lake build "${default_targets[@]}" SolkeyTestSuite
+gate_lake_args=()
+if [[ -n "${LEAN_GATE_CONFIG:-}" ]]; then gate_lake_args=(-f "$LEAN_GATE_CONFIG"); fi
+lake "${gate_lake_args[@]}" build "${default_targets[@]}" SolkeyTestSuite
 if [[ "$with_bridge" -eq 1 ]]; then
   ./scripts/check-bridge.sh
 fi
