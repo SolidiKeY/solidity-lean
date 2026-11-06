@@ -20,8 +20,8 @@ theorem syntax or unavailable typed counts; the older checkpoint remains history
 No partial checkpoint or prerequisite pass is full completion.
 The cloud move6 section (next) reports a paired same-machine timing rerun at
 +2.39%, below the 10% stop. Its comparison method differs from the H64/H68
-single-sample protocol, so the HOLD's release is left to the human; the
-older timing statements in this introduction are history.
+single-sample protocol; coordinator decision H102 accepted it and released the
+HOLD. The older timing statements in this introduction are history.
 
 ## Cloud move6 (H75): ownership move, registration and H68 timing rerun
 
@@ -112,6 +112,14 @@ for this branch and for any integrator regeneration. Both files moved unchanged
 outside the library tree; they return to `Solidity/Roadmap/V16/` when the
 prerequisite closure is delivered. No theorem in them changed and none is claimed
 checked. `staging-manifest.json` keeps the original historical paths.
+
+**Coordinator decision H102 (relayed 2026-11-06, answers Q1).** The paired
+same-VM rerun is accepted as the timing protocol: five interleaved pairs with the
+baseline re-measured on the same machine, decided on medians. At +2.39% the H68
+timing HOLD is released; further G49 proof work is measured the same way, with
+pairs and medians recorded here. Per H85 the coordinator integrates head
+`5f7c70b1` (PassCorrect, adapters, BridgeGoal) into master; this branch merges
+`origin/master` afterwards.
 
 **Gates (this VM, `scripts/coord-tools/gate.sh checkpoint` at `d6473620`).**
 `build-touched` and `library` (`lake build Solidity`, 6001 jobs) PASS; trust,
