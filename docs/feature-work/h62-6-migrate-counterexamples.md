@@ -176,3 +176,19 @@ The saved tests contain no production registration requirements; coordinator
 registration fragment: **none** (only standalone test modules were added).
 The existing persistent goal remains unfinished; no replacement goal/thread was
 created. get_goal was unavailable, as allowed by the coordinator clarification.
+
+## H82 retirement and final successor handoff
+
+The human explicitly stopped this worker after accepting the successor queue relay.
+The survivor is `solidity-h62-6-20261106/migrate-root-gate`; integration belongs to it
+after the final stopped/head acknowledgement. The complete original assignment,
+original queue, exact scope and successor instructions are committed under
+`tests/h62/item6/migrate-counterexamples/retirement/`.
+Current H78 static evidence qualifies the earlier named API census: all original
+public generated declarations are still unenumerated, including visibility and
+exact generated signatures. No blanket generated exclusion or shim is claimed.
+Retirement exports use `/workspace/h62-migrate-counterexamples/retirement-h82/`;
+original snapshots/manifests remain unchanged. PAUSED was requested but no pause
+operation is exposed (stop_goal supports only complete/blocked); the worker stops
+without a substitute state change or automatic implementation continuation.
+No H71 push permission was supplied; this branch is committed locally only.
