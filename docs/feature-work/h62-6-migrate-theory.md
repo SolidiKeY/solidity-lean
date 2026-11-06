@@ -145,6 +145,11 @@ No new API interface, proof, or trust-policy change is introduced into the core.
   `Solidity/Hash/CollisionBound.lean`. Proof failures at 407, 660, 680 and
   diagnostic pins at 950, 953, 956, 959, 962, 968 fail on v4.35. This blocks
   seven assigned files, including the otherwise independent Tuple target.
+- `PERF-KEYSORT-WALL-435`: KeySort prerequisite wall increased from 1.511297 s
+  to 2.013636 s (33.24%). This incomplete prefix used different reporting
+  revisions and does not establish the full comparison. **Further migration
+  Lean runs are held for root/gate review** under the >10% STOP rule. No
+  performance acceptance or threshold waiver is claimed.
 - `PERF-PREFIX-RSS-435`: passing prerequisite modules show increased sampled RSS;
   root/gate must review `prefix-metrics.json`. These incomplete prefixes do not
   establish a full migration timing delta. Any regression must be escalated;
@@ -171,7 +176,8 @@ Absolute artifact root: `/workspace/scratch/migrate-theory`.
 - Handoff (full committed head): `/workspace/scratch/migrate-theory/handoff.md`.
 - Checksums: `/workspace/scratch/migrate-theory/SHA256SUMS`.
 
-After receiving reviewed owner overlays at this pinned base, rerun all assigned
+After root/gate resolves the performance stop and reviewed owner overlays are
+received at this pinned base, rerun all assigned
 modules serially with the identical pinned v4.35 archive. Coordinate exact Theory
 files before any existing-file edits. Preserve signatures, semantics, observations
 and proof budgets; warn and inspect history before a potentially slower refactor.
