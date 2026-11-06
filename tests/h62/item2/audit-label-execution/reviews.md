@@ -58,3 +58,44 @@ superseded source-root lookup. Only `final-map-probe/` covers the final tracked
 Bridge vendor roots and official sysroot lookup. Review approval does not imply
 premise feasibility, exact elaborated signatures, totality/success, public
 negative-compiler controls, or final build validation.
+
+
+## H70 source-owner and premise-bundle follow-up
+
+Finder checked all 18 unmatched exact files and 51 declaration attributions,
+including the declaration-free Frontend/Yul/Parsing.lean. Frozen integration
+history and documents support VY1 (24 declarations) and V17 (27); registry producer
+mapping and migration overlay ownership remain separate. No new H30 reservation
+or write permission is claimed. Commands were read-only `git log --diff-filter=A`,
+`git show`, `git merge-base --is-ancestor`, source/document `sed`/`rg`, and
+`python3 -B` in-memory census regeneration/comparison.
+
+Finder decisive output after actual changes:
+
+```text
+regenerated_enriched_census_matches_saved PASS
+unchanged_identity_signature_and_original_owner_evidence 656
+exact_missing_H30_files 18 attributed_declarations 51
+new_H30_reservations_claimed 0
+source_notes 10 definitions 7
+forall_header_result_distinctions_retained PASS
+```
+
+Skeptic identified two concrete issues: Source.Data.Inner (E:=E) data was tagged
+as a source equality premise due to :=; a synthetic wrong live_producer passed
+reconciliation because no producer mapping ID was checked. Fixes ignore named
+assignments/comments when detecting equalities and validate producer_mapping_id
+against registry.owner. Tests include both original counterexamples, inferred
+binder and result-quantifier distinctions, false witness and stale-signature
+rejection, and exact H30-versus-source attribution counts.
+
+Skeptic final read-only `python3 -B` in-memory checks passed: all 18 producer IDs
+match their registry owners, a wrong producer raises live producer mapping
+mismatch, named arguments/comments create no equality hints, actual equalities
+still do, and all 656 statements retain pending witness/elaboration/fidelity.
+Every attribution explicitly grants no edit permission. No remaining confirmed
+finding in the fixes. Both reviews used no Lean, server, writes or fixes.
+
+Review boundaries remain unchanged: ten manual source inspections plus source
+routing for all rows do not establish any elaborated type, structure inhabitance,
+per-input feasibility or simultaneous witness. No proof checkpoint is complete.

@@ -33,6 +33,9 @@ result=dict(base=c["base"], counts=c["counts"], proof_witnesses_verified=0,
             uncovered=[dict(name=r["name"],path=r["path"],line=r["line"],
                             visibility=r["visibility"],signature_sha256=r["signature_sha256"],
                             owner_evidence=r["owner_evidence"],
+                            producer_attribution=r.get("producer_attribution"),
+                            source_premise_bundle=r.get("source_premise_bundle"),
+                            source_review=r.get("source_review"),
                             import_blockers=sorted(blockers(module(r["path"]))),
                             simultaneous_witness="pending", premise_classification="pending-elaboration")
                        for r in c["declarations"]])

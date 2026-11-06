@@ -1,5 +1,5 @@
 {
-  "delivery": "Saved for local coordinator retrieval; no relay tool/script is installed in this VM. No original owned file edited.",
+  "delivery": "H70 coordinator router reports accepted relays by migrate-backend, migrate-bridge, migrate-frontend, migrate-hash, migrate-source, migrate-syntax and migrate-yul; wait for authorized overlays. relay.sh is host-only; no VM installation task. No original-file edit permission granted.",
   "base": "c6f550e281a7e5affa9a99bc2cdaed556dec00e4",
   "blockers": [
     {
