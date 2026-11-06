@@ -544,3 +544,36 @@ are preserved. These fixes do not claim an additional audit/proving scope.
 Final global documentation checking passes after the four file fixes. The19audit
 regressions and4affected ABI-world scanner regressions pass. The complete227file
 source census repeats identically and retains all1660original signature hashes.
+
+
+## Coordinator-requested b7c3cc5110b1 merge resolution
+
+The coordinator requested merging published masterb7c3cc5110b1 into the original
+audit branch. The only conflict was the packet-panic H71 candidate documentation.
+This lane's sole prior edit there replaced a nonexistent proposed file reference
+with its module name. Upstream already retains that module identity and adds the
+newer Q1 authorization for three-control review-only proposals, including their
+unregistered/unvalidated boundaries. The resolution takes that exact upstream
+file, preserving the newer decisions without editing any Lean source or approving
+producer adoption. Original pre-merge source/queue evidence remains historical.
+The full four-checkpoint audit remains unfinished; this merge establishes no new
+proof, runtime, gas/fork, axiom or performance gate. Exact parents, conflict blobs,
+resolution and validation live off Git in merge-b7c3cc5110b1 under the evidence root.
+
+Independent read-only finder and skeptic confirmed the exact-upstream resolution
+and retained proposal limits, without Lean, jobs or writes. Their review covers
+this documentation conflict, not validation of other incoming upstream changes.
+
+The whole staged whitespace check reports eight single-space context lines in
+an unchanged upstream migration proposal patch. Its exact upstream bytes are
+retained because those spaces are unified-patch context markers. A separate
+comparison against origin/master checks this lane's own changes. No complete
+current-tree build or proof validation is asserted by the merge resolution.
+
+The global documentation check also exposed a newly merged reference to a
+proposed, unapplied InferHelpers file. H82 permits the documentation-only repair:
+identify the proposed module by its dotted name, retaining all unvalidated
+migration and owner/adoption requirements. No proposal or definition was applied.
+
+Both independent reviewers also confirmed the InferHelpers citation-only fix
+retains its unapplied/unvalidated status and owner/adoption boundaries.
