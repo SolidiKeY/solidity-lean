@@ -783,3 +783,10 @@ All 21 theorem axiom reports are guarded; only the existing standard axioms occu
 Independent read-only finder and skeptic reviews found no confirmed defect.
 The final general and control checks passed in 1.94 and 1.42 seconds respectively
 under the unchanged serial resource/proof limits; full-lane completion is not claimed.
+
+The generated Solidity library root now imports EncodedError,
+EncodedErrorControls, PrefixFailure and PrefixFailureControls. All 42 axiom
+reports across these modules are guarded, including every PrefixFailure report.
+Fresh per-file elaboration executes these guards and the controls successfully.
+Registration is checked with the repository generator; no proof statement,
+producer boundary, execution result or refusal changes in this repair.
