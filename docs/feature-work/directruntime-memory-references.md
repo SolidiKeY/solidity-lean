@@ -502,3 +502,35 @@ The publication changes no DirectRuntime/executable-AST interface. Ordinary
 consumer integration,fresh native/browser positive diamond Identity and all
 modality controls,and the full merged VM gate remain open. No ordinary proof
 closure,full-tree cache freshness or RUNTIME_GATE_PASS is claimed.
+
+
+## H82 recovery: independent H44 packaging of available bulk
+
+The restored checkout did not contain worker commit618dda88 or its native
+packet. Exact remote fetch returned `not our ref`;no evidence was fabricated.
+The missing assigned branch was recreated at pinned baseb419c3cf,then advanced
+to verified published master7ae5607c. The original clean work branch remains
+preserved. Full618dda88 integration/split still requires the authenticated
+original commit/bundle and missing runtime assets. No retiring member scope
+was edited or integrated, and no stopped/paused acknowledgement is assumed.
+
+An independent H44 item is complete for the available published data:479
+generated fixture/evidence files(4079938 payload bytes)are archived under
+`tests/directruntime-20261104/memory-references/runtime/h82-h44/`. Every member
+was read back and SHA256-checked;all working files remain at original paths.
+Only Git tracking is removed. `bulk-manifest.json` records absolute archive
+path,size,hash,coverage and retained source hashes. Functional sources,Lean
+statements,proof budgets and gate scripts are byte-identical to this published
+base. Local Git excludes prevent accidentally restaging the retained data;
+no existing production/configuration file was changed for that exclusion.
+
+For a fresh checkout,verify the archive hash and extract it at the repository
+root before running the unchanged gates. Existing fixture/admission generators
+remain available;missing data still fails the gates rather than being skipped.
+No fresh Lean/native/browser gate is claimed for this tracking-only increment.
+Original native/browser validation,full gates,missing worker data,and the
+consolidation merge-first handoff remain open.
+
+Separate read-only finder/skeptic reviews verified all479 preserved payload
+files,the archive/hash and14 retained-source hashes;neither used Lean/server
+or changed files. No findings. Documentation paths and whitespace checks pass.
