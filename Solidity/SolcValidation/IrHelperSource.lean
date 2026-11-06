@@ -80,7 +80,7 @@ theorem tdiv_inRange (a b : Int) (ha : -((2 ^ 255 : Nat) : Int) ≤ a ∧ a < ((
     (b0 : b ≠ 0) :
     PrimTy.int.inRange (a.tdiv b) = true ↔ ¬ (a = -((2 ^ 255 : Nat) : Int) ∧ b = -1) := by
   simp only [PrimTy.inRange, decide_eq_true_eq]
-  have hb := Int.natAbs_eq b
+  have hb : b = (b.natAbs : Int) ∨ b = -(b.natAbs : Int) := Int.natAbs_eq b
   by_cases one : b.natAbs = 1
   · rw [one] at hb
     rcases hb with h | h
@@ -144,7 +144,9 @@ private theorem ofInt_int_out {n : Int} (h : ¬ PrimTy.int.inRange n = true) :
     (PrimTy.int.ofInt? n).map Subtype.val = none := by
   simp only [PrimTy.ofInt?, dif_neg h, Option.map_none]
 
-/-- The source's checked `int` division on two words (read as two's complement). -/
+/-- The source's checked `int` division on two words (read as two's complement). The
+reading of a word as a source value (`x.val` for `uint`, `Yul.signed` for `int`) is
+chosen here; the source↔word relation itself is G01's. -/
 def sourceDiv (x y : Word) : Option Int :=
   (Solidity.BinOp.evalNum .int rfl (Solidity.Yul.signed x) (Solidity.Yul.signed y) .div rfl).map Subtype.val
 
@@ -274,7 +276,8 @@ theorem checked_div_matches_source (k : Nat) (x y : Word) (s : σ) :
 
 /-- Simulation of `checked_exp_t_uint256_t_uint256`'s body by the source's checked `**`
 at `uint`: a source value is returned as that word with no machine effect; on a source
-revert the first machine effect is solc's `Panic(0x11)` sequence. -/
+revert the result factors through solc's `Panic(0x11)` sequence from the entry state
+(on a `RevertHalts` machine it is exactly that fault: `checked_exp_overflow_halts`). -/
 theorem checked_exp_matches_source (k : Nat) (x y : Word) (s : σ) :
     match sourceExp x y with
     | some v => evalBlock M ctx (k + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s =

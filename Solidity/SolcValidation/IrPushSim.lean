@@ -40,7 +40,7 @@ theorem copy_call {F G : List FnSig} (E : FunEnv F) (env : FunEnv G) {nm r : Str
     (ha : ∀ j, evalExpr M ctx (j + d) E arg vs s = .ok (s, fun _ => v)) (j : Nat) :
     evalExpr M ctx (j + d + 7) E (.call m (.cons arg .nil)) vs s = .ok (s, fun _ => v) := by
   have h1 : evalExpr M ctx (j + d + 5) E arg vs s = .ok (s, fun _ => v) := by
-    have := ha (j + 5); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact ha (j + 5)
   simp only [evalExpr.eq_5, evalArgs.eq_3, evalArgs.eq_2, h1, run_ok_bind, run_pure, Vals.ofFn, consFn_zero,
     Vals.zeros, Vals.append_cons', Vals.append_nil']
   rw [hE]
@@ -76,9 +76,9 @@ theorem shl_call {F : List FnSig} (E : FunEnv F)
     (h2 : ∀ j, evalExpr M ctx (j + d) E e2 vs s = .ok (s, fun _ => v)) (j : Nat) :
     evalExpr M ctx (j + d + 12) E (.call m (.cons e1 (.cons e2 .nil))) vs s = .ok (s, fun _ => v) := by
   have g2 : evalExpr M ctx (j + d + 9) E e2 vs s = .ok (s, fun _ => v) := by
-    have := h2 (j + 9); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact h2 (j + 9)
   have g1 : evalExpr M ctx (j + d + 10) E e1 vs s = .ok (s, fun _ => 0) := by
-    have := h1 (j + 10); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact h1 (j + 10)
   simp only [evalExpr.eq_5, evalArgs.eq_3, evalArgs.eq_2, g1, g2, run_ok_bind, run_pure, Vals.ofFn, consFn_zero,
     consFn_succ, Vals.zeros, Vals.append_cons', Vals.append_nil']
   rw [hE]

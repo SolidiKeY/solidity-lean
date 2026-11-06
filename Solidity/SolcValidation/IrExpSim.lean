@@ -7,10 +7,12 @@ import Solidity.SolcValidation.IrHelperSteps
 
 On any machine and state, the helper group of `SolcValidation/IrExpHelpers.lean`
 runs as the arithmetic model of `SolcValidation/IrExpModel.lean`: without any
-machine effect it returns `base ^ exponent` when that fits in a word, and
-otherwise its first machine effect is solc's `Panic(0x11)` sequence from the
-entry state (after it, on a machine whose `revert` returns, the code goes on;
-`∃ cont` leaves that continuation unspecified).
+machine effect it returns `base ^ exponent` when that fits in a word. Otherwise
+its result factors through solc's `Panic(0x11)` sequence from the entry state
+(`∃ cont, … = panicRun M 0x11 s >>= cont`). That form is only informative when
+the panic sequence faults: on a machine whose `revert` halts (`RevertHalts M`)
+the result is exactly that fault (`checked_exp_overflow_halts`); on a machine
+whose `revert` returns, it says nothing about the body's effects.
 
 The proofs compose statement-level lemmas with `rw` (see
 `SolcValidation/IrHelperSteps.lean`); the loop of `checked_exp_helper` is
@@ -217,7 +219,7 @@ theorem loop_body (i : Nat) (p0 b0 e mx p b : Word) (hmx : mx.val = maxWord) (s 
             odd, ↓reduceIte]
         · rfl
       · intro z
-        have := and_one_val e
+        have : (Solidity.Yul.Pure.eval .«and» (word2 e 1)).val = e.val % 2 := and_one_val e
         simp only [Vals.get_here, Vals.get_there] at z
         rw [z] at this
         rw [odd] at this
@@ -261,7 +263,7 @@ theorem steps_le : ∀ (n e : Nat), e < 2 ^ (n + 1) → steps e ≤ n := by
       have : e / 2 < 2 ^ (n + 1) := by
         rw [Nat.pow_succ] at h
         omega
-      have := ih (e / 2) this
+      have : steps (e / 2) ≤ n := ih (e / 2) this
       omega
 
 theorem word_val_lt (n : Nat) (h : n < 2 ^ 256) : (Solidity.Yul.word n).val = n := Nat.mod_eq_of_lt h
@@ -499,7 +501,7 @@ theorem panicIf_false (code : Word) (s : σ) : panicIf M false code s = .ok s :=
 theorem panicIf_true (code : Word) (s : σ) : panicIf M true code s = panicRun M code s := rfl
 
 theorem word_le_max (mx w : Word) (hmx : mx.val = maxWord) : decide (mx.val < w.val) = false := by
-  have := w.isLt
+  have : w.val < 2 ^ 256 := w.isLt
   rw [hmx]
   exact decide_eq_false (by unfold maxWord; omega)
 
@@ -632,7 +634,7 @@ theorem exp_word (a : Word) (e : Nat) (eW : e < 2 ^ 256) :
   rw [h, Solidity.Yul.powWord_correct, word_val_lt e eW, word_val, Nat.mod_mod]
 
 /-- The body of `checked_exp_unsigned(base, exponent, max)` (with `max = 2^256 - 1`) runs as
-`expUnsigned`: the returned `power` is the model's value, or the first machine effect is the panic. -/
+`expUnsigned`: the returned `power` is the model's value, or the result factors through the panic. -/
 theorem unsigned_run (j : Nat) (b e : Nat) (mx : Word) (bW : b < 2 ^ 256) (eW : e < 2 ^ 256)
     (hmx : mx.val = maxWord) (s : σ) :
     match expUnsigned b e with
@@ -742,7 +744,8 @@ theorem max_lit_val : (115792089237316195423570985008687907853269984665640564039
 
 /-- The body of `checked_exp_t_uint256_t_uint256(base, exponent)` on any machine and state:
 `power = base ** exponent` with no machine effect when it fits in a word; otherwise the
-first machine effect is solc's `Panic(0x11)` sequence. -/
+result factors through solc's `Panic(0x11)` sequence from the entry state (informative
+when that sequence faults; see `checked_exp_overflow_halts`). -/
 theorem checked_exp_body (j : Nat) (x y : Word) (s : σ) :
     (x.val ^ y.val < 2 ^ 256 → evalBlock M ctx (j + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s =
       .ok (s, .cons x (.cons y (.cons (Solidity.Yul.word (x.val ^ y.val)) .nil)), .normal)) ∧

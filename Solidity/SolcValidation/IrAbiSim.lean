@@ -7,7 +7,8 @@ import Solidity.SolcValidation.IrExpSim
 On any machine and state, the body of solc 0.8.38's decoder of one `uint256`
 from calldata (`SolcValidation/IrAbiHelpers.lean`), entered with
 `(headStart, dataEnd)`, does one of two things: when `slt(sub(dataEnd, headStart), 32)`
-holds, its first machine effect is `revert(0, 0)`; otherwise its only machine
+holds, its result factors through `revert(0, 0)` from the entry state (exactly that
+fault on a machine whose `revert` halts: `decodeTuple_short_halts`); otherwise its only machine
 effect is `calldataload(headStart)`, and it returns that word. The validator
 `validator_revert_t_uint256` never fires for a `uint256` (its cleanup is the
 identity), which `validator_body` proves.

@@ -142,7 +142,7 @@ theorem expUnsigned_correct (b e : Nat) (bW : b < 2 ^ 256) :
   · rw [if_pos b2, b2]
     by_cases big : 255 < e
     · have : ¬ 2 ^ e < 2 ^ 256 := fun h => by
-        have := (Nat.pow_lt_pow_iff_right (by decide : 1 < 2)).mp h
+        have : e < 256 := (Nat.pow_lt_pow_iff_right (by decide : 1 < 2)).mp h
         omega
       rw [if_pos big, if_neg this]
     · have fits : 2 ^ e < 2 ^ 256 := (Nat.pow_lt_pow_iff_right (by decide : 1 < 2)).mpr (by omega)
@@ -163,7 +163,7 @@ theorem expUnsigned_correct (b e : Nat) (bW : b < 2 ^ 256) :
     dsimp only
     by_cases fits : b ^ e < 2 ^ 256
     · have : ¬ maxWord / b' < p' := fun h => by
-        have := (div_lt_iff p' b' (by omega)).mp h
+        have : 2 ^ 256 ≤ p' * b' := (div_lt_iff p' b' (by omega)).mp h
         omega
       rw [if_neg this, if_pos fits, h5, Nat.mod_eq_of_lt fits]
     · have : maxWord / b' < p' := (div_lt_iff p' b' (by omega)).mpr (by omega)

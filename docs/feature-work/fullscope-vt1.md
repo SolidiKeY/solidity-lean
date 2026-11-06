@@ -689,19 +689,20 @@ conflicts). All proofs below are kernel-checked (per-file Lean diagnostics, no
 `sorry`, no new axiom, no `maxHeartbeats` change); `#print axioms` gives only
 `propext`, `Classical.choice`, `Quot.sound` (or a subset).
 
-**Cause of the earlier kernel deep recursion.** It was neither `Pure.sub`'s
-`2^256` nor the cleanup collapse itself, but the one-shot `simp` over a whole
-helper body: the proof term it builds rewrites under a large nested `do`
-continuation, and checking it recursed too deeply in the kernel (bisected:
-`simp only [run_ok_bind]` after the first rewrite already triggered it, while
-the same rewrite by a statement lemma did not). The fix is the coordinator's
+**The earlier kernel deep recursion.** Bisection found a trigger, not a proven
+cause: after unfolding the whole `checked_sub` body, `simp only [run_ok_bind]`
+(rewriting under the large nested `do` continuation) already made the kernel
+recurse too deeply, while the same step done by a statement-level lemma did
+not. Other contributing causes are not excluded. The fix is the coordinator's
 suggestion in its general form: `SolcValidation/IrHelperSteps.lean` proves one
 lemma per statement shape over an abstract environment and abstract values
 (`assign_cleanupU`, `assign_pure2`, `if_panic11`, `items_stmt_normal`,
 `items_stmt_map`, `items_last`, `op1_gen`/`op2_gen` for call-free expressions at
-any fuel above a bound, …) and composes them with `rw`, so each kernel check is
-small. No literal `2^256` is unfolded: `sub` is kept folded and characterized by
-`pure_sub_val`/`sub_gt` (stated with `rw`).
+any fuel above a bound, …) and composes them mostly with `rw` (some finished steps still use a bounded
+`simp only` over one statement or one call), so each kernel check is small.
+`sub` is kept folded and characterized by `pure_sub_val`/`sub_gt`; the
+remaining `rfl`s on literals (`lit_min`, `max_lit_val`, `lit_val`) only compute
+`literal % 2^256` on numerals.
 
 ### Checked arithmetic (namespace `Solidity.SolcValidation.IrSyntax`)
 - `checked_sub_body (k) (x y : Word) (s : σ) : evalBlock M ctx (k + 30) helperEnv bodySub (.cons x (.cons y (.cons 0 .nil))) s = if y.val ≤ x.val then .ok (s, …word (x.val - y.val)…, .normal) else (fun s => (s, …Pure.eval .sub (word2 x y)…, .normal)) <$> panicRun M 0x11 s`
@@ -739,20 +740,30 @@ the square-and-multiply loop with its `base > max / base` test), and
 `steps e ≤ 255` by `steps_le`), `helper_run`, `u1_*`…`u7_run` (the seven
 statements of `checked_exp_unsigned`), `unsigned_run`, and
 - `checked_exp_body (j) (x y : Word) (s : σ) : (x.val ^ y.val < 2^256 → evalBlock M ctx (j + 420) expEnv expExpU256 (…x, y, 0…) s = .ok (s, …word (x.val ^ y.val)…, .normal)) ∧ (¬ x.val ^ y.val < 2^256 → ∃ cont, evalBlock … = panicRun M 0x11 s >>= cont)`:
-  no machine effect when the power fits; otherwise the first effect is solc's
-  panic sequence from the entry state (`∃ cont`: what follows, on a machine
-  whose `revert` returns, is left unspecified).
+  no machine effect when the power fits. In the overflow case the `∃ cont` form
+  is informative only when the panic sequence faults: in `Except` it is
+  equivalent to "if `panicRun M 0x11 s = .error e` then the result is `.error e`",
+  and it says nothing on a machine whose `revert` returns. Hence
+- `RevertHalts M` (`IrHelperSteps.lean`: `revert` always halts with
+  `HaltKind.revert`, a property the consumer's EVM machine proves; nothing
+  assumes it unless it says so), `panic_factor_halts`, and
+  `checked_exp_overflow_halts (j x y s) (h : RevertHalts M) (over) : ∃ e, panicRun M 0x11 s = .error e ∧ evalBlock … = .error e`:
+  on such a machine the overflowing body ends exactly with the panic sequence's
+  fault, from the entry state.
 - `checked_exp_matches_source` (`IrHelperSource.lean`): the same against
   `sourceExp` = `BinOp.evalNum .uint … .pow`.
-This generalizes `Evm/Exp.lean` by an adapter over the imported IR (that module
-is not edited).
+This is an analogue of `Evm/Exp.lean`'s square-and-multiply proofs for the
+imported IR; no lemma relates the two yet (`Evm/Exp.lean` is not edited), so
+"generalizes `Evm/Exp.lean`" (T02's wording) is not claimed.
 
 ### ABI and storage helpers (machine level)
 - `IrAbiHelpers.lean`/`IrAbiSim.lean` (the five functions of
   `abi_decode_tuple_t_uint256`): `validator_body` (no effect: the `uint256`
   cleanup is the identity), `decodeU256_body`, and
   `decodeTuple_body (k) (h d) (s)`: with `short := decide (signed (sub(d, h)) < 32)`,
-  `short = true → ∃ cont, evalBlock … = M.run .revert (word2 0 0) s >>= cont` and
+  `short = true → ∃ cont, evalBlock … = M.run .revert (word2 0 0) s >>= cont` (the
+  same caveat as above; `decodeTuple_short_halts` gives the exact result under
+  `RevertHalts M`) and
   `short = false → evalBlock … = (fun r => (r.1, …r.2 0…, .normal)) <$> M.run .calldataload (fun _ => h) s`.
 - `IrPushHelpers.lean`/`IrPushSim.lean` (the thirteen functions of
   `array_push_from_t_uint256_to_t_array$_t_uint256_$dyn_storage_ptr`):
@@ -762,6 +773,13 @@ is not edited).
   `sload(a)` again and `Panic(0x32)` unless `l <` that; `mstore(0, a)`;
   `keccak256(0, 32)` giving `h`; `sload(h + l)`; `sstore(h + l, v)` — each on
   the state the previous step returned, for any machine.
+Provenance: `extract-helpers.py` cuts each function at its first occurrence in
+`Census.unoptimized.yul`, so the push group comes from the creation object
+`Census_134` (the constructor's `values.push`), and the exp and ABI groups take
+`cleanup_t_uint256`, `validator_revert_t_uint256` and the `revert_error_…` helper
+from the creation object and the rest from `Census_134_deployed`. The texts are
+identical up to indentation in both objects, so the theorems are unaffected, but
+no group is literally either object's function environment.
 What a calldata word or a storage slot means for the source (ABI decoding and
 solc's storage layout, D3) is G01's relation; these theorems state the exact
 machine behaviour and assume nothing about the machine.
@@ -772,7 +790,14 @@ agreements on edge words` (bases around 0/1/2/10/11/306/307/2^128/2^255/2^256-1,
 exponents up to 300 so the oracle can compute `x ^ y`; larger exponents are
 covered by the theorem), provenance passes for all four fixtures
 (`IR_HELPER_PROVENANCE_PASS 8`, `IR_EXP_PROVENANCE_PASS 6`,
-`IR_ABI_PROVENANCE_PASS 5`, `IR_PUSH_PROVENANCE_PASS 13`).
+`IR_ABI_PROVENANCE_PASS 5`, `IR_PUSH_PROVENANCE_PASS 13`; each count is now
+also checked against the definition lines of the text, and each name must be
+defined exactly once). The exp test also checks that a fitting power leaves the
+effect log empty. These provenance passes are secondary evidence: the
+`*_certified` theorems are what tie each tree to its text. The Lean tests run
+through the Lean server here, not through `check-ir.sh` (`lake env lean` is
+denied in this session), and their machine halts on `revert`, so they do not
+exercise a returning `revert`.
 `VT1_SKIP_LEAN=1 check-ir.sh`: ARTIFACTS_CHECK_PASS, HELPERS_CHECK_PASS,
 HELPER_MODULES_CHECK_PASS, VT1_IR_CHECKS_PASS.
 
@@ -791,3 +816,30 @@ HELPER_MODULES_CHECK_PASS, VT1_IR_CHECKS_PASS.
   VM's pinned-binary outputs.
 - The physical byte-memory machine (VX4/X06) and world (VY4) as `Machine`
   instances, gas (D1/D2), calls/creates: unchanged from C07.
+
+### C09 reviews (read-only, no Lean server)
+Finder: no high-severity defect. The Nat model matches the Yul text; the
+statements, fuel and effect order (right-to-left arguments) match solc;
+the oracle is independent. Findings: (1) the "generalizes `Evm/Exp.lean`" claim
+was unsupported, so it was reworded as an analogue; (2) the provenance counts
+were tautological, so they are now checked against definition lines, with
+exactly-once names; (3) mixed creation/runtime provenance is now documented;
+(4) about 30 untyped `have`s; (5) the exp test ignored the effect log, and now
+requires it empty when the power fits; (6) `.term` regeneration is not in
+`check-ir.sh`, so soundness rests on the certificates (known open:
+tree uniqueness).
+Skeptic: (1, must-fix) the `∃ cont, … = panicRun … >>= cont` form is vacuous on
+a machine whose `revert` returns, so "first machine effect" overclaimed. Fixed:
+`RevertHalts`, `panicRun_bind_halts`, `panicRun_error_of_halts`,
+`panic_factor_halts`, `checked_exp_overflow_halts`, `decodeTuple_short_halts`,
+plus reworded docstrings (`IrExpSim`, `IrHelperSource`, `IrAbiSim`) and this
+section. (2) Provenance: documented. (3) Provenance checks: strengthened.
+(4) Lean tests are run by the server: stated. (5) The deep-recursion wording
+was too firm, so it is now stated as a bisected trigger; the `rw`/literal
+wording was corrected. (6) The word-reading of source values is now stated in
+`sourceDiv`'s docstring as this lane's choice, with the relation left to G01.
+Not changed: the `have`s that instantiate a lemma (`body`, `hr`, `hu`, `hc`,
+`t`, `t4`, `t5`, `spec`, `ih'`, `h`) stay untyped, because their type is the
+cited lemma's statement and spelling it out would repeat large `match` terms.
+The short ones are now typed, and the `have := …; rw … at this` patterns were
+replaced by `rw`; exact.

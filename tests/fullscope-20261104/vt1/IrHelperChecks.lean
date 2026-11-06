@@ -119,7 +119,9 @@ def expCallT : Expr (expSigs ++ []) ArgNames 1 :=
 
 def runExp (x y : Nat) : Except String Nat :=
   match evalExpr logMachine emptyCtx 2000 expEnv expCallT (argVals (W x) (W y)) [] with
-  | .ok (_, v) => .ok (v ⟨0, by decide⟩).val
+  | .ok (log, v) =>
+      -- no machine effect when the power fits (`checked_exp_body`)
+      if log.isEmpty then .ok (v ⟨0, by decide⟩).val else .error "unexpected effects"
   | .error (.halt log .revert) =>
       match log with
       | [("mstore", [0, sel]), ("mstore", [4, code]), ("revert", [0, 36])] =>
@@ -164,13 +166,16 @@ in the saved `Census` IR. -/
     unless (census.splitOn whole).length > 1 do
       throw (IO.userError s!"not a verbatim fixture substring: {whole.take 60}")
     n := n + 1
-  unless n == 6 do throw (IO.userError s!"expected 6 functions, found {n}")
+  -- counted independently of `expSigs`: lines of the text that start a definition
+  let defs := (expHelpersText.splitOn "\n").filter (fun l => l.trimLeft.startsWith "function ")
+  unless n == 6 && defs.length == 6 do
+    throw (IO.userError s!"expected 6 functions, found {n} names and {defs.length} definition lines")
   IO.println s!"IR_EXP_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
 
 /-! Provenance of `abiHelpersText` and `pushHelpersText`: each is its extracted
 fixture, and each of its functions (cut by name) is verbatim in the saved
 `Census` IR. -/
-def checkGroup (label file : String) (text : String) (sigs : List FnSig) : IO Unit := do
+def checkGroup (label file : String) (text : String) (sigs : List FnSig) (expected : Nat) : IO Unit := do
   let dir := "tests/fullscope-20261104/vt1/fixtures"
   unless text == (← IO.FS.readFile s!"{dir}/{file}") do
     throw (IO.userError s!"{label} text differs from fixtures/{file}")
@@ -179,6 +184,8 @@ def checkGroup (label file : String) (text : String) (sigs : List FnSig) : IO Un
   let mut n := 0
   for (name, i) in names.zipIdx do
     let start := "function " ++ name ++ "("
+    unless (text.splitOn start).length == 2 do
+      throw (IO.userError s!"{label}: {name} not defined exactly once")
     let after := ((text.splitOn start).drop 1).headD ""
     let upto := match names[i + 1]? with
       | some next => ((after.splitOn ("function " ++ next ++ "(")).headD "")
@@ -187,7 +194,10 @@ def checkGroup (label file : String) (text : String) (sigs : List FnSig) : IO Un
     unless (census.splitOn whole).length > 1 do
       throw (IO.userError s!"{label}: not a verbatim fixture substring: {whole.take 60}")
     n := n + 1
+  let defs := (text.splitOn "\n").filter (fun l => l.trimLeft.startsWith "function ")
+  unless n == expected && defs.length == expected do
+    throw (IO.userError s!"{label}: expected {expected} functions, found {n} names and {defs.length} definition lines")
   IO.println s!"IR_{label}_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
 
-#eval checkGroup "ABI" "abi-helpers.yul" abiHelpersText abiSigs
-#eval checkGroup "PUSH" "push-helpers.yul" pushHelpersText pushSigs
+#eval checkGroup "ABI" "abi-helpers.yul" abiHelpersText abiSigs 5
+#eval checkGroup "PUSH" "push-helpers.yul" pushHelpersText pushSigs 13

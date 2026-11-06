@@ -199,7 +199,7 @@ theorem pure2_expr (k : Nat) {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.P
 theorem sub_gt (x y : Word) :
     x.val < (Solidity.Yul.Pure.eval .«sub» (word2 x y)).val ↔ x.val < y.val := by
   have h : x.val < (x.val + 2 ^ 256 - y.val) % 2 ^ 256 ↔ x.val < y.val := by
-    have w := sub_wraps x y
+    have w : x.val < (Solidity.Yul.word (x.val + 2 ^ 256 - y.val)).val ↔ x.val < y.val := sub_wraps x y
     rw [word_val] at w
     exact w
   rw [pure_sub_val]
@@ -308,7 +308,7 @@ theorem op1_gen {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.Pure 1) {L : L
     evalExpr M ctx (j + d + 3) E (.op (.evm (.pure p)) (.cons e .nil)) vs s =
       .ok (s, fun _ => Solidity.Yul.Pure.eval p (fun _ => v)) := by
   have h1 : evalExpr M ctx (j + d + 1) E e vs s = .ok (s, fun _ => v) := by
-    have := h (j + 1); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact h (j + 1)
   simp only [evalExpr.eq_4, evalArgs.eq_3, evalArgs.eq_2, evalOp, h1, run_ok_bind, run_pure, consFn_one]
 
 theorem op2_gen {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.Pure 2) {L : List String}
@@ -318,9 +318,9 @@ theorem op2_gen {F : List FnSig} (E : FunEnv F) (p : Solidity.Yul.Pure 2) {L : L
     evalExpr M ctx (j + d + 4) E (.op (.evm (.pure p)) (.cons e1 (.cons e2 .nil))) vs s =
       .ok (s, fun _ => Solidity.Yul.Pure.eval p (word2 v1 v2)) := by
   have g2 : evalExpr M ctx (j + d + 1) E e2 vs s = .ok (s, fun _ => v2) := by
-    have := h2 (j + 1); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact h2 (j + 1)
   have g1 : evalExpr M ctx (j + d + 2) E e1 vs s = .ok (s, fun _ => v1) := by
-    have := h1 (j + 2); rw [Nat.add_right_comm] at this; exact this
+    rw [Nat.add_right_comm]; exact h1 (j + 2)
   simp only [evalExpr.eq_4, evalArgs.eq_3, evalArgs.eq_2, evalOp, g1, g2, run_ok_bind, run_pure, consFn_two]
 
 /-! ## A panic that may return -/
