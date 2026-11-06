@@ -562,3 +562,30 @@ The label final head's Hash/CollisionBound and Yul/ReservedNames migration repai
 belong only in the isolated migration overlay; they remain out of the live branch.
 The current producer wait is the H82 memory-copies successor's checked paired-load
 ByteWorld/emission provenance. Static classification discharges none of it.
+
+
+## H86 fresh bounded KeySort source check
+
+The first regenerated prerequisite checked the unchanged frozen KeySort source
+with Lean 4.24.0 (`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`) and Lake
+5.0.0-src+797c613 recorded from the pinned toolchain. The actual source command
+used `-j1 -M8192 --tstack=131072`, returned zero in 4.231 seconds, and retained
+the exact source and output hashes. No module exceeded 60 seconds. This is a
+single cold source-check measurement, not a paired performance comparison.
+
+The new group used a 12 GiB, swap-disabled, one-CPU workload container and a
+separate durable 128 MiB, swap-disabled monitor. Admission followed H1 advice on
+only this checkout's inactive regenerable build files. Fresh READY was required
+before workload start, with the unchanged 16 GiB parent, 4 GiB reserve and
+512 MiB margin. The monitor sampled a 1,046,904,832-byte parent peak and passed;
+the source process and container both exited zero. Bounded Docker calls,
+created-workload cleanup, launcher monitor-liveness checks and an independent
+295-second process-group timeout addressed the preflight review findings.
+
+Evidence is sealed under
+`/workspace/parallel-20261103/executable-bytecode/h86-keysort/`.
+This is a direct Lean source check, **not** `lake build Solidity.KeySort`,
+MCP transport evidence, expanded inspection acceptance, a performance gate or
+`RUNTIME_GATE_PASS`. Those required gates remain open. No prior timing STOP was
+released and no stopped full gate was rerun. Frozen sources and proof budgets
+were unchanged; no raw historical MCP payload was fabricated or relabelled.
