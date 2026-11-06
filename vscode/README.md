@@ -273,3 +273,19 @@ LSP position units, not the file encoding. Automatic verification is disabled.
 This suite does not measure proof
 performance or establish Dafny compile/run/test equivalence; Run/Test and macOS
 key dispatch still require native observations.
+
+**Build Compiler Artifact with Import Options** (**F6**) accepts a JSON object
+containing only `includePaths` and `remappings`, initially populated from this
+resource's settings. For example:
+
+```json
+{"includePaths":["vendor with spaces"],"remappings":["alias/=lib/"]}
+```
+
+Omitted fields retain resource defaults; an empty array clears that field for
+this invocation. Relative include paths resolve against the project root and
+are passed as absolute paths. The command does not modify workspace settings.
+Unknown fields, runtime/proof options and malformed values are rejected; no
+shell string is executed. The artifact is a compiler AST, not a binary or proof.
+This finite JSON contract differs from Dafny's arbitrary custom CLI string;
+full custom-build equivalence and native F6/macOS observations remain open.
