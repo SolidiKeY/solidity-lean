@@ -683,3 +683,28 @@ turn origin/master advanced to `ac9d8db2ad2b29d4f04ed2391d78b5f19b4c97a6`;
 its per-file `lake lean` gate does not implement this inventory-wide timing
 acceptance. The H28 final Git object remains absent locally. No H56
 measurement, bounded KeySort, runtime gate or proof pass is claimed.
+
+## Selected Lake workspace observations
+
+An additive synthetic observer fingerprints caller-selected configuration
+files and dependency/cache trees and binds a digest of a candidate command.
+Tests exercise selected file content, timestamp and link-count changes,
+dependency and cache mutations, command changes, symlink/missing paths and
+rejection of unknown environment keys. The first focused test run failed
+because the missing-directory test expected `OSError` while the existing
+cache helper raises `ValueError`; the corrected focused run passed.
+
+Independent read-only finder and skeptic reviews identified missing file
+mtime/link metadata and raw command retention; the observer now records the
+metadata and stores a command digest rather than raw command data. They also
+identified that Lake/Lean dynamically load shared libraries, and root and
+Bridge have distinct workspace manifests, packages and builds. Executable
+hashes alone do not authenticate the toolchain. Lake may choose an Elan cache
+instead of XDG cache; caller-selected trees do not establish actual cache
+selection or complete dependency/input coverage. `LEAN_PATH` is refused by
+the command allowlist, so the observer cannot represent all resolved import
+environments. Sequential snapshots cannot establish simultaneous consistency
+or prevent workspace loading and dependency materialization. Paths and labels
+in the observation remain visible; its digest is not a confidentiality or
+authentication guarantee. No production runner, H56 measurement, bounded
+KeySort, runtime gate or Lean proof pass is claimed.
