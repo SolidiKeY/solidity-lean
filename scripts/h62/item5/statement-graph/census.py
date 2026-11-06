@@ -79,7 +79,7 @@ def main():
             started = time.monotonic()
             logfile = evidence/(src.stem+'.log')
             def bound():
-                resource.setrlimit(resource.RLIMIT_AS,(12*1024**3,12*1024**3))
+                resource.setrlimit(resource.RLIMIT_AS,(8*1024**3,8*1024**3))
             with logfile.open('w') as out:
                 proc = subprocess.Popen(cmd,cwd=ROOT,env=env,stdout=out,stderr=subprocess.STDOUT,start_new_session=True,preexec_fn=bound)
                 try:

@@ -402,3 +402,37 @@ budget, axiom-set or exclusion change. The specific Contracts:1104 wait still
 stands, with its exact empty guard preserved: H30 standard-axiom re-pinning does
 not authorize changing it. Full PassCorrect, witness/vacuity, public-shim/editor
 requirements and all member frozen acceptance/STOP constraints remain binding.
+
+### H82b authenticated intake and typed witness checkpoint
+
+The H82b package at `/workspace/h82-handoffs/h82b-20261106T180909Z`
+passed its archive, manifest and all 557 per-file hashes. Its authoritative
+assignment envelopes, live scope and stopped/head receipts resolve the metadata
+waits. Legacy rendered-wrapper hashes remain provenance; no byte equivalence
+with the extracted assignment text is asserted. Three exact final heads are
+integrated: result-size-cache `6c93ebcd`, pin-fragments `7587ff4e`, and
+trust-fragments `8dc693e4`. Drift, artifact and runtime final Git objects remain
+unavailable. Metadata receipt does not establish their merge or any gate pass.
+The coordinator-requested origin/master merge is `fe5140232485efba2d47ff55f0ac90e497c1e22f`.
+All own uncommitted work was preserved through that merge.
+
+Optional `#h62_witness` registrations now compute the universal closure of an
+actual elaborated binder or constructor-field type. A safe kernel-checked helper
+must match that closure with rigid consumer universes and no unresolved
+metavariables or transitive axioms. Exported witness evidence is separate from
+statement and proof-helper dependencies. The graph verifies location, exact type,
+producer ownership and preceding named premise prerequisites. Witness availability
+alone cannot discharge an earlier open premise or complete a Type-valued interface.
+The fixture separates inhabited positive witnesses from intentional contradiction.
+No production statement, definition, axiom guard, exclusion or proof budget changed;
+no new source axiom, sorry or native_decide was added.
+
+At this checkpoint 44 external Python controls pass; exporter per-file MCP
+and direct serial exporter/WitnessFixture compilation pass with official Lean
+4.35.0. Evidence is under `/workspace/h62-statement-graph-evidence/h82-witness-*`.
+The authenticated H78/H81 policy is applied conservatively: one Lean job, explicit
+-j1, 8 GiB address-space cap, no swap and 4 GiB available reserve. Full fixture
+acceptance, new negative controls and fresh timing remain pending at commit time.
+Production G49/G50 declarations and Contracts' exact empty guard fix remain waits;
+no production discharge or RUNTIME_GATE_PASS is claimed. Pin writer STOP remains
+unchanged and its explicitly paused proposal was not resumed.

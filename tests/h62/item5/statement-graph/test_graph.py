@@ -13,6 +13,9 @@ SPEC.loader.exec_module(g)
 OVERLAY_SPEC = importlib.util.spec_from_file_location('h70overlay', ROOT/'scripts/h62/item5/statement-graph/owner_overlay.py')
 overlay = importlib.util.module_from_spec(OVERLAY_SPEC)
 OVERLAY_SPEC.loader.exec_module(overlay)
+VERIFY_SPEC = importlib.util.spec_from_file_location('h62verify', ROOT/'scripts/h62/item5/statement-graph/verify.py')
+verifier = importlib.util.module_from_spec(VERIFY_SPEC)
+VERIFY_SPEC.loader.exec_module(verifier)
 BASE = 'c6f550e281a7e5affa9a99bc2cdaed556dec00e4'
 TREE = '1'*40
 
@@ -62,7 +65,7 @@ class GraphTests(unittest.TestCase):
         self.assertEqual(nodes['L']['status'], 'done')
         self.assertEqual(nodes['H']['status'], 'open')
         self.assertEqual(nodes['R']['premises'][0]['name'], 'assumption')
-        self.assertEqual(self.graph['counts'], dict(open=1,ready=1,blocked=1,done=1,total=4,typedDeclarations=4,pendingInputs=0,knownOpenPremises=1,premiseInventoryComplete=True,openPremises=1))
+        self.assertEqual(self.graph['counts'], dict(open=1,ready=1,blocked=1,done=1,total=4,typedDeclarations=4,pendingInputs=0,knownOpenPremises=1,dischargedPremises=0,premiseInventoryComplete=True,openPremises=1))
         self.assertEqual(self.graph['progress']['G49']['nodes'], ['P','R'])
         self.assertEqual(self.graph['progress']['G49']['openPremises'], 1)
 
@@ -328,6 +331,118 @@ class GraphTests(unittest.TestCase):
         finally:
             overlay.BUNDLE = original_bundle
         self.assertFalse((Path(self.tmp.name)/'not-created').exists())
+
+    def witness_model(self, prior=False, typed=False):
+        export,catalog=inputs()
+        proof_binders=[]
+        roles={}
+        if prior:
+            proof_binders.append(dict(name='unproved',type='False',typeExpr='False',isProp=True,references=[]))
+            roles['0']={'kind':'premise','owner':'proof-owner'}
+        index=len(proof_binders)
+        key=str(index)
+        ty='Certificate' if typed else 'True'
+        evidence=dict(consumer='R',scope='binder',index=index,declaration='W',checkedDeclaration='Checked.R.'+key,
+                      kernelChecked=True,binderTypeExpr=ty,expectedTypeExpr='closed:'+ty,helperTypeExpr='closed:'+ty,
+                      priorBinders=['0'] if prior else [],axioms=[])
+        proof_binders.append(dict(name='cert' if typed else 'proof',type=ty,typeExpr=ty,isProp=not typed,references=[],witness=evidence))
+        roles[key]={'kind':'premise','owner':'proof-owner'}
+        row=copy.deepcopy(export['declarations'][2]);row.update(declaration='R',binders=proof_binders,typeReferences=[],proofReferences=[],isTheorem=True)
+        producer=copy.deepcopy(export['declarations'][2]);producer.update(declaration='W',binders=[],typeReferences=[],proofReferences=[],isTheorem=not typed)
+        return dict(schema=1,source='Lean.ConstantInfo.type',declarations=[row,producer]),dict(fixture=True,nodes=[
+            dict(id='R',declaration='R',kind='statement',area='consumer',owner='consumer-owner',binderRoles=roles,completed=not prior),
+            dict(id='W',declaration='W',kind='helper',area='producer',owner='proof-owner')],roots={'G49':['R']})
+
+    def test_checked_witness_discharges_exact_premise(self):
+        export,catalog=self.witness_model()
+        graph=g.build(export,catalog,BASE,TREE)
+        root=next(n for n in graph['nodes'] if n['id']=='R')
+        self.assertEqual(root['status'],'done')
+        self.assertEqual(root['premises'][0]['status'],'done')
+        self.assertEqual(root['witnessDependencies'],['W'])
+        self.assertEqual(root['dependencies'],[])
+        self.assertEqual(graph['counts']['openPremises'],0)
+        self.assertEqual(graph['counts']['dischargedPremises'],1)
+
+    def test_checked_type_certificate_and_prior_open_condition(self):
+        export,catalog=self.witness_model(typed=True)
+        graph=g.build(export,catalog,BASE,TREE)
+        self.assertEqual(next(n for n in graph['nodes'] if n['id']=='R')['status'],'done')
+        export,catalog=self.witness_model(prior=True)
+        graph=g.build(export,catalog,BASE,TREE)
+        root=next(n for n in graph['nodes'] if n['id']=='R')
+        self.assertEqual(root['status'],'blocked')
+        self.assertEqual(root['premises'][1]['blockedByPremises'],['R#0'])
+        self.assertEqual(graph['counts']['openPremises'],2)
+        self.assertEqual(graph['counts']['dischargedPremises'],0)
+        root_spec=next(n for n in catalog['nodes'] if n['id']=='R');root_spec['completed']=True
+        with self.assertRaisesRegex(ValueError,'open named premises'):
+            g.build(export,catalog,BASE,TREE)
+
+    def test_checked_witness_rejects_wrong_identity_type_axioms_and_prerequisites(self):
+        mutations=[('consumer','Other','location mismatch'),('scope','field','location mismatch'),('index',True,'location mismatch'),
+                   ('kernelChecked',False,'kernel check'),('binderTypeExpr','Wrong','type evidence mismatch'),
+                   ('helperTypeExpr','Wrong','type evidence mismatch'),('axioms',['Classical.choice'],'axiom-free'),
+                   ('priorBinders',['0'],'prerequisite inventory'),('declaration','Missing','dead/unclassified')]
+        for field,value,pattern in mutations:
+            with self.subTest(field=field):
+                export,catalog=self.witness_model()
+                export['declarations'][0]['binders'][0]['witness'][field]=value
+                with self.assertRaisesRegex(ValueError,pattern):g.build(export,catalog,BASE,TREE)
+        export,catalog=self.witness_model(prior=True)
+        export['declarations'][0]['binders'][1]['witness']['priorBinders']=[]
+        with self.assertRaisesRegex(ValueError,'prerequisite inventory'):g.build(export,catalog,BASE,TREE)
+
+    def test_checked_witness_requires_producer_owner_and_axiom_evidence(self):
+        export,catalog=self.witness_model()
+        catalog['nodes'][1]['owner']='another-owner'
+        with self.assertRaisesRegex(ValueError,'producer owner mismatch'):g.build(export,catalog,BASE,TREE)
+        export,catalog=self.witness_model()
+        export['declarations'][1]['axioms']=['sorryAx']
+        with self.assertRaisesRegex(ValueError,'axiom-dependent'):g.build(export,catalog,BASE,TREE)
+
+    def test_checked_field_witnesses_require_constructor_prefix_and_do_not_complete_type(self):
+        export,catalog=self.witness_model()
+        root=export['declarations'][0]
+        proof=root['binders'][0]
+        root['binders']=[dict(name='n',type='Nat',typeExpr='Nat',isProp=False,references=[])]
+        first=copy.deepcopy(proof);first['name']='first'
+        first['witness'].update(scope='field',index=0,priorBinders=['0'],checkedDeclaration='Checked.R.field0')
+        second=copy.deepcopy(first);second['name']='second'
+        second['witness'].update(index=1,priorBinders=['0','field:0'],declaration='W2',checkedDeclaration='Checked.R.field1')
+        root['fields']=[first,second];root['isTheorem']=False
+        producer=copy.deepcopy(export['declarations'][1]);producer['declaration']='W2';export['declarations'].append(producer)
+        spec=catalog['nodes'][0];spec['completed']=False
+        spec['binderRoles']={'0':{'kind':'parameter','reason':'ordinary data'},'field:0':{'kind':'premise','owner':'proof-owner'},'field:1':{'kind':'premise','owner':'proof-owner'}}
+        catalog['nodes'].append(dict(id='W2',declaration='W2',kind='helper',area='producer',owner='proof-owner'))
+        graph=g.build(export,catalog,BASE,TREE)
+        row=next(n for n in graph['nodes'] if n['id']=='R')
+        self.assertEqual(row['status'],'ready')
+        self.assertEqual([p['status'] for p in row['premises']],['done','done'])
+        self.assertEqual(graph['counts']['dischargedPremises'],2)
+        second['witness']['priorBinders']=['field:0']
+        with self.assertRaisesRegex(ValueError,'prerequisite inventory'):g.build(export,catalog,BASE,TREE)
+
+    def test_checked_helper_identity_cannot_be_replayed_at_another_target(self):
+        export,catalog=self.witness_model()
+        second=copy.deepcopy(export['declarations'][0]['binders'][0])
+        second['name']='second'
+        second['witness'].update(index=1,priorBinders=['0'])
+        export['declarations'][0]['binders'].append(second)
+        catalog['nodes'][0]['binderRoles']['1']={'kind':'premise','owner':'proof-owner'}
+        with self.assertRaisesRegex(ValueError,'duplicate checked witness helper'):g.build(export,catalog,BASE,TREE)
+
+    def test_imported_witness_conflict_requires_diagnostic_body(self):
+        filename='witness-overlay-conflict.lean'
+        setup=dict(fileName=filename,severity='error',data='unknown module prefix WitnessOverlayA')
+        self.assertFalse(verifier.is_witness_conflict_diagnostic(json.dumps(setup)))
+        self.assertFalse(verifier.is_witness_conflict_diagnostic(filename+':1:0: error: unknown module'))
+        real=dict(fileName=filename,severity='error',data='conflicting imported H62 witnesses')
+        self.assertTrue(verifier.is_witness_conflict_diagnostic(json.dumps(real)))
+        duplicate=dict(fileName=filename,severity='error',data="import WitnessOverlayB failed, environment already contains 'H62.CheckedWitness.H62Fixture.root.binder_1' from WitnessOverlayA")
+        self.assertTrue(verifier.is_witness_conflict_diagnostic(json.dumps(duplicate)))
+        duplicate['data']="environment already contains 'Unrelated.declaration'"
+        self.assertFalse(verifier.is_witness_conflict_diagnostic(json.dumps(duplicate)))
 
     def test_bad_lease_and_done_node(self):
         for ttl in (0,-1,float('nan'),float('inf'),86401):
