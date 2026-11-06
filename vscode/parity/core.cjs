@@ -197,9 +197,13 @@ function hostEvidenceErrors(result,config) {
   if(!Array.isArray(result?.scenarios)||!Array.isArray(result?.checks))return [...errors,'missing scenarios/checks'];
   const ids=result.scenarios.map(s=>s.id);
   if(ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length)errors.push('invalid or duplicate scenario IDs');
-  if(config.suite==='custom-default-commands'){
+  if(config.suite==='trace-light-show'){
+    if(config.target!=='dafny'||!ids.includes('native-trace-light-show-hide'))errors.push('missing native light trace observation');
+  }else if(config.suite==='trace-visibility'){
+    if(config.target!=='dafny'||!ids.includes('native-trace-tab-visibility-theme'))errors.push('missing native trace visibility observation');
+  }else if(config.suite==='custom-default-commands'){
     if(!ids.includes('command-custom-default-build-keybinding'))errors.push('missing native default custom command scenario');
-    if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action'])if(!ids.includes(id))errors.push('missing native observation '+id);}
+    if(config.target==='dafny'){for(const id of ['native-trace-show-copy-hide','native-dafny-run-action','native-dafny-test-action','native-trace-lifecycle'])if(!ids.includes(id))errors.push('missing native observation '+id);}
   } else if(config.suite==='custom-commands'){
     if(!ids.includes('command-custom-build-keybinding'))errors.push('missing native custom command scenario');
   } else if(config.suite==='commands'){
