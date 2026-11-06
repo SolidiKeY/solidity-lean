@@ -43,3 +43,31 @@ memory guard. It exited 0 in 1.634 seconds with no diagnostic output; log:
 `/workspace/scratch/h55-vectors-tables/keysort.log`. An initial attempt did not
 run Lean because `/usr/bin/time` was absent; the successful retry used the shell
 timer. No whole-task runtime gate, compile, speed comparison or review is claimed.
+
+## Emitted modules: serial Lean check
+
+`vector_codec.py emit` checks all records against the authenticated original
+bytes, then writes nine Lean files to a new directory outside the checkout. It
+refuses an existing destination. End-to-end tests verify complete emitted bytes,
+no overwrite, and refusal of a changed result before creating the destination.
+The five Python tests pass. The 30 WordTable parts contain 439 theorem
+headings; the 45 FixtureControls files contain 45. These preliminary counts are
+not exact migration case accounting or an owner-approved patch.
+
+`PYTHONDONTWRITEBYTECODE=1 python3 -u scripts/h55/vectors-tables/compile_vectors.py`
+compiled the six local imports and all nine emitted modules, serially, using
+Lean 4.24.0, `LEAN_NUM_THREADS=1`, `-j1`, `--tstack=131072`, and a guard of
+4 GiB against both available host memory and cgroup headroom. Full command and
+per-file outcomes are in `/workspace/scratch/h55-vectors-tables/compile.log`.
+The first attempt failed because the generated source was outside the default Lean
+root; `/workspace/scratch/h55-vectors-tables/compile-attempt1.log` retains
+that failure. The successful retry supplies an explicit root and strengthened
+the memory guard. No source theorem or owner file was edited. This validates the
+emitted declarations against these freshly built imports, not universal opcode
+agreement, full acceptance, or a whole-repository build.
+
+The isolated object cache is `/workspace/scratch/h55-vectors-tables/lean-objects.tar.gz`;
+its SHA-256 is recorded in the external handoff checksum manifest. The baseline
+and post-migration speed comparison, independent finder and skeptic reviews,
+exact Raw case accounting, table migration patches and production owner
+handoffs remain pending. The current compile timings are not that comparison.

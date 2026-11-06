@@ -1,4 +1,7 @@
 import copy
+import json
+import subprocess
+import tempfile
 import importlib.util
 import sys
 import unittest
@@ -19,6 +22,21 @@ class CodecTests(unittest.TestCase):
             self.assertEqual(codec.render(path, records), original, path)
             self.assertEqual(codec.render(path, records), codec.render(path, copy.deepcopy(records)), path)
         self.assertEqual(total, 6903)
+
+    def test_emit_cli_and_reject_changed_output(self):
+        data = {"schema": 1, "files": {p: codec.extract(p, (ROOT / p).read_bytes()) for p in census.PATHS}}
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp); records = base / "records.json"; dest = base / "generated"
+            records.write_text(json.dumps(data))
+            command = [sys.executable, "-B", str(ROOT / "scripts/h55/vectors-tables/vector_codec.py"), "emit", str(records), "--output", str(dest)]
+            self.assertEqual(subprocess.run(command, capture_output=True).returncode, 0)
+            for p in census.PATHS: self.assertEqual((dest / p).read_bytes(), (ROOT / p).read_bytes())
+            self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
+            data["files"][census.PATHS[0]][0]["result"] = "999"
+            records.write_text(json.dumps(data)); rejected = base / "rejected"
+            command[-1] = str(rejected)
+            self.assertNotEqual(subprocess.run(command, capture_output=True).returncode, 0)
+            self.assertFalse(rejected.exists())
 
     def test_mutations_for_every_file(self):
         for path in census.PATHS:

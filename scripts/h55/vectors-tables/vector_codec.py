@@ -66,9 +66,11 @@ def render(path, rows):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("extract", "check"))
+    parser.add_argument("mode", choices=("extract", "check", "emit"))
     parser.add_argument("data", type=Path)
+    parser.add_argument("--output", type=Path)
     a = parser.parse_args()
+    if (a.mode == "emit") != (a.output is not None): parser.error("--output is required only for emit")
     expected = json.loads(census.MANIFEST.read_text())["files"]
     if census.census(census.ROOT) != expected: raise SystemExit("frozen inputs differ")
     if a.mode == "extract":
@@ -78,10 +80,20 @@ def main():
         a.data.write_text(json.dumps({"schema": 1, "files": records}, separators=(",", ":")) + "\n")
     else:
         data = json.loads(a.data.read_text())
-        if set(data) != {"schema", "files"} or data["schema"] != 1 or set(data["files"]) != set(census.PATHS): raise ValueError("inventory/schema")
+        if set(data) != {"schema", "files"} or type(data["schema"]) is not int or data["schema"] != 1 or set(data["files"]) != set(census.PATHS): raise ValueError("inventory/schema")
+        rendered = {}
         for p in census.PATHS:
             output = render(p, data["files"][p])
             if output != (census.ROOT / p).read_bytes(): raise ValueError(f"{p}: output differs")
+            rendered[p] = output
+        if a.mode == "emit":
+            destination = a.output.resolve()
+            if destination.is_relative_to(census.ROOT): raise ValueError("output must remain outside checkout")
+            destination.mkdir(parents=True, exist_ok=False)
+            for p, output in rendered.items():
+                target = destination / p
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(output)
         print("PASS: all 6903 declarations and complete module bytes reproduced")
 
 if __name__ == "__main__": main()
