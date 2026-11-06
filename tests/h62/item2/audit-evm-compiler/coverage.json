@@ -473,6 +473,215 @@
       "classification": "Ordinary fixed-Osaka interface; all data/proof inputs jointly instantiated, no global Producer structure",
       "producer_owner": "master",
       "owner_authority": "Supplied G45.05 owner key and Opcode module G45.05 header"
+    },
+    {
+      "original": "Solidity.Backend.starts_cons",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:53",
+      "source_signature_sha256": "337f62cd980d2537cab893f64442449ac0e8395376c5dbd05d4ef9b36dafa2ee",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case00",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.inPushData_cons",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:57",
+      "source_signature_sha256": "9e2e27f8fb195a8c575c2f912c66cce763db71e3bafcae7dcee7f9dec6b72d7d",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case01",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.mem_starts",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:79",
+      "source_signature_sha256": "8265cbe5a7bd10b61a71c32fe47ab526b55ac11b735105cdc26e417a69b7c2b5",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case02",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.Boundary.cons",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:124",
+      "source_signature_sha256": "680361d111826723fdc99e51c751272ca487e3f9dec1bfba391660bb8d78faca",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case03",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.mem_starts_iff_boundary",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:143",
+      "source_signature_sha256": "4fdf000bcd304405b6acc4ba552d4d5a5335e94bd945d21cb442f7e9a9efe9b7",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case04",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.validJumpdest_iff",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:171",
+      "source_signature_sha256": "abe094d4ea36e1c2d76f67ec1ea0f2148d9c0168be8110475a9123d83b6f24f3",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case05",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.Instr.opcode_eq_jumpdest",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:184",
+      "source_signature_sha256": "b3f1b3407d0e6c30877db880a574052a3afae710cbca58df38725693589501eb",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case06",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.immWidth_opcode",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:194",
+      "source_signature_sha256": "7d6eea5490f1a8591dc216e12fce3d2b8b6569f2bd7d95f09c80b8adde056280",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case07",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.Instr.encode_eq",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:199",
+      "source_signature_sha256": "9808ad938faa4f7f7b457fa0ebb8ce49d413720efbc560da1d8b2cfb17125486",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case08",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.starts_instr_append",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:206",
+      "source_signature_sha256": "a77fdba4fe704b8996a8fa1588422a985e6ac69483c460ce7a33500cb57a9dfb",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case09",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.offset_cons_succ",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:214",
+      "source_signature_sha256": "bff1d9d8a796f6754f1380e0c4fcdd393904b30eea02889cd59d8c4e70107335",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case10",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.offset_append",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:219",
+      "source_signature_sha256": "226dc0f084703917995f980cf0c84e6ea691c2c55091d07806b0f66d2dba6ef2",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case11",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.starts_encode_append",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:226",
+      "source_signature_sha256": "27cf6469509cb7f974ec7220e78e8d47a0197d16b08f08d19d86c71bf8072bb6",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case12",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.getElem?_encode_append_offset",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:247",
+      "source_signature_sha256": "16f369c6fccef312117157b34cf7931836034bd29a81223588003529732d412f",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case13",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.validJumpdest_encode_append",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:269",
+      "source_signature_sha256": "0568e05b6304f8288967317f261dee3f5e9d51ac1f72cd0f892f4e914d6fadbd",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case14",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.validJumpdest_encode_iff",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:279",
+      "source_signature_sha256": "524c2a805d1d93f762befbcfec77543b977eb64e5efc10e9176965b4677fbbdb",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case15",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.offset_lt_size",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:297",
+      "source_signature_sha256": "878f7c592891a22586d989c62b8122f8fb1dd87042bf47bb24a821fcbc261299",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case16",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.validJumpdest_encode_append_iff",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:312",
+      "source_signature_sha256": "acfe4855ac0f2633b10f61f7eb1353af3e31b89330261f24aa00472cce03fbe7",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case17",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
+    },
+    {
+      "original": "Solidity.Backend.validJumpdest_encode_prefix",
+      "statement_id": "Solidity/Backend/Jumpdest.lean:333",
+      "source_signature_sha256": "751bb5fae68389e6d6fb240b1da7c7b446ce4eb439ed0c3bfb41cb467aff73d6",
+      "status": "joint-witness-checked",
+      "proof": "Solidity.H62.EvmCompilerAudit.Jumpdest.case18",
+      "module": "tests/h62/item2/audit-evm-compiler/JumpdestAudit.lean",
+      "classification": "Per-input byte/program data and, where present, dependent boundary/lookup/size proof hypotheses; complete original forall telescope jointly inhabited. No global producer premise.",
+      "producer_owner": "master",
+      "owner_authority": "Supplied G45.05 owner key and frozen Jumpdest module header."
     }
   ]
 }

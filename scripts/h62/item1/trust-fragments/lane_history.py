@@ -74,21 +74,18 @@ def read_commit(commit):
 
 
 def read_current_files(lane_root):
-    result = {}
-    if lane_root.exists():
-        for lane in sorted(lane_root.iterdir(), key=lambda p: p.name):
-            for path in sorted(lane.iterdir(), key=lambda p: p.name):
-                result[f'{lane.name}/{path.name}'] = path.read_bytes()
-    return result
+    return collect.read_lane_files(lane_root)
+
+
+def inventory_from_files(files):
+    inventory = {}
+    for path, data in sorted(files.items(), key=lambda row: tuple(row[0].split('/', 1))):
+        add(inventory, path.split('/', 1)[0], data.decode('utf-8'))
+    return inventory
 
 
 def read_current(lane_root):
-    inventory = {}
-    if lane_root.exists():
-        for lane in sorted(lane_root.iterdir(), key=lambda p: p.name):
-            for path in sorted(lane.iterdir(), key=lambda p: p.name):
-                add(inventory, lane.name, path.read_text(encoding='utf-8'))
-    return inventory
+    return inventory_from_files(read_current_files(lane_root))
 
 
 def preserve(prior, current):
