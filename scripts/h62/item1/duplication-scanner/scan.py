@@ -26,17 +26,17 @@ BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([
 
 ID_REST_CHAR = re.compile("[" + ID_REST + "]")
 
-def signature_coverage(rows):
-    """Guard five-record success being mistaken for selected-scope coverage.
+def signature_coverage(rows, signature_key="fixture_signature", linked_label="local-fixture-linkage"):
+    """Guard partial live binding being mistaken for selected-scope coverage.
 
     This partitions lexical rows, including unsupported and same-spelling rows.
     It does not enumerate generated kernel declarations or establish ownership.
-    Only the live gate may attach fixture_signature before this census runs.
+    Only the live gate may attach its designated signature field before this census.
     """
     entries = []
-    counts = {"local-fixture-linkage": 0, "unresolved": 0}
+    counts = {linked_label: 0, "unresolved": 0}
     for row in rows:
-        status = "local-fixture-linkage" if "fixture_signature" in row else "unresolved"
+        status = linked_label if signature_key in row else "unresolved"
         counts[status] += 1
         entries.append({k: row[k] for k in ("path", "line", "name", "kind")} |
                        {"status": status, "lexical_reject_reason": row["reject_reason"]})
@@ -51,6 +51,33 @@ def live_receipt_hash(binder, output, live):
     if binder.regular(output/"receipt.json")["sha256"] != expected:
         raise ValueError("live scanner receipt hash mismatch")
     return expected
+
+
+def attach_source_bindings(rows, inputs, linked, live, source_path, signature_key="fixture_signature"):
+    """Guard source drift, partial row coverage and stale annotation reuse."""
+    selected = [row for row in rows if row["path"] == source_path]
+    sources = [row for row in inputs if row["path"] == source_path]
+    if not selected or len(sources) != 1:
+        raise ValueError("missing or ambiguous selected source")
+    source_hash = sources[0]["sha256"]
+    if linked["source_sha256"] != source_hash or live["source_sha256"] != source_hash:
+        raise ValueError("scan source differs from live source-location bytes")
+    key = lambda row: tuple(row[k] for k in ("path", "line", "name", "kind"))
+    by_key = {key(row):row for row in linked["rows"]}
+    selected_keys = {key(row) for row in selected}
+    if len(by_key) != len(linked["rows"]) or len(selected_keys) != len(selected) or set(by_key) != selected_keys:
+        raise ValueError("source-location/selected-row coverage mismatch")
+    direct = sum(row["status"] == "direct-source-signature-link" for row in linked["rows"])
+    if direct != linked["linked"] or direct != live["linked"]:
+        raise ValueError("source-location linkage count mismatch")
+    if any(signature_key in row for row in selected):
+        raise ValueError("stale source annotation already present")
+    for row in selected:
+        binding = by_key[key(row)]
+        if binding["status"] == "direct-source-signature-link":
+            row[signature_key] = {k:binding[k] for k in ("declaration", "signature", "selection")}
+            row[signature_key].update(source_path=source_path, source_sha256=source_hash,
+                                      linkage="direct-source-location")
 
 
 def raw_literal(text, i):
@@ -405,9 +432,11 @@ def main():
     binding_options = parser.add_mutually_exclusive_group()
     binding_options.add_argument("--fixture-binding-output", type=Path, help="fresh live five-fixture rebuild directory; never accepts an old receipt")
     binding_options.add_argument("--source-binding-output", type=Path, help="fresh live fixture source-location binding directory; never accepts saved receipts")
+    binding_options.add_argument("--project-binding-output", type=Path, help="fresh live pinned KeySort source binding; never accepts saved receipts")
     args = parser.parse_args()
     root = args.root.resolve()
-    binding_output = args.source_binding_output if args.source_binding_output is not None else args.fixture_binding_output
+    binding_output = (args.project_binding_output if args.project_binding_output is not None else
+                      args.source_binding_output if args.source_binding_output is not None else args.fixture_binding_output)
     if (args.previous is None) != (args.previous_sha256 is None):
         parser.error("--previous and --previous-sha256 must be supplied together")
     if any(Path(pat).is_absolute() or ".." in Path(pat).parts for pat in args.paths):
@@ -425,6 +454,12 @@ def main():
         if args.source_binding_output.exists() or args.source_binding_output.is_symlink():
             parser.error("source binding output must be fresh; saved receipts are not accepted")
         selection["source_binding_contract"] = hashlib.sha256((root/"tests/h62/item1/duplication-scanner/source-location-pins.json").read_bytes()).hexdigest()
+    if args.project_binding_output is not None:
+        if root != Path(__file__).resolve().parents[4] or not args.project_binding_output.is_absolute():
+            parser.error("project binding requires the real checkout root and absolute fresh output")
+        if args.project_binding_output.exists() or args.project_binding_output.is_symlink():
+            parser.error("project binding output must be fresh; saved receipts are not accepted")
+        selection["project_binding_contract"] = hashlib.sha256((root/"tests/h62/item1/duplication-scanner/project-leaf-pins.json").read_bytes()).hexdigest()
     previous = None
     old_inputs, old_statements, old_bodies = {}, {}, {}
     if args.previous is not None:
@@ -564,19 +599,7 @@ def main():
                 live = controller.run(binding_output)
                 binding_receipt_sha = live_receipt_hash(binder,binding_output,live)
                 linked = controller.read_bound_json(binding_output/"source-bindings.json",live["bindings_sha256"])
-            source_hash = next(r["sha256"] for r in inputs if r["path"] == source_path)
-            if linked["source_sha256"] != source_hash or live["source_sha256"] != source_hash:
-                raise ValueError("scan source differs from live source-location bytes")
-            key = lambda row: tuple(row[k] for k in ("path","line","name","kind"))
-            by_key = {key(row):row for row in linked["rows"]}
-            if len(by_key) != len(linked["rows"]) or set(by_key) != {key(row) for row in selected}:
-                raise ValueError("source-location/selected-row coverage mismatch")
-            for row in selected:
-                binding = by_key[key(row)]
-                if binding["status"] == "direct-source-signature-link":
-                    row["fixture_signature"] = {k:binding[k] for k in ("declaration","signature","selection")}
-                    row["fixture_signature"].update(source_path=source_path,source_sha256=source_hash,
-                                                    linkage="direct-source-location")
+            attach_source_bindings(rows,inputs,linked,live,source_path)
             fixture_binding = {"kind":"live-direct-source-location-rebuild","records":linked["linked"],
                                "raw_environment_binding":"unbound","pins_sha256":live["pins_sha256"],
                                "coverage":signature_coverage(rows),
@@ -585,6 +608,31 @@ def main():
                                "boundary":"Only pinned fixture source/name/type linkage. Candidate refusals and ownership checks remain; no global, private/unloaded, proof-body or attestation claim."}
         except (OSError,ValueError,RecursionError) as exc:
             parser.error("live source binding: "+str(exc))
+    if args.project_binding_output is not None:
+        try:
+            if errors or unmatched:
+                raise ValueError("cannot bind incomplete selected inputs")
+            source_path = "Solidity/KeySort.lean"
+            if not any(row["path"] == source_path for row in rows):
+                raise ValueError("selected scope must contain the pinned project source")
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("h62_project_binder",Path(__file__).with_name("bind_project_leaf.py"))
+            controller = importlib.util.module_from_spec(spec); spec.loader.exec_module(controller)
+            binder = controller.binder
+            with binder.writer_lease():
+                live = controller.run(binding_output)
+                binding_receipt_sha = live_receipt_hash(binder,binding_output,live)
+                linked = controller.source_binding.read_bound_json(binding_output/"source-bindings.json",live["bindings_sha256"])
+            attach_source_bindings(rows,inputs,linked,live,source_path,"project_signature")
+            fixture_binding = {"kind":"live-pinned-project-leaf-rebuild", "project_module":"Solidity.KeySort",
+                               "source_path":source_path, "records":linked["linked"],
+                               "execution_binding":"trusted-live-project-leaf", "pins_sha256":live["pins_sha256"],
+                               "coverage":signature_coverage(rows,"project_signature","local-project-linkage"),
+                               "visible_kernel_constants":linked["visible_kernel_total"],
+                               "kernel_without_lexical_link":linked["kernel_without_lexical_link"],
+                               "boundary":"Only pinned unchanged KeySort source/name/type linkage. Anonymous and other selected rows remain unresolved; all candidate refusals and ownership checks remain. No general/private/unloaded/body-equivalence or runtime acceptance claim."}
+        except (OSError,ValueError,RecursionError) as exc:
+            parser.error("live project binding: "+str(exc))
     def alias_reasons(group):
         paths = {row["path"] for row in group}
         return (["shared-resolved-source"]
@@ -655,7 +703,7 @@ def main():
         owner_config_sha256=digest(owners), registry_sha256=hashlib.sha256(registry_bytes).hexdigest(), scanner_sha256=scanner_sha256,
         rejections=dict(by_reason=rejection_counts,
                         unknown_ownership=sum(r["owner"] == "unknown" for r in rows)), errors=errors,
-        **({"fixture_binding": fixture_binding} if fixture_binding is not None else {})),
+        **({("project_binding" if args.project_binding_output is not None else "fixture_binding"): fixture_binding} if fixture_binding is not None else {})),
         sort_keys=True, ensure_ascii=False, indent=2)
     if fixture_binding is not None:
         with binder.writer_lease():
