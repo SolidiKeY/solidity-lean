@@ -10,7 +10,7 @@ private def rejects (request : Json) (expected : String) : IO Unit := do
   | .error actual => unless actual == expected do throw (IO.userError s!"expected {expected}, got {actual}")
   | .ok _ => throw (IO.userError s!"accepted invalid request: {expected}")
 private def controls : IO Unit := do
-  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"))
+  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"))
   let some source := (J.nodes fixture).find? (fun n => J.kind n == "ContractDefinition")
     | throw (IO.userError "missing contract")
   let request := Json.mkObj [("contract", source), ("function", "specified"),
