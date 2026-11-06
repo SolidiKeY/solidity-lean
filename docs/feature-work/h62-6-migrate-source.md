@@ -15,7 +15,7 @@ All original Source files and tracked lean-toolchain remain byte-identical to ba
 | Checkpoint | State | Decisive evidence |
 |---|---|---|
 | 1 Census and clean old baseline | Done, with bounded evidence below | All 199 assigned Source modules / 246 local prerequisites pass; complete old type ledger and hashes |
-| 2 Official release adaptation | Blocked | Exact official pin installed; isolated Ctor repair passes; unchanged original and external dependencies fail; generated API contract unresolved |
+| 2 Official release adaptation | Blocked | Exact official pin installed; isolated Ctor repair passes; unchanged original and external dependencies fail; source-use target validation incomplete |
 | 3 New full build and matched timing | Blocked | 15 target modules pass, 3 fail, 228 import-blocked; no complete target run or valid timing delta |
 | 4 Reviewed migration handoff | Partial | Reviewable unapplied proof patch, tooling and diagnostic artifacts ready; integration/whole migration gate unfinished |
 
@@ -123,7 +123,7 @@ were acknowledged with the committed patch/head/hash. Only their supplied excerp
 were received; the full staged Roadmap payloads have not been obtained or reviewed.
 Their witness/totality/gas/fork queues remain their owners' work.
 
-## Cross-directory failures and unresolved generated API
+## Cross-directory failures and generated-use validation
 
 new-diagnostic-01: **15 pass (5 Source), 3 fail, 228 import-blocked**.
 MS-DEP-HASH: migrate-hash owns CollisionBound, with contains equality failure at407,
@@ -137,20 +137,26 @@ Partial old/new inventories explicitly say complete=false and request 5/199 modu
 2365 old entries,2422 new;18 missing names,75 additions,555 changed raw type/universe
 records,1792 identical. Independent reviews matched139 explicitly named authored
 declarations with identical raw types. This is bounded evidence, not full-directory
-compatibility. Missing16 enum toCtorIdx helpers and2 hygienic names are not waived.
+compatibility. Missing16 enum toCtorIdx helpers and2 hygienic names are recorded compiler-generated
+changes, not frozen source-written statement changes under the coordinator ruling.
 All555 changed rows are generated, but not all changes are alpha/formatting:
 Syn.noConfusion and FrameBudget.noConfusionType change argument structure; Q.isInt's
-generated equation uses a changed BEq Int instance. No textual consumers found is
-not authority to drop an API.
+generated equation uses a changed BEq Int instance. The coordinator has now clarified that generated signatures are outside the
+exact-type freeze; source-written statements and proof budgets remain frozen.
 
-Official4.35 unconditionally generates the new noConfusion signature; no supported
-genNoConfusion legacy-signature control was found. genInjectivity/genCtorIdx do not
-restore it; redeclaring an existing constant is rejected. Custom elaborator work
-would be a major unvalidated change, not an approved workaround. **Q-MS-API-01**
-remains pending: include generated exports in the exact freeze, or obtain the
-root/gate's authoritative authored-export manifest and adjudication of every
-remaining generated difference. Neither option has been selected or approved.
-Scope question and detailed evidence are saved in scope-questions.json.
+**Q-MS-API-01 is resolved by the coordinator.** The exact-type freeze covers
+source-written statements and their proof budgets, not compiler-generated
+auxiliaries such as noConfusion, recOn, casesOn or matchers. Every affected source
+use still must be adapted and every adapted use listed for cut-over review.
+No custom replacement elaborator or restoration of old generated signatures is
+required on the strength of signature differences alone. This clarification does
+not authorize original-file edits, trust changes, budget increases or a passing gate.
+
+The complete old raw declaration/type ledger is a reference superset containing
+both authored and generated declarations. Its hashes do not define the frozen
+contract by themselves. Raw generated differences alone are not migration blockers.
+The earlier scope-question record remains historical evidence; the authoritative
+answer is in h70-generated-scope-resolution/decision.json within the evidence directory.
 
 A bounded semantic bridge in IntegerInstanceSemantics checks Q.isInt=true iff its
 numerator modulo denominator is zero, plus an inhabited zero positive control,
@@ -179,7 +185,7 @@ New scoped document paths and git diff whitespace checks must pass before export
 
 Resume the original persistent goal on this same VM/branch. Do not reset/create a
 goal or self-launch a replacement thread. Root/coordinator must resolve owner
-coordination, external migration overlays and Q-MS-API-01. Then apply approved
+coordination and external migration overlays. Then apply approved
 proof repair, recheck every assigned module under the exact official release,
 reconcile frozen interfaces and standard axioms, run matched clean old/new metrics
 and required full affected/repository gates, fix reviews, and complete the root-gate
@@ -201,3 +207,29 @@ manifest uses sorted keys/indent2. Partial ledgers are rejected; requested modul
 must equal the assigned census and current source bytes must match every frozen
 file SHA. This algorithm hashes compiler representations without asserting
 cross-version semantic equality. Bulk outputs stay off git; the generator is tracked.
+
+## Generated declaration source-use inventory after clarification
+
+generated-uses.py scans exactly the199 owned files, masks comments/strings, and
+records qualified/receiver direct-spelling candidates with line/column and enclosing declaration
+candidates. It includes recursors, matchers, constructor injectivity, equation
+names and ctorIdx. This is lexical navigation, not Lean name resolution; both unqualified explicit references and implicit
+tactic/elaborator references are omitted. Current pinned source has364
+candidates;67 ctorIdx references are in Horizon. No source originals changed,
+so **adapted generated-declaration source uses on this branch: []**.
+
+The Ctor proposal still contains only proposed proof-body adaptations to
+Syn.nodes_eq and Syn.excl_ctor, validated in an isolated fixture. It remains
+unapplied and is not recorded as an accomplished Source edit. Target Source file
+checks, including implicit generated uses, remain blocked by the saved Hash/Raw
+owner dependencies and original-file coordination. Each future actual source-use
+adaptation must enter the cut-over manifest with file/declaration/old/new use and
+proof/statement-budget validation. This preparatory audit rejects every tracked or untracked Source difference.
+It does not accept or validate an adaptation manifest; that validator remains
+future work when approved original-file changes are available.
+
+The latest H70 tickets add consumers, not edit/Lean-restart permissions. The
+migrate-lowering full handoff was requested by exact coordinator staged path and
+SHA in the updated receipt; it has not been delivered or reviewed. Existing
+performance/trust STOP dispositions remain untouched. No new Lean runs were made
+for this policy/documentation update.
