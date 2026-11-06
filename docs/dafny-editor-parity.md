@@ -1535,3 +1535,34 @@ fix. A fresh full suite remains required at the measurement-only follow-up head.
 Checkpoint exports: `/workspace/dafny-parity-handoff-20261106T231530Z/original.patch`, `/workspace/dafny-parity-handoff-20261106T231530Z/HANDOFF.md`,
 `/workspace/dafny-parity-handoff-20261106T231530Z/SHA256SUMS`; exact head/base/source and gate exits are recorded
 in `/workspace/dafny-parity-handoff-20261106T231530Z/SOURCE.json` after commit. Bulk evidence remains outside git.
+
+
+### Handoffs — native hover before certified-request completion (2026-11-06)
+
+The preserved65fc native proof-help trace contains no hover during its proof
+request. A real assertion against that saved trace exits1. Initial computed
+summary/exit labels were explicitly corrected and retained as non-executed
+summary values; the executed receipt is authoritative. No product hover defect
+was established. The existing harness now requests the actual registered
+VSCode provider during the same single genuine certified verification request.
+No verifier pause, injection, extra proof job or deadline/profile change.
+
+Native development observation exits0/partial: exact source comment/signature
+and UTF16 range4:11–13; hoverrequest25/response26 precede current terminal32
+and actual certified response33. Hover wire RTT45ms and proofrequest5632ms
+are single observations, not a performance matrix. Exact provider/report wire
+payloads and stable source URI/version/hash/open/synchronization match. Source
+checks retain local editor-session ownership. PeakRSS4120514560, no resource
+STOP/live survivors.20targeted tests pass; finder/skeptic found no scoped defect.
+
+Pinned HoverTest.cs SHA40f95c3cd72acef186e6ea7adea7aed2e77e8858e1e43f819bcbaa18f5711e5b
+uses NeverVerifies, waits for compilation and confirms hover wins while its
+diagnostics task remains incomplete. Our bounded finishing proof/explicit
+request is a partial corresponding observation, not that entire fixture or
+auto-on-open/rendered-hover/pairedDafny/macOS/lifecycle equivalence. Existing
+row behavior:hover-before-verification-completes remains partial; all489 IDs,
+order, expected fields/frozen270 and judge/gate/budget contracts are unchanged.
+[Checksum-bound evidence](dafny-hover-proof-evidence-manifest.json) stays off git.
+Exact committed-head native/full lightweight checks remain required. Full
+build/TestSuite/timedstrict/trust, metadata/trace producers, hostedCI and the
+entire original performance/paired judgment queue remain unfinished.

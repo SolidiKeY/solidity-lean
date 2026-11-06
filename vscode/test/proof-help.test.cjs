@@ -53,3 +53,18 @@ test('next native trial is not admitted after cleanup identity refusal even when
  const {assertRetirementComplete}=require('../parity/run.cjs');let admitted=false;const previous={error:'identity changed',resources:{cleanup:{remaining:[],identityRefusals:[{pid:1234,birth:'old',error:'identity changed'}]}}};assert.throws(()=>{assertRetirementComplete(previous);admitted=true;},/identity/);assert.equal(admitted,false);
  assert.doesNotThrow(()=>assertRetirementComplete({resources:{cleanup:{remaining:[],identityRefusals:[]}}}));assert.throws(()=>assertRetirementComplete({resources:{cleanup:{remaining:[]}}}),/ownership evidence/);
 });
+
+// Original hover-before-verification obligation: actual ordering, never fake proof authority.
+function injectedHoverWire(){
+ const {workload}=require('../parity/workloads.cjs'),source=workload('local',1,true),expected=require('../parity/proof-help.cjs').proofHoverExpected(source),owner={...binding(),textHash:createHash('sha256').update(source).digest('hex'),protocolOpenIndex:0},value={contents:{kind:'markdown',value:expected.text},range:expected.range},proof=report();proof.results[0].sourceHash=owner.textHash;
+ const client=message=>({direction:'client',message}),server=message=>({direction:'server',message});
+ const rows=[client({method:'textDocument/didOpen',params:{textDocument:{uri:owner.uri,version:owner.version,text:source,synchronizationId:owner.synchronizationId}}}),client({id:1,method:'solidityLean/verify',params:{textDocument:{uri:owner.uri,version:owner.version},options:{certify:true,counterexamples:true}}}),client({id:2,method:'textDocument/hover',params:{textDocument:{uri:owner.uri,version:owner.version},position:expected.position}}),server({id:2,result:value}),server({method:'solidityLean/status',params:{...owner,sourceHash:owner.textHash,state:'complete'}}),server({id:1,result:proof})];return{rows,owner,expected,value,proof};
+}
+test('hover expectation binds exact shared source documentation/signature/UTF16 token range (injected)',()=>{
+ const a=injectedHoverWire(),check=require('../parity/workloads.cjs').assertHoverObservation;check(a.value,a.expected);
+ assert.match(a.expected.text,/function f0\(\) public pure returns \(uint256 result\)/);for(const change of [{contents:{kind:'markdown',value:'nonempty wrong hover'}},{range:{start:a.expected.range.start,end:{...a.expected.range.end,character:a.expected.range.end.character+1}}}])assert.throws(()=>check({...a.value,...change},a.expected));
+});
+test('hover wire observation requires exact source lifetime, order and actual provider/report payload (injected)',()=>{
+ const {verificationHoverOrder}=require('../parity/proof-help.cjs'),accept=a=>verificationHoverOrder(a.rows,1,a.owner,a.expected.position,a.value,a.proof);accept(injectedHoverWire());
+ for(const mutate of [a=>a.rows[2].message.params.textDocument.version++,a=>a.rows[0].message.params.textDocument.synchronizationId='other',a=>a.rows.splice(3,0,a.rows.splice(4,1)[0]),a=>a.rows[3].message={id:2,error:{code:-32800}},a=>a.rows[3].message.result={...a.value,contents:{kind:'markdown',value:'wrong wire'}},a=>a.rows[5].message.result={...a.proof,errors:['wrong']},a=>a.rows.splice(2,0,{direction:'client',message:{method:'textDocument/didChange',params:{textDocument:{uri:a.owner.uri,version:2},contentChanges:[{text:'changed'}]}}}),a=>a.rows.push(a.rows[2])]){const a=injectedHoverWire();mutate(a);assert.throws(()=>accept(a));}
+});
