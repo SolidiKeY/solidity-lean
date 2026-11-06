@@ -94,3 +94,15 @@ a01d358fc628244d078370d728fc485daf58839908a24303446ef33db18a1124  /workspace/aud
 f88b63b7e45cdac6a49d97ecfdaac6a426823a9568439e6ce5f4caa2d493466d  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/integration-audit/timings-before.json
 c73baf228cb39a71bbb1e9d0605497fc868b50da225d258e1fed59a733f9b060  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/integration-audit/timings-before.log
 159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/integration-audit/versions.log
+
+# Full-gate reserve stops and reviewed local artifact-cache recovery
+6a1ba9ab18938058882d5094b250a27e5a5de26c460001c8e23504770146b440  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/artifact-advice-1.json
+2b4b0df764f5eefc4a16df53537b1fa3220d1f27469a635a62646e19af6154dd  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/cache-before-full-2.json
+b23e90aaea789f996d086e99d49ad8203b68888133457441d3d49ffb5a301708  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/cache-before-full.json
+619f8b195ab7b47eb2fb667db309f9fe27139bf37127c55e6cbc14261b73e995  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full-2-resource.json
+4f6e75d1f32fffb4fa1a53273fcc48cf559fc82e1e1d1f6781e82224000800dd  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full-2.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full-2.stderr
+583241e359a3f24360d266f57260e90ab5f3cc0b65b92e20c688c533c5e9da22  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full-resource.json
+8492f10c70e7bf7da6b7cc66734281eb6170a7b00e87fd3a9d9a5e76cc7be3a9  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full.log
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/full.stderr
+4f5fd415662c71a3d0041d078b063e57e57503ebc9a3d59b1d89270e09789afd  /workspace/audit-abi-world-evidence/resume-20261106/checkpoints/artifact-recovery/reviews.md

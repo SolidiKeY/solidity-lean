@@ -384,3 +384,26 @@ its actual outcome, obtain final read-only review and export the exact committed
 head/evidence. The coordinator's reported touched/Bridge passes are reported
 evidence, not a substitute for an unrun local full gate. No RUNTIME_GATE_PASS or
 full assignment completion is claimed at this checkpoint.
+
+### Full-gate resource recovery on the integration tree
+
+First current full attempt stopped at375/6053 after335.149s when its strict
+4GiB reserve was crossed (minimum4273532928bytes); noLeanerrors,cleanuptrue,
+noSwap,oneheavyjob. PowerBounds passed170s. Generated-build advice reclaimed
+only90MB; retry stopped at the same dependency after21.358s, not a passing gate.
+
+The installed Lake uses /home/agent/.cache/lake/artifacts, a separate local
+cache (not a downloaded per-master cache). It held16010 regular artifacts,
+5.308GB. A new additive cache_artifact_advice.py uses the same writer lock,
+rejects liveLean/Lake and symlinked roots, anchors traversal with directoryFDs,
+opens nofollow/nonblocking/read-only, and advises current-UID regular files only.
+It writes/removes no artifacts, changes no budget or reserve accounting, and
+uses no network/globalcache drop. Both independent reviewers accepted it after
+requiring the nonblocking-open safeguard. No source/proof edits were made.
+
+Its first run advised5.308GB with zero errors/skips and observed cgroup current
+fall from5991899136 to500625408bytes. Advice is not guaranteed eviction. The
+previous timing pair remains valid only for its documented generated-build-cache
+conditioning; this artifact advice is separate full-gate memory housekeeping.
+The unchanged full gate will resume using retained completed artifacts and the
+same16hard/12RSS/4reserve/noSwap/onejob policy. Both failed attempts are retained.
