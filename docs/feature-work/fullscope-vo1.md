@@ -1040,3 +1040,50 @@ other statement or scope exit clears them; loop bodies start empty. Controls
 O03 remaining: internal-function inlining, unused-function pruning (open, below),
 redundant `sload`/`mload`/store elimination and LICM (wait for X06 aliasing facts; no
 assumed facts). CSE does not look inside storage/memory reads or across calls.
+
+CSE review (separate read-only finder+skeptic, no Lean server): no soundness defect.
+Finder: the docstring did not distinguish entry creation by `x = e` (pure, independent
+of `x`) from `T x = e` (any `e`; impure entries can never match since `Val.pbeq` is
+`false` outside the pure fragment) — docstring fixed; `get_set_ne'`/`get_set'` copy
+`RunFrame`'s lemmas to avoid importing it (kept). Skeptic: `Prog.cse_empty_runC` is
+premise-free run equality; storage-read entries cannot be reused after a storage write
+(storage-writing statements clear entries, and impure entries never match); coverage
+gaps recorded above (no storage/memory read CSE, nothing across joins or into loops,
+syntactic matching only).
+
+## O03 checkpoint: inlining of internal calls — 2026-11-06
+
+`Optimizer/Inline.lean`. A void internal call with value arguments,
+`.call f args .none body` with `args.allVal = true`, becomes
+`{ T₁ x₁ = e₁; …; Tₙ xₙ = eₙ; body' }` (`inlineBlock`), each argument read past the
+parameters before it (`Val.wk (thinUnder _)`) and `body' := (body.wk (thinTop Γ ps)).2.2`.
+Theorems (exact): `bindArgs_runC` (the declarations evaluate the arguments in
+`Args.evalT`'s order with its halts); `inlineBlock_runC f args h body :
+Stmt.runC (inlineBlock args h body) = Stmt.runC (.call f args .none body)`;
+`ConstFold.Prog.inl_runC P` (no premise); `inl_preserves`. The proof reuses the
+existing `Prog.run_wk`, `TWkRel.drop`, `Prog.wk_over`, `TEnv.off_wk` unchanged; the new
+environment lemmas are `put_top`, `put_under`, `drop_put_top`, `off_top`,
+`off_bot_inj` (an environment is determined by the list of its values).
+Controls (`O03Controls.lean`): `call_inlined` (exact inlined syntax), `inlined_ok`/
+`call_ok` and `inlined_reverts`/`call_reverts` on concrete states, `ret_call_kept`.
+
+Not covered (left as written): calls with return values (`CallRet.val/rets/mem/storage`),
+storage or memory parameters, `callRec`, receiver calls, `try` self-calls; calls
+inside an inlined body are not inlined in the same pass (run it again).
+
+### Unused-function pruning: open
+
+In the lowering IR an internal callee has no table entry: every `Stmt.call` carries its
+callee's body, so an unused internal function has no representation to prune there.
+In Yul (`Stmt.functions ss bodies rest`) pruning a group that `rest` never calls needs a
+strengthening of Yul syntax over `Member` indices and a fuel-shifted simulation of
+`Yul.Closed.evalStmtNode` (the `functions` node consumes one fuel step), which is not
+done. Open, no claim.
+
+### Remaining O03
+
+- Redundant `sload`/`mload`/store elimination and LICM of memory/storage reads: wait for
+  X06 aliasing facts (VX4, wave B); no assumed aliasing facts.
+- LICM of pure expressions: a hoisted expression may fail when the loop runs zero
+  times, so only failure-free expressions could move; not done.
+- Unused-function pruning (above), inlining with return values/reference parameters.
