@@ -818,3 +818,52 @@ Final closed-value addition was independently checked by finder and skeptic:
 all4987 unique rows bind matching initializer body fingerprints and all223
 output hashes verify. Both report no defect; the global documentation failure
 remains explicitly unresolved.
+
+## H70 native entry classification and exact replay attribution
+
+Replayed only the unchanged producer final link, with diagnostic map/trace and
+save-temps flags in an owned output directory. The entire20963016-byte ELF is
+byte-identical to the original(a3f920a74d53ea9f5201cbafa166900efd2495c65b1bd98e7c7ef26990bd8c6a).
+The retained initializer object closes the earlier ephemeral-object gap.
+The replay map assigns all8405 text-symbol rows to6639 unique input sections;
+zero text rows remain unattributed. All569 input identifiers have object/member
+fingerprints or an explicit linker-synthesized classification.
+
+The six previously unmatched names are classified from actual disassembly:
+
+| Name | Replay attribution and observed role |
+|---|---|
+| _start | Scrt1.o: ABI startup transfers main through __libc_start_main. |
+| __do_init | clang_rt.crtbegin.o: guarded exception-frame registration. |
+| __do_fini | clang_rt.crtbegin.o: guarded DSO finalization/frame deregistration. |
+| _init | crti.o prologue and optional weak profiling hook; crtn.o return tail. |
+| _fini | crti.o/crtn.o platform finalization prologue/return. |
+| compact_initialize | Retained initialize.o: dispatcher to206 rewritten module initializers. |
+
+All206 dispatcher calls match both retained C source and actual assembly.
+Zero-size init/fini symbol extents are not invented; both section input
+contributions remain recorded. The map is exact input-section attribution for
+a byte-identical replay, not reconstruction of the historical link process.
+Weak/dynamic callbacks are not declared semantically harmless or excluded.
+
+Full attribution gate passes4.495s,244804KiB in12GiB/no-swap serial scope.
+Six refusal controls pass0.602s,48240KiB: missing range,overlapping ranges,
+truncated input domain,changed original ELF,changed census fingerprint,and
+Python optimization disabling checks. The first overlap fixture incorrectly
+appended a duplicate outside the text section and failed; skeptic identified
+it, the duplicate now sits beside the real startup entry, and the failed
+receipt/maps remain preserved. Finder and skeptic verified the fix and all
+six results, with no remaining finding; neither invoked Lean/server.
+
+Bulk replay ELF/map/objects/disassembly and negative evidence stay outside Git.
+linker-attribution-receipt.json records exact commands,exits,wall/RSS,script
+hashes and archive path/size/hash with complete member readback. No producer,
+Lean source,theorem,axiom,budget or trust boundary changed. No semantic absence
+certification or RUNTIME_GATE_PASS is claimed. Existing browser,live four-case
+certification and relayed documentation waits remain; no duplicate ticket.
+
+Finder and skeptic also verified final archive/member hashes and compact
+receipt consistency. Owned-document paths and Python syntax/whitespace checks
+pass. The four unchanged global documentation failures remain with the
+existing relayed owners; they were not masked or re-run unchanged. Exact
+browser handoff and request-journal hashes still match the accepted bytes.
