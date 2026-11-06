@@ -1,5 +1,13 @@
 # H62 item 1 infer helpers — preliminary handoff
 
+Current live status (2026-11-06): the canonical helper and test import shim are
+approved by coordinator decisions #47/#49. Both production inferencer files
+remain unchanged, including their generated public equations. Decision #50
+authorizes the four own-lane conversion conditions to pass `Γ.mapFree` exactly
+as current master requires. Scoped Lean 4.24 checks pass; the original full
+assignment and its isolated migration/acceptance obligations remain unfinished.
+The older preparation sections below are retained historical checkpoints.
+
 Base: c6f550e281a7e5affa9a99bc2cdaed556dec00e4. This is an incomplete
 inventory, not a completed checkpoint. Scope is the copied helpers only;
 H55 retains both inferencers and their relations.
@@ -382,3 +390,46 @@ await the conditional owner decision. No statement change, axiom addition,
 budget change or source push is claimed. Both read-only reviewers identified
 the generated API issue; the finder also identified the audit script's test-shim
 assumption, whose draft fix is preserved with the migration.
+
+## Accepted canonical agreement interface (#49/#50)
+
+The canonical module is registered at `Solidity/Source/InferHelpers.lean`.
+The former test module imports it, preserving the public shared namespace
+without duplicate definitions. Production helpers retain their original
+match-shaped definitions. `SharedAgreement.lean` and `SharedConsumers.lean`
+provide the pointwise and exact-consumer interface; no full-inferencer
+equivalence is claimed. The original plain-alias proposal remains a historical
+review artifact, not the accepted production patch.
+
+Exactly these four own-lane declarations now thread the existing `Γ.mapFree`
+argument into their conversion condition, with no other premise change:
+
+- `Solidity.H62.InferHelpers.source_conv_elem` in `CaseSpecifications.lean`.
+- `Solidity.H62.InferHelpers.static_conv_elem` in `CaseSpecifications.lean`.
+- `Solidity.H62.InferHelpers.source_convElem_mem` in `CompletenessCompatibility.lean`.
+- `Solidity.H62.InferHelpers.SharedConsumers.shared_convElem_mem` in `SharedConsumers.lean`.
+
+The fresh scoped run passes KeySort, all three helper test modules, the shim,
+the eight agreement declarations, three shared consumers and 31 named census
+queries. The environment-level API check confirms all 16 original branch
+equation signatures and six dependent matcher signatures. No axiom beyond
+`propext`, `Classical.choice` and `Quot.sound` is recorded; the shared rules
+and observation equalities are axiom-free. Six scanner regressions pass.
+Read-only finder and skeptic reviews accept statement and resource fidelity.
+
+The serial driver now uses package `weakLeanArgs = ["-j1"]` instead of treating
+thread count as a semantic artifact-cache input. Explicit per-process `-j1`,
+12 GiB/no swap and the 4 GiB headroom guard remain unchanged. The published
+master cache at ac9d8db2ad was checksum-verified and its Lean 4.24 toolchain
+matched. Cache reuse remains conditional on Lake's input hashes. One checkpoint
+was interrupted for this driver repair; a subsequent import build was stopped
+by the headroom guard after cache extraction. Clean intake file-cache pages
+were released without deleting files or relaxing limits, and the affected
+import closure then passed. Canceled/stopped attempts are not passing gates
+or a valid before/after timing comparison.
+
+Final whole-library gate outcomes and exact source bindings are recorded in
+the external `/workspace/sol-numeric-literals-helper-migration/` handoff.
+The shared G07 inventory is left to its separate reconciliation job (H67).
+This module also resolves this lane's missing documentation reference reported
+by the memory-reference owners; unrelated documentation tickets remain routed.

@@ -151,14 +151,14 @@ def static_payable {Γ : Ctx} {x : Syn .expr} {σ : STy}
 /-- Preserve the conversion check and result type with the source location helper. -/
 def source_conv_elem {Γ : Ctx} {x : Syn .expr} {σ : STy}
     (el : Elem) (h : el ≠ .addressPayable) (d : Typed Γ x σ)
-    (he : σ.explicit Γ.isBase (el.ty σ.convLoc) = true) :
+    (he : σ.explicit Γ.isBase Γ.mapFree (el.ty σ.convLoc) = true) :
     Typed Γ (.call (.elemType el h) (.positional (.cons x .nil))) (el.ty σ.convLoc) :=
   .convElem d rfl he
 
 /-- Preserve the conversion check and result type with the static location helper. -/
 def static_conv_elem {Γ : Ctx} {x : Syn .expr} {σ : STy}
     (el : Elem) (h : el ≠ .addressPayable) (d : Typed Γ x σ)
-    (he : σ.explicit Γ.isBase (el.ty (Solidity.Frontend.Static.convLoc σ)) = true) :
+    (he : σ.explicit Γ.isBase Γ.mapFree (el.ty (Solidity.Frontend.Static.convLoc σ)) = true) :
     Typed Γ (.call (.elemType el h) (.positional (.cons x .nil)))
       (el.ty (Solidity.Frontend.Static.convLoc σ)) :=
   .convElem d rfl he

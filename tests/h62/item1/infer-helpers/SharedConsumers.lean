@@ -24,7 +24,7 @@ theorem shared_delete_res {Γ : Ctx} {a : Syn .expr} {τ : STy}
 theorem shared_convElem_mem {Γ : Ctx} {el : Elem} {h : el ≠ .addressPayable}
     {x : Syn .expr} {σ : STy} {dx : Typed Γ x σ}
     (hx : Res.expr dx ∈ infer Γ x)
-    (he : σ.explicit Γ.isBase (el.ty (Shared.convLoc σ)) = true) :
+    (he : σ.explicit Γ.isBase Γ.mapFree (el.ty (Shared.convLoc σ)) = true) :
     Res.expr (Typed.convElem (h := h) dx rfl
       (by simpa only [source_location] using he)) ∈
       infer Γ (.call (.elemType el h) (.positional (.cons x .nil))) :=

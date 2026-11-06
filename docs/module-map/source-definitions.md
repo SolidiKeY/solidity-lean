@@ -87,6 +87,9 @@
 | `Source/Agreement/Locals.lean` | Intrinsic primitive contexts, total related local environment producer and locals-only state projection. |
 | `Source/Agreement/NormalStatement.lean` | Unproved one-way normal-result locals obligation over actual source/model evaluators; whole-step simulation remains VY5 H16 work. |
 | `Source/MonetaryFit.lean` | BalancesFit writer inventory: initial state, `deploy`'s two account writes, generic fitting/same-balance account updates, `Authority.writeSource` under an explicit range premise and its guarded `writeSourceChecked?`; satisfiable transfer witness and unguarded/wide-authority negative controls. Per-writer laws, not whole-evaluator reachability. |
+# Shared inference helpers
+
+| `Source/InferHelpers.lean` | Canonical shallow mapping, payable-argument and conversion-location helpers for the source/static pointwise agreement interface; exact rule equations and branch controls. |
 # Source agreement producers
 
 | `Source/Agreement/NormalBoolBindings.lean` | Actual boolean literal initializer normal-step producer and two-initializer composition, retaining primitive locals only. |
