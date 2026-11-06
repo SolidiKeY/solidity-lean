@@ -52,10 +52,29 @@ def classify(source, curated):
     expected = {row["id"] for row in declarations if row["file"] in files}
     if set(reviewed) != expected:
         raise ValueError("reviewed file has unaccounted declarations")
+    owners = curated.get("semantic_owner_by_file", {})
+    source_hashes = {row["path"]: row["sha256"] for row in source.get("sources", [])}
+    if not isinstance(owners, dict):
+        raise ValueError("invalid semantic-owner map")
+    for file, owner in owners.items():
+        if file not in known_files or not isinstance(owner, dict):
+            raise ValueError("unknown semantic-owner file")
+        if owner.get("source_sha256") != source_hashes.get(file) or file not in source_hashes:
+            raise ValueError("semantic-owner source hash differs")
+        if (owner.get("status") != "confirmed"
+                or owner.get("authority_kind") != "coordinator-user-answer"
+                or not isinstance(owner.get("owner"), str) or not owner["owner"].strip()
+                or not isinstance(owner.get("authority"), str) or not owner["authority"].strip()):
+            raise ValueError("semantic owner lacks explicit authoritative confirmation")
     result = []
     for original in declarations:
         row = {key: original[key] for key in ["id", "file", "line", "source_name", "signature_sha256"]}
-        row["semantic_owner_status"] = "unresolved; migration scope does not establish live semantic ownership"
+        if original["file"] in owners:
+            row["semantic_owner"] = dict(owners[original["file"]])
+            row["semantic_owner_status"] = "confirmed: " + owners[original["file"]]["owner"]
+        else:
+            row["semantic_owner"] = {"status": "unresolved"}
+            row["semantic_owner_status"] = "unresolved; migration scope does not establish live semantic ownership"
         if original["id"] in reviewed:
             row.update(role_status="reviewed static source classification", roles=reviewed[original["id"]])
         else:
@@ -64,7 +83,7 @@ def classify(source, curated):
     return {"schema_version": 1, "base": source["base"], "source_census_sha256": EXPECTED_CENSUS,
             "boundary": "Static source classification only; kernel identity, joint feasibility and semantic-owner confirmation remain separate",
             "counts": {"source_candidates": len(result), "role_reviewed": len(reviewed),
-                       "role_pending": len(result)-len(reviewed), "semantic_owners_unresolved": len(result),
+                       "role_pending": len(result)-len(reviewed), "semantic_owners_unresolved": sum(row["semantic_owner"]["status"] != "confirmed" for row in result),
                        "new_joint_witnesses": 0}, "declarations": result}
 
 
