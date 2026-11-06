@@ -345,3 +345,165 @@ is due within the requested 3–5-item window using this same VM, branch and exi
 goal. No replacement goal/thread, competing continuation, push, merge, pre-gate,
 publication or deployment is created. Exact new committed head and patch hashes
 will be saved in the external H70 handoff/report after committing this item.
+
+
+## H70 follow-up: parser-resolved source signatures and partial Hash receipt
+
+Fourth reviewed backfill item. All four original checkpoints remain unfinished.
+The 23 source-header ambiguities reported above are now resolved **at the source
+parser level**. Exact elaborated/kernel signatures, implicit generalization,
+live file ownership, joint feasibility and actual compiler contracts remain
+pending. No original interface statement has been edited or replaced.
+
+### Source inventory and fidelity
+
+The additive `HeaderParser.lean` imports only pinned toolchain `Lean`, obtains
+the compiler's already-loaded environment, and runs `Parser.Command.declSig` on
+retained source text. Only this helper's definitions elaborate. No frozen source
+declaration, proof body or imported Solidity interface is elaborated by this
+tool. It does not initialize dynamic modules, invoke unsafe APIs, execute frozen
+proofs, add an axiom or bypass kernel checking. It is outside production roots;
+the intrinsic dependency-free core and generated registration remain unchanged.
+`parse-headers.py` supplies explicit serial/resource bounds and frozen input span
+checks, then records parser positions as both UTF8 bytes and character offsets.
+
+All **3,932 theorem/lemma source signatures** across 439 mapped files parsed
+successfully with zero errors, including all 23 previously ambiguous nested-match
+headers. All 4,141 original source identities and 550 mapped modules are retained.
+The 209 record/class source regions and 711 own-field candidates remain accounted
+for; their inherited/default/implicit fields still require kernel reconciliation.
+Source header binder candidates return from 19,796 to 20,114 after the 23 missing
+headers are restored. A parser boundary is not an inferred Lean hypothesis count.
+
+The proof separators are 3,875 `:=`, 54 equation-arm `|`, and three `where`.
+After ignoring outer whitespace, exactly three previously nonempty lexical
+headers also needed correction: they included the first field of a `where`
+proof. The parser now stops at the complete unchanged statement before that proof:
+
+- `Solidity.Backend.AbiEntry.Interface.SourceEntryAgreement.of_exact_result`
+  (`Solidity/Backend/AbiEntry/Interface.lean`).
+- `Solidity.Backend.MemoryCopies.snapshot_paths_of_mirror`
+  (`Solidity/Backend/MemoryCopies/SnapshotPaths.lean`).
+- `Solidity.Backend.TryCall.PanicControls.entry`
+  (`Solidity/Backend/TryCall/PanicControls.lean`).
+
+These were inventory boundary defects, not theorem weakening. No repair to these
+original declarations was performed. Source spellings, especially private or
+mutual declarations, are still not asserted to be exact kernel FQNs. Section
+variables and inferred binders remain an elaboration obligation. The updated
+census has zero unresolved theorem-source boundaries, but **zero verified kernel
+signatures, new simultaneous witnesses, live-file-owner confirmations and public
+compiler-contract credits**. EntryAudit remains byte-identical and local only.
+
+The optional `--parsed-headers` reconciliation input validates each source ID,
+path/line/name tuple, full frozen-region hash, signature hash, syntax kind,
+character and UTF8 spans, proof separator and summary counts. Duplicate IDs,
+forged spans and proof-credit claims are rejected. Complete original source
+regions are retained even when a parser diagnostic occurs. Parser errors save
+that evidence and return failure; success is not silently substituted for an
+unparsed statement.
+
+### Exact CopyPaths ticket inventory
+
+`copypaths-inventory.json` contains all nine source declarations and retained
+record fields from these exact frozen files, with current hashes, source
+signatures, area routes and pending statuses:
+
+- `Solidity/Backend/MemoryCopies/CopyPathInterface.lean` SHA256
+  `b9caa03d5afc851783d9a2c5746569165a473f9c41e8221bc13b2941a067e368`.
+- `Solidity/Backend/MemoryCopies/CopyPaths.lean` SHA256
+  `ab6f22502371e7731cc53c7184a6d9767e1783233d42b0cdc755a8a0376b6ccf`.
+
+The coordinator reports ticket destinations
+`solidity-copy-recovery-20261030/memory-storage-copy` and
+`solidity-v07-v11-20261030/v11-memory-operations`, with no pending current-owner
+delivery. That establishes neither agreement nor file ownership. Exact V11/CR
+CopyPaths ownership remains unresolved. No live-owner confirmation or original-
+file edit permission is inferred. The source census still separates roadmap
+responsibility, source writer/dependency roles and exact file ownership.
+
+### Received Hash patch: checksum and applicability only
+
+The coordinator supplied patch text from migrate-hash ticket head
+`78c110f83dc1a30700acd1b5bd34b19f61da6ccd`, reporting source head
+`2a18afcdba00a85645b0b3079704f78ffcd78860`. Neither owner commit was fetched or
+imported here. After correcting one transcription context-space, the preserved
+patch exactly matches the advertised SHA256
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+`git apply --check` passes against the unchanged local Hash file, whose Git blob
+is `b54c93a5b24340a19160c1fb378d057ccee60f84`. The patch has **not been applied**,
+committed as an original-file edit, or used to certify a compatible prerequisite
+bundle. Its bytes remain off git; a small owner receipt and checksums are saved.
+
+Full Hash migration gates, Syntax.Raw and the compatible Backend/AbiEntry
+prerequisites remain pending as reported. No owner validation, proof budget,
+axiom guard change, cut-over or new ownership is implied by the relay. Kernel
+feasibility and compiler-success work continue to wait for compatible reviewed
+owner results. The existing one-entry V1 capacity escalation remains unchanged;
+no new statement weakening or H55 repair implementation is introduced.
+
+### Verification, failed experiments and review
+
+Final parser command (exact argv/environment in `command.json`):
+`LEAN_NUM_THREADS=1` pinned Lean 4.35.0 with `-j1 -M8192 --tstack=131072`
+on the additive `HeaderParser.lean`, with explicit task-specific input/output
+paths. The resource wrapper enforces 12GiB address space, no host swap, 4GiB
+available-memory reserve and a 300s stop. No systemd-run or Lean server was used.
+The final all-theorem parser pass took 2.119s, 1,623,600KiB max RSS; the earlier
+complete pass took 1.970s. These are parser-tool measurements (about +7.6%), not
+whole-project checking performance acceptance. Existing proof checking was not
+refactored. Full affected/final gates and end-to-end timing remain pending.
+
+Early experiments failed at sysroot lookup or dynamic parser-extension loading;
+those logs are preserved and not passing gates. Final extraction uses the
+compiler's existing standard environment and no unsafe dynamic initializer API.
+Skeptic found that individual parse errors initially left the CLI exit at zero;
+fixed to preserve the error report and return exit 1. The end-to-end malformed-
+header regression records helper compilation exit 0, one parser error and CLI
+exit 1. No malformed source declaration is elaborated as a theorem.
+
+`check-header-inventory.py` passes: 3,932 source prefixes, equality of all 23 subset
+results, 2,647 Unicode-sensitive byte/character spans, the three `where` proof
+boundaries, exact original identities, eight forged-metadata rejection cases,
+negative CLI failure and all public/kernel/witness credits still zero.
+Prior H70 reconciliation acceptance is also retained. Deterministic reconciled
+census/TSV/escalation outputs are generated twice and byte-compared.
+
+Independent finder and skeptic used no Lean server/builds or writes. Both
+checked the complete source inventory and final parser boundaries; skeptic's
+failure-status finding was fixed and regression-tested. Final narrow reviews
+pass. All original production/Source files, axiom pins, toolchain configuration
+and EntryAudit remain unchanged. No new `sorry`, `axiom`, `native_decide`, unsafe
+API, proof-budget increase, push, merge, pre-gate or publication is introduced.
+
+Bulk evidence is in `/workspace/h62-audit-memory-headers-evidence`. The committed
+small source-header manifest binds parser outputs, received patch, receipts,
+regression logs, CopyPaths inventory and reviewed handoff inputs. The deterministic
+generators and tests remain in the assigned scripts/tests directories.
+
+This is the fourth reviewed backfill item in the requested 3–5-item window.
+Coordinator fresh-thread handoff is due using the same original VM, branch and
+existing goal. No replacement goal or competing continuation is created. Resume
+only with verified compatible owner prerequisites and exact owner replies;
+complete all remaining witnesses, real compiler success/negative/gas/fork
+contracts and full fidelity/final gates before any completion claim.
+
+
+Latest routing receipt: migrate-hash head
+`a3f49ee0ec1829e63022c90194048d5a1ffe0d22` reports the same partial patch and
+checksum. Its `/home/guilherme/.local/state/cloudvm-coord/receipts/router-20261106T160530Z/`
+host receipt path is recorded but was not retrieved from this VM. The received
+message bytes are the locally checksum-verified artifact; no full affected gate,
+owner source commit import or Source/Raw readiness is implied.
+
+**Conservative STOP observation:** the two final Python reconciliation runs took
+4.276746s and 5.034220s (+17.7%). They produced byte-identical census/TSV/ledger
+outputs, but this repeat increase exceeds 10%. No further heavy checks or
+performance-sensitive changes are run after observing it; no performance
+acceptance is granted. This is not a controlled before/after Lean proof-checking
+comparison and does not establish such a regression. The production Lean code
+is unchanged. `timing-stop.json` retains the exact values and calls for the
+coordinator/fresh thread to conduct controlled measurement under unchanged
+limits, without rerunning simply to obtain a passing sample. The fourth
+source-work item is reviewed and saved, with acceptance still partial; all
+original checkpoints and required performance/final gates remain unfinished.

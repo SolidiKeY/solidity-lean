@@ -119,7 +119,7 @@ def field_regions(region, body_start):
         fields.append(dict(name=match[2],source=text,start=start,end=end,categories=tags,role=role))
     return fields
 
-def classify(row):
+def classify(row, parsed_header=None):
     region = row["source_command_region"]
     clean = census.mask(region)
     end, body = prefix_end(clean,row["kind"])
@@ -129,6 +129,10 @@ def classify(row):
         boundary = "unresolved; full original source region retained, proof not classified as header"
     else:
         prefix = region[:end]
+    if parsed_header is not None:
+        end = parsed_header["header_end"]
+        prefix = region[:end]
+        boundary = "Lean-parser source signature boundary; kernel/inferred signature pending"
     binders = outer_binders(prefix) if prefix else []
     fields = field_regions(region,body) if row["kind"] in ("structure","class") else []
     combined = "\n".join(b["type_source"] for b in binders)
@@ -165,7 +169,43 @@ def classify(row):
         global_inhabitation_status="not established by source classification",
         per_input_feasibility_status="not established by global record existence")
 
-def reconcile(root, source, routes, ownership, ownership_path):
+def validate_parsed_headers(source, report):
+    identities = {r["source_id"]:r for r in report["identities"]}
+    if len(identities) != len(report["identities"]): raise ValueError("Duplicate header identity")
+    result = {}
+    seen = set()
+    for header in report["results"]:
+        index = header["source_id"]
+        if index in seen or not 0 <= index < len(source["declarations"]): raise ValueError("Duplicate/invalid header source id")
+        seen.add(index)
+        row = source["declarations"][index]
+        identity = identities.get(index)
+        if identity is None or (identity["path"],identity["line"],identity["source_name"]) != (row["path"],row["line"],row["name"]):
+            raise ValueError("Header source identity mismatch")
+        if row["kind"] not in ("theorem","lemma"): raise ValueError("Header target is not a theorem")
+        if header["status"] != "source-parsed": continue
+        if header["syntax_kind"] != "Lean.Parser.Command.declSig": raise ValueError("Unexpected header syntax kind")
+        region = row["source_command_region"]
+        prefix = header["header_source"]
+        if header["source_region_sha256"] != digest_text(region): raise ValueError("Header frozen source hash mismatch")
+        if header["header_sha256"] != digest_text(prefix): raise ValueError("Header hash mismatch")
+        end = header["header_end"]
+        if not 0 < end < len(region) or prefix != region[:end]: raise ValueError("Header character span mismatch")
+        if header["header_end_utf8"] != len(prefix.encode()): raise ValueError("Header UTF8 span mismatch")
+        if not region[end:].lstrip().startswith((":=","|","where")): raise ValueError("Header does not precede proof delimiter")
+        result[index] = header
+    if seen != set(identities): raise ValueError("Header result inventory mismatch")
+    expected = dict(requested=len(seen),source_parsed=len(result),parse_errors=len(seen)-len(result))
+    if any(report["counts"].get(key) != value for key,value in expected.items()):
+        raise ValueError("Header summary count mismatch")
+    if report["counts"].get("kernel_signatures") != 0 or report["counts"].get("simultaneous_witness_credits") != 0:
+        raise ValueError("Source parser cannot grant proof credits")
+    return result
+
+def digest_text(text):
+    return hashlib.sha256(text.encode()).hexdigest()
+
+def reconcile(root, source, routes, ownership, ownership_path, parsed_headers=None):
     items = {i["id"]: i for i in ownership["items"]}
     evidence_catalog = {}
     def evidence(ref):
@@ -213,14 +253,16 @@ def reconcile(root, source, routes, ownership, ownership_path):
         module_routes[path] = prepared[rule["id"]]
         modules.append(dict(**original,area_route_rule=rule["id"],routing=module_routes[path]))
     rows = []
-    for row in source["declarations"]:
+    parsed = validate_parsed_headers(source,parsed_headers) if parsed_headers is not None else {}
+    for index, row in enumerate(source["declarations"]):
         key = (row["path"],row["name"].rsplit(".",1)[-1])
         override = overrides.get(key)
         if override: used[key] += 1
         raw = (root/row["path"]).read_text()[row["source_start"]:row["source_end"]]
         if raw != row["source_command_region"]: raise ValueError("Source span mismatch")
         rows.append(dict(**row,area_routing=override or module_routes[row["path"]],
-            declaration_owner_override=bool(override),premise_bundle=classify(row)))
+            declaration_owner_override=bool(override),premise_bundle=classify(row,parsed.get(index)),
+            parser_header_status="source-parsed" if index in parsed else "not supplied; lexical candidate only"))
     if any(used[k] != 1 for k in overrides): raise ValueError("Override not used exactly once")
     identities = [(r["path"],r["line"],r["name"]) for r in rows]
     if len(identities) != len(set(identities)): raise ValueError("Duplicate source identity")
@@ -231,6 +273,8 @@ def reconcile(root, source, routes, ownership, ownership_path):
         counts=dict(source["counts"],area_routed_declarations=len(rows),
             source_field_candidates=sum(len(r["premise_bundle"]["fields"]) for r in rows),
             source_header_binders=sum(len(r["premise_bundle"]["binders"]) for r in rows),
+            parser_source_signatures=len(parsed),
+            unresolved_source_headers=sum(not r["premise_bundle"]["header_source"] for r in rows),
             bundle_classes=dict(sorted(count.items())),area_owner_routes=dict(sorted(owner_count.items())),
             exact_live_file_owner_confirmations=0,kernel_verified_signatures=0,
             public_compiler_contract_credits=0),
@@ -266,14 +310,16 @@ def main():
     p.add_argument("--owners",type=pathlib.Path,required=True)
     p.add_argument("--routes",type=pathlib.Path,required=True)
     p.add_argument("--output",type=pathlib.Path,required=True)
+    p.add_argument("--parsed-headers",type=pathlib.Path)
     p.add_argument("--findings",type=pathlib.Path)
     p.add_argument("--escalations",type=pathlib.Path)
     p.add_argument("--uncovered",type=pathlib.Path)
     a = p.parse_args()
-    result = reconcile(a.root.resolve(),json.loads(a.census.read_text()),json.loads(a.routes.read_text()),json.loads(a.owners.read_text()),a.owners.resolve())
+    result = reconcile(a.root.resolve(),json.loads(a.census.read_text()),json.loads(a.routes.read_text()),json.loads(a.owners.read_text()),a.owners.resolve(),json.loads(a.parsed_headers.read_text()) if a.parsed_headers else None)
     if a.findings:
         attach_findings(a.root.resolve(),result,json.loads(a.findings.read_text()))
     result["input_sha256"] = {str(v.resolve()):sha(v) for v in (a.census,a.owners,a.routes)}
+    if a.parsed_headers: result["input_sha256"][str(a.parsed_headers.resolve())] = sha(a.parsed_headers)
     if a.findings: result["input_sha256"][str(a.findings.resolve())] = sha(a.findings)
     if a.escalations:
         lines = ["ESCALATE: "+f["qualified_statement"]+"; evidence: "+f["finding"]+" Sources: "+", ".join(e["path"] for e in f["evidence"])+"; options: "+" | ".join(f["repair_options"]) for f in result.get("source_findings",[])]
