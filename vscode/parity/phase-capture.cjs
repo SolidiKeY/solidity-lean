@@ -1,7 +1,7 @@
 // Fresh-launch, acknowledged phase screenshots. A callback success without image bytes is insufficient.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),{randomUUID}=require('node:crypto');
-const phases=['open','first-feedback','verified','proof-broken','proof-fixed'].flatMap(phase=>[phase,phase+'-hover']);
+const phases=[...['open','first-feedback','verified','proof-broken','proof-fixed'].flatMap(phase=>[phase,phase+'-hover']),'trace-shown','trace-copied','trace-hidden'];
 function terminal(state){return !!state&&(['complete','error','cancelled'].includes(state.state)||state.namedVerifiables?.length>0&&state.namedVerifiables.every(s=>s.status>=4));}
 function outcome(state){
   if(state?.namedVerifiables?.length){const statuses=state.namedVerifiables.map(s=>s.status);return statuses.every(s=>s===5)?'proved':statuses.every(s=>[4,5].includes(s))&&statuses.includes(4)?'failed':null;}

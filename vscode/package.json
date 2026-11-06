@@ -65,6 +65,10 @@
       {
         "command": "solidityLean.test",
         "title": "Solidity Lean: Run Concrete Typed-Model Tests"
+      },
+      {
+        "command": "solidityLean.buildCustomArgs",
+        "title": "Solidity Lean: Build Compiler Artifact with Import Options"
       }
     ],
     "submenus": [
@@ -126,6 +130,11 @@
           "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
           "command": "solidityLean.test",
           "group": "0_execution@2"
+        },
+        {
+          "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted",
+          "command": "solidityLean.buildCustomArgs",
+          "group": "0_execution@3"
         }
       ]
     },
@@ -258,6 +267,12 @@
         "command": "solidityLean.test",
         "key": "shift+f5",
         "mac": "shift+f5",
+        "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
+      },
+      {
+        "command": "solidityLean.buildCustomArgs",
+        "key": "f6",
+        "mac": "f6",
         "when": "editorTextFocus && editorLangId == solidity && resourceScheme == file && isWorkspaceTrusted"
       }
     ]
