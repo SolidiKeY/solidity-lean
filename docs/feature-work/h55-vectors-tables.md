@@ -99,3 +99,17 @@ text. The first schema matched only 438 headings because it omitted
 unrecognized theorem headings. Attempt-one data and manifest are preserved in
 that scratch directory. This transcribes proof bodies, does not synthesize them,
 compile them, or provide an owner-approved production migration patch.
+
+## Raw source census preparation
+
+`raw_census.py` pins all 102 Raw source files and records eight inductive headings,
+20 recognized constructor headings, and 1,839 candidate branch lines. Detailed
+line records are off Git at `/workspace/scratch/h55-vectors-tables/raw-census.json`,
+with a committed checksum; a second extraction matched byte-for-byte. All 102
+source hashes match the published base. Negative controls exercise missing and
+extra files, missing, extra, changed and reordered-looking branch declarations,
+and a changed family schema. The candidate-line scan is textual and may include
+non-case syntax or omit cases not written at line starts. It does not establish
+semantic case accounting or prove that any parametrisation preserves behavior.
+All source-file migrations, meaningful Lean validation and owner handoffs remain
+pending. Eleven Python tests passed after the WordTable correction.
