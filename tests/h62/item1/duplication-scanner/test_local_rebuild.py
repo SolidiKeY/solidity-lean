@@ -148,6 +148,21 @@ class LocalRebuildControls(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"symlink"):
             binding.companion_artifacts(artifacts)
 
+    def test_coverage_retains_unbound_same_spelling_and_rejected_rows(self):
+        rows=[{"path":"A.lean","line":1,"name":"same","kind":"theorem","reject_reason":None,"fixture_signature":{}},
+              {"path":"B.lean","line":1,"name":"same","kind":"theorem","reject_reason":None},
+              {"path":"A.lean","line":9,"name":"unsupported","kind":"def","reject_reason":"missing-top-level-definition"}]
+        report=binding.scanner.signature_coverage(rows)
+        self.assertEqual(report["counts"],{"local-fixture-linkage":1,"unresolved":2})
+        self.assertEqual([(r["path"],r["line"],r["status"]) for r in report["rows"]],
+                         [("A.lean",1,"local-fixture-linkage"),("B.lean",1,"unresolved"),("A.lean",9,"unresolved")])
+        self.assertEqual(report["rows"][-1]["lexical_reject_reason"],"missing-top-level-definition")
+        self.assertFalse(report["complete_signature_coverage"])
+        self.assertFalse(report["ownership_verified"])
+
+    def test_empty_scope_cannot_claim_complete_signature_coverage(self):
+        self.assertFalse(binding.scanner.signature_coverage([])["complete_signature_coverage"])
+
     def scan(self,root,pattern,output):
         return subprocess.run([sys.executable,"-B",str(ROOT/"scripts/h62/item1/duplication-scanner/scan.py"),str(root),pattern,"--fixture-binding-output",str(output)],capture_output=True,timeout=10)
 

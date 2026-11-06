@@ -26,6 +26,25 @@ BINDER = re.compile(r"([({\[])\s*(" + IDENT + r"(?:\s+" + IDENT + r")*)\s*:\s*([
 
 ID_REST_CHAR = re.compile("[" + ID_REST + "]")
 
+def signature_coverage(rows):
+    """Guard five-record success being mistaken for selected-scope coverage.
+
+    This partitions lexical rows, including unsupported and same-spelling rows.
+    It does not enumerate generated kernel declarations or establish ownership.
+    Only the live gate may attach fixture_signature before this census runs.
+    """
+    entries = []
+    counts = {"local-fixture-linkage": 0, "unresolved": 0}
+    for row in rows:
+        status = "local-fixture-linkage" if "fixture_signature" in row else "unresolved"
+        counts[status] += 1
+        entries.append({k: row[k] for k in ("path", "line", "name", "kind")} |
+                       {"status": status, "lexical_reject_reason": row["reject_reason"]})
+    return {"basis": "selected lexical declaration rows; generated declarations are not enumerated",
+            "total": len(rows), "counts": counts, "rows": entries,
+            "complete_signature_coverage": counts["unresolved"] == 0 and bool(rows),
+            "ownership_verified": False}
+
 def raw_literal(text, i):
     if text[i] != "r" or (i and (ID_REST_CHAR.fullmatch(text[i-1]))): return None
     match = RAW_START.match(text, i)
@@ -506,6 +525,7 @@ def main():
             fixture_binding = {"kind": "live-canonical-five-fixture-rebuild", "records": 5,
                                "raw_environment_binding": "unbound", "compiler_sha256": live["compiler_sha256"],
                                "pins_sha256": live["pins_sha256"],
+                               "coverage": signature_coverage(rows),
                                "boundary": "Only five pinned fixture rows have local source/artifact linkage; all candidate refusal/ownership checks remain. Execution receipt is external, not accepted as input."}
         except (OSError, ValueError) as exc:
             parser.error("live fixture binding: " + str(exc))
