@@ -112,3 +112,5 @@
 | `Source/Agreement/BoolSlotAndControls.lean` | Internally instantiated conjunction client, Source selected/skipped right-hand effects and fuel, and operator-distinction controls. |
 | `Source/Agreement/BoolSlotOr.lean` | Actual short-circuit disjunction initializer with corresponding local left operand and literal right operand. |
 | `Source/Agreement/BoolSlotOrControls.lean` | Internally instantiated disjunction client, reversed selected/skipped right-hand effects/fuel and operator-distinction controls. |
+| `Source/Agreement/BoolSlotToggle.lean` | Actual computed-RHS boolean read-modify-write expression/statement producer, returning the new value and retaining exact local/state history. |
+| `Source/Agreement/BoolSlotToggleControls.lean` | Internally instantiated computed-assignment client, low fuel/new-result controls and actual Source/model two-head-update restoration. |

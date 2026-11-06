@@ -3686,6 +3686,8 @@ import Solidity.Source.Agreement.BoolSlotOr
 import Solidity.Source.Agreement.BoolSlotOrControls
 import Solidity.Source.Agreement.BoolSlotRead
 import Solidity.Source.Agreement.BoolSlotReadControls
+import Solidity.Source.Agreement.BoolSlotToggle
+import Solidity.Source.Agreement.BoolSlotToggleControls
 import Solidity.Source.Agreement.Locals
 import Solidity.Source.Agreement.NormalBoolAssign
 import Solidity.Source.Agreement.NormalBoolAssignControls

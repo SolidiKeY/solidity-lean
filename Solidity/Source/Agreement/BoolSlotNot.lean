@@ -23,6 +23,20 @@ theorem source_run_bind_ok {Γ : RCtx} {α β : Type}
   rw [hm]
   exact hf
 
+/-- Actual unary evaluation preserves its input locals/state and returns the
+negated old lookup; this is an operational component, not a supplied outcome. -/
+theorem bool_not_eval_source (pre tail : List PrimTy) (b : Bool)
+    (G : Glob E) (F : Fr) (n : Nat)
+    (ls : Locals E.layout (sourceContext (pre ++ .bool::tail))) (st : St E)
+    (read : ls.get (sourceBoolSlot tail pre) = .bool b) :
+    (evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre)))).run
+      (ls, st) = (.ok (.val (.bool (!b))), (ls, st)) := by
+  have hr : (evalE G F (n+1) (.local (sourceBoolSlot tail pre))).run (ls, st) =
+      (.ok (.val (.bool b)), (ls, st)) := by
+    change (Except.ok (ε := Halt) (RVal.val (ls.get (sourceBoolSlot tail pre))), (ls, st)) = _
+    rw [read]
+  exact source_run_bind_ok _ _ (ls, st) (ls, st) (.val (.bool b)) _ hr (by rfl)
+
 /-- Operational helper: the only read premise is the actual old local lookup.
 The public producer below derives it internally from the related input states. -/
 theorem bool_not_init_source (pre tail : List PrimTy) (b : Bool)
@@ -34,13 +48,9 @@ theorem bool_not_init_source (pre tail : List PrimTy) (b : Bool)
         (sourceContext (pre ++ .bool::tail)) (sourceContext (.bool::pre ++ .bool::tail)))
       ls).run (.nil, st) =
       (.ok (.normal (.cons (.bool (!b)) ls)), (.nil, st)) := by
-  have hr : (evalE G F (n+1) (.local (sourceBoolSlot tail pre))).run (ls, st) =
-      (.ok (.val (.bool b)), (ls, st)) := by
-    change (Except.ok (ε := Halt) (RVal.val (ls.get (sourceBoolSlot tail pre))), (ls, st)) = _
-    rw [read]
   have hu : (evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre)))).run
       (ls, st) = (.ok (.val (.bool (!b))), (ls, st)) :=
-    source_run_bind_ok _ _ (ls, st) (ls, st) (.val (.bool b)) _ hr (by rfl)
+    bool_not_eval_source pre tail b G F n ls st read
   have hb : (do getV (← convRV F (n+2) .bool
       (← evalE G F (n+2) (.unary .not (.local (sourceBoolSlot tail pre)))))).run
       (ls, st) = (.ok (.bool (!b)), (ls, st)) :=
