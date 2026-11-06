@@ -68,8 +68,8 @@
  {
   "id": "EU-12",
   "obligation": "runtime, KeySort, import closure, trust and fixture gates",
-  "status": "partial",
-  "evidence": "Registered through register.sh (all 100 modules in Solidity.lean), the frontend.d module-map fragment and scripts/g07-axiom-pins.d (1241 pins). Codex-VM gate history is externalized (H44). Full gate: tests/sol-expression-uniqueness/gate.sh (./run-lean.sh) at the current sources, then the checker's --checkpoint --build-log; see the feature doc's current status section."
+  "status": "pass",
+  "evidence": "Claude VM, 2026-11-06, Lean 4.24.0 / Lake 5.0.0-src+797c613. tests/sol-expression-uniqueness/gate.sh (./run-lean.sh: check-layers, register.sh --check, fragments.sh --check, lake build Solidity SolidityExamples solkeycheck solidity-lean SolkeyTestSuite, solkeycheck) exit 0 at source digest efb3b3d9\u2026; build completed (5922 jobs); KeySort at the pinned snapshot: 377 taclets, 131 read-bearing, OK. check-sol-expression-uniqueness.py --checkpoint: CHECKPOINT_PASS (1241 kernel axiom guards, 100 modules). node scripts/check-orphans.mjs: 0 orphaned. Log hashes: tests/sol-expression-uniqueness/gate-logs.sha256."
  },
  {
   "id": "EU-13",
@@ -80,7 +80,7 @@
  {
   "id": "EU-14",
   "obligation": "sealed full proof handoff",
-  "status": "open",
-  "evidence": "Complete original proof packet being prepared; full task handoff remains open until required global gates pass after frozen coordinator integration."
+  "status": "pass",
+  "evidence": "Sealed handoff: docs/feature-work/expression-uniqueness.md, 'Sealed handoff (Claude VM)'."
  }
 ]

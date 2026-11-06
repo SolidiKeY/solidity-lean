@@ -1,0 +1,4 @@
+# Gate logs from the Claude VM (kept off git; volatile scratchpad paths are provenance only).
+f79c9242e5e4d34dfff31439da1b1312368044142506bcf224be4ac116e9a2ee  build1.log  (first full ./run-lean.sh, 94m30s wall, 321m user; one stale-header race on SignedCheckedMul.Controls)
+9c44a2f82b857025e5cd4f54d0ffbc7c0b6e4ce6d952062a281206b04fb60bab  gate.log    (gate.sh: library built, 5922 jobs; KeySort against the unpinned ../solkey main b8d5f88 drifts, exit 1)
+230e145c904941ef9d887abd7a80f761ed70bbd51bba346456f174a28253e5a1  gate2.log   (gate.sh with SOLKEY_RULES = pinned snapshot: exit 0)

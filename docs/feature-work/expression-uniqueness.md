@@ -924,3 +924,59 @@ used the Lean server.
      static only.
   6. `obligations.json` (EU-12, EU-13) and `registration-manifest.json` (rows
      file, note, central pins, kernel inventory) were stale. They are updated.
+
+## Sealed handoff (Claude VM)
+
+- **Branch:** `cloud/moved4-20261105/expression-uniqueness`.
+- **Start:** `cloud/expression-uniqueness-move` (c2e862c1) merged, plus master
+  aec9adf1, which was already contained.
+- **Toolchain:** Lean 4.24.0, Lake 5.0.0-src+797c613. The VM had 4 cores and
+  15 GB of RAM; Lake ran in its default parallel mode.
+
+**Headline theorems, kernel-checked by the library build.** Each pins
+`[propext, Classical.choice, Quot.sound]` in `AxiomPins.lean`:
+
+```lean
+theorem certified_expression_yield_unique (a b : Syn .expr) (ts : List Tok)
+    (da : a.Derives ts) (ha : a.prec = true) (db : b.Derives ts) (hb : b.prec = true) : a = b
+theorem certifiedYieldUnique : CertifiedYieldUnique
+theorem parseCat_expression_accepted_unique {p : Nat → P (Syn .expr)} {src : Bytes}
+    {tree : Syn .expr} {layout : List Choice} (accepted : parseCat p src = .ok (tree, layout)) :
+    ∃ ps, lex src = .ok ps ∧ tree.toks layout = some (tokensOf ps) ∧ tree.prec = true ∧
+      ∀ other : Syn .expr, other.Derives (tokensOf ps) → other.prec = true → tree = other
+```
+
+All 1241 declarations of the area are pinned with standard axioms only, and
+recorded centrally in
+`scripts/g07-axiom-pins.d/Solidity/Frontend/ExpressionUniqueness/AxiomPins.json`.
+
+**Gates, all passing:**
+
+| Gate | Result |
+|---|---|
+| `tests/sol-expression-uniqueness/gate.sh LOG`, which runs `./run-lean.sh` with `SOLKEY_RULES` set to the pinned snapshot | exit 0; build completed (5922 jobs); KeySort 377 taclets, 131 read-bearing, OK |
+| `python3 scripts/check-sol-expression-uniqueness.py --build-log LOG` | CHECKPOINT_PASS (1241 guards, 100 modules); ACCEPTANCE_PASS |
+| `python3 tests/sol-expression-uniqueness/checker-controls.py` | all controls pass; the kernel-environment controls are skipped because their evidence is externalized |
+| `node scripts/check-orphans.mjs` | 5906 reachable, 0 orphaned |
+| `register.sh --check`, `fragments.sh --check` | pass |
+| `sha256sum -c tests/sol-expression-uniqueness/SOURCE-SHA256SUMS` | pass |
+| EU-01: constructor list against current `Syntax.lean` | 29 = 29 |
+
+`gate-logs.sha256` lists the hashes of the gate logs; the logs themselves are
+not in git.
+
+**KeySort and the sibling checkout.** Without `SOLKEY_RULES`, `check-solkey.sh`
+reads `../solkey`, which on this VM is upstream `main` (b8d5f88), not the pin
+`473da8944c`. Against that checkout it reports 167 mismatches. The check is
+defined against the pinned snapshot (`docs/solkey-migration.md`), and at the pin
+it passes. The mismatches come from the unpinned checkout, not from this lane.
+
+**Slow modules.** These took over 60 s as dependency builds while four jobs ran
+in parallel: `ExpressionUniqueness.Families` 118 s (the Codex VM recorded about
+188 s) and `ExpressionUniqueness.ExpressionLowFree` 99 s. Nothing in this lane
+changed them.
+
+**Not re-run.** The 130 external solc parsing observations and the
+kernel-environment dump audit depend on the H44 evidence and on the pinned
+soljson (sha256 `6c74ffba…`), and neither can be reached from this VM. They are
+external tests, not part of the kernel proof.
