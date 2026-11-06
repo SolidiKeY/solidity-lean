@@ -214,6 +214,23 @@ folded public theorem with fifteen open residual fields. Full integration/build
 and actual producer acceptance remain pending; old missing staging prerequisites
 and historical hash mismatches are not waived by H64/H65.
 
+### H64 final static/accounting checkpoint
+
+The final documentation path gate passes: all references resolve, with 115
+existing ambiguities retained. Whitespace passes. The full repository entry
+passes both layer checks (862 core modules; zero reach elaborator/parser adapters)
+then exits 1 on stale shared-root registration, before any Lean build. The five
+unregistered H55/H64 modules remain central integration work under the frozen
+write lease. This failed integration gate is retained alongside the independent
+failed timing gate. No full-build or full-scope Terra acceptance is claimed.
+
+Four accounting test methods pass, including fifteen metadata corruption cases
+and integrity checks for altered readable logs and stale runs. Independent
+finder/skeptic final reviews found no further confirmed defect after the
+supported-family fix; their source/document reviews do not waive either failed
+gate or the five incompatible representative families. Exact command results,
+review records, hashes and publication status are exported with the final head.
+
 ### H64/H65 export
 
 Current evidence: `/workspace/h64-g49-evidence`.
