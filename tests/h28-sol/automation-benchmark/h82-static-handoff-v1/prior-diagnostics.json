@@ -1,0 +1,74 @@
+[
+  {
+    "prior_run": "h70-baseline24-controls",
+    "command": [
+      "env",
+      "-C",
+      "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-v435/baseline24",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lake",
+      "env",
+      "/workspace/.setup/tools/lean-4.24.0-linux/bin/lean",
+      "-j1",
+      "--tstack=131072",
+      "ContextControls.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 4.004349528000034,
+    "receipt": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline24-controls/run.json",
+    "interpretation": "prior diagnostic only; no fresh gate, comparable performance or trust acceptance"
+  },
+  {
+    "prior_run": "h70-baseline35-controls",
+    "command": [
+      "env",
+      "-C",
+      "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-v435/baseline35",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lake",
+      "env",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lean",
+      "-j1",
+      "--tstack=131072",
+      "ContextControls.lean"
+    ],
+    "exit": 1,
+    "wall_seconds": 4.507622526999967,
+    "receipt": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-controls/run.json",
+    "interpretation": "prior diagnostic only; no fresh gate, comparable performance or trust acceptance"
+  },
+  {
+    "prior_run": "h70-baseline35-context-axioms",
+    "command": [
+      "env",
+      "-C",
+      "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-v435/baseline35",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lake",
+      "env",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lean",
+      "-j1",
+      "--tstack=131072",
+      "AuditContext.lean"
+    ],
+    "exit": 0,
+    "wall_seconds": 3.506910542000014,
+    "receipt": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-baseline35-context-axioms/run.json",
+    "interpretation": "prior diagnostic only; no fresh gate, comparable performance or trust acceptance"
+  },
+  {
+    "prior_run": "h82-field-proof-kernel-decide-v1",
+    "command": [
+      "env",
+      "-C",
+      "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h70-v435/adapted35",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lake",
+      "env",
+      "/workspace/.setup/tools/lean-4.35.0-linux/bin/lean",
+      "-j1",
+      "--tstack=131072",
+      "ContextControls.lean"
+    ],
+    "exit": 1,
+    "wall_seconds": 7.515033710998978,
+    "receipt": "/workspace/solidity-lean/tests/h28-sol/automation-benchmark/evidence/h82-field-proof-kernel-decide-v1/run.json",
+    "interpretation": "prior diagnostic only; no fresh gate, comparable performance or trust acceptance"
+  }
+]

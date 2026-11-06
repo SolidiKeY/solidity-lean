@@ -1,0 +1,18 @@
+--- a/tests/h28-sol/automation-benchmark/ContextControls.lean
++++ b/tests/h28-sol/automation-benchmark/ContextControls.lean
+@@ -48,2 +48,5 @@
+   let info ← getConstInfo id.getId
++  let proof ← match info with
++    | .thmInfo theoremInfo => pure theoremInfo.value
++    | _ => throwError "h28_audit requires an actual theorem body"
+   let axioms ← collectAxioms id.getId
+@@ -55,3 +58,3 @@
+     ("signature", toJson (reprStr info.type)),
+-    ("proof_nodes", toJson info.value!.sizeWithoutSharing),
++    ("proof_nodes", toJson proof.sizeWithoutSharing),
+     ("axioms", Json.arr entries)]
+@@ -65,3 +68,3 @@
+       type := info.type
+-      value := info.value!
++      value := proof
+     }

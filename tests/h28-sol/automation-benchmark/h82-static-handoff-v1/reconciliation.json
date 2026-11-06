@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "source_head": "1aeaf276da8145d9cffdbbc76ff4b192f6360efb",
+  "audit_calculus": {
+    "fetched_head": "c361178f68f34c276a02b15691cd726aaa85a51e",
+    "merged": false,
+    "frozen_prompt_sha256_required": "4c70d03b6d031c0831674a2e7c833f1d3ddfe505cf6e3dceefe1cde26ef54268",
+    "handoff_path": "/workspace/h62-audit-calculus-handoff",
+    "handoff_present": false,
+    "stopped_ack_received": false,
+    "checkpoints": [
+      "Inventory exact signatures and owners",
+      "Simultaneous premise witnesses",
+      "Compiler success and negative controls",
+      "Fidelity and coverage verification"
+    ],
+    "all_checkpoint_status": "unfinished; member execution barred pending authenticated handoff and retirement acknowledgement"
+  },
+  "h28": {
+    "status": "explicitly paused; no further Lean",
+    "formal_obligations": [
+      "actualCallerFields",
+      "extractionActuallyChanges",
+      "h28_audit actual-proof kernel replay acceptance"
+    ],
+    "api_proposal": "API-only.unvalidated.patch",
+    "proposal_applied": false,
+    "ambient_axiom_delta": "Classical.choice reported and reproduced; exact dependency cause and trust disposition unresolved"
+  },
+  "waits": [
+    {
+      "lane": "audit-calculus",
+      "item": "Authenticated final handoff including frozen prompt, exact scope manifest, bundle/checksums and explicit stopped/goal-paused acknowledgement; fetched c361 is not sufficient."
+    },
+    {
+      "lane": "migrate-syntax",
+      "item": "DEP-SYNTAX-RAW: owner-reviewed isolated v4.35 overlay for Solidity/Syntax/Raw.lean."
+    },
+    {
+      "lane": "migrate-root-gate",
+      "item": "AUDIT-AMBIENT-AXIOMS: Context Classical.choice audit and H28 pause disposition."
+    }
+  ],
+  "runtime_gate_pass": false,
+  "new_lean_execution": false,
+  "timing_comparison": "none; failed-versus-passing runs are not comparable performance acceptance"
+}
