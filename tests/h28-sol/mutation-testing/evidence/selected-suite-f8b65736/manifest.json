@@ -1,0 +1,1149 @@
+{
+  "schema": 1,
+  "authorization": "H44",
+  "archive": "/workspace/h28-selected-export-f8b65736/proof-worlds.tar.gz",
+  "archive_bytes": 56215388,
+  "archive_sha256": "17836afbe0df1a8c3836a99a524363888716778d45158779f1a334400531350d",
+  "members": {
+    "SHA256SUMS": {
+      "bytes": 38284,
+      "sha256": "2e6bda841c0b542f38c3e5bccb59d880b7c1f982353497b14285648aa82d2b26"
+    },
+    "catalog.json": {
+      "bytes": 764,
+      "sha256": "f427b8a7247f443ff7a843e74ef736e99332af6d1896c07d6abb6f117edc0d7e"
+    },
+    "census/InventoryAudit.lean": {
+      "bytes": 31989,
+      "sha256": "50a662458218d17e1fcc92e3798a2c6c64f85b42a008ad34a0323e6576866ed2"
+    },
+    "census/InventoryAudit.olean": {
+      "bytes": 151496,
+      "sha256": "c0b0267507d47cba7e3b5b40175c64e51b80adc774b9bb6f0000385d7dca9e3e"
+    },
+    "census/InventoryNegative.lean": {
+      "bytes": 31990,
+      "sha256": "73e2abd8c1e1372ae4b590d4752c5e0cc5dc58fff17e1142b294193fa0baff66"
+    },
+    "census/catalog.json": {
+      "bytes": 652493,
+      "sha256": "953fe8697d7f42d5b53af4bdd6a28684afa512a3dd52b1e5f12c5fd00919dfe6"
+    },
+    "census/keysort.log": {
+      "bytes": 109,
+      "sha256": "4a4851415d8d14b8218997de054a4809d3a5dcefdce43c667ea61fd6865fd0f8"
+    },
+    "census/negative.log": {
+      "bytes": 538285,
+      "sha256": "c8ba046d094c24e847d3a317449f37bd6d7c471f46f760ba7ef1c971393c95fe"
+    },
+    "census/positive.log": {
+      "bytes": 535910,
+      "sha256": "9344503f65e3a20c91c6c5fabf3b9b743540b910e2c82f6a437b9017da752f46"
+    },
+    "census/result.json": {
+      "bytes": 12308,
+      "sha256": "5f76cf77fa033a30a66a3d7f7916c08831607d717d3c900c910cd0533cff8c3b"
+    },
+    "census/versions.json": {
+      "bytes": 1601,
+      "sha256": "2095f64714b173d65f88faeefef7b5bca8600ffd42d76a734ba0f677aeb1c243"
+    },
+    "census/versions.log": {
+      "bytes": 159,
+      "sha256": "159844bb03690a833f246d4a9473b59a18d9c3267ff2c3ce328f3c87c31071e4"
+    },
+    "commands/census.log": {
+      "bytes": 1017,
+      "sha256": "f3f2381703290704e6c03102c8ccf65d9ec41df79221e28b74059c036fa6fc42"
+    },
+    "commands/normal.log": {
+      "bytes": 188,
+      "sha256": "a97211b15ca8f59fb76cd6ae39bbeb02cc6e607c2099835205baf4347c0e9a54"
+    },
+    "commands/optimized.log": {
+      "bytes": 188,
+      "sha256": "ce6937765d6133a417dbea37614356fd80f5bdbb4975bc813b7a5da6b4d6088b"
+    },
+    "commands/result.json": {
+      "bytes": 1309,
+      "sha256": "095e6e843fc6365f7696cee7efb6c4b3643277b908249c7b51e4694f4f0d96f1"
+    },
+    "commands/selected-run.log": {
+      "bytes": 2275,
+      "sha256": "f3dd33ea341e128ce61e0879d05d1624d91025502e8f437c5d9ba1ae230b32b1"
+    },
+    "ledger.json": {
+      "bytes": 371070,
+      "sha256": "fe9b0f161a95a492a1d490769d4b2c5641334fb67e1483ada124c7d11316b44f"
+    },
+    "reviews.json": {
+      "bytes": 589,
+      "sha256": "16c190baf2e9d0a71a0ac95541862ad336725e47e1b8b770eb50f44480a37898"
+    },
+    "run/SHA256SUMS": {
+      "bytes": 31110,
+      "sha256": "1c566a876c68c8ea6869aeb87626a38d686e858bee8c02d081b61f2fc6fdc715"
+    },
+    "run/alias.receiver-getter-twice/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "b4fb46f3506693bef30c5fa5b33b5ec77fafb23d9aba1371674f6d612876c4f0"
+    },
+    "run/alias.receiver-getter-twice/baseline-oracle.log": {
+      "bytes": 13708,
+      "sha256": "3d1e7951896b8def7d4d81c3e46a12779fb4c00a416aaea7e814ef8825118c06"
+    },
+    "run/alias.receiver-getter-twice/baseline-witness.log": {
+      "bytes": 19213,
+      "sha256": "ab2eaec2211150feeeb1ea1e626911e66c96edd0bfc75c5ffa4b2b7789967aa4"
+    },
+    "run/alias.receiver-getter-twice/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/alias.receiver-getter-twice/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/AliasBaseline.olean": {
+      "bytes": 293016,
+      "sha256": "7a5a810757f47b81becbc0481a9ba8f93ca41d902304dc9ed066e19b931ad480"
+    },
+    "run/alias.receiver-getter-twice/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5465256,
+      "sha256": "b1cf85a00361698dd1dc42cd5f64dc2d8dbfc6fb3ff5c4bfc4dc6e11ca3eadd1"
+    },
+    "run/alias.receiver-getter-twice/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/AliasTwiceKill.olean": {
+      "bytes": 306520,
+      "sha256": "027ac21d75444c1dfada5c90f416329e02ecaa9bff516a8df0761464e3f3282f"
+    },
+    "run/alias.receiver-getter-twice/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "258557a568e9592368fefdc08ec13c9c4b1cb6b31e9be406e6410d073c0d6e8f"
+    },
+    "run/alias.receiver-getter-twice/mutant-oracle.log": {
+      "bytes": 15082,
+      "sha256": "daa5f94953c11fe5ddbeffc2e2da6f38bbe349ad7f6514b5b1117982a073e6cd"
+    },
+    "run/alias.receiver-getter-twice/mutant-witness.log": {
+      "bytes": 19015,
+      "sha256": "445c0ee07df03e0cbfce1dbacdaff99b3b31d90d372ccec76e6d196ddea8a9d5"
+    },
+    "run/alias.receiver-getter-twice/mutant.patch": {
+      "bytes": 1246,
+      "sha256": "be65d5fecc03a136685ced38a36b1158724a5d8b3217bf8fb54de3245cded885"
+    },
+    "run/alias.receiver-getter-twice/result.json": {
+      "bytes": 33979,
+      "sha256": "507554564e3899725907f6ca972c7b81fe984f789d7fc1123748c21298087dbf"
+    },
+    "run/bounds.array-read-skipped/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "169353f69b4a72fdbd9d1a7f421e8773f82ece58a4688c7d9f898a9ce7d925d0"
+    },
+    "run/bounds.array-read-skipped/baseline-oracle.log": {
+      "bytes": 4745,
+      "sha256": "da411166506b3659733e88e1747070b2d376696b160c50502326f32d9ff911d2"
+    },
+    "run/bounds.array-read-skipped/baseline-witness.log": {
+      "bytes": 11506,
+      "sha256": "8ff6888c5500704b9db9281540e884e63a163fac30215fb39b6c65bb0fe381f0"
+    },
+    "run/bounds.array-read-skipped/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/bounds.array-read-skipped/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/BoundsBaseline.olean": {
+      "bytes": 159568,
+      "sha256": "1fd10d2ead03109e7b686fcea9ccca0ab449453d88ccbf611824aae40d563409"
+    },
+    "run/bounds.array-read-skipped/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5458776,
+      "sha256": "6b7566c3a3773bb5c714a8ebd20b8af633a2cbc1d8b60a8d0521aee793619b54"
+    },
+    "run/bounds.array-read-skipped/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/BoundsSkippedKill.olean": {
+      "bytes": 220728,
+      "sha256": "bb790a189c49cb75dd4e0271b21b9722e17f82e0faba677d51dcb209d091cfdb"
+    },
+    "run/bounds.array-read-skipped/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "90c075f594feacf332daec5a1523f6ec94a71884d61a169612bc70f12f996aeb"
+    },
+    "run/bounds.array-read-skipped/mutant-oracle.log": {
+      "bytes": 5432,
+      "sha256": "5186024494378637b45c3e5aa2e3429b65f7588bc18c85b339afe1d5d501e5af"
+    },
+    "run/bounds.array-read-skipped/mutant-witness.log": {
+      "bytes": 10653,
+      "sha256": "f07b8a7955dac216a585a8f190b80558b6d545ca20dfe378c5484ebe77c5a96d"
+    },
+    "run/bounds.array-read-skipped/mutant.patch": {
+      "bytes": 531,
+      "sha256": "20721fcafdbd3685f63b619da67fc168cd7b555454e3e2cd0a5aa3daae9f7831"
+    },
+    "run/bounds.array-read-skipped/result.json": {
+      "bytes": 31696,
+      "sha256": "0a324025946a6baa7ba0b4604f40c401f6674d53e32e1794b096ee13b42a1cb4"
+    },
+    "run/callback.failed-send-flag-true/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "2b4df8a7de19de04dd9456e5291804d5c35e5beccd969fcec38c6b9fbce1cccc"
+    },
+    "run/callback.failed-send-flag-true/baseline-oracle.log": {
+      "bytes": 10157,
+      "sha256": "8d752df076236345935897e108c4dd54d750c4f81d83da2fd3a331ba041f1a01"
+    },
+    "run/callback.failed-send-flag-true/baseline-witness.log": {
+      "bytes": 22587,
+      "sha256": "42b24ea93e58cb242d0a64489f9489bf698d3c73f917bb8fea4013a4f5627f0e"
+    },
+    "run/callback.failed-send-flag-true/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/callback.failed-send-flag-true/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/CallbackBaseline.olean": {
+      "bytes": 207424,
+      "sha256": "fba8b9fdbdfa09d4665a83ef7e6e99ef6f8a5deb7518b662221947e0c0a3b8be"
+    },
+    "run/callback.failed-send-flag-true/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459768,
+      "sha256": "ce4aa8b8372f006e4cbcd82abf4956e6997c799750a7707aa0d31561cc0a8171"
+    },
+    "run/callback.failed-send-flag-true/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/CallbackFailureKill.olean": {
+      "bytes": 337952,
+      "sha256": "88647bb12445d17b9939733bfbde563f0f72dd96de9d837ce05fa163b7ec5f95"
+    },
+    "run/callback.failed-send-flag-true/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "38770942b82631904c3fec688b96da746c8107e6f03f88db6d0ec944e7d6adbd"
+    },
+    "run/callback.failed-send-flag-true/mutant-oracle.log": {
+      "bytes": 10910,
+      "sha256": "a8a9567e90c3c7fa018f76f29660ca883873e079f83fb8424d613e4dad3acf3a"
+    },
+    "run/callback.failed-send-flag-true/mutant-witness.log": {
+      "bytes": 21830,
+      "sha256": "611c88fb96f41af243552c84410e31475eb975d55ecbc41b7b16ad87ab445e47"
+    },
+    "run/callback.failed-send-flag-true/mutant.patch": {
+      "bytes": 465,
+      "sha256": "c3627488641a73963ace3d956aaf898713fada91d0227e18daf9c4669ce20679"
+    },
+    "run/callback.failed-send-flag-true/result.json": {
+      "bytes": 47025,
+      "sha256": "1031e261439df1e2d361d7c960b0466d86105f73dcc691a038a60ba79f79de85"
+    },
+    "run/control.guard-invalid-syntax/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "94754fe62f5a1a56f88c90faef60c42f259f8c292de912c732b8ec06399539c9"
+    },
+    "run/control.guard-invalid-syntax/baseline-oracle.log": {
+      "bytes": 2163,
+      "sha256": "d5744588e740f2ad44e857a092a2c8c7217fcacc22f313aad327abf315f5bcad"
+    },
+    "run/control.guard-invalid-syntax/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/control.guard-invalid-syntax/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/GuardBaseline.olean": {
+      "bytes": 78880,
+      "sha256": "2ca7ff3d4bedc31056d0bbbca0ac4af6c26c649b231a02c642ddd767d95e4736"
+    },
+    "run/control.guard-invalid-syntax/mutant-compile.log": {
+      "bytes": 11189,
+      "sha256": "badc2fad59bbba3892202ec631e241594ac4e222172f04eb72dd7a8f0bfe1309"
+    },
+    "run/control.guard-invalid-syntax/mutant.patch": {
+      "bytes": 686,
+      "sha256": "7187e2f40e68a83ca396fdbca10f474f338d2676a721153c0a423e395cc38db7"
+    },
+    "run/control.guard-invalid-syntax/result.json": {
+      "bytes": 13215,
+      "sha256": "def03d409c13d44cb5b4d2ad76b77a90542a0723098ba9bf693771f2544a11a2"
+    },
+    "run/control.guard-label-equivalent/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "a41fd9cb83b825a6cb703e71490f3fd393a2c1817d6cab5f635a8530356fd92d"
+    },
+    "run/control.guard-label-equivalent/baseline-equivalence.log": {
+      "bytes": 2660,
+      "sha256": "7097eea82f7b4667b94bdb8c559c6e46638b4764dd36eddd31291f0c0a0d9f11"
+    },
+    "run/control.guard-label-equivalent/baseline-oracle.log": {
+      "bytes": 2163,
+      "sha256": "def46cd89845be3e72dea92ca9ae291a2770be7583e6ff68266ef27e52ab1efd"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/baseline-equivalence/tests/h28-sol/mutation-testing/oracles/GuardEquivalent.olean": {
+      "bytes": 58296,
+      "sha256": "04bd9365e0a5c892af49ccbed35454cc2a2a501fab665b5c38e452f8f03baca6"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/GuardBaseline.olean": {
+      "bytes": 78880,
+      "sha256": "2ca7ff3d4bedc31056d0bbbca0ac4af6c26c649b231a02c642ddd767d95e4736"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/mutant-equivalence/tests/h28-sol/mutation-testing/oracles/GuardEquivalent.olean": {
+      "bytes": 58296,
+      "sha256": "04bd9365e0a5c892af49ccbed35454cc2a2a501fab665b5c38e452f8f03baca6"
+    },
+    "run/control.guard-label-equivalent/compiled-artifacts/mutant-oracle/tests/h28-sol/mutation-testing/oracles/GuardBaseline.olean": {
+      "bytes": 78880,
+      "sha256": "2ca7ff3d4bedc31056d0bbbca0ac4af6c26c649b231a02c642ddd767d95e4736"
+    },
+    "run/control.guard-label-equivalent/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "fbdabc31aa350ca90b3416c8b0f62e8da137796483549e6e78d2620b405ce277"
+    },
+    "run/control.guard-label-equivalent/mutant-equivalence.log": {
+      "bytes": 2660,
+      "sha256": "a5630d53c25efcebeb7f9f0813f15edd1e605d58180b58b07eeba2140bb32e64"
+    },
+    "run/control.guard-label-equivalent/mutant-oracle.log": {
+      "bytes": 2163,
+      "sha256": "0f5d89570e59765becb96ec36946695d5bbee4ecab8a49d76c928c4635ebc714"
+    },
+    "run/control.guard-label-equivalent/mutant.patch": {
+      "bytes": 689,
+      "sha256": "36d720f8ac42853f8a2afb63d98471818b5e2a0b6337c5c1a30cb83032409d8a"
+    },
+    "run/control.guard-label-equivalent/result.json": {
+      "bytes": 30457,
+      "sha256": "b4a3cb1b9f54ebe2f9e8f9beb2ef72470a61a5e9cfd7c28178b1996906380c2f"
+    },
+    "run/control.guard-weak-oracle-survivor/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "9b9c47f687fa08216840a6337c81f1ba078005584b73cbc13be1ffb8fe3529df"
+    },
+    "run/control.guard-weak-oracle-survivor/baseline-oracle.log": {
+      "bytes": 2193,
+      "sha256": "035186189a8a87606c97dde6e977903fa37d5de202a156ff312c600fcd446924"
+    },
+    "run/control.guard-weak-oracle-survivor/baseline-regression.log": {
+      "bytes": 2163,
+      "sha256": "2fcc788c5ccb24fa303e96e33a6c3e2a6f4d5f88c61800cf405d6448f1d98de6"
+    },
+    "run/control.guard-weak-oracle-survivor/baseline-witness.log": {
+      "bytes": 3675,
+      "sha256": "576f4699e8df2d61e1ce291cf8ad42e09fa5a961da710584c044d233a86b73af"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.olean": {
+      "bytes": 57544,
+      "sha256": "8d7f0445cad2fe9ac085b0a9006ac089c764225bf87e42cacfbfe58ba13b5b2d"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/baseline-regression/tests/h28-sol/mutation-testing/oracles/GuardBaseline.olean": {
+      "bytes": 78880,
+      "sha256": "2ca7ff3d4bedc31056d0bbbca0ac4af6c26c649b231a02c642ddd767d95e4736"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459704,
+      "sha256": "875e46a5638b79b3e0dccf468b61d4cb1320b126633ed9118c1572b249d5efeb"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/mutant-oracle/tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.olean": {
+      "bytes": 57544,
+      "sha256": "8d7f0445cad2fe9ac085b0a9006ac089c764225bf87e42cacfbfe58ba13b5b2d"
+    },
+    "run/control.guard-weak-oracle-survivor/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.olean": {
+      "bytes": 88024,
+      "sha256": "1cb0eb1168b3769bfce466b7965a002a2e7f3964bc49653b11231dc100dc4137"
+    },
+    "run/control.guard-weak-oracle-survivor/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "60f2dc2a975dc659394c7bb19bf77a17b3f04265679acb17f540c7d4ce8f73f2"
+    },
+    "run/control.guard-weak-oracle-survivor/mutant-oracle.log": {
+      "bytes": 2193,
+      "sha256": "ab9f09d5819e59aa1e0f84efe6a0ecc5255dd74a6ddc568175d4304048e4141b"
+    },
+    "run/control.guard-weak-oracle-survivor/mutant-regression.log": {
+      "bytes": 2785,
+      "sha256": "fb8eca02f66f3ada2cffcf16bb5952702731ad49176aa8f87551fd3565ed8e10"
+    },
+    "run/control.guard-weak-oracle-survivor/mutant-witness.log": {
+      "bytes": 3047,
+      "sha256": "8e66b49283d88fea86c9ecc33fb503edac9360be9bff20fe82e5898ad38cf422"
+    },
+    "run/control.guard-weak-oracle-survivor/mutant.patch": {
+      "bytes": 690,
+      "sha256": "22b83ae0905a99fbee7068b6054bd05b1b99c4c2857bc36075753f8453d06c88"
+    },
+    "run/control.guard-weak-oracle-survivor/result.json": {
+      "bytes": 38137,
+      "sha256": "a6d919913667c156be6322593cc1c0fcebd4eca5b3abebfa47dc8349517c7fb0"
+    },
+    "run/control.revert-diamond-true/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "fc3d9a8ee1265d56671733f7d1f233a01e892a32e70d16f34ea5e0a3ce233a12"
+    },
+    "run/control.revert-diamond-true/baseline-oracle.log": {
+      "bytes": 2161,
+      "sha256": "e0a6c963d9f9b49082e2bb3806843dd37ac0db7c7b6a5d68d174293ad22c0739"
+    },
+    "run/control.revert-diamond-true/baseline-witness.log": {
+      "bytes": 3402,
+      "sha256": "2a13c2017e1e4c66468123f8dc084b62aa21f6b113e9c5690e75eca6d6369cff"
+    },
+    "run/control.revert-diamond-true/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/control.revert-diamond-true/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/RevertBaseline.olean": {
+      "bytes": 55048,
+      "sha256": "2518a83df89b09c443d025def9c1c60d94c0d10b2428557afc4db19f78b48ef6"
+    },
+    "run/control.revert-diamond-true/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459800,
+      "sha256": "084d717dbd4640a73bc4c9b671f7c75d9b0fe09aefecf87af3941e58f7839ced"
+    },
+    "run/control.revert-diamond-true/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.olean": {
+      "bytes": 63480,
+      "sha256": "97ef2f72dc7ac75aacb9b308e9ae4dbb6338fd87c2ce3fbd2c39918dc298a0bf"
+    },
+    "run/control.revert-diamond-true/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "07745ac9fbe689e3bf0f1bb384de90c41306717d08ea5c0bd9b8f0b8825cc32a"
+    },
+    "run/control.revert-diamond-true/mutant-oracle.log": {
+      "bytes": 2605,
+      "sha256": "56932bcbda4e13f7446ef5399e8b7344f82be2bb13d86ccb2bc27b6fbc25a6fb"
+    },
+    "run/control.revert-diamond-true/mutant-witness.log": {
+      "bytes": 2955,
+      "sha256": "45281d052af2db199a25496d44f1b192a56fbc002c50f53cd11a917561f19ad5"
+    },
+    "run/control.revert-diamond-true/mutant.patch": {
+      "bytes": 526,
+      "sha256": "236a43dea919ec8d6d128b4f3f882dcd833d9d690d07c0dfcec20dbf2aaf4911"
+    },
+    "run/control.revert-diamond-true/result.json": {
+      "bytes": 26933,
+      "sha256": "35c01835f7ac5c8ac0a744a72035ac83a11904c8f93978bf3c549ce66fd93e6e"
+    },
+    "run/delete.array-index-skipped/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "34e0f5e603e379cac487ec12499ad31a226fef9c9d8c4865a0ea48811d3556fe"
+    },
+    "run/delete.array-index-skipped/baseline-oracle.log": {
+      "bytes": 2920,
+      "sha256": "f428153d718e3d070e059e9c7276fee9aa949e4a39f6243d66fc98710a83ac7f"
+    },
+    "run/delete.array-index-skipped/baseline-witness.log": {
+      "bytes": 7739,
+      "sha256": "6120a8336cbc978db9d68fdbef44b4e5c61116fdc3ce0fbd7e6f2fd9b412ba97"
+    },
+    "run/delete.array-index-skipped/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/delete.array-index-skipped/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/DeleteBaseline.olean": {
+      "bytes": 129952,
+      "sha256": "58fcedc08d1b00ab8257c1cddae2170003eb410d82f16c47ef0de6b5f3c21637"
+    },
+    "run/delete.array-index-skipped/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5458328,
+      "sha256": "57ac2348277c8474300756c5a76edb9cece4b338f042acfdafca44afc15907d4"
+    },
+    "run/delete.array-index-skipped/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/DeleteSkippedKill.olean": {
+      "bytes": 159952,
+      "sha256": "4a187ef0e6d9e34bdd509dd33e1d8ac420a3ef4cb14a9e2957f5d4a951121d50"
+    },
+    "run/delete.array-index-skipped/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "4b4a852b06d1a98ca5ff2df0021b3466d36c8a29b0afc74b9441627eb2c6f838"
+    },
+    "run/delete.array-index-skipped/mutant-oracle.log": {
+      "bytes": 3491,
+      "sha256": "171b1f9a17f177f933c0ad1c11e8c6073e926b124261b980e46cca627ab67ae7"
+    },
+    "run/delete.array-index-skipped/mutant-witness.log": {
+      "bytes": 7032,
+      "sha256": "ea9d74833d9e529628598535d339813de28bee375a9f33dbf6b2665a04afad96"
+    },
+    "run/delete.array-index-skipped/mutant.patch": {
+      "bytes": 581,
+      "sha256": "0a0712c1def8d189b5a4dcda556b3bf01dd9a52b367ac12a609aaed0152ebb7e"
+    },
+    "run/delete.array-index-skipped/result.json": {
+      "bytes": 29137,
+      "sha256": "5001b435aaadb4ae9d023278aaecfc0e10bd636f16c5e9fed7658b4828047369"
+    },
+    "run/division.div-sub-helper-min-and-zero/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "961f32651b44fd88c26a5208dc4473b5d02435c985c05094a8eb3b7b0ee32357"
+    },
+    "run/division.div-sub-helper-min-and-zero/baseline-oracle.log": {
+      "bytes": 2290,
+      "sha256": "c032ea94e016a82558e0f10e5471d1cc1ff1503487de3051e4de9ce2432b6531"
+    },
+    "run/division.div-sub-helper-min-and-zero/baseline-witness.log": {
+      "bytes": 8087,
+      "sha256": "0c06217c35dc94b0a80f86c59a5c310deef866c73bf49e2d13bde631e7c37b80"
+    },
+    "run/division.div-sub-helper-min-and-zero/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/division.div-sub-helper-min-and-zero/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/DivisionBaseline.olean": {
+      "bytes": 100296,
+      "sha256": "42691b2d501302b487e3f86c2ab8f8b1f6baa219877f5e570acf9d528af5b53b"
+    },
+    "run/division.div-sub-helper-min-and-zero/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5464952,
+      "sha256": "63fe7e90e0ca61dac1d8bc9371e4c9e307c1271506d6f0a12166b3241b8972da"
+    },
+    "run/division.div-sub-helper-min-and-zero/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/DivisionSubtractKill.olean": {
+      "bytes": 162104,
+      "sha256": "1a8cc9309b655b82e6e1e448368fd12187d75ede7921171945fdb5145490b9e5"
+    },
+    "run/division.div-sub-helper-min-and-zero/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "efbe63ff91cf7f7b3f73b78b372cb812bcfc8e4a19e4a4bb30b713d856348c51"
+    },
+    "run/division.div-sub-helper-min-and-zero/mutant-oracle.log": {
+      "bytes": 2937,
+      "sha256": "0365d45800095461a8e2f127a2e7749e388086097df777c32f1c3932690b4df6"
+    },
+    "run/division.div-sub-helper-min-and-zero/mutant-witness.log": {
+      "bytes": 7436,
+      "sha256": "20bfaa2c6bbc2aebd4a050dd278ee580e452121967ddcff077cd3605fafb5507"
+    },
+    "run/division.div-sub-helper-min-and-zero/mutant.patch": {
+      "bytes": 811,
+      "sha256": "9d2f82b1e30143c2c1526f3dbe3b63e0568051436e31d173f36d1580e3edd759"
+    },
+    "run/division.div-sub-helper-min-and-zero/result.json": {
+      "bytes": 29147,
+      "sha256": "b579024562550dd333593ff748084d1ffa71d3b2445f22aeefbf2ccf2cfc9438"
+    },
+    "run/frames.return-parameter-projection/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "4aae1586ed64a1e87b0eb5d144ae802cb6fba43cd907c5d5e8e5f298d79d7aaf"
+    },
+    "run/frames.return-parameter-projection/baseline-oracle.log": {
+      "bytes": 8527,
+      "sha256": "63af7c47cfe7bb586f7319e91af6756bd031e199658a93f84472cf5ea6d2b015"
+    },
+    "run/frames.return-parameter-projection/baseline-witness.log": {
+      "bytes": 22040,
+      "sha256": "38d495fa584dbb84d43f7213b1bc0b366cf0891b435b0156289ccdaf00e76fc5"
+    },
+    "run/frames.return-parameter-projection/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/frames.return-parameter-projection/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/FrameReturnBaseline.olean": {
+      "bytes": 220912,
+      "sha256": "520b65892d064ba90fe26784cffe884027bf99e66c9c1955956968966e5ba447"
+    },
+    "run/frames.return-parameter-projection/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5466176,
+      "sha256": "841d1a903c49d9336c091054fbaafc8ce19fa39f1ae48881a140765c9a3a8baa"
+    },
+    "run/frames.return-parameter-projection/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/FrameReturnKill.olean": {
+      "bytes": 1270328,
+      "sha256": "c447a4a42077d951896891d953f7d3803279d7bed6f546fe7fe0c74bac63081e"
+    },
+    "run/frames.return-parameter-projection/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "612543b2df9062d66e517786018acfba32c55612a8aac6b88099ae96e5d0ecdc"
+    },
+    "run/frames.return-parameter-projection/mutant-oracle.log": {
+      "bytes": 9046,
+      "sha256": "2624e1b66074a1b694104934b97c0bbeafa463aa52ed27fbc19343f8358d4203"
+    },
+    "run/frames.return-parameter-projection/mutant-witness.log": {
+      "bytes": 21525,
+      "sha256": "8e5cfd00f124879618c6f97df90a0deee88720ab28b7d97fd03838a1406e62aa"
+    },
+    "run/frames.return-parameter-projection/mutant.patch": {
+      "bytes": 704,
+      "sha256": "d5efb94800be479e62f0524495f5d4a4feb20dbc95f073b3c4f2af21df3f013d"
+    },
+    "run/frames.return-parameter-projection/result.json": {
+      "bytes": 44519,
+      "sha256": "94286fb756e9d55e03226bb6ec2ccee4b94888f9fe2fdc91a4a4f688e7984b8e"
+    },
+    "run/guard.require-revert-true/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "fee7483af7e595b03c702bedb4fa3de65ae5078db2786517b28ec0e6331800cc"
+    },
+    "run/guard.require-revert-true/baseline-oracle.log": {
+      "bytes": 2233,
+      "sha256": "947d2f32aa8b477083f3fd34dfb2f1d846e735074cb2007d1c5ef0f3a9d22fe6"
+    },
+    "run/guard.require-revert-true/baseline-witness.log": {
+      "bytes": 3699,
+      "sha256": "694a79c3e5003c0a9c6e5b13c875f5dceb1d36fbe47cdba1fd0d279e9df49139"
+    },
+    "run/guard.require-revert-true/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/guard.require-revert-true/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/GuardFalseBaseline.olean": {
+      "bytes": 78448,
+      "sha256": "3ef0771cd454513c02e8c2a46db53dcf82eb7d15927e7d9d6b2cc249c602fec2"
+    },
+    "run/guard.require-revert-true/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459640,
+      "sha256": "9fc7b175b58fdae43d0c265aca3d0d4f37da6dc9ff677d2aa46012321f91ca74"
+    },
+    "run/guard.require-revert-true/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.olean": {
+      "bytes": 90088,
+      "sha256": "71da4f3b16b0fc20e3c9b1a88789eb10172bbfe80f5b00d702a3ea711f00a57b"
+    },
+    "run/guard.require-revert-true/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "081a1e6aeecb0fbf24452abf583c24ab9965922159bd77ca1ce89212412f8af0"
+    },
+    "run/guard.require-revert-true/mutant-oracle.log": {
+      "bytes": 2858,
+      "sha256": "915e4969d21a310bee28f3cbd63cdabec0aa7d4466eacc90c1e83367df6f5e50"
+    },
+    "run/guard.require-revert-true/mutant-witness.log": {
+      "bytes": 3070,
+      "sha256": "65145d7669c570818251bc21baa218c7fb62e4a9fd112dd55a4df93ba7ce8d5b"
+    },
+    "run/guard.require-revert-true/mutant.patch": {
+      "bytes": 688,
+      "sha256": "9e418efe67907da298592ec1bede228e995d2e51ecc4fdb56133637714440080"
+    },
+    "run/guard.require-revert-true/result.json": {
+      "bytes": 27567,
+      "sha256": "9265014b50f9878a4a9a4d7f7c5432f4d8d80efd6dc0a9e677b981c85104eef0"
+    },
+    "run/guard.require-success-false/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "c23a2295fd0c4ca5c97fdf803060977b38fdf75e40ad2c7fdeb7a7c85a2f5913"
+    },
+    "run/guard.require-success-false/baseline-oracle.log": {
+      "bytes": 2163,
+      "sha256": "01a5104181bd586595ea5ce62198a32dce8cb25925d340f0268d6b1847cdf48d"
+    },
+    "run/guard.require-success-false/baseline-witness.log": {
+      "bytes": 3675,
+      "sha256": "528576b6fcbf7662a0332111a923b8e7d3a0e13b4515a8c1cfb4ddaa7629a0d6"
+    },
+    "run/guard.require-success-false/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/guard.require-success-false/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/GuardBaseline.olean": {
+      "bytes": 78880,
+      "sha256": "2ca7ff3d4bedc31056d0bbbca0ac4af6c26c649b231a02c642ddd767d95e4736"
+    },
+    "run/guard.require-success-false/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459704,
+      "sha256": "875e46a5638b79b3e0dccf468b61d4cb1320b126633ed9118c1572b249d5efeb"
+    },
+    "run/guard.require-success-false/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.olean": {
+      "bytes": 88024,
+      "sha256": "1cb0eb1168b3769bfce466b7965a002a2e7f3964bc49653b11231dc100dc4137"
+    },
+    "run/guard.require-success-false/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "099298f3eff3b93302a4a928870c53d9b792be6727ca7a525c3906642ff79877"
+    },
+    "run/guard.require-success-false/mutant-oracle.log": {
+      "bytes": 2785,
+      "sha256": "374c60da3b570583e4f754ab79a18dac5b88ebc4b80ac0a092958162668ed09e"
+    },
+    "run/guard.require-success-false/mutant-witness.log": {
+      "bytes": 3047,
+      "sha256": "51a6d3af46cbcdefce3acf0e5574fd128393f6d517461fda0699866571409be6"
+    },
+    "run/guard.require-success-false/mutant.patch": {
+      "bytes": 690,
+      "sha256": "22b83ae0905a99fbee7068b6054bd05b1b99c4c2857bc36075753f8453d06c88"
+    },
+    "run/guard.require-success-false/result.json": {
+      "bytes": 27414,
+      "sha256": "08b08cd99191621dc9d53d35b675096f5916778ca232c87f6a9f42d9f7515778"
+    },
+    "run/manifest.json": {
+      "bytes": 65886,
+      "sha256": "b9a1356af9a9a15d19d701be0e35e7fc9b32e9d53cfedfd982a2066007657573"
+    },
+    "run/overflow.compound-sub-helper-max/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "beb93b08b2d0c3f9d4d2ef9b41f5815e853988003608b2a7991fe9e999a310da"
+    },
+    "run/overflow.compound-sub-helper-max/baseline-oracle.log": {
+      "bytes": 2222,
+      "sha256": "963fd06f3efb7623eb013c41b1426202baa58a7548c0b99586691860df16c3aa"
+    },
+    "run/overflow.compound-sub-helper-max/baseline-witness.log": {
+      "bytes": 5173,
+      "sha256": "76186af799ada6b190d004f8c1345a78093066c28cbc60cfee91bec7f78909e9"
+    },
+    "run/overflow.compound-sub-helper-max/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/overflow.compound-sub-helper-max/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/OverflowBaseline.olean": {
+      "bytes": 98200,
+      "sha256": "72e46aad5f9d2b9d1a437b717bf7d9aeb36580ad3f4d6c51753ec3eb093f9661"
+    },
+    "run/overflow.compound-sub-helper-max/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5460840,
+      "sha256": "d97528663ebc4b4e81b18c224c3bc745d5fd22876cbba2f89cb52946b54dba33"
+    },
+    "run/overflow.compound-sub-helper-max/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/OverflowSubtractKill.olean": {
+      "bytes": 146672,
+      "sha256": "1338156ff025278e82cc39bf2a6a472c62819e8534201d1011ab57fb723bf934"
+    },
+    "run/overflow.compound-sub-helper-max/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "1c20c58040e9f71f79fc52acca99484d6a2bc309d5f348f26b31e43188933ed9"
+    },
+    "run/overflow.compound-sub-helper-max/mutant-oracle.log": {
+      "bytes": 2859,
+      "sha256": "e50cef48392b63d2946a327857057eb3addac98d3170cee16ccaccd718ae06f9"
+    },
+    "run/overflow.compound-sub-helper-max/mutant-witness.log": {
+      "bytes": 4533,
+      "sha256": "277ce971de9deeaa7093d2c73df85795ab8313e12763b2e831de8434427dae96"
+    },
+    "run/overflow.compound-sub-helper-max/mutant.patch": {
+      "bytes": 698,
+      "sha256": "da8cf342ca220bc1390f56db9a91e21ace812c1f34098574925af6d21129788e"
+    },
+    "run/overflow.compound-sub-helper-max/result.json": {
+      "bytes": 28335,
+      "sha256": "5c5cdc912bacfaafdf416bab4b6da3ed77e84d87c319730918b83e7be4250e28"
+    },
+    "run/overflow.increment-erased-max/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "7272698773c6eed4207c8454308730626e067ececa5602d410f79d7c3bbe0a19"
+    },
+    "run/overflow.increment-erased-max/baseline-oracle.log": {
+      "bytes": 2279,
+      "sha256": "515271132b630bf18ecf815dd2a6ad98f7853bfc8f88134af9d884841b1f8204"
+    },
+    "run/overflow.increment-erased-max/baseline-witness.log": {
+      "bytes": 5106,
+      "sha256": "298315f5327f57347b3828a5212c4c7d47d611454ac4a84e6292f9f477a6ce1d"
+    },
+    "run/overflow.increment-erased-max/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/overflow.increment-erased-max/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/OverflowIncBaseline.olean": {
+      "bytes": 93568,
+      "sha256": "ce11493cf59c14b0a26cd7243e314d5bc947ce7f860fd3000013f15ef25a10dc"
+    },
+    "run/overflow.increment-erased-max/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5458840,
+      "sha256": "e92f01abb6dab1de28ab8f06d4f6bff5d125665bf0b9a80445a4e5a3ac8efb07"
+    },
+    "run/overflow.increment-erased-max/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.olean": {
+      "bytes": 124536,
+      "sha256": "ccf8ed7b18b70dfc6aabb3276e0a1f5d0fa8701b25375338b1bffc4749d91745"
+    },
+    "run/overflow.increment-erased-max/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "cf7410457f54b97d96d2514a541068bbdf7d0d7be97ec37ebfa58d38c9df9ca4"
+    },
+    "run/overflow.increment-erased-max/mutant-oracle.log": {
+      "bytes": 2820,
+      "sha256": "1de2b3fd6a7a3be82703b91b72f91bf881524965d1638388edb23b0b4f12dcd4"
+    },
+    "run/overflow.increment-erased-max/mutant-witness.log": {
+      "bytes": 4494,
+      "sha256": "5de659d4b4a99cfc437776b59e8c91d1bf56b529cc94b6acf5a6325128a7caa9"
+    },
+    "run/overflow.increment-erased-max/mutant.patch": {
+      "bytes": 489,
+      "sha256": "4ec47f7cc94fbaeb79c2db360d821cb7242de47e452c8699141117f8122f6f73"
+    },
+    "run/overflow.increment-erased-max/result.json": {
+      "bytes": 28259,
+      "sha256": "e5cbc99561fa99a95532c3b1574b08d03eef6b18abdcbb9aff15bd551fa6ba03"
+    },
+    "run/payment.failure-books-payment/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "3d673eee09b7854522924b64f869b3ab5468c818e179df257cc7dfb44b2f0150"
+    },
+    "run/payment.failure-books-payment/baseline-oracle.log": {
+      "bytes": 4682,
+      "sha256": "1beb0889f1f54be7c60eb591da03ed364df754e03b23c38472545371b2a39b44"
+    },
+    "run/payment.failure-books-payment/baseline-witness.log": {
+      "bytes": 11342,
+      "sha256": "a5d0b893f3c6951200501ea9ed784381f2ad7a5356fef5d70748484336d17628"
+    },
+    "run/payment.failure-books-payment/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/payment.failure-books-payment/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/RollbackBaseline.olean": {
+      "bytes": 142600,
+      "sha256": "cde635b1b5ce8cd534cfa89aede002e7c5bfb8574465ee23dcdce72452f5d748"
+    },
+    "run/payment.failure-books-payment/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459960,
+      "sha256": "d6b7edfb838d79282a3832c7dff0f3a2b7cc60cf9905cc909588d38854fceb01"
+    },
+    "run/payment.failure-books-payment/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/RollbackBookedKill.olean": {
+      "bytes": 231096,
+      "sha256": "ad79de100dcc6d2e4c1fe831611a01defd0111fee65aac904c6527fe069836fe"
+    },
+    "run/payment.failure-books-payment/mutant-compile.log": {
+      "bytes": 112,
+      "sha256": "48cbed931304d78d33aa0ea7f0c21eff4b9f9f9b85e364b8d552435e29a17ea1"
+    },
+    "run/payment.failure-books-payment/mutant-oracle.log": {
+      "bytes": 5530,
+      "sha256": "384ae5f2e7122ca1508d371c263aeb770a12236434cfffb5b0746b7d175112f2"
+    },
+    "run/payment.failure-books-payment/mutant-witness.log": {
+      "bytes": 10574,
+      "sha256": "02d8a2322618ac9a21ea87fff1e79c6968084d679b58e8e91beb8326c3f668de"
+    },
+    "run/payment.failure-books-payment/mutant.patch": {
+      "bytes": 484,
+      "sha256": "3a02abb69fe15d5cda149fb3e7be663302f7ea1c057099dcd9d4aff5b82d5e83"
+    },
+    "run/payment.failure-books-payment/result.json": {
+      "bytes": 34746,
+      "sha256": "7cc414e3a0999dd0ed538b34f64cddf97c606bc50edd49d9b494ed41244569f2"
+    },
+    "run/payment.success-flag-false/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "a7f1eed13e25b19768e107237516d75f884cb6dfcb56e50d654b69f208396417"
+    },
+    "run/payment.success-flag-false/baseline-oracle.log": {
+      "bytes": 3794,
+      "sha256": "007274cb6fb937d9218b0eddb078f94384193bad78fdf37ac564b70a1828490c"
+    },
+    "run/payment.success-flag-false/baseline-witness.log": {
+      "bytes": 12035,
+      "sha256": "7102083d75c5b93d513264400be00604b0f4fd24e3911fd1f4d25fcd579a9ef2"
+    },
+    "run/payment.success-flag-false/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/payment.success-flag-false/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/PaymentBaseline.olean": {
+      "bytes": 136104,
+      "sha256": "beb9d2f9ddea5f79187668962dd93488648caf1acc00cabd0f11b76c499da5a1"
+    },
+    "run/payment.success-flag-false/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459736,
+      "sha256": "c3703ad4fefecb1914d25c78f1b12fc5c16df235710fb323c6422f3205dd3793"
+    },
+    "run/payment.success-flag-false/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.olean": {
+      "bytes": 206656,
+      "sha256": "56429ecb72728595d4e45d656b7d23a05b162c10cc16f979d16a4f6d57ab72d3"
+    },
+    "run/payment.success-flag-false/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "cb509c80389cb9ccd8673d91883cf21859b66d7d092d11a3a185c6da6c544693"
+    },
+    "run/payment.success-flag-false/mutant-oracle.log": {
+      "bytes": 4560,
+      "sha256": "63eee8038b7a11636c2ecc500a7896bed1a978694539fac4d1ea6683b5f7b3d8"
+    },
+    "run/payment.success-flag-false/mutant-witness.log": {
+      "bytes": 11269,
+      "sha256": "82eeb27b539c588ee577c788f5dabb5b23a187278fe4a9c8ec3b53bef849a240"
+    },
+    "run/payment.success-flag-false/mutant.patch": {
+      "bytes": 429,
+      "sha256": "c15b070ba04afb09007b67440e11c3ced0c8f1f3a723b743a1fb8cf5ecb14f7d"
+    },
+    "run/payment.success-flag-false/result.json": {
+      "bytes": 34568,
+      "sha256": "54b98c510f695c720d60fed4a0c768c760443e8b8e9c7a34a3d973c5885cbd7d"
+    },
+    "run/pop.empty-skipped/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "571dee74c65b055a2a969dc1ae45d0adbe801bee67d21c01463dcb00f059fe36"
+    },
+    "run/pop.empty-skipped/baseline-oracle.log": {
+      "bytes": 2842,
+      "sha256": "79a80652ab20ceb4dfa856235d1ced248b4240773a4873d89352615bb804bb8c"
+    },
+    "run/pop.empty-skipped/baseline-witness.log": {
+      "bytes": 7372,
+      "sha256": "1dc6f34d6d97b997edd9c55ac66640b230acb32e6df7bf449fb3f9230283f56e"
+    },
+    "run/pop.empty-skipped/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/pop.empty-skipped/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/PopBaseline.olean": {
+      "bytes": 131480,
+      "sha256": "a2dc06ca8d54e5cb47ce28e1691f565a516acf86f14969de73aff0bf940304cf"
+    },
+    "run/pop.empty-skipped/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459064,
+      "sha256": "292ef3a0a67642c628f0e0f69cd40177c167cacc14b0f0aed3a046afc74aac1f"
+    },
+    "run/pop.empty-skipped/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/PopSkippedKill.olean": {
+      "bytes": 161120,
+      "sha256": "eba49b282ae35cb8214aea8cfd1a80bdb43e5d020d28523a664e1aed952da74b"
+    },
+    "run/pop.empty-skipped/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "fadee9376199910418d37ff9b8efe1835411de7f269717c86a27f2c91752d20b"
+    },
+    "run/pop.empty-skipped/mutant-oracle.log": {
+      "bytes": 3329,
+      "sha256": "a9217d192fc158a91597243e9f5ea01be4f0742112e73fa3ad477ac051549880"
+    },
+    "run/pop.empty-skipped/mutant-witness.log": {
+      "bytes": 6850,
+      "sha256": "a527631c58fc18726ad6bc856231617d9cc9df27334a9cd63161bc7d28a06fd7"
+    },
+    "run/pop.empty-skipped/mutant.patch": {
+      "bytes": 665,
+      "sha256": "3d833fbb38b053d21b62eef283ebfff31bc26d304c6964b62ef75b41e1646e17"
+    },
+    "run/pop.empty-skipped/result.json": {
+      "bytes": 28589,
+      "sha256": "db37621e93e795c1a9028ae81ca6d697bb7022588b78615fc125c1bdf4564fdc"
+    },
+    "run/push.compound-updates-swapped/baseline-compile.log": {
+      "bytes": 112,
+      "sha256": "c34b7b777187f2a75ec564acdec1044b81e6ab2ba46f9b7dcf99d4ae68f24b19"
+    },
+    "run/push.compound-updates-swapped/baseline-oracle.log": {
+      "bytes": 3003,
+      "sha256": "3a208ad75e503017316c5c2dd871d02085a9ecca0844e85413f48313b70f52d1"
+    },
+    "run/push.compound-updates-swapped/baseline-witness.log": {
+      "bytes": 11875,
+      "sha256": "6c8e4ab72d5dc5c0d039c21500e067b2904a8313f1f78a2fb0d92df25436ebf0"
+    },
+    "run/push.compound-updates-swapped/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/push.compound-updates-swapped/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.olean": {
+      "bytes": 187416,
+      "sha256": "4eb1c5594eb0cb68e1a9404f768984b331db084393af258629193cd318758715"
+    },
+    "run/push.compound-updates-swapped/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459864,
+      "sha256": "0bc490025c10184e639f4d20772ddf26b77860ae203b3b2f569fd4c76f7eac0d"
+    },
+    "run/push.compound-updates-swapped/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.olean": {
+      "bytes": 225936,
+      "sha256": "86fe0af2f8ff5f1edabb485dd004489682fc37ebc66c71a189979c1bffed5af0"
+    },
+    "run/push.compound-updates-swapped/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "71ee33777672e6f8df106ff8b50c03152e87eec0ca288a1f7801d02384ce1218"
+    },
+    "run/push.compound-updates-swapped/mutant-oracle.log": {
+      "bytes": 4326,
+      "sha256": "1b8f979c771b9ae494a19a452d42c9e58933d7a4fa4b8f29c7a7935a27b52ae6"
+    },
+    "run/push.compound-updates-swapped/mutant-witness.log": {
+      "bytes": 10549,
+      "sha256": "c204d9962efa47a5dc6459807313d963bf6490c1d8eae2987317e157e68a3d35"
+    },
+    "run/push.compound-updates-swapped/mutant.patch": {
+      "bytes": 715,
+      "sha256": "e3171069484f2e461bcf8e1fba150fbe9a8c2383e4b86e895244306d0c45e4dc"
+    },
+    "run/push.compound-updates-swapped/result.json": {
+      "bytes": 31495,
+      "sha256": "eff5246ab80f6a147044dd7204faba07d54fae1ec57ac20f5d320448b558900a"
+    },
+    "run/push.reference-tail-cleared/baseline-compile.log": {
+      "bytes": 111,
+      "sha256": "42266c9ea4576d04294649c5026a311c5dbb492b761ca21823a080081ae481da"
+    },
+    "run/push.reference-tail-cleared/baseline-oracle.log": {
+      "bytes": 5133,
+      "sha256": "c1b408adb053e1fed385b87e5e775b73bdab623ca61c5ca073e2490c253acb9e"
+    },
+    "run/push.reference-tail-cleared/baseline-witness.log": {
+      "bytes": 12113,
+      "sha256": "c0d3ea1b0a9e44ab659c6ea4550203c0ca79480b81ff00cedd4e2450ff0f00a3"
+    },
+    "run/push.reference-tail-cleared/compiled-artifacts/baseline-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5459832,
+      "sha256": "1801ba4dfa1ff7cef483573301eb76b37da54f5895c12c2473343bc8c10ec5f3"
+    },
+    "run/push.reference-tail-cleared/compiled-artifacts/baseline-oracle/tests/h28-sol/mutation-testing/oracles/PushTailBaseline.olean": {
+      "bytes": 192968,
+      "sha256": "44ad39718e5c8a8108408b3e38f8be744365fab06dcc226476e9c8c0b37f04ec"
+    },
+    "run/push.reference-tail-cleared/compiled-artifacts/mutant-compile/Solidity/Calculus/Rules.olean": {
+      "bytes": 5462776,
+      "sha256": "91acb5c006f8b51a19182ca91ac1e1383607d8eddeab14c12dbb962dd2fbc6f6"
+    },
+    "run/push.reference-tail-cleared/compiled-artifacts/mutant-witness/tests/h28-sol/mutation-testing/oracles/PushTailClearKill.olean": {
+      "bytes": 227536,
+      "sha256": "3b0cff042c1dcc27845ea50c407059f7cf4f749f2ac9c1a1582162fabf847858"
+    },
+    "run/push.reference-tail-cleared/mutant-compile.log": {
+      "bytes": 111,
+      "sha256": "3c2ebf2496ca57279effde8615f51128cddef9c21fc10ca74c1da4858746b702"
+    },
+    "run/push.reference-tail-cleared/mutant-oracle.log": {
+      "bytes": 5705,
+      "sha256": "8cb4bc276da9f39fb0c792b7e58cfeaf57f1ffec7b14720c3c6ffea5102f16e7"
+    },
+    "run/push.reference-tail-cleared/mutant-witness.log": {
+      "bytes": 11540,
+      "sha256": "071604f743f80400cef82f08fa09ff2453ec6917523f489a15e145928cdd5587"
+    },
+    "run/push.reference-tail-cleared/mutant.patch": {
+      "bytes": 763,
+      "sha256": "69c136176837133c1172b2ca4c1efcdabc8f68785ed4cd836067f84471461aca"
+    },
+    "run/push.reference-tail-cleared/result.json": {
+      "bytes": 31249,
+      "sha256": "e7d9a39b42081b1ec44653d759f53566fedd7b54edb16aeb55754f1e35aad6f7"
+    },
+    "run/result.json": {
+      "bytes": 652934,
+      "sha256": "9197a84387c6b5d51643a2ba426d5b413b6d6f0e276b0e769e39f3b91b54ea74"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/AliasBaseline.lean": {
+      "bytes": 7455,
+      "sha256": "138befa4d0e3a9c8452201fe8c8dcd599c297f249e2134ca40f5394525a8a751"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/AliasTwiceKill.lean": {
+      "bytes": 9131,
+      "sha256": "53bd884bc0d62de6ac11bff9affa040f3ae42979ee5270b6caceab00abe1f624"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/BoundsBaseline.lean": {
+      "bytes": 3116,
+      "sha256": "059db341369f65869183ce8c422d2852b4fd9c2cf102678ee7641a1252e91cdc"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/BoundsSkippedKill.lean": {
+      "bytes": 5215,
+      "sha256": "debc07e078ca0938447de5bdc97c655a8b3ed9f51e211dc400751feb2910965e"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/CallbackBaseline.lean": {
+      "bytes": 4715,
+      "sha256": "de340249b80f01eeb91d0b53e0c2177004207c1f9ab9bef546754f3b79f86591"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/CallbackFailureKill.lean": {
+      "bytes": 9352,
+      "sha256": "c0154e2afaffd7d8b78a5dd5e0e8042e6d256844a9e47239d8cb4a92dea5e756"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/DeleteBaseline.lean": {
+      "bytes": 1644,
+      "sha256": "5bedd7f6795f26c1f6537ad7b1e61b42191bbd1e7e16531dfe20d08c45735b55"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/DeleteSkippedKill.lean": {
+      "bytes": 2886,
+      "sha256": "ccca00f0e1b59bf171ef78beb5f481f912a2dc67b3314afde971256adac0ca7a"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/DivisionBaseline.lean": {
+      "bytes": 1363,
+      "sha256": "fd1ec9bd8200c51823ea1ccb93dd92f5faef1ecd52cd993385cf4b4b77d369e6"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/DivisionSubtractKill.lean": {
+      "bytes": 3239,
+      "sha256": "1a70933ed6443f1c5554496d4b4b9f23656cca64485e3876d1dba5e04f8437d5"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/FrameReturnBaseline.lean": {
+      "bytes": 4217,
+      "sha256": "34977c19b55b5b5552c6314790e7ae25d6ae393729d762ae653bd3436eba66a4"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/FrameReturnKill.lean": {
+      "bytes": 10884,
+      "sha256": "73a1283e63547b66513dbea8fe2fe83cb25c43f51389dfcf2dad30f17c4053a0"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/GuardBaseline.lean": {
+      "bytes": 1099,
+      "sha256": "c68bc5209bc77526b2b7fa43aa85a41f572de18c45d63901e1b69b9cef5a3d01"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/GuardEquivalent.lean": {
+      "bytes": 1601,
+      "sha256": "e438c64b429a282756b24e32894588214f8e2990622d97b1e675fbce072cd32f"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/GuardFalseBaseline.lean": {
+      "bytes": 1092,
+      "sha256": "7bb5e129a4f46e189a1f0dfc4daf984a356cdb5caff0adafd9b0cec4cd5c593e"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/GuardFalsePolarityKill.lean": {
+      "bytes": 2035,
+      "sha256": "b16424fb02d3fc64319689a214a535fed821729d1194b185d5e6c996f0760f69"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/GuardTruePolarityKill.lean": {
+      "bytes": 2029,
+      "sha256": "521891721ea8598866a1932044ec7e7ff41809197aa0585f30bd80cb9f840d40"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/OverflowBaseline.lean": {
+      "bytes": 1236,
+      "sha256": "c7af8a42a3a9a6c59c9c41ff31acc712e2e58c76626718e0b01b879e90850808"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/OverflowIncBaseline.lean": {
+      "bytes": 1217,
+      "sha256": "4a309b8fd210e39138400b05d38da2d9f1723eb9682dbf5f8237fc47f05990aa"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/OverflowIncSkipKill.lean": {
+      "bytes": 2658,
+      "sha256": "1c0e362275bdf2c2e48eed44fc9f2ad9f06c1b1657743b9e656937fec39fd730"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/OverflowSubtractKill.lean": {
+      "bytes": 2912,
+      "sha256": "5ae5c5822db6a0199dc463055692ccaa440734f81113522de84b78a60a494fa3"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PaymentBaseline.lean": {
+      "bytes": 1849,
+      "sha256": "171c3b08a4286826f67e1eefada3b0800d1e560efc5cd9c7701c0a96c235cbc4"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PaymentFalseKill.lean": {
+      "bytes": 4595,
+      "sha256": "fbb4ebd568b499a5fe08314307700c3229380915c0a661c0e64939276e9b797f"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PopBaseline.lean": {
+      "bytes": 1589,
+      "sha256": "555fe41ffee312fb3fdf507040c02ca72ac054a231065de8949664e02af17175"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PopSkippedKill.lean": {
+      "bytes": 2837,
+      "sha256": "cac41e9773a515b9d58a98948a9176f5da7c6fbc0381e0538824a3164806e31d"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PushOrderBaseline.lean": {
+      "bytes": 2600,
+      "sha256": "a80cda87cbfbe10b940740335d890c62c893e7f1725acc5cf63937e363016510"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PushOrderSwappedKill.lean": {
+      "bytes": 4766,
+      "sha256": "ad4b4bf25e014c1ecef419a5bd85800b183689586b59546db709798e6420dff5"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PushTailBaseline.lean": {
+      "bytes": 3433,
+      "sha256": "f8884d84ac056c19f493d1cc5f90dc345aa12bd1c2fb1534c35a5bb47be5349c"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/PushTailClearKill.lean": {
+      "bytes": 5544,
+      "sha256": "b813788f044c3e7b7fb86b51d14884e44ca5ac12df8bd1ba7905fc3421f59395"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/RevertBaseline.lean": {
+      "bytes": 879,
+      "sha256": "2fab8e1f10a5bfaa206cabcbcd75de1db9fec8a12b0aeaf18e47c87a8403587c"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/RevertDiamondKill.lean": {
+      "bytes": 1489,
+      "sha256": "120b7f53e487e5586f70bc036bd2f47433a5ecc1247e08c6de475afeaa68a2ea"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/RollbackBaseline.lean": {
+      "bytes": 2070,
+      "sha256": "10355fa94803c8073c47d6c3730481b295995a5ba2a5ba0464dfc998c264e69a"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/RollbackBookedKill.lean": {
+      "bytes": 4816,
+      "sha256": "afb7641b8a5ce9b37baf172c8880d9a8fe94ae1076f0c00278a1d67b92fcdb5e"
+    },
+    "sources/tests/h28-sol/mutation-testing/oracles/WeakGuardOracle.lean": {
+      "bytes": 1190,
+      "sha256": "b02e252f2826ba8851155b473d64b0a4a5ee03f6d385a1e69f3dc53dc2f0f9b1"
+    }
+  }
+}

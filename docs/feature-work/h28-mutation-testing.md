@@ -894,9 +894,11 @@ shrink that candidate census. The callback cache receipt remains a VM-only H44
 pin, explicitly marked in the manifest and `bulk-data.json.frame_profile_inputs`
 and authenticated by the existing frozen bulk index and runner. The inventory
 itself is tracked, so this mixed-input profile is separate from the legacy
-two-off-Git-input declarations. Current census counts are 34 fixtures, 12
-profiles and 19 distinct variants. Development passes are unscored; the frozen
-whole pilot run, reviews and evidence seal remain pending.
+two-off-Git-input declarations. At that frame freeze the census had 34 fixtures,
+12 profiles and 19 variants; the current selected suite has 34 fixtures,
+13 profiles and 19 variants. Development passes were unscored; the frozen
+pilot subsequently passed at `e198e3fbe0d29687129e571cdc5a192b7755b753`,
+with the run, reviews and evidence seal recorded below.
 
 
 Coordinator publication `af972480b7eb44498a7d754f0761dd3adf5e39eb` is merged
@@ -919,7 +921,8 @@ passed. Finder/skeptic development and actual-evidence reviews are separate from
 seal replay. `verify_combined.py --profile frame` uses fixed 2/1 accounting and
 the unchanged strict certificate/source/artifact/resource checks.
 
-H41 frame pack `/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
+H44 frame evidence pack (subject to H41 cache delivery)
+`/workspace/h28-frame-export-e198e3fb/proof-worlds.tar.gz` has 6363366 bytes, SHA256
 `16236914543752364467b16717fdcd07eaf9147edc949726f6d5c85265625ab6`, with 41 H44-pinned regular members. It stays
 on this VM for coordinator pull; no transfer is claimed. Normal dependencies
 are separately pinned; mutant objects remain isolated. Frame semantics are
@@ -927,3 +930,113 @@ restricted to the typed selected call and its pending caller callback, and
 provide no whole-compiler correctness claim. Full queue acceptance remains false:
 final selection ledger, expanded combined execution, and final repository gates
 are still pending.
+
+
+Coordinator follow-up: the first frame section now points to the completed
+frozen pilot rather than leaving its status pending. The frame pack and member
+manifest both label evidence authorization H44; the separate
+`cache_delivery_authorization` field records H41. Delivery remains pending.
+Published master `79e4972532b0628c539911dc80c4904d776e81ef` is integrated
+by rebase after verifying identical owned files in its rebased delivery. Engine
+and bulk delivery anchors advance together; immutable semantic/cache and
+historical snapshot pins remain unchanged.
+
+
+### Whole selected-suite freeze
+
+`manifests/selected-suite.json` composes all original 17 case payloads unchanged
+with the direct rollback and return-frame mutants: 19 IDs, 15 scored mutants
+and four controls. Its tracked source-attribution index lists every selected
+declaration span. This supplements the exhaustive 290-declaration/308-unit
+candidate census; unselected candidates are not exclusions, equivalences or
+proved soundness. The callback cache remains an explicit VM-only H44 pin,
+authenticated by the frozen bulk index and runner. Current accounting is
+34 fixtures, 13 profiles and 19 case variants. Whole execution and exhaustive
+selection/oracle accounting subsequently passed at
+`f8b657366fc38e1aad85ba080d14bb2c249448eb`, as recorded below.
+Whole-assignment `scope_complete` remains false pending final gates.
+
+
+The whole selected run at `f8b657366fc38e1aad85ba080d14bb2c249448eb` passed: all 19 IDs ran,
+all 15 scored mutants were killed, and all four controls had their declared
+outcomes. No unrun case contributes to the denominator. Retained evidence has
+113 checks, 78 isolated objects and 321 owned axiom exports. Summed check time
+610.982s; peak RSS 1,468,648 KiB; minimum estimated
+reserve 4,386,742,272 bytes. Normal and optimized controls
+each passed all 89 tests. Separate finder/skeptic actual-run audits PASS.
+
+The fresh census gate separately passed all 294 signature/axiom exports, seven
+complete printed families, four universal finite operator facts and its wrong
+table negative control. Actual Lean4.24.0/Lake5.0.0-src+797c613 and bounded
+KeySort passed first. The generated ledger enumerates all 290 declarations,
+308 units, 34 fixtures and 13 profiles. All 34 fixtures have selected oracle
+roles. Twelve declarations contain selected edits; 278 remain explicitly
+unselected. The alias rewrite's ten edit spans outside DSL premise units are
+also retained. Unselected does not mean excluded, equivalent or proved sound.
+Both reviewers independently passed this exhaustive accounting.
+
+H44 evidence archive `/workspace/h28-selected-export-f8b65736/proof-worlds.tar.gz` has 56215388 bytes and SHA256
+`17836afbe0df1a8c3836a99a524363888716778d45158779f1a334400531350d`, with 285 per-member hashes committed. The H41
+cache-delivery status is ready for coordinator pull; no transfer is claimed.
+It includes the ledger and fresh census proofs alongside all whole-run objects
+and commands; immutable dependency packs remain separately pinned.
+`verify_combined.py --profile selected` is intended to authenticate exact 19/15 outcomes and
+all proof/source/resource certificates, then regenerates the full ledger and
+source/kernel census and checks every fixture theorem's successful axiom
+inventory. Dedicated fault controls use these real saved proofs, never mocked
+success. Whole-assignment acceptance still awaits these final replay/control
+gates, their reviews, and the final repository gate; the selected score alone
+does not establish compiler correctness.
+
+
+### Coordinator held-review corrections
+
+The source audit confirms **15 distinct scored programs**, not 14: the scored
+roles contain 11 `mutant` cases and four `negative-control` semantic mutations.
+The four unscored runner controls are `known-kill`, `invalid-control`,
+`equivalent-control` and `runner-survivor-control`, one each. The survivor
+explicitly repeats `guard.require-success-false` through `control_of`, so there
+are 18 distinct program hashes across all 19 IDs. Its duplicate does not enter
+the scored denominator. The manifest now records these complete role counts.
+Ledger validation rejects duplicate scored hashes and every undeclared hash
+duplication; only the linked survivor with a regression oracle may repeat its
+scored parent. Dedicated controls check both refusal and the permitted link.
+
+The ledger now regenerates every candidate declaration and textual unit from
+the immutable source, compares the entire catalog, authenticates the selected
+inventory file hash and checks every selected inventory span against source.
+Controls reject removal of an unselected candidate, forged catalog/index spans,
+and absent or repeated edit text. Frozen prose spacing is restored. The first
+frame paragraph distinguishes its historical 12 profiles from the current 13.
+The historical bulk `source_head` is explicitly renamed `snapshot_source_head`
+(61724cdf); the current delivery base remains 79e49725. Snapshot provenance is
+preserved rather than relabeled as current delivery.
+
+The first whole run at f8b65736 and its H44 pack remain immutable historical
+evidence under `selected_proof_pack_f8b65736`; the strengthened validator and
+revised frozen manifest require fresh ledger/census/whole-suite gates before
+final acceptance. Case payloads, theorem statements, input premises, exclusions
+and budgets have not changed.
+
+
+### Fresh strengthened receipt
+
+The held accounting fixes are frozen at `aab23327962bcc278dd8fee43cd85652f9377fc1`. Fresh normal and
+optimized gates each pass 94 controls. Fresh source-complete ledger generation,
+the 294-export census, its independent negative control and all 19 case IDs
+pass. All 15 distinct scored programs are killed; the four explicitly named
+unscored runner controls retain their expected outcomes. This fresh run has
+113 checks, 78 objects and 321 owned axiom exports; summed time
+632.738s, peak RSS 1,468,692 KiB, minimum estimated
+reserve 4,295,225,344 bytes. Separate finder/skeptic
+actual-run and inventory reviews PASS.
+
+The current `selected_proof_pack` now points to **this fresh run**, not f8.
+Archive `/workspace/h28-selected-export-aab23327/proof-worlds.tar.gz` has 56216293 bytes and SHA256
+`32625cd27ee6171cf5d206417d0ae491b6837649521fcd11e9b9de4a2cdc3748`, with 288 committed H44 member hashes. The
+historical f8 receipt and archive remain unchanged under their historical key.
+Both entrypoints consume the current key consistently. Direct strengthened
+accounting replay passed before sealing. Actual published-entrypoint replay
+and all eight fault controls are next; no current full replay acceptance is
+claimed until their results are recorded. H41 delivery remains coordinator
+pending. Whole repository gates and whole-assignment acceptance remain pending.
