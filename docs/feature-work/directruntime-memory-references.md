@@ -867,3 +867,42 @@ receipt consistency. Owned-document paths and Python syntax/whitespace checks
 pass. The four unchanged global documentation failures remain with the
 existing relayed owners; they were not masked or re-run unchanged. Exact
 browser handoff and request-journal hashes still match the accepted bytes.
+
+## H71 exact-journal browser report intake
+
+Fetched native-browser owner headcc62220dcf1a47771536d75599b0ef588d143d62
+without merging or editing that lane. Both published replay/reconciliation
+manifest hashes match the authenticated dispatch. All343 runtime Lean source
+fingerprints match our native build at both owner build0140eb13 and owner
+headcc62220; bridge and closure script hashes also match. The local original
+537822-byte,84-request journal retains SHAae658ff7, and the committed harness
+retains SHA63a01fa7. Earlier field-only reconciliation had zero exact-object
+matches; the subsequent exact-wire replay report has84. They are distinct.
+
+The owner reports real native/Chromium WASM replay with64proved,16refuted,
+fourpending per backend,including mandatory positive Identity diamond and
+paired controls. This clears the functional execution wait by owner report.
+Its gate used revalidated prior fresh H81 binaries, not new builds for this
+replay;141.646s is functional gate time,not benchmark acceptance. No unchanged
+STOP is rerun. Four diamond cases and original whole-lane limits remain.
+
+Local metadata/source/journal checks pass1.806s,15764KiB in12GiB/no-swap
+scope. The owner's exact handoff and two raw evidence archives are absent on
+this VM. Executed harness SHA37be7c06 and reported report-only lineage cannot
+yet be independently checked here from raw bytes. The local committed harness
+SHA is verified; no parent-commit equality or local browser execution is
+invented. Current exact artifacts are requested through the existing owner
+channel in browser-result-artifact-request.json, with source/destination paths
+and hashes. This requests evidence delivery, not another execution or build.
+
+Bulk copied metadata/source fingerprints stay outside Git, sealed with complete
+archive readback. browser-result-intake-receipt.json records commands,scope,
+local checks,owner-reported results and missing raw evidence separately.
+Finder/skeptic report no intake defect; neither used Lean/server. No producer,
+Lean source,theorem,axiom,budget or trust boundary changed. No source/compiler
+preservation,universal machine correctness or RUNTIME_GATE_PASS is claimed.
+
+Final finder and skeptic independently verified the metadata archive hash,
+all seven members,checker hash and receipt boundaries. No findings. Owned
+document paths,Python syntax and whitespace pass; unchanged global reference
+failures remain with their existing relayed owners.
