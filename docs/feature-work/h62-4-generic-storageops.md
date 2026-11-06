@@ -432,3 +432,24 @@ measured standard axiom sets. One matched warm sample measured 51.83 seconds
 before and 52.62 seconds after (1.5% increase, within 10%). Exact-byte packet
 checks and six tampering controls pass. Independent read-only finder and skeptic
 found no issue. Full-family correspondence and original lane closure remain open.
+
+## Retained-cycle semantic case ledger
+
+C218 records manual source obligations for all five frozen controls in
+TargetRetainedCycle.Controls: three successful execution equations, seven
+ordered tuple components, the successful uncleared-child counterexample, two
+refusal orders, and five changed-payload conjuncts. The ordered case retains
+all 18 store slots and nine sampled context fields. Whole-machine execution
+equalities remain distinct from those finite observations. Stable reuse of an
+already-cleared child does not restore its original payload; older retained
+tail, opaque cell and outside words remain separately accounted for. Neither
+a revert result nor the final execution index establishes rollback or gas
+adequacy. No Source or physical-machine adequacy follows.
+
+The generator checks exact frozen module bytes, all five statements and
+fixture support. Source drift, omitted/duplicated cases, shortened observations,
+changed statements and a fabricated proof-acceptance flag are rejected. Both
+independent read-only reviewers found no issue. This ledger adds zero verified
+proofs and supplies no generic instance or correspondence acceptance; the
+1623-claim implementation queue and all existing timing/resource holds remain
+open. No production source, premise, definition or axiom inventory was edited.
