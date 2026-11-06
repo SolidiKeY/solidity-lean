@@ -738,6 +738,7 @@ import Solidity.Backend.MemoryCopies.RuntimeStorageArrayInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultControls
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaultInterface
 import Solidity.Backend.MemoryCopies.SelectedArrayDefaults
+import Solidity.Backend.MemoryCopies.SelectedDefaultDemandInterface
 import Solidity.Backend.MemoryCopies.SingletonCopy
 import Solidity.Backend.MemoryCopies.SingletonCopyControls
 import Solidity.Backend.MemoryCopies.SingletonCopyInterface
