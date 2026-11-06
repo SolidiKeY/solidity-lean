@@ -287,6 +287,23 @@ diffs it).  `docs/testsuite-proofs.md` has the counts and timings.
 | `Frontend/QualifiedUnits/ReferenceCoverage.lean` | Universal preservation of frozen explicit references and all finite identifier/member paths. |
 | `Frontend/QualifiedUnits/SignatureResolution.lean` | Signature-aware declaration resolution over original Source identities (the public consumer `resolve`). |
 | `Frontend/QualifiedUnits/SignatureResolutionControls.lean` | Kernel observations for the actual signature-aware resolver, paired with each main compiler query. |
+| `Frontend/LiteralGrammarH28/BodyPins.lean` | String-body theorem signatures and axiom reports. |
+| `Frontend/LiteralGrammarH28/BoundaryPins.lean` | Quote/scanner theorem signatures and axiom reports. |
+| `Frontend/LiteralGrammarH28/Classification.lean` | Hex/unicode literal relations and exact classification/refusal boundaries; keeps the raw unicode line/bidi guards. |
+| `Frontend/LiteralGrammarH28/EncodingValue.lean` | `CodepointBytes`: independent `\u` escape byte arithmetic (surrogates included); hex pair/quad value bounds. |
+| `Frontend/LiteralGrammarH28/FragmentCompleteness.lean` | Classification inversions extended to arbitrary fragment lists of every kind. |
+| `Frontend/LiteralGrammarH28/Fragments.lean` | `Fragments`/`FragmentValue`: fragment sequences, byte concatenation and per-fragment splitting. |
+| `Frontend/LiteralGrammarH28/FullControls.lean` | Kernel controls for every nonnumeric classification arm and fragment sequence, independent of compiler outcomes. |
+| `Frontend/LiteralGrammarH28/FullPins.lean` | All public lane theorem signatures and axiom reports (the audit's pin source). |
+| `Frontend/LiteralGrammarH28/Global.lean` | Literal classification inversion over unrestricted raw input. |
+| `Frontend/LiteralGrammarH28/Lengths.lean` | Scanner split uniqueness and strictly shorter suffix; byte-length bounds for plain, hex and unicode literals and fragment sequences. |
+| `Frontend/LiteralGrammarH28/ModeGrammar.lean` | All-mode (sol/yul/asm/pragma) literal and fragment grammar relation. |
+| `Frontend/LiteralGrammarH28/ProofSafety.lean` | Safety report for the word-table proof tactic's generated declarations. |
+| `Frontend/LiteralGrammarH28/Roundtrips.lean` | Constructive encode/classify round trips in every literal-bearing mode. |
+| `Frontend/LiteralGrammarH28/Split.lean` | Exact literal splitting in each admitted lexer mode, any suffix kept. |
+| `Frontend/LiteralGrammarH28/TaggedEncoding.lean` | Constructive hex/unicode literal encodings passing the line/bidi guards. |
+| `Frontend/LiteralGrammarH28/Utf8Shape.lean` | `\u` escape byte shape (lead/continuation, non-overlong) and code-point recovery; no scalar check. |
+| `Frontend/LiteralGrammarH28/WordTable.lean` | Exhaustive word-table return classes, proved by a checked proof-producing tactic. |
 | `Frontend/StatementGrammarH28/G0Nodes.lean` | Gate G0 twin of `Syn.nodes` constructors (`g0NodeCtors`, `Syn.casesOn` with structural recursion) read by the fixture observers, linked by `g0NodeCtors_eq_nodes`. |
 | `Frontend/StatementGrammarH28/AtomConditional.lean` | Statement-grammar `if`/`while`/`do`/empty-`for` coverage with arbitrary expression conditions under the exposed atom premise `ExprAtomRparen`; nearest else and token uniqueness inside the fragment. |
 | `Frontend/StatementGrammarH28/AtomNested.lean` | Mutual `AtomStmt`/`AtomItems`/`AtomCatch`/`AtomCatches` fragment: arbitrarily nested blocks, control leaves, `return e;`, `unchecked` items, atom-condition `if`/`while`/`do`/`for`, `for` initialisers, simple statements, `emit`/`revert`, contextual `revert` expression statements, `try`/`catch` and `assembly` (stated sub-parser premises); coverage by mutual structural recursion with syntax-derived budgets under the else and catch frames, nearest else, token and prefix uniqueness. |
