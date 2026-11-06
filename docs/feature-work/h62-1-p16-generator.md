@@ -134,11 +134,19 @@ without Lean. They identified local-versus-commit source checks, misleading
 pass labels, and Git symlink modes; fixes and fixture controls were added, and
 both found no further concrete defect in their final read-only review. The
 existing tests cover per-owner and integrated synthetic snapshots, missing and
-unrelated commit IDs, revision-source helpers, changed files and symlinks. A
-full end-to-end synthetic owner-commit test was not run: automatic approval
-review rejected the proposed fixture command, citing possible redirection of
-real checkout Git metadata and removal of a source file. No such command ran.
-The existing fixture helpers do not substitute for that end-to-end check.
+unrelated commit IDs, revision-source helpers, changed files and symlinks. The coordinator approved an isolated end-to-end test after the earlier command
+was rejected by automatic approval review. `python3 -B tests/h62/item1/p16-generator/test_owner_commit_isolated.py`
+passed with exit 0: it creates and removes a new Git repository under
+`/workspace/scratch`, has no remotes, clears inherited Git variables, and checks
+an owner commit plus missing-source and symlink-source commits. It copies the
+pinned P16 text and uses synthetic source files and a synthetic baseline commit;
+the copied conservation script is adjusted to that fixture-only baseline. Its
+result does not validate either real owner head. The test emitted
+`fixture_removed=/workspace/scratch/p16-owner-test-gz6g3top`; command output is
+in `/workspace/h62-p16-evidence/owner-commit-isolated.log`. Independent
+read-only finder and skeptic reviews inspected isolation before and after the
+run; inherited Git variables were scrubbed following their initial finding.
+Both final reviews found no further concrete defect, and neither used Lean.
 
 H70 supplied inline excerpts identified as partial owner overlays for
 `Solidity/Hash/CollisionBound.lean` (owner artifact SHA-256
