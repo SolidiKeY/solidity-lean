@@ -29,12 +29,14 @@ def returnU8 {ctx} (pipeline : Pipeline) (state : State ctx)
   | .legacy => LocalOperations.u8Input ((materialize state).1.get index)
   | .viaIR => LocalOperations.u8Input ((materialize state).1.get index)
 
-/-- Independent numeric relation on the intrinsically typed return value.
-The raw frame itself retains the original word. -/
+/-- Numeric characterization of the canonical Boolean return projection.
+Its soundness equation is definitional; the raw frame retains the original word. -/
 def BoolReturnD {ctx} (_pipeline : Pipeline) (state : State ctx)
     (index : Solidity.Source.Idx ctx.tys .bool) (value : Solidity.Source.Val ctx.env.layout .bool) : Prop :=
   value.key = some (if (boolWord state index).val != 0 then 1 else 0)
 
+/-- Numeric characterization of the canonical uint8 return projection.
+Its soundness equation is definitional; the raw frame retains the original word. -/
 def U8ReturnD {ctx} (_pipeline : Pipeline) (state : State ctx)
     (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8))
     (value : Solidity.Source.Val ctx.env.layout (.int Solidity.Source.IntTy.u8)) : Prop :=
@@ -156,7 +158,7 @@ theorem run_returnU8_agrees : ∀ (ctx : Solidity.Source.Ctx) (control : Solidit
     exact congrArg some (returnU8_agrees ctx pipeline (capture first result.state.cells)
       (capture second result.state.cells) rfl index)
 
-/-- The independent canonical Boolean return relation determines the entire intrinsic value. -/
+/-- The canonical Boolean return relation determines the entire intrinsic value. -/
 theorem returnBool_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
  (state : Solidity.Yul.RawFrame.State ctx)
  (index : Solidity.Source.Idx ctx.tys .bool)
@@ -184,7 +186,7 @@ theorem returnBool_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidi
     rw [same]
     exact returnBool_sound pipeline state index
 
-/-- The independent canonical uint8 return relation determines the entire intrinsic value. -/
+/-- The canonical uint8 return relation determines the entire intrinsic value. -/
 theorem returnU8_complete : ∀ (ctx : Solidity.Source.Ctx) (pipeline : Solidity.Roadmap.Pipeline)
  (state : Solidity.Yul.RawFrame.State ctx)
  (index : Solidity.Source.Idx ctx.tys (.int Solidity.Source.IntTy.u8))
