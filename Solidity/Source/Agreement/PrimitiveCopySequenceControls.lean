@@ -45,4 +45,25 @@ theorem primitive_copy_sequence_not_swap (D : Layout) (C : Contract) (H : HTy) :
   cases related with
   | cons head rest => exact false_not_true D head
 
+/-- Inward-first model execution retains the original deeper value in both slots. -/
+theorem primitive_copy_inward_model_deep (p : PrimTy)
+    (model : Solidity.State C (modelContext [p,p])) :
+    let mid := model.setLocal .here (TEnv.get (modelPrimitiveSlot p [] [p]) model.env)
+    (mid.setLocal (modelPrimitiveSlot p [] [p]) mid.env.1).env =
+      (model.env.2.1, model.env.2.1, ()) := by
+  rfl
+
+/-- Actual bool computations from the same initial model state do not commute. -/
+theorem primitive_copy_orders_not_commute
+    (model : Solidity.State C (modelContext [.bool,.bool])) :
+    let initial := (model.setLocal .here true).setLocal (.there .here) false
+    let inward := initial.setLocal .here (TEnv.get (.there .here) initial.env)
+    let outward := initial.setLocal (.there .here) initial.env.1
+    (inward.setLocal (.there .here) inward.env.1).env ≠
+      (outward.setLocal .here (TEnv.get (.there .here) outward.env)).env := by
+  dsimp only
+  intro same
+  have impossible : false = true := congrArg Prod.fst same
+  cases impossible
+
 end Solidity.Source.Agreement

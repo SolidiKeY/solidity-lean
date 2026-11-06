@@ -127,5 +127,5 @@
 | `Source/Agreement/PrimitiveSavedAssignControls.lean` | Saved/original head liveness, mixed neighbors and overwritten-target refusal controls. |
 | `Source/Agreement/PrimitiveSlotReverse.lean` | Actual deeper-slot-to-head primitive assignment with internally derived operand, normal client and timeout. |
 | `Source/Agreement/PrimitiveSlotReverseControls.lean` | Retained source/tail/neighbors and real opposite-direction controls. |
-| `Source/Agreement/PrimitiveCopySequence.lean` | Concrete outward-first bidirectional primitive copies, actual intermediate reads, normal agreement/client and horizon-four timeout. |
-| `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, actual target result and swap refusal controls. |
+| `Source/Agreement/PrimitiveCopySequence.lean` | Both orders of concrete primitive copies, actual intermediate reads, normal agreements/clients and horizon-four timeouts. |
+| `Source/Agreement/PrimitiveCopySequenceControls.lean` | Original-value survival by copy order, same-input model noncommutation and swap refusal controls. |
