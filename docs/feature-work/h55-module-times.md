@@ -43,3 +43,33 @@ read-only finder and skeptic reviews without Lean server, owner migration
 patches and exact leases, qualifying splits, identical-state before/after
 wall and RSS with stop above 10% slowdown, affected-module and final gates,
 cache pack, checksums and final handoff. No claim of completion is made.
+
+## Additive census and Lake-log parser
+
+The coordinator confirmed that missing `get_goal` is not a blocker and that
+H56 VM identity remains a measurement dependency. `census.py` enumerates and
+hashes every Git-tracked Lean path in the live worktree; it fails on missing
+files or symlinks. Its classifications retain every row, including 101
+vendor-review, nine bridge-control-review, 254 control-check-review, and 14
+root-or-other-review paths. The other categories comprise 5,907 core, 354
+examples and 527 Bridge paths. This is not a completed source-to-module/build
+mapping, a clean-tree guarantee, or authority to exclude any category.
+
+`lake_log.py` recognizes Lake Built/Replayed rows with strict duration units,
+and its CLI compares an explicit module-to-path JSON inventory with the log
+and supplied process exit status. Duplicate or missing mappings and records,
+extra modules, replays, bad timing syntax, failed process status and times over
+300 seconds fail. Its input log and exit status are unauthenticated; it cannot
+prove the clock, execution, timeout, cache state, environment or inventory.
+Untimed replay rows are rejected as unrecognized timing rows. When run as a
+library on `tests/h28-terra/drift-reports/evidence/full-gate.log`, the parser
+found 144 timed rows and one unrecognized untimed replay row. This historical
+probe is not H56 evidence.
+
+The first expanded unit-test run failed to import the parser due to an
+unterminated docstring; it was fixed. The subsequent command
+`PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s tests/h55/module-times -p 'test_*.py' -v`
+passed six test methods. Independent finder and skeptic reviews remain pending.
+Timeout enforcement and fake-clock detection are not implemented; synthetic
+status and malformed-time tests do not establish either property. No source or
+proof migration occurred, and the full gate remains incomplete.
