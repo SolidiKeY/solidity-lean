@@ -1,4 +1,4 @@
-import tests.h55.«yul-artifact».PreparationImage
+import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.ForCompilation
 
 /-! Exact selected and preselection for-producer adapters. A successful phase

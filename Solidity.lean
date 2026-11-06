@@ -4635,6 +4635,7 @@ import Solidity.Yul.Compilation.ArithmeticVisitorShapes
 import Solidity.Yul.Compilation.ArithmeticVisitorShapesControls
 import Solidity.Yul.Compilation.ArityShapes
 import Solidity.Yul.Compilation.Artifact
+import Solidity.Yul.Compilation.ArtifactPreparation
 import Solidity.Yul.Compilation.BitExpressions
 import Solidity.Yul.Compilation.BitMachineExecution
 import Solidity.Yul.Compilation.BitMachineExecutionControls
