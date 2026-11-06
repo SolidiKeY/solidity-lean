@@ -956,3 +956,39 @@ Final paired observations: pinned Dafny five phases partial, local open missing/
 Bulk, prior failed attempts, ordered logs and review findings remain on this VM. Committed `docs/dafny-decisions-evidence-manifest.json` binds the external archive and official provisioning assets by absolute path, size and SHA256; no screenshots/log dumps committed (H44). Final exact-head receipts follow outside git in the same artifact root. All484 rows and frozen270 retained; no row newly complete.
 
 Whole original remaining scope: real failed-postcondition producer/source provenance/certification and decorations; actual concrete CLI kernel/native validation; outstanding contribution/API/protocol/lifecycle implementations; local proof-phase screenshots and visual differences; full native proof/solver/adversarial/retention/scheduler/large-project/cold-warm/median-p95/scaling matrices; both independent fresh-process judgments per complete row; mandatory full build/TestSuite/timed strict/trust/KeySort and unchanged parity-gate exit0. Five prior questions are answered as recorded in `docs/dafny-human-decisions.json`; H49 excludes proof-help alone. No goal mutation or push/merge/PR.
+
+### H44 inventory bulk follow-up — 2026-11-06
+
+Coordinator held `db53aaaa705a` because the full inventory adds unreviewable bulk.
+The exact670,902-byte inventory (484 obligations, frozen270 unchanged) is now
+VM-only, ignored at its existing `docs/dafny-editor-features.json` path. No row,
+assessment, expected observation, evidence, gate or judge was changed. The file
+is untracked, not removed from this VM. The prior H44 manifest's statement that
+inventory remains tracked is historical and superseded by this follow-up.
+
+`docs/dafny-editor-inventory-manifest.json` commits only absolute paths, sizes and
+SHA256 for `/workspace/dafny-parity-inventory-h44-20261106/bulk.tar.gz`, its index
+and raw inventory. Archive38,454 bytes; raw inventory670,902 bytes. Existing
+evidence archive/manifests remain unchanged. Restore both bundles before checks:
+
+```sh
+python3 scripts/coord-tools/dafny-parity-bulk.py --restore
+python3 scripts/coord-tools/dafny-parity-bulk.py --manifest docs/dafny-editor-inventory-manifest.json --restore
+```
+
+For relocated bundles, add `--directory DIR` separately to each command. CI uses
+`DAFNY_PARITY_BULK_DIR` and `DAFNY_PARITY_INVENTORY_DIR`; each directory must contain
+its checksum-bound `bulk.tar.gz` and `files.json`. Coordinator must provision the
+bytes on a fresh runner; a path variable alone is insufficient. Missing/modified
+bundles fail closed, with no fallback/recreated inventory or skipped gates. The
+restore helper's only new allowed destination is the exact inventory path;
+tracked, nonignored, symlinked and unexpected existing files remain rejected.
+Future inventory changes require a new preserved bundle and updated manifest.
+
+Finder/skeptic packaging reviews and exact-head checks are retained under
+`/workspace/dafny-parity-inventory-h44-20261106/`. This is an H44 packaging repair
+only, with no Lean/runtime source or proof-budget changes, no heavy build, no
+push/merge/PR or goal mutation. Whole original assignment remains partial:484
+obligations, no complete rows; failed parity/full resource-gate attempts and
+remaining kernel/runtime/rendered/performance/adversarial/paired-judge obligations
+from the previous handoff remain binding.
