@@ -242,3 +242,33 @@ All four original checkpoints remain unfinished. Wait for
 solidity-h62-6-20261106/migrate-syntax on Solidity/Syntax/Raw.lean lines
 597/650/665/682/684 before value_success_tail proof imports. Host relay journals
 establish delivery acceptance only; owner agreement and validation are unproved.
+
+## Held partial Raw prerequisite and source return frontiers
+
+Coordinator reports migration-owner head
+72441d298484976c48dd14b4e095c9149b852025 and partial Raw source commit
+074e62c1840dd2d7ab19c95ca5d437ebfe57dbb8, reported source SHA256
+a463aa0f978da5d5bae6ba5cffdfa95861a495a8d69942502b706b7b157ec506.
+Reported host patch SHA256 is
+34fc66ea93a8a2c956ebb51f225b03593109239c5b46631aaa28bfb24efb2a9a.
+The host receipt path is not locally available. These are reported hashes,
+not locally verified artifact hashes. No patch was applied or migration commit
+merged. The frozen local Raw source remains unchanged.
+
+Thirty reported axiom-growth entries require root review. The coordinator
+explicitly grants no trust acceptance or lifting of holds. Keep
+B-MIGRATION-SYNTAX-RAW open and record B-RAW-TRUST-REVIEW as an unresolved
+root-review dependency; do not retry value_success_tail imports on this basis.
+Receipt details are saved in owner-prerequisite-receipt.json off git.
+
+Remaining source review now records outer return frontiers for every row:
+102 existential results, 27 macro-expansion cases, one universal result,
+four remaining let-prefixed results after macro classification, and 1,125 other results. Macro occurrence takes
+precedence over outer syntax, including a let-prefixed macro result. Existential witnesses are
+outputs, not new premises. A universal result requires binder-inclusion review;
+it is not evidence of a global inhabited premise. Other results do not establish
+absence of hypotheses. Macro expansion, let reduction, actual implicit inclusion
+and simultaneous feasibility remain unverified. This adds no theorem or premise.
+All four original checkpoints remain unfinished; no Lean run is authorized by
+the partial receipt. Source-only acceptance and independent review evidence are
+saved with the return-frontier checkpoint.

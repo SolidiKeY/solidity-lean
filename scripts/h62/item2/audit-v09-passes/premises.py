@@ -227,6 +227,20 @@ def constraint_form(text):
     return "unresolved-source-form"
 
 
+def return_frontier(conclusion):
+    """Record outer source syntax, never infer missing inputs or feasibility."""
+    text = masked(conclusion).lstrip()
+    if "type_of%" in text:
+        return "macro-expansion-required"
+    if text.startswith("∃"):
+        return "existential-result; witnesses-are-outputs"
+    if text.startswith("∀"):
+        return "universal-result; binder-inclusion-review-required"
+    if text.startswith("let "):
+        return "let-prefixed-result; reduction-review-required"
+    return "other-source-result; no-hypothesis-absence-inference"
+
+
 def macro_heads(conclusion):
     result = []
     for match in re.finditer(r"type_of%\s*\(*\s*([\w.']+)", masked(conclusion)):
@@ -284,6 +298,7 @@ def main():
             "source_binders": binders, "available_section_variables": context,
             "signature_start": signature_start,
             "return_type": conclusion, "source_roles_present": kinds,
+            "return_frontier": return_frontier(conclusion),
             "macro_callee_tokens": macro_heads(conclusion),
             "return_type_kind": "type_of-macro; expansion-required" if "type_of%" in conclusion else "source-syntax; elaboration-required",
             "return_type_logical_inputs": "pending source review and Lean; return type retained verbatim (including all forall/arrows)",
@@ -302,6 +317,7 @@ def main():
                     "rows_without_source_binder_groups": sum(not r["source_binders"] for r in rows),
                     "rows_with_global_certificate_or_law": sum(any(b["source_role"].startswith("global-") for b in r["source_binders"]) for r in rows),
                     "rows_with_per_input_role": sum(any(b["source_role"].startswith("per-input-") for b in r["source_binders"]) for r in rows),
+                    "return_frontiers": dict(sorted(Counter(r["return_frontier"] for r in rows).items())),
                     "residual_constraint_forms": dict(sorted(Counter(b["source_constraint_form"] for b in explicit if "source_constraint_form" in b).items())),
                     "macro_callee_token_count": sum(len(r["macro_callee_tokens"]) for r in rows),
                     "type_of_macro_return_rows": sum("type_of%" in r["return_type"] for r in rows),

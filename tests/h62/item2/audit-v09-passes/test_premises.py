@@ -13,6 +13,13 @@ import premises
 
 
 class PremiseAcceptance(unittest.TestCase):
+    def test_outer_return_syntax_does_not_supply_premises(self):
+        self.assertEqual(premises.return_frontier("∃ x, P x ∧ ∀ tail, Q x tail"), "existential-result; witnesses-are-outputs")
+        self.assertEqual(premises.return_frontier("∀ tail, run code tail = result"), "universal-result; binder-inclusion-review-required")
+        self.assertEqual(premises.return_frontier("let x := state; P x"), "let-prefixed-result; reduction-review-required")
+        self.assertEqual(premises.return_frontier("let x := state; type_of% (f x)"), "macro-expansion-required")
+        self.assertIn("no-hypothesis-absence", premises.return_frontier("P → Q"))
+
     def test_residual_constraint_distinctions(self):
         self.assertEqual(premises.constraint_form("Memory.compileProg b F P = some left"), "compiler-acceptance-equation")
         self.assertEqual(premises.constraint_form("b + Memory.frameNeedProg Q ≤ frame"), "frame-or-arena-bound")
