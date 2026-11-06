@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "sourceParent": "ff147cc0e134d4b220fb656a58b497f9579ac1af",
+  "obligation": "submenus:dafny.context",
+  "status": "partial",
+  "archive": {
+    "path": "/workspace/dafny-parity-native-f6-20261106/evidence.tar.gz",
+    "bytes": 7693402,
+    "sha256": "f451ac434add0bcba6d664978c0cf48ad8149ca96e8b984c3910f352baaf7ee7"
+  },
+  "files": 478,
+  "reviewMember": "REVIEWS.md",
+  "comparisonMember": "COMPARISON.md",
+  "scope": "Native Linux F6 default/custom failure receipts, pinned Dafny real trace show/copy/hide; no completed obligation, no proof equivalence"
+}

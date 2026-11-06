@@ -169,3 +169,15 @@ an owned recovery ref. Fresh rebased build/axioms/Lean controls/native18+2/owner
 checks passed. Current migration-packet pins the new published base;native source/
 C hashes still bind the same binary. Original CR/WASM/exhaustive closure obligations
 are unchanged. No RuntimeGate or whole-lane completion is claimed.
+
+## H68 consumer decision (2026-11-06)
+
+CR and DR-D: retain required `typeDescriptions.typeIdentifier` and `tryCall` in producer output; migrate compatibility fixtures. Preserve existing builtin-ID normalization and loop annotations. Human selected option 1; the adapter alternative is closed. This packet is for coordinator relay; no producer-owned path was edited. Deliver exact reviewed producer commits for consumption. Metadata retention does not establish intrinsic/source preservation or remove any refusal.
+
+H68 compatibility packet: `compatibility-fixtures.mjs` regenerates all five owned source fixtures with the pinned compiler and `retained-metadata.mjs`. `preflight-metadata.py` independently binds raw identities/metadata and all other normalized JSON values to recorded4095. Receipts/raw compiler outputs and before/after hashes are in `evidence/h68/metadata-*`. Dedicated composed/modality/Yul generators retain the same metadata policy. No edits to scripts/solc-ast.mjs or CR/D paths. All affected controls and native18+2 passed; see metadata-gates.log.
+
+## H44 external data prerequisite
+
+The held a073878c data is preserved locally and removed from the source increment. `bulk-manifest.json` records its absolute VM archive path, size, SHA-256 and repository-relative destination. Copy the archive to `archiveRelative`, create `tests/directruntime-20261104/shared-translator/artifacts/h68-bulk`, and extract there with `tar --zstd -xf ARCHIVE -C PACKET_ROOT`. Run `python3 tests/directruntime-20261104/shared-translator/verify-bulk.py` before the controls. Missing or changed data fails closed; no historical-fixture fallback is provided.
+
+Current H68 receipts are under `artifacts/h68-bulk/evidence/h68`; the source packet's earlier evidence/h68 references are historical. Tracked4095 fixture/census/coverage/matrix data is restored unchanged. Current migrated fixture hashes and806 selected-field observations are in the retained packet, not those historical ledgers. The original57-kind suites keep their exact frozen baseline inputs.
