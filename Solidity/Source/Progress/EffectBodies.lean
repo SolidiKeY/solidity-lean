@@ -15,7 +15,7 @@ inductive EffectItems (A : Decl → Prop) {R : List STy} {M : Bool} :
   | stmt {Γ Ξ Δ} {s : RStmt E R M .body Γ Ξ} {rest : RItems E R M .body Ξ Δ} :
       s.ValFragC A → s.OpsOK → EffectItems A rest → EffectItems A (.stmt s rest)
   | builtin {Γ Δ ts t} {b : Builtin} {args : RArgs E Γ ts}
-      {ht : b.callTy E.isBase ts = some t} {rest : RItems E R M .body Γ Δ} :
+      {ht : b.callTy E.isBase E.mapFree ts = some t} {rest : RItems E R M .body Γ Δ} :
       BuiltinFragment A b args t → EffectItems A rest →
       EffectItems A (.stmt (.expr (.builtin b args ht)) rest)
   | emit {Γ Δ ps} {ev : Decl} {he : ev.paramTys E = some ps}
@@ -28,7 +28,7 @@ this is the flow fact needed to continue the containing body. -/
 theorem builtin_statement_normal {A : Decl → Prop} (G : Glob E) (F : Fr)
     (he : ∀ n, ExprNSAt A G F n) (n nps : Nat) (ph : Option (Ph E))
     {R : List STy} {M : Bool} {Γ : RCtx} {ts : List STy} {t : STy}
-    (b : Builtin) (args : RArgs E Γ ts) (ht : b.callTy E.isBase ts = some t)
+    (b : Builtin) (args : RArgs E Γ ts) (ht : b.callTy E.isBase E.mapFree ts = some t)
     (hf : BuiltinFragment A b args t) (l : Locals E.layout Γ) :
     NSP (execS G F n nps ph (.expr (R := R) (M := M) (k := .body) (.builtin b args ht)) l)
       (fun o => ∃ l', o = .normal l') := by

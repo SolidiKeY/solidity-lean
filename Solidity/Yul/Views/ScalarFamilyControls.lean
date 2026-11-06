@@ -57,7 +57,7 @@ def sfAddr2 : Roadmap.Word := ⟨0xcccccccccccccccccccccccc112233445566778899001
 def sfRaw : SlotView := fun q => if q = 0 ∨ q = 1 ∨ q = 2 ∨ q = 3 then 0 else if q = 1000 then sfWord0 else if q = 1001 then sfWord1 else if q = 2000 then sfWordBytes else if q = 2001 then sfWordBytesTail else if q = 3000 then sfAddr0 else if q = 3001 then sfAddr1 else if q = 3002 then sfAddr2 else if q = 4 then 999 else 77
 
 def sfState : Source.EMState sfEnv [] :=
-  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := sfEnv.layout) (sfEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩⟩⟩
+  ⟨.nil,⟨⟨⟨fun _ => Source.Account.empty (D := sfEnv.layout) (sfEnv.lay account)⟩,.empty,[]⟩,.empty,[],[],⟨[],.nil⟩, Source.FailureExecution.Cursor.empty⟩⟩
 def sfResidual : ResidualJournal complementCarrierOwnership :=
   ⟨fun k => if k.transient then 0 else packedMask sfLayout.registrations sfRaw k.slot,[]⟩
 

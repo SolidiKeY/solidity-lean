@@ -1,0 +1,17 @@
+{
+ "Solidity/Yul/Compilation/LetSequenceCompilationControls.lean:Solidity.Yul.Compilation.LetSequenceCompilation.Controls.selected": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetSequenceCompilationControls.lean:Solidity.Yul.Compilation.LetSequenceCompilation.Controls.source_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Yul/Compilation/LetSequenceCompilationControls.lean:Solidity.Yul.Compilation.LetSequenceCompilation.Controls.target_done": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

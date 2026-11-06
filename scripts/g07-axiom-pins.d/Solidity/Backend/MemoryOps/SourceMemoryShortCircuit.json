@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceMemoryShortCircuit.lean:Solidity.Backend.MemoryOps.source_bool_write_bounds_short_circuit": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

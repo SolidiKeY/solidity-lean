@@ -40,16 +40,15 @@ theorem readLoc_keep {P : EMState E Γ → Prop} (F : Fr) {t : STy} (loc : Loc E
     · exact Hoare.lift' fun _ h => h
   | cd off => exact Hoare.lift' fun y h => by cases decodeWord E.layout (cdWordAt F off) t <;> exact h
   | cdBytes base index =>
-    exact Hoare.bind (Hoare.lift' fun _ h => by cases cdNested F base index 1 <;> exact h)
-      fun ⟨_, _⟩ => Hoare.pure' fun _ h => h
+    exact Hoare.bind (Hoare.lift' fun y h => by cases cdNested F base index 1 <;> exact h) fun _ =>
+      Hoare.pure' fun _ h => h
   | cdString base index =>
-    exact Hoare.bind (Hoare.lift' fun _ h => by cases cdNested F base index 1 <;> exact h)
-      fun ⟨_, _⟩ => Hoare.pure' fun _ h => h
+    exact Hoare.bind (Hoare.lift' fun y h => by cases cdNested F base index 1 <;> exact h) fun _ =>
+      Hoare.pure' fun _ h => h
   | cdArray base index =>
-    rename_i σ
-    exact Hoare.bind (Hoare.lift' fun _ h => by cases cdNested F base index σ.cdHeadBytes <;> exact h)
-      fun ⟨_, _⟩ => Hoare.pure' fun _ h => h
-  | cdFixedArray _ _ => exact Hoare.pure' fun _ h => h
+    exact Hoare.bind (Hoare.lift' fun y h => by cases cdNested F base index _ <;> exact h) fun _ =>
+      Hoare.pure' fun _ h => h
+  | cdFixedArray => exact Hoare.pure' fun _ h => h
 
 theorem MemPres.readLoc_all (F : Fr) {t : STy} (loc : Loc E.layout Γ t) :
     MemPres (readLoc F loc) := fun _ => readLoc_keep F loc

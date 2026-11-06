@@ -8,6 +8,9 @@ import hashlib
 import json
 import pathlib
 import re
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from lexical import code_only, unknown_identifiers
 
 ROOT = pathlib.Path(__file__).resolve().parents[4]
 AGREEMENT = ROOT / "Solidity/Source/Agreement"
@@ -35,7 +38,7 @@ def closure(path):
         if current in seen or not current.is_file():
             continue
         seen.add(current)
-        for line in current.read_text().splitlines():
+        for line in code_only(current.read_text()).splitlines():
             if line.startswith("import "):
                 for module in line[7:].split():
                     pending.append(ROOT.joinpath(*module.split(".")).with_suffix(".lean"))
@@ -44,8 +47,9 @@ def closure(path):
 
 def record(path):
     data = path.read_bytes()
-    lines = data.decode().splitlines()
+    lines = code_only(data.decode()).splitlines()
     return {"path": relative(path), "sha256": hashlib.sha256(data).hexdigest(),
+            "unknown_quoted_identifiers": unknown_identifiers(data.decode()),
             "declarations": [{"line": i, "name": m.group(2), "kind": m.group(1)}
                 for i, line in enumerate(lines, 1)
                 if (m := re.match(r"^(theorem|def|abbrev|lemma)\s+(\w+)", line))]}
@@ -62,10 +66,10 @@ def main():
         reachable = closure(path)
         targets = relation_set if path in leased_set else leased_set
         row["opposite_set_reachable"] = sorted(map(relative, reachable & targets))
-        row["bindingrel_lines"] = [i for i, line in enumerate(path.read_text().splitlines(), 1)
+        row["bindingrel_lines"] = [i for i, line in enumerate(code_only(path.read_text()).splitlines(), 1)
                                    if re.search(r"\bBindingRel\b", line)]
         rows.append(row)
-    print(json.dumps({"method": "lexical column-zero single-line imports; source files only",
+    print(json.dumps({"method": "comment/string-masked column-zero single-line imports; source files only",
                       "leased_controls": rows[:len(leased)], "relation_controls": rows[len(leased):]}, indent=2))
 
 

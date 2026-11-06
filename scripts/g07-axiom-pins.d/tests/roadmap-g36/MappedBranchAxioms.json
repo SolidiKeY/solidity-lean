@@ -1,0 +1,109 @@
+{
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.admitted": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.code_exact": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.condition": [],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.condition_represented": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.condition_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.arm_codes": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.bad_emitted": [
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.checked": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.condition_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.core": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.emitted": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.emitted_code": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.exitObservation": [],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.frame_observation": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.left": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.pending_exit_exact": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.right": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.short_exit_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.typed_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.unsupported_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.Controls.wrong_capture_refused": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.correct": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.emit": [],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.program": [
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.true_pending_skip": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "tests/roadmap-g36/MappedBranchAxioms.lean:Solidity.Backend.StructuredFlow.MappedBranch.true_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

@@ -1,0 +1,766 @@
+{
+  "schema": 1,
+  "derivation": "Frozen BEFORE new driver execution. Actual selected runMods bytesargument/aliasprefix/placeholder/rethrowpostlude. Body fullDEAD/empty/panic abort skips postlude, even danglingargument99. Plain normal OR actual return both reach postlude fullAABB/DEAD/empty/panic; missingheap99 stuck only when postlude actuallyread. Empty real .nil modifier suppresses functionbody entirely. Missingbody/parameterframe exact actual Source.stuck. Lowbody0..7 timeout preserves original savedboolframe. fnLocals savedbool distinct temporary two-reference functionframe and modifierargument/alias frames. firstPhysical sourcewrites ctrue raw0xab000002, full Source journal list with finite oldaccount/selectedc fields, residual/owned journals, oldheap0AABB/newheap1payload; rawdirty companion distinctcleanparams. Two independently provided credit events1:9,1:17 plus log1:55 retained ordered. No frontend derivation/G01/generalmodifier/wholeworld/native adequacy.",
+  "raw": [
+    "2",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "2309737967",
+    "1793",
+    "22136",
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+    "77345497107738552411838431392522000948863935069627095510731433067785723314176"
+  ],
+  "frame": {
+    "types": [
+      "bool"
+    ],
+    "bool": true,
+    "refs": [
+      null,
+      null
+    ]
+  },
+  "logs": [
+    [
+      "1",
+      [
+        85
+      ]
+    ]
+  ],
+  "physical": {
+    "word": "2868903938",
+    "sourceJournalLength": 1,
+    "residualJournal": [
+      [
+        false,
+        "1",
+        "43",
+        "0"
+      ]
+    ],
+    "ownedJournal": [
+      [
+        false,
+        "1",
+        "43",
+        0,
+        1
+      ]
+    ],
+    "sourceJournal": [
+      {
+        "kind": "account",
+        "address": "1",
+        "old": {
+          "balance": "0",
+          "nonce": 0,
+          "code": null,
+          "storage": {
+            "cPresent": false,
+            "cValue": false
+          }
+        }
+      }
+    ],
+    "currentAccount": {
+      "balance": "0",
+      "nonce": 0,
+      "code": null,
+      "storage": {
+        "cPresent": true,
+        "cValue": true
+      }
+    },
+    "currentTransient": {
+      "cPresent": false,
+      "cValue": false
+    }
+  },
+  "outerRef": {
+    "kind": "memory",
+    "logicalIndex": 0
+  },
+  "cases": [
+    {
+      "name": "body-DEAD",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "body-empty",
+      "payload": [],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": []
+      }
+    },
+    {
+      "name": "body-panic",
+      "payload": [
+        78,
+        72,
+        123,
+        113,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          78,
+          72,
+          123,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "wrong-body-alias",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          170,
+          187
+        ]
+      }
+    },
+    {
+      "name": "normal-reaches-postlude-AABB",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          170,
+          187
+        ]
+      }
+    },
+    {
+      "name": "return-reaches-postlude-AABB",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          170,
+          187
+        ]
+      }
+    },
+    {
+      "name": "normal-postlude-DEAD",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "return-postlude-full-panic",
+      "payload": [
+        78,
+        72,
+        123,
+        113,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          78,
+          72,
+          123,
+          113,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      }
+    },
+    {
+      "name": "normal-postlude-empty",
+      "payload": [],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": []
+      }
+    },
+    {
+      "name": "body-revert-skips-dangling-postlude",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        }
+      ],
+      "result": {
+        "tag": "revert",
+        "bytes": [
+          222,
+          173
+        ]
+      }
+    },
+    {
+      "name": "normal-reaches-dangling-postlude",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        }
+      ],
+      "result": {
+        "tag": "stuck",
+        "reason": "dangling memory reference"
+      }
+    },
+    {
+      "name": "return-reaches-dangling-postlude",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        }
+      ],
+      "result": {
+        "tag": "stuck",
+        "reason": "dangling memory reference"
+      }
+    },
+    {
+      "name": "empty-modifier-suppresses-body",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "locals": [
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty-modifier-does-not-read-dangling",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 99
+        }
+      ],
+      "result": {
+        "tag": "success",
+        "locals": [
+          {
+            "type": "memory",
+            "logicalIndex": 1
+          },
+          {
+            "type": "memory",
+            "logicalIndex": 99
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-modifier-body",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "stuck",
+        "reason": "modifier without a body"
+      }
+    },
+    {
+      "name": "wrong-parameter-frame",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "stuck",
+        "reason": "modifier parameters"
+      }
+    },
+    {
+      "name": "body-fuel-0",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-1",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-2",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-3",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-4",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-5",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-6",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    },
+    {
+      "name": "body-fuel-7",
+      "payload": [
+        222,
+        173
+      ],
+      "inputLocals": [
+        {
+          "type": "memory",
+          "logicalIndex": 1
+        },
+        {
+          "type": "memory",
+          "logicalIndex": 0
+        }
+      ],
+      "result": {
+        "tag": "timeout"
+      }
+    }
+  ],
+  "events": [
+    {
+      "kind": "credit",
+      "address": "1",
+      "value": "9"
+    },
+    {
+      "kind": "credit",
+      "address": "1",
+      "value": "17"
+    }
+  ]
+}

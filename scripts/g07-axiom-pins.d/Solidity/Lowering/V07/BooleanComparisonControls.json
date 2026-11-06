@@ -1,0 +1,96 @@
+{
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.assignment_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.binder_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.capture_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.code_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.commute_client": [],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.equal_content_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.extension_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.glob_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.initial": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.live_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.operand_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.pair_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.pass_client": [
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.self_alias_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.source_value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.swap_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.tail_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.transport_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.value_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Lowering/V07/BooleanComparisonControls.lean:Solidity.Lowering.V07.BooleanComparisonControls.world_client": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}
