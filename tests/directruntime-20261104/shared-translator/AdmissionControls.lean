@@ -12,7 +12,7 @@ private def sharedRefusal (node : Json) (expected : String) : Bool :=
   match ExecutableAst.Shared.checkedExpression node with
   | .error actual => actual == expected | .ok _ => false
 private def controls : IO Unit := do
-  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/ReaderFixtures.ast.json"))
+  let fixture ← checked (Json.parse (← IO.FS.readFile "tests/directruntime-20261104/shared-translator/artifacts/h68-bulk/ReaderFixtures.ast.json"))
   let ast ← checked (fixture.getObjVal? "ast")
   let provenance ← checked (Source.read fixture ast)
   let check (node : Json) (kind : Source.DiagnosticKind) (name : Lean.Name) (line : Nat) : IO Unit := do
