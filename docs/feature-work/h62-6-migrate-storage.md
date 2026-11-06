@@ -1,170 +1,205 @@
-# H62 item 6 — Storage migration overlay (blocked)
+# H62 Storage migration — H70 partial owner-overlay handoff
 
-Owner: `solidity-h62-6-20261106/migrate-storage`; repository
-`/workspace/solidity-lean`; branch
+Status: **blocked, assignment incomplete**. Checkpoints: 1 done (assigned
+component census/old baseline), 2 partial, 3 blocked, 4 partial handoff exported.
+Repository `/workspace/solidity-lean`; branch
 `codex/solidity-h62-6-20261106/migrate-storage`; exact base
-`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The fetched base is an ancestor
-of published `origin/master`. Original branch `work` was preserved. No reset,
-push, merge, cut-over, freeze, default-branch edit or live-owner transfer occurred.
-Checkpoint 1 is complete for the assigned component; checkpoints 2–4 remain
-partial/blocked. The entire assignment is NOT complete.
+`c6f550e281a7e5affa9a99bc2cdaed556dec00e4`. The base was fetched and verified
+as an ancestor of published master. Original clean branch `work` remains
+preserved; no reset, push, merge, default-branch edit, freeze or ownership
+transfer. No original Hash/Storage source, toolchain file, generated root/map
+or axiom pin has been edited. All implementation writes are assigned scripts,
+tests and this document.
 
-## Checkpoint 1: census and clean old component build — done
+## Current blocker and concrete review request
 
-All 21 original Storage files are byte-identical to the base: all statements,
-definitions, cases, premises and proof budgets are preserved. Census: 360 named
-source declarations, 36 external source dependencies, 57 modules including
-KeySort, eight direct cross-directory edges, 1,576 downstream affected modules.
-Census and whole-source SHA-256: `/workspace/migrate-storage-evidence/census-base.json`.
-Lexical declaration rows are navigation aids, not an elaborated ABI proof.
+**O-STORAGE-001 / OWNER_COORDINATION**, exact file
+`Solidity/Storage/HashedLayout.lean:376`, theorem `STy.locate_bounded`.
+With the exact relayed Hash overlay, Lean4.35 fails dependent elimination in
+the word/nonempty-path proof arm. The following guards at417/420 detect
+`sorryAx` from rejected error recovery; no failing artifact or pin is accepted.
+All21 assigned modules depend on this module; none has passed the new build.
 
-The authoritative baseline is `old-clean-3`: 57/57 modules and 21/21 assigned
-originals PASS; wall **160.346414358 s**, peak sampled aggregate RSS
-**848093184 bytes**. Actual Lean 4.24.0 commit
-`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake
-`5.0.0-src+797c613`; `KEYSORT_COMPONENT_PASS`; `COMPONENT_RESULT 0 None`.
-Source/control unchanged checks passed, zero OOM kills, private runtime stopped.
+Live producer: `solidity-v07-v11-20261030/v10-storage-operations` (V10), via
+coordinator. Migration overlay lane: this branch. Exact-file request and
+source/proposal hashes: `/workspace/migrate-storage-evidence/dependency-report.json`
+and `h70-dependency-report.json`. Original source remains untouched pending
+coordination. The concrete **UNAPPLIED** proposal is
+`tests/h62/item6/migrate-storage/hashed-layout-proposal.patch`, SHA256
+`c7e83d702c94f9c4baee4f6fa497bc6f37826763ca34f3d4a3d18810c1eec537`.
+It changes only the proof arm:
 
-```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/census.py
-PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-storage/acceptance.py
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/measure.py /workspace/.setup/tools/lean-4.24.0-linux /workspace/migrate-storage-evidence/old-clean-3 --image sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377
+```lean
+| .word, _, s :: _, _, _, _, _, h => by cases s <;> cases h
 ```
 
-All module commands, exits, wall/RSS measurements, archive/executable/source
-hashes and cleanup state are in `old-clean-3/result.json` under that evidence
-directory; console and per-module logs are adjacent. Reproduction requires a
-NEW output directory; the runner refuses an existing directory.
+This proposal has isolated rejection-case evidence below. It has NOT been
+applied to the original or claimed to validate the full module. Obtain live
+owner exact-file coordination or an equivalent owner-supplied migration first.
+H70 routing explicitly supplies no original-file permission.
 
-Fixed resources: immutable Ubuntu runtime image above; one CPU; Docker hard
-memory cap 12 GiB; total memory+swap 12 GiB (zero swap); 4 GiB available reserve;
-one Lean process; `LEAN_NUM_THREADS=1`; `-j1 --tstack=131072 -M10240`.
-Sources/toolchains are mounted read-only. Empty private artifact directories,
-no Lake or per-master cache. RSS is sampled, not an exact high-water mark;
-OS page cache is not normalized. These are per-file component elaborations,
-not the repository `./run-lean.sh` full gate. The idle container sentinel is
-killed for cleanup; its exit 137 is separate from each recorded Lean exit.
+**G-ROOT-001 / FINAL_INTEGRATED_GATE_AND_RESOURCE_DISPOSITION**, owner
+`solidity-h62-6-20261106/migrate-root-gate`: complete matched comparison,
+resource disposition, full affected1576-module validation and `./run-lean.sh`
+remain pending. Root alone owns the final tracked `lean-toolchain` edit.
+Whole-build timing/RSS delta remains **null**. No `RUNTIME_GATE_PASS`, full
+build/comparison pass, or assignment completion is claimed.
 
-## Checkpoint 2: identical official toolchain — pinned; migration blocked
+## H70 Hash-owner relay: exact private fixture, component passes
 
-Coordinator inputs in `/workspace/h62-coordinator-inputs/` were checked against
-`sha256.json`. Official `leanprover/lean4:v4.35.0` archive
-`lean-4.35.0-linux.tar.zst`, SHA-256
+Owner `solidity-h62-6-20261106/migrate-hash`, reported head
+`a3f49ee0ec1829e63022c90194048d5a1ffe0d22`, source `2a18afcd`.
+The inline patch exactly matches relay SHA256
+`3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff`.
+It is saved at `tests/h62/item6/migrate-storage/collision-bound-owner.patch`.
+The host-only receipt path was unavailable on this VM; it was not treated as
+retrieved. Inline bytes were verified independently. `relay.sh` is host-only;
+no VM installation or external publication was attempted.
+
+`prepare_owner_overlay.py` copies the57-module pinned closure plus the two
+existing API/export fixtures to `/workspace/migrate-storage-evidence/h70-source/`.
+It applies only the exact Hash patch to that private copy. Manifest:
+`h70-source-manifest.json`; original blob
+`b54c93a5b24340a19160c1fb378d057ccee60f84`; patched blob
+`092971eda8c7d6997276a92ba19b25b7ce05844e`. Only the Hash copy changes;
+all statements/imports/budgets are preserved.59 source files are hashed and
+read-only. Actual compiled hashes and pinned original hashes are separate.
+Before/after source, manifest and control checks all passed; runtime stopped.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/prepare_owner_overlay.py /workspace/migrate-storage-evidence/h70-source /workspace/migrate-storage-evidence/h70-source-manifest.json
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/measure.py /workspace/migrate-storage-evidence/toolchains/lean-4.35.0-linux /workspace/migrate-storage-evidence/h70-new-clean-1 --image sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377 --owner-fixture /workspace/migrate-storage-evidence/h70-source-manifest.json
+```
+
+Actual result: KeySort PASS, Keccak PASS, owner-patched CollisionBound PASS
+(including its original axiom guards), then unchanged HashedLayout FAIL.
+Four modules attempted, three passed, zero assigned modules passed. Decisive
+logs: `h70-new-clean-1.console.log`; module logs and full commands/exits are in
+`h70-new-clean-1/logs/` and `result.json`. D-HASH-001 is component-cleared
+**only in this private owner fixture**; the owner's full affected gates remain
+pending, and original Hash source remains unchanged.
+
+Both independent reviewers confirmed the Hash patch changes proofs only and
+the actual fixture matches the exact postimage. Their consumer-hardening
+suggestion was implemented after this diagnostic run: future `measure.py`
+consumption independently checks the full expected postimage, not just the
+manifest and patch digest. The exact run-time measure/census bytes are retained
+at `h70-run-controls/`, verified against the run's recorded control hashes.
+The actual run's owner postimage is independently verified by current controls.
+No claim is made that the subsequent hardening executed in that earlier run.
+
+## Bounded resources, versions and timing boundary
+
+Official `leanprover/lean4:v4.35.0`, archive
+`lean-4.35.0-linux.tar.zst`, SHA256
 `7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d`.
-Archive/extraction: `/workspace/migrate-storage-evidence/toolchains/`.
-Actual candidate Lean 4.35.0 commit
-`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`, Lake
-`5.0.0-src+eb6cafb`. Tracked `lean-toolchain` is unchanged; only root migration
-owns its final edit. No alternative compiler or cross-version cache was used.
+Actual Lean4.35.0 commit `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`,
+Lake `5.0.0-src+eb6cafb`. Actual old Lean4.24.0 commit
+`797c613eb9b6d4ec95db23e3e00af9ac6657f24b`, Lake
+`5.0.0-src+797c613`. Archive/extraction and coordinator input verification are
+under `/workspace/migrate-storage-evidence/`. No alternative build or
+v4.24 per-master cache is used.
+
+Same runtime image and limits throughout: one CPU; hard Docker12GiB cap;
+memory+swap total12GiB (zero swap);4GiB available reserve; one heavy Lean
+process; `LEAN_NUM_THREADS=1`; `-j1 --tstack=131072 -M10240`; offline network;
+read-only source/toolchain mounts. No systemd-run. Component measurements use
+empty private output/cache directories. RSS is sampled; OS page cache is not
+normalized. Component elaboration does not replace repository final gates.
+The stopped idle container sentinel's137 exit is separate from each Lean exit.
+
+Authoritative old baseline `old-clean-3`:57/57 modules and21/21 assigned
+originals PASS;160.346414358 seconds; peak sampled RSS848093184 bytes.
+Original commands/results remain in the prior handoff and `old-clean-3/result.json`.
+
+ESCALATE partial KeySort observations to root gate: old wall1.665646s,
+new wall2.09012s (25.4841% increase); old sampled RSS261459968,
+new522829824 bytes. This failed partial run supplies no matched whole-build
+regression figure. Heavy migration stopped at the failed prerequisite; only
+bounded isolated backfill followed. Retain the binding rule: escalate any
+regression and STOP >10% slowdown; complete matched comparison and resource
+disposition remain G-ROOT-001 obligations.
+
+## Completed in-scope backfill and proof boundaries
+
+All21 original modules remain byte-identical to base:360 named source
+declarations and all original cases, semantics, premises and budgets preserved.
+No new production helpers, `sorry`, `axiom`, `native_decide`, or raised budgets.
+Census/import closure, whole-source hashes, eight direct cross-directory edges,
+36 external source dependencies and1576 affected downstream modules are in
+`census-base.json`. Declaration rows are lexical navigation aids.
+
+Old kernel-type export:1065 constants across all21 modules, including generated
+constants; `frozen-interface-old.json` and raw `frozen-api-old-bound.log` remain
+off git. The deterministic generator validates uniqueness/module coverage,
+sorts module/name and hashes canonical metadata-stripped type/level repr.
+Definition semantics additionally rely on source hashes; generated/binder
+names can cause conservative structural-hash differences. Candidate type
+export/comparison remains blocked.
+
+Earlier `ApiControls.lean` passes both official versions for the Hash migration
+boundary; old hash-bound results are retained. Its isolated proofs did not
+repair production. New `LocateRejectControls.lean` is test-only: faithful
+parameter-only copies of Loc/STy/Step/locate, a classifier covering all11
+invalid constructor/head combinations, three named proofs, four rejection or
+valid-path examples. The word/nonempty contradiction proves the exact local
+elimination boundary without new premises. Empty paths and valid mapping
+access ensure the fixture is not reject-all.
+
+Both final bound runs PASS; all control/original/compiled-source checks true,
+runtimes stopped. The three old proofs have no axioms; the new proofs use
+standard `propext`. These facts do not prove production `locate_bounded` or
+full affected validation. The initial old empty-path `rfl` attempt failed and
+is retained; the final portable proof explicitly splits the type. No failed
+error-recovery proof is accepted.
 
 ```sh
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/measure.py /workspace/migrate-storage-evidence/toolchains/lean-4.35.0-linux /workspace/migrate-storage-evidence/new-clean-2 --image sha256:d9b8c34d61a9b9a3c44cab883d7d2f2619d674966ab520186f799cf32e3e0377
-```
-
-`new-clean-2`: KeySort PASS and Keccak PASS, then external
-`Solidity/Hash/CollisionBound.lean` FAIL. No assigned Storage module could run;
-all 21 depend transitively on this file. Actual errors:
-
-- line 407, `countP_contains_le`: function equality after `congr 1` unsolved;
-- line 660, `countP_near_le`: `omega` fails after decide/Prop simplification;
-- line 680, `countP_covers_le`: same boundary;
-- six subsequent `#guard_msgs` axiom checks detect `sorryAx` from error recovery.
-
-No failed artifact was accepted, no axiom pin changed, no `sorryAx` authorized.
-Original and added source contain zero `sorry`, `axiom`, `native_decide`.
-Source/control unchanged checks passed and runtime stopped.
-
-Typed blocker **D-HASH-001 / DEPENDENCY_MIGRATION**, owner
-`solidity-h62-6-20261106/migrate-hash`. Exact-file request, original source hash,
-diagnostics, affected modules, all external dependency owners and root-gate
-request are in `/workspace/migrate-storage-evidence/dependency-report.json`.
-The hash owner must provide a statement/budget-preserving migration overlay;
-this lane made no outside-scope edits. No `relay.sh` is supplied here; the
-coordinator retrieves the saved request and committed artifacts from this VM.
-
-## Checkpoint 3: comparison and final gates — blocked
-
-No complete new build exists. Whole-build timing/RSS delta is **null**, not an
-improvement or regression claim. Any regression must escalate; >10% slowdown
-must STOP. ESCALATE to migrate-root-gate: partial KeySort sampled RSS grew from
-261459968 to 522256384 bytes (+99.7462%); this is a per-module observation,
-not a completed-build comparison. Measure full wall/RSS again after dependencies
-and owned modules pass under identical settings.
-
-Full affected validation (1,576 downstream modules), `./run-lean.sh`, and new
-frozen-type comparison remain pending behind D-HASH-001 / G-ROOT-001. Passing
-KeySort and provisioning are prerequisites, not proofs of those gates.
-No `RUNTIME_GATE_PASS`, full gate pass or assignment completion is claimed.
-
-## Permitted backfill — completed and reviewed
-
-`ApiControls.lean` proves the exact list-membership function equality and the
-two local interval implications, retaining the original hypotheses and exact
-local copies of `Near`/`Covers`. Three named theorems, two predicate definitions,
-two Decidable instances and two negative examples are test-only additions.
-Both official toolchains PASS; printed axiom sets contain only `propext`,
-`Classical.choice`, `Quot.sound` as applicable. These isolated proofs do not
-repair the external module or establish Storage migration success.
-
-`InterfaceHashes.lean` exports metadata-stripped kernel type/level syntax for
-**1,065 constants across all 21 original modules**, including generated
-constants. Its private helper and command are test-only. `report.py` rejects
-duplicates, checks exact module coverage, sorts by module/name and hashes
-canonical records. `/workspace/migrate-storage-evidence/frozen-interface-old.json`
-is the old type manifest; raw 7.6 MB output stays off git. Type hashes concern
-statements; definition semantics additionally rely on unchanged source bytes.
-Generated/binder-name drift can conservatively produce different type hashes
-without a semantic change. Candidate type hashes are still blocked.
-
-```sh
-# Each is bounded, serial, offline and uses a stopped measurement runtime.
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/fixture.py /workspace/migrate-storage-evidence/old-clean-3 tests/h62/item6/migrate-storage/ApiControls.lean /workspace/migrate-storage-evidence/api-controls-old-bound.log
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/fixture.py /workspace/migrate-storage-evidence/new-clean-2 tests/h62/item6/migrate-storage/ApiControls.lean /workspace/migrate-storage-evidence/api-controls-new-bound.log
-PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/fixture.py /workspace/migrate-storage-evidence/old-clean-3 tests/h62/item6/migrate-storage/InterfaceHashes.lean /workspace/migrate-storage-evidence/frozen-api-old-bound.log
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/fixture.py /workspace/migrate-storage-evidence/old-clean-3 tests/h62/item6/migrate-storage/LocateRejectControls.lean /workspace/migrate-storage-evidence/h70-locate-old-bound.log
+PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/fixture.py /workspace/migrate-storage-evidence/new-clean-2 tests/h62/item6/migrate-storage/LocateRejectControls.lean /workspace/migrate-storage-evidence/h70-locate-new-bound.log
+PYTHONDONTWRITEBYTECODE=1 python3 tests/h62/item6/migrate-storage/overlay-acceptance.py
 PYTHONDONTWRITEBYTECODE=1 python3 scripts/h62/item6/migrate-storage/report.py /workspace/migrate-storage-evidence
 ```
 
-Adjacent `*.result.json` binds fixture/runner/control/source hashes, unchanged
-checks, actual Lean/Lake versions, archive identity, image and stopped cleanup.
-Python negative controls PASS: nested comments, strings, multi-imports, import
-cycle rejection, declaration positions, actual owned/external drift and missing
-inputs. These tests are tooling acceptance, not EVM/solc differential tests.
+Locate fixtures run on the stopped original-root runtimes above; the already
+bound H70 source tree is not silently extended or modified. Owner-overlay
+negative controls verify exact digest/path/postimage, original/fixture hashes,
+and rejection of unpatched/tampered postimages. Earlier scanner negative
+controls cover comments, strings, imports/cycles, positions and file drift.
+These are tooling and isolated Lean checks, not solc/EVM differential tests.
 
-Independent read-only finder and skeptic reviews used neither Lean nor its
-server. Confirmed findings were fixed: all external input identity checks,
-archive/binary/image binding, signal cleanup, bounded Docker calls, host-worker
-guards, source positions, PID sampling, bytecode removal, actual mutation
-controls, fixture input binding, deterministic export parser. Reviewers verified
-fixture definitions/premises against the original failing subgoals and parsed
-all 1,065 exported constants. Remaining limits are explicitly recorded above.
+Independent read-only finder and skeptic used neither Lean execution nor its
+server and made no edits. They confirmed exact Hash postimage/proof-only changes,
+all11 rejection cases and valid controls, unweakened vocabulary, unapplied
+proposal scope, actual4attempt/3pass outcome and unknown complete timing.
+Their postimage hardening finding is fixed; source/run hashes and axiom limits
+are explicit. Reviews are retained in `reviews.md`; final gates remain blocked.
 
-Historical failed attempts are retained: `old-clean-1` had an invalid Docker
-sampler (missing PID); `new-clean-1` used old CLI syntax `-M=10240`, rejected
-before checking source by 4.35. The corrected spelling is `-M10240`; both
-versions were rerun identically. The first type exporter used unqualified
-`liftIO`; only the corrected, hash-bound export is authoritative. None of these
-failed attempts supplies a passing proof or comparison.
+## Exported checkpoint and coordinator continuation
 
-## Checkpoint 4: reviewable partial handoff; original goal blocked
-
-All implementation writes are within assigned scripts/tests/doc paths. No
-production Storage file, central map/root, axiom pin or toolchain file changed.
-No production registration fragment is needed; test-only registration note is
+Commit only this isolated branch. No new production registration is needed;
+all Lean additions are test fixtures. Registration note:
 `tests/h62/item6/migrate-storage/registration-fragment.md`.
+`export.py` emits `original.patch`, prerequisite `migration.bundle`, `handoff.md`,
+`committed-state.json`, deterministic `evidence.tar.gz`, and `checksums.sha256`
+under `/workspace/migrate-storage-evidence/`. Bulk remains off git with
+committed generators and checksum manifests. Prior exported a81b06e checkpoint
+is retained in `history/a81b06e570570d6695564f20627b6cab0d00b0ef/`.
+A relocated `local-checksums.sha256` verifies the preserved historical copies;
+the retained old manifest itself still uses its original absolute paths.
+All absolute paths and final committed HEAD are in exported metadata.
 
-`export.py` exports the committed patch, prerequisite bundle, handoff, metadata,
-deterministic evidence archive and checksums into
-`/workspace/migrate-storage-evidence/`. Exact final HEAD is recorded in
-`committed-state.json` and the exported handoff; base is stated above.
-Original patch: `original.patch`; bundle: `migration.bundle`; handoff:
-`handoff.md`; archive: `evidence.tar.gz`; checksums: `checksums.sha256`.
-H44 bulk stays off git and is reproducible from committed generators.
+Fresh-thread handoff goes to the coordinator, not a self-launched replacement.
+Continue this same VM/environment
+`ccarenv_b64_Y2NhcmVudl9kODgyZDA2ODc5ZjA4MTkxYmI4OGZhZjhlOWEwOTczYg`,
+branch and existing blocked goal. Goal ID/get_goal is not exposed; the supplied
+frozen objective SHA is
+`4b3d109b4fbd5c345a4db540473024c3c38e98353533491a0561043b347ae938` is not a substitute
+for a goal ID. No goal was created/reset. The coordinator-confirmed supplied
+objective remains binding.
 
-Resume this exact VM/branch/existing goal after the hash-owner overlay is
-available: validate original interfaces and budgets, build all 21 modules on
-4.35, export/compare their types, measure a complete clean candidate against
-160.346414358 s / 848093184 sampled bytes, escalate any regression and STOP
->10% slowdown, run required full affected/final gates through the root owner,
-repeat independent reviews and export a complete handoff. No new goal or
-replacement thread was created. Missing callable `get_goal` is optional per
-coordinator; the existing frozen objective remains binding.
+Next: obtain O-STORAGE-001 exact-file coordination, apply only an approved
+statement/budget-preserving migration on the assigned lane, build the full
+candidate, compare frozen types and clean matched resources, obtain G-ROOT-001
+resource disposition and all required affected/final gates, repeat reviews,
+and export a complete handoff. No checkpoint or elapsed time completes this
+unfinished queue.

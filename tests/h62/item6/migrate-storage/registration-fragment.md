@@ -1,7 +1,7 @@
 # Registration fragment
 
-No production modules are added. `ApiControls.lean` and
-`InterfaceHashes.lean` are isolated migration fixtures under the assigned tests
-scope, invoked explicitly by `fixture.py`. Do not add them to generated core
-roots or central module maps. Any later promotion requires owner-approved area
-module registration by the coordinator; this lane supplies no root changes.
+No production module is added. `ApiControls.lean`, `LocateRejectControls.lean`
+and `InterfaceHashes.lean` are isolated fixtures, invoked explicitly by
+`fixture.py`. Do not register them in generated core roots or central maps.
+Owner/proposal patch files are evidence and remain unapplied to originals.
+Any future production registration requires coordinator/area-owner approval.

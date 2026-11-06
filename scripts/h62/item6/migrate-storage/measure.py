@@ -4,7 +4,8 @@ Uses an offline Docker cgroup, serial per-file Lean, and no Lake caches.
 Output root must be NEW; baseline and candidate share identical controls.
 """
 import argparse,fcntl,hashlib,json,os,pathlib,signal,subprocess,time
-from census import ROOT,census
+from census import ROOT,census,frozen_matches,digest
+from prepare_owner_overlay import validate_postimage
 D=["docker","--host=unix:///var/run/docker.sock"]
 ENV={k:v for k,v in os.environ.items() if k not in ["DOCKER_HOST","DOCKER_CONTEXT","DOCKER_TLS","DOCKER_TLS_VERIFY","DOCKER_CERT_PATH"]}
 LIMIT=12*1024**3;RESERVE=4*1024**3
@@ -31,12 +32,30 @@ def sha(path):
 def interrupted(signum,frame):raise RuntimeError("controller signal "+str(signum))
 
 def main():
- a=argparse.ArgumentParser();a.add_argument("toolchain",type=pathlib.Path);a.add_argument("output",type=pathlib.Path);a.add_argument("--image",required=True);a.add_argument("--timeout",type=int,default=600);x=a.parse_args()
+ a=argparse.ArgumentParser();a.add_argument("toolchain",type=pathlib.Path);a.add_argument("output",type=pathlib.Path);a.add_argument("--image",required=True);a.add_argument("--owner-fixture",type=pathlib.Path);a.add_argument("--timeout",type=int,default=600);x=a.parse_args()
  assert x.toolchain.is_absolute() and x.output.is_absolute()
  assert not x.output.exists(),"refuse non-clean output"
  lock=open("/tmp/solidity-lean-feature-groups-20261025/writer.lock","r+");fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
  subprocess.run(["git","-C",str(ROOT),"status","--short","--branch"],check=True)
  graph=census();assert graph["closure_matches_checkout"],"external source drift";assert all(f["unchanged"] for f in graph["files"])
+ source_root=ROOT;source_manifest=None;source_manifest_sha=None
+ source_tree={m.replace(".","/")+".lean":h for m,h in graph["closure_source_sha256"].items()}
+ compiled_hashes=graph["closure_source_sha256"]
+ if x.owner_fixture:
+  assert x.owner_fixture.is_absolute()
+  source_manifest=x.owner_fixture;source_manifest_sha=sha(source_manifest)
+  fixture=json.loads(source_manifest.read_text());source_root=pathlib.Path(fixture["source_root"])
+  assert source_root.is_absolute() and not source_root.is_relative_to(ROOT)
+  assert fixture["patch_sha256"]=="3aebc61f1a1979d4e36d669e3c33f5ae8c848d38a3ca0574c62329bdc154bbff"
+  assert sha(pathlib.Path(fixture["patch_path"]))==fixture["patch_sha256"]
+  assert fixture["base_closure_source_sha256"]==graph["closure_source_sha256"]
+  assert fixture["changed_file"]=="Solidity/Hash/CollisionBound.lean" and not fixture["production_sources_edited"]
+  assert set(fixture["tree_sha256"])==set(fixture["original_tree_sha256"])
+  assert [p for p in fixture["tree_sha256"] if fixture["tree_sha256"][p]!=fixture["original_tree_sha256"][p]]==[fixture["changed_file"]]
+  assert frozen_matches(ROOT,fixture["original_tree_sha256"])
+  source_tree=fixture["tree_sha256"];assert frozen_matches(source_root,source_tree)
+  validate_postimage(source_root/fixture["changed_file"])
+  compiled_hashes={m:source_tree[m.replace(".","/")+".lean"] for m in graph["build_order"]}
  assert len(pathlib.Path("/proc/swaps").read_text().splitlines())==1,"swap active"
  assert available()>=RESERVE
  no_competing_lean()
@@ -50,8 +69,8 @@ def main():
  else:assert "4.24.0" in x.toolchain.name,"unassigned toolchain"
  x.output.mkdir();(x.output/"artifacts").mkdir();(x.output/"logs").mkdir()
  for m in graph["build_order"]:(x.output/"artifacts"/pathlib.Path(m.replace(".","/"))).parent.mkdir(parents=True,exist_ok=True)
- profile=["create","--name","migrate-storage-"+x.output.name,"--network=none","--memory="+str(LIMIT),"--memory-swap="+str(LIMIT),"--cpus=1","--cap-drop=ALL","--security-opt=no-new-privileges","--user",str(os.getuid())+":"+str(os.getgid()),"-e","LEAN_NUM_THREADS=1","-e","LEAN_PATH=/out/artifacts","--mount","type=bind,src="+str(ROOT)+",dst=/src,readonly","--mount","type=bind,src="+str(x.toolchain)+",dst=/toolchain,readonly","--mount","type=bind,src="+str(x.output)+",dst=/out","-w","/src",x.image,"sleep","infinity"]
- cid=cmd(profile,text=True).strip();result={"container":cid,"profile":profile,"modules":[],"component_only":True,"cache":"empty output dir; direct Lean; no Lake artifact or per-master cache; OS page cache not normalized","archive":{"path":str(archive),"sha256":archive_sha},"limits":{"memory":LIMIT,"memory_swap_total":LIMIT,"cpus":1,"reserve":RESERVE,"lean_threads":1},"closure_source_sha256":graph["closure_source_sha256"],"controls_sha256":{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [pathlib.Path(__file__),pathlib.Path(__file__).with_name("census.py"),x.toolchain/"bin/lean",x.toolchain/"bin/lake"]}}
+ profile=["create","--name","migrate-storage-"+x.output.name,"--network=none","--memory="+str(LIMIT),"--memory-swap="+str(LIMIT),"--cpus=1","--cap-drop=ALL","--security-opt=no-new-privileges","--user",str(os.getuid())+":"+str(os.getgid()),"-e","LEAN_NUM_THREADS=1","-e","LEAN_PATH=/out/artifacts","--mount","type=bind,src="+str(source_root)+",dst=/src,readonly","--mount","type=bind,src="+str(x.toolchain)+",dst=/toolchain,readonly","--mount","type=bind,src="+str(x.output)+",dst=/out","-w","/src",x.image,"sleep","infinity"]
+ cid=cmd(profile,text=True).strip();result={"container":cid,"profile":profile,"modules":[],"component_only":True,"cache":"empty output dir; direct Lean; no Lake artifact or per-master cache; OS page cache not normalized","archive":{"path":str(archive),"sha256":archive_sha},"limits":{"memory":LIMIT,"memory_swap_total":LIMIT,"cpus":1,"reserve":RESERVE,"lean_threads":1},"closure_source_sha256":compiled_hashes,"base_closure_source_sha256":graph["closure_source_sha256"],"source_root":str(source_root),"source_tree_sha256":source_tree,"source_manifest":str(source_manifest) if source_manifest else None,"source_manifest_sha256":source_manifest_sha,"controls_sha256":{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [pathlib.Path(__file__),pathlib.Path(__file__).with_name("census.py"),pathlib.Path(__file__).with_name("prepare_owner_overlay.py"),x.toolchain/"bin/lean",x.toolchain/"bin/lake"]}}
  (x.output/"profile.json").write_text(json.dumps(result,indent=2))
  start=time.monotonic();reason=None
  for sig in [signal.SIGTERM,signal.SIGHUP,signal.SIGINT]:signal.signal(sig,interrupted)
@@ -96,8 +115,9 @@ def main():
    result["runtime_after"]=json.loads(cmd(["inspect",cid]))[0]["State"]
    assert not result["runtime_after"]["Running"],"cleanup failed"
    after=census();result["sources_unchanged"]=graph==after and after["closure_matches_checkout"]
+   result["fixture_sources_unchanged"]=frozen_matches(source_root,source_tree) and (source_manifest is None or sha(source_manifest)==source_manifest_sha)
    result["controls_unchanged"]=all(sha(pathlib.Path(p))==h for p,h in result["controls_sha256"].items())
-   if not result["sources_unchanged"] or not result["controls_unchanged"]:result["exit"]=1
+   if not result["sources_unchanged"] or not result["controls_unchanged"] or not result["fixture_sources_unchanged"]:result["exit"]=1
   except BaseException as e:
    result["exit"]=1;result["cleanup_error"]=str(e)
   result["peak_sampled_aggregate_rss_bytes"]=max((m["peak_sampled_aggregate_rss_bytes"] for m in result["modules"]),default=0)

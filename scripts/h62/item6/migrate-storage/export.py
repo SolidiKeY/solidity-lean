@@ -22,6 +22,13 @@ subprocess.run(["git","-C",str(ROOT),"bundle","verify",str(E/"migration.bundle")
 state={"base":BASE,"head":head,"branch":branch,"repository":str(ROOT),"changed_files":changes,"goal_status":"blocked","production_lean_files_edited":0}
 (E/"committed-state.json").write_text(json.dumps(state,indent=2,sort_keys=True)+"\n")
 (E/"handoff.md").write_text("Committed HEAD: `"+head+"`\n\n"+(ROOT/"docs/feature-work/h62-6-migrate-storage.md").read_text())
+# Historical receipts retain their original absolute manifest; add a relocated
+# checksum list so the preserved prior checkpoint remains directly verifiable.
+if (E/"history").exists():
+ for directory in sorted((E/"history").iterdir()):
+  if directory.is_dir():
+   prior=sorted(p for p in directory.iterdir() if p.is_file() and p.name!="local-checksums.sha256")
+   (directory/"local-checksums.sha256").write_text("".join(sha(p)+"  "+str(p)+"\n" for p in prior))
 # Raw Lean artifacts and full compiler trees remain on the VM; the release
 # archive has its own manifest entry below. Archive only review evidence.
 excluded={"checksums.sha256","evidence-files.sha256","evidence.tar.gz","CLOUDVM-RESULT.json"}

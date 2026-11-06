@@ -11,8 +11,13 @@ profile=json.loads((run/"profile.json").read_text());cid=profile["container"];j=
 assert not j["State"]["Running"] and j["HostConfig"]["Memory"]==LIMIT and j["HostConfig"]["MemorySwap"]==LIMIT and j["HostConfig"]["NanoCpus"]==1000000000
 for sig in [signal.SIGTERM,signal.SIGINT,signal.SIGHUP]:signal.signal(sig,interrupted)
 argv=["exec",cid,"/toolchain/bin/lean","-j1","--tstack=131072","-M10240","/src/"+str(fixture)]
-controls={str(p):sha(p) for p in [pathlib.Path(__file__),ROOT/"scripts/h62/item6/migrate-storage/measure.py",ROOT/"scripts/h62/item6/migrate-storage/census.py",ROOT/fixture]}
-originals={m.replace(".","/")+".lean":h for m,h in profile["closure_source_sha256"].items()}
+controls={str(p):sha(p) for p in [pathlib.Path(__file__),ROOT/"scripts/h62/item6/migrate-storage/measure.py",ROOT/"scripts/h62/item6/migrate-storage/census.py",ROOT/"scripts/h62/item6/migrate-storage/prepare_owner_overlay.py",ROOT/fixture]}
+source_root=pathlib.Path(profile.get("source_root",ROOT))
+compiled=profile.get("source_tree_sha256",{m.replace(".","/")+".lean":h for m,h in profile["closure_source_sha256"].items()})
+originals={m.replace(".","/")+".lean":h for m,h in profile.get("base_closure_source_sha256",profile["closure_source_sha256"]).items()}
+assert frozen_matches(source_root,compiled)
+assert (source_root/fixture).read_bytes()==(ROOT/fixture).read_bytes()
+controls[str(source_root/fixture)]=sha(source_root/fixture)
 assert frozen_matches(ROOT,originals)
 result={"runtime_image":j["Image"],"archive":profile["archive"],"controls_sha256":controls,"command":argv,"source":str(fixture),"component_only":True,"source_sha256":sha(ROOT/fixture),"measurement_profile_sha256":sha(run/"profile.json")};start=time.monotonic()
 try:
@@ -39,7 +44,8 @@ finally:
   result["cleanup_stopped"]=True
   result["controls_unchanged"]=all(sha(pathlib.Path(p))==h for p,h in controls.items())
   result["original_sources_unchanged"]=frozen_matches(ROOT,originals)
-  assert result["controls_unchanged"] and result["original_sources_unchanged"],"input drift"
+  result["compiled_sources_unchanged"]=frozen_matches(source_root,compiled)
+  assert result["controls_unchanged"] and result["original_sources_unchanged"] and result["compiled_sources_unchanged"],"input drift"
  except BaseException as e:result.update(exit=1,cleanup_error=str(e))
  out.with_suffix(".result.json").write_text(json.dumps(result,indent=2))
 print(json.dumps(result));sys.exit(result["exit"])
