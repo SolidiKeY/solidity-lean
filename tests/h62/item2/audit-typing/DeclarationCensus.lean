@@ -81,12 +81,13 @@ elab "#audit_witness " original:ident " via " witness:ident : command => do
     logInfo m!"AUDIT-WITNESS {original.getId} via {witness.getId}: exact premise bundle"
 
 /-- Preserve every original input, including proof binders and dependencies,
-in one existential telescope. Restricted to the reviewed default statements. -/
+in one existential telescope. Restricted to the reviewed default and resolution-completeness statements. -/
 elab "#audit_full_inputs " original:ident " via " witness:ident : command => do
   liftTermElabM do
     let names := [`Solidity.SVal.dfltBelow_irrel, `Solidity.SVal.dfltBelow_dflt,
       `Solidity.SFields.dfltBelow_eq, `Solidity.SVal.dflt_all,
-      `Solidity.SFields.dflt_all, `Solidity.SVal.dfltBelow_all]
+      `Solidity.SFields.dflt_all, `Solidity.SVal.dfltBelow_all,
+      `Solidity.Frontend.Static.unitsChecker_complete]
     unless names.contains original.getId do
       throwError "unreviewed full-input signature"
     let originalInfo ← getConstInfo original.getId

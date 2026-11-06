@@ -43,9 +43,22 @@ def main():
             assert hashlib.sha256(frozen_dependency).hexdigest() == record["source_sha256"]
             artifact = EVIDENCE/"olean"/Path(path).with_suffix(".olean")
             assert hashlib.sha256(artifact.read_bytes()).hexdigest() == record["olean_sha256"]
+        frontend_records = json.loads((EVIDENCE/"frontend-units-build-results.json").read_text())
+        frontend_plan = json.loads((EVIDENCE/"frontend-units-build-plan.json").read_text())
+        assert [r["command"][-1] for r in frontend_records] == frontend_plan
+        assert frontend_plan[-1] == "Solidity/Frontend/Static/UnitsExamples.lean"
+        for record in frontend_records:
+            assert record["exit"] == 0 and record["stopped"] is None
+            assert record["command"][0] == str(LEAN)
+            path = record["command"][-1]
+            frozen_dependency = subprocess.check_output(["git", "show", f"{BASE}:{path}"], cwd=ROOT)
+            assert (ROOT/path).read_bytes() == frozen_dependency
+            assert hashlib.sha256(frozen_dependency).hexdigest() == record["source_sha256"]
+            artifact = EVIDENCE/"olean"/Path(path).with_suffix(".olean")
+            assert hashlib.sha256(artifact.read_bytes()).hexdigest() == record["olean_sha256"]
         env = dict(os.environ, LEAN_NUM_THREADS="1", LEAN_PATH=str(EVIDENCE/"olean"))
         results = []
-        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean"]:
+        for path in [source, TESTS+"DeclarationCensus.lean", TESTS+"ClosureWitnesses.lean", TESTS+"ClosureCensus.lean", TESTS+"ClosureFidelity.lean", TESTS+"ValuesListsWitnesses.lean", TESTS+"ValuesListsFidelity.lean", TESTS+"ValuesDefaultsWitnesses.lean", TESTS+"ValuesDefaultsFidelity.lean", TESTS+"UnitsSuccess.lean", TESTS+"UnitsSuccessFidelity.lean"]:
             current = int(Path("/sys/fs/cgroup/memory.current").read_text())
             cap = int(Path("/sys/fs/cgroup/memory.max").read_text())
             assert cap-current >= 4*1024**3, "Insufficient 4 GiB reserve"
@@ -119,7 +132,10 @@ def main():
         assert len(default_checked) == len(set(default_checked)) == 6
         assert set(default_checked) == expected_defaults
         assert "sorryAx" not in defaults_log
-        print("38 source witnesses checked; full assignment pending")
+        units_log = (EVIDENCE/"UnitsSuccessFidelity-checked.log").read_text()
+        assert units_log.count("AUDIT-FULL-INPUTS Solidity.Frontend.Static.unitsChecker_complete via ") == 1
+        assert "sorryAx" not in units_log
+        print("39 source witnesses and static resolution success controls checked; full assignment pending")
 
 if __name__ == "__main__":
     main()
