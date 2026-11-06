@@ -666,3 +666,48 @@ The coordinator confirmed that master's kernel-check serialization change does
 not discharge or permit an unchanged retry of the prior PowerBounds stop.
 Legacy RuntimeConsumer live semantic ownership remains coordinator-pending;
 migrate-root-gate's known scope is the isolated v4.35 overlay.
+
+
+## Boolean-binding success and joint feasibility backfill
+
+The additive test module `BoolBindingSuccess.lean` covers the existing public
+Boolean-binding compiler without changing its producer. It proves successful
+execution for every valid Boolean word in a seeded represented frame, validated
+raw-bit storage, and one simultaneous witness containing the actual program,
+global certificate, selected result and both initial-memory hypotheses. Negative
+controls distinguish reject-all and revert-all implementations; the same selected
+program retains dirty-word and short-head reverts. These are intrinsic gasless IR
+observations, with no native loader, Source adequacy, charged gas/fork acceptance
+or native 1024-stack result asserted.
+
+The direct first attempt failed on two `if True` simplifications. Its exit-1
+diagnostics are preserved, not accepted as proofs. With MCP inactive and its
+local package absent, the repository tactic-search fallback confirmed the
+`simp only [ite_true]` correction. The changed file then kernel-checked in
+5.889 seconds with seven exact standard-axiom guards and an empty diagnostic log.
+No `sorry`, axiom, budget increase or producer edit was introduced. The new typed
+joint witness is not yet linked by the full generated hypothesis-domain census;
+the existing exactly-once coverage ledger is not decremented.
+
+The check reused 238 already source/product-bound frozen import products,
+mounted read-only, and never recompiled the stopped PowerBounds target. Both
+independent namespace monitors passed under 12 GiB/no swap/one CPU, with the
+original aggregate deadline unchanged. The monitors sampled a maximum 1,603,993,600-byte
+parent peak. The per-file result and runtime versions (Lean 4.24.0, commit
+797c613eb9b6d4ec95db23e3e00af9ac6657f24b; Lake 5.0.0-src+797c613) are in
+`/workspace/parallel-20261103/executable-bytecode/bool-binding-success/`.
+No module exceeded 60 seconds. The initial pre-admission refusal on owned Python
+bytecode is retained; cleanup removed only those five regenerable files.
+
+The audit-only verifier roster and registration proposal include the new test.
+No generated library-root or production module-map row is required. Full
+703-source closure, 190-core/37-Bridge inspection, exact ledger linkage, whole
+package/Bridge and matched performance gates remain open. This checkpoint is not
+`RUNTIME_GATE_PASS` or completion of the original assignment.
+
+Independent finder and skeptic reviews strengthened the new joint-witness
+conclusion with explicit program identity, valid-word and full-size facts, all
+proved rather than assumed. The final strengthened file was rechecked; earlier
+passing versions remain separately hash-bound in the evidence. H112 is respected:
+this is an instantiation of the existing generic BoolBindingCertificate, with
+parameterized success, rather than a new per-shape compiler/Artifact family.
