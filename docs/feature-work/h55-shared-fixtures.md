@@ -597,3 +597,23 @@ Any later fixture consolidation must preserve the following original cases:
 
 This is a partial manual census of one control file, not an ExtCall edit,
 full Source-family acceptance, a replacement proof or independent review.
+
+## G19 assignment and loop semantic review (partial)
+
+The exact original G19 assignment list remains unestablished. Read-only review
+of three broad candidate controls records these original obligations; it does
+not assert that these are the only assigned G19 cases.
+
+| Control and declarations | Original observations to preserve |
+|---|---|
+| AssignmentBlocks `maps`, `initial`, `joined` | Preserve the typed slot map and relation for both flags, arbitrary write lists/pipelines/fuel/checked mode, actual Source and target runs, the post relation and unchanged target global state. |
+| AssignmentBlocks `observed`, `repeated_observed`, `reversed_observed`, `reverse_refused` | Preserve complete four-slot observations, repeated-write behavior, reversed-order result and explicit inequality. |
+| AssignmentBlocks `untouched`, `self_alias_observed` | Preserve the unrelated uint value 77, target heap/global fields and the actual same-slot observation. |
+| AssignmentWhileReset `initial`, `entry`, `joined`, `checked`, `observed` | Preserve the mapped initial relation, simulation entry, actual Source and target loop results, machine execution, both false local words, untouched memory cell 3 and stack `[77]`. |
+| AssignmentWhileReset `omitted_checked`, `omitted_observed`, `omitted_loop_refused`, `self_alias` | Preserve the separate omitted-body target run and its true word, the inequality with the actual loop, and the same-slot Source/target case. |
+| WhileReturn `yes`, `no`, `same_slot` | Preserve return versus normal Source outcomes and actual target/mapping relations for both checked modes; retain the self-aliased slot case. |
+| WhileReturn `captured_true`, `true_not_fallthrough`, `false_not_return`, `nontrivial_input` | Preserve the actual captured target true value, both explicit wrong-outcome inequalities and the live memory/storage input observations. |
+
+These are named public statements in three candidate files only. Private and
+generated declarations, all other G19 cases, the exact assigned scope and
+independent review remain open; this matrix is not a migration acceptance.
