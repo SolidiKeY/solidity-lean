@@ -7,6 +7,8 @@ remain under the authorized tests prefix until area-owner-approved registration:
 |---|---|---|
 | LayoutAudit | Solidity.Evm.Layout | Five joint-impossibility controls and individual occupancy witnesses |
 | SuccessAudit | Solidity.Evm.Examples | Nonempty success, exact failure, four trivial-output controls |
+| JointWitness | JointImpossible | Full dependent-telescope supplied-witness checking and ambient-assumption rejection control |
+| JumpdestAudit | JointWitness, Solidity.Backend.Jumpdest | All 19 joint inputs and concrete byte-boundary controls |
 | JointImpossible | Lean | External audit-only kernel-checked joint-impossibility command; no core import |
 | IntentionalAudit | JointImpossible and frozen EVM modules | Eighteen H69 intentional joint-impossibility audits |
 | OpcodeAudit | Solidity.Backend.Opcode | Sixteen joint input packages, two closed statements, total encoding and failure controls |
