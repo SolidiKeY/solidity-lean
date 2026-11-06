@@ -324,3 +324,19 @@ pass. The earlier live-drift failure and the intermediate mixed-tree failure
 are retained. These are scanner/plan tests, not Lean proofs, witness coverage,
 semantic correspondence or acceptance of the modified live family. All 1623
 claim proof obligations and the original trust/migration holds remain open.
+
+## Rejected scheduler append extraction
+
+A candidate additive generic append law over the unchanged modifyMany
+definition was tried in two exact-statement late-failure controls. The generic
+law and repaired consumers passed kernel checks. The first consumer scripts
+failed on list normalization/partial application; those failed receipts are
+retained and not accepted. The repaired consumer file took 4.36 seconds against
+a 3.60-second unchanged warm baseline, a 21.1% increase exceeding the frozen
+10% STOP limit. The scheduler file itself measured 1.90 versus 1.88 seconds.
+
+The complete candidate was rejected. OperationFamilies and OperationControls
+were restored byte-for-byte to the committed tree, and the rejected patch and
+measurements remain outside Git. No unchanged retry, accepted generic helper,
+correspondence result or completed family migration is claimed. All 1623
+original control proof obligations remain in the retained plan.
