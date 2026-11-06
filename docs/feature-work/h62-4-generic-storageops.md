@@ -474,3 +474,24 @@ statements and fixture support remain pinned. Source/case/observation/statement
 and fabricated-proof-acceptance mutations are rejected. This adds three manual
 source plans and zero new verified proofs or generic correspondence instances;
 the full 1623-claim queue remains unfinished. Production sources are unchanged.
+
+## H113 parent page-cache accounting correction
+
+Coordinator decision H113 authorizes the lane monitor to exclude active_file
+and inactive_file page-cache charges from parent headroom accounting. The
+monitor now records parent and runtime non-reclaimable usage separately, each
+as max(0, memory.current - active_file - inactive_file), and sets parent_other
+to max(0, parent_non_reclaimable - runtime_non_reclaimable). Raw parent_other
+and every cache/non-cache term remain in each receipt. This avoids subtracting
+runtime-owned cache from other users twice. The preserved monitor's 12 GiB cap,
+zero swap, serial thread check, 16 GiB parent cap, 1 GiB reserve and host-headroom
+checks are unchanged. H111 changes only the launching shell stack limit.
+
+The fresh preflight passes: raw parent_other 5184303104 bytes becomes adjusted
+286285824 bytes. Four controls pass, including rejection of actual non-cache
+pressure and consistent handling of runtime-owned cache. Separate direct Lean
+and Lake version probes and the serial KeySort build pass; an earlier configured
+driver version probe rejected its flag ordering and is retained as a failed
+probe. Both read-only reviewers found no issue. Historical resource refusals
+and the denied reclaim attempt remain failed receipts; they are not relabeled.
+This resource correction establishes no new theorem or whole-lane validation.
