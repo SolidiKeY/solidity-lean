@@ -85,6 +85,25 @@ def wrongSignature {C : Contract} (depth : Nat) : Prog C (Frame A) (Frame A) :=
 
 theorem wrong_signature {C : Contract} (depth : Nat) : readHead A rfl (wrongSignature (C:=C) depth)=none := by rfl
 
+theorem guarded_continuation {C : Contract} (continuation : Prog C (Frame A) (Frame A)) :
+ AllocatingGuardedTurn.read A
+   (.cons (.ite guard (.cons AllocatingScalarSource.allocate continuation) (.cons zero .nil)) .nil)=
+ some ⟨continuation,rfl⟩ := by rfl
+
+def wrongFunction {C : Contract} (depth : Nat) (child : Unit → Prog C (Frame A) (Frame A)) :
+ Prog C (Frame A) (Frame A) :=
+ .cons (.ite guard (.cons AllocatingScalarSource.allocate
+   (.cons (.callRec "different" depth (next A rfl) (result A) child) (.cons increment .nil)))
+   (.cons zero .nil)) .nil
+
+theorem wrong_function_name {C : Contract} (depth : Nat) (child : Unit → Prog C (Frame A) (Frame A)) :
+ readHead A rfl (wrongFunction depth child)=none := by
+ simp only [wrongFunction,readHead,guarded_continuation,bind,Option.bind_some,
+     AllocatingSourceViews.readClosedCons,AllocatingSourceViews.readCons,Option.map_some,
+     AllocatingSourceViews.closeCons,AllocatingScalarLeaves.Controls.actual_tail,
+     AllocatingHeadViews.readRecursiveCall,AllocatingHeadViews.read,closeCall,
+     dif_pos True.intro,next_checked,result_checked,dif_neg (by decide : ("different" : Name)≠"allocatingScalar")]
+
 end Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.next_checked' depends on axioms: [propext] -/
 #guard_msgs (whitespace := lax) in
@@ -134,3 +153,10 @@ end Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls
 /-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_signature' depends on axioms: [propext, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_signature
+
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.guarded_continuation' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.guarded_continuation
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_function_name' depends on axioms: [propext, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.AllocatingRecursiveCheck.Controls.wrong_function_name
