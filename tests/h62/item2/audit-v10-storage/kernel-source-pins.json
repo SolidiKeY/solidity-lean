@@ -18,6 +18,10 @@
     "tests/h62/item2/audit-v10-storage/SourceReadWitnesses.lean": {
       "sha256": "e022c4d26cc1f4e65888116d1ae1d2230e0924078bd76071bfe624e3cacf3b43",
       "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint199-final/1.log"
+    },
+    "tests/h62/item2/audit-v10-storage/SourceWriteWitnesses.lean": {
+      "sha256": "85c54bf51f313fb235dd99d4fcc7e39a822c01acf6bf969d9f4567984e617987",
+      "kernel_log": "/workspace/v10-storage-operations-evidence/checkpoint200-final/1.log"
     }
   }
 }

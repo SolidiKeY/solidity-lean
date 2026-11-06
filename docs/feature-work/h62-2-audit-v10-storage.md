@@ -433,3 +433,24 @@ The updated registry has fourteen mapped references and 3267 unmapped rows,
 with unchanged original row identities. Kernel-source pins include this fourth
 checked test module. Source paths and target slots remain independently chosen
 inputs; the new certificate reuse does not establish their compilation relation.
+
+## Actual Source write premise witnesses
+
+SourceWriteWitnesses reuses the published Source fixture and complete write
+certificate. Its writable/ordinary flags and int53 word observation jointly
+inhabit source_write, storeVal_word and complete at the same typed inputs,
+with actual storeVal fuel one. Standard decide discharged the full raw bundle.
+Static, zero-fuel and type failures retain their distinct outcomes. A static
+zero-fuel call times out before write refusal; a scalar Boolean word observation
+does not make it compatible with the fixture's uint destination. A different
+target operand still executes, while violating the selected word agreement.
+
+The source path and target slot remain independent as the frozen statement
+specifies. No address compiler, value lowering, world relation or general
+preservation theorem follows. Three additional frozen premise bundles are
+checked without Source implementation or interface changes. Registry source
+pins and exact original row identities are extended, not replaced.
+
+The current reference ledger has seventeen mapped bundles and 3264 unmapped
+rows, with five kernel-checked test modules. The earlier counts are historical
+checkpoints; no original census row or failed receipt has been discarded.
