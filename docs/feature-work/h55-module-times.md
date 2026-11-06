@@ -1089,3 +1089,29 @@ preserved outside the repository at
 re-review and identical-condition verification are required before any
 claimed H109 A/B; the sampled watcher is not production attestation. No H93
 h55b cold-timing experiment was run.
+
+The same Stipend dependency preparation was repeated on the after copy with
+the same container limits and reported 13 fetched Lake jobs, `untrusted-exited`
+and exit 0; no individual Lean compilation or A/B pass is claimed from it.
+An initial byte comparison found the private cache input-index contents equal
+but modification times different; the timestamp was normalized on the after
+copy and that change recorded. `h109_cache_compare.py` then observed equal
+content and selected metadata for 19,344 entries, with distinct inode sets.
+The independently prepared `.lake` trees initially differed in metadata;
+recorded timestamp normalization was followed by an equal observation for
+40 entries. A content projection of the source trees found exactly the five
+preview source changes and five added preview pin modules. These observations
+are non-atomic and do not bind ACLs, xattrs, physical backing, page-cache
+state, VM identity or subsequent mutations. They are not measurements.
+
+A second unexecuted draft,
+`/workspace/h55-module-times-evidence/h109-prepare-deps-unreviewed.py`, was
+reviewed and found not to guarantee one Lean process or conclusive cleanup
+after interrupted container creation; it also did not safely handle all
+evidence-path and stderr cases. The first A/B runner draft was also rejected
+for unbound input state, timer/RSS and cleanup concerns. Both drafts remain
+off Git with hashes in `tests/h55/module-times/h109-ab-preparation.sha256`.
+ESCALATE: after two unsuccessful Terra runner designs, return runner design
+to Sol or use a coordinator-supplied authenticated serial runner. Neither
+option grants the pin migration window or changes the proof/resource budget.
+The five-module A/B and H109 final gates remain pending.
