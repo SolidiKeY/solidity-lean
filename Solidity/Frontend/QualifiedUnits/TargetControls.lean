@@ -82,7 +82,7 @@ theorem visible_barrier_no_target :
 theorem callable_erases :
     (SignatureNormalization.types DifferentialControls.hopsInput [] "A.sol" none .memory
       (.fnType (.cons (.param (.elem .bool) none none) .nil) (some .external) none .nil)).map
-        (·.map SignatureNormalization.TypeKey.erase) =
+        (·.map NormalizationAdequacy.erase) =
       some [.fn true [.bool] [] none] := rfl
 
 /-- Struct members are not signature syntax and are refused, not guessed. -/

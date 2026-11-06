@@ -2,7 +2,7 @@ import Solidity.Frontend.QualifiedUnits.SignatureNormalization
 
 /-! Structural adequacy of signature normalization against Source elaboration.
 
-`TypeKey.erase` forgets the original declaration identity of a nominal leaf,
+`erase` forgets the original declaration identity of a nominal leaf,
 keeping only the `DeclName` (scope and spelling) that `Source.Syn.tys` uses.
 Away from nominal leaves the two elaborators must coincide: `types_sound`
 shows every normalized key list erases to the Source elaboration, and
@@ -17,8 +17,8 @@ added. Struct members and variable declarations are outside signature
 categories and normalize to `none`; `fields_refused` records that. This is
 adequacy relative to the existing Source elaborator, not solc type
 checking (G13) or external Solidity correctness. -/
-namespace Solidity.Frontend.QualifiedUnits.SignatureNormalization
-open Solidity.Source
+namespace Solidity.Frontend.QualifiedUnits.NormalizationAdequacy
+open Solidity.Source SignatureNormalization
 
 /-- The Source-level name of an original declaration identity. -/
 def declName (P : UnitSet) (i : DeclId) : DeclName :=
@@ -29,7 +29,7 @@ def declName (P : UnitSet) (i : DeclId) : DeclName :=
 mutual
 
 /-- Forget nominal identities, keeping the Source `DeclName`. -/
-def TypeKey.erase {P : UnitSet} : TypeKey P → STy
+def erase {P : UnitSet} : TypeKey P → STy
   | .integer t => .int t
   | .boolean => .bool
   | .address p => .address p
@@ -41,27 +41,22 @@ def TypeKey.erase {P : UnitSet} : TypeKey P → STy
   | .valueType r => .udvt (declName P r.val)
   | .contract r => .contract (declName P r.val)
   | .record l r => .struct l (declName P r.val)
-  | .array l e n => .array l e.erase n
-  | .mapping k v => .mapping k.erase v.erase
-  | .callable e ps rs m => .fn e (TypeKey.eraseList ps) (TypeKey.eraseList rs) m
+  | .array l e n => .array l (erase e) n
+  | .mapping k v => .mapping (erase k) (erase v)
+  | .callable e ps rs m => .fn e (eraseList ps) (eraseList rs) m
 
-def TypeKey.eraseList {P : UnitSet} : List (TypeKey P) → List STy
+def eraseList {P : UnitSet} : List (TypeKey P) → List STy
   | [] => []
-  | k :: ks => k.erase :: TypeKey.eraseList ks
+  | k :: ks => erase k :: eraseList ks
 
 end
 
-end Solidity.Frontend.QualifiedUnits.SignatureNormalization
-
-namespace Solidity.Frontend.QualifiedUnits.NormalizationAdequacy
-open Solidity.Source SignatureNormalization
-
-theorem eraseList_eq {P : UnitSet} : (ks : List (TypeKey P)) → TypeKey.eraseList ks = ks.map TypeKey.erase
+theorem eraseList_eq {P : UnitSet} : (ks : List (TypeKey P)) → eraseList ks = ks.map erase
   | [] => rfl
-  | k :: ks => by simp only [TypeKey.eraseList, List.map_cons, eraseList_eq ks]
+  | k :: ks => by simp only [eraseList, List.map_cons, eraseList_eq ks]
 
 theorem elementary_erase {P : UnitSet} (loc : DataLoc) (e : Elem) :
-    (elementary P loc e).erase = e.ty loc := by
+    erase (elementary P loc e) = e.ty loc := by
   cases e with
   | fixed s dims => cases dims <;> rfl
   | _ => rfl
@@ -69,7 +64,7 @@ theorem elementary_erase {P : UnitSet} (loc : DataLoc) (e : Elem) :
 /-- Normalized nominal leaves erase to the Source user type. -/
 abbrev LeafSound (P : UnitSet) (R : List Remapping) (u : String) (scope : Option DeclId)
     (E : Env) (sc : Option String) : Prop :=
-  ∀ loc p k, nominal P R u scope loc p = some k → E.userTy sc loc p = some k.erase
+  ∀ loc p k, nominal P R u scope loc p = some k → E.userTy sc loc p = some (erase k)
 
 /-- Every Source user type also has a qualified nominal leaf. -/
 abbrev LeafComplete (P : UnitSet) (R : List Remapping) (u : String) (scope : Option DeclId)
@@ -78,7 +73,7 @@ abbrev LeafComplete (P : UnitSet) (R : List Remapping) (u : String) (scope : Opt
 
 theorem keyType_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
     {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) {k : MapKey} {key : TypeKey P}
-    (h : keyType P R u scope k = some key) : E.keyTy sc k = some key.erase := by
+    (h : keyType P R u scope k = some key) : E.keyTy sc k = some (erase key) := by
   cases k with
   | elem e _ =>
     simp only [keyType, Option.some.injEq] at h
@@ -92,7 +87,7 @@ theorem keyType_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : O
       rw [hn] at h
       have hu := hl _ _ _ hn
       cases r <;> simp only [Option.some.injEq, reduceCtorEq] at h <;> subst key <;>
-        simp only [Env.keyTy, hu, TypeKey.erase]
+        simp only [Env.keyTy, hu, erase]
 
 theorem keyType_complete {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
     {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) (hc : LeafComplete P R u scope E sc)
@@ -111,14 +106,14 @@ theorem keyType_complete {P : UnitSet} {R : List Remapping} {u : String} {scope 
       cases r with
       | record l ref =>
         subst σ
-        simp only [hu, TypeKey.erase, reduceCtorEq] at h
+        simp only [hu, erase, reduceCtorEq] at h
       | _ => exact ⟨_, rfl⟩
 
 /-- Soundness: every normalized key list erases to the Source elaboration. -/
 theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
     {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) :
     ∀ {c : Cat} (s : Syn c) {loc : DataLoc} {ks : List (TypeKey P)},
-      types P R u scope loc s = some ks → s.tys E sc loc = some (ks.map TypeKey.erase) := by
+      types P R u scope loc s = some ks → s.tys E sc loc = some (ks.map erase) := by
   intro c s
   induction s
   all_goals intro loc ks h
@@ -155,7 +150,7 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
     split at h
     · rename_i a b ha hb
       cases h
-      simp only [Syn.tys, ihp ha, ihr hb, List.map_cons, List.map_nil, TypeKey.erase, eraseList_eq]
+      simp only [Syn.tys, ihp ha, ihr hb, List.map_cons, List.map_nil, erase, eraseList_eq]
     · cases h
   case mapping k _ v _ ih =>
     change (if loc = .storage then
@@ -169,7 +164,7 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
         cases h
         have := ih hv
         simp only [List.map_cons, List.map_nil] at this
-        simp only [Syn.tys, hs, if_true, keyType_sound hl hk, this, List.map_cons, List.map_nil, TypeKey.erase]
+        simp only [Syn.tys, hs, if_true, keyType_sound hl hk, this, List.map_cons, List.map_nil, erase]
       · cases h
     · cases h
   case userType p =>
@@ -188,7 +183,7 @@ theorem types_sound {P : UnitSet} {R : List Remapping} {u : String} {scope : Opt
       cases h
       have := iht ht
       simp only [List.map_cons, List.map_nil] at this
-      simp only [Syn.tys, this, hn, List.map_cons, List.map_nil, TypeKey.erase]
+      simp only [Syn.tys, this, hn, List.map_cons, List.map_nil, erase]
     · cases h
 
 /-- Signature categories: type names, parameters, event/error parameters and lists. -/
@@ -300,7 +295,7 @@ existing Source elaboration, success and failure alike. -/
 theorem types_adequate {P : UnitSet} {R : List Remapping} {u : String} {scope : Option DeclId}
     {E : Env} {sc : Option String} (hl : LeafSound P R u scope E sc) (hc : LeafComplete P R u scope E sc)
     {c : Cat} (s : Syn c) (hs : Supported c = true) (loc : DataLoc) :
-    (types P R u scope loc s).map (·.map TypeKey.erase) = s.tys E sc loc := by
+    (types P R u scope loc s).map (·.map erase) = s.tys E sc loc := by
   cases ht : types P R u scope loc s with
   | some ks => rw [types_sound hl s ht]; rfl
   | none =>

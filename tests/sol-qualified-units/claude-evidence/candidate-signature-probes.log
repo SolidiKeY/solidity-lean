@@ -1,0 +1,5 @@
+public-memory-calldata: reject 7723
+internal-memory-calldata: reject 7723
+external-calldata-public-memory: accept
+internal-storage-memory-override: reject 7792
+internal-storage-memory-overload: accept

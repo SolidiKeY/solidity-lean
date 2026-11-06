@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Qualified-unit scope audit. Default acceptance fails closed while work is pending.
 
+--claude-vm audits tests/sol-qualified-units/claude-evidence/ (claude-gates.py receipts).
+
 --signature-foundation-only audits bounded H27 evidence and explicitly leaves G12 pending.
 --inventory-only checks the recorded source/declaration inventory, not completion.
 Default runs all gates serially; saved-evidence audits enforce freshness and actual outcomes.
@@ -29,7 +31,11 @@ def sha(path):
 
 
 
-def audit(inventory_only=False, foundation_only=False):
+def audit(inventory_only=False, foundation_only=False, claude=False):
+    ev = ROOT / ("tests/sol-qualified-units/claude-evidence" if claude else "tests/sol-qualified-units/evidence")
+    runner_file = ROOT / ("tests/sol-qualified-units/claude-gates.py" if claude else "tests/sol-qualified-units/run-candidate-gates.py")
+    artifacts = json.loads((ROOT / "tests/sol-qualified-units/compiler-artifacts.json").read_text())
+    artifact_shas = {a["sha256"] for a in artifacts["artifacts"]}
     scope = json.loads((ROOT / "tests/sol-qualified-units/scope.json").read_text())
     matrix = json.loads((ROOT / "tests/sol-qualified-units/constructors.json").read_text())
     syntax = ROOT / "Solidity/Source/Syntax.lean"
@@ -55,21 +61,27 @@ def audit(inventory_only=False, foundation_only=False):
     assert actual == scope["modules"], "module/declaration inventory drift"
     assert constructors == scope["inductive_constructors"], "inductive constructor inventory drift"
     declaration_pins = json.loads((ROOT / scope["reflection_pins"]).read_text())
-    declaration_report = json.loads((ROOT / "tests/sol-qualified-units/evidence/declaration-report.json").read_text())
+    declaration_report = json.loads((ev / "declaration-report.json").read_text())
     assert {"modules": declaration_report["modules"], "declarations": declaration_report["declarations"]} == declaration_pins, "reflected declaration inventory drift"
     assert set(declaration_report["modules"]) == {p[:-5].replace("/", ".") for p in actual}, "reflected module scope mismatch"
     all_declarations = {row["name"]: row for row in declaration_report["declarations"]}
     assert len(all_declarations) == len(declaration_report["declarations"]), "duplicate reflected declaration"
-    partial_baseline = json.loads((ROOT / "tests/sol-qualified-units/evidence/compiler-helper-baseline.json").read_text())
-    assert {name for name, row in all_declarations.items() if row["partial"]} == set(partial_baseline["partial_helpers"]), "new partial helper"
+    if claude:
+        partial_helpers = set(json.loads((ROOT / "tests/sol-qualified-units/partial-helpers.json").read_text())["partial_helpers"])
+        assert all(name.endswith("._unsafe_rec") for name in partial_helpers), "non-generated partial helper"
+    else:
+        partial_baseline = json.loads((ev / "compiler-helper-baseline.json").read_text())
+        partial_helpers = set(partial_baseline["partial_helpers"])
+    assert {name for name, row in all_declarations.items() if row["partial"]} == partial_helpers, "new partial helper"
     assert not any(row["unsafe"] or row["axiom"] or not set(row["axioms"]) <= {"propext", "Classical.choice", "Quot.sound"} for row in all_declarations.values()), "reflected trust violation"
     for path, names in actual.items():
         namespace = re.search(r"^namespace (Solidity\.Frontend\.QualifiedUnits[\w.]*)", (ROOT / path).read_text(), re.M)[1]
         assert all(namespace + "." + name in all_declarations for name in names), "source declaration missing from reflection"
     for path, digest in declaration_report["sources"].items():
         assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == digest, "stale declaration audit " + path
-    for path, digest in {**partial_baseline["byte_identical_source_sha256"], **partial_baseline.get("h27_reviewed_source_sha256", {})}.items():
-        assert sha(ROOT / path) == digest, "changed compiler-helper baseline " + path
+    if not claude:
+        for path, digest in {**partial_baseline["byte_identical_source_sha256"], **partial_baseline.get("h27_reviewed_source_sha256", {})}.items():
+            assert sha(ROOT / path) == digest, "changed compiler-helper baseline " + path
     g0 = json.loads((ROOT / "tests/sol-qualified-units/g0-kernel-helpers.json").read_text())
     assert g0["syntax_sha256"] == sha(ROOT / "Solidity/Source/Syntax.lean"), "G0 syntax drift"
     for helper in g0["helpers"]:
@@ -93,7 +105,7 @@ def audit(inventory_only=False, foundation_only=False):
         assert twin["theorem"] in all_declarations, "missing twin equivalence theorem"
     pins = json.loads((ROOT / "tests/sol-qualified-units/axiom-pins.json").read_text())
     observed = {}
-    for match in re.finditer(r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])", (ROOT / "tests/sol-qualified-units/evidence/candidate-axioms.log").read_text(), re.M):
+    for match in re.finditer(r"^'([^'\n]+)' (?:does not depend on any axioms|depends on axioms: \[([^\]]*)\])", (ev / "candidate-axioms.log").read_text(), re.M):
         observed[match[1]] = [] if match[2] is None else [name.strip() for name in match[2].split(",")]
     assert observed == pins, "axiom pin drift"
     expected_theorems = set()
@@ -107,13 +119,13 @@ def audit(inventory_only=False, foundation_only=False):
     signature_theorems = {name for name in expected_theorems if any(name.startswith("Solidity.Frontend.QualifiedUnits." + area + ".") for area in ["TypePaths", "SignatureNormalization", "SignatureHiding", "NormalizationControls", "SignatureMembers", "SignatureMemberControls", "SignatureResolution", "SignatureResolutionControls", "MergeSpecification"])}
     assert len(signature_matrix["rows"]) == len(signature_theorems), "signature matrix row count"
     assert {row["kernel_theorem"] for row in signature_matrix["rows"]} == signature_theorems, "signature matrix coverage"
-    signature_probe = json.loads((ROOT / "tests/sol-qualified-units/evidence/h27-location-probe.json").read_text())
+    signature_probe = json.loads((ev / "h27-location-probe.json").read_text())
     assert signature_probe["compiler_fixtures_pass"] and signature_probe["script_sha256"] == sha(ROOT / "tests/sol-qualified-units/h27-location-probe.mjs"), "stale signature compiler probes"
-    assert signature_probe["version"] == "0.8.38+commit.1835d247.Emscripten.clang" and signature_probe["sha256"] == "6c74ffba0ea4cf9521e78b16052a98208770bb7677616de08ced239f4312d390", "signature compiler pin"
+    assert signature_probe["version"] == artifacts["version"] == "0.8.38+commit.1835d247.Emscripten.clang" and signature_probe["sha256"] in artifact_shas, "signature compiler pin"
     assert [row["id"] for row in signature_probe["rows"]] == signature_matrix["compiler_probe_ids"], "signature probe coverage"
     assert [[row["id"], row["accepted"], [e["code"] for e in row["errors"]]] for row in signature_probe["rows"]] == signature_probe["expected"], "signature probe outcome mismatch"
     resolution_matrix = json.loads((ROOT / "tests/sol-qualified-units/resolution-probe-matrix.json").read_text())
-    resolution_probe = json.loads((ROOT / "tests/sol-qualified-units/evidence/resolution-barrier-probe.json").read_text())
+    resolution_probe = json.loads((ev / "resolution-barrier-probe.json").read_text())
     assert resolution_probe["compiler_fixtures_pass"] and resolution_probe["script_sha256"] == sha(ROOT / "tests/sol-qualified-units/resolution-barrier-probe.mjs"), "stale resolution probe driver"
     assert resolution_probe["version"] == signature_probe["version"] and resolution_probe["sha256"] == signature_probe["sha256"], "resolution compiler pin"
     assert [r["id"] for r in resolution_probe["rows"]] == [r["id"] for r in resolution_matrix["rows"]], "resolution probe row inventory"
@@ -125,8 +137,9 @@ def audit(inventory_only=False, foundation_only=False):
         assert row["kernel_fixture"] is not None, "unwitnessed constructor " + row["constructor"]
         assert "Solidity.Frontend.QualifiedUnits." + row["kernel_fixture"] in pins, "unrun constructor fixture"
     compiler = json.loads((ROOT / "tests/sol-qualified-units/compiler-matrix.json").read_text())
-    report = json.loads((ROOT / "tests/sol-qualified-units/evidence/solc-report.json").read_text())
-    assert report["version"] == compiler["version"] and report["sha256"] == compiler["sha256"], "compiler pin mismatch"
+    report = json.loads((ev / "solc-report.json").read_text())
+    assert report["version"] == compiler["version"] == artifacts["version"] and report["sha256"] in artifact_shas, "compiler pin mismatch"
+    assert compiler["sha256"] in artifact_shas, "matrix compiler pin not in artifact pins"
     assert report["matrix_sha256"] == hashlib.sha256((ROOT / "tests/sol-qualified-units/compiler-matrix.json").read_bytes()).hexdigest(), "stale compiler matrix evidence"
     assert [r["id"] for r in report["rows"]] == [r["id"] for r in compiler["rows"]], "compiler fixture inventory drift"
     for row, result in zip(compiler["rows"], report["rows"]):
@@ -143,49 +156,58 @@ def audit(inventory_only=False, foundation_only=False):
     for link in query_links:
         row = next(row for row in compiler["rows"] if row["id"] == link["id"])
         assert link["kernel_theorem"] in row["kernel_theorems"] and "Solidity.Frontend.QualifiedUnits." + link["kernel_theorem"] in pins, "unrun paired resolver observation"
-    metadata = json.loads((ROOT / "tests/sol-qualified-units/evidence/candidate-build.json").read_text())
+    metadata = json.loads((ev / ("gate-build.json" if claude else "candidate-build.json")).read_text())
     for path, expected in metadata["sources"].items():
         assert hashlib.sha256((ROOT / path).read_bytes()).hexdigest() == expected, "stale kernel build " + path
     sources = {path: sha(ROOT / path) for path in sorted([*actual, *scope["inputs"]])}
     assert metadata["sources"] == declaration_report["sources"] == sources, "incomplete source binding"
-    runner_sha = sha(ROOT / "tests/sol-qualified-units/run-candidate-gates.py")
+    runner_sha = sha(runner_file)
     for saved in [metadata, declaration_report, report]:
         assert saved["runner_sha256"] == runner_sha, "stale runner evidence"
     assert report["fixture_script_sha256"] == sha(ROOT / "tests/sol-qualified-units/solc-fixtures.mjs"), "stale compiler driver"
-    for kind, saved in [("declarations", declaration_report)]:
-        assert saved["input_sha256"] == sha(ROOT / f"tests/sol-qualified-units/evidence/{kind}-input.lean.txt"), "stale reflected input"
-    query = json.loads((ROOT / "tests/sol-qualified-units/evidence/query-report.json").read_text())
+    if claude:
+        gates = runpy.run_path(str(runner_file))
+        for kind in ["axioms", "declarations", "queries"]:
+            assert (ev / f"probe-{kind}.lean").read_text() == gates["probe_text"](kind), "stale probe " + kind
+        assert declaration_report["input_sha256"] == sha(ev / "probe-declarations.lean"), "stale reflected input"
+    else:
+        for kind, saved in [("declarations", declaration_report)]:
+            assert saved["input_sha256"] == sha(ev / f"{kind}-input.lean.txt"), "stale reflected input"
+    query = json.loads((ev / "query-report.json").read_text())
     assert query["sources"] == sources and query["runner_sha256"] == runner_sha, "stale query source/runner"
     assert query["matrix_sha256"] == report["matrix_sha256"], "stale query matrix"
     assert query["query_gate_sha256"] == sha(ROOT / "tests/sol-qualified-units/query_gate.py"), "stale query comparator"
-    assert query["compiler_report_sha256"] == sha(ROOT / "tests/sol-qualified-units/evidence/solc-report.json"), "stale query compiler graph"
-    assert query["input_sha256"] == hashlib.sha256(lean_queries(compiler).encode()).hexdigest() == sha(ROOT / "tests/sol-qualified-units/evidence/queries-input.lean.txt"), "stale query commands"
+    assert query["compiler_report_sha256"] == sha(ev / "solc-report.json"), "stale query compiler graph"
+    if claude:
+        assert query["input_sha256"] == sha(ev / "probe-queries.lean"), "stale query commands"
+    else:
+        assert query["input_sha256"] == hashlib.sha256(lean_queries(compiler).encode()).hexdigest() == sha(ev / "queries-input.lean.txt"), "stale query commands"
     recomputed = compare_queries(query["observed"], compiler, report)
     assert all(query[key] == value for key, value in recomputed.items()), "query comparison/report disagreement"
     if foundation_only:
         assert recomputed["compiler_agreement"], "signature-aware differential disagreement"
         assert not any(row["resolution_gap"] for row in compiler["rows"]), "unresolved query gap marker"
         sources = {path: sha(ROOT / path) for path in sorted([*actual, *scope["inputs"]])}
-        runner_sha = sha(ROOT / "tests/sol-qualified-units/run-candidate-gates.py")
+        runner_sha = sha(runner_file)
         assert declaration_report["sources"] == sources and declaration_report["runner_sha256"] == runner_sha, "stale foundation reflection"
-        assert declaration_report["input_sha256"] == sha(ROOT / "tests/sol-qualified-units/evidence/declarations-input.lean.txt"), "stale foundation input"
+        assert declaration_report["input_sha256"] == sha(ev / ("probe-declarations.lean" if claude else "declarations-input.lean.txt")), "stale foundation input"
         for mode in ["build", "axioms", "declarations", "signature-probes", "resolution-probes", "keysort", "solc", "queries"]:
-            saved = json.loads((ROOT / f"tests/sol-qualified-units/evidence/gate-{mode}.json").read_text())
+            saved = json.loads((ev / f"gate-{mode}.json").read_text())
             assert saved["passed"] and saved["mode"] == mode and saved["process_exit"] == 0, "foundation gate failure " + mode
             assert saved["sources"] == sources and saved["runner_sha256"] == runner_sha, "stale foundation gate " + mode
             assert saved["minimum_available_bytes"] >= 4 * 1024**3, "foundation reserve " + mode
             assert saved["lakefile_sha256"] == sha(ROOT / "lakefile.toml"), "foundation Lake drift"
-            assert saved["log_sha256"] == sha(ROOT / f"tests/sol-qualified-units/evidence/candidate-{mode}.log"), "foundation log drift"
+            assert saved["log_sha256"] == sha(ev / f"candidate-{mode}.log"), "foundation log drift"
             subprocess.run(["git", "merge-base", "--is-ancestor", saved["repository_base"], "HEAD"], cwd=ROOT, check=True)
         print(f"SIGNATURE_FOUNDATION_PASS: {len(actual)} modules, {len(all_declarations)} declarations, {len(pins)} theorem pins, {len(signature_matrix['rows'])} H27 theorem rows, 7 supplementary compiler probes, 17 direct queries; full G12 acceptance pending")
         return
     gate_results = {}
     for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:
-        saved = json.loads((ROOT / f"tests/sol-qualified-units/evidence/gate-{mode}.json").read_text())
+        saved = json.loads((ev / f"gate-{mode}.json").read_text())
         assert saved["mode"] == mode and saved["runner_sha256"] == runner_sha and saved["sources"] == sources, "stale gate evidence " + mode
         assert saved["lakefile_sha256"] == sha(ROOT / "lakefile.toml"), "stale Lake configuration " + mode
         subprocess.run(["git", "merge-base", "--is-ancestor", saved["repository_base"], "HEAD"], cwd=ROOT, check=True)
-        assert saved["log_sha256"] == sha(ROOT / f"tests/sol-qualified-units/evidence/candidate-{mode}.log"), "changed gate log " + mode
+        assert saved["log_sha256"] == sha(ev / f"candidate-{mode}.log"), "changed gate log " + mode
         assert saved["minimum_available_bytes"] >= 4 * 1024**3, "reserve gate " + mode
         gate_results[mode] = saved["passed"]
     print("DIRECT_DIFFERENTIAL: " + ("pass" if recomputed["compiler_agreement"] else "fail " + ", ".join(recomputed["mismatches"])))
@@ -207,17 +229,18 @@ if __name__ == "__main__":
     parser.add_argument("--inventory-only", action="store_true")
     parser.add_argument("--signature-foundation-only", action="store_true", help="audit saved H27 foundation evidence; does not complete G12 acceptance")
     parser.add_argument("--audit-only", action="store_true", help="audit saved evidence without rerunning gates")
+    parser.add_argument("--claude-vm", action="store_true", help="audit claude-evidence/ produced by tests/sol-qualified-units/claude-gates.py (no Docker runner)")
     args = parser.parse_args()
     try:
         failures = []
-        if not args.inventory_only and not args.audit_only and not args.signature_foundation_only:
+        if not args.inventory_only and not args.audit_only and not args.signature_foundation_only and not args.claude_vm:
             gates = []
             for mode in ["build", "axioms", "declarations", "solc", "queries", "signature-probes", "resolution-probes", "keysort", "repository"]:
                 command = [sys.executable, str(ROOT / "tests/sol-qualified-units/run-candidate-gates.py"), mode]
                 result = subprocess.run(command, cwd=ROOT, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
                 with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock", "a") as lock:
                     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                    (ROOT / f"tests/sol-qualified-units/evidence/controller-{mode}.log").write_text(result.stdout)
+                    (ev / f"controller-{mode}.log").write_text(result.stdout)
                 status = "pass" if result.returncode == 0 else "fail"
                 print(f"GATE {mode} {status}; tests/sol-qualified-units/evidence/candidate-{mode}.log")
                 gates.append({"command": command, "exit": result.returncode, "status": status})
@@ -225,8 +248,8 @@ if __name__ == "__main__":
                     failures.append(mode)
             with open("/tmp/solidity-lean-feature-groups-20261025/writer.lock", "a") as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                (ROOT / "tests/sol-qualified-units/evidence/acceptance-gates.json").write_text(json.dumps(gates, indent=2) + "\n")
-        audit(args.inventory_only, args.signature_foundation_only)
+                (ev / "acceptance-gates.json").write_text(json.dumps(gates, indent=2) + "\n")
+        audit(args.inventory_only, args.signature_foundation_only, args.claude_vm)
         assert not failures, "gate failures: " + ", ".join(failures)
     except (AssertionError, OSError, ValueError) as error:
         print(str(error), file=sys.stderr)

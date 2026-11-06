@@ -1,0 +1,689 @@
+{
+  "rows": [
+    {
+      "id": "multi-hop",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.M.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "missing-symbol",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.M.Missing",
+          "matched": true,
+          "expected_refusal": "missing",
+          "actual": {
+            "local_index": null,
+            "reason": "missing",
+            "status": "error"
+          }
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "ambiguous-namespace",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected_refusal": "ambiguous",
+          "actual": {
+            "local_index": null,
+            "reason": "ambiguous",
+            "status": "error"
+          }
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "same-spelling-units",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "L.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        },
+        {
+          "reference": "R.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "symbol-namespace-alias",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "transitive-all",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "diamond-identity",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "cyclic-namespace",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.Back.N.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "private-base-fallback",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "C.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "visible-base-shadow",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected_refusal": "missing",
+          "actual": {
+            "local_index": null,
+            "reason": "missing",
+            "status": "error"
+          }
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "local-shadow",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.T",
+          "matched": true,
+          "expected_refusal": "localShadow",
+          "actual": {
+            "local_index": 0,
+            "reason": "localShadow",
+            "status": "error"
+          }
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "inherited-type",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "N.Base",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "B.sol",
+              0
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        },
+        {
+          "reference": "D.S",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "B.sol",
+              1
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "B.sol",
+              1
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "ambiguous-base",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "D.S",
+          "matched": true,
+          "expected_refusal": "missing",
+          "actual": {
+            "local_index": null,
+            "reason": "missing",
+            "status": "error"
+          }
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "inherited-overload-gap",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "f",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "A.sol",
+              1
+            ],
+            [
+              "decl",
+              "B.sol",
+              1
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "A.sol",
+              1
+            ],
+            [
+              "decl",
+              "B.sol",
+              1
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    },
+    {
+      "id": "qualified-parameter-overload-gap",
+      "matched": true,
+      "queries": [
+        {
+          "reference": "f",
+          "matched": true,
+          "expected": [
+            [
+              "decl",
+              "A.sol",
+              1
+            ],
+            [
+              "decl",
+              "B.sol",
+              2
+            ]
+          ],
+          "actual": [
+            [
+              "decl",
+              "A.sol",
+              1
+            ],
+            [
+              "decl",
+              "B.sol",
+              2
+            ]
+          ],
+          "missing": [],
+          "extra": []
+        }
+      ],
+      "recorded_gap": false
+    }
+  ],
+  "compiler_agreement": true,
+  "mismatches": [],
+  "observed": [
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "multi-hop",
+      "reference": "N.M.T"
+    },
+    {
+      "answer": {
+        "local_index": null,
+        "reason": "missing",
+        "status": "error"
+      },
+      "id": "missing-symbol",
+      "reference": "N.M.Missing"
+    },
+    {
+      "answer": {
+        "local_index": null,
+        "reason": "ambiguous",
+        "status": "error"
+      },
+      "id": "ambiguous-namespace",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "same-spelling-units",
+      "reference": "L.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "same-spelling-units",
+      "reference": "R.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "symbol-namespace-alias",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "transitive-all",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "diamond-identity",
+      "reference": "T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "cyclic-namespace",
+      "reference": "N.Back.N.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "C.sol"
+          }
+        ]
+      },
+      "id": "private-base-fallback",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "local_index": null,
+        "reason": "missing",
+        "status": "error"
+      },
+      "id": "visible-base-shadow",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "local_index": 0,
+        "reason": "localShadow",
+        "status": "error"
+      },
+      "id": "local-shadow",
+      "reference": "N.T"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 0,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "inherited-type",
+      "reference": "N.Base"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 1,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "inherited-type",
+      "reference": "D.S"
+    },
+    {
+      "answer": {
+        "local_index": null,
+        "reason": "missing",
+        "status": "error"
+      },
+      "id": "ambiguous-base",
+      "reference": "D.S"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 1,
+            "kind": "decl",
+            "unit": "A.sol"
+          },
+          {
+            "index": 1,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "inherited-overload-gap",
+      "reference": "f"
+    },
+    {
+      "answer": {
+        "status": "ok",
+        "symbols": [
+          {
+            "index": 1,
+            "kind": "decl",
+            "unit": "A.sol"
+          },
+          {
+            "index": 2,
+            "kind": "decl",
+            "unit": "B.sol"
+          }
+        ]
+      },
+      "id": "qualified-parameter-overload-gap",
+      "reference": "f"
+    }
+  ],
+  "sources": {
+    "Solidity/Frontend/QualifiedUnits/Checked.lean": "02425ae76050b1ce22385c60302cd13f43508e3cc0eefdaf577e0e79d695e221",
+    "Solidity/Frontend/QualifiedUnits/CheckedControls.lean": "202cc5205d98669aed039382ae41a4c51a143f31f5ec2d09aa6b0c5c53e113ec",
+    "Solidity/Frontend/QualifiedUnits/ConstructorFixtures.lean": "ca1406339c57eaffcdb28590b36e795b73b8ef6775d589e3c83c08ae712e8904",
+    "Solidity/Frontend/QualifiedUnits/Controls.lean": "fb5896dd7e25eebdf32cbf36b8a42e8654d68beab6bd62e0b9bb017a907e73b9",
+    "Solidity/Frontend/QualifiedUnits/DifferentialControls.lean": "dc643fa398076a3505bbf5a82044eb432b91e69b625a9e42d3014d1685f16be5",
+    "Solidity/Frontend/QualifiedUnits/Inheritance.lean": "6df120d44b1468a657622be580084a8e89ad5200f92d9eb8b707269dbf64965c",
+    "Solidity/Frontend/QualifiedUnits/Layout.lean": "c4fd11bedbdd00589323d3eaf2e0b94e9c31563bbf1b944e4a82b812225f572d",
+    "Solidity/Frontend/QualifiedUnits/Linearization.lean": "1ce3c9ff2c499d234574f5a4f9f7d35e12579e201ff44b404484e87984746912",
+    "Solidity/Frontend/QualifiedUnits/Lookup.lean": "c35216b9b304c2845ab58ef850105ed1aa1943b99b635f623c35128924198123",
+    "Solidity/Frontend/QualifiedUnits/MergeSpecification.lean": "1b5b23339269130036f56ba5c1c2b80b53308d96f9aeea55ce3a1844536bc876",
+    "Solidity/Frontend/QualifiedUnits/NormalizationAdequacy.lean": "9209e1f138a5813bf5c92b2b493bced0a70e5fda57d3f288061568dd6acaeaa9",
+    "Solidity/Frontend/QualifiedUnits/NormalizationControls.lean": "e0a23f04685f8425b333a371769c2575799690226a31558decf995011cbcdbd9",
+    "Solidity/Frontend/QualifiedUnits/ReferenceControls.lean": "66989256a8d4974a05fdf25491cea52b0583d3f971e1441c7f62ecb3a2ea9744",
+    "Solidity/Frontend/QualifiedUnits/ReferenceCoverage.lean": "b7b9e8483e0d1568522a49ab1eaee6eb4360400478915110d3b569b78432eac5",
+    "Solidity/Frontend/QualifiedUnits/References.lean": "9299d770105a50eca452a540500ce29c34e83eb1bdae40a5e0864c6cecfcd1dc",
+    "Solidity/Frontend/QualifiedUnits/Relation.lean": "cefe3fa82d1b68807384926a5be746ec8fa633040e836749a7c6c4ebac75f23d",
+    "Solidity/Frontend/QualifiedUnits/SignatureGap.lean": "218bc10d9ff50b3ed0f7047e2ddf582e3c05f14b6cc7635158ff677d6050da21",
+    "Solidity/Frontend/QualifiedUnits/SignatureHiding.lean": "bb6e7c27b38ea666103adee02e36b772cd5f9b74ff8276c6c4876c633aa6c394",
+    "Solidity/Frontend/QualifiedUnits/SignatureMemberControls.lean": "a0861531785bb150f43b3f927484400fea428c9cdfc792b3eceb7a702d8b4535",
+    "Solidity/Frontend/QualifiedUnits/SignatureMembers.lean": "6ab202f1d76bc718bd27a85455c4701b7f7885b908210554ad882a527e7b672f",
+    "Solidity/Frontend/QualifiedUnits/SignatureNormalization.lean": "2b96b9bcdf27cfdedd1514fd0397c502d608c93e0b539492f22702def7347d94",
+    "Solidity/Frontend/QualifiedUnits/SignatureResolution.lean": "89a70622eca93e32baf670bd9642ee010138c454984c09d871970ab706f461b8",
+    "Solidity/Frontend/QualifiedUnits/SignatureResolutionControls.lean": "d1f1f5844a535fe8f5f1bb9590348b584a30ed0adb4b409b324677456e9d1dd1",
+    "Solidity/Frontend/QualifiedUnits/Specification.lean": "ae81c2f99a1f9c0198eb1805555dc2c8eb297524ba5c99a3ef15cfafa7996155",
+    "Solidity/Frontend/QualifiedUnits/Target.lean": "cfe048414eb1b3d29885f5e43cfa2e475faa20c21ed1ce2337b3d0b7c4ce5a33",
+    "Solidity/Frontend/QualifiedUnits/TargetControls.lean": "a5df2fa892862931355eb4d62c7db2f2b747ed8e28dc11394062998e04777125",
+    "Solidity/Frontend/QualifiedUnits/TypePaths.lean": "defc856b7212c50b6a9863de92ee9944619f6e5a1f049d84beba1a3df0c28b1e",
+    "Solidity/Frontend/QualifiedUnits/UnitPaths.lean": "ac2aef0d1bf0f843aec5deee619f9874507d7a5ddf17cc43d821137a82323624",
+    "Solidity/Frontend/Static/Closure.lean": "abf0e5f72ebeecb6330f47ece944b3f2724d1a680c4332e5963ac1ec1aef3faa",
+    "Solidity/Frontend/Static/Overloads.lean": "c72965fdb12e5952d95e1b44684de35f544b355aeeafc8e10b9692a595c8d2de",
+    "Solidity/Frontend/Static/Units.lean": "c85edc2df18acabfba22eebeab5f556e42d953c0a67ae70865d0a9ea3651fd6b",
+    "Solidity/Source/Decls.lean": "cb089a2a9e6eef84cc39fa987df90e8df0314d8cd456d613be312a2fdd2f86d9",
+    "Solidity/Source/Resolve.lean": "0b1e35279a41d629ca3e92800bf32d62f792016e61e204c140b88fafd4ca67f1",
+    "Solidity/Source/Syntax.lean": "47083cdc17a18369bf31ae828694f977c78e1bfea4a5deb92b4320190598bf95",
+    "Solidity/Source/Units.lean": "e67eec20ef932289c485f09d8e9005bbd559ce55c4f1f55134dcc00a226fee86",
+    "docs/feature-work/frontend-static.md": "95097e350585b5eb87c3d6c4b6ddcacc4d9fd82faafe82246f69f30534d733ac"
+  },
+  "matrix_sha256": "176b982241041b5239eff3cf562f264a230d96e96315eabba2d187ef264f511d",
+  "query_gate_sha256": "0f7c24f36b04d6c1903e2dae6b960242b52d588fb7f981a1d8cb7eb396bd3946",
+  "runner_sha256": "8aa6ec82c2b1570869b149b3ae87932f6081d37257c52dfebb0bc680bfac107d",
+  "input_sha256": "3d8397b90fbdf37f4694ddb52b5b6552faea326927e57574e56c939e44b82ee5",
+  "compiler_report_sha256": "9f68a857feff854377084a89c0647c289dcf2a0c98c6ac5b07ad7529fbfeab70"
+}

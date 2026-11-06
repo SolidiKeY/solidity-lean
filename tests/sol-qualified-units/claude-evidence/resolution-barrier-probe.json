@@ -1,0 +1,46 @@
+{
+  "version": "0.8.38+commit.1835d247.Emscripten.clang",
+  "sha256": "0b15fcb24fe784ed60f3853afc7f7e133a427bf1ac0d682e3f808d44b8e2fa6c",
+  "script_sha256": "f4bc600961756d78c9823a346a4513c142c293af8e8b6b3e138f499690fdb2b9",
+  "expected": [
+    [
+      "overload-variable-barrier",
+      false,
+      [
+        "9097",
+        "9097"
+      ]
+    ],
+    [
+      "getter-override",
+      true,
+      []
+    ]
+  ],
+  "compiler_fixtures_pass": true,
+  "rows": [
+    {
+      "id": "overload-variable-barrier",
+      "source": "pragma solidity 0.8.38; contract A { function f(uint) internal virtual pure returns(uint) { return 1; }} contract B is A { bool internal f; } contract D is B { function f(bool) internal pure returns(uint) { return 2; }}",
+      "source_sha256": "78417574100ac93f9f3f47d2981c63b7944090569e333bb072222c4ed55c8027",
+      "accepted": false,
+      "errors": [
+        {
+          "code": "9097",
+          "message": "Identifier already declared."
+        },
+        {
+          "code": "9097",
+          "message": "Identifier already declared."
+        }
+      ]
+    },
+    {
+      "id": "getter-override",
+      "source": "pragma solidity 0.8.38; abstract contract A { function f() external view virtual returns(bool); } contract B is A { bool public override f; }",
+      "source_sha256": "802237dea9516995aa8cfebb0b2b2b2a837f8e52520d6117187303f472a89f68",
+      "accepted": true,
+      "errors": []
+    }
+  ]
+}
