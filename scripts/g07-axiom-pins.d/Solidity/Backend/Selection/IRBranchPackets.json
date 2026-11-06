@@ -1,0 +1,35 @@
+{
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.empty_suffix": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.join_normal": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.numeric_zero": [
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.split": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.suffix_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/Selection/IRBranchPackets.lean:Solidity.Backend.Selection.IRBranch.test_run": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

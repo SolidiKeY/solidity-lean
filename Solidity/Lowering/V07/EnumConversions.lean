@@ -29,10 +29,10 @@ theorem enum_read {D : Source.Layout} (d : Source.DeclName) (capacity : D.enumSi
   exact (Option.some.inj related).symm
 
 theorem allowed_from (E : Source.Env) (d : Source.DeclName) :
-    (Source.STy.int .u256).explicit E.isBase (.enum d) = true := rfl
+    (Source.STy.int .u256).explicit E.isBase E.mapFree (.enum d) = true := rfl
 
 theorem allowed_to (E : Source.Env) (d : Source.DeclName) :
-    (Source.STy.enum d).explicit E.isBase (.int .u256) = true := rfl
+    (Source.STy.enum d).explicit E.isBase E.mapFree (.int .u256) = true := rfl
 
 theorem source_from_uint {D : Source.Layout} (d : Source.DeclName) (x : Int)
     (hx : Source.IntTy.u256.lo ≤ x ∧ x ≤ Source.IntTy.u256.hi)

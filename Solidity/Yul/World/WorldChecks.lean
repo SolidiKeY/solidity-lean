@@ -120,7 +120,7 @@ theorem destruction_controls :
 /-- Destruction's balance transfer changes both known accounts. -/
 theorem destruction_transfer :
     (destructTransfer s₀ false (addr 1) (addr 2)).map (fun s =>
-      ((s.world.accounts (addr 1)).balance.val, (s.world.accounts (addr 2)).balance.val)) =
+      ((s.world.accounts (addr 1)).balance, (s.world.accounts (addr 2)).balance)) =
       some (0, 100) := by decide
 
 /-- Nonempty prefix, two callee outcomes and a later bounds failure combine. -/
@@ -280,7 +280,7 @@ theorem fresh_unscheduled_reset :
 theorem second_transaction_control :
     (unscheduledLife.finish.schedule false (addr 2)).map (fun t =>
       (t.created (addr 2), t.doomed (addr 2), (t.execution.world.accounts (addr 2)).balance)) =
-      some (false, false, toWord 23) ∧
+      some (false, false, 23) ∧
     (unscheduledLife.finish.execution.transient.cells (addr 1)).read countPath =
       Val.default D₀ (LW (addr 1) countPath) := ⟨rfl, rfl⟩
 
