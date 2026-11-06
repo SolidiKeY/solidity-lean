@@ -16,7 +16,8 @@ semantic acceptance. Zero Lean helpers, axioms, sorry, frozen-statement changes,
 trust shortcuts or raised proof budgets were introduced. Core remains intrinsic
 and dependency-free. No push, merge, PR, pre-gate or publication occurred.
 
-The old Bridge package clean measurement is pending. Official release
+The old Bridge package clean measurement remains incomplete after a resource
+stop in attempt 5. Official release
 provisioning and both KeySort prerequisites passed. Proof/API migration,
 new clean measurements, affected validation and full final gates are pending.
 No RUNTIME_GATE_PASS or actual before/after timing delta exists.
@@ -80,6 +81,22 @@ runs are preserved and are not accepted clean Bridge measurements:
 - Bridge attempt 4: missing ProofWidgets JS prerequisite caused a real target
   failure. The invalid run was stopped, exit -15 after 1,874.2515 seconds;
   its partial Lean outputs cannot be reused in a clean measurement.
+- Bridge attempt 5: the 4 GiB reserve guard stopped the active
+  `Solidity/Backend/Scalar/PowerBounds.lean` compiler. The runner exited 1;
+  the child command exited -15 after 7,028.575882715 seconds, with peak VM
+  usage 12,911,218,688 bytes. Receipt status is `fail`. No accepted timing or
+  theorem failure follows. No live runner/compiler remains; two exited
+  wrapper zombies await PID 1 reaping. Failed partial outputs remain preserved
+  in their original owned build trees and must not be reused as a clean run.
+
+`PowerBounds` is in Bridge's import closure. The earlier full-core commands
+were overbroad, but this particular dependency cannot be excluded. The exact
+local chain is `SolidityBridge` →
+`SolidityBridge.RoadmapV15.P10.SignedDivisionConsumer` →
+`Solidity.Backend.Scalar.SignedMul` →
+`Solidity.Backend.Scalar.PowerGuard` →
+`Solidity.Backend.Scalar.PowerBounds`. The runner and source remained unchanged
+through attempt 5. Its source was last modified before the attempt started.
 
 Unused owned v4.35 release-file cache was advised away via read-only file
 handles, reducing VM usage from 4.95 GB to 1.05 GB. No contents were changed or
@@ -140,23 +157,45 @@ placeholder file was fabricated.
 
 ## Incoming H70 requests
 
-`DEP-H70-01`: the audit-label-execution ticket from requester head
-`a107fd353aba492a3144da90cabcbde20032ca0c` is unavailable in this VM. Its verified
-host receipt and requested VM delivery path are recorded in the exported
-requests/DEP-H70-01.json, with expected 11,017 bytes and SHA256
-`4d515bbb0b5de8540c660ccf8c5f0aa5efa3a2f9d502eba8dab5142391ed51f1`.
-Coordinator delivery is requested for exact-path read-only triage. Its reported
-51 unresolved declaration owners have not been accepted as this lane's producer
-scope. relay.sh is host-only and is not a VM installation task.
+Latest incoming tickets are saved byte-identically to the coordinator hashes:
 
-The audit-precompiles relay from head
-`5fcec7dca5ab0d6d321eaf29ca176045b5c38e0c` routes `DEP-BRIDGE-435` to this lane
-and precompile-agreement. This VM has frozen v4.24 source dependencies for the
-old baseline; approved v4.35 dependencies remain pending. `OBL-SUCCESS` belongs
-to G43/V14 and requires a separate actual-compiler success theorem, not a change
-to `Solidity.Stipend.Obligation`. Raw String and BLS recursion prerequisites
-remain with their named migration owners. Routing grants no original-file
-permission, budget change or passing gate; all frozen statements remain intact.
+- Label-execution head `d89b309029f9ad57f17711432aeef4990005994b`, ticket
+  SHA256 `5f63fe1a9f15bdd857e4bd601f59a36886cc06477474bcbf80bedf6ce2cc6c3d`.
+  Its six non-Bridge prerequisites remain with their named migration owners;
+  B07 is the common Bridge dependency request. The older DEP-H70-01 file
+  delivery request is superseded and inactive.
+- Audit-precompiles head `13ae4273bad4123baea9347dfa724ded432dfd57`, ticket
+  SHA256 `952fa62cf764b457877c5c511c16d828fbef1761201d6af31628abd1e7d5290c`.
+  DEP-BRIDGE-435 is routed to this lane and precompile-agreement. Its full
+  20,624-byte handoff still needs coordinator delivery; exact host/VM paths
+  and SHA256 are in the exported DEP-H70-PRECOMPILES-HANDOFF request.
+
+OBL-SUCCESS remains G43/V14's separate actual-compiler success theorem; no
+change to `Solidity.Stipend.Obligation` is requested or authorized. Raw String
+and BLS recursion prerequisites stay with their named owners. Routing grants
+no source permission, proof-budget change or passing-gate claim. relay.sh is
+host-only and is not a VM installation task.
+
+## Concrete unapplied dependency proposal
+
+COORD-BRIDGE-435 supplies a reviewable proposal for exactly
+`Bridge/lakefile.toml` and `Bridge/lake-manifest.json`, saved off git under
+`/workspace/h62-migrate-bridge-evidence/proposals/v4.35.0-common-deps`.
+The dependency-only patch SHA256 is
+`ee61b53ebe5cd46688c8a986dcaebf3e8172b0d5f07e16aa3b835f928c8ab832`.
+Exact official v4.35.0 tag receipts bind:
+
+- Mathlib `56a005855ea17e0b0958f73ec801ae140b0a1679`;
+- CSLib `5b56df99362532c46e1175381fbbdd755bd56030`;
+- Auto `30f46ddb9a68d6878f5a1337eb2565ba4e70126b`.
+
+The upstream toolchains match v4.35.0 and shared transitive revisions agree.
+Independent finder/skeptic metadata reviews passed. This is unapplied,
+unelaborated metadata, not API acceptance or original-file agreement. Draft
+warning-suppression flags were removed. New Auto declares a versioned solver
+asset without a content-digest check; provenance and its non-proof-asset setup
+policy remain pending. No solver binary was downloaded or run. Selected old
+Loom examples use the default `grind`, with no source SMT override found.
 
 ## Dependencies and continuation
 
@@ -170,9 +209,29 @@ and no H55 work duplicated.
 Continue the same persistent goal and VM. No new/reset/completed goal or
 replacement thread was created. get_goal is unavailable; coordinator explicitly
 waived that optional inspection. Coordinator owns fresh-thread handoff after
-the reviewed work items. Do not self-launch a replacement. Inspect the live
-measurement before another Lean job or any source/toolchain mutation. Finish
-old measurement acceptance, then proof/API migration once root coordination
-arrives, new matched measurements, all affected/full gates and new independent
-reviews. Escalate any regression and stop above 10 percent slowdown. A partial
-checkpoint is not completion of the original four-checkpoint queue.
+the reviewed work items. Do not self-launch a replacement. Inspect saved
+receipts and process state before another Lean job or source/toolchain mutation.
+Resolve the failed old measurement under unchanged limits, then perform proof/API
+migration once root coordination arrives, new matched measurements, all
+affected/full gates and new independent reviews. Escalate any regression and
+stop above 10 percent slowdown. A partial checkpoint is not completion of the
+original four-checkpoint queue.
+
+`RESOURCE-OLD-01` [old clean measurement]: root/gate and migrate-backend must
+coordinate a reviewed within-budget recovery for the observed PowerBounds
+reserve stop. After termination the VM had about 4.31 GB file cache versus
+42 MB anonymous memory. Advisory eviction of only owned, unused artifact pages
+is a plausible experiment, not a validated fix. A module-boundary policy must
+be deterministic, included in elapsed time, reviewed, and identical for old/new
+measurements. Clearing initial cache alone may repeat growth before this file.
+No global drop_caches, larger cap, lower reserve, partial-output clean reuse,
+statement change, omitted dependency or proof-budget increase is authorized by
+this report. Keep failed evidence. No automatic retry with the same conditions
+was launched. This file belongs to the backend owner and remains read-only here.
+
+Final attempt-5 finder and skeptic reviews independently confirmed the resource
+failure, cleanup and actual import chain. They found no basis for a passing
+timing, theorem-failure conclusion, exclusion or regression waiver. Both were
+read-only and used no Lean server. Their complete results and corrected handoff
+are preserved in the new versioned evidence export. The persistent goal must
+remain unfinished; request root/dependency/resource delivery before resuming.
