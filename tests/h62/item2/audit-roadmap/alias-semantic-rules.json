@@ -1,0 +1,269 @@
+{
+  "boundary": "Expected exact frozen one-line RHS and reviewed source meaning; no kernel proof claim.",
+  "aliases": {
+    "Solidity.Roadmap.Word": {
+      "category": "bounded-numeric-alias",
+      "expected_rhs": "Fin (2 ^ 256)",
+      "remaining": "Embedded Fin bound; no compiler/runtime law.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 55
+        },
+        {
+          "path": "Solidity/Semantics.lean",
+          "line": 23
+        }
+      ]
+    },
+    "Solidity.Roadmap.Address": {
+      "category": "bounded-numeric-alias",
+      "expected_rhs": "Fin (2 ^ 160)",
+      "remaining": "Embedded Fin bound; no account/session invariant.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 58
+        }
+      ]
+    },
+    "Solidity.Roadmap.Bytes": {
+      "category": "byte-list-alias",
+      "expected_rhs": "List UInt8",
+      "remaining": "Byte-list data, not ABI validity.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 61
+        }
+      ]
+    },
+    "Solidity.Roadmap.Prefixes": {
+      "category": "resource-indexed-observation-family",
+      "expected_rhs": "R \u2192 Prefix E O",
+      "remaining": "Consistency is a separate predicate.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 97
+        },
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 127
+        }
+      ]
+    },
+    "Solidity.Roadmap.Strategy": {
+      "category": "history-indexed-interaction-function",
+      "expected_rhs": "List Event \u2192 Move",
+      "remaining": "No realizability/soundness law supplied by alias.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 422
+        },
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 440
+        }
+      ]
+    },
+    "Solidity.Roadmap.Ledger": {
+      "category": "bounded-balance-function",
+      "expected_rhs": "(Address \u2192 Word) \u2192 List Event \u2192 Address \u2192 Word",
+      "remaining": "Bounded outputs; no conservation law supplied.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Contracts.lean",
+          "line": 446
+        }
+      ]
+    },
+    "Solidity.Roadmap.Evm.Bytes": {
+      "category": "byte-list-alias",
+      "expected_rhs": "List UInt8",
+      "remaining": "No precompile-input or ABI validity follows.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Roadmap/Evm.lean",
+          "line": 45
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.SSCP2.NewAllocation.Controls.\u0393": {
+      "category": "context-fixture-alias",
+      "expected_rhs": "[.int .u256,.bytes .memory,.bool]",
+      "remaining": "Context data; no execution witness.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Source/Resolved.lean",
+          "line": 34
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.SourceSizeControls.Context": {
+      "category": "context-fixture-alias",
+      "expected_rhs": "[uint,uint]",
+      "remaining": "Source type list; uint resolution stays in this lexical Source fixture.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Source/SemanticsExamples.lean",
+          "line": 48
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.Model": {
+      "category": "contract-fixture-alias",
+      "expected_rhs": "CountdownWitness.P.C",
+      "remaining": "Chain: CountdownWitness.P.C -> Evm.Memory.CompileExamples.C; no runtime law from alias.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean",
+          "line": 10
+        },
+        {
+          "path": "Solidity/Evm/MemoryCompileExamples.lean",
+          "line": 9
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.Context": {
+      "category": "context-fixture-alias",
+      "expected_rhs": "Parameters CountdownWitness.A",
+      "remaining": "A is the published array-uint type; dependent context data.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveSource.lean",
+          "line": 9
+        },
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean",
+          "line": 18
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.initial": {
+      "category": "indexed-state-fixture-alias",
+      "expected_rhs": "MutatingActivation.Checks.bad",
+      "remaining": "Chain: MutatingActivation.Checks.bad -> ArrayProbe.Checks.bad; execution evidence separate.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean",
+          "line": 386
+        },
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean",
+          "line": 68
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.machine": {
+      "category": "machine-fixture-alias",
+      "expected_rhs": "MutatingActivation.Checks.badMachine",
+      "remaining": "Chain: MutatingActivation.Checks.badMachine -> ArrayProbe.Checks.badMachine; representation separate.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean",
+          "line": 387
+        },
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3ArrayProbe.lean",
+          "line": 69
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.condition": {
+      "category": "code-projection-from-compiled-object",
+      "expected_rhs": "(guardCompiled (C := Model) 2 CountdownWitness.F).code",
+      "remaining": "Projection is code data; do not infer agreement from compiled-object name.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3RecursiveActivation.lean",
+          "line": 186
+        },
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3CountdownWitness.lean",
+          "line": 19
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.NativeRevertConsumer.action": {
+      "category": "instruction-list-fixture-alias",
+      "expected_rhs": "MutatingActivation.code (C := Model) 2 CountdownWitness.F 8",
+      "remaining": "Actual run and resource adequacy remain separate.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Backend/InternalFlow/RuntimeFrameV3MutatingActivation.lean",
+          "line": 79
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.FramedReasonConsumer.Context": {
+      "category": "context-fixture-alias",
+      "expected_rhs": "[.bytes .memory]",
+      "remaining": "Context data; no storage/source validity law.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Examples/Roadmap/V16/FramedReasonConsumer.lean",
+          "line": 15
+        }
+      ]
+    },
+    "Solidity.Roadmap.V16.FramedReasonConsumer.sourceInitial": {
+      "category": "source-state-pair-fixture-alias",
+      "expected_rhs": "(Source.L0 E,populated)",
+      "remaining": "Locals/state pair; intrinsic and semantic state obligations remain separate.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Source/Hoare.lean",
+          "line": 25
+        },
+        {
+          "path": "Solidity/Lowering/V08/SourceCustomErrorControls.lean",
+          "line": 18
+        },
+        {
+          "path": "Solidity/Lowering/V08/SourceCustomErrorControls.lean",
+          "line": 26
+        }
+      ]
+    },
+    "Solidity.Tools.Gen": {
+      "category": "random-generator-monad-alias",
+      "expected_rhs": "StateM StdGen",
+      "remaining": "Generic payload may carry proofs; generated data is not semantic evidence.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Tools/Common.lean",
+          "line": 28
+        }
+      ]
+    },
+    "Solidity.TDom": {
+      "category": "primitive-indexed-finite-domain-alias",
+      "expected_rhs": "(p : PrimTy) \u2192 List p.Denote",
+      "remaining": "Bool or range-subtype values; not quantifier completeness.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Tools/Counterexample.lean",
+          "line": 193
+        },
+        {
+          "path": "Solidity/Semantics.lean",
+          "line": 23
+        }
+      ]
+    },
+    "Solidity.Latex.RM": {
+      "category": "renderer-metaprogram-monad-alias",
+      "expected_rhs": "ReaderT Options (StateRefT (Array String) MetaM)",
+      "remaining": "Generic output remains parameter-dependent; Expr is syntax until checked.",
+      "target_evidence": [
+        {
+          "path": "Solidity/Tools/LatexTerm.lean",
+          "line": 385
+        }
+      ]
+    }
+  }
+}

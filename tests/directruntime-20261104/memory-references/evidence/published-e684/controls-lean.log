@@ -1,6 +1,0 @@
-PASS memory: shared obligation construction: 84 with existing producer callbacks (not proof closure)
-PASS memory: intrinsic typing: 84 admitted, 2 incompatible initializers refused; initial-model outcomes checked (not universal validity)
-PASS memory: admission: 86 accepted, 20 malformed refused; Identity uses existing newArr/declMemory/index/assign/assert
-PASS composed: shared obligation construction: 84 with existing producer callbacks (not proof closure)
-PASS composed: intrinsic typing: 84 admitted, 2 incompatible initializers refused; initial-model outcomes checked (not universal validity)
-PASS composed: admission: 86 accepted, 20 malformed refused; Identity uses existing newArr/declMemory/index/assign/assert
