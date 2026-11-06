@@ -526,3 +526,21 @@ This records named public statements in these two controls only, not the
 complete cross-family census, all private/generated cases or any migrated
 statement acceptance. The existing kernel Source candidate inventories remain
 baseline evidence, not independent review.
+
+### Complete original V08 control-file baseline partition
+
+`verify_v08_coverage.py` checks that all 106 original V08 `*Controls.lean`
+files partition into the 74 lexical Source-execution candidates, 28 other
+unchanged controls, and the four extract-failure controls compared before and
+after. The 28 unchanged controls built and were inventoried one module at a
+time: 999 owned kernel constants, 604 theorems and 395 non-theorem values;
+none were flagged unsafe, partial or axiom declarations. The generated
+`compare_v08_remaining.py` self-comparison and type/body/axiom/removal/unsafe
+addition negative controls passed. Build and audit files remain off Git, hashed
+in `tests/h55/shared-fixtures/v08-remaining-evidence.sha256`.
+
+This establishes a kernel declaration/body baseline across the 106 original
+V08 control files, with the four changed files compared separately. It is not
+semantic review of all cases, the whole assignment's exact scope, independent
+review, or acceptance of future changes; non-control modules and other areas
+remain outside this particular partition.
