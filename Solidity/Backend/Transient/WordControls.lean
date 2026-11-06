@@ -23,7 +23,7 @@ def source : Source.EMState env [.bool] :=
    ⟨⟨⟨fun _ => Source.Account.empty _⟩,Source.Transient.empty,[]⟩,
     (Source.Heap.empty.alloc ⟨.bytes .memory,.bytes [0xa1,0xfe]⟩).1,
     [.call Controls.other ⟨3,by decide⟩ [0x42] false],[(Controls.owner,[0x99])],
-    ⟨[.bool],.cons (.bool false) .nil⟩⟩⟩
+    ⟨[.bool],.cons (.bool false) .nil⟩,Source.FailureExecution.Cursor.empty⟩⟩
 
 theorem unsigned_encoding : unsigned.word=some unsignedWord := by decide +kernel
 

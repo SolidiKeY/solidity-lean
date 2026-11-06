@@ -1,0 +1,43 @@
+{
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.aggregate_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.bool_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.empty_boundary": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.huge_all_sizes": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.huge_no_wrap": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.malformed_size_fault": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.passed_head_not_decoded": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.protected_and_saved": [],
+ "Solidity/Backend/AbiEntry/HeadGateControls.lean:Solidity.Backend.AbiEntry.HeadGateControls.short_before_fuel": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

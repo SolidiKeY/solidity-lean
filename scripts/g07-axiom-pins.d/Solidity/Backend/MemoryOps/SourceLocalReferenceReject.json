@@ -1,0 +1,7 @@
+{
+ "Solidity/Backend/MemoryOps/SourceLocalReferenceReject.lean:Solidity.Backend.MemoryOps.source_bool_local_delete_reject_program": [
+  "Classical.choice",
+  "Quot.sound",
+  "propext"
+ ]
+}

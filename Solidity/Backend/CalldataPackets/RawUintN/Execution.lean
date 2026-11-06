@@ -174,16 +174,16 @@ theorem guarded_run {E : Source.Env} {Γ : Source.RCtx}
   rw [Source.Hoare.run_bind]
   cases Source.cdTail data i 32 <;> rfl
 
-theorem implicit_copy (n : Width) (isBase : Source.DeclName → Source.DeclName → Bool) :
-    Source.STy.implicit isBase (.array .calldata (.int n.intTy) none) (ArrayTy n) = true := by
-  change ((Source.STy.int n.intTy).same (.int n.intTy) && true && true) = true
+theorem implicit_copy (n : Width) (isBase : Source.DeclName → Source.DeclName → Bool) (mapFree : Source.DeclName → Bool) :
+    Source.STy.implicit isBase mapFree (.array .calldata (.int n.intTy) none) (ArrayTy n) = true := by
+  change ((Source.STy.int n.intTy).same (.int n.intTy) && true && true && _) = true
   rw [Source.STy.same_refl]
   rfl
 
 /-- The actual resolved implicit conversion, not a supplied successful run. -/
 def copyExpr {E : Source.Env} {Γ : Source.RCtx} (n : Width)
     (i : Source.Idx Γ (.array .calldata (.int n.intTy) none)) : Source.RExpr E Γ (ArrayTy n) :=
-  .conv (.local i) (.inl (implicit_copy n E.isBase))
+  .conv (.local i) (.inl (implicit_copy n E.isBase E.mapFree))
 
 theorem eval_copy {E : Source.Env} {Γ : Source.RCtx}
     (n : Width) (G : Source.Glob E) (F : Source.Fr) (fuel : Nat) (y : Source.EMState E Γ)
