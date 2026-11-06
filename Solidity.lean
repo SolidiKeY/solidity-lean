@@ -901,6 +901,8 @@ import Solidity.Backend.MemoryCopies.SourceStringsInterface
 import Solidity.Backend.MemoryCopies.StorageMemoryPipeline
 import Solidity.Backend.MemoryCopies.StorageMemoryPipelineControls
 import Solidity.Backend.MemoryCopies.StorageMemoryPipelineInterface
+import Solidity.Backend.MemoryCopies.StorageRoundTrip
+import Solidity.Backend.MemoryCopies.StorageRoundTripControls
 import Solidity.Backend.MemoryCopies.StorageRoundTripInterface
 import Solidity.Backend.MemoryCopies.TraversalControls
 import Solidity.Backend.MemoryCopies.TraversalFootprint
