@@ -20,8 +20,8 @@ theorem lookup (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
 
 theorem accepted (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     catalogueB (globals p fixed) "C" [] 1 [d] = true := by
-  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true, dispatch, signature,
-    lookup]
+  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true]
+  rw [BoundParentControls.dispatch p fixed, BoundParentControls.signature, lookup p fixed]
   decide +kernel
 
 theorem catalogue (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
@@ -37,8 +37,8 @@ theorem whole (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
 /-- The fixed `bool[2]` return default needs one fuel step. -/
 theorem no_fuel_refused (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     catalogueB (globals p fixed) "C" [] 0 [d] = false := by
-  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true, dispatch, signature,
-    lookup]
+  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true]
+  rw [BoundParentControls.dispatch p fixed, BoundParentControls.signature, lookup p fixed]
   decide +kernel
 
 def undeclared : Decl := {d with name := "missing"}
@@ -58,8 +58,8 @@ theorem lookup (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
 
 theorem accepted (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :
     catalogueB (globals p fixed) "C" [] 1 [d] = true := by
-  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true, dispatch, signature,
-    lookup]
+  simp only [catalogueB, entryB, List.all_cons, List.all_nil, Bool.and_true]
+  rw [BoundCatalogueParentControls.dispatch p fixed, BoundCatalogueParentControls.signature, lookup p fixed]
   decide +kernel
 
 theorem catalogue (p : Roadmap.Pipeline) (fixed : Roadmap.Fixed) :

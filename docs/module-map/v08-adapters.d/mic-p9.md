@@ -1,0 +1,2 @@
+| `Source/Calls/BoundRecognizer.lean` | Executable sound recognizers (`readyB`, `boundB`, fuelled `finiteDefaultB`) and `catalogueB`, which implies `BoundMemoryCatalogue` from the actual dispatch target and body; `OpsOK` from elaboration. |
+| `Source/Calls/BoundRecognizerControls.lean` | `catalogueB` replaces two hand-built catalogue proofs on elaborated units; refuses zero default fuel and an undeclared function. |

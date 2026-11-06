@@ -3945,6 +3945,8 @@ import Solidity.Source.Agreement.PrimitiveSlotReverseControls
 import Solidity.Source.Agreement.PrimitiveTypes
 import Solidity.Source.Calldata
 import Solidity.Source.CalldataExamples
+import Solidity.Source.Calls.BoundRecognizer
+import Solidity.Source.Calls.BoundRecognizerControls
 import Solidity.Source.Const
 import Solidity.Source.ConstCheck
 import Solidity.Source.Ctor
