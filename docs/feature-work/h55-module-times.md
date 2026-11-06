@@ -346,3 +346,26 @@ not proof that the selected tree comprises all actual Lean caches, that a cache
 is authentic, or that a before/after measurement occurred. It is not wired into
 an accepted runner. Race-free snapshots, H56 identity and measurements, the
 full gate, independent reviews and cache pack remain outstanding.
+
+## H82 paused-member update and receipt consistency
+
+The coordinator subsequently confirmed the H28 member goal paused. Its
+reported final head is `28900209b0e221f9e20e07e06921a79527ca4d18`, but the
+handoff directory is unavailable on this VM and the member explicitly reports
+that the exact original rendered prompt is absent. Its branch was not found at
+the named remote ref. The member must not be merged or worked on until the
+final bundle, checksums, exact rendered prompt and scope are obtained and
+verified. The module-times branch was externally advanced by two clean merges
+of published master; previous local head `298e57b77d9d1cfbc8c9ad0f7d81acb7da9d4428`
+remains an ancestor. On the resulting tree the candidate census retains 7,369
+Lean paths: 7,064 module-name candidates and 305 standalone file-check
+candidates, with no same-context collisions. These are not approved recipes.
+
+The additive `evidence_consistency.py` checks supplied rows against a supplied
+inventory and common source, tool, image, cache and VM fields. It rejects
+missing, duplicate, stale, nonfresh, failed, nonserial, over-budget,
+resource-invalid and inconsistent dual-clock examples. It checks consistency
+only: a forged set of matching inputs can pass; it does not authenticate H56,
+clock readings, inventory, source/tool/cache or process execution, and it is not
+a production gate. The 34-method synthetic suite passes. Independent reviews,
+H56 actual measurements and all full-scope acceptance remain pending.
