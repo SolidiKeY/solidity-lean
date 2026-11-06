@@ -72,6 +72,9 @@ open Solidity.Examples.DecisionResidueReasons
 theorem mapping_residue : mappingReversed.inTarget {} = true ∧ mappingReversed.Residue :=
   ⟨mapping_target_control, residue_iff_unknown.2 mapping_global_unknown⟩
 
+/-- Every leaf route refuses it, each refusal named, in `decideGoal`'s order. -/
+theorem mapping_routeRefusals : mappingReversed.routeRefusals = leafRoutes := by decide +kernel
+
 /-- Its finer VA1 source reason is reported (the source reasons consult no route). -/
 theorem mapping_sourceReason : mappingReversed.sourceReasons =
     [ResidueReason.mappingReversedFreshFieldReason] := by decide +kernel
@@ -117,6 +120,10 @@ try refuses, its swapped leaf over the normalizer budget. -/
 def hashBudget : Fml Names [] :=
   strings (.imp (.not (.eq hS hT))
     (.all (.user "x") .uint (.all (.user "y") .uint (doubled hashAtom 10))))
+
+/-- In target, with a hash, and every hash try refuses (kernel, about 24 s). -/
+theorem hashBudget_residue : hashBudget.inTarget {} = true ∧ hashBudget.hasHash = true ∧
+    hashBudget.Residue := by decide +kernel
 
 end Hash
 
@@ -201,5 +208,8 @@ theorem residue_not_claimed :
 #print axioms residue_not_claimed
 #print axioms mapping_residue
 #print axioms exhausted_residue
+#print axioms hashBudget_residue
+#print axioms mapping_routeRefusals
+
 
 end Solidity.Examples.DecisionResidue
