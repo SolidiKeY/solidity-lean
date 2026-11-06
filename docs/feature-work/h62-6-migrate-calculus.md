@@ -1,3 +1,62 @@
+# H82 retirement acknowledgement — implementation stopped
+
+This section supersedes historical stop/continuation wording below. The human
+explicitly requested stop-and-handoff after successor relay acceptance.
+`handoff_to`: `solidity-h62-6-20261106/migrate-root-gate`. The final full commit
+and cumulative export are recorded in the retirement artifact manifest; the prior
+snapshot 201748fa51ec0386ac648e0aea31ed5e1843a264 is not asserted final.
+
+No new Lean run, proof implementation, source adaptation, VM, goal, Claude-owned
+source edit or message was performed for this retirement checkpoint. It adds only
+required assignment/scope/queue/policy/provenance and stopped-state documentation.
+The original VM, branch, evidence, H70 producer and prior sealed handoff are preserved.
+The successor integrates the final head only after this worker's stopped acknowledgement.
+
+The original assignment, entire work/backfill queue and exact 389-entry scope are
+committed under `tests/h62/item6/migrate-calculus/retirement/`, with SHA256SUMS.
+The assignment was transcribed from the visible original thread; the exact scope
+substring comes from the verified original ownership snapshot. The unavailable
+launcher-rendered wire bytes are not falsely claimed to match the supplied
+0992f14182a95808d7e2bf1d1e1610b8677b2b85e79f2c8697c7fb782cd1eb59 identity.
+The full visible assignment and original goal objective are both preserved.
+
+Current H78 supersedes RSS-only stops within the 8 GiB per-module cap. Historical
++102.4262% diagnostic RSS growth remains cut-over evidence, not a standalone active
+RSS stop. Separate slowdown/trust/acceptance holds remain. Historical runs enforced
+12 GiB and are not retroactively claimed to be 8 GiB gates. Full H81 policy text,
+H71 push permission, root-local H78 requirements and schema files were not delivered
+here. Coordinator-local paths are provenance only. No push is made because H71
+permission is unavailable and the original no-push constraint remains.
+
+H82 removes exact-file owner agreements for the specified statement-preserving
+proof/additive/import/module-split/doc edits. Existing statement/signature,
+statement-dependent definition, budget, axiom-set or exclusion changes still require
+the owner; frozen ones require H57 versioned pairs. No obsolete proof-only agreement
+request is retained as a blocker. None of these standing permissions authorizes
+implementation after this explicit retirement/pause.
+
+Remaining waits and every original queue/backfill item are in retirement-state.json:
+accepted Syntax.Raw prerequisite delivery/confirmation; root-gate matched full
+comparison and public API/trust acceptance; delivery of existing H78 new exports
+and authoritative requirements/policy artifacts as needed. H78 coverage includes
+all original public generated noConfusion/recOn/casesOn/match_ and other declarations,
+with per-shim old/new/shim signatures, visibility and provenance. No blanket generated
+exclusion or consumer-rewrite compatibility is accepted. implemented_shims=[].
+The old complete type inventory is preserved; complete new exports/visibility and
+shim records remain unfinished. No full migration, semantic equivalence or runtime
+acceptance is inferred. H44/H68/H69/H78/H80/H81 obligations carry to the survivor.
+
+**Pause capability failure:** only codex_goals_stop_goal(outcome=complete|blocked)
+is exposed; no pause/get/update-goal operation exists in the current tool catalog.
+The requested PAUSED service transition therefore cannot be submitted or confirmed.
+No unsupported enum, substitute completion, goal reset or replacement was attempted.
+Last observed service state was blocked in the previous result; current readback is
+unavailable. The worker stops under the explicit user retirement instruction and
+will not automatically continue implementation. The coordinator must use a
+pause-capable control if a service-level PAUSED transition is required.
+
+---
+
 # H62 migrate-calculus: blocked migration, reviewed H70 producer available
 
 The clean old-toolchain directory build passes. The H70 proof-only producer is
