@@ -665,6 +665,9 @@ import Solidity.Backend.MemoryCopies.FixedStoragePathInterface
 import Solidity.Backend.MemoryCopies.ForwardOverlap
 import Solidity.Backend.MemoryCopies.ForwardOverlapControls
 import Solidity.Backend.MemoryCopies.ForwardOverlapInterface
+import Solidity.Backend.MemoryCopies.GuardedDefaultDeclaration
+import Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationControls
+import Solidity.Backend.MemoryCopies.GuardedDefaultDeclarationInterface
 import Solidity.Backend.MemoryCopies.HeapContents
 import Solidity.Backend.MemoryCopies.HeapContentsControls
 import Solidity.Backend.MemoryCopies.HeapContentsInterface
