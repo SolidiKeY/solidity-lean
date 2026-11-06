@@ -14,8 +14,10 @@ namespace Solidity.Examples.DecisionGapPartialOrSub
 open Solidity.Decide Solidity.Decide.ResidueReason
 set_option Elab.async false
 
+/-- One `uint ⇒ uint` mapping root and one uint root. -/
 def Floors : Contract := contract!{ mapping(uint => uint) owed; uint cap; }
 
+/-- The family's roots in `Floors`. -/
 def roots : PartialOrRoots Floors := ⟨"cap", "owed", rfl, rfl⟩
 
 /-- `owed[k] == r` under the block `owed[i] == v`, subtraction literal `c`. -/
@@ -45,6 +47,7 @@ def otherClaim : Fml Floors [] :=
       (.eq (roots.mapRead (.pvV (.there .here))) (.app0 (.lit (uintOfNat 5)))))))
     (.eq (roots.mapRead (.app0 (.lit (uintOfNat 2)))) (.app0 (.lit (uintOfNat 5))))
 
+/-- Target, membership, coverage and the public verdict. -/
 @[noinline] def observe (φ : Fml Floors []) : Bool × Bool × Bool × String :=
   (φ.inTarget {}, φ.partialOrSub, φ.Covered, match decideGoal φ with
     | .proved => "proved" | .refuted _ => "refuted" | .unknown => "unknown")

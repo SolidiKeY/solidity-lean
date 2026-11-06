@@ -29,11 +29,13 @@ def subGuard (sp : PartialOrRoots C) (c : PrimTy.uint.Denote) :
         (.app2 (.binop .sub rfl) sp.scalarRead (.app0 (.lit c)))))
     (.app2 (.binop .le (p := .uint) rfl) (.pvV (.there .here)) (.pvV (.there .here)))
 
+/-- `∀ uint i; ∀ uint j; subGuard == true → m[i] == value`. -/
 def subBlock (sp : PartialOrRoots C) (i j : Var) (c value : PrimTy.uint.Denote) : Fml C [] :=
   .all i .uint (.all j .uint
     (.imp (.eq (sp.subGuard c) (.app0 (.lit true)))
       (.eq (sp.mapRead (.pvV (.there .here))) (.app0 (.lit value)))))
 
+/-- The block implies `m[key] == result`. -/
 def subClaim (sp : PartialOrRoots C) (i j : Var)
     (c value key result : PrimTy.uint.Denote) : Fml C [] :=
   .imp (sp.subBlock i j c value)

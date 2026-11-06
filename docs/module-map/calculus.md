@@ -247,3 +247,4 @@
 | `Calculus/DecisionThresholdStore.lean` | Threshold-uniform storages (`Fill`): every dynamic array of one length, mappings as one default, leaves `lo` below an index threshold and `hi` past it; candidate symbolic countermodel regions. |
 | `Calculus/DecisionBlockRefute.lean` | Refutes false literal-bounded blocks `∀ x̄; (∀ i; i < n → body) → concl` at a threshold region by `n` proof-carrying checks (`Fml.checkMemoryAt`); `Fml.blockRefutable`, consulted through `gapAnswer?`. |
 | `Calculus/DecisionPartialOrSub.lean` | The partial-OR floor family at any subtraction literal `c` whose subtraction from zero halts (`PartialOrSub`): exact verdict `PartialOrSub.valid_iff`, the same region countermodel; consulted through `gapAnswer?`. |
+| `Calculus/DecisionPartialOrSubComplete.lean` | Recognition of the subtraction-literal partial-OR family is complete (`partialOrSub_complete`, `partialOrSub_iff`). |

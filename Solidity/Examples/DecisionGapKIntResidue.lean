@@ -6,8 +6,9 @@ import Solidity.Examples.DecisionKInt
 A negative KeY-`int` binder is decided by encoding it over two words
 (`Fml.kencB`, `Calculus/KIntEncode.lean`); the encoding's multiplier `zMul n`
 must fit a word, which bounds the literals it can compare against at about
-`2^511`. Past that the binder is in the target and not covered. The same
-statement at a small literal is covered. These pins narrow the Residue shape;
+`2^511`. The three members below, past that bound, are in the target and not
+covered (pinned examples, not a general theorem). The same statement at a
+small literal is covered. These pins narrow the Residue shape;
 they do not decide it. (`negBig` is false: its hypothesis holds; `negBigGood`
 and `nestedBig` are valid: their hypotheses fail.)
 -/
