@@ -3,26 +3,27 @@ import Solidity.Backend.InternalFlow.RuntimeFrameV4TrivialFamily
 
 /-! H68 family 3 (`p1_frame_bridge`) for the V4 trivial recursive family.
 
-Native context: the external approved family `approved`; `Approved` is the
-unchanged V3/V4 family agreement with the admitted physical domain
-`V4TrivialFamily.domain`, which has no index or outcome filter. The canonical
-languages are `P1Lang.sourceLang`/`targetLang` of the actual family
-`V4TrivialFamily.source` and the actual emitted image
-`V4TrivialFamily.image.code`, with prescribed `beta := id` and
-`nu := fun _ _ => ()`. `Local` is the entire V4 producer conclusion: the
-universal return and bare-revert claims, universal family coverage, source
-coherence, the admitted successful witness and the agreement itself.
+This is a type-inhabitation and plumbing check of the requested shape, not
+evidence of P1 adequacy. The family is degenerate (its step ignores its
+continuation: no recursion, empty body, never reverts or panics), the
+observation is the coarse frame-boundary one of `P1Lang`, and the content of
+the `PassCorrect` is only: the source is unfinished at depth 0 and succeeds at
+every positive depth; the target always succeeds.
 
-Every `PassCorrect` field is proved: forward at every depth (the exhausted
-depth 0 is an unfinished prefix below the target's), backward for every
-target prefix (the target always succeeds, as `ReturnClaim` at depth 1 shows
-for every admitted input). Nothing is assumed beyond the agreement.
+* Native context: the external approved family `approved`; `Approved` is the
+  unchanged family agreement with the producer's admitted domain
+  `V4TrivialFamily.domain` (no index or outcome filter; its provenance is not
+  established). The languages are built from that domain, not from
+  `approved`; the agreement is a pointwise iff, so this changes no membership.
+* `beta := id` and `nu := fun _ _ => ()` follow from the joint `Input`
+  environment and the `Unit` target resource. Neither is shown uniform with
+  the single public G49 environment map, and the pass's `Input` environment
+  does not match neighbouring G49 passes, so it folds only as a singleton.
+* `Local` carries the actual V4 producer with this plan (not a restatement):
+  universal return and bare-revert claims (the latter vacuous here), coverage,
+  coherence, the successful witness and the agreement.
 
-Scope: this is the bridge for one degenerate family whose outcomes are all
-known (success at positive depth, exhaustion at 0, never a revert or panic).
-A bridge for general P1 families needs, per family, depth consistency of the
-source language and backward transport of EVERY target outcome, i.e. the
-panic/payload/exhaustion/divergence transports of G37.02/G38. -/
+General families are not delivered: see `docs/feature-work/runtime-frame-p1.md`. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge
 open Evm Evm.Memory P1Lang V4TrivialFamily
 open Solidity.Roadmap (Event Outcome Prefix Lang Prefixes)
@@ -71,15 +72,10 @@ theorem target_prefix (e : Input P.C P.Γ) (h : e.In allowed) :
   rw [run]
   rfl
 
-/-- The entire original V4 conclusion for this family and agreement. -/
+/-- The entire original V4 conclusion: the actual producer, with this plan. -/
 def Local (approved : Nat → InterfaceV3.Admission P.C P.Γ) : Prop :=
-  InterfaceV3.FamilyAdmissionAgreement approved domain ∧
-  InterfaceV3.FamilyEntryCoverage 0 F domain plan ∧
-  (∃ n, InterfaceV3.SuccessfulEntry 0 F (domain n) (source n) (plan.at n)) ∧
-  InterfaceV1.RecursiveReturnCoherence "trivial" (.nil : Args P.C P.Γ []) .none
-    V3GeneralBoundary.trivialStep ∧
-  (∀ n, InterfaceV1.ReturnClaim 0 F (source n) (plan.at n)) ∧
-  (∀ n, InterfaceV1.BareRevertClaim 0 F (source n) (plan.at n))
+  Nonempty { p : InterfaceV4.PendingRecursiveReturns 0 F approved domain "trivial" .nil .none
+      V3GeneralBoundary.trivialStep // p.plan = plan }
 
 /-- The full refinement between the canonical languages. -/
 def pass : PassCorrect (Behaviour.ofLang A ()) (Behaviour.ofLang B ()) where
@@ -105,9 +101,10 @@ external approved family, `Approved` its unchanged agreement. -/
 def p1_frame_bridge (approved : Nat → InterfaceV3.Admission P.C P.Γ)
     (agreement : InterfaceV3.FamilyAdmissionAgreement approved domain) :
     BridgeGoal A B () () id (fun _ _ => ()) (Local approved) :=
-  ⟨pass, rfl, rfl, agreement, coverage, successful, coherent, returns, bare_revert⟩
+  ⟨pass, rfl, rfl, ⟨⟨producer approved agreement, rfl⟩⟩⟩
 
-/-- The bridge enters the G49 fold as an ordinary pass. -/
+/-- `BridgeGoal.pass`; it folds only as a singleton (its `Input` environment
+matches no neighbouring G49 pass). -/
 def fold_entry (approved : Nat → InterfaceV3.Admission P.C P.Γ)
     (agreement : InterfaceV3.FamilyAdmissionAgreement approved domain) :
     PassCorrect (Behaviour.ofLang A ()) (Behaviour.ofLang B ()) :=
@@ -115,8 +112,8 @@ def fold_entry (approved : Nat → InterfaceV3.Admission P.C P.Γ)
 
 /-! ## Controls -/
 
-/-- The bridge is inhabited (with `approved := domain`; not provenance). -/
-theorem inhabited : Nonempty (BridgeGoal A B () () id (fun _ _ => ()) (Local domain)) :=
+/-- Joint satisfiability (with `approved := domain`; not provenance). -/
+theorem satisfiable : Nonempty (BridgeGoal A B () () id (fun _ _ => ()) (Local domain)) :=
   ⟨p1_frame_bridge domain fun _ _ _ _ _ _ _ => Iff.rfl⟩
 
 /-- The source language is not success-only: depth 0 is unfinished. -/
@@ -124,9 +121,18 @@ theorem source_unfinished_at_zero (e : Input P.C P.Γ) : (sourceSem source e 0).
   rw [prefix_zero]
 
 /-- The populated caller is allowed in both languages. -/
-theorem allowed_member : A.Allowed ⟨1, 16, caller0, P.base, machine0, 10⟩ := member
+theorem allowed_member : A.Allowed ⟨1, 16, caller0, P.base, machine0, 10⟩ ∧
+    B.Allowed ⟨1, 16, caller0, P.base, machine0, 10⟩ := ⟨member, member⟩
 
-/-- A narrowed frame is not allowed: the domain is the physical one. -/
+/-- Panics are observed as completed reverts, not erased. -/
+theorem panic_observed {Δ : Ctx} {H : HTy} :
+    sourcePrefix (.error .panic : TRes (Solidity.Out P.C H Δ)) = ⟨[], some (.revert [])⟩ := rfl
+
+/-- A pending jump is not a frame exit. -/
+theorem pending_jump_unfinished (m : Machine) :
+    (targetPrefix (.ok m 1)).final = none := rfl
+
+/-- The producer's domain rejects a frame too small for its arena. -/
 theorem refused_frame : ¬ B.Allowed ⟨1, 14, caller0, P.base, machine0, 10⟩ := wrong_frame
 
 end Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge
@@ -136,8 +142,8 @@ end Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge
  Quot.sound] -/
 #guard_msgs in
 #print axioms Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.p1_frame_bridge
-/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.inhabited' depends on axioms: [propext,
+/-- info: 'Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.satisfiable' depends on axioms: [propext,
  Classical.choice,
  Quot.sound] -/
 #guard_msgs in
-#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.inhabited
+#print axioms Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.satisfiable

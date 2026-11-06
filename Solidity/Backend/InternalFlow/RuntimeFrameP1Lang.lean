@@ -16,12 +16,25 @@ identity.
 * Target: `Evm.run` has no resource index, so the resource is `Unit`; the
   prefix is the actual run of the code image from the input's machine.
 
-Observations use the shared `Event`/`Outcome` types at the frame boundary. An
-internal frame emits no session event, so `events = []`; success is
-`Outcome.success []`, a bare revert `Outcome.revert []`, and every other halt
-(panic, payload, exhaustion, divergence, target fault) is an unfinished
-prefix. The typed states, `StateRepr`, stack, allocator and frame words are
-NOT observed here; they are retained in the bridge's `Local` conclusion.
+Observations use the shared `Event`/`Outcome` types at the frame boundary,
+deliberately coarsened to what the target model `Evm.Out` can show (it carries
+no return or revert data):
+
+* `events = []`. This is canonical only for families without external calls
+  or payments (`transfer`, `send`, `tryCall` produce session events); for
+  other families this language is not their canonical one.
+* Source success is `Outcome.success []`; every source revert class (bare
+  revert, panic, revert with data) is `Outcome.revert []`, as the compiler's
+  own agreement maps a panic to a bare target `REVERT`. Revert data is not
+  observed (G38).
+* Depth exhaustion (a resource failure at that horizon) and divergence are
+  unfinished prefixes.
+* Target `.ok _ 0` is success and `.revert` is revert; `.fault` (including a
+  non-terminating loop) and `.ok _ (k+1)` (a pending jump, not a frame exit)
+  are unfinished.
+
+The typed states, `StateRepr`, stack, allocator and frame words are NOT
+observed; they are retained only in a bridge's `Local` conclusion.
 The source language needs depth consistency, a real per-family fact, so it
 takes that proof as an argument. -/
 namespace Solidity.Backend.InternalFlow.RuntimeFrame.P1Lang
@@ -47,13 +60,14 @@ def sourcePrefix {C : Contract} {Δ : Ctx} {H : HTy}
     (r : TRes (Solidity.Out C H Δ)) : Prefix Event Outcome :=
   match r with
   | .ok _ => ⟨[], some (.success [])⟩
-  | .error .revert => ⟨[], some (.revert [])⟩
-  | .error _ => ⟨[], none⟩
+  | .error .revert | .error .panic | .error (.revertWith _) => ⟨[], some (.revert [])⟩
+  | .error .exhausted | .error .diverge => ⟨[], none⟩
 
 /-- Frame-boundary observation of a target run. -/
 def targetPrefix (r : Evm.Out) : Prefix Event Outcome :=
   match r with
-  | .ok _ _ => ⟨[], some (.success [])⟩
+  | .ok _ 0 => ⟨[], some (.success [])⟩
+  | .ok _ (_ + 1) => ⟨[], none⟩
   | .revert => ⟨[], some (.revert [])⟩
   | .fault => ⟨[], none⟩
 

@@ -9919,12 +9919,12 @@
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.inhabited": [
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.p1_frame_bridge": [
   "Classical.choice",
   "Quot.sound",
   "propext"
  ],
- "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.p1_frame_bridge": [
+ "Solidity/Backend/InternalFlow/RuntimeFrameP1Bridge.lean:Solidity.Backend.InternalFlow.RuntimeFrame.P1Bridge.satisfiable": [
   "Classical.choice",
   "Quot.sound",
   "propext"

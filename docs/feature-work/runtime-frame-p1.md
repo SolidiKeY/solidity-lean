@@ -1848,63 +1848,98 @@ BridgeGoal (A_frame x) (B_frame x) (ps_frame x) (pt_frame x) (beta_frame x)
 
 ### Canonical languages
 
-`RuntimeFrameP1Lang` defines, for one P1 context (a source family
-`source : Nat → Stmt C Γ Δ`, an emitted code image and an admitted domain),
-`sourceLang` and `targetLang` of type `Lang Event Outcome`:
+`RuntimeFrameP1Lang` defines `sourceLang` and `targetLang` of type
+`Lang Event Outcome` for one P1 context. A context is a source family
+`source : Nat → Stmt C Γ Δ`, an emitted code image and an admitted domain.
 
-- **Environment:** both languages use the same `Input` (the
-  `L frame caller base machine start` of `Entry`). `Allowed` is the admitted
-  domain, so the prescribed `beta` is the identity.
-- **Resources:** the source resource is the quotation depth, the only bound
-  intrinsic recursion has. The target resource is `Unit`, since `Evm.run` is
-  not indexed.
-- **Observations:** these are frame-boundary outcomes of the actual runs.
-  - There are no session events, because an internal frame emits none.
-  - Success becomes `Outcome.success []` and a bare revert `Outcome.revert []`.
-  - Every other halt (panic, payload, exhaustion, divergence, target fault)
-    is an unfinished prefix.
-  - Typed states and machine facts are not observed; they stay in `Local`.
-- **Depth consistency:** the source language takes the depth-consistency
-  proof as an argument, because `Lang.consistent` makes it a per-family fact.
+**Shared parts.**
 
-### Delivered bridge
+- Both languages use the same `Input`: the `L frame caller base machine
+  start` of `Entry`. `Allowed` is the admitted domain.
+- The source resource is the quotation depth. The target resource is `Unit`,
+  because `Evm.run` takes no resource index.
+- The source language takes depth consistency as an argument. It is a fact
+  that each family must prove.
 
-`RuntimeFrameP1Bridge.p1_frame_bridge` is proved for the V4 trivial family,
-with these instantiations:
+**Observation.** It is deliberately coarsened to what `Evm.Out` can show,
+since `Evm.Out` carries no data:
 
-- **Native context:** the external approved family.
-- **`Approved_frame`:** the unchanged family agreement with the full physical
-  domain (no index or outcome filter).
-- **Programs and maps:** the actual source family and the actual emitted
-  image, with `beta := id` and `nu := fun _ _ => ()`.
-- **`Local_frame`:** the whole V4 conclusion: agreement, coverage, the
-  successful witness, coherence, and the universal return and bare-revert
-  claims.
+- `events = []`. This is canonical only for families without external calls
+  or payments.
+- Success is `success []`. Every source revert class is `revert []`: bare
+  revert, panic, and revert with data. This matches the compiler's mapping of
+  a panic to a bare `REVERT`.
+- Depth exhaustion and divergence are unfinished.
+- On the target side, `ok _ 0` is success and `revert` is revert. A fault, or
+  an `ok` with a pending jump, is unfinished.
 
-All `PassCorrect` fields are proved without further premises:
+Typed states and machine facts are not observed; they live only in `Local`.
+Whether this coarse observation is acceptable to G49, or counts as the
+"trivial trace" the request rules out, is for the G49 lane to decide. A
+richer canonical language needs revert data and events in the target model.
 
-- Forward at every depth: depth 0 is unfinished, so it lies below the
-  target's prefix.
-- Backward for every target prefix: the target always succeeds, which
-  `ReturnClaim` at depth 1 shows for every admitted input.
+### Delivered bridge: a shape check
 
-`fold_entry` gives the G49 fold entry through `BridgeGoal.pass`. `inhabited`
-instantiates `approved := domain`, which shows satisfiability, not
-provenance. The controls show that depth 0 is unfinished (the source
-language is not success-only) and that a narrowed frame is not allowed.
+`RuntimeFrameP1Bridge.p1_frame_bridge` is proved for the degenerate V4
+trivial family. It is a type-inhabitation and plumbing check of the requested
+`BridgeGoal`, not evidence of P1 adequacy.
 
-### Not delivered
+**Instantiation.**
 
-The bridge for general P1 families, including the scalar and allocating
-countdown families, is not delivered. Each family needs two things:
+- Native context: the external approved family.
+- `Approved_frame`: the unchanged agreement with the producer's admitted
+  domain. That domain has no index or outcome filter, and its provenance is
+  not established.
+- Programs: the actual family and its emitted image.
+- `beta := id` and `nu := fun _ _ => ()`. These are forced by the joint
+  `Input` environment and the `Unit` resource. Neither is shown uniform with
+  the single public map.
+- `Local_frame`: the actual V4 producer with this plan, not a restatement of
+  its fields. Its bare-revert claim is vacuous here.
 
-- depth consistency of its source language, which fails for index-dependent
-  steps;
-- backward transport of every target outcome.
+**What the `PassCorrect` proves.** All its fields are proved with no premise
+beyond the agreement, but their content is small:
 
-The second needs the panic, payload, exhaustion and divergence transports of
-G37.02/G38, and the request forbids replacing them with success and
-bare-revert evidence. The countdown families have known exhausted-source /
-successful-target depths and panicking arithmetic, so their bridge needs that
-work first. The request's `adapterStatus` for P1 stays with the G49 lane,
-which must verify this delivery.
+- the source is unfinished at depth 0 and succeeds at every positive depth;
+- the target always succeeds, by `ReturnClaim` at depth 1.
+
+**Fold entry.** The pass's `Input` environment matches no neighbouring G49
+pass, so `fold_entry` folds only as a singleton.
+
+**Controls.**
+
+- `satisfiable` instantiates `approved := domain`. This is not provenance.
+- Depth 0 is unfinished.
+- A panic is observed as a completed revert.
+- A pending jump is unfinished.
+- The domain rejects a frame too small for the arena.
+
+### Not delivered: general families
+
+For general families, the bridge is not merely unproved: with this
+observation it is false for some families.
+
+- **Payment.** A paying call succeeds in the source, but the compiler's
+  target reverts. So `success [] ≤ revert []` fails forward.
+- **Revert data.** A family with a payload revert loses its data in the
+  observation.
+- **External calls.** A family with external calls has session events this
+  language does not observe.
+- **Depth consistency.** It is a per-family obligation, and no
+  counterexample is exhibited.
+- **Missing transports.** Even families without these features need
+  backward transport of every target outcome. In particular, a target revert
+  must match a source revert at some depth. That requires the
+  panic/exhaustion transports of G37.02/G38, which P1 does not have; success
+  and bare-revert evidence cannot stand in.
+
+A general bridge therefore needs a richer canonical language, with revert
+data and events on the target, plus those transports. The G49 lane must
+verify this delivery; the request's `adapterStatus` stays theirs.
+
+Reviews: read-only finder and skeptic reviews found the proofs sound and the
+first observation too coarse. Panic and payload reverts had been unfinished,
+which made their transport vacuous; this is fixed. The docs had overclaimed
+the "full domain", the ordinary fold entry and the blockers; these are
+corrected. `Local` now reuses the producer, and `ok` with a pending jump is no
+longer success.
