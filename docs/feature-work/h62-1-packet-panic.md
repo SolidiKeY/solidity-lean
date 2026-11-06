@@ -41,3 +41,7 @@ Two independent read-only reviewers, without Lean, checked all 102 observations 
 ## H71 owner candidate
 
 The staged `tests/h62/item1/packet-panic/PanicBytes.lean` and `CheckedMulEquivalence.lean`, plus `prepare_mul_patch.py`, prepare an owner-applied proposal without changing any owned original. See `tests/h62/item1/packet-panic/H71-CANDIDATE.md` for exact names, signatures, unregistered module dependency, two-theorem patch scope, owner-message provenance, actual diagnostic outcomes, resource limits and uncompleted gates. The staged candidate is not proved or published. MIC retains CheckedMul ownership; MRS reports a separate unverified 4.35 Roadmap/Contracts axiom blocker and grants no CheckedSub edit or application agreement.
+
+## H71 isolated fixture and Q1 routing
+
+Q1 is an owner wait, routed to `solidity-compiler10-20261028/memory-internal-calls` for `Q1 panic_not_empty proof`; the two-proof owner proposal stays unchanged. The `Init`-only `PanicBytesFixture.lean` has eight independently reviewed fixture theorems diagnosed successfully under the pinned Lean MCP, with no axioms reported. Its locally copied byte recurrence is textually compared to pinned Source bytes by `test_fixture_source_shape.py`; no kernel connection to actual `Source.panicData`, producer equivalence, or target behavior has been proved. The prior real-helper diagnostic remains failed on unavailable imports, and all original gates remain open. Details and resource/cleanup limitations are in `tests/h62/item1/packet-panic/H71-CANDIDATE.md`.
