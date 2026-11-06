@@ -1513,3 +1513,25 @@ IDs/order/expectations/frozen270 are unchanged. Full roots/trust/TestSuite/timed
 strict, actual solver/performance/scaling/paired rendered/macOS matrices,
 producer-owned clause/span/positioned traces, hosted CI and both per-row
 judgments remain open. No completed row or overall runtime gate pass is claimed.
+
+
+### Handoffs — exact native proof-help and deadline observation (2026-11-06)
+
+At65fc533e9d71fec0714b48de4d7b22e1b178747a the official checksum-verified
+VSCode1.108 Linux observer exits0 with a partial certified proof-help scenario.
+It records a genuine kernel-certified refutation, native QuickPick selection
+and both actual project documents. Peak sampledRSS3775954944 bytes; no resource
+STOP. All sampled normal Lean/Lake PID births disappear; remaining Electron
+zombies stay visible, so complete process/solver retention is not established.
+The [native receipt manifest](dafny-native-retirement-evidence-manifest.json)
+binds screenshots, DOM/AX, source/protocol/OS observations and failed checks.
+
+The full65fcNode suite found one new observer timestamp assertion error
+(418pass/1fail/4skip). Measuring the real admission clock read now requires
+exactly+1000ms, with no tolerance or production change. Targeted22pass/two
+actual-Lean opt-ins skip; independent finder/skeptic cleared the measurement
+fix. A fresh full suite remains required at the measurement-only follow-up head.
+
+Checkpoint exports: `/workspace/dafny-parity-handoff-20261106T231530Z/original.patch`, `/workspace/dafny-parity-handoff-20261106T231530Z/HANDOFF.md`,
+`/workspace/dafny-parity-handoff-20261106T231530Z/SHA256SUMS`; exact head/base/source and gate exits are recorded
+in `/workspace/dafny-parity-handoff-20261106T231530Z/SOURCE.json` after commit. Bulk evidence remains outside git.
