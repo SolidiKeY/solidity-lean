@@ -8,6 +8,7 @@ cd "$(git rev-parse --show-toplevel)"
 dir=tests/fullscope-20261104/vt1
 python3 -I "$dir/generate-artifacts.py" --check
 python3 -I "$dir/extract-helpers.py" --check
+python3 -I "$dir/gen-exp-module.py" --check
 if [[ "${VT1_SKIP_LEAN:-0}" != 1 ]]; then
   for f in IrParseChecks IrEvalChecks IrHelperChecks; do
     out=$(lake env lean --tstack=131072 "$dir/$f.lean" 2>&1)

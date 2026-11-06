@@ -1,4 +1,5 @@
 import Solidity.SolcValidation.IrHelperSteps
+import Solidity.SolcValidation.IrExpSim
 import Solidity.Semantics.Ops
 
 /-!
@@ -17,7 +18,7 @@ Covered: `checked_add_t_uint256`, `checked_sub_t_uint256` and
 `checked_mul_t_uint256` at their call sites (`uint` `+`, `-`, `*`), and the body
 of `checked_div_t_int256` (`int` `/`, words read as two's complement by
 `Yul.signed`; `tdiv_inRange` is the source's range fact behind solc's
-`min / -1` test).
+`min / -1` test), and the body of `checked_exp_t_uint256_t_uint256` (`uint` `**`).
 -/
 namespace Solidity.SolcValidation.IrSyntax
 open Solidity.SolcValidation
@@ -164,6 +165,18 @@ theorem sourceDiv_eq (x y : Word) :
       rw [tdiv_inRange _ _ (signed_range x) sy]
       exact fun h => m ⟨(signed_min x).mp h.1, (signed_neg_one y).mp h.2⟩
 
+/-- The source's checked `uint` exponentiation on two words. -/
+def sourceExp (x y : Word) : Option Int :=
+  (Solidity.BinOp.evalNum .uint rfl (x.val : Int) (y.val : Int) .pow rfl).map Subtype.val
+
+theorem sourceExp_eq (x y : Word) :
+    sourceExp x y = if x.val ^ y.val < 2 ^ 256 then some ((x.val ^ y.val : Nat) : Int) else none := by
+  simp only [sourceExp, Solidity.BinOp.evalNum, Solidity.BinOp.arithInt]
+  rw [if_neg (by omega), some_bind', Int.toNat_natCast, ← Int.natCast_pow]
+  by_cases fits : x.val ^ y.val < 2 ^ 256
+  · rw [if_pos fits, ofInt_uint_in ((uint_inRange _).mpr fits)]
+  · rw [if_neg fits, ofInt_uint_out (fun h => fits ((uint_inRange _).mp h))]
+
 section
 variable {σ : Type} (M : Machine σ) (ctx : ObjectCtx)
 
@@ -258,6 +271,25 @@ theorem checked_div_matches_source (k : Nat) (x y : Word) (s : σ) :
       rw [panicIf, c1, if_neg Bool.false_ne_true, run_ok_bind, panicIf, c2, if_neg Bool.false_ne_true,
         run_ok_bind, pure_sdiv, word2_one, word2_zero, if_neg y0]
 
+
+/-- Simulation of `checked_exp_t_uint256_t_uint256`'s body by the source's checked `**`
+at `uint`: a source value is returned as that word with no machine effect; on a source
+revert the first machine effect is solc's `Panic(0x11)` sequence. -/
+theorem checked_exp_matches_source (k : Nat) (x y : Word) (s : σ) :
+    match sourceExp x y with
+    | some v => evalBlock M ctx (k + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s =
+        .ok (s, .cons x (.cons y (.cons (Solidity.Yul.word v.toNat) .nil)), .normal)
+    | none => ∃ cont, evalBlock M ctx (k + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s =
+        panicRun M 0x11 s >>= cont := by
+  rw [sourceExp_eq]
+  have h := checked_exp_body M ctx k x y s
+  by_cases fits : x.val ^ y.val < 2 ^ 256
+  · rw [if_pos fits]
+    dsimp only
+    rw [Int.toNat_natCast]
+    exact h.1 fits
+  · rw [if_neg fits]
+    exact h.2 fits
 end
 
 end Solidity.SolcValidation.IrSyntax

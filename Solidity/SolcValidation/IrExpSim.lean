@@ -729,6 +729,53 @@ theorem unsigned_run (j : Nat) (b e : Nat) (mx : Word) (bW : b < 2 ^ 256) (eW : 
       show Solidity.Yul.word ((Solidity.Yul.word p').val * (Solidity.Yul.word b').val) = _
       rw [word_val_lt p' pW, word_val_lt b' h4, word_mod]
 
+/-! ## `checked_exp_t_uint256_t_uint256` -/
+
+theorem word_self (w : Word) : Solidity.Yul.word w.val = w := Fin.ext (Nat.mod_eq_of_lt w.isLt)
+
+theorem drop_power (vs : Vals (["base", "exponent", "max"] ++ ["power"])) :
+    (Vals.drop ["base", "exponent", "max"] vs).toFn ⟨0, by decide⟩ = vs.get (.there (.there (.there .here))) := by
+  match vs with
+  | .cons _ (.cons _ (.cons _ (.cons _ .nil))) => rfl
+
+theorem max_lit_val : (115792089237316195423570985008687907853269984665640564039457584007913129639935 : Word).val = maxWord := rfl
+
+/-- The body of `checked_exp_t_uint256_t_uint256(base, exponent)` on any machine and state:
+`power = base ** exponent` with no machine effect when it fits in a word; otherwise the
+first machine effect is solc's `Panic(0x11)` sequence. -/
+theorem checked_exp_body (j : Nat) (x y : Word) (s : σ) :
+    (x.val ^ y.val < 2 ^ 256 → evalBlock M ctx (j + 420) expEnv expExpU256 (.cons x (.cons y (.cons 0 .nil))) s =
+      .ok (s, .cons x (.cons y (.cons (Solidity.Yul.word (x.val ^ y.val)) .nil)), .normal)) ∧
+    (¬ x.val ^ y.val < 2 ^ 256 → ∃ cont, evalBlock M ctx (j + 420) expEnv expExpU256
+      (.cons x (.cons y (.cons 0 .nil))) s = panicRun M 0x11 s >>= cont) := by
+  have hl : expE1.lookup (s := ⟨"checked_exp_unsigned", ["base", "exponent", "max"], ["power"]⟩)
+      (.there (.there (.there (.there .here)))) = ⟨_, expEnv, expExpUnsigned⟩ := rfl
+  have hu := unsigned_run M ctx (j + 14) x.val y.val _ x.isLt y.isLt max_lit_val s
+  rw [expUnsigned_correct x.val y.val x.isLt, word_self, word_self] at hu
+  rw [expExpU256, block_empty,
+    items_stmt_normal M ctx (j + 418) _ _ _ _ _ _ _ (assign_of M ctx _ _ _ _ _ _ _ (exp_cleanup_call M ctx (j + 410) _ _ rfl _ _ _)),
+    items_stmt_normal M ctx (j + 417) _ _ _ _ _ _ _ (assign_of M ctx _ _ _ _ _ _ _ (exp_cleanup_call M ctx (j + 409) _ _ rfl _ _ _)),
+    items_last M ctx (j + 415)]
+  simp only [Vals.get_here, Vals.get_there, Vals.set_here, Vals.set_there]
+  simp only [evalStmt, evalExpr, evalArgs, run_ok_bind, run_pure, Vals.get_here, Vals.get_there]
+  rw [hl]
+  simp only [Vals.ofFn, consFn_zero, consFn_succ, Vals.zeros, Vals.append_cons', Vals.append_nil']
+  constructor
+  · intro fits
+    rw [if_pos fits] at hu
+    obtain ⟨vs, fl, h, hp⟩ := hu
+    simp only [uv] at h
+    rw [h]
+    simp only [run_ok_bind, assignAll, Vals.set_here, Vals.set_there]
+    rw [drop_power, hp]
+  · intro over
+    rw [if_neg over] at hu
+    obtain ⟨cont, h⟩ := hu
+    simp only [uv] at h
+    rw [h]
+    simp only [bind_assoc]
+    exact ⟨_, rfl⟩
+
 end
 
 end Solidity.SolcValidation.IrSyntax

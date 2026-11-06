@@ -103,3 +103,65 @@ text) is a verbatim substring of the saved solc IR. -/
     n := n + 1
   unless n == 8 do throw (IO.userError s!"expected 8 functions, found {n}")
   IO.println s!"IR_HELPER_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
+
+/-! The `checked_exp` group (`IrExpHelpers.lean`), run end to end on edge words
+for the base and exponents around each of solc's branches (`e = 0`, bases 0/1/2,
+the small-range shortcut bounds 11/78 and 307/32, the loop, `2^256` overflow),
+against the source's checked `**` at `uint` (exponents up to 300: the oracle
+computes `x ^ y` exactly). -/
+def expArgs : Args (expSigs ++ []) ArgNames 2 :=
+  .cons (.var "a" .here) (.cons (.var "b" (.there .here)) .nil)
+
+def expCallT : Expr (expSigs ++ []) ArgNames 1 :=
+  .call (s := ⟨"checked_exp_t_uint256_t_uint256", ["base", "exponent"], ["power"]⟩)
+    (.there (.there (.there (.there (.there .here))))) expArgs
+
+def runExp (x y : Nat) : Except String Nat :=
+  match evalExpr logMachine emptyCtx 2000 expEnv expCallT (argVals (W x) (W y)) [] with
+  | .ok (_, v) => .ok (v ⟨0, by decide⟩).val
+  | .error (.halt log .revert) =>
+      match log with
+      | [("mstore", [0, sel]), ("mstore", [4, code]), ("revert", [0, 36])] =>
+          if sel == panicSelector.val then .error s!"panic {code}" else .error "bad selector"
+      | _ => .error "unexpected effects"
+  | .error .fuel => .error "fuel"
+  | .error _ => .error "other fault"
+
+#eval show IO Unit from do
+  let bases : List Nat := [0, 1, 2, 3, 10, 11, 306, 307, 2 ^ 128 - 1, 2 ^ 128, 2 ^ 255, 2 ^ 256 - 1]
+  -- exponents stay small enough for the source oracle to compute `x ^ y` exactly;
+  -- huge exponents are covered by `checked_exp_matches_source`
+  let exps : List Nat := [0, 1, 2, 31, 32, 77, 78, 127, 128, 255, 256, 300]
+  let mut n := 0
+  for x in bases do
+    for y in exps do
+      let want := ofSrc ((BinOp.evalNum .uint rfl (x : Int) (y : Int) .pow rfl).map Subtype.val)
+      let got := runExp x y
+      unless same got want do
+        throw (IO.userError s!"exp({x}, {y}): helper {repr got}, source {repr want}")
+      n := n + 1
+  IO.println s!"IR_EXP_HELPER_PASS {n} checked_exp/source agreements on edge words"
+
+/-! Provenance of `expHelpersText`: the extracted fixture, each function verbatim
+in the saved `Census` IR. -/
+#eval show IO Unit from do
+  let dir := "tests/fullscope-20261104/vt1/fixtures"
+  unless expHelpersText == (← IO.FS.readFile s!"{dir}/exp-helpers.yul") do
+    throw (IO.userError "expHelpersText differs from fixtures/exp-helpers.yul")
+  let census ← IO.FS.readFile s!"{dir}/Census.unoptimized.yul"
+  -- Each function, cut by name from its keyword to its own closing brace (a comment
+  -- inside `checked_exp_unsigned` contains the word "function", so no plain split).
+  let names := expSigs.map (·.name)
+  let mut n := 0
+  for (name, i) in names.zipIdx do
+    let start := "function " ++ name ++ "("
+    let after := ((expHelpersText.splitOn start).drop 1).headD ""
+    let upto := match names[i + 1]? with
+      | some next => ((after.splitOn ("function " ++ next ++ "(")).headD "")
+      | none => after.dropRight "    }\n}\n".length
+    let whole := start ++ upto.dropRightWhile (· != '}')
+    unless (census.splitOn whole).length > 1 do
+      throw (IO.userError s!"not a verbatim fixture substring: {whole.take 60}")
+    n := n + 1
+  unless n == 6 do throw (IO.userError s!"expected 6 functions, found {n}")
+  IO.println s!"IR_EXP_PROVENANCE_PASS {n} whole functions verbatim from the saved IR"
