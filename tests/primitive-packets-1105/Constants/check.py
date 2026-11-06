@@ -47,6 +47,13 @@ def current_record(spec):
  raw=path.read_bytes();assert hashlib.sha256(raw).hexdigest()==spec['sha256'],'current execution digest differs'
  return json.loads(raw)
 
+def current_scope_changes(root=ROOT):
+ # Published master may advance independently of this lane's pinned provenance.
+ base=subprocess.check_output(['git','merge-base','HEAD','origin/master'],cwd=root,text=True).strip()
+ changed=subprocess.check_output(['git','diff','--no-renames','--name-only',base,'--'],cwd=root,text=True).splitlines()
+ untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=root,text=True).splitlines()
+ return scope_candidates(changed,untracked)
+
 def scope_candidates(diff,untracked): return set(diff)|set(untracked)
 def validate_scope(paths):
  for p in paths:
@@ -170,9 +177,7 @@ def main():
   try:validate_inventory(bad)
   except AssertionError:pass
   else:raise AssertionError('mutation accepted '+kind)
- changed=subprocess.check_output(['git','diff','--name-only',M['owned_start'],'--'],cwd=ROOT,text=True).splitlines()
- untracked=subprocess.check_output(['git','ls-files','--others','--exclude-standard'],cwd=ROOT,text=True).splitlines()
- validate_scope(scope_candidates(changed,untracked))
+ validate_scope(current_scope_changes())
  for candidate in [scope_candidates([],['Solidity/UntrackedForeign.lean']),scope_candidates(['Solidity/TrackedForeign.lean'],[])]:
   try:validate_scope(candidate)
   except AssertionError:pass
