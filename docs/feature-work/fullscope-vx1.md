@@ -6,7 +6,7 @@ Repository: `/workspace/solidity-lean`.
 
 Current status: H38 resolved Q-ORACLE-01 by authorizing option 2. The run-indexed proposal is source/kernel checked and submitted for producer review; full X01 freeze/readiness remains pending. Earlier blocking-question sections below are checkpoint history.
 
-Current integrated prerequisite: rebased onto published `e6849d3bdf516099d20c33d3581d523449764018`. Original assigned base remains `e70b959bf6dd81d09bfaf6eda8025b1cc98bc4c3`; original head `2b8d7e70c03f436e06c151dfcf32352560905468` is preserved at `refs/vx1-preserved/pre-rebase-e6849d3b`. Rewritten H38 proposal `76efe1a37a459b77b2e330d98eaafbd5b999ae7c` is byte-identical and still awaits producer review.
+Current integrated prerequisite: published `38d38d87e74376d6b95daf9b792fa884333f20b3`, present in start head `90f79509d5882cf521249f52e71b50046d1f5898`. Original assigned base and pre-rebase histories remain preserved. Current proposal import is `Solidity.Language.EnvironmentFields.Contracts`, namespace `Solidity.Roadmap.FullScope`; H38 approval/freeze remains pending.
 
 Current cache policy is H41 coordinator-pull: preserve verified VM packs, report path/SHA, never run ship-cache.sh on the VM. The checkpoint-02 pack is coordinator-received; the H38 pack remains coordinator-pending. Historical helper-transfer requests below are superseded.
 
@@ -802,3 +802,58 @@ reported paths are Source.Agreement.{Locals,NormalStatement,Primitive,PrimitiveT
 to Semantics.Run;20 earlier violations remain. Resolution belongs to the Source/
 G07 owners under existing policy, not an automatic whitelist expansion. Exact
 logs and pin-origin.json are preserved. These findings do not change any proof.
+
+## OOM hold response, 2026-11-06: isolate the proposal leaf
+
+Human authorized an OOM repair and push of a head marked [oom-fix]. Start head
+90f79509d5882cf521249f52e71b50046d1f5898, published input
+38d38d87e74376d6b95daf9b792fa884333f20b3. The host pre-gate reported six8GiB
+kills with no last module. That host failing module is still UNKNOWN; the
+journal/command was requested. No local measurement reproduced an8GiB OOM.
+
+The lane's only changed registered library module was Roadmap.Contracts,
+invalidating3364 reverse dependents (3361 default touched targets). Its own
+baseline check passed8.010s at324264KiB maximum child RSS, so it is not shown
+to be an8GiB proof. A large inherited candidate, Yul.Checks.Arithmetic.Part01,
+passed43.042s at803528KiB. A tiny two-module Lake probe was serial at one thread;
+it supplies no process-overlap evidence. The3361-target cache/planning-only probe
+used73416KiB and failed on missing artifacts, not OOM. These distinguish measured
+facts from hypotheses and do not identify the host's failing module.
+
+Restored Solidity/Roadmap/Contracts.lean byte-for-byte to published master. Moved
+the entire FullScope/RunIndexed namespace into the explicitly imported leaf
+Solidity/Language/EnvironmentFields/Contracts.lean, within VX1 ownership. Everything
+from namespace through EOF is byte-identical: names, statements, premises,
+observations, proofs and budgets unchanged. Only the owned control import changed.
+Legacy G01 consumers retain their unchanged foundation. FullScope consumers must
+now explicitly import Solidity.Language.EnvironmentFields.Contracts; no backward
+import shim was added because it would recreate the dependency invalidation.
+No other production consumer exists in this checkout. H38 owner review/freeze
+remains pending and the new path must be relayed to all original consumers.
+
+The changed registered-module closure is now one leaf. Actual touched gate
+builds only that module, PASS2.011s,273208KiB maximum child RSS, zero OOM events.
+Leaf standalone kernel check PASS1.543s,270476KiB; all39 existing controls
+PASS1.440s,246472KiB. All checks used verified8GiB/no-swap, explicit Lean-j1,
+LEAN_NUM_THREADS=1 and continuous4GiB parent reserve. No maxHeartbeats or other
+proof-budget rescue. These are scoped local passes, not host pre-gate clearance.
+
+A stale local foundation object still contained relocated declarations despite
+Lake's up-to-date/cache receipt, causing duplicate-declaration errors on the first
+standalone leaf check. Preserved the stale object/receipts; rebuilt the small
+foundation with a private cache in3.481s using explicit-j1. The final standalone
+kernel checks pass. MCP's initial zero-error report alone was not treated as proof.
+
+Independent finder/skeptic found no semantic/G0 defect in the extraction. Both
+verified exact body/foundation identity and require explicit import migration and
+central registration. Temporary root profiling TOML was removed; its fixture and
+all profiling commands/PID RSS/cgroup memory.events remain in owned evidence.
+The targeted checkpoint passed touched/trust/layers/fragments/doc paths but failed
+foreign library cache admission, the unregistered leaf's root/orphan checks and
+existing shared pin drift (4133 unrecorded, zero axiom-set errors). No shared
+registry/map/pin policy was edited. Registration/map proposal is retained for COORD.
+
+Evidence: tests/calldata-packets-1105/RawAddress/evidence/oom-20261106.
+This mitigates measured rebuild amplification and is to be pushed for host
+re-gating; exact host OOM attribution/result remains pending. Original X01 full
+freeze/all30 rescope, X02 production and other owner obligations remain open.
