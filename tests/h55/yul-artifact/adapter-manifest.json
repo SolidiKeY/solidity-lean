@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "adapters": [
+    {
+      "producer_file": "Solidity/Yul/Compilation/ScopedControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ScopedControlAdapter.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ScopedControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LetScopeCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LetScope",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+    },
+    {
+      "producer_file": "Solidity/Yul/Compilation/LoopControlCompilation.lean",
+      "declaration_kind": "structure",
+      "declaration_name": "Artifact",
+      "adapter_module": "tests/h55/yul-artifact/ControlFamilyAdapters.lean",
+      "namespace": "Solidity.Yul.Compilation.H55ControlFamilies.LoopControl",
+      "boundary": "exact Artifact.Image of encode; original producer recovered; no Compiled adapter or family migration claimed"
+    }
+  ]
+}
