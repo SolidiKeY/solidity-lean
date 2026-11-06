@@ -57,7 +57,7 @@ and `solidity-inline-assembly5-20261031/vy3-compilation`. Please relay to both:
 
 ## Verification, reviews and outstanding gates
 
-The scoped Python suite currently has 16 tests. It covers exact baseline
+The scoped Python suite currently has 17 tests. It covers exact baseline
 reproduction, missing/extra/order/body drift, removed and tampered baseline
 fragments, joint fragment/hash tampering against the pinned Git source, bad
 registration and missing source, invalid/injected comments, unexpected files,

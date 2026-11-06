@@ -376,6 +376,23 @@ class GeneratorControls(unittest.TestCase):
         self.assertEqual(json.loads(result.stdout)[0]["change"], "T")
         self.assertEqual(json.loads(result.stdout)[0]["mode"], "120000")
 
+    def test_conservation_rejects_duplicate_nodes_and_partial_snapshots(self):
+        lane = self.root / LANE
+        target = self.root / TARGET
+        command = [sys.executable, "-B", str(lane / "conservation.py"), "--owner", "integrated", "--after", str(target)]
+        first_import = self.original.splitlines(keepends=True)[0]
+        target.write_text(first_import + self.original)
+        result = subprocess.run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertEqual(json.loads(result.stdout)["unregistered_imports"][0]["count"], 1)
+        doc = (lane / "body/001.txt").read_text()
+        target.write_text(self.original + "\n" + doc)
+        result = subprocess.run(command, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["unregistered_documentation_sha256"][0]["count"], 1)
+        target.write_text("import Solidity.Yul.Syntax\n")
+        self.assertEqual(subprocess.run(command, capture_output=True).returncode, 2)
+
     def test_bad_input(self):
         entries = sorted((self.root / LANE / "imports").glob("*.txt"))
         entries[1].write_text(entries[0].read_text())
