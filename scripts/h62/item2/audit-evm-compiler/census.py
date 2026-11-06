@@ -35,15 +35,28 @@ def mask(s):
     return ''.join(out)
 
 def signature_end(m,start):
-    nesting=[]; i=start
+    nesting=[]; i=start; root_match=False; pending_lets=0
+    opening='({[⟨⦃'; closing=')} ]⟩⦄'.replace(' ','')
+    def keyword(word,at):
+        previous=m[at-1] if at else ' '
+        after=m[at+len(word)] if at+len(word)<len(m) else ' '
+        identifier=lambda c:c.isalnum() or c in "_'.«»"
+        return m.startswith(word,at) and not identifier(previous) and not identifier(after)
     while i<len(m):
         c=m[i]
-        if c in '({[': nesting.append(c)
-        elif c in ')}]':
-            if not nesting: raise ValueError('unbalanced signature')
+        if c in opening: nesting.append(c)
+        elif c in closing:
+            if not nesting or opening.index(nesting[-1])!=closing.index(c):
+                raise ValueError('unbalanced signature')
             nesting.pop()
-        if not nesting and c=='|' and not m[m.rfind('\n',0,i)+1:i].strip(): return i
-        if not nesting and (m.startswith(':=',i) or m.startswith('where',i) and (i==0 or m[i-1].isspace()) and (i+5==len(m) or m[i+5].isspace())): return i
+        if not nesting:
+            if keyword('match',i):root_match=True
+            if keyword('let',i):pending_lets+=1
+            if m.startswith(':=',i):
+                if pending_lets:pending_lets-=1
+                else:return i
+            if c=='|' and not root_match and not m[m.rfind('\n',0,i)+1:i].strip():return i
+            if keyword('where',i):return i
         i+=1
     raise ValueError('missing theorem body')
 
@@ -97,7 +110,7 @@ def main():
     if token_count!=len(result): raise ValueError(f'masked tokens {token_count} != records {len(result)}')
     keys=[(r['file'],r['line']) for r in result]
     if len(set(keys))!=len(keys): raise ValueError('duplicate declaration position')
-    output=dict(schema=1,base='c6f550e281a7e5affa9a99bc2cdaed556dec00e4',module_map_sha256=sha(map_path.read_text()),modules=modules,module_count=len(modules),candidate_count=len(result),kernel_verified=False,statements=result)
+    output=dict(schema=2,signature_parser="balanced-root-let-match-aware",base='c6f550e281a7e5affa9a99bc2cdaed556dec00e4',module_map_sha256=sha(map_path.read_text()),modules=modules,module_count=len(modules),candidate_count=len(result),kernel_verified=False,statements=result)
     pathlib.Path(a.output).write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({k:output[k] for k in ('module_count','candidate_count','kernel_verified')}))
 if __name__=='__main__': main()

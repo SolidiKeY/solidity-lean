@@ -1,4 +1,11 @@
-# Owner ticket SCOPE1: literal simultaneous-witness requirement
+# Resolved owner ticket SCOPE1: historical escalation record
+
+Resolution: human H69 (2026-11-06) accepts a checked proof of joint impossibility
+for intentionally contradictory negative controls, separation lemmas and refutations.
+All five cases below are now `intentional-impossibility-checked`; none requests
+a statement change or remains a scope blocker. Their checked proofs and reasons
+are retained in LayoutAudit and coverage.json. The escalation text below is
+historical, not a renewed request. TC1 is separately resolved: stay on v4.24.0.
 
 Routing: coordinator to the frozen Evm/Layout area producer. No original-file edit is requested.
 

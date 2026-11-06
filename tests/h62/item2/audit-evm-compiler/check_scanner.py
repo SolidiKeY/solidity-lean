@@ -28,6 +28,26 @@ with tempfile.TemporaryDirectory() as d:
  assert all(r['source_signature'].count('theorem')==1 for r in rows)
  assert rows[2]['preceding_context_command_history']==['variable {x : Nat}','omit x in']
  assert rows[3]['preceding_context_command_history']==[]
+# Declaration delimiters must not consume assignments/arms inside the type.
+edge_fixture="""namespace Edge
+@[simp] theorem tupleProof : (0 : Nat) = (⟨0, by have h := True.intro; exact h⟩ : {n : Nat // True}).1 := by rfl
+theorem rootLet : let x := 0; x = x := by rfl
+theorem inlineMatch (x : Bool) : x = match x with
+ | true => true
+ | false => false := by cases x <;> rfl
+theorem conditionalMatch (x : Bool) : x = if x then match x with
+ | true => true
+ | false => false
+ else false := by cases x <;> rfl
+end Edge
+"""
+with tempfile.TemporaryDirectory() as d:
+ p=pathlib.Path(d)/'edges.lean';p.write_text(edge_fixture);edges=c.scan(p)
+ assert len(edges)==4
+ assert 'have h := True.intro' in edges[0]['source_signature']
+ assert 'let x := 0; x = x' in edges[1]['source_signature']
+ assert '| false => false' in edges[2]['source_signature']
+ assert 'else false' in edges[3]['source_signature']
 assert c.mask('a /- b /- c -/ d -/ e')=='a                   e'
 try:c.mask('/- open')
 except ValueError:pass

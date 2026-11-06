@@ -48,6 +48,8 @@ for link in coverage['links']:
     seen.add(key); row=by_id[key]
     if row['source_signature_sha256']!=link['source_signature_sha256'] or row['candidate_name']!=link['original']:raise ValueError('frozen coverage statement mismatch')
     row['simultaneous_witness']=link['status'];row['audit_proof']=link['proof'];row['audit_module']=link['module'];row['global_versus_per_input_classification']=link['classification']
+    if link.get('producer_owner'):
+        row['producer_owner']=link['producer_owner'];row['owner_authority']=link['owner_authority']
 x['witness_coverage']=dict(collections.Counter(r['simultaneous_witness'] for r in x['statements']))
 x['kernel_verified']=False
 pathlib.Path(a.output).write_text(json.dumps(x,ensure_ascii=False,indent=2)+'\n'); print(json.dumps(dict(counts)))
