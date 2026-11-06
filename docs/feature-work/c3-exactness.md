@@ -427,3 +427,36 @@ tests/sol-c3-exactness/E684-HANDOFF.md and evidence/e684-inventory-gap.json.
 Historical full-driver H1 failures also remain unwaived; full acceptance fails
 explicitly. H41 delivery stays coordinator-pending, no shipping or freshness
 claim. No premise/budget/registry change, default merge, push, PR or goal reset.
+
+
+## H82 authenticated successor intake and current validation
+
+Final stopped C3 head21043c5220a7c0390810ec7088c83a6bd9c8ff8c was verified and
+merged by9192f209cd12c30a5183bc2c779a631102dc8061 before member work. Full frozen
+prompt/queue/scope hashes match the receipt; delivered H82b archive, manifest,
+SUMS and exact verified-final-stop member entry were checked. Metadata/frozen
+assignment/stopped acknowledgement wait is resolved. External runtime/seal and
+cache bytes are not included and remain unretrieved. No retired goal was woken.
+
+All nine Lean sources and six original producer pins remain unchanged. Updated
+scope baseline is the authenticated integration, not permission to edit another
+area. Portable bounded timing preserves failure/signal statuses. Fresh receipt
+selection is digest-bound outside Git; original tracked evidence is untouched.
+An additional current-file guard prevents cached build logs alone certifying
+kernel checks. It accepts exact direct elaboration or the preferred MCP Audit
+diagnostic, requiring current hashes/toolchain/bounds and explicit zero errors.
+Actual MCP diagnostic PASS; fresh compiler9 fixtures PASS; current fixture
+checkpoint236 declarations/12families with4scope+21general+9fixture negative
+controls PASS; five portable-evidence unit tests PASS; owned236pins already
+registered. Canonical KeySort377/131/table131 PASS. Lean4.24.0, Lake5.0.0.
+
+Retained CLI direct-import failures show missing physical C3 .olean files even
+though cached/fetched targets exit0. MCP's supported import setup succeeds;
+this does not establish CLI cache recovery or full runtime. No unchanged
+OpenLoops timing STOP was repeated. Full checkpoint still refuses unfinished
+full gates/reviews; global zero-error inventory has4405unrecorded changes
+(last actual check), and full cache-only readiness exits3. No RUNTIME_GATE_PASS.
+External solc observations, kernel proofs, constructor-name order and actual
+constructor execution remain distinct. Source, theorem, budget, axiom and
+exclusion bytes are unchanged. See tests/sol-c3-exactness/SUCCESSOR-HANDOFF.md
+for absolute paths, measured limits/times, exact resolved/unresolved waits.

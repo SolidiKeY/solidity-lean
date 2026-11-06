@@ -6,7 +6,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 AREA = ROOT / "tests/sol-c3-exactness"
 BASE = "6f3eedf0788ee1f8a3bcf230558c712ecdca04d5"
-ADOPTED_UPSTREAM = "e6849d3bdf516099d20c33d3581d523449764018"
+# H82 authenticated dependency-first successor integration; all producer pins
+# stay fixed to BASE and the original exclusive C3 scope remains unchanged.
+ADOPTED_UPSTREAM = "9192f209cd12c30a5183bc2c779a631102dc8061"
 PREFIX = "Solidity.Frontend.C3Exactness."
 ALLOWED = ("Solidity/Frontend/C3Exactness/", "tests/sol-c3-exactness/",
            "scripts/check-sol-c3-exactness.py", "docs/feature-work/c3-exactness.md")
@@ -16,7 +18,7 @@ REQUIRED = {"Solidity/Source/Resolve.lean", "Solidity/Source/Inheritance.lean",
 TOOLING = {"scripts/check-sol-c3-exactness.py", "tests/sol-c3-exactness/run-bounded.py",
            "tests/sol-c3-exactness/lakefile.worker.toml", "tests/sol-c3-exactness/bin/lake",
            "tests/sol-c3-exactness/manifest.json"}
-TOOLING |= {"tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
+TOOLING |= {"scripts/coord-tools/lean-mcp", "tests/sol-c3-exactness/check-fixtures.mjs", "tests/sol-c3-exactness/final-checks.py", "tests/sol-c3-exactness/axiom-registration.json", "tests/sol-c3-exactness/release-owned-file-cache.py"}
 TOOLING |= {str(p.relative_to(ROOT)) for p in (AREA / "fixtures").rglob("*") if p.is_file()}
 FIXTURE_MANIFEST_SHA = "9a2ab74a8040178026a74a04929116ce6d7d9ce064b315c5ba5c0678b342190f"
 STANDARD = {"propext", "Classical.choice", "Quot.sound"}
@@ -226,6 +228,24 @@ def write_scope_errors(paths, adopted_is_ancestor):
     return errors
 
 
+def bound_evidence(key, legacy):
+    """Resolve refreshed H44 evidence through a committed digest manifest.
+
+    Historical files remain untouched. All original receipt, scope, resource,
+    source-pin and guarded-kernel checks still apply to the selected bytes.
+    """
+    index = AREA / 'SUCCESSOR-EVIDENCE.json'
+    if not index.exists():
+        return legacy
+    record = json.loads(index.read_text())[key]
+    path = ROOT / record['path']
+    if not path.resolve().is_relative_to(AREA.resolve()):
+        raise ValueError('successor evidence path escapes C3 area')
+    if sha(path.read_bytes()) != record['sha256']:
+        raise ValueError('successor evidence digest drift: ' + key)
+    return path
+
+
 def validate(m, overlays=None, receipt_override=None):
     overlays = overlays or {}
     def read(path):
@@ -322,8 +342,8 @@ def validate(m, overlays=None, receipt_override=None):
     changed += subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"],
                                        cwd=ROOT, text=True).splitlines()
     errors.extend(write_scope_errors(changed, ancestry))
-    log_path = AREA / "evidence/audit-confirmation.log"
-    receipt_path = log_path.with_suffix(".log.json")
+    log_path = bound_evidence("audit_log", AREA / "evidence/audit-confirmation.log")
+    receipt_path = bound_evidence("audit_receipt", (AREA / "evidence/audit-confirmation.log.json"))
     require(receipt_path.exists(), "missing bounded audit receipt")
     receipt = receipt_override if receipt_override is not None else (
         json.loads(receipt_path.read_text()) if receipt_path.exists() else {})
@@ -345,6 +365,23 @@ def validate(m, overlays=None, receipt_override=None):
     log = log_bytes.decode()
     require("Build completed successfully" in log and "Exit status: 0" in log and
             not re.search(r"^error:", log, re.M), "guarded kernel audit has not passed")
+    # A cached build log may replay guards despite missing physical imports.
+    # Require actual current-file elaboration or repository-preferred MCP
+    # diagnostics before certifying kernel controls; never cached output alone.
+    direct_log = bound_evidence("direct_log", AREA / "evidence/direct-audit.log")
+    direct_receipt = bound_evidence("direct_receipt", AREA / "evidence/direct-audit.log.json")
+    require(direct_log.exists() and direct_receipt.exists(), "missing direct kernel audit evidence")
+    if direct_log.exists() and direct_receipt.exists():
+        r = json.loads(direct_receipt.read_text())
+        cli = ["lake", "lean", "Solidity/Frontend/C3Exactness/Audit.lean", "--", "-j1", "--tstack=131072"]
+        mcp = ["scripts/coord-tools/lean-mcp", "diag", "Solidity/Frontend/C3Exactness/Audit.lean"]
+        require(r.get("command") in [cli, mcp], "direct audit command drift")
+        require(r.get("exit") == 0 and not r.get("interrupted") and not r.get("pressure_stop"), "direct kernel audit has not passed")
+        require(r.get("input_hashes") == expected_snapshot, "direct audit source snapshot drift")
+        require(r.get("memory_limit_bytes") == 12884901888 and r.get("swap_limit_bytes") == 0 and r.get("minimum_parent_available_bytes", 0) >= 4*1024**3, "direct audit resource envelope drift")
+        require(r.get("lean_version", "").startswith("Lean (version 4.24.0,") and r.get("lake_version", "").startswith("Lake version 5.0.0-src+797c613"), "direct audit toolchain drift")
+        text = direct_log.read_text()
+        require(r.get("log_sha256") == sha(direct_log.read_bytes()) and "Exit status: 0" in text and not re.search(r"^.*error:", text, re.M) and (r.get("command") != mcp or "diag: 0 errors" in text), "direct audit log did not pass")
     require(m["open_obligations"] or m.get("checkpoints", {}).get("final") == "done", "unfinished final obligations were erased")
     return errors
 
@@ -388,8 +425,9 @@ def fixture_errors(overlays=None, receipt_override=None):
         else:
             require(bool(observed), "negative fixture accepted")
         require(row.get("comparison_limit") == f.get("comparison_limit"), "fixture comparison boundary drift")
-    log_path = "tests/sol-c3-exactness/evidence/compiler-fixtures-final.log"
-    receipt = receipt_override if receipt_override is not None else json.loads(read(log_path + ".json"))
+    log_path = str(bound_evidence("fixture_log", AREA / "evidence/compiler-fixtures-final.log").relative_to(ROOT))
+    fixture_receipt = bound_evidence("fixture_receipt", AREA / "evidence/compiler-fixtures-final.log.json")
+    receipt = receipt_override if receipt_override is not None else json.loads(fixture_receipt.read_text())
     cmd = ["node", checker_path, str(AREA / ".artifacts/compiler" / fm["compiler"]["file"]), packet_path]
     require(receipt.get("command") == cmd, "fixture command drift")
     require(receipt.get("exit") == 0 and not receipt.get("interrupted") and not receipt.get("pressure_stop"), "fixture run did not pass")
