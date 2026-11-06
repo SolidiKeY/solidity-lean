@@ -18,7 +18,7 @@
  * documentation text, and `src` with the 1-based source `line` it starts at
  * on every statement and declaration.  The rest (`isPure`, name locations,
  * primitive `typeIdentifier`, …) is noise that changes with unrelated edits.
- * Modern fixtures retain scalar UDVT type identifiers for nominal operator checks.  A
+ * Modern fixtures retain all string type identifiers; frozen legacy fixtures keep their selected representation.  A
  * function's `modifiers` and a contract's `baseContracts` are kept when they
  * are not empty: the import refuses what it would otherwise drop.
  *
@@ -325,10 +325,9 @@ function trim(n, parentKey) {
     if (k === "typeDescriptions") {
       if (v && v.typeString !== undefined) {
         out.typeDescriptions = { typeString: v.typeString };
-        // Operator aliases must retain nominal identity, even when two UDVTs
-        // have the same underlying primitive or spelling in separate scopes.
-        if (!legacyFixture && typeof v.typeIdentifier === "string" &&
-            v.typeIdentifier.startsWith("t_userDefinedValueType"))
+        // H68: retain compiler type identity for composed executable readers.
+        // Frozen legacy fixtures keep their separately selected representation.
+        if (!legacyFixture && typeof v.typeIdentifier === "string")
           out.typeDescriptions.typeIdentifier = v.typeIdentifier;
       }
       continue;
