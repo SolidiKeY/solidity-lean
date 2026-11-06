@@ -3,7 +3,8 @@ import Solidity.Frontend.QualifiedUnits.SignatureMembers
 /-! Independent deterministic C3 merge judgment on original declaration identities.
 The judgment mentions head/tail membership and deletion, never mergeOwners or
 its fuel. The public equivalence accounts for the exact output-length budget;
-it does not yet prove the hierarchy-specific idUniverse bound sufficient. -/
+the hierarchy-specific idUniverse bound is proved sufficient in
+`Linearization.order_iff`. -/
 namespace Solidity.Frontend.QualifiedUnits.MergeSpecification
 open Solidity.Source
 
