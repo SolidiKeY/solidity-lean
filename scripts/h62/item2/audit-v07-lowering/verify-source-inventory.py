@@ -10,6 +10,7 @@ import re
 p = argparse.ArgumentParser(description=__doc__)
 p.add_argument("--repo", required=True, type=pathlib.Path)
 p.add_argument("--inventory", required=True, type=pathlib.Path)
+p.add_argument("--dependencies", type=pathlib.Path)
 a = p.parse_args()
 j = json.loads(a.inventory.read_text())
 assert hashlib.sha256((a.repo/j["scope"]).read_bytes()).hexdigest() == j["map_sha256"]
@@ -42,11 +43,15 @@ for row in j["theorems"] + j["structures"] + j["supplemental_structures"] + j["s
     for ctx in row["context_commands"]:
         assert source[ctx["start"]:ctx["end"]] == ctx["source"]
         assert ctx["end"] <= row["start"]
+    field_keys = set()
     for field in row.get("fields", []):
         text = source[field["start"]:field["end"]]
         assert text == field["source"]
         assert hashlib.sha256(text.encode()).hexdigest() == field["sha256"]
         assert field["end"] <= len(source)
+        assert (field["start"], field["end"]) not in field_keys
+        field_keys.add((field["start"], field["end"]))
+        assert re.match(r"\s*([A-Za-z_][A-Za-z0-9_']*)\s*:", text)[1] == field["source_qualified_name"].rsplit(".",1)[-1]
 # Independent line-oriented count for this frozen tree; regex never extracts a
 # signature, so it cannot duplicate the generator's signature-boundary algorithm.
 counts = {}
@@ -70,3 +75,29 @@ for suffix in ("scalar_value", "source_assignment_run"):
     assert any(r["local_name"] == suffix for r in producer_rows)
 print("PASS: 162 source hashes; 968 unique theorem slices; 7 mapped structures / 32 fields; exact context offsets; 15 explicit global-producer signatures; field-boundary regressions")
 print("NOT CHECKED: Lean elaboration, propositionhood, semantic premise completeness, inhabitation, simultaneous witnesses, public-contract success")
+
+if a.dependencies:
+    d = json.loads(a.dependencies.read_text())
+    seen = set()
+    for contract in d["contracts"]:
+        raw = (a.repo/contract["path"]).read_bytes()
+        source = raw.decode()
+        assert hashlib.sha256(raw).hexdigest() == contract["module_sha256"]
+        assert source[contract["start"]:contract["end"]] == contract["source"]
+        assert source[contract["start"]:contract["header_end"]] == contract["header_source"]
+        assert hashlib.sha256(contract["source"].encode()).hexdigest() == contract["sha256"]
+        assert contract["name"] not in seen
+        seen.add(contract["name"])
+        assert contract["inhabitation"] == "unproved"
+        assert contract["statement_fidelity"] == "pending-elaboration"
+        field_names = set()
+        for field in contract.get("fields", []):
+            assert contract["start"] <= field["start"] < field["end"] <= contract["end"]
+            assert source[field["start"]:field["end"]] == field["source"]
+            assert hashlib.sha256(field["source"].encode()).hexdigest() == field["sha256"]
+            assert re.match(r"\s*([A-Za-z_][A-Za-z0-9_']*)\s*:",field["source"])[1] == field["name"]
+            assert field["name"] not in field_names
+            field_names.add(field["name"])
+    assert len(d["contracts"]) == d["count"] == 17
+    assert sum(len(c.get("fields", [])) for c in d["contracts"]) == d["fields"] == 82
+    print("PASS: 17 imported contract definitions / 82 fields; exact source/hash/offset checks; inhabitation remains unproved")

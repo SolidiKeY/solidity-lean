@@ -71,6 +71,14 @@ def context(source, code, offset):
 
 def classification(domain):
     # Source-level evidence only. A named structure does not imply inhabitation.
+    if domain == "P8a.Spec":
+        return "global-source-specification", "P8.FrozenInterface Spec aliases Roadmap.SourceSpec; its fields are global semantic obligations, not an input witness."
+    if domain == "P8a.OperationalReference":
+        return "global-operational-reference", "Frozen reference supplies Resource/points/Executes; actual-source adequacy remains a separate obligation."
+    if domain.startswith("P8a.SourceOrigins "):
+        return "global-source-origin-model", "Frozen SourceOrigins supplies meaning for all well-formed in-profile resolutions; not a per-input admission witness."
+    if domain.startswith("P8a.RootModel "):
+        return "global-root-feature-model", "Frozen RootModel supplies execution/observation/feature relations and classification; no inhabitance or exact extraction follows."
     if "P8a.Producer" in domain:
         return "global-producer-contract", "Frozen producer bundles universally quantified laws; not a per-input run witness."
     if re.search(r"\b(?:Condition|MemoryCapture|StorageCapture)\b", domain):
